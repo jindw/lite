@@ -26,9 +26,7 @@ ondblclick= "${action.dblclick}“
  * 文本内表达式
  {{{
 示例：${user.name}
-
 功能：出现在XML文档的文本节点中，输出表达式值，并转义其xml标记
-
 说明：模版表达式求值，是一个基于模板上下文数据的读值和简单只读运算的过程。
 在JavaScript中。其功能类似于:
 function(el){with(context){return eval(el)})
@@ -40,20 +38,15 @@ function(el){with(context){return eval(el)})
 <input type="button"
 onclick="${clickScript}"
 onmouseover="${overScript}"/>
-
 功能：输出表达式值（转义），但是如果整个属性节点的值为null，整个节点将不被输出。
-
 说明：与直接的表达式的区别是：在xml语法约束下，省去了不必要条件判断。
   }}}
  * 输出标签
   {{{
 示例： <c:out value=“${ user.name} ”>
-
 属性表：
 value：El表达式
-
 功能：输出表达式值，但是不转义其xml标记
-
 说明：与直接的表达式唯一的区别是：不转义。
   }}}
 
@@ -75,7 +68,6 @@ value：El表达式
 <c:otherwise>分支3</c:otherwise>
 </c:choose >
 功能：选择第一个条件执行，如果没有命中，执行c:otherwise节点。
-
 说明：这一系列标签其实和if else系列等价，翻译后的目标代码也万全相同。他们的出现，只是为了更加清晰的语法表现手段，而非功能的增加。
   }}}
  * 循环标签
@@ -85,19 +77,15 @@ value：El表达式
 ${for.index}:${item}.
 </c:for>
 <c:else>没有找到任何记录</c:else>
-for标签属性表：
+for 标签属性表：
 var：字符串，且内容为JavaScript的合法变量名。
 items ：EL,迭代内容。
 status：状态变量字符串，其内容为JavaScript的合法变量名；是该循环内for状态的别名。
 功能：对items表达式中的数据循环，将每个元素依次申明为var中制定的名称的变量。
-说明：
-for状态数据结构：{index:0,end:6}。
+for状态数据结构说明：{index:0,end:6}。
 循环过程中将维护for的状态（index属性）
+
 else 标记特别说明：当其与for循环组合，当for循环执行0次后，与其配合的else节点可以执行（常见于做空循环的友好提示，如没有查询到任何数据）。
-
-选择块标签语法说明
-
-示例：
   }}}
 == 包含标签（编译期）==
   {{{
