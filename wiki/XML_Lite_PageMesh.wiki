@@ -1,0 +1,43 @@
+#labels Featured,Phase-Design
+== PageMesh？SiteMesh ==
+对，XML 模板引擎的PageMesh的设计就是来自于SiteMesh。配置方式也类似。有些简化。但与SiteMesh不同，Lite XML 的PageMesh是
+
+
+== 基本语法 ==
+PageMesh 规则定义在：decorators.xml文件中，该文件默认放置在你的WEB-INF目录下。
+示例文件：
+{{{
+<decorators>
+    <excludes>
+        <pattern>/user/login.xhtml</pattern>
+        <pattern>/**-json.xhtml</pattern>
+    </excludes>
+    <decorator name="book" layout="/book/layout.xhtml">
+        <pattern>/book/**.xhtml</pattern>
+    </decorator>
+    <decorator name="user" layout="/user/layout.xhtml">
+        <pattern>/user/**.xhtml</pattern>
+        <pattern>/group/**.xhtml</pattern>
+    </decorator>
+</decorators>
+}}}
+====查找方法====
+ * 创建解析上下文。
+ * 获取你请求的模板相对路径，将其设置为当前模板路径。
+ * 在excludes节点下查找是否匹配。
+ * 若存在匹配，当前模板无需装饰，直接解析当前模板（跳转到最后一步）。
+ * 在decorator中查找最长的匹配模式。
+ * 若*不*存在匹配，当前模板无需装饰，直接解析当前模板（跳转到最后一步）。
+ * 当前模板对应的xml Document对象作为当前模板上下文的#page节点。
+ * 将最长模式所在的decorator节点指定的layout属性（sitemesh名称为page）作新的当前模板路径。
+ * 解析当前模板路径。
+
+
+==== 模式匹配语法 ====
+ * "**"表示任意蚊子匹配，相当于正则表达式 ".*"。
+ * "*"表示一级目录的任意匹配（不能包含"/"）。
+
+==== 与SiteMesh 差异 ====
+ * PageMesh永远不关心参数。
+ * decorator节点下用 layout属性代替SiteMesh的page属性（为了使语义更加明了）。
+ * 模式匹配的**语法与SiteMesh有些细微差别...。
