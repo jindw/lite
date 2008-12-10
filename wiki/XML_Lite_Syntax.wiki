@@ -40,9 +40,9 @@ ${user.name}。
   * 说明:
     模版表达式求值，是一个基于模板上下文数据的读值和简单只读运算的过程。
     在JavaScript中。其功能类似于
-    {{{
+{{{
 function(el){with(context){return eval(el)})
-    }}}
+}}}
 
  ==== 属性内表达式 ====
   * 示例:
