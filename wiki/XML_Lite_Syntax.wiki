@@ -1,7 +1,7 @@
 #labels Featured,Phase-Design
 ==基于XML 解析器的模板的语法亮点==
  * XML结构模板有利于保证输出页面结构的完整性。
-    XML 本身的良好结构，有利于保证输出结构的完整性，减少输出结果的低级错误。
+    XML 本身的良好严谨的结构要求，使得输出结构的也更容易保持正确的结构，减少大量代码结构上的低级错误。
  * 语法空白的自动压缩  
     标记语言都有自己的语法空白，xml语言知道标记语言的语法，可以自动优化无效的语法空白 
  * 简单的可选xml属性编写
@@ -9,32 +9,34 @@
     {{{
 <input 
 #if(${action.click!=null})
-onclick= "${action.click}“ 
+onclick= "${action.click}" 
 #end
 #if(${action.dblclick!=null})
-ondblclick= "${action.dblclick}“
+ondblclick= "${action.dblclick}"
 #end>
     }}}
     * xml模版：
     {{{
 <input  onclick = "${action.click}" ondblclick= "${action.dblclick}" >
     }}}
- * 基于xpath的片段选取和模版套用。
-    可以将密切关联的若干模版碎片集中存放。
+ * 文档片断级的代码复用。
+    基于xpath的片段选取，可以将密切关联的若干模版碎片集中存放，并反复利用。
+    如，我们可以吧Webwork的自定义标记定义在一个完整的表单对象中。
 
  * 可以轻松实现装饰模版。
-    PageMesh 功能，编译期的SiteMesh
- * 通过XSD文件，可以很好的利用通用XML编辑器（语法提示，检查，高亮，格式化）。
+    PageMesh 功能，编译期的SiteMesh。轻松实现高校的页面装饰功能（布局管理）。
+    细节见：http://code.google.com/p/lite/wiki/XML_Lite_PageMesh
+ * 通过XSD文件，可以很好的利用通用XML编辑器。
+    被IDE宠坏了的朋友有福了，引入XML语法描述文件后，标准的通用编辑器可以轻松的支持XML_Lite自己的*语法提示* ，*语法检查* ，*代码高亮* 、*格式化* 。
 
 == 输出语法 ==
  * 文本内表达式
- {{{
 示例：${user.name}
 功能：出现在XML文档的文本节点中，输出表达式值，并转义其xml标记
 说明：模版表达式求值，是一个基于模板上下文数据的读值和简单只读运算的过程。
 在JavaScript中。其功能类似于:
 function(el){with(context){return eval(el)})
-  }}}
+
 
  * 属性内表达式
   {{{
@@ -47,7 +49,7 @@ onmouseover="${overScript}"/>
   }}}
  * 输出标签
   {{{
-示例： <c:out value=“${ user.name} ”>
+示例： <c:out value="${ user.name} ">
 属性表：
 value：El表达式
 功能：输出表达式值，但是不转义其xml标记
@@ -59,16 +61,16 @@ value：El表达式
 ==控制标签==
  * 条前标签
   {{{
-<c:if test=“${index == 0}”>[${index},</c:if>
-<c:else-if test=“${index == end}”>${index}]</c:else-if>
+<c:if test="${index == 0}">[${index},</c:if>
+<c:else-if test="${index == end}">${index}]</c:else-if>
 <c:else>${index},</c:else>
   }}}
  * 选择标签
    {{{
 
 <c:choose >
-<c:when test=“${type == 1}”>分支1</c:when >
-<c:when test=“${type == 2}”>分支2</c:when >
+<c:when test="${type == 1}">分支1</c:when >
+<c:when test="${type == 2}">分支2</c:when >
 <c:otherwise>分支3</c:otherwise>
 </c:choose >
 功能：选择第一个条件执行，如果没有命中，执行c:otherwise节点。
@@ -77,7 +79,7 @@ value：El表达式
  * 循环标签
   {{{
 示例：
-<c:for var=“item” items=“${list}”>
+<c:for var="item" items="${list}">
 ${for.index}:${item}.
 </c:for>
 <c:else>没有找到任何记录</c:else>
@@ -94,10 +96,10 @@ else 标记特别说明：当其与for循环组合，当for循环执行0次后�
 == 包含标签（编译期）==
   {{{
  示例：
-<c:include path=“part.xhtml” 
+<c:include path="part.xhtml" 
 xpath="//xhtml:head"/>
-<c:include xpath=“//*[@id=‘block’]”/>
-<c:include path=“template.xhtml” var=“childData”/>
+<c:include xpath="//*[@id='block']"/>
+<c:include path="template.xhtml" var="childData"/>
 
 属性表：
 path ：字符串，可选，未指定时代表需要包含的文档为当前文档。
@@ -112,12 +114,12 @@ xpath确实有点烦琐^_^
 == 变量申明标签==
   {{{
 属性值
-<c:var name=“myName” value=“${user.name}” />
+<c:var name="myName" value="${user.name}" />
 value：El表达式（非必要，若无，取子节点渲染数据）
 功能：定义变量，内容可以来自value属性或者子节点。
 
 内容值
-<c:var name=“myName” >
+<c:var name="myName" >
 ${user.firstName} ${user.lastName}
 </c:var>
   }}}
