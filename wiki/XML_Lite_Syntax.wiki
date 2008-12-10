@@ -100,10 +100,10 @@ ${for.index}:${item}.
 <c:else>没有找到任何记录</c:else>
 }}}
   * for标签：
-
 ||var：   ||字符串，且内容为JavaScript的合法变量名。||
 ||items ：||EL,迭代内容。||
 ||status：||状态变量字符串，其内容为JavaScript的合法变量名；是该循环内for状态的别名。||
+
   * 功能：
     对items表达式中的数据循环，将每个元素依次申明为var中制定的名称的变量。
   * for状态数据结构说明
