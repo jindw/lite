@@ -31,29 +31,29 @@ ondblclick= "${action.dblclick}"
 
 == 输出语法 ==
  ==== 文本内表达式 ====
-  * 在JavaScript中。其功能类似于
-    {{{
-function(el){with(context){return eval(el)})
-    }}}
-  * 示例
+  * 示例:
 {{{
 ${user.name}。
 }}}
-  * 功能
+  * 功能:
     出现在XML文档的文本节点中，输出表达式值，并转义其xml标记。
-  * 说明
+  * 说明:
+    在JavaScript中。其功能类似于
+    {{{
+function(el){with(context){return eval(el)})
+    }}}
     模版表达式求值，是一个基于模板上下文数据的读值和简单只读运算的过程。
 
  ==== 属性内表达式 ====
-  * 示例
+  * 示例:
 {{{
 <input type="button"
 onclick="${clickScript}"
 onmouseover="${overScript}"/>
 }}}
-  * 功能
+  * 功能:
     输出表达式值（转义），但是如果整个属性节点的值为null，整个节点将不被输出。
-  * 说明
+  * 说明:
     与直接的表达式的区别是：在xml语法约束下，省去了不必要条件判断。
 
  ==== 输出标签 ====
@@ -61,24 +61,24 @@ onmouseover="${overScript}"/>
 {{{
 <c:out value="${ user.name} ">
 }}}
-  * 属性表
-  * value
+  * 属性表:
+  * value:
     El表达式
-  * 功能
+  * 功能:
     输出表达式值，但是不转义其xml标记。
-  * 说明
+  * 说明:
     与直接的表达式唯一的区别是：不转义。
 
 ==控制标签==
  ==== 条前标签 ====
-  * 示例
+  * 示例:
 {{{
 <c:if test="${index == 0}">[${index},</c:if>
 <c:else-if test="${index == end}">${index}]</c:else-if>
 <c:else>${index},</c:else>
 }}}
  ==== 选择标签 ====
-  * 示例
+  * 示例:
 {{{
 <c:choose >
 <c:when test="${type == 1}">分支1</c:when >
@@ -86,13 +86,13 @@ onmouseover="${overScript}"/>
 <c:otherwise>分支3</c:otherwise>
 </c:choose >
 }}}
-  * 功能
+  * 功能:
     选择第一个条件执行，如果没有命中，执行c:otherwise节点。
-  * 说明
+  * 说明:
     这一系列标签其实和if else系列等价，翻译后的目标代码也万全相同。他们的出现，只是为了更加清晰的语法表现手段，而非功能的增加。
 
  ==== 循环标签 ====
-  * 示例
+  * 示例:
 {{{
 <c:for var="item" items="${list}">
 ${for.index}:${item}.
