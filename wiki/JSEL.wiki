@@ -1,0 +1,84 @@
+#labels Featured
+===JSEL简介===
+JSEL是一个基于逆波兰式结构，采用JS运算规则的简单的表达式解释引擎。
+同时他还是一个JSON解析引擎。
+
+
+==== 基本特征 ====
+
+
+  * 基于逆波兰式这个简单的计算模型，最大的特点就是简单。
+  * 支持短路优化（运算过程中，会根据需要，跳过无需计算的节点（boolean运算和三元运算有此类需求）。 
+  * 运算规则基于前端开发人员熟悉的JavaScript，可以用于模板引擎的表达式实现。
+  * 他同时还是JSON解释引擎的超集，可以用于解释JSON数据源。
+  * 简单的运算接口，可以简单的重新定义运算规则。
+  * 由于引擎本身实现的简单，程序体积非常小（JAR文件只有22k，同类工具OGNL 168k）；适合于嵌入其他对文件大小要求苛刻环境，如需要下载的webstart小程序。
+
+==== 基本用法 ====
+{{{
+import org.xidea.el.Expression;
+import org.xidea.el.ExpressionImpl;
+import java.util.HashMap;
+public class Test{
+    public static void main(String[] args){
+        Expression el = new ExpressionImpl("var1 +2 * var2");
+        //Expression el = new ExpressionImpl("var1 +2 * var2",new CalculaterImpl());//你也可以定义你自己的运算规则
+        HashMap context = new HashMap();
+        context.put("var1",111);
+        context.put("var2",222);
+        Object result1 = el.evaluate(context);//555
+        context.put("var2",333);
+        Object result2 = el.evaluate(context);//777
+        System.out.println("result1:");
+        System.out.println(result1);
+        System.out.println("result2:");
+        System.out.println(result2);
+    }
+}
+}}}
+==== 语法====
+{{{
+四则运算：
++，-，*，/
+取模运算：
+%
+正负运算：
++，-
+条件运算
+==，!=,<，>,>=,<=
+Boolean运算(&&和||有条件短路优化)
+!，&&，||
+三目运算(有条件短路优化)
+xxx?yy:zz
+
+括弧（运算优先级控制）
+（）
+
+List构造器(生成ArrayList)
+[1,3,var1,'234']
+
+Map构造器(生成HashMap)
+{"key1":1,"key2":[item1,item2]}
+全局函数语法：
+parseInt("234")
+成员函数调用语法：
+"abc".startsWith("bc")
+}}}
+
+
+==== 表达式计算性能 ====
+
+  * 对于常见表达式计算，暂时还没有做相关性能测试。但是鉴于其基于逆波兰式这种简单的运算模型，他的性能应该会比较理想。
+
+==== JSON解析性能 ====
+  * 测试数据实例是JSIDoc模板引擎的json中间格式数据，数据量巨大（由于结果集合中字符串比重很大，我们做了一些处理，截断了超过10个字符的内容）
+
+  * 与专门的JSON引擎相比，JSEL 的解析过程和专业的JSON解析最大的区别是:EL解析设计为可多次求值，有解析和运算两个过程。解析的过程会形成一个经优化的中间的数据结构，解析的耗时占全部运算时间的90%以上。
+
+  * 与JSON官方网站发布的JSON解析程序相比，JSEL的效率更胜一筹，效率大概是他们的1.5至两倍。
+
+  * 还有一个更加简单高效率的JSON解析器：StringTree，与其相比，JSEL单次解析的耗时大概是stringtree的两到三倍。
+
+
+== 下载 ==
+ * JSEL：[http://code.google.com/p/lite/downloads/list?q=label:JSEL]
