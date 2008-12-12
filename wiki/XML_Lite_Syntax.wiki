@@ -1,14 +1,14 @@
 #labels Featured,Phase-Design
 ==基于XML 解析器的模板的语法亮点==
   * XML严谨的代码风格有利于培养程序员良好的编程习惯。
-    前端程序员在代码结构完美上的最求普遍很低，使用XML模板引擎有利于程序员养成严谨的编码风格，以及追求代码结构完美的习惯。
+    前端程序员在程序结构完美上的最求普遍很低，使用XML模板引擎有利于程序员养成严谨的编码风格，以及追求代码结构完美的习惯。
   * XML结构模板有利于保证输出页面结构的完整性。
     XML 本身的良好严谨的结构要求，使得输出结构的也更容易保持正确的结构，减少大量代码结构上的低级错误。
-  * 语法空白的自动压缩  
-    标记语言都有自己的语法空白，xml语言知道标记语言的语法，可以自动优化无效的语法空白 
-  * 简单的可选xml属性编写
-    * velocity：
-    {{{
+  * XML自身语法约束可以协助程序员更高效的编码。
+    选项太多，往往使人茫然，合理的约束对编码的支持是非常有利的
+    * 简单的可选xml属性编写
+      * velocity：
+      {{{
 <input 
 #if(${action.click!=null})
 onclick= "${action.click}" 
@@ -16,11 +16,13 @@ onclick= "${action.click}"
 #if(${action.dblclick!=null})
 ondblclick= "${action.dblclick}"
 #end>
-    }}}
-    * xml模版：
-    {{{
+      }}}
+      * xml模版：
+      {{{
 <input  onclick = "${action.click}" ondblclick= "${action.dblclick}" >
-    }}}
+      }}}
+    * 开速安全的格式化和语法空白的自动压缩
+      标记语言都有自己的语法空白，xml语言知道标记语言的语法，可以自动优化无效的语法空白 
   * 文档片断级的代码复用。
     基于xpath的片段选取，可以将密切关联的若干模版碎片集中存放，并反复利用。
     如，我们可以吧Webwork的自定义标记定义在一个完整的表单对象中。
@@ -28,6 +30,7 @@ ondblclick= "${action.dblclick}"
   * 可以轻松实现装饰模版。
     PageMesh 功能，编译期的SiteMesh。轻松实现高校的页面装饰功能（布局管理）。
     细节见：http://code.google.com/p/lite/wiki/XML_Lite_PageMesh
+
   * 通过XSD文件，可以很好的利用通用XML编辑器。
     被IDE宠坏了的朋友有福了，引入XML语法描述文件后，标准的通用编辑器可以轻松的支持XML_Lite自己的*语法提示* ，*语法检查* ，*代码高亮* 、*格式化* 。
 
