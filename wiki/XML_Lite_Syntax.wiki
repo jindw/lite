@@ -146,13 +146,12 @@ ${user.firstName} ${user.lastName}
  ==== 包含标签 ====
   * 示例：
   {{{
-<c:include path="part.xhtml" 
-xpath="//xhtml:head"/>
-<c:include xpath="//*[@id='block']"/>
-<c:include path="template.xhtml" var="childData"/>
+<c:include path="menu.xhtml"/>
+<c:include path="controls.xhtml" xpath="//*[@id='pageList']"/>
+<c:include path="#page" xpath="//xhtml:body"/>
   }}}
   * 属性表：
-    * _ path _ ：字符串，可选，未指定时代表需要包含的文档为当前文档。
+    * _ path _ ：字符串，可选，未指定时代表需要包含的文档为当前文档。可以是表示一个相对路径，也可以制定一个编译上文的变量（如，页面装饰其实现中，先将目标模板文档对象，作为编译上下文的#page变量，能后解析布局模板）
     * _ xpath _ ：字符串,可选，用于选取文档片段的xpath语句。
 
   * 功能：
