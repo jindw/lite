@@ -68,9 +68,8 @@ onmouseover="${overScript}"/>
 {{{
 <c:out value="${ user.name} ">
 }}}
-  * 属性表:
-  * value:
-    El表达式
+  * value属性:
+    El表达式,描述需要输出的文本
   * 功能:
     输出表达式值，但是*不编码*其xml标记。
   * 说明:
