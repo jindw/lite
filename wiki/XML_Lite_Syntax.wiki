@@ -123,7 +123,7 @@ ${for.index}:${item}.
 
 
 == 变量申明标签 ==
-  ==== 属性值====
+  ==== 通过属性值申明变量====
   {{{
 <c:var name="myName" value="${user.name}" />
   }}}
@@ -133,7 +133,7 @@ ${for.index}:${item}.
     * 功能：
       定义变量，内容来自value属性。
 
-  ==== 内容值====
+  ==== 通过子节点申明变量====
     {{{
 <c:var name="myName" >
 ${user.firstName} ${user.lastName}
