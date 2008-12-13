@@ -23,7 +23,7 @@ function(el){with(context){return eval(el)})
  ==== 输出标签 ====
   * 示例
 {{{
-<c:out value="${ user.name} ">
+<c:out value="${ user.name} "/>
 }}}
   * value属性:
     El表达式,描述需要输出的文本
