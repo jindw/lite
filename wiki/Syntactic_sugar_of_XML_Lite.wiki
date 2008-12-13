@@ -61,5 +61,6 @@ ondblclick= "${html.encode(action.dblclick)}"
     受CommonTemplate启发，for作为关键字，用来表示循环状态，不让废变量空间，意思又简单明了。
 
   * 实现简单，库文件总共不过100k。
-
+    相比于其他模板引擎动辄上M几百k，Lite加上解析器也不过百k，小巧精悍。
   * 夸语言平台。
+    目前已支持JS，Java，Python。
