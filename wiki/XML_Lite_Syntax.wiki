@@ -143,7 +143,7 @@ ${user.firstName} ${user.lastName}
       定义变量，变量名称是name属性，内容来自子节点输出的文本。
 
 == 编译期标签 ==
- ==== 包含标签 ====
+  ==== 包含标签 ====
   * 示例：
   {{{
 <c:include path="menu.xhtml"/>
@@ -158,4 +158,4 @@ ${user.firstName} ${user.lastName}
     包含一个文档，或者文档片段。
 
   * 说明：
-    xpath确实有点烦琐^_^
+    xpath确实有点烦琐,但毕竟事标准，标准永远不是最好的，但他是可行的。
