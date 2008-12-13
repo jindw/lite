@@ -1,8 +1,8 @@
 #labels Featured,Phase-Design
 ==基本概念==
   ==== 表达式====
-    类似JSP2.0中引入的EL，表达式是一个简单的运算模型，具有只读的特征。Lite默认实现中，采用的是JSEL。这是一个基于JavaScript运算规则的表达式计算引擎。
-  ==== 控制标签====
+    类似JSP2.0中引入的EL，表达式是一个简单的运算模型，具有只读的特征。Lite默认实现中，采用的是[http://code.google.com/p/lite/wiki/JSEL JSEL]。这是一个基于JavaScript运算规则的表达式计算引擎。
+  ==== 控制标记====
     类似JSP中的标记库，语法上也与JSTL类似，但是更加简单。
 == 输出语法 ==
  ==== 文本内表达式 ====
