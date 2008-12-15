@@ -25,7 +25,10 @@ Lite的语法非常简单，如果你熟悉jstl，那么，你基本也就熟悉
  * else 指令
  * var 指令
  * include 指令（编译期指令）
-
+更多介绍见：
+[http://code.google.com/p/lite/wiki/XML_Lite_Syntax XML_Lite_Syntax]
+您也可以在线测试这些语法：
+[http://www.xidea.org/project/lite/]
 === Lite 的XML语法的优势===
 
 XML良好的结构，对于模板的语意表达和代码组织非常有利。
@@ -33,6 +36,8 @@ XML良好的结构，对于模板的语意表达和代码组织非常有利。
 同时，模板通常用来生成类XML数据（如html），XML源代码懂XML语法，用它来生成标记另外一种类XML标记语言，有一定的先天优势。
 
 主要表现有：
- * 代码的格式化和自动的空白压缩。
- * 简单的可选属性表示方法。
- * 文档片段级别的包含。
+ * 更严谨的结构和方便的代码复用。
+ * 自动化的编码处理和语法优化。
+ * 更好的工具支持和编码效率。
+更多见：
+[http://code.google.com/p/lite/wiki/Syntactic_sugar_of_XML_Lite Syntactic_sugar_of_XML_Lite]
