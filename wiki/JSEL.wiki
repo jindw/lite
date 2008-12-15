@@ -81,4 +81,4 @@ parseInt("234")
 
 
 == 下载 ==
- * JSEL：[http://code.google.com/p/lite/downloads/list?q=label:JSEL]
+ * JSEL：[http://code.google.com/p/lite/downloads/list]
