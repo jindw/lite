@@ -1,0 +1,68 @@
+* {
+    font-size:12px;
+    font-family:"宋体", Verdana;
+    color:#333333;
+}
+html{
+	font-size:12px;
+	width:100%;
+    height:100%;
+	padding:0px;
+	margin:0px;
+}
+
+body{
+    height:100%;
+    width:780px;
+    padding:0px;
+    margin:auto;
+}
+
+/*-----------------------------header-------------------------------*/
+#header{
+    position:relative;
+    clear:both;
+    background: #EEE;
+    height:15%;
+    border-bottom: 5px solid #DDD;
+}
+#header .title{
+    margin: 5px;
+    font-size:24px;
+    font-family:Verdana;
+    font-weight:bold;
+    border:3px double blue;
+}
+/*-----------------------------body-------------------------------*/
+#body{
+    padding-top:5px;
+    width:100%;
+    height:70%;
+    background: #FAFAFA;
+}
+/*-----------------------------main-------------------------------*/
+#main{
+}
+/*-----------------------------left-------------------------------*/
+#side {
+    float:left;
+    width:16%;
+    height:100%;
+    border:3px double blue;
+}
+
+
+/*----------------------------content tabs-------------------------------------------*/
+#main {
+    float:right;
+    position:relative;
+    top:0px;
+    left:0px;
+    width:82%;
+    height:100%;
+    border:3px double blue;
+}
+#footer{
+    border:3px double blue;
+    height:10%;
+}
