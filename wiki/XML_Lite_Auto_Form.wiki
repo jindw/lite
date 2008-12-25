@@ -1,0 +1,28 @@
+#labels Featured,Phase-Design
+== 什么是AutoForm ==
+当你使用一些MVC框架编写网页的时候，编写表单一般都有一些自定义标记库，虽然这些烦琐的标记库增加了我们不少学习负担，但是，他还是有些好处的，比如，我们再也不用自己填充这些表单的值了，他会根据你表单标签的名称/属性和Action上下文，自动设置表单的值。
+
+是的，AutoForm就是实现类似的功能，但是，他不需要你学习新的标记库。
+你的HTML Input/Select....等等，就可以直接更具他的名称属性，自动填充value值，或者初始化选中状态。
+
+在补充一下：
+AutoForm不是一个独立的实体，它只是XML_Lite语法设计上的一个特征。
+
+== 填充规则 ==
+
+=== input 填充规则：===
+  * type 属性为 "checkbox" 或者 "radio"
+    # 如果input包含checked属性，直接按照普通方式渲染该节点，跳过以下步骤。
+    # 通过name属性，抓取上下文对象。
+    # 计算value值（如果是el，则需计算），并转化为字符值（String.valueOf(object)）
+    # 迭代结果（2）,如果发现有对象的字符值等价于结果（3）则该对象为选中状态（checked="checked"），跳过以下步骤。
+    # 设置input 为非选中状态（无checked属性）
+  * type 属性为其他类型
+    # 如果input包含value属性，直接按照普通方式渲染该节点，跳过以下步骤。
+    # 设置input的value属性为"${<name>}"。
+      name为input的name属性值，如：user.name。这时value属性被设置为：${user.name}(下一步渲染过程中，这将渲染为一个属性节点，其值自动填充)
+
+=== textarea 填充规则：=== 
+  待续....
+=== select/option填充规则：=== 
+  待续....
