@@ -1,2 +1,0 @@
-= Introduction =
-请看：http://code.google.com/p/lite/wiki/XML_Lite_Auto_Form?ts=1230185385&updated=XML_Lite_Auto_Form
