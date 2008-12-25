@@ -19,10 +19,14 @@ AutoForm不是一个独立的实体，它只是XML_Lite语法设计上的一个�
     # 设置input 为非选中状态（无checked属性）
   * type 属性为其他类型
     # 如果input包含value属性，直接按照普通方式渲染该节点，跳过以下步骤。
-    # 设置input的value属性为"${&lt;name&gt;}"。
+    # 设置input的value属性为"${name}"。
       name为input的name属性值，如：user.name。这时value属性被设置为：${user.name}(下一步渲染过程中，这将渲染为一个属性节点，其值自动填充)
 
 === textarea 填充规则：=== 
-  待续....
+  * 包含有效内容（非空文本或子节点）
+    不做填充处理，直接渲染
+  * 否则
+    # 清除无效子节点
+    # 添加文本子节点${name}(name 的解释如上)
 === select/option填充规则：=== 
-  待续....
+  option选中规类似<input name="test" type="checkbox">。不同的是，name属性取的是上层select的name属性。
