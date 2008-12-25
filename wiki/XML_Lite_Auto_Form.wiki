@@ -1,12 +1,12 @@
 #labels Featured,Phase-Design
-== 什么是AutoForm ==
+== AutoForm 是什么 ==
+AutoForm不是一个独立的实体，它只是XML_Lite语法设计上的一个特征。
+
+== AutoForm 像是什么 ==
 当你使用一些MVC框架编写网页的时候，编写表单一般都有一些自定义标记库，虽然这些烦琐的标记库增给我们加了不少学习负担，但是，他还是有些好处的，比如，我们再也不用自己填充这些表单的值了，他会根据你表单标签的名称/属性和Action上下文，自动设置表单的值。
 
 是的，AutoForm就是实现类似的功能，但是，他不需要你学习新的标记库。
 你的HTML Input/Select....等等，就可以直接更具他的名称属性，自动填充value值，或者初始化选中状态。
-
-在补充一下：
-AutoForm不是一个独立的实体，它只是XML_Lite语法设计上的一个特征。
 
 == 填充规则 ==
 
@@ -29,4 +29,4 @@ AutoForm不是一个独立的实体，它只是XML_Lite语法设计上的一个�
     # 清除无效子节点
     # 添加文本子节点${name}(name 的解释如上)
 === select/option填充规则：=== 
-  option选中规类似<input name="test" type="checkbox">。不同的是，name属性取的是上层select的name属性。
+  option选中规类似《input name="test" type="checkbox"》。不同的是，name属性取的是上层select的name属性。
