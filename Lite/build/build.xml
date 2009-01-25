@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="GBK"?>
+<project name="Lite" default="build" basedir="../">
+	<tstamp>
+		<format property="version" pattern="yyyyMMdd" />
+	</tstamp>
+	<target name="init">
+		<delete dir="build/temp">
+		</delete>
+		<mkdir dir="build/dest/jslite" />
+		<mkdir dir="build/dest" />
+	</target>
+	<target name="jar-template" depends="init">
+		<jar destfile="build/dest/JSEL.jar">
+			<fileset dir="web/WEB-INF/classes">
+				<include name="org/xidea/el/**/*.class" />
+				<exclude name="**/test/**/*.*" />
+			</fileset>
+		</jar>
+		<copy tofile="build/dest/JSEL-${version}.jar" file="build/dest/JSEL.jar" />
+
+		<jar destfile="build/dest/JSEL-Source.jar">
+			<zipfileset src="build/dest/JSEL.jar" />
+			<fileset dir="src/main">
+				<include name="org/xidea/el/**/*.java" />
+				<exclude name="**/test/**/*.*" />
+			</fileset>
+		</jar>
+
+
+		<echo file="build/dest/jslite/__package__.js">this.addScript("template.js",["XMLParser","Template"])</echo>
+		<jar destfile="build/dest/Template.jar" compress="true">
+			<fileset dir="web/WEB-INF/classes">
+				<include name="org/xidea/el/**/*.class" />
+				<include name="org/xidea/lite/**/*.class" />
+				<include name="org/xidea/lite/dtd/**/*.ent" />
+				<include name="org/xidea/lite/dtd/**/xhtml1.dtd" />
+				<exclude name="**/test/**/*.*" />
+			</fileset>
+			<fileset dir="src/main" defaultexcludes="true">
+				<include name="org/xidea/el/*.java" />
+				<include name="org/xidea/el/json/*.java" />
+				<include name="org/xidea/lite/*.java" />
+			</fileset>
+			<zipfileset prefix="org/xidea/lite/" dir="build/dest/jslite/">
+				<include name="template.js" />
+				<include name="__package__.js" />
+			</zipfileset>
+		</jar>
+		<delete>
+			<fileset dir="build/dest/jslite/">
+				<include name="template.js" />
+				<include name="__package__.js" />
+			</fileset>
+		</delete>
+		<copy tofile="build/dest/Template-${version}.jar" file="build/dest/Template.jar" />
+
+		<jar destfile="build/dest/Template-Source.jar">
+			<zipfileset src="build/dest/Template.jar">
+			</zipfileset>
+			<fileset dir="web/scripts">
+				<include name="org/xidea/lite/*.js" />
+			</fileset>
+			<fileset dir="src/main">
+				<include name="org/xidea/el/**/*.java" />
+				<include name="org/xidea/lite/**/*.java" />
+				<exclude name="**/test/**/*.*" />
+			</fileset>
+		</jar>
+	</target>
+
+	<target name="compress" depends="init">
+		<java classname="org.jside.jsi.tools.export.ExportorAction">
+			<classpath>
+				<path path="../JSA/classes"></path>
+				<fileset dir="../JSA/">
+					<include name="**/*.jar" />
+				</fileset>
+				<path path="../JSA/classes"></path>
+			</classpath>
+			<arg value="-scriptBase" />
+			<arg value="${basedir}/web/scripts" />
+			<arg value="-outputExported" />
+			<arg value="${basedir}/build/dest/jslite/template.js" />
+			<arg value="-ascii" />
+			<arg value="false" />
+			<arg value="-features" />
+			<arg value="org.xidea.lite:compile" />
+			<arg value="-features" />
+			<arg value=":debug" />
+			<arg value="org.xidea.lite:Template" />
+			<arg value="org.xidea.lite:Parser" />
+			<arg value="org.xidea.lite:TextParser" />
+			<arg value="org.xidea.lite:XMLParser" />
+		</java>
+		<java classname="org.jside.jsi.tools.export.ExportorAction">
+			<classpath>
+				<fileset dir="../JSA/">
+					<include name="**/*.jar" />
+				</fileset>
+			</classpath>
+			<arg value="-scriptBase" />
+			<arg value="${basedir}/web/scripts" />
+			<arg value="-outputExported" />
+			<arg value="${basedir}/build/dest/jslite/demo.js" />
+			<arg value="-ascii" />
+			<arg value="false" />
+			<arg value="-features" />
+			<arg value="org.xidea.jsi.boot:$log" />
+			<arg value="-features" />
+			<arg value="org.xidea.lite:compile" />
+			<arg value="-features" />
+			<arg value=":debug" />
+			<arg value="org.xidea.lite:Parser" />
+			<arg value="org.xidea.lite:TextParser" />
+			<arg value="org.xidea.lite:XMLParser" />
+			<arg value="org.xidea.lite.demo:$log" />
+			<arg value="org.xidea.lite.demo:TestCase" />
+		</java>
+	</target>
+	<target name="build" depends="jar-template">
+
+	</target>
+
+</project>
