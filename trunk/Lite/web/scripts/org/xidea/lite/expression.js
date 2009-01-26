@@ -3,12 +3,15 @@ function Expression(tokens){
 }
 Expression.prototype.evaluate = function(context){
      try{
-     	 var stack = []
-         _evaluate(stack,this.tokens,context);
-         return stack[0];
+         return evaluate(this.tokens,context);
      }catch(e){
          $log.trace(e);
      }
+}
+function evaluate(el,context){
+     var stack = [];
+     _evaluate(stack,el,context)
+     return realValue(stack[0]);
 }
 function _evaluate(stack, tokens,context){
     for(var i=0;i<tokens.length;i++){
@@ -41,26 +44,39 @@ function _evaluate(stack, tokens,context){
                         arg2=arg1;
                         arg1 = stack.pop();
                 }
-                if(type == OP_PARAM_JOIN){
-                    arg1.push(arg2)
+                arg1 = compute(item, arg1, arg2)
+                if(arg1 instanceof LazyToken){
+                    _evaluate(stack, arg1.data, context)
+                } else{
                     stack.push(arg1)
-                }else if(type == OP_MAP_PUSH){
-                    arg1[item[1]]= arg2;
-                    stack.push(arg1)
-                }else{
-                    arg1 = compute(item, arg1, arg2)
-                    if(arg1 instanceof LazyToken){
-                        _evaluate(stack, arg1.data, context)
-                    } else{
-                        stack.push(arg1)
-                    }
                 }
         }
     }
 }
+function realValue(arg1){
+	if(arg1 instanceof PropertyValue){
+    	return arg1.base[arg1.name];
+    }
+    return arg1;
+}
 function compute(op,arg1,arg2){
     var type = op[0];
+    if(type == OP_INVOKE_METHOD){
+    	if(arg1 instanceof Function){
+            return arg1.apply(null,arg2);
+    	}else if(arg1 instanceof PropertyValue){
+            return arg1.base[arg1.name].apply(arg1.base,arg2);
+    	}else{
+    		throw new Error("not a fn!!"+arg1)
+    	}
+    }
+    arg1 = realValue(arg1);
+    arg2 = realValue(arg2);
     switch(type){
+    case OP_STATIC_GET_PROP:
+        arg2 = op[1]
+    case OP_GET_PROP:
+        return new PropertyValue(arg1,arg2);
     case OP_NOT:
         return !arg1;
     case OP_POS:
@@ -101,31 +117,27 @@ function compute(op,arg1,arg2){
         if(arg1){
             return arg2;
         }else{
-            return LazyToken;
+            return LazyToken;//use as flag
         }
     case OP_QUESTION_SELECT:
-        if(arg1 == LazyToken){
+        if(arg1 == LazyToken){//use as flag
             return arg2;
         }else{
             return arg1;
         }
-    case OP_GET_PROP:
-        return arg1[arg2];
-    case OP_STATIC_GET_PROP:
-        //$log.error(arg1,arg2,op[1])
-        return arg1[op[1]];
-    case OP_GET_METHOD:
-        return buildInvoker(arg1[arg2],arg1);
-    case OP_INVOKE_METHOD:
-        return arg1.apply(null,arg2);
+    case OP_PARAM_JOIN:
+        arg1.push(arg2)
+        return arg1;
+    case OP_MAP_PUSH:
+        arg1[item[1]]= arg2;
+        return arg1;
     }
-}
-function buildInvoker(memberMethod,thiz){
-	return function(){
-        return memberMethod.apply(thiz,arguments);
-    };
 }
 function LazyToken(value){
     this.value = value;
+}
+function PropertyValue(base,name){
+    this.base = base;
+    this.name = name;
 }
 

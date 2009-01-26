@@ -39,22 +39,22 @@ public abstract interface ExpressionToken {
 	public static final int OP_EQ = (0xE<<2) +2;//==;
 	public static final int OP_NOTEQ = (0xF<<2) +2;//!=;
 	public static final int OP_AND = (0x10<<2) +2;//&&;
-	public static final int OP_OR = (0x12<<2) +2;//||;
+	public static final int OP_OR = (0x11<<2) +2;//||;
 	
 	
 
-	public static final int OP_NOT = (0x13<<2) +1;//!;
-	public static final int OP_POS = (0x14<<2) +1;//+;//正数
-	public static final int OP_NEG = (0x15<<2) +1;//-;//负数
+	public static final int OP_NOT = (0x12<<2) +1;//!;
+	public static final int OP_POS = (0x13<<2) +1;//+;//正数
+	public static final int OP_NEG = (0x14<<2) +1;//-;//负数
 
 	//public static final int OP_GET_METHOD = (0x16<<2) +2;//.();
-	public static final int OP_INVOKE_METHOD = (0x17<<2) +2;//()
+	public static final int OP_INVOKE_METHOD = (0x15<<2) +2;//()
 
 
 	//与Map Join 共享字面量（map join 会忽略）
-	public static final int OP_PARAM_JOIN = (0x18<<2) +2;//,
+	public static final int OP_PARAM_JOIN = (0x16<<2) +2;//,
 	//与三元运算符共享字面值
-	public static final int OP_MAP_PUSH = (0x19<<2) +2;//:,
+	public static final int OP_MAP_PUSH = (0x17<<2) +2;//:,
 	
 	
 	public abstract int getType();

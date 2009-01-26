@@ -249,8 +249,3 @@ function xmlReplacer(c){
           return '&#34;';
     }
 }
-function evaluate(el,context){
-     var stack = [];
-     _evaluate(stack,el,context)
-     return stack[0];
-}

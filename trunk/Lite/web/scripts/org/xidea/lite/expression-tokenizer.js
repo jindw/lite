@@ -126,7 +126,6 @@ var fns = {
 			switch (op.charAt(0)) {
 			case '(':
 				if (this.status == STATUS_EXPRESSION) {
-					this.insertAndReturnIsStatic();
 					this.addToken([OP_INVOKE_METHOD, null]);
 					if (this.skipSpace(')')) {
 						this.addToken([VALUE_CONSTANTS,
@@ -260,53 +259,6 @@ var fns = {
 		}
 	},
 
-	insertAndReturnIsStatic :function() {
-		var index = this.tokens.length - 1;
-		var token = this.tokens[index];
-		switch (token[0]) {
-		case BRACKET_END:
-			var depth = 0;
-			index--;
-			while (index >= 0) {
-				var type = token[0];
-				if (type == BRACKET_BEGIN) {
-					depth--;
-					if (depth == 0) {
-						if (index - 1 > 0
-								&& this.tokens[index - 1][0] == OP_GET_PROP) {
-							// TODO:....
-							this.tokens[index - 1]= [
-									OP_GET_METHOD, null];
-							return false;
-						} else {
-							// this.tokens.push(index,
-							// [OP_GET_GLOBAL_METHOD,
-							// null]);
-							return true;
-						}
-					}
-				} else if (type == BRACKET_END) {
-					depth++;
-				}
-				index--;
-				token = this.tokens[index];
-			}
-			break;
-		case VALUE_VAR:// gloabl call
-			// this.tokens.set(index,new TokenImpl(VALUE_CONSTANTS,
-			// ((VarToken)token).getValue()));
-			// this.tokens.push(index,
-			// [OP_GET_GLOBAL_METHOD,
-			// null]);
-			return true;
-		case VALUE_CONSTANTS:// member call
-			this.tokens[index - 1]=[OP_GET_METHOD,
-					null];
-			return false;
-		}
-		throw new Error("无效方法调用语法");
-	},
-
 	addList :function() {
 		this.addToken([BRACKET_BEGIN, null]);
 		this.addToken([VALUE_NEW_LIST, null]);
@@ -431,7 +383,7 @@ function getPriority(type) {
 	case BRACKET_END:
 		return Math.MIN_VALUE;
 	case OP_GET_PROP:
-	case OP_GET_METHOD:
+	//case OP_GET_METHOD:
 	//case OP_GET_GLOBAL_METHOD:
 	case OP_INVOKE_METHOD:
 	case VALUE_NEW_LIST:

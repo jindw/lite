@@ -100,7 +100,7 @@ function appendCode(code,buf,idpool,depth){
                 var bufbak = idpool.get();
                 buf.push("var ",bufbak,"=_$0;_$0=[];");
                 appendCode(childCode,buf,idpool,depth);
-                buf.push("_$0=",bufbak,";");
+                buf.push("var ",varName,"=_$0.join('');_$0=",bufbak,";");
                 idpool.free(bufbak);
                 break;
             case IF_TYPE:
@@ -110,7 +110,7 @@ function appendCode(code,buf,idpool,depth){
                 appendCode(childCode,buf,idpool,depth+1)
                 printIndex(buf,depth,"}");
                 var nextElse = code[i+1];
-                if(nextElse[0] == ELSE_TYPE){
+                while(nextElse[0] == ELSE_TYPE){
                     i++;
                     var childCode = nextElse[1];
                     var test = nextElse[2];
@@ -131,8 +131,10 @@ function appendCode(code,buf,idpool,depth){
                 //TODO:没有处理else，for(Number),for(Object)
                 var indexId = idpool.get();
                 var itemsId = idpool.get();
+                var previousForValueId = idpool.get();
                 var itemsEL = item[3];
                 var varNameId = item[2]; 
+                var statusNameId = item[4]; 
                 var childCode = item[1];
                 printIndex(buf,depth,"var ",itemsId,"=",itemsEL,";");
                 printIndex(buf,depth,"var ",indexId,"=0;")
@@ -148,15 +150,32 @@ function appendCode(code,buf,idpool,depth){
                 depth--
                 printIndex(buf,depth,"}");
                 
+                
+                printIndex(buf,depth,"var ",previousForValueId ,"=this['for']");
+                printIndex(buf,depth,"this['for'] = {lastIndex:",itemsId,".length-1,depth:",previousForValueId,"?",previousForValueId,".depth+1:0};" );
+                if(statusNameId){
+                    var previousStatusNameId = idpool.get();
+                    printIndex(buf,depth,"var ",previousStatusNameId ,"=",statusNameId);
+                	printIndex(buf,depth,"var ",statusNameId ,"=this['for'];" );
+                }
+                
                 printIndex(buf,depth,"for(;",indexId,"<",itemsId,".length;",indexId,"++){");
-                printIndex(buf,depth+1,"var ",varNameId,"=",itemsId,"[",indexId,"]");
+                printIndex(buf,depth+1,"this['for'].index=",indexId,";");
+                printIndex(buf,depth+1,"var ",varNameId,"=",itemsId,"[",indexId,"];");
                 appendCode(childCode,buf,idpool,depth+1)
                 printIndex(buf,depth,"}");
                 
                 
-                idpool.free(itemsId);
+                printIndex(buf,depth ,"this['for']=",previousForValueId);
+                if(statusNameId){
+                    idpool.free(previousStatusNameId)
+                    printIndex(buf,depth ,statusNameId,"=",previousStatusNameId);
+                }
+                
+                idpool.free(itemsId);;
+                idpool.free(previousForValueId);
                 var nextElse = code[i+1];
-                if(nextElse[0] == ELSE_TYPE){
+                while(nextElse[0] == ELSE_TYPE){
                     i++;
                     var childCode = nextElse[1];
                     var test = nextElse[2];
@@ -167,6 +186,7 @@ function appendCode(code,buf,idpool,depth){
                     }
                     appendCode(childCode,buf,idpool,depth+1)
                     printIndex(buf,depth,"}");
+                    nextElse = code[i+1];
                 }
                 idpool.free(indexId);
                 break;

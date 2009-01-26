@@ -1,8 +1,8 @@
 this.addScript('template.js',"Template"
-               ,"_evaluate"
+               ,"evaluate"
                ,["parser.js","text-parser.js","xml-parser.js"]);
 
-this.addScript('expression.js',["Expression","_evaluate"]
+this.addScript('expression.js',["Expression","evaluate"]
               ,0
               ,"expression-token.js");
 this.addScript('parser.js',"*"
