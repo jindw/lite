@@ -1,8 +1,11 @@
 package org.xidea.el.operation;
 
+import java.lang.reflect.Method;
 import java.util.Map;
 
-public class PropertyValue {
+import org.xidea.el.ExpressionResult;
+
+public class PropertyValue implements ExpressionResult{
 	private Object base;
 	private Object name;
 	private Class<? extends Object> type;
@@ -16,19 +19,14 @@ public class PropertyValue {
 		if (base != null) {
 			Object context2 = getValue();
 			if (context2 == null) {
-				type = getNextType(base.getClass(), name);
+				type = ReflectUtil.getType(base.getClass(), name);
 			} else {
 				base = context2;
 			}
 		} else if (type != null) {
-			type = getNextType(type, name);
+			type = ReflectUtil.getType(type, name);
 		}
 		name = key;
-	}
-
-	private Class<? extends Object> getNextType(Class<? extends Object> type2,
-			Object name2) {
-		return null;
 	}
 
 	public Object getBase() {
@@ -39,8 +37,33 @@ public class PropertyValue {
 		return ReflectUtil.getValue(base, name);
 	}
 
+	public Class<? extends Object> getType() {
+		if(type == null){
+			return type;
+		}else{
+			Object value = getValue();
+			if(value!= null){
+				return value.getClass();
+			}else{
+				return ReflectUtil.getType(base.getClass(),name);
+			}
+		}
+	}
+
+	public void setValue(Object value) {
+		ReflectUtil.setValue(base,name,value);
+	}
 	public Invocable getInvocable(Map<String, Map<String, Invocable>> methodMap,Object[] args) {
-		return createInvocable(methodMap,base,name.toString(),args);
+		Invocable invocable = createInvocable(methodMap,base,name.toString(),args);
+		if(invocable == null){
+			Object object = getValue();
+			if(object instanceof Invocable){
+				invocable = (Invocable) object;
+			}else if(object instanceof Method){
+				return createProxy((Method)object);
+			}
+		}
+		return invocable;
 	}
 
 	static Invocable createInvocable(
@@ -93,4 +116,5 @@ public class PropertyValue {
 			}
 		};
 	}
+
 }

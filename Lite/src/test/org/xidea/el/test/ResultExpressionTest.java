@@ -5,9 +5,7 @@ import java.util.HashMap;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.xidea.el.Expression;
 import org.xidea.el.ExpressionImpl;
-import org.xidea.el.ResultExpressionImpl;
 
 public class ResultExpressionTest {
 	private HashMap<Object,Object> root;
@@ -27,10 +25,10 @@ public class ResultExpressionTest {
 	}
 	private void doTest(String el) {
 		ExpressionImpl el1 = new ExpressionImpl(el);
-		ResultExpressionImpl el2 = new ResultExpressionImpl(el);
+		ExpressionImpl el2 = new ExpressionImpl(el);
 		long t1=0,t2=0;
 		Object v1=null,v2=null;
-		int i=1000,j=1000;
+		int i=1,j=1000;
 		while(i-->0){
 			int k = j;
 			t1-=System.nanoTime();

@@ -9,7 +9,8 @@ public interface Expression{
 	 * @param context 变量表
 	 * @return
 	 */
-	public Object evaluate(Map<? extends Object, ? extends Object> context);
+	public Object evaluate(Object context);
+	public ExpressionResult evaluateAsResult(Object context);
 	/**
 	 * 返回表达式的源代码
 	 * @return
