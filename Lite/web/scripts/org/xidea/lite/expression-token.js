@@ -13,41 +13,41 @@ var VALUE_NEW_MAP = -0x04;//{;
 //符号标记 ????? !!
 
 //与正负符号共享字面值
-var OP_ADD = (1<<2) +2;//+;
-var OP_SUB = (2<<2) +2;//-;
+var OP_ADD = 6;//(1<<2) +2;//+;
+var OP_SUB = 10;//(2<<2) +2;//-;
 	
-var OP_MUL = (3<<2) +2;//*;
-var OP_DIV = (4<<2) +2;///;
-var OP_MOD = (5<<2) +2;//%;
-var OP_QUESTION = (6<<2) +2;//?;
-var OP_QUESTION_SELECT = (7<<2) +2;//:;
+var OP_MUL = 14;//(3<<2) +2;//*;
+var OP_DIV = 18;//(4<<2) +2;///;
+var OP_MOD = 22;//(5<<2) +2;//%;
+var OP_QUESTION = 26;//(6<<2) +2;//?;
+var OP_QUESTION_SELECT = 30;//(7<<2) +2;//:;
 
-var OP_GET_PROP = (8<<2) +2;//.;
-var OP_STATIC_GET_PROP = (9<<2) +1;//.#;
+var OP_GET_PROP = 34;//(8<<2) +2;//.;
+var OP_STATIC_GET_PROP =37;// (9<<2) +1;//.#;
 	
-var OP_LT = (0xA<<2) +2;//<;
-var OP_GT = (0xB<<2) +2;//>;
-var OP_LTEQ = (0xC<<2) +2;//<=;
-var OP_GTEQ = (0xD<<2) +2;//>=;
-var OP_EQ = (0xE<<2) +2;//==;
-var OP_NOTEQ = (0xF<<2) +2;//!=;
-var OP_AND = (0x10<<2) +2;//&&;
-var OP_OR = (0x12<<2) +2;//||;
+var OP_LT = 42;//(0xA<<2) +2;//<;
+var OP_GT = 46;//(0xB<<2) +2;//>;
+var OP_LTEQ = 50;//(0xC<<2) +2;//<=;
+var OP_GTEQ = 54;//(0xD<<2) +2;//>=;
+var OP_EQ = 58;//(0xE<<2) +2;//==;
+var OP_NOTEQ = 62;// (0xF<<2) +2;//!=;
+var OP_AND = 66;//(0x10<<2) +2;//&&;
+var OP_OR =70;// (0x11<<2) +2;//||;
 	
 	
 
-var OP_NOT = (0x13<<2) +1;//!;
-var OP_POS = (0x14<<2) +1;//+;//正数
-var OP_NEG = (0x15<<2) +1;//-;//负数
+var OP_NOT =73;// (0x12<<2) +1;//!;
+var OP_POS = 77;//(0x13<<2) +1;//+;//正数
+var OP_NEG = 81;//(0x14<<2) +1;//-;//负数
 
-var OP_GET_METHOD = (0x16<<2) +2;//.();
-var OP_INVOKE_METHOD = (0x17<<2) +2;//()
+//var OP_GET_METHOD = (0x16<<2) +2;//.();
+var OP_INVOKE_METHOD = 86;//(0x15<<2) +2;//()
 
 
 //与Map Join 共享字面量（map join 会忽略）
-var OP_PARAM_JOIN = (0x18<<2) +2;//,
+var OP_PARAM_JOIN = 90;//(0x16<<2) +2;//,
 //与三元运算符共享字面值
-var OP_MAP_PUSH = (0x19<<2) +2;//:,
+var OP_MAP_PUSH = 94;//(0x17<<2) +2;//:,
 
 
 
@@ -75,8 +75,7 @@ OP_ADD, "+", OP_SUB, "-", OP_MUL, "*", OP_DIV, "/",
 		",",// map list,
 		OP_GET_PROP,
 		".",// prop
-		OP_GET_METHOD, "#.", OP_INVOKE_METHOD,
-		"#()" // , OP_GET_GLOBAL_METHOD, "#"//method call
+		OP_INVOKE_METHOD,"#()" // , OP_GET_GLOBAL_METHOD, "#"//method call
 
 ];
 

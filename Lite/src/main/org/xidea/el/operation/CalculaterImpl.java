@@ -92,10 +92,10 @@ public class CalculaterImpl implements Calculater {
 		    arg2 = op.getParam();
 		case ExpressionToken.OP_GET_PROP:
 			if (arg1 instanceof PropertyValue) {
-				((PropertyValue) arg1).next(arg2);
+				((PropertyValue) arg1).next(realValue(arg2));
 				return arg1;
 			} else {
-				return createRefrence(arg1, arg2);
+				return createRefrence(arg1, realValue(arg2));
 			}
 		case ExpressionToken.OP_INVOKE_METHOD:
 			try {
