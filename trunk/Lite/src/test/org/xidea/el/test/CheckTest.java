@@ -1,12 +1,9 @@
 package org.xidea.el.test;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
-import org.xidea.el.Expression;
 import org.xidea.el.ExpressionFactory;
 import org.xidea.el.ExpressionFactoryImpl;
-import org.xidea.el.ExpressionImpl;
 
 public class CheckTest {
 	ExpressionFactory expressionFactory = ExpressionFactoryImpl.getInstance();

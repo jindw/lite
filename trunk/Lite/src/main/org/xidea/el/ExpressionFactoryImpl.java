@@ -36,7 +36,7 @@ public class ExpressionFactoryImpl implements ExpressionFactory {
 			if(el instanceof List){
 				el = toTokens((List<?>)el);
 			}
-			return new ExpressionImpl(null,(ExpressionToken[])el,null,null);
+			return new ExpressionImpl(null,(ExpressionToken[])el,DEFAULT_CALCULATER,DEFAULT_GLOBAL_MAP);
 		}
 	}
 	private ExpressionToken toToken(Object value){
@@ -132,9 +132,8 @@ public class ExpressionFactoryImpl implements ExpressionFactory {
 			ExpressionToken item = list[index];
 			int type = item.getType();
 			if(type>=3){
-				pos-=(type & 3);
+				pos-=(type & 3)-1;
 			}else{
-
 				if(type == ExpressionToken.VALUE_LAZY){
 					check((ExpressionToken[]) item.getParam());
 				}

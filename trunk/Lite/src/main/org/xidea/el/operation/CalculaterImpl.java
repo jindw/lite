@@ -81,15 +81,46 @@ public class CalculaterImpl implements Calculater {
 		return result;
 	}
 
+	public Object createRefrence(Object base, Object name) {
+		return new PropertyValue(base, name);
+	}
 	@SuppressWarnings("unchecked")
 	public Object compute(ExpressionToken op, Object arg1, Object arg2) {
 		final int type = op.getType();
-		if (type == ExpressionToken.OP_GET_PROP) {
+		switch (type) {
+		case ExpressionToken.OP_STATIC_GET_PROP:
+		    arg2 = op.getParam();
+		case ExpressionToken.OP_GET_PROP:
 			if (arg1 instanceof PropertyValue) {
 				((PropertyValue) arg1).next(arg2);
 				return arg1;
 			} else {
-				return new PropertyValue(arg1, arg2);
+				return createRefrence(arg1, arg2);
+			}
+		case ExpressionToken.OP_INVOKE_METHOD:
+			try {
+				Object thiz = null;
+				Object[] arguments = (arg2 instanceof List) ? ((List<?>) arg2)
+						.toArray() : EMPTY_ARGS;
+				Invocable invocable = null;
+				if (arg1 instanceof PropertyValue) {
+					PropertyValue pv = (PropertyValue) arg1;
+					invocable = pv.getInvocable(methodMap, arguments);
+					thiz = pv.getBase();
+				} else {
+					if (arg1 instanceof Invocable) {
+						invocable = (Invocable) arg1;
+					} else if ((arg1 instanceof java.lang.reflect.Method)) {
+						invocable = PropertyValue
+								.createProxy((java.lang.reflect.Method) arg1);
+					}
+				}
+				return invocable.invoke(thiz, arguments);
+			} catch (Exception e) {
+				if (log.isDebugEnabled()) {
+					log.debug("方法调用失败:" + arg1, e);
+				}
+				return null;
 			}
 		}
 		arg1 = realValue(arg1);
@@ -158,37 +189,6 @@ public class CalculaterImpl implements Calculater {
 				return arg2;
 			} else {
 				return arg1;
-			}
-			// case ExpressionToken.OP_GET_PROP:
-			// return ReflectUtil.getValue(arg1, arg2);
-			// case ExpressionToken.OP_STATIC_GET_PROP:
-			// return ReflectUtil.getValue(arg1, op.getParam());
-			// case ExpressionToken.OP_GET_METHOD:
-			// return createInvocation(arg1, String.valueOf(arg2));
-		case ExpressionToken.OP_INVOKE_METHOD:
-			try {
-				Object thiz = null;
-				Object[] arguments = (arg2 instanceof List) ? ((List) arg2)
-						.toArray() : EMPTY_ARGS;
-				Invocable invocable = null;
-				if (arg1 instanceof PropertyValue) {
-					PropertyValue pv = (PropertyValue) arg1;
-					invocable = pv.getInvocable(methodMap, arguments);
-					thiz = pv.getValue();
-				} else {
-					if (arg1 instanceof Invocable) {
-						invocable = (Invocable) arg1;
-					} else if ((arg1 instanceof java.lang.reflect.Method)) {
-						invocable = PropertyValue
-								.createProxy((java.lang.reflect.Method) arg1);
-					}
-				}
-				return invocable.invoke(thiz, arguments);
-			} catch (Exception e) {
-				if (log.isDebugEnabled()) {
-					log.debug("方法调用失败:" + arg1, e);
-				}
-				return null;
 			}
 		case ExpressionToken.OP_PARAM_JOIN:
 			((List) arg1).add(arg2);

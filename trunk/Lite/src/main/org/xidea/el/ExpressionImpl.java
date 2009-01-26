@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.xidea.el.operation.Calculater;
 import org.xidea.el.operation.Invocable;
+import org.xidea.el.operation.ReflectUtil;
 import org.xidea.el.parser.ExpressionToken;
 import org.xidea.el.parser.ExpressionTokenizer;
 
@@ -31,17 +32,30 @@ public class ExpressionImpl implements Expression {
 		this.globalMap = globalMap;
 	}
 
-	public Object evaluate(Map<? extends Object, ? extends Object> context) {
+	public Object evaluate(Object context) {
 		if (context == null) {
 			context = Collections.emptyMap();
 		}
 		ValueStack stack = new ValueStack();
 		evaluate(stack, expression, context);
-		return stack.pop();
+		return calculater.realValue(stack.pop());
+	}
+
+	public ExpressionResult evaluateAsResult(Object context) {
+		if (context == null) {
+			context = Collections.emptyMap();
+		}
+		ValueStack stack = new ValueStack();
+		evaluate(stack, expression, context);
+		Object result = stack.pop();
+		if (result instanceof ExpressionResult) {
+			return (ExpressionResult) result;
+		}
+		return wrapResult(calculater.realValue(result));
 	}
 
 	protected void evaluate(ValueStack stack, ExpressionToken[] tokens,
-			Map<? extends Object, ? extends Object> context) {
+			Object context) {
 		ExpressionToken item = null;
 		int i = tokens.length;
 		while (i-- > 0) {
@@ -54,14 +68,15 @@ public class ExpressionImpl implements Expression {
 				if (length > 1) {
 					arg2 = stack.pop();
 					arg1 = stack.pop();
-				} else {//if (length == 1) {
+				} else {// if (length == 1) {
 					arg1 = stack.pop();
 				}
 				Object result = calculater.compute(item, arg1, arg2);
 				if (result instanceof ExpressionToken) {
 					ExpressionToken lazyToken = (ExpressionToken) result;
-					if(lazyToken.getType() == ExpressionToken.VALUE_LAZY){
-						evaluate(stack, (ExpressionToken[]) lazyToken.getParam(),context);
+					if (lazyToken.getType() == ExpressionToken.VALUE_LAZY) {
+						evaluate(stack, (ExpressionToken[]) lazyToken
+								.getParam(), context);
 						return;
 					}
 				}
@@ -72,8 +87,7 @@ public class ExpressionImpl implements Expression {
 		}
 	}
 
-	protected Object getTokenValue(Map<? extends Object, ? extends Object> context,
-			ExpressionToken item) {
+	protected Object getTokenValue(Object context, ExpressionToken item) {
 		switch (item.getType()) {
 		case ExpressionToken.VALUE_NEW_LIST:
 			return new ArrayList<Object>();
@@ -84,11 +98,7 @@ public class ExpressionImpl implements Expression {
 			if ("this".equals(value)) {
 				return context;
 			} else {
-				Object result = context.get(value);
-				if (result == null && !context.containsKey(value)) {
-					result = globalMap.get(value);
-				}
-				return result;
+				return createVariable(context, value);
 			}
 		case ExpressionToken.VALUE_LAZY:
 			return (item);
@@ -96,6 +106,34 @@ public class ExpressionImpl implements Expression {
 			return item.getParam();
 		}
 		throw new IllegalArgumentException();
+	}
+
+	protected Object createVariable(Object context, String key) {
+		if (context instanceof Map) {
+			java.util.HashMap<?, ?> contextMap = (java.util.HashMap<?, ?>) context;
+			if (contextMap.get(key)==null && !contextMap.containsKey(key)) {
+				return calculater.createRefrence(globalMap,key);
+			}
+		} else if (ReflectUtil.getType(context.getClass(), key) == null) {
+			return calculater.createRefrence(globalMap,key);
+		}
+		return calculater.createRefrence(context,key);
+	}
+
+	protected ExpressionResult wrapResult(final Object realValue) {
+		return new ExpressionResult() {
+			public Class<? extends Object> getType() {
+				return realValue.getClass();
+			}
+
+			public Object getValue() {
+				return realValue;
+			}
+
+			public void setValue(Object value) {
+				throw new UnsupportedOperationException();
+			}
+		};
 	}
 
 	@Override

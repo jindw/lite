@@ -20,6 +20,7 @@ public interface Calculater {
 	 * @param arg2 参数2
 	 * @return 运算结果
 	 */
-	@SuppressWarnings("unchecked")
 	public Object compute(ExpressionToken op,Object arg1,Object arg2) ;
+	public Object realValue(Object result);
+	public Object createRefrence(Object base,Object name);
 }

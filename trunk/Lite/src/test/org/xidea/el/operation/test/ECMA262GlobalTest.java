@@ -15,10 +15,10 @@ import org.xidea.el.operation.Invocable;
 
 public class ECMA262GlobalTest {
 	ExpressionFactory factory = new ExpressionFactoryImpl();
-	Invocable encodeURI = new ECMA262Global(ECMA262Global.ID_ENCODEURI);
-	Invocable decodeURI = new ECMA262Global(ECMA262Global.ID_DECODEURI);
-	Invocable encodeURIComponent = new ECMA262Global(ECMA262Global.ID_ENCODEURICOMPONENT);
-	Invocable decodeURIComponent = new ECMA262Global(ECMA262Global.ID_DECODEURICOMPONENT);
+	Invocable encodeURI = new ECMA262Global.EncodeURI();
+	Invocable decodeURI = new ECMA262Global.DecodeURI();
+	Invocable encodeURIComponent = new ECMA262Global.EncodeURIComponent();
+	Invocable decodeURIComponent = new ECMA262Global.DecodeURIComponent();
 
 	@Test
 	public void testEncodeURLComponentEL() throws Exception{
@@ -37,8 +37,8 @@ public class ECMA262GlobalTest {
 		encodeMap.put("http://www.xidea.org/a b c 金 大 为", "http%3A%2F%2Fwww.xidea.org%2Fa%20b%20c%20%E9%87%91%20%E5%A4%A7%20%E4%B8%BA".replace("%20", "+"));
 		for (String key : encodeMap.keySet()) {
 			String value = encodeMap.get(key);
-			assertEquals(value,encodeURIComponent.invoke(key));
-			assertEquals(key,decodeURIComponent.invoke(value));
+			assertEquals(value,encodeURIComponent.invoke(null,key));
+			assertEquals(key,decodeURIComponent.invoke(null,value));
 		}
 //		System.out.println(encodeURIComponent.invoke("1 2"));
 //		System.out.println(decodeURIComponent.invoke("1+2"));
@@ -51,8 +51,8 @@ public class ECMA262GlobalTest {
 		encodeMap.put("http://www.xidea.org/a?金=大&为=2", "http://www.xidea.org/a?%E9%87%91=%E5%A4%A7&%E4%B8%BA=2".replace("%20", "+"));
 		for (String key : encodeMap.keySet()) {
 			String value = encodeMap.get(key);
-			assertEquals(value,encodeURI.invoke(key));
-			assertEquals(key,decodeURI.invoke(value));
+			assertEquals(value,encodeURI.invoke(null,key));
+			assertEquals(key,decodeURI.invoke(null,value));
 		}
 	}
 	@Test

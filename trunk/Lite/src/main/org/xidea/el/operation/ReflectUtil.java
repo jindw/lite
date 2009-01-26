@@ -3,7 +3,6 @@ package org.xidea.el.operation;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
-import java.lang.reflect.TypeVariable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -41,7 +40,8 @@ public class ReflectUtil {
 				.parseInt(String.valueOf(key));
 	}
 
-	public static Object getValue(Class<? extends Object> type, Object key) {
+	public static Class<? extends Object> getType(Class<? extends Object> type,
+			Object key) {
 		if (type != null) {
 			if (type.isArray()) {
 				if (LENGTH.equals(key)) {
@@ -50,8 +50,16 @@ public class ReflectUtil {
 					return type.getComponentType();
 				}
 			} else if (Collection.class.isAssignableFrom(type)) {
-				TypeVariable<?>[] ca = type.getTypeParameters();
-				for (TypeVariable tv : ca) {
+				// TypeVariable<?>[] ca = type.getTypeParameters();
+				// for (TypeVariable tv : ca) {
+				// }
+				return Object.class;
+			} else if (Map.class.isAssignableFrom(type)) {
+				return Object.class;
+			} else {
+				PropertyDescriptor pd = getPropertyDescriptor(type, String.valueOf(key));
+				if(pd!=null){
+					return pd.getPropertyType();
 				}
 			}
 		}
@@ -78,9 +86,8 @@ public class ReflectUtil {
 				if (context instanceof Map) {
 					return ((Map<?, ?>) context).get(key);
 				}
-				Map<String, PropertyDescriptor> pm = getPropertyMap(context
-						.getClass());
-				PropertyDescriptor pd = pm.get(key);
+				PropertyDescriptor pd = getPropertyDescriptor(context
+						.getClass(), String.valueOf(key));
 				if (pd != null) {
 					Method method = pd.getReadMethod();
 					if (method != null) {
@@ -95,5 +102,39 @@ public class ReflectUtil {
 		}
 		return null;
 	}
-}
 
+	private static PropertyDescriptor getPropertyDescriptor(
+			Class<? extends Object> type, String key) {
+		Map<String, PropertyDescriptor> pm = getPropertyMap(type);
+		return pm.get(key);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static void setValue(Object base, Object key, Object value) {
+		if (base != null) {
+			try {
+				if (base.getClass().isArray()) {
+					Array.set(base, toIndex(key), value);
+				} else if (base instanceof List<?>) {
+					((List<Object>) base).set(toIndex(key), value);
+				}
+				if (base instanceof Map) {
+					((Map<Object, Object>) base).put(key, value);
+				}
+				PropertyDescriptor pd = getPropertyDescriptor(base.getClass(),
+						String.valueOf(key));
+				if (pd != null) {
+					Method method = pd.getWriteMethod();
+					if (method != null) {
+						method.invoke(base, value);
+					}
+				}
+			} catch (Exception e) {
+				if (log.isDebugEnabled()) {
+					log.debug(e);
+				}
+			}
+		}
+
+	}
+}
