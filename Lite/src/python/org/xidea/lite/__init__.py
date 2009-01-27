@@ -1,10 +1,9 @@
 from Expression import evaluate
 from Template import renderList
 import StringIO
-def test():
-	output = StringIO.StringIO();
-	Template(["12345",[0,[1,2,[6]]]]).render({},output)
-	print output.getvalue()
+
+
+
 
 class Expression:
     """ generated source for ExpressionImpl
