@@ -9,16 +9,16 @@ import org.junit.Test;
 import org.xidea.el.Expression;
 import org.xidea.el.ExpressionFactory;
 import org.xidea.el.ExpressionFactoryImpl;
-import org.xidea.el.operation.ECMA262Global;
+import org.xidea.el.operation.ECMA262Impl;
 import org.xidea.el.operation.Invocable;
 
 
-public class ECMA262GlobalTest {
+public class ECMA262GlobalsTest {
 	ExpressionFactory factory = new ExpressionFactoryImpl();
-	Invocable encodeURI = new ECMA262Global.EncodeURI();
-	Invocable decodeURI = new ECMA262Global.DecodeURI();
-	Invocable encodeURIComponent = new ECMA262Global.EncodeURIComponent();
-	Invocable decodeURIComponent = new ECMA262Global.DecodeURIComponent();
+	Invocable encodeURI = new ECMA262Impl.EncodeURI();
+	Invocable decodeURI = new ECMA262Impl.DecodeURI();
+	Invocable encodeURIComponent = new ECMA262Impl.EncodeURIComponent();
+	Invocable decodeURIComponent = new ECMA262Impl.DecodeURIComponent();
 
 	@Test
 	public void testEncodeURLComponentEL() throws Exception{

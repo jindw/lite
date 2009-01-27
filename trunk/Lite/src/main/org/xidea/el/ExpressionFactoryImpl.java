@@ -7,9 +7,8 @@ import java.util.Map;
 
 import org.xidea.el.operation.Calculater;
 import org.xidea.el.operation.CalculaterImpl;
-import org.xidea.el.operation.ECMA262Global;
+import org.xidea.el.operation.ECMA262Impl;
 import org.xidea.el.operation.Invocable;
-import org.xidea.el.operation.TemplateGlobal;
 import org.xidea.el.parser.ExpressionToken;
 import org.xidea.el.parser.ExpressionTokenizer;
 import org.xidea.el.parser.TokenImpl;
@@ -21,8 +20,7 @@ public class ExpressionFactoryImpl implements ExpressionFactory {
 	public static final Map<String, Invocable> DEFAULT_GLOBAL_MAP;
 	static {
 		HashMap<String, Invocable> map = new HashMap<String, Invocable>();
-		TemplateGlobal.appendTo(map);
-		ECMA262Global.appendTo(map);
+		ECMA262Impl.appendTo(map);
 		DEFAULT_GLOBAL_MAP = Collections.unmodifiableMap(map);
 	}
 	public static ExpressionFactory getInstance() {

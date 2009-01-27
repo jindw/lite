@@ -9,9 +9,9 @@ import org.apache.commons.logging.LogFactory;
 import org.xidea.el.parser.ExpressionToken;
 
 public class CalculaterImpl implements Calculater {
+	private static final Log log = LogFactory.getLog(CalculaterImpl.class);
 	protected static final Object SKIP_QUESTION = new Object();
 	private static final Object[] EMPTY_ARGS = new Object[0];
-	private static final Log log = LogFactory.getLog(CalculaterImpl.class);
 	private Map<String, Map<String, Invocable>> methodMap;
 	private NumberArithmetic arithmetic = new NumberArithmetic();
 
@@ -64,13 +64,13 @@ public class CalculaterImpl implements Calculater {
 		} else if (arg1.equals(arg2)) {
 			return 0;
 		}
-		arg1 = ECMA262Util.ToPrimitive(arg1, Number.class);
-		arg2 = ECMA262Util.ToPrimitive(arg2, Number.class);
+		arg1 = ECMA262Impl.ToPrimitive(arg1, Number.class);
+		arg2 = ECMA262Impl.ToPrimitive(arg2, Number.class);
 		if (arg1 instanceof String && arg2 instanceof String) {
 			return ((String) arg1).compareTo((String) arg2);
 		}
-		Number n1 = ECMA262Util.ToNumber(arg1);
-		Number n2 = ECMA262Util.ToNumber(arg2);
+		Number n1 = ECMA262Impl.ToNumber(arg1);
+		Number n2 = ECMA262Impl.ToNumber(arg2);
 		return arithmetic.compare(n1, n2, validReturn);
 	}
 
@@ -127,32 +127,32 @@ public class CalculaterImpl implements Calculater {
 		arg2 = realValue(arg2);
 		switch (type) {
 		case ExpressionToken.OP_NOT:
-			return !ECMA262Util.ToBoolean(arg1);
+			return !ECMA262Impl.ToBoolean(arg1);
 		case ExpressionToken.OP_POS:
-			return ECMA262Util.ToNumber(arg1);
+			return ECMA262Impl.ToNumber(arg1);
 		case ExpressionToken.OP_NEG:
-			return arithmetic.subtract(0, ECMA262Util.ToNumber(arg1));
+			return arithmetic.subtract(0, ECMA262Impl.ToNumber(arg1));
 			/* +-*%/ */
 		case ExpressionToken.OP_ADD:
-			Object p1 = ECMA262Util.ToPrimitive(arg1, String.class);
-			Object p2 = ECMA262Util.ToPrimitive(arg2, String.class);
+			Object p1 = ECMA262Impl.ToPrimitive(arg1, String.class);
+			Object p2 = ECMA262Impl.ToPrimitive(arg2, String.class);
 			if (p1 instanceof String || p2 instanceof String) {
 				return String.valueOf(p1) + p2;
 			} else {
-				return arithmetic.add(ECMA262Util.ToNumber(p1), ECMA262Util
+				return arithmetic.add(ECMA262Impl.ToNumber(p1), ECMA262Impl
 						.ToNumber(p2));
 			}
 		case ExpressionToken.OP_SUB:
-			return arithmetic.subtract(ECMA262Util.ToNumber(arg1), ECMA262Util
+			return arithmetic.subtract(ECMA262Impl.ToNumber(arg1), ECMA262Impl
 					.ToNumber(arg2));
 		case ExpressionToken.OP_MUL:
-			return arithmetic.multiply(ECMA262Util.ToNumber(arg1), ECMA262Util
+			return arithmetic.multiply(ECMA262Impl.ToNumber(arg1), ECMA262Impl
 					.ToNumber(arg2));
 		case ExpressionToken.OP_DIV:
-			return arithmetic.divide(ECMA262Util.ToNumber(arg1), ECMA262Util
+			return arithmetic.divide(ECMA262Impl.ToNumber(arg1), ECMA262Impl
 					.ToNumber(arg2), true);
 		case ExpressionToken.OP_MOD:
-			return arithmetic.modulus(ECMA262Util.ToNumber(arg1), ECMA262Util
+			return arithmetic.modulus(ECMA262Impl.ToNumber(arg1), ECMA262Impl
 					.ToNumber(arg2));
 
 			/* boolean */
@@ -166,20 +166,20 @@ public class CalculaterImpl implements Calculater {
 
 			/* and or */
 		case ExpressionToken.OP_AND:
-			if (ECMA262Util.ToBoolean(arg1)) {
+			if (ECMA262Impl.ToBoolean(arg1)) {
 				return arg2;// 进一步判断
 			} else {// false
 				return arg1;// //skip
 			}
 
 		case ExpressionToken.OP_OR:
-			if (ECMA262Util.ToBoolean(arg1)) {
+			if (ECMA262Impl.ToBoolean(arg1)) {
 				return arg1;
 			} else {
 				return arg2;
 			}
 		case ExpressionToken.OP_QUESTION:// a?b:c -> a?:bc -- >a?b:c
-			if (ECMA262Util.ToBoolean(arg1)) {// 取值1
+			if (ECMA262Impl.ToBoolean(arg1)) {// 取值1
 				return arg2;
 			} else {// 跳过 取值2
 				return SKIP_QUESTION;
