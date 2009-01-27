@@ -111,13 +111,12 @@ public class ExpressionImpl implements Expression ,PrepareExpression {
 			if (result !=null){
 				return result;
 			}
-			if(!contextMap.containsKey(key)){
-				return globalMap.get(key);
-			}
+			return globalMap.get(key);
 		} else if (ReflectUtil.getType(context.getClass(), key) == null) {
-			return calculater.createRefrence(globalMap,key);
+			return globalMap.get(key);
+		}else{
+		    return calculater.createRefrence(context,key);
 		}
-		return calculater.createRefrence(context,key);
 	}
 
 

@@ -31,10 +31,14 @@ public class PrepareExpressionImpl extends ExpressionImpl {
 		if (context instanceof Map) {
 			Map<?, ?> contextMap = (Map<?, ?>) context;
 			if (contextMap.get(key) == null && !contextMap.containsKey(key)) {
-				return calculater.createRefrence(globalMap, key);
+				//readonly
+				//return calculater.createRefrence(globalMap, key);
+				return globalMap.get(key);
 			}
 		} else if (ReflectUtil.getType(context.getClass(), key) == null) {
-			return calculater.createRefrence(globalMap, key);
+			//readonly
+			//return calculater.createRefrence(globalMap, key);
+			return globalMap.get(key);
 		}
 		return calculater.createRefrence(context, key);
 	}

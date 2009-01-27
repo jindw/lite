@@ -15,7 +15,7 @@ public class PropertyValue implements ExpressionResult{
 		this.name = name;
 	}
 
-	public void next(Object key) {
+	public Object next(Object key) {
 		if (base != null) {
 			Object context2 = getValue();
 			if (context2 == null) {
@@ -27,6 +27,7 @@ public class PropertyValue implements ExpressionResult{
 			type = ReflectUtil.getType(type, name);
 		}
 		name = key;
+		return this;
 	}
 
 	public Object getBase() {
@@ -38,7 +39,7 @@ public class PropertyValue implements ExpressionResult{
 	}
 
 	public Class<? extends Object> getType() {
-		if(type == null){
+		if(type != null){
 			return type;
 		}else{
 			Object value = getValue();
