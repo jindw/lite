@@ -11,24 +11,33 @@ import org.xidea.el.operation.ReflectUtil;
 import org.xidea.el.parser.ExpressionToken;
 import org.xidea.el.parser.ExpressionTokenizer;
 
-public class ExpressionImpl implements Expression {
+public class ExpressionImpl implements Expression ,PrepareExpression {
 	protected final Calculater calculater;
+	protected final Map<String, Invocable> globalMap;
+	
+	
 	protected final ExpressionToken[] expression;
-	protected String source;
+	protected final String source;
+	private PrepareExpression pe;
 
-	private final Map<String, Invocable> globalMap;
 
+	public ExpressionResult prepare(Object context) {
+		if(pe == null){
+			pe = new PrepareExpressionImpl(source, expression, calculater, globalMap);
+		}
+		return pe.prepare(context);
+	}
 	public ExpressionImpl(String el) {
 		this(el, new ExpressionTokenizer(el).getTokens().getData(),
 				ExpressionFactoryImpl.DEFAULT_CALCULATER,
 				ExpressionFactoryImpl.DEFAULT_GLOBAL_MAP);
 	}
 
-	public ExpressionImpl(String source, ExpressionToken[] compiled,
+	public ExpressionImpl(String source, ExpressionToken[] expression,
 			Calculater calculater, Map<String, Invocable> globalMap) {
 		this.source = source;
 		this.calculater = calculater;
-		this.expression = compiled;
+		this.expression = expression;
 		this.globalMap = globalMap;
 	}
 
@@ -39,19 +48,6 @@ public class ExpressionImpl implements Expression {
 		ValueStack stack = new ValueStack();
 		evaluate(stack, expression, context);
 		return calculater.realValue(stack.pop());
-	}
-
-	public ExpressionResult evaluateAsResult(Object context) {
-		if (context == null) {
-			context = Collections.emptyMap();
-		}
-		ValueStack stack = new ValueStack();
-		evaluate(stack, expression, context);
-		Object result = stack.pop();
-		if (result instanceof ExpressionResult) {
-			return (ExpressionResult) result;
-		}
-		return wrapResult(calculater.realValue(result));
 	}
 
 	protected void evaluate(ValueStack stack, ExpressionToken[] tokens,
@@ -110,9 +106,13 @@ public class ExpressionImpl implements Expression {
 
 	protected Object createVariable(Object context, String key) {
 		if (context instanceof Map) {
-			java.util.HashMap<?, ?> contextMap = (java.util.HashMap<?, ?>) context;
-			if (contextMap.get(key)==null && !contextMap.containsKey(key)) {
-				return calculater.createRefrence(globalMap,key);
+			Map<?, ?> contextMap = (Map<?, ?>) context;
+			Object result = contextMap.get(key);
+			if (result !=null){
+				return result;
+			}
+			if(!contextMap.containsKey(key)){
+				return globalMap.get(key);
 			}
 		} else if (ReflectUtil.getType(context.getClass(), key) == null) {
 			return calculater.createRefrence(globalMap,key);
@@ -120,24 +120,10 @@ public class ExpressionImpl implements Expression {
 		return calculater.createRefrence(context,key);
 	}
 
-	protected ExpressionResult wrapResult(final Object realValue) {
-		return new ExpressionResult() {
-			public Class<? extends Object> getType() {
-				return realValue.getClass();
-			}
-
-			public Object getValue() {
-				return realValue;
-			}
-
-			public void setValue(Object value) {
-				throw new UnsupportedOperationException();
-			}
-		};
-	}
 
 	@Override
 	public String toString() {
 		return source;
 	}
+
 }
