@@ -5,35 +5,49 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.Map.Entry;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class ReflectUtil {
+public abstract class ReflectUtil {
 	private static final Log log = LogFactory.getLog(ReflectUtil.class);
 	private static final String LENGTH = "length";
 	private static final Map<Class<?>, Map<String, PropertyDescriptor>> classPropertyMap = new HashMap<Class<?>, Map<String, PropertyDescriptor>>();
 
-	private static Map<String, PropertyDescriptor> getPropertyMap(Class<?> clazz) {
+	protected static Map<String, PropertyDescriptor> getPropertyMap(Class<?> clazz) {
 		Map<String, PropertyDescriptor> propertyMap = classPropertyMap
 				.get(clazz);
 		if (propertyMap == null) {
 			try {
 				propertyMap = new HashMap<String, PropertyDescriptor>();
-				classPropertyMap.put(clazz, propertyMap);
 				PropertyDescriptor[] properties = java.beans.Introspector
 						.getBeanInfo(clazz).getPropertyDescriptors();
 				for (int i = 0; i < properties.length; i++) {
 					PropertyDescriptor property = properties[i];
 					propertyMap.put(property.getName(), property);
 				}
+				// propertyMap = Collections.unmodifiableMap(propertyMap);
+				classPropertyMap.put(clazz, propertyMap);
 			} catch (Exception e) {
 			}
 		}
 		return propertyMap;
 	}
+
+	private static Map<String, ? extends Object> map(final Object context) {
+		Map<String, PropertyDescriptor> ps = getPropertyMap(context.getClass());
+		HashMap<String, Object> result = new HashMap<String, Object>() {
+
+
+		};
+		return result;
+	}
+
 
 	private static int toIndex(Object key) {
 		return key instanceof Number ? ((Number) key).intValue() : Integer
@@ -57,8 +71,9 @@ public class ReflectUtil {
 			} else if (Map.class.isAssignableFrom(type)) {
 				return Object.class;
 			} else {
-				PropertyDescriptor pd = getPropertyDescriptor(type, String.valueOf(key));
-				if(pd!=null){
+				PropertyDescriptor pd = getPropertyDescriptor(type, String
+						.valueOf(key));
+				if (pd != null) {
 					return pd.getPropertyType();
 				}
 			}
