@@ -9,7 +9,7 @@ public interface ExpressionResult{
 	 * @param context 变量表
 	 * @return
 	 */
-	public void setValue(Object value);
+	public Object setValue(Object value);
 	public Object getValue();
 	public Class<? extends Object> getType();
 }
