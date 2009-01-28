@@ -53,7 +53,7 @@ public class PrepareExpressionImpl extends ExpressionImpl {
 				return realValue;
 			}
 
-			public void setValue(Object value) {
+			public Object setValue(Object value) {
 				throw new UnsupportedOperationException();
 			}
 		};

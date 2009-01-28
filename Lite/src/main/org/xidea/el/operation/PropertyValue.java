@@ -51,8 +51,9 @@ public class PropertyValue implements ExpressionResult{
 		}
 	}
 
-	public void setValue(Object value) {
+	public Object setValue(Object value) {
 		ReflectUtil.setValue(base,name,value);
+		return null;
 	}
 	public Invocable getInvocable(Map<String, Map<String, Invocable>> methodMap,Object[] args) {
 		Invocable invocable = createInvocable(methodMap,base,name.toString(),args);

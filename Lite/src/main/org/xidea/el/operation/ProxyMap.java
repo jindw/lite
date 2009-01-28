@@ -1,51 +1,21 @@
 package org.xidea.el.operation;
 
-import java.util.Collection;
+import java.beans.PropertyDescriptor;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.Map.Entry;
 
-class ProxyMap extends HashMap<Object, Object> {
+class ProxyMap extends HashMap<String, Object> {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 	private Object base;
-	ProxyMap(Object base) {
+	ProxyMap(Object base, Map<String, PropertyDescriptor> ps) {
 		this.base = base;
-	}
-
-	@Override
-	public boolean containsValue(Object value) {
-		for(Object key : super.keySet()){
-			Object value2 = get(key);
-			if(value == null){
-				if(value == value){
-					return true;
-				}
-			}else{
-				if(value.equals(value2)){
-					return true;
-				}
-			}
+		for (String key : ps.keySet()) {
+			super.put(key, new PropertyEntry(key));
 		}
-		return false;
 	}
-
-	@Override
-	public Set<Entry<Object, Object>> entrySet() {
-		@SuppressWarnings("unchecked")
-		Set<Entry<Object, Object>> result = super.entrySet();
-		for(Entry<Object, Object> entry : result){
-			Object value = entry.getValue();
-			if(value instanceof PropertyValue){
-				
-			}
-		}
-		return result;
-	}
-
 	@SuppressWarnings("unchecked")
 	@Override
 	public Object get(Object key) {
@@ -58,35 +28,41 @@ class ProxyMap extends HashMap<Object, Object> {
 	}
 
 	@Override
-	public Object put(Object key, Object value) {
+	public Object put(String key, Object value) {
 		Object v = super.put(key, value);
 		if (v instanceof PropertyEntry) {
 			PropertyEntry pe = (PropertyEntry) v;
-			Object result = (Object) pe.getValue();
-			pe.setValue(value);
-			return result;
+			return pe.setValue(value);
 		} else {
 			return v;
 		}
 	}
+//
+//	@Override
+//	public Set<Entry<Object, Object>> entrySet() {
+//		@SuppressWarnings("unchecked")
+//		Set<Entry<Object, Object>> result = new HashSet<Entry<Object,Object>>(super.entrySet());
+//		for(Entry<Object, Object> entry : result){
+//			Object value = entry.getValue();
+//			if(value instanceof PropertyValue){
+//				entry.setValue(((PropertyValue)value).getValue());
+//			}
+//		}
+//		return result;
+//	}
 
-	@Override
-	public void putAll(Map<? extends Object, ? extends Object> m) {
-		for (Map.Entry<? extends Object, ? extends Object> entry : m.entrySet()) {
-			put(entry.getKey(), entry.getValue());
-		}
-	}
 
-	@Override
-	public Collection<Object> values() {
-		return super.values();
-	}
+//
+//	@Override
+//	public void putAll(Map<? extends Object, ? extends Object> m) {
+//		for (Map.Entry<? extends Object, ? extends Object> entry : m.entrySet()) {
+//			put(entry.getKey(), entry.getValue());
+//		}
+//	}
 
-	private static Object NULL = new Object();
-	class PropertyEntry implements Map.Entry<Object, Object> {
+
+	protected class PropertyEntry implements Map.Entry<Object, Object> {
 		private Object key;
-		private Object value = NULL;
-
 		public PropertyEntry(String key) {
 			this.key = key;
 		}
@@ -96,14 +72,13 @@ class ProxyMap extends HashMap<Object, Object> {
 		}
 
 		public Object getValue() {
-			if (NULL == value) {
-				value = ReflectUtil.getValue(base, key);
-			}
-			return value;
+			return ReflectUtil.getValue(base, key);
 		}
 
 		public Object setValue(Object value) {
-			return this.value = value;
+			Object old =  getValue();
+			ReflectUtil.setValue(base, key,value);
+			return old;
 		}
 
 	}

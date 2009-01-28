@@ -13,6 +13,7 @@ import org.apache.commons.logging.LogFactory;
 import org.xidea.el.Expression;
 import org.xidea.el.ExpressionFactory;
 import org.xidea.el.ExpressionFactoryImpl;
+import org.xidea.el.operation.ReflectUtil;
 
 public class Template {
 	private static Log log = LogFactory.getLog(Template.class);
@@ -44,9 +45,16 @@ public class Template {
 		this.items = this.compile(list);
 	}
 
-	public void render(Map<? extends Object, ? extends Object> context,
+	@SuppressWarnings("unchecked")
+	public void render(Object context,
 			Writer out) throws IOException {
-		renderList(context, items, out);
+		Map<? extends Object, ? extends Object> contextMap;
+		if(context instanceof Map){
+			contextMap = (Map<? extends Object, ? extends Object>) context;
+		}else{
+			contextMap = ReflectUtil.map(context);
+		}
+		renderList(contextMap, items, out);
 	}
 
 	@SuppressWarnings("unchecked")

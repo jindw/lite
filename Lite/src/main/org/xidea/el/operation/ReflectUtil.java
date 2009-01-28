@@ -5,11 +5,8 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.Map.Entry;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,13 +36,9 @@ public abstract class ReflectUtil {
 		return propertyMap;
 	}
 
-	private static Map<String, ? extends Object> map(final Object context) {
+	public static Map<String, ? extends Object> map(final Object context) {
 		Map<String, PropertyDescriptor> ps = getPropertyMap(context.getClass());
-		HashMap<String, Object> result = new HashMap<String, Object>() {
-
-
-		};
-		return result;
+		return new ProxyMap(context,ps);
 	}
 
 
