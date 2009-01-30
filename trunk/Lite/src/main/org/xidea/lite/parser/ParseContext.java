@@ -2,11 +2,14 @@ package org.xidea.lite.parser;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.Template;
 
 public class ParseContext {
@@ -17,6 +20,7 @@ public class ParseContext {
 	private URL currentURL;
 	private ArrayList<Object> result = new ArrayList<Object>();
 	private HashSet<URL> resources = new HashSet<URL>();
+	private HashMap<String,String> typeIdMap = new HashMap<String, String>();
 	private int depth = -1;
 	private boolean reserveSpace;
 	private boolean format = false;
@@ -64,6 +68,9 @@ public class ParseContext {
 
 	public Set<URL> getResources() {
 		return resources;
+	}
+	public void addResource(URL resource) {
+		resources.add(resource);
 	}
 	public void setCurrentURL(URL currentURL) {
 		if(currentURL!=null){
@@ -175,6 +182,13 @@ public class ParseContext {
 		}
 
 		assert(stackTop ==0);
+		if(!this.typeIdMap.isEmpty()){
+			HashMap<String, String> idTypeMap = new HashMap<String, String>();
+			for (Map.Entry<String, String> entry : typeIdMap.entrySet()) {
+				idTypeMap.put(entry.getValue(), entry.getKey());
+			}
+			current.add(Arrays.asList(Template.EL_ADD_ONS_TYPE,JSONEncoder.encode(idTypeMap)));
+		}
 		return current;
 	}
 
@@ -196,6 +210,16 @@ public class ParseContext {
 			result2.add(buf.toString());
 		}
 		return result2;
+	}
+
+	public String addGlobalInvocable(Class<? extends Object> class1) {
+		String name = class1.getName();
+		String id = typeIdMap.get(name);
+		if(id == null){
+			id = "__"+typeIdMap.size()+"__";
+			typeIdMap.put(name, id);
+		}
+		return id;
 	}
 
 }

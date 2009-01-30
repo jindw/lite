@@ -46,12 +46,7 @@
 				<include name="__package__.js" />
 			</zipfileset>
 		</jar>
-		<delete>
-			<fileset dir="build/dest/jslite/">
-				<include name="template.js" />
-				<include name="__package__.js" />
-			</fileset>
-		</delete>
+		<delete file="build/dest/jslite/__package__.js"/>
 		<copy tofile="build/dest/Template-${version}.jar" file="build/dest/Template.jar" />
 
 		<jar destfile="build/dest/Template-Source.jar">
@@ -71,22 +66,22 @@
 	<target name="compress" depends="init">
 		<java classname="org.jside.jsi.tools.export.ExportorAction">
 			<classpath>
-				<path path="../JSA/classes"></path>
 				<fileset dir="../JSA/">
 					<include name="**/*.jar" />
 				</fileset>
 				<path path="../JSA/classes"></path>
 			</classpath>
+			<arg value="-config.ascii" />
+			<arg value="false" />
+			<arg value="-config.features" />
+			<arg value="org.xidea.lite:compile" />
+			
 			<arg value="-scriptBase" />
 			<arg value="${basedir}/web/scripts" />
+			
 			<arg value="-outputExported" />
 			<arg value="${basedir}/build/dest/jslite/template.js" />
-			<arg value="-ascii" />
-			<arg value="false" />
-			<arg value="-features" />
-			<arg value="org.xidea.lite:compile" />
-			<arg value="-features" />
-			<arg value=":debug" />
+			<arg value="-exports" />
 			<arg value="org.xidea.lite:Template" />
 			<arg value="org.xidea.lite:Parser" />
 			<arg value="org.xidea.lite:TextParser" />
@@ -98,18 +93,21 @@
 					<include name="**/*.jar" />
 				</fileset>
 			</classpath>
+
+			<arg value="-config.ascii" />
+			<arg value="false" />
+			<arg value="-config.features" />
+			<arg value="org.xidea.jsi.boot:$log" />
+			<arg value="-config.features" />
+			<arg value="org.xidea.lite:compile" />
+			<arg value="-config.features" />
+			<arg value=":debug" />
+			
 			<arg value="-scriptBase" />
 			<arg value="${basedir}/web/scripts" />
 			<arg value="-outputExported" />
 			<arg value="${basedir}/build/dest/jslite/demo.js" />
-			<arg value="-ascii" />
-			<arg value="false" />
-			<arg value="-features" />
-			<arg value="org.xidea.jsi.boot:$log" />
-			<arg value="-features" />
-			<arg value="org.xidea.lite:compile" />
-			<arg value="-features" />
-			<arg value=":debug" />
+			<arg value="-exports" />
 			<arg value="org.xidea.lite:Parser" />
 			<arg value="org.xidea.lite:TextParser" />
 			<arg value="org.xidea.lite:XMLParser" />

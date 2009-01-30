@@ -20,6 +20,7 @@ public class PropertyValue implements ExpressionResult{
 			Object context2 = getValue();
 			if (context2 == null) {
 				type = ReflectUtil.getType(base.getClass(), name);
+				base = null;
 			} else {
 				base = context2;
 			}
@@ -40,7 +41,7 @@ public class PropertyValue implements ExpressionResult{
 
 	public Class<? extends Object> getType() {
 		if(type != null){
-			return type;
+			return ReflectUtil.getType(type,name);
 		}else{
 			Object value = getValue();
 			if(value!= null){

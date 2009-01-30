@@ -21,14 +21,17 @@ import java.util.Map;
  * @author jindw
  */
 public class JSONEncoder {
-	private static JSONEncoder encoder = new JSONEncoder(true);
-	boolean emitClassName = true;
+	private static JSONEncoder encoder = new JSONEncoder();
+	private final boolean printClassName ;
+	private final int depth;
 
-	public JSONEncoder(boolean emitClassName) {
-		this.emitClassName = emitClassName;
+	public JSONEncoder(boolean emitClassName,int depth) {
+		this.printClassName = emitClassName;
+		this.depth = depth;
 	}
 
 	public JSONEncoder() {
+		this(false,16);
 	}
 
 	public static String encode(Object value) {
@@ -57,6 +60,9 @@ public class JSONEncoder {
 			out.write(String.valueOf(object));
 		} else if (object instanceof Number) {
 			out.write(String.valueOf(object));
+		} else if (object instanceof Class) {
+			//Class 系列化容易导致死循环
+			print(((Class<?>) object).getName(), out);
 		} else if (object instanceof String) {
 			print((String) object, out);
 		} else if (object instanceof Character) {
@@ -67,6 +73,9 @@ public class JSONEncoder {
 					print(object.toString(), out);
 					return;
 				}else{
+					if(cached.size()>depth){
+						throw new RuntimeException("深度超出许可范围："+cached);
+					}
 					cached.add(object);
 				}
 			}
@@ -142,8 +151,9 @@ public class JSONEncoder {
 				PropertyDescriptor prop = props[i];
 				String name = prop.getName();
 				Method accessor = prop.getReadMethod();
-				if ((emitClassName == true || !"class".equals(name))
-						&& accessor != null) {
+				if (accessor != null &&
+						(!"class".equals(name) || printClassName)
+						 ) {
 					if (!accessor.isAccessible()) {
 						accessor.setAccessible(true);
 					}

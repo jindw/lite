@@ -8,7 +8,6 @@ import java.util.Map;
 import org.xidea.el.operation.Calculater;
 import org.xidea.el.operation.CalculaterImpl;
 import org.xidea.el.operation.ECMA262Impl;
-import org.xidea.el.operation.Invocable;
 import org.xidea.el.parser.ExpressionToken;
 import org.xidea.el.parser.ExpressionTokenizer;
 import org.xidea.el.parser.TokenImpl;
@@ -17,9 +16,9 @@ import org.xidea.el.parser.Tokens;
 public class ExpressionFactoryImpl implements ExpressionFactory {
 	private static ExpressionFactoryImpl expressionFactory = new ExpressionFactoryImpl();
 	public static final Calculater DEFAULT_CALCULATER = new CalculaterImpl();
-	public static final Map<String, Invocable> DEFAULT_GLOBAL_MAP;
+	public static final Map<String, Object> DEFAULT_GLOBAL_MAP;
 	static {
-		HashMap<String, Invocable> map = new HashMap<String, Invocable>();
+		HashMap<String, Object> map = new HashMap<String, Object>();
 		ECMA262Impl.appendTo(map);
 		DEFAULT_GLOBAL_MAP = Collections.unmodifiableMap(map);
 	}
@@ -27,6 +26,14 @@ public class ExpressionFactoryImpl implements ExpressionFactory {
 		return expressionFactory;
 	}
 
+	private final Map<String, Object> globals;
+
+	public ExpressionFactoryImpl() {
+		this(DEFAULT_GLOBAL_MAP);
+	}
+	public ExpressionFactoryImpl(Map<String, Object> globals){
+		this.globals = globals;
+	}
 	public Expression createEL(Object el) {
 		if(el instanceof String){
 			return new ExpressionImpl((String)el);
@@ -34,7 +41,7 @@ public class ExpressionFactoryImpl implements ExpressionFactory {
 			if(el instanceof List){
 				el = toTokens((List<?>)el);
 			}
-			return new ExpressionImpl(null,(ExpressionToken[])el,DEFAULT_CALCULATER,DEFAULT_GLOBAL_MAP);
+			return new ExpressionImpl(null,(ExpressionToken[])el,DEFAULT_CALCULATER,globals);
 		}
 	}
 	private ExpressionToken toToken(Object value){

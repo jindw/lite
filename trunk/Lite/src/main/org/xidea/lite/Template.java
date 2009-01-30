@@ -5,6 +5,7 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.Array;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,12 +30,13 @@ public class Template {
 	public static final int ATTRIBUTE_TYPE = 7;// [7,'value','name']
 	public static final int ATTRIBUTE_VALUE_TYPE = 8;// [8,'value']
 	public static final int CAPTRUE_TYPE = 9;// [1,[...],'var']
+	public static final int EL_ADD_ONS_TYPE =-1;// [1,[...],'var']
 
 	public static final String FOR_KEY = "for";
 	public static final String IF_KEY = "if";
+	private Map<String, Object> gloabls = new HashMap<String, Object>(ExpressionFactoryImpl.DEFAULT_GLOBAL_MAP);
 
-	private ExpressionFactory expressionFactory = ExpressionFactoryImpl
-			.getInstance();
+	private ExpressionFactory expressionFactory = new ExpressionFactoryImpl();
 
 	protected Object[] items;// transient＄1�7
 
@@ -143,6 +145,9 @@ public class Template {
 				cmd[0] = type;
 				// children
 				switch (type) {
+				case EL_ADD_ONS_TYPE:
+					this.compileAddOns(createExpression(cmd[1]));
+					break;
 				case CAPTRUE_TYPE:
 				case IF_TYPE:
 				case ELSE_TYPE:
@@ -178,6 +183,20 @@ public class Template {
 			}
 		}
 		return result;
+	}
+
+	private void compileAddOns(Expression createExpression) {
+		@SuppressWarnings("unchecked")
+		Map<String, String> addOnMap = (Map<String, String>) createExpression.evaluate(null);
+		for(Map.Entry<String, String> entry : addOnMap.entrySet()){
+			String key = entry.getKey();
+			try {
+				Object value = Class.forName(entry.getValue()).newInstance();
+				gloabls.put(key, value);
+			} catch (Exception e) {
+				log.error("无法装载扩展："+entry.getValue(),e);
+			}
+		}
 	}
 
 	protected Expression createExpression(Object elo) {

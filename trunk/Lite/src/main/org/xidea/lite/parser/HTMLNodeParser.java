@@ -13,6 +13,7 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.Text;
 import org.xidea.el.json.JSONEncoder;
+import org.xidea.el.operation.TextContains;
 import org.xidea.lite.Template;
 
 public class HTMLNodeParser implements NodeParser {
@@ -135,7 +136,7 @@ public class HTMLNodeParser implements NodeParser {
 					// attributes.add(new Object[] { Template.IF_STRING_IN_TYPE,
 					// collectionEL, valueEL });
 					attributes.add(new Object[] { Template.IF_TYPE,
-							createCSEL(collectionEL, valueEL) });
+							createCSEL(context,collectionEL, valueEL) });
 					attributes.add(" " + ATTRIBUTE_SELECTED + "=\""
 							+ BOOLEAN_ATTBUTE_MAP.get(ATTRIBUTE_SELECTED)
 							+ "\"");
@@ -166,7 +167,7 @@ public class HTMLNodeParser implements NodeParser {
 				// collectionEL,
 				// valueEL });
 				attributes.add(new Object[] { Template.IF_TYPE,
-						createCSEL(collectionEL, valueEL) });
+						createCSEL(context,collectionEL, valueEL) });
 				attributes.add(" " + ATTRIBUTE_CHECKED + "=\""
 						+ BOOLEAN_ATTBUTE_MAP.get(ATTRIBUTE_CHECKED) + "\"");
 				attributes.add(END);
@@ -192,8 +193,9 @@ public class HTMLNodeParser implements NodeParser {
 	 * @param collectionEL
 	 * @return
 	 */
-	protected Object createCSEL(final String collectionEL, final String valueEL) {
-		return this.parser.optimizeEL("__contains_string__(" + collectionEL
+	protected Object createCSEL(ParseContext context,final String collectionEL, final String valueEL) {
+		String id=context.addGlobalInvocable(TextContains.class);
+		return this.parser.optimizeEL(id +"(" + collectionEL
 				+ "," + valueEL + ")");
 	}
 

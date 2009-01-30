@@ -16,7 +16,7 @@ public abstract class ReflectUtil {
 	private static final String LENGTH = "length";
 	private static final Map<Class<?>, Map<String, PropertyDescriptor>> classPropertyMap = new HashMap<Class<?>, Map<String, PropertyDescriptor>>();
 
-	protected static Map<String, PropertyDescriptor> getPropertyMap(Class<?> clazz) {
+	private static Map<String, PropertyDescriptor> getPropertyMap(Class<?> clazz) {
 		Map<String, PropertyDescriptor> propertyMap = classPropertyMap
 				.get(clazz);
 		if (propertyMap == null) {
@@ -26,6 +26,7 @@ public abstract class ReflectUtil {
 						.getBeanInfo(clazz).getPropertyDescriptors();
 				for (int i = 0; i < properties.length; i++) {
 					PropertyDescriptor property = properties[i];
+					//property.getReadMethod().setAccessible(true);
 					propertyMap.put(property.getName(), property);
 				}
 				// propertyMap = Collections.unmodifiableMap(propertyMap);

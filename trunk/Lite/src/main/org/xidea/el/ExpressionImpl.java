@@ -6,14 +6,13 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.xidea.el.operation.Calculater;
-import org.xidea.el.operation.Invocable;
 import org.xidea.el.operation.ReflectUtil;
 import org.xidea.el.parser.ExpressionToken;
 import org.xidea.el.parser.ExpressionTokenizer;
 
 public class ExpressionImpl implements Expression ,PrepareExpression {
 	protected final Calculater calculater;
-	protected final Map<String, Invocable> globalMap;
+	protected final Map<String, Object> globalMap;
 	
 	
 	protected final ExpressionToken[] expression;
@@ -34,7 +33,7 @@ public class ExpressionImpl implements Expression ,PrepareExpression {
 	}
 
 	public ExpressionImpl(String source, ExpressionToken[] expression,
-			Calculater calculater, Map<String, Invocable> globalMap) {
+			Calculater calculater, Map<String, Object> globalMap) {
 		this.source = source;
 		this.calculater = calculater;
 		this.expression = expression;

@@ -8,6 +8,9 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.xidea.el.json.JSONEncoder;
+import org.xidea.el.json.JSONTokenizer;
+
 /**
  * 模拟ECMA262行为，保持基本一至，但迫于简单原则，略有偷懒行为^_^
  * 
@@ -15,7 +18,7 @@ import java.util.regex.Pattern;
  * @see org.mozilla.javascript.NativeGlobal
  */
 public abstract class ECMA262Impl {
-	public static void appendTo(Map<String, Invocable> globalInvocableMap) {
+	public static void appendTo(Map<String, Object> globalInvocableMap) {
 		globalInvocableMap.put("encodeURI", new EncodeURI());
 		globalInvocableMap.put("decodeURI", new DecodeURI());
 
@@ -27,6 +30,51 @@ public abstract class ECMA262Impl {
 
 		globalInvocableMap.put("parseFloat", new ParseFloat());
 		globalInvocableMap.put("parseInt", new ParseInt());
+		globalInvocableMap.put("Math", new MathImpl());
+		globalInvocableMap.put("JSON", new JSON());
+	}
+
+	private static NumberArithmetic na = new NumberArithmetic();
+
+	public static class MathImpl {
+		public Number min(Number n1, Number n2) {
+			switch (na.compare(n1, n2, 8)) {
+			case -1:
+			case 0:
+				return n1;
+			case 1:
+				return n2;
+			default:
+				return Float.NaN;
+			}
+		}
+		public Number max(Number n1, Number n2) {
+			switch (na.compare(n1, n2, 8)) {
+			case 1:
+			case 0:
+				return n1;
+			case -1:
+				return n2;
+			default:
+				return Float.NaN;
+			}
+		}
+	}
+
+	public static class JSON {
+		public static final Object stringify(Object value){
+			return encode(value);
+		}
+		public static final Object encode (Object value){
+			return JSONEncoder.encode(value);
+		}
+		public static final Object parse(Object value){
+			return decode(value);
+		}
+		public static final Object decode (Object value  ){
+			return new JSONTokenizer(ToPrimitive(value, String.class).toString()).parse();
+		}
+
 	}
 
 	public static class EncodeURIComponent implements Invocable {
@@ -53,7 +101,9 @@ public abstract class ECMA262Impl {
 	}
 
 	public static class EncodeURI extends EncodeURIComponent {
-		private static final Pattern URL_SPLIT = Pattern.compile("[\\/\\:&\\?=]");
+		private static final Pattern URL_SPLIT = Pattern
+				.compile("[\\/\\:&\\?=]");
+
 		@Override
 		protected Object process(final String text, String charset)
 				throws UnsupportedEncodingException {
@@ -169,8 +219,6 @@ public abstract class ECMA262Impl {
 		}
 	}
 
-
-
 	private static Object getArg(Object[] args, int index, Object defaultValue) {
 		if (index >= 0 && index < args.length) {
 			return args[index];
@@ -179,8 +227,6 @@ public abstract class ECMA262Impl {
 		}
 	}
 
-
-
 	private static Number parseNumber(String text, int radix) {
 		try {
 			return Integer.parseInt(text, radix);
@@ -188,8 +234,6 @@ public abstract class ECMA262Impl {
 			return Long.parseLong(text, radix);
 		}
 	}
-
-
 
 	/**
 	 * @param value
@@ -216,8 +260,6 @@ public abstract class ECMA262Impl {
 			return true;
 		}
 	}
-
-
 
 	/**
 	 * @param arg1
@@ -253,8 +295,6 @@ public abstract class ECMA262Impl {
 		}
 	}
 
-
-
 	/**
 	 * 
 	 * @param <T>
@@ -286,7 +326,7 @@ public abstract class ECMA262Impl {
 		} else if (value instanceof String) {
 			return value;
 		}
-	
+
 		if (toString) {
 			return String.valueOf(value);
 		} else {
