@@ -83,6 +83,8 @@ public class TextParser implements Parser {
 					if (p$ + 1 < p1) {
 						fn = text.substring(p$ + 1, p1);
 						if (!FN_PATTERN.matcher(fn).find()) {
+							result.add(text.substring(start, p$+1));
+							start =  p$+1;
 							continue;
 						}
 					} else {
