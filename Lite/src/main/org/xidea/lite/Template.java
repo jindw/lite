@@ -36,7 +36,7 @@ public class Template {
 	public static final String IF_KEY = "if";
 	private Map<String, Object> gloabls = new HashMap<String, Object>(ExpressionFactoryImpl.DEFAULT_GLOBAL_MAP);
 
-	private ExpressionFactory expressionFactory = new ExpressionFactoryImpl();
+	private ExpressionFactory expressionFactory = new ExpressionFactoryImpl(gloabls);
 
 	protected Object[] items;// transient＄1�7
 

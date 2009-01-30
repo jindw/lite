@@ -9,7 +9,7 @@ import java.util.Collection;
  * @author jindw
  */
 public class TextContains implements Invocable {
-	public TextContains(int type) {
+	public TextContains() {
 	}
 
 	public Object invoke(Object thizz,Object... args) throws Exception {
@@ -29,6 +29,10 @@ public class TextContains implements Invocable {
 				if (item != null && key.equals(String.valueOf(item))) {
 					return Boolean.TRUE;
 				}
+			}
+		}else {
+			if(String.valueOf(value).equals(key)){
+				return true;
 			}
 		}
 		return Boolean.FALSE;
