@@ -37,7 +37,7 @@ public class NumberArithmetic {
 	 *            左参数
 	 * @param n2
 	 *            右参数
-	 * @return 结果
+	 * @return 结果 0,1,-1,validReturn
 	 */
 	public int compare(Number n1, Number n2, int validReturn) {
 		if (isNaN(n1) || isNaN(n2)) {

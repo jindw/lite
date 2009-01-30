@@ -4,34 +4,35 @@ import java.beans.PropertyDescriptor;
 import java.util.HashMap;
 import java.util.Map;
 
-class ProxyMap extends HashMap<String, Object> {
+public class ProxyMap extends HashMap<String, Object> {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private Object base;
 	ProxyMap(Object base, Map<String, PropertyDescriptor> ps) {
-		this.base = base;
 		for (String key : ps.keySet()) {
-			super.put(key, new PropertyEntry(key));
+			super.put(key, new PropertyValue(base,key));
 		}
 	}
 	@SuppressWarnings("unchecked")
 	@Override
 	public Object get(Object key) {
 		Object v = super.get(key);
-		if (v instanceof PropertyEntry) {
-			return (Object) ((PropertyEntry) v).getValue();
+		if (v instanceof PropertyValue) {
+			return (Object) ((PropertyValue) v).getValue();
 		} else {
 			return v;
 		}
+	}
+	public Object getPropertyValue(Object key){
+		return super.get(key);
 	}
 
 	@Override
 	public Object put(String key, Object value) {
 		Object v = super.put(key, value);
-		if (v instanceof PropertyEntry) {
-			PropertyEntry pe = (PropertyEntry) v;
+		if (v instanceof PropertyValue) {
+			PropertyValue pe = (PropertyValue) v;
 			return pe.setValue(value);
 		} else {
 			return v;
@@ -60,26 +61,25 @@ class ProxyMap extends HashMap<String, Object> {
 //		}
 //	}
 
-
-	protected class PropertyEntry implements Map.Entry<Object, Object> {
-		private Object key;
-		public PropertyEntry(String key) {
-			this.key = key;
-		}
-
-		public Object getKey() {
-			return key;
-		}
-
-		public Object getValue() {
-			return ReflectUtil.getValue(base, key);
-		}
-
-		public Object setValue(Object value) {
-			Object old =  getValue();
-			ReflectUtil.setValue(base, key,value);
-			return old;
-		}
-
-	}
+//
+//	protected class PropertyEntry implements Map.Entry<Object, Object> {
+//		private Object key;
+//		public PropertyEntry(String key) {
+//			this.key = key;
+//		}
+//
+//		public Object getKey() {
+//			return key;
+//		}
+//
+//		public Object getValue() {
+//			return ReflectUtil.getValue(base, key);
+//		}
+//
+//		public Object setValue(Object value) {
+//			Object old =  getValue();
+//			ReflectUtil.setValue(base, key,value);
+//			return old;
+//		}
+//	}
 }

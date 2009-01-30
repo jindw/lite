@@ -4,14 +4,14 @@ import java.util.Collections;
 import java.util.Map;
 
 import org.xidea.el.operation.Calculater;
-import org.xidea.el.operation.Invocable;
+import org.xidea.el.operation.ProxyMap;
 import org.xidea.el.operation.ReflectUtil;
 import org.xidea.el.parser.ExpressionToken;
 
 public class PrepareExpressionImpl extends ExpressionImpl {
 
 	public PrepareExpressionImpl(String source, ExpressionToken[] expression,
-			Calculater calculater, Map<String, Invocable> globalMap) {
+			Calculater calculater, Map<String, Object> globalMap) {
 		super(source, expression, calculater, globalMap);
 	}
 	public ExpressionResult prepare(Object context) {
@@ -30,14 +30,24 @@ public class PrepareExpressionImpl extends ExpressionImpl {
 	protected Object createVariable(Object context, String key) {
 		if (context instanceof Map) {
 			Map<?, ?> contextMap = (Map<?, ?>) context;
-			if (contextMap.get(key) == null && !contextMap.containsKey(key)) {
+			Object value ;
+			if(context instanceof ProxyMap){
+				value = ((ProxyMap)context).getPropertyValue(key);
+			}else{
+				value = contextMap.get(key);
+			}
+			if(value instanceof ExpressionResult){
+				return value;
+			}
+			if (value== null && !contextMap.containsKey(key)) {
 				//readonly
 				//return calculater.createRefrence(globalMap, key);
-				return globalMap.get(key);
+				Object object = globalMap.get(key);
+				if(object != null){
+					return object;
+				}
 			}
 		} else if (ReflectUtil.getType(context.getClass(), key) == null) {
-			//readonly
-			//return calculater.createRefrence(globalMap, key);
 			return globalMap.get(key);
 		}
 		return calculater.createRefrence(context, key);
@@ -46,7 +56,7 @@ public class PrepareExpressionImpl extends ExpressionImpl {
 	protected ExpressionResult wrapResult(final Object realValue) {
 		return new ExpressionResult() {
 			public Class<? extends Object> getType() {
-				return realValue.getClass();
+				return realValue == null? null:realValue.getClass();
 			}
 
 			public Object getValue() {

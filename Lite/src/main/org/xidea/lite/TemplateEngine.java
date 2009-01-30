@@ -54,8 +54,7 @@ public class TemplateEngine{
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	public void render(String path, Map context, Writer out) throws IOException {
+	public void render(String path, Object context, Writer out) throws IOException {
 		getTemplate(path).render(context, out);
 	}
 
@@ -113,6 +112,16 @@ public class TemplateEngine{
 
 	protected Template createTemplate(String path, ParseContext parseContext) {
 		String decoratorPath = decoratorMapper.getDecotatorPage(path);
+		if(this.webRoot!=null){
+			try {
+				parseContext.addResource(new File(webRoot,path).toURI().toURL());
+				if(decoratorPath!=null){
+					parseContext.addResource(new File(webRoot,decoratorPath).toURI().toURL());
+				}
+			} catch (MalformedURLException e) {
+				log.warn(e);
+			}
+		}
 		if (decoratorPath != null) {
 			try {
 				Node node = parser.loadXML(getResource(path), parseContext);
@@ -152,10 +161,16 @@ public class TemplateEngine{
 
 		private long getLastModified(File[] files) {
 			long i = 0;
+			long j = 0;
 			for (File file : files) {
-				i = Math.max(file.lastModified(), i);
+				long k = file.lastModified();
+				if(k == 0){
+					j++;
+				}
+				j*=2;
+				i = Math.max(k, i);
 			}
-			return i;
+			return i+j;
 		}
 	}
 
