@@ -33,10 +33,10 @@ var TestCase = {
 	    E("optimizedResult").value = jsCode;
 	    var templateResult = E("templateResult");
 	    var htmlResult = E("htmlResult");
-	    var i = 5;
+	    var step = 5;
 	    var interval = setInterval(function(){
-	    	if(i--){
-	    		templateResult.style.backgroundColor = (i&1)?'yellow':""
+	    	if(step--){
+	    		templateResult.style.backgroundColor = (step&1)?'yellow':""
 	    	}else{
 	    		clearInterval(interval)
 	    	}
