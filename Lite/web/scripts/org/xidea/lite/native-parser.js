@@ -67,6 +67,7 @@ function buildNativeJS(code){
     try{
         var result =  new Function("_$0","_$1",buf.join(''));
     }catch(e){
+    	$log(buf.join(''))
         throw e;
     }
     result.toString=function(){//_$1 encodeXML
@@ -89,7 +90,7 @@ function appendCode(code,buf,idpool,depth){
                 break;
             case ATTRIBUTE_VALUE_TYPE:
             case EL_XML_TEXT_TYPE:
-			    buf.push("_$0.push(String(",item[1],").replace(/<>&'\"/g,_$1));")
+			    buf.push("_$0.push(String(",item[1],").replace(/[<>&'\"]/g,_$1));")
                 break;
             case VAR_TYPE:
                 buf.push("var ",item[2],"=",item[1],";")
