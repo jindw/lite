@@ -129,7 +129,7 @@ function compute(op,arg1,arg2){
         arg1.push(arg2)
         return arg1;
     case OP_MAP_PUSH:
-        arg1[item[1]]= arg2;
+        arg1[op[1]]= arg2;
         return arg1;
     }
 }

@@ -214,7 +214,7 @@
 		</ul>
 	    ]]></description>
 		<source><![CDATA[<code xmlns:c="http://www.xidea.org/ns/template/core">
-  <c:include path="menu.xml" xpath="//entry[@key='PageMesh']" >
+  <c:include path="menu.xml" xpath="//entry[@key='PageMesh']/description" >
   </c:include>
 </code>]]></source>
 	</entry>

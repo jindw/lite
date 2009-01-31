@@ -47,10 +47,10 @@ var TestCase = {
 	        var t1 = new Date();
 	        var count = testCount;
 	        while(count--){
-	            var result1 = jsTemplate.render(context);
+	            var jsResult = jsTemplate.render(context);
 	        }
 	        $log.debug("Lite JS Time:",new Date()-t1)
-	        templateResult.value = result1;
+	        templateResult.value = jsResult;
 	    }catch(e){
 	        $log.error("Lite JS优化版本模板渲染错误",e)
 	    }
@@ -58,7 +58,7 @@ var TestCase = {
 	        var t1 = new Date();
 	        var count = testCount;
 	        while(count--){
-	            var result2 = jsonTemplate.render(context);
+	            var JSONResult = jsonTemplate.render(context);
 	        }
 	        $log.debug("Lite JSON Time:",new Date()-t1)
 	    }catch(e){
@@ -67,7 +67,7 @@ var TestCase = {
 	    var doc = htmlResult.contentWindow.document;
 	    doc.open();
 	    doc.write('<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">')
-	    doc.write(result1);
+	    doc.write(jsResult);
 	    doc.close();
 	    try{
     	    var a = doc.getElementsByTagName("a");
@@ -76,8 +76,8 @@ var TestCase = {
     	        a[i].target="_blank";
     	    }
     	}catch(e){}
-	    if(result1!=result2){
-	        $log.error("优化后的jslite与优化前渲染结果有差别！！！",result1,result2)
+	    if(jsResult!=JSONResult){
+	        $log.error("优化后的jslite与优化前渲染结果有差别！！！","JS:"+jsResult,"JSON:"+JSONResult)
 	    }
 	    try{
 	        templateResult.scrollIntoView();

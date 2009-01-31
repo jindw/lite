@@ -10,6 +10,12 @@
 		<mkdir dir="build/dest" />
 	</target>
 	<target name="jar-template" depends="init">
+		<delete>
+			<fileset dir="build/dest/">
+				<include name="JSEL-*.jar" />
+				<include name="Template-*.jar" />
+			</fileset>
+		</delete>
 		<jar destfile="build/dest/JSEL.jar">
 			<fileset dir="web/WEB-INF/classes">
 				<include name="org/xidea/el/**/*.class" />
@@ -46,7 +52,7 @@
 				<include name="__package__.js" />
 			</zipfileset>
 		</jar>
-		<delete file="build/dest/jslite/__package__.js"/>
+		<delete file="build/dest/jslite/__package__.js" />
 		<copy tofile="build/dest/Template-${version}.jar" file="build/dest/Template.jar" />
 
 		<jar destfile="build/dest/Template-Source.jar">
@@ -64,35 +70,27 @@
 	</target>
 
 	<target name="compress" depends="init">
-		<java classname="org.jside.jsi.tools.export.ExportorAction">
-			<classpath>
-				<fileset dir="../JSA/">
-					<include name="**/*.jar" />
-				</fileset>
-				<path path="../JSA/classes"></path>
-			</classpath>
+		<java classname="org.jside.jsi.tools.export.ExportAction" classpath="../JSA/build/dest/JSA-CMD.jar">
+			<arg value="-scriptBase" />
+			<arg value="${basedir}/web/scripts" />
+
 			<arg value="-config.ascii" />
 			<arg value="false" />
 			<arg value="-config.features" />
 			<arg value="org.xidea.lite:compile" />
 			
-			<arg value="-scriptBase" />
-			<arg value="${basedir}/web/scripts" />
-			
-			<arg value="-outputExported" />
-			<arg value="${basedir}/build/dest/jslite/template.js" />
 			<arg value="-exports" />
 			<arg value="org.xidea.lite:Template" />
 			<arg value="org.xidea.lite:Parser" />
 			<arg value="org.xidea.lite:TextParser" />
 			<arg value="org.xidea.lite:XMLParser" />
+
+			<arg value="-outputExported" />
+			<arg value="${basedir}/build/dest/jslite/template.js" />
 		</java>
-		<java classname="org.jside.jsi.tools.export.ExportorAction">
-			<classpath>
-				<fileset dir="../JSA/">
-					<include name="**/*.jar" />
-				</fileset>
-			</classpath>
+		<java classname="org.jside.jsi.tools.export.ExportAction" classpath="../JSA/build/dest/JSA-CMD.jar">
+			<arg value="-scriptBase" />
+			<arg value="${basedir}/web/scripts" />
 
 			<arg value="-config.ascii" />
 			<arg value="false" />
@@ -102,20 +100,19 @@
 			<arg value="org.xidea.lite:compile" />
 			<arg value="-config.features" />
 			<arg value=":debug" />
-			
-			<arg value="-scriptBase" />
-			<arg value="${basedir}/web/scripts" />
-			<arg value="-outputExported" />
-			<arg value="${basedir}/build/dest/jslite/demo.js" />
+
 			<arg value="-exports" />
 			<arg value="org.xidea.lite:Parser" />
 			<arg value="org.xidea.lite:TextParser" />
 			<arg value="org.xidea.lite:XMLParser" />
 			<arg value="org.xidea.lite.demo:$log" />
 			<arg value="org.xidea.lite.demo:TestCase" />
+			
+			<arg value="-outputExported" />
+			<arg value="${basedir}/build/dest/jslite/demo.js" />
 		</java>
 	</target>
-	<target name="build" depends="jar-template">
+	<target name="build" depends="compress,jar-template">
 
 	</target>
 
