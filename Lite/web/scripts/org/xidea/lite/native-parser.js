@@ -111,7 +111,7 @@ function appendCode(code,buf,idpool,depth){
                 appendCode(childCode,buf,idpool,depth+1)
                 printIndex(buf,depth,"}");
                 var nextElse = code[i+1];
-                while(nextElse[0] == ELSE_TYPE){
+                while(nextElse && nextElse[0] == ELSE_TYPE){
                     i++;
                     var childCode = nextElse[1];
                     var test = nextElse[2];
@@ -176,7 +176,7 @@ function appendCode(code,buf,idpool,depth){
                 idpool.free(itemsId);;
                 idpool.free(previousForValueId);
                 var nextElse = code[i+1];
-                while(nextElse[0] == ELSE_TYPE){
+                while(nextElse && nextElse[0] == ELSE_TYPE){
                     i++;
                     var childCode = nextElse[1];
                     var test = nextElse[2];
