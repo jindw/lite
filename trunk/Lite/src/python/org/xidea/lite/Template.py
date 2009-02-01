@@ -167,17 +167,10 @@ def processCaptrue(context, data):
 def processAttribute(context, data, out):
     result = evaluate(data[1],context)
     if result is not None:
-        value = ""
-        if isinstance(result, str):
-            value = result
-            if len(result) == 0:
-                return
-        else:
-            value = str(result)
         out.write(" ")
         out.write(data[2])
         out.write("=\"")
-        printXMLAttribute(value, context, out, False)
+        printXMLAttribute(str(result), context, out, False)
         out.write('"')
 
 def processAttributeValue(context, data, out):

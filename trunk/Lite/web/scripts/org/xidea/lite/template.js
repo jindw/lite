@@ -180,14 +180,10 @@ function processCaptrue(context, data) {
 function processAttribute(context, data, out){
 	var result = evaluate(data[1],context);
 	if (result != null) {
-		var value = String(result);
-		if (!value) {
-			return;
-		}
 		out.push(' ');
 		out.push(data[2]);// prefix
 		out.push('="');
-		out.push(value.replace(/[<>&]/g,xmlReplacer));
+		out.push(String(result).replace(/[<>&]/g,xmlReplacer));
 		out.push('"');
 	}
 
