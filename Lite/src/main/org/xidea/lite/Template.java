@@ -204,7 +204,7 @@ public class Template {
 	}
 
 	@SuppressWarnings("unchecked")
-	protected void printXMLAttribute(String text, Map context, Writer out,
+	protected void printXMLAttribute(String text, Writer out,
 			boolean escapeSingleChar) throws IOException {
 		for (int i = 0; i < text.length(); i++) {
 			int c = text.charAt(i);
@@ -375,17 +375,11 @@ public class Template {
 			throws IOException {
 		Object result = ((Expression) data[1]).evaluate(context);
 		if (result != null) {
-			String value;
-			if (result instanceof String) {
-				value = (String) result;
-				if (((String) result).length() == 0) {
-					return;
-				}
-			} else {
-				value = String.valueOf(result);
-			}
+//			if (result instanceof String && ((String) result).length() == 0) {
+//				return;
+//			}
 			out.write((String) data[2]);// prefix
-			printXMLAttribute(value, context, out, false);
+			printXMLAttribute(String.valueOf(result), out, false);
 			out.write('"');
 		}
 
@@ -395,7 +389,7 @@ public class Template {
 	protected void processAttributeValue(Map context, Object[] data, Writer out)
 			throws IOException {
 		printXMLAttribute(String.valueOf(((Expression) data[1])
-				.evaluate(context)), context, out, true);
+				.evaluate(context)), out, true);
 	}
 
 	protected void prossesBreak(Object[] data) {
