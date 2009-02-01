@@ -16,7 +16,7 @@ var TestCase = {
 	        var jsTemplate = new Template(jsCode);
 	        jsCode = jsCode.toString()
 	    }catch(e){
-	        $log.error("模板解析失败",e);
+	        $log.error("模板解析失败（JS）",e);
 	        return false;
 	    }
 	    try{
@@ -26,7 +26,7 @@ var TestCase = {
 	        var jsonTemplate = new Template(jsonCode);
 	        jsonCode =JSON.encode(jsonCode);
 	    }catch(e){
-	        $log.error("模板解析失败",e);
+	        $log.error("模板解析失败（JSON）",e);
 	        return false;
 	    }
 	    E("templateCode").value = jsonCode;

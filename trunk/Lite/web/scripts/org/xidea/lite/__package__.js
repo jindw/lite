@@ -10,7 +10,7 @@ this.addScript('parser.js',"*"
                ,["buildNativeJS"]);
 this.addScript('text-parser.js',["TextParser"]
                ,["Parser","parser.js"]
-               ,["parseNativeEL","ExpressionTokenizer",]);
+               ,["parseNativeEL","ExpressionTokenizer"]);
 this.addScript('xml-parser.js',"XMLParser"
                ,["TextParser","parser.js"]); 
 this.addScript("expression-token.js","*");
