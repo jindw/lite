@@ -55,18 +55,21 @@
 		<delete file="build/dest/jslite/__package__.js" />
 		<copy tofile="build/dest/Template-${version}.jar" file="build/dest/Template.jar" />
 
-		<jar destfile="build/dest/Template-Source.jar">
-			<zipfileset src="build/dest/Template.jar">
-			</zipfileset>
-			<fileset dir="web/scripts">
-				<include name="org/xidea/lite/*.js" />
-			</fileset>
-			<fileset dir="src/main">
-				<include name="org/xidea/el/**/*.java" />
-				<include name="org/xidea/lite/**/*.java" />
-				<exclude name="**/test/**/*.*" />
-			</fileset>
-		</jar>
+        <jar destfile="build/dest/Template-Test.jar">
+            <manifest>
+                <attribute name="Main-Class" value="org.xidea.lite.test.app.SimpleWebServer" />
+            </manifest>
+            <zipfileset src="build/dest/Template.jar">
+                <include name="**/*.class" />
+            </zipfileset>
+            <zipfileset src="web/WEB-INF/lib/commons-logging-1.0.4.jar">
+                <include name="**/*.class" />
+            </zipfileset>
+            <fileset dir="web/WEB-INF/classes" defaultexcludes="true">
+                <include name="org/xidea/lite/test/app/*.class" />
+                <include name="org/xidea/lite/test/webserver/*.class" />
+            </fileset>
+        </jar>
 	</target>
 
 	<target name="compress" depends="init">
