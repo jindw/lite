@@ -1,5 +1,6 @@
 package org.xidea.lite.test.app;
 
+import java.awt.Desktop;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -7,6 +8,9 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.net.URI;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.xidea.el.json.JSONDecoder;
 import org.xidea.lite.TemplateEngine;
@@ -16,14 +20,17 @@ import org.xidea.lite.test.webserver.RequestHandle;
 
 public class SimpleWebServer extends MutiThreadWebServer {
 	private static final String INDEX_XHTML = "index.xhtml";
+	private static final String POST_FIX_XHTML = ".xhtml";
 	private File webBase ;
 	private TemplateEngine engine;
+	private long lastAcessTime = System.currentTimeMillis();
 	public SimpleWebServer(File webBase){
 		this.webBase = webBase;
 		engine = new TemplateEngine(webBase);
 	}
 	protected void processRequest(RequestHandle handle) throws IOException {
-		String url = handle.getRequestURI().substring(1);
+		lastAcessTime = System.currentTimeMillis();
+		String url = handle.getRequestURI();
 		File file = new File(webBase,url);
 		if(file.isDirectory()){
 			File index = new File(file,INDEX_XHTML);
@@ -32,7 +39,7 @@ public class SimpleWebServer extends MutiThreadWebServer {
 				file = index;
 			}
 		}
-		if(url.endsWith(INDEX_XHTML)){
+		if(url.endsWith(POST_FIX_XHTML)){
 			Writer out = new StringWriter(); 
 			File json = new File(webBase,url.substring(0,url.lastIndexOf('.'))+".json");
 			Object object = null;
@@ -42,12 +49,18 @@ public class SimpleWebServer extends MutiThreadWebServer {
 					text = text.substring(1);
 				}
 				object = JSONDecoder.decode(text);
+			}else{
+				object = new Object();
 			}
 			engine.render(url, object, out);
 			handle.printContext(out, "text/html");
 			return;
 		}
-		handle.printFile(file);
+		if(file.isDirectory() && !url.endsWith("/")){
+			handle.printRederect(url+'/');
+		}else{
+		     handle.printFile(file);
+		}
 	}
 	public String loadText(File file) {
 		try {
@@ -64,8 +77,31 @@ public class SimpleWebServer extends MutiThreadWebServer {
 			return null;
 		}
 	}
+	protected void closeIfTimeout(int time) {
+		long passed = System.currentTimeMillis() - this.lastAcessTime;
+		if(passed > time){
+			System.out.println("timeout and close server:"+time);
+			System.exit(1);
+		}else{
+			//System.out.println("wait time:" +passed);
+		}
+	}
 	public static void main(String[] a) throws Exception {
-		SimpleWebServer server = new SimpleWebServer(new File(".").getAbsoluteFile());
+		File root = new File(".");
+		if(new File(root,"web/WEB-INF").exists()){
+			root = new File(root,"web");
+		}
+		final SimpleWebServer server = new SimpleWebServer(root.getAbsoluteFile());
 		server.start();
+		
+		new Timer().schedule(new TimerTask(){
+
+			@Override
+			public void run() {
+				server.closeIfTimeout(1000*60*5);
+			}
+			
+		}, 1000*60,1000*60);
+		Desktop.getDesktop().browse(new URI("http://localhost:"+server.getPort()));
 	}
 }
