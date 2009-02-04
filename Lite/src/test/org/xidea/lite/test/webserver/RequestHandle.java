@@ -270,4 +270,15 @@ public class RequestHandle {
 		return values != null?values[0]:null;
 	}
 
+	public void printRederect(String path) throws IOException {
+
+		writeln("HTTP/1.1 200 ok");
+		writeln("Refresh: 0; url="+path);
+		headPrinted = true;
+		writeln("");
+		
+		 
+
+	}
+
 }

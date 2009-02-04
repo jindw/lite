@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -42,11 +41,11 @@ public class TemplateEngine{
 
 	public TemplateEngine(File webRoot, File config) {
 		try {
-			InputStream configStream = null;
 			if(config != null && config.exists()){
-				configStream = new FileInputStream(config);
+				this.decoratorMapper = new DecoratorMapper(new FileInputStream(config));
+			}else{
+				log.warn("找不到装饰器配置信息:"+config.getAbsolutePath());
 			}
-			this.decoratorMapper = new DecoratorMapper(configStream);
 			this.webRoot = webRoot;
 		} catch (FileNotFoundException e) {
 			log.error(e);
