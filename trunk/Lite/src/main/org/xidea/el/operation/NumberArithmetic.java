@@ -30,6 +30,24 @@ public class NumberArithmetic {
 		return clazz.isInstance(n1) || clazz.isInstance(n2);
 	}
 
+	static Number getValue(Class<? extends Object> type, Number value) {
+		if (type.isAssignableFrom(Long.class)) {
+			return value.longValue();
+		} else if (type.isAssignableFrom(Integer.class)) {
+			return value.intValue();
+		}else if (type.isAssignableFrom(Short.class)) {
+			return value.shortValue();
+		}else if (type.isAssignableFrom(Byte.class)) {
+			return value.byteValue();
+		}else if (type.isAssignableFrom(Double.class)) {
+			return value.doubleValue();
+		}else if (type.isAssignableFrom(Float.class)) {
+			return value.floatValue();
+		}else{
+			return null;
+		}
+	}
+
 	/**
 	 * 加法运算
 	 * 

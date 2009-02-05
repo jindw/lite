@@ -71,7 +71,7 @@ public class XMLParser extends TextParser {
 	}
 	
 	public List<Object> parse(Object data) {
-		return parse(data, new ParseContext());
+		return parse(data, new ParseContextImpl());
 	}
 	public List<Object> parse(Object data,ParseContext context) {
 		try {

@@ -21,7 +21,7 @@ public class HTMLNodeParser implements NodeParser {
 			"^(?:meta|link|img|br|hr|input)$", Pattern.CASE_INSENSITIVE);
 	public static final Pattern PRE_LEAF = Pattern.compile(
 			"^(?:script|style|pre|textarea)$", Pattern.CASE_INSENSITIVE);
-
+	private static final Object[] END = new Object[0];
 	private static final String XHTMLNS = "http://www.w3.org/1999/xhtml";
 	private static final String EL_INPUT = "input";
 	private static final String EL_TEXTAREA = "textarea";
@@ -100,7 +100,7 @@ public class HTMLNodeParser implements NodeParser {
 					} else if (EL_INPUT.equals(localName)) {
 						return parseCloneBooleanInput(el, context);
 					} else if (EL_SELECT.equals(localName)) {
-						context.put(KEY_SELECT, el);
+						context.setAttribute(KEY_SELECT, el);
 						return parseElement(node, context, null);
 					} else if (EL_OPTION.equals(localName)) {
 						return parseCloneBooleanInput(el, context);
@@ -116,7 +116,7 @@ public class HTMLNodeParser implements NodeParser {
 		element = (Element) element.cloneNode(true);// options 有值，textarea有值
 		String type = element.getAttribute(ATTRIBUTE_TYPE);
 		if (EL_OPTION.equals(element.getLocalName())) {
-			Element selectNode = (Element) context.get(KEY_SELECT);
+			Element selectNode = (Element) context.getAttribute(KEY_SELECT);
 			if (!element.hasAttribute(ATTRIBUTE_SELECTED)) {
 				if (selectNode.hasAttribute(ATTRIBUTE_NAME)
 						&& selectNode.hasAttribute(ATTRIBUTE_VALUE)) {
@@ -212,9 +212,9 @@ public class HTMLNodeParser implements NodeParser {
 				if (value.startsWith("${") && value.endsWith("}")) {
 					value = value.substring(2, value.length() - 1);
 					final Object el = this.parser.optimizeEL(value);
-					context.append(new Object[] { Template.IF_TYPE, el });
+					context.appendIf(el);
 					context.append(trueValue);
-					context.append(END);
+					context.appendEnd();
 				} else {
 					context.append(trueValue);
 				}
@@ -236,7 +236,7 @@ public class HTMLNodeParser implements NodeParser {
 			// this.parser.parseNode(attributes.item(i), context);
 		}
 		if (exts != null) {
-			context.appendList(exts);
+			context.appendAll(exts);
 		}
 		if (HTML_LEAF.matcher(tagName).find()) {
 			context.append("/>");

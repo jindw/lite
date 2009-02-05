@@ -19,6 +19,7 @@ import org.w3c.dom.Node;
 import org.xidea.lite.Template;
 import org.xidea.lite.parser.DecoratorMapper;
 import org.xidea.lite.parser.ParseContext;
+import org.xidea.lite.parser.ParseContextImpl;
 import org.xidea.lite.parser.XMLParser;
 
 public class TemplateEngine{
@@ -97,7 +98,7 @@ public class TemplateEngine{
 	}
 
 	private TemplateEntry createTemplateEntry(String path) {
-		ParseContext parseContext = new ParseContext();
+		ParseContext parseContext = new ParseContextImpl();
 		Template template = createTemplate(path, parseContext);
 		Set<URL> resources = parseContext.getResources();
 		ArrayList<File> files = new ArrayList<File>();
@@ -124,7 +125,7 @@ public class TemplateEngine{
 		if (decoratorPath != null) {
 			try {
 				Node node = parser.loadXML(getResource(path), parseContext);
-				parseContext.put("#page", node);
+				parseContext.setAttribute("#page", node);
 				path = decoratorPath;
 			} catch (Exception e) {
 				log.error(e);
