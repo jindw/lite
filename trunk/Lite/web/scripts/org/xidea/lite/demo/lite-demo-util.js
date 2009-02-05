@@ -43,13 +43,14 @@ var TestCase = {
 	    	
 	    },300);
 	    var testCount = 100;
+	    var jsTime
 	    try{
 	        var t1 = new Date();
 	        var count = testCount;
 	        while(count--){
 	            var jsResult = jsTemplate.render(context);
 	        }
-	        $log.debug("Lite JS Time:",new Date()-t1)
+	        jsTime = new Date()-t1;
 	        templateResult.value = jsResult;
 	    }catch(e){
 	        $log.error("Lite JS优化版本模板渲染错误",e)
@@ -60,7 +61,9 @@ var TestCase = {
 	        while(count--){
 	            var JSONResult = jsonTemplate.render(context);
 	        }
-	        $log.debug("Lite JSON Time:",new Date()-t1)
+	        $log.info("模版消耗时间（？毫秒/"+testCount+"次）：",
+	        "jsTime:"+jsTime,
+	        "json:"+(new Date()-t1))
 	    }catch(e){
 	        $log.error("Lite JSON模板渲染错误",e)
 	    }
