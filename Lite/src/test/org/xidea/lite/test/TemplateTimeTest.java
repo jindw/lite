@@ -18,6 +18,7 @@ import org.xidea.el.json.JSONEncoder;
 import org.xidea.el.parser.ExpressionToken;
 import org.xidea.lite.Template;
 import org.xidea.lite.parser.ParseContext;
+import org.xidea.lite.parser.ParseContextImpl;
 import org.xidea.lite.parser.XMLParser;
 
 @SuppressWarnings("unchecked")
@@ -135,7 +136,7 @@ public class TemplateTimeTest {
 	}
 
 }
-class ParseContext2 extends ParseContext{
+class ParseContext2 extends ParseContextImpl{
 	public List<Object> getResult(){
 		return super.getResult();
 	}

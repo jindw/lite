@@ -3,7 +3,6 @@ package org.xidea.lite.parser;
 import org.w3c.dom.Node;
 
 public interface NodeParser {
-	public static final Object[] END = new Object[0];
 	/**
 	 * 
 	 * @param node

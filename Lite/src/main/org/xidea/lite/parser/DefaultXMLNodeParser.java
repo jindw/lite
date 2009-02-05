@@ -11,7 +11,6 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.ProcessingInstruction;
 import org.w3c.dom.Text;
-import org.xidea.lite.Template;
 
 public class DefaultXMLNodeParser implements NodeParser {
 
@@ -72,7 +71,7 @@ public class DefaultXMLNodeParser implements NodeParser {
 			context.appendIndent();
 		}
 		context.append("<![CDATA[");
-		context.appendList(this.parser.parseText(((CDATASection) node)
+		context.appendAll(this.parser.parseText(((CDATASection) node)
 				.getData(), false, false, 0));
 		context.append("]]>");
 		// if (format) {
@@ -139,7 +138,7 @@ public class DefaultXMLNodeParser implements NodeParser {
 			if (format) {
 				context.appendIndent();
 			}
-			context.appendList(this.parser.parseText(text, true, false, 0));
+			context.appendAll(this.parser.parseText(text, true, false, 0));
 			// if (format) {
 			// context.appendFormatEnd();
 			// }
@@ -181,8 +180,8 @@ public class DefaultXMLNodeParser implements NodeParser {
 				throw new RuntimeException("只能有单个EL表达式");
 			} else {// 只考虑单一EL表达式的情况
 				Object[] el = (Object[]) buf.get(0);
-				context.append(new Object[] { Template.ATTRIBUTE_TYPE, el[1],
-						name });
+				context.appendAttribute(el[1],
+						name);
 				return null;
 			}
 		}
@@ -194,7 +193,7 @@ public class DefaultXMLNodeParser implements NodeParser {
 				buf.set(0, "http://www.w3.org/1999/xhtml");
 			}
 		}
-		context.appendList(buf);
+		context.appendAll(buf);
 		context.append("\"");
 		return null;
 	}

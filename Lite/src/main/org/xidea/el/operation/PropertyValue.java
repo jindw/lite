@@ -115,6 +115,16 @@ public class PropertyValue implements ExpressionResult{
 	static Invocable createProxy(final java.lang.reflect.Method method) {
 		return new Invocable() {
 			public Object invoke(Object thiz, Object... args) throws Exception {
+				Class<? extends Object> clazzs[] = method.getParameterTypes();
+				for (int i = 0; i < clazzs.length; i++) {
+					Class<? extends Object> type = clazzs[i];
+					Object value = args[i];
+					if(Number.class.isAssignableFrom(type)){
+						args[i] = NumberArithmetic.getValue(type, ECMA262Impl.ToNumber(value));
+					}else if(String.class.isAssignableFrom(type)){
+						args[i] = value == null?null:String.valueOf(value);
+					}
+				}
 				return method.invoke(thiz, args);
 			}
 		};

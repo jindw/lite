@@ -1,10 +1,5 @@
 package org.xidea.lite.parser;
 
-import static org.xidea.lite.Template.ELSE_TYPE;
-import static org.xidea.lite.Template.FOR_TYPE;
-import static org.xidea.lite.Template.IF_TYPE;
-import static org.xidea.lite.Template.VAR_TYPE;
-import static org.xidea.lite.Template.CAPTRUE_TYPE;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -114,21 +109,21 @@ public class CoreXMLNodeParser implements NodeParser {
 			if (name != null) {
 				DocumentFragment cachedNode = parser.toDocumentFragment(node,
 						node.getChildNodes());
-				context.put("#" + name, cachedNode);
+				context.setAttribute("#" + name, cachedNode);
 			}
 			if (var != null) {
 				Node next = node.getFirstChild();
-				context.append(new Object[] { CAPTRUE_TYPE, var });
+				context.appendCaptrue(var);
 				if (next != null) {
 					do {
 						this.parser.parseNode(next, context);
 					} while ((next = next.getNextSibling()) != null);
 				}
-				context.append(END);
+				context.appendEnd();
 			}
 			if (path != null) {
 				if (path.startsWith("#")) {
-					doc = (Node) context.get(path);
+					doc = (Node) context.getAttribute(path);
 					String uri;
 					if (doc instanceof Document) {
 						uri = ((Document) doc).getDocumentURI();
@@ -153,7 +148,7 @@ public class CoreXMLNodeParser implements NodeParser {
 			if (xslt != null) {
 				Source xsltSource;
 				if (xslt.startsWith("#")) {
-					Node node1 = ((Node) context.get(xslt));
+					Node node1 = ((Node) context.getAttribute(xslt));
 					Transformer transformer = javax.xml.transform.TransformerFactory
 							.newInstance().newTransformer();
 					DOMResult result = new DOMResult();
@@ -204,13 +199,13 @@ public class CoreXMLNodeParser implements NodeParser {
 	Node parseIfTag(Node node, ParseContext context) {
 		Node next = node.getFirstChild();
 		Object test = getAttributeEL(node, "test");
-		context.append(new Object[] { IF_TYPE, test });
+		context.appendIf(test);
 		if (next != null) {
 			do {
 				this.parser.parseNode(next, context);
 			} while ((next = next.getNextSibling()) != null);
 		}
-		context.append(END);
+		context.appendEnd();
 		return null;
 	}
 
@@ -219,11 +214,11 @@ public class CoreXMLNodeParser implements NodeParser {
 		Node next = node.getFirstChild();
 		if (((Element) node).hasAttribute("test")) {
 			Object test = getAttributeEL(node, "test");
-			context.append(new Object[] { ELSE_TYPE, test });
+			context.appendElse(test);
 		} else if(reqiiredTest) {
 			throw new IllegalArgumentException("@test is required");
 		} else {
-			context.append(new Object[] { ELSE_TYPE, null });
+			context.appendElse(null);
 		}
 
 		if (next != null) {
@@ -231,20 +226,20 @@ public class CoreXMLNodeParser implements NodeParser {
 				this.parser.parseNode(next, context);
 			} while ((next = next.getNextSibling()) != null);
 		}
-		context.append(END);
+		context.appendEnd();
 		return null;
 	}
 
 	Node parseElseTag(Node node, ParseContext context) {
 		context.removeLastEnd();
 		Node next = node.getFirstChild();
-		context.append(new Object[] { ELSE_TYPE, null });
+		context.appendElse( null);
 		if (next != null) {
 			do {
 				this.parser.parseNode(next, context);
 			} while ((next = next.getNextSibling()) != null);
 		}
-		context.append(END);
+		context.appendEnd();
 		return null;
 	}
 
@@ -283,13 +278,13 @@ public class CoreXMLNodeParser implements NodeParser {
 		Object items = getAttributeEL(node, "items");
 		String var = getAttribute(node, "var");
 		String status = getAttribute(node, "status");
-		context.append(new Object[] { FOR_TYPE, var, items, status });
+		context.appendFor( var, items, status );
 		if (next != null) {
 			do {
 				this.parser.parseNode(next, context);
 			} while ((next = next.getNextSibling()) != null);
 		}
-		context.append(END);
+		context.appendEnd();
 		return null;
 	}
 
@@ -298,15 +293,15 @@ public class CoreXMLNodeParser implements NodeParser {
 		String value = getAttribute(node, "value");
 		if (value == null) {
 			Node next = node.getFirstChild();
-			context.append(new Object[] { CAPTRUE_TYPE, name });
+			context.appendCaptrue(name);
 			if (next != null) {
 				do {
 					this.parser.parseNode(next, context);
 				} while ((next = next.getNextSibling()) != null);
 			}
-			context.append(END);
+			context.appendEnd();
 		} else {
-			context.append(new Object[] { VAR_TYPE, toEL(value), name });
+			context.appendVar(toEL(value), name);
 		}
 		return null;
 	}
@@ -343,19 +338,18 @@ public class CoreXMLNodeParser implements NodeParser {
 			// this.parser.parseNode(next, context);
 			// } while ((next = next.getNextSibling()) != null);
 			// }
-			// context.append(END);
+			// context.appendEnd();
 			content = node.getTextContent();
 		}
 		context
-				.append(new Object[] { VAR_TYPE, parser.optimizeEL(content),
-						var });
+				.appendVar(parser.optimizeEL(content),var);
 		return null;
 	}
 
 	Node parseOutTag(Node node, ParseContext context) {
 		String value = getAttribute(node, "value");
 		List<Object> result = this.parser.parseText(value, false, false, 0);
-		context.appendList(result);
+		context.appendAll(result);
 		return null;
 	}
 
