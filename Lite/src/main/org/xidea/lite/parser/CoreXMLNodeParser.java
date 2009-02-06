@@ -18,6 +18,7 @@ import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xidea.el.json.JSONEncoder;
+import org.xidea.lite.Template;
 
 public class CoreXMLNodeParser implements NodeParser {
 	private static final String TEMPLATE_NAMESPACE = "http://www.xidea.org/ns/template";
@@ -348,7 +349,7 @@ public class CoreXMLNodeParser implements NodeParser {
 
 	Node parseOutTag(Node node, ParseContext context) {
 		String value = getAttribute(node, "value");
-		List<Object> result = this.parser.parseText(value, false, false, 0);
+		List<Object> result = this.parser.parseText(value, Template.EL_TYPE, 0);
 		context.appendAll(result);
 		return null;
 	}

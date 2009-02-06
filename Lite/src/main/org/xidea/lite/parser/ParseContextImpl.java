@@ -183,7 +183,7 @@ public class ParseContextImpl implements ParseContext {
 			for (Map.Entry<String, String> entry : typeIdMap.entrySet()) {
 				idTypeMap.put(entry.getValue(), entry.getKey());
 			}
-			current.add(Arrays.asList(Template.EL_ADD_ONS_TYPE, JSONEncoder
+			current.add(Arrays.asList(Template.ADD_ONS_TYPE, JSONEncoder
 					.encode(idTypeMap)));
 		}
 		return current;

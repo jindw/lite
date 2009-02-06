@@ -13,7 +13,8 @@ import org.xidea.el.ExpressionFactoryImpl;
 import org.xidea.lite.Template;
 
 public class TextParser implements Parser {
-	private static final Pattern FN_PATTERN = Pattern.compile("^[\\w]+\\s*$");
+	private static final Pattern FN_PATTERN = Pattern
+			.compile("$([\\w]+\\{|end)");
 
 	private ExpressionFactory expressionFactory = ExpressionFactoryImpl
 			.getInstance();
@@ -23,12 +24,13 @@ public class TextParser implements Parser {
 	}
 
 	public List<Object> parse(Object text, ParseContext context) {
-		return parseText((String) text, false, false, (char) 0);
+		return parseText((String) text, Template.EL_TYPE, (char) 0);
 	}
 
 	protected InputStream getInputStream(URL url) throws IOException {
 		return url.openStream();
 	}
+
 	protected String encodeText(String text, int quteChar) {
 		StringWriter out = new StringWriter();
 		for (int i = 0; i < text.length(); i++) {
@@ -66,55 +68,42 @@ public class TextParser implements Parser {
 	 * @abstract
 	 * @return <Array> result
 	 */
-	public List<Object> parseText(String text, boolean encodeXML,
-			boolean encodeAttr, int quteChar) {
+	public List<Object> parseText(String text, int defaultElType, int quteChar) {
 		int i = 0;
 		int start = 0;
 		int length = text.length();
 		ArrayList<Object> result = new ArrayList<Object>();
 		do {
 			final int p$ = text.indexOf('$', start);
-			if (p$<0 || isEscaped$(text, p$)) {
+			if (p$ < 0) {
 				continue;
-			} else {
-				final int p1 = text.indexOf('{', p$);
-				if (p1 > p$) {
-					String fn;
-					if (p$ + 1 < p1) {
-						fn = text.substring(p$ + 1, p1);
-						if (!FN_PATTERN.matcher(fn).find()) {
-							result.add(text.substring(start, p$+1));
-							start =  p$+1;
-							continue;
-						}
-					} else {
-						fn = "";
-					}
-					int p2 = findELEnd(text, p1, length);
-					if (p2 > 0) {
-						if (p1 > start) {
-							Object el = optimizeEL(text.substring(p1 + 1, p2));
-							try {
-								if (start < p$) {
-									result.add(text.substring(start, p$));
-								}
-								if (encodeAttr) {
-									result
-											.add(new Object[] {
-													Template.ATTRIBUTE_VALUE_TYPE,
-													el, null });
-								} else if (encodeXML) {
-									result.add(new Object[] {
-											Template.EL_TYPE_XML_TEXT, el });
-								} else {
-									result.add(new Object[] { Template.EL_TYPE,
-											el });
+			} else if (p$ > 0 && text.charAt(p$ - 1) == '\\') {
+				int pre = p$ - 1;
+				while (pre-- > 0 && text.charAt(pre) == '\\')
+					;
+				int count = p$ - pre;
 
-								}
-								start = p2 + 1;
-							} catch (Exception e) {
-							}
+				result.add(text.substring(start, p$ - count % 2));
+				start = p$;
+				if ((count & 1) == 0) {// escape
+					continue;
+				}
+			}
+			String fn = findFN(text, p$);
+			// final int p1 = text.indexOf('{', p$);
+			if (fn != null) {
+				if ("end".equals(fn)) {
+
+				} else {
+					int elBegin = p$ + fn.length() + 1;
+					int elEnd = findELEnd(text, elBegin, length);
+					if (elEnd > 0) {
+						if (start < p$) {
+							result.add(text.substring(start, p$));
 						}
+						Object el = optimizeEL(text.substring(elBegin, elEnd));
+						result.add(new Object[] { defaultElType, el });
+						start = elEnd + 1;
 					}
 				}
 			}
@@ -123,7 +112,27 @@ public class TextParser implements Parser {
 		if (start < length) {
 			result.add(text.substring(start));
 		}
-		if (encodeXML || encodeAttr) {
+		return encodeResult(result, defaultElType, quteChar);
+	}
+
+	private String findFN(String text, int p$) {
+		int next = p$ + 1;
+		for (; next < text.length()
+				&& Character.isJavaIdentifierPart(text.charAt(next)); next++)
+			;
+		String fn = text.substring(p$ + 1, next);
+		if ("end".equals(fn) || next < text.length()
+				&& text.charAt(next) == '{') {
+			return fn;
+		} else {
+			return null;
+		}
+	}
+
+	private List<Object> encodeResult(ArrayList<Object> result,
+			int defaultElType, int quteChar) {
+		int i;
+		if (defaultElType != Template.EL_TYPE) {
 			i = result.size();
 			while (i-- > 0) {
 				Object item = result.get(i);
@@ -141,13 +150,6 @@ public class TextParser implements Parser {
 
 	public Object optimizeEL(String expression) {
 		return expressionFactory.optimizeEL(expression);
-	}
-
-	private boolean isEscaped$(String text, int p) {
-		int pre = p;
-		while (pre-- > 0 && text.charAt(p) == '\\')
-			;
-		return (p - pre & 1) == 0;
 	}
 
 	private int findELEnd(String text, int p, int length) {
