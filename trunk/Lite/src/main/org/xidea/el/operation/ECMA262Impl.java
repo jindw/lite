@@ -3,7 +3,9 @@ package org.xidea.el.operation;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,49 +32,200 @@ public abstract class ECMA262Impl {
 
 		globalInvocableMap.put("parseFloat", new ParseFloat());
 		globalInvocableMap.put("parseInt", new ParseInt());
-		globalInvocableMap.put("Math", new MathImpl());
+		globalInvocableMap.put("Math", math);
 		globalInvocableMap.put("JSON", new JSON());
 	}
 
 	private static NumberArithmetic na = new NumberArithmetic();
 
-	public static class MathImpl {
-		public Number min(Number n1, Number n2) {
-			switch (na.compare(n1, n2, 8)) {
-			case -1:
-			case 0:
-				return n1;
-			case 1:
-				return n2;
-			default:
-				return Float.NaN;
+	private static Map<String, Object> math;
+	static {
+		double LN10 = Math.log(10);
+		double LN2 = Math.log(2);
+		math = new HashMap<String, Object>();
+		math.put("E", Math.E);
+		math.put("PI", Math.PI);
+		math.put("LN10", LN10);
+		math.put("LN2", LN2);
+		math.put("LOG2E", 1 / LN2);
+		math.put("LOG10E", 1 / LN10);
+		math.put("SQRT1_2", Math.sqrt(0.5));
+		math.put("SQRT2", Math.sqrt(2));
+		//15.8.2.11 max([ value1 [, value2 [,...]]])
+		math.put("min", new MaxMin(false));
+		//15.8.2.12 min([ value1 [, value2 [,...]]])
+		math.put("max", new MaxMin(true));
+		//15.8.2.14 random()
+		math.put("random", new Invocable() {
+			// 15.8.2.14 random()
+			public Object invoke(Object thizz, Object... args) throws Exception {
+				return Math.random();
 			}
+		});
+		//15.8.2.1 abs(x)
+		math.put("abs", new DoubleInvocable(){
+			@Override
+			Object compute(Number x) {
+				if(na.compare(0,x, 2) == 1){
+					x = na.subtract(0, x);
+				}
+				return x;
+			}
+		});
+		//15.8.2.2 acos(x) 
+		math.put("acos", new DoubleInvocable(){
+			Object compute(Number x) {
+				return Math.acos(x.doubleValue());
+			}
+		});
+		//15.8.2.3 asin(x)
+		math.put("asin", new DoubleInvocable(){
+			Object compute(Number x) {
+				return Math.asin(x.doubleValue());
+			}
+		});
+		//15.8.2.4 atan(x)
+		math.put("atan", new DoubleInvocable(){
+			Object compute(Number x) {
+				return Math.atan(x.doubleValue());
+			}
+		});
+		//15.8.2.6 ceil(x)
+		math.put("ceil", new DoubleInvocable(){
+			Object compute(Number x) {
+				return Math.ceil(x.doubleValue());
+			}
+		});
+		//15.8.2.7 cos(x)
+		math.put("cos", new DoubleInvocable(){
+			Object compute(Number x) {
+				return Math.cos(x.doubleValue());
+			}
+		});
+		//15.8.2.8 exp(x)
+		math.put("exp", new DoubleInvocable(){
+			Object compute(Number x) {
+				return Math.exp(x.doubleValue());
+			}
+		});
+		//15.8.2.9 floor(x)
+		math.put("floor", new DoubleInvocable(){
+			Object compute(Number x) {
+				return Math.floor(x.doubleValue());
+			}
+		});
+		//15.8.2.10 log(x)
+		math.put("log", new DoubleInvocable(){
+			Object compute(Number x) {
+				return Math.log(x.doubleValue());
+			}
+		});
+		//15.8.2.13 pow(x, y)
+		math.put("pow", new Double2Invocable(){
+			Object compute(Number x,Number y) {
+				return Math.pow(x.doubleValue(),y.doubleValue());
+			}
+		});
+		//15.8.2.15 round(x)
+		math.put("round", new DoubleInvocable(){
+			Object compute(Number x) {
+				return Math.round(x.doubleValue());
+			}
+		});
+		//15.8.2.16 sin(x)
+		math.put("sin", new DoubleInvocable(){
+			Object compute(Number x) {
+				return Math.sin(x.doubleValue());
+			}
+		});
+		//15.8.2.17 sqrt(x)
+		math.put("sqrt", new DoubleInvocable(){
+			Object compute(Number x) {
+				return Math.sqrt(x.doubleValue());
+			}
+		});
+		//15.8.2.18 tan(x)
+		math.put("tan", new DoubleInvocable(){
+			Object compute(Number x) {
+				return Math.tan(x.doubleValue());
+			}
+		});
+		math = Collections.unmodifiableMap(math);
+	}
+	private abstract static class DoubleInvocable implements Invocable {
+		public Object invoke(Object thiz, Object... args) throws Exception {
+			Number n1 = ToNumber(getArg(args, 0, Double.NaN));
+			return this.compute(n1);
 		}
-		public Number max(Number n1, Number n2) {
-			switch (na.compare(n1, n2, 8)) {
-			case 1:
-			case 0:
-				return n1;
-			case -1:
-				return n2;
-			default:
-				return Float.NaN;
+		abstract Object compute(Number x) ;
+	}
+	private abstract static class Double2Invocable implements Invocable {
+		public Object invoke(Object thiz, Object... args) throws Exception {
+			Number n1 = ToNumber(getArg(args, 0, Double.NaN));
+			Number n2 = ToNumber(getArg(args, 1, Double.NaN));
+			return this.compute(n1,n2);
+		}
+		abstract Object compute(Number x,Number y) ;
+	}
+
+	private static class MaxMin implements Invocable {
+		private boolean max;
+
+		public MaxMin(boolean max) {
+			this.max = max;
+		}
+
+		public Object invoke(Object thiz, Object... args) throws Exception {
+			Number n1 = null;
+			for (int i = 0; i < args.length; i++) {
+				Number n2 = ToNumber(getArg(args, i, Float.NaN));
+				if (NumberArithmetic.isNaN(n2)) {
+					return n2;
+				}
+				if (max) {
+					if (NumberArithmetic.isPI(n2)) {
+						return n2;
+					}
+				} else {
+					if (NumberArithmetic.isNI(n2)) {
+						return n2;
+					}
+				}
+				if (i == 0) {
+					n1 = n2;
+				} else {
+					switch (na.compare(n1, n2, 8)) {
+					case 1:
+						if (!max) {// min
+							n1 = n2;
+						}
+					case -1:
+						if (max) {
+							n1 = n2;
+						}
+					}
+				}
 			}
+			return n1;
 		}
 	}
 
 	public static class JSON {
-		public static final Object stringify(Object value){
+		public static final Object stringify(Object value) {
 			return encode(value);
 		}
-		public static final Object encode (Object value){
+
+		public static final Object encode(Object value) {
 			return JSONEncoder.encode(value);
 		}
-		public static final Object parse(Object value){
+
+		public static final Object parse(Object value) {
 			return decode(value);
 		}
-		public static final Object decode (Object value  ){
-			return new JSONTokenizer(ToPrimitive(value, String.class).toString()).parse();
+
+		public static final Object decode(Object value) {
+			return new JSONTokenizer(ToPrimitive(value, String.class)
+					.toString()).parse();
 		}
 
 	}
