@@ -84,7 +84,7 @@ public class XMLParserTest {
 		test("<xml attr=\"-${test}\"/>", "<xml attr=\"-true\"></xml>");
 		test("<xml attr=\"${false}\"/>", "<xml attr=\"false\"></xml>");
 		test("<xml attr=\"${null}\"/>", "<xml></xml>");
-		test("<xml attr=\"${''}\"/>", "<xml></xml>");
+		test("<xml attr=\"${''}\"/>", "<xml attr=\"\"></xml>");
 		test("<xml attr=\"${' ' }\"/>", "<xml attr=\" \"></xml>");
 		test("<xml attr=\"${null}-\"/>", "<xml attr=\"null-\"></xml>");
 		test("<xml attr=\"${''}-\"/>", "<xml attr=\"-\"></xml>");

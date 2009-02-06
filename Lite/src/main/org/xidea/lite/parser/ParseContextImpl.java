@@ -220,7 +220,7 @@ public class ParseContextImpl implements ParseContext {
 	}
 
 	public void appendAttribute(Object el, String name) {
-		this.append(new Object[] { Template.ATTRIBUTE_TYPE, name });
+		this.append(new Object[] { Template.ATTRIBUTE_TYPE,el, name });
 
 	}
 
