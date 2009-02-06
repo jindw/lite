@@ -11,6 +11,8 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.ProcessingInstruction;
 import org.w3c.dom.Text;
+import org.xidea.lite.Template;
+
 
 public class DefaultXMLNodeParser implements NodeParser {
 
@@ -72,7 +74,7 @@ public class DefaultXMLNodeParser implements NodeParser {
 		}
 		context.append("<![CDATA[");
 		context.appendAll(this.parser.parseText(((CDATASection) node)
-				.getData(), false, false, 0));
+				.getData(), Template.EL_TYPE, 0));
 		context.append("]]>");
 		// if (format) {
 		// context.appendFormatEnd();
@@ -138,7 +140,7 @@ public class DefaultXMLNodeParser implements NodeParser {
 			if (format) {
 				context.appendIndent();
 			}
-			context.appendAll(this.parser.parseText(text, true, false, 0));
+			context.appendAll(this.parser.parseText(text, Template.EL_XML_TEXT_TYPE, 0));
 			// if (format) {
 			// context.appendFormatEnd();
 			// }
@@ -154,7 +156,7 @@ public class DefaultXMLNodeParser implements NodeParser {
 				.getPrefix(), value)) {
 			return null;
 		}
-		List<Object> buf = this.parser.parseText(value, true, true, '"');
+		List<Object> buf = this.parser.parseText(value, Template.ATTRIBUTE_TYPE, '"');
 		boolean isStatic = false;
 		boolean isDynamic = false;
 		// hack parseText is void

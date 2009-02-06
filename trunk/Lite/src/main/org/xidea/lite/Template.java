@@ -26,11 +26,11 @@ public class Template {
 	public static final int FOR_TYPE = 4;// [4,[...],'var','items','status']//status
 	public static final int BREAK_TYPE = 5;// [1,depth]
 
-	public static final int EL_TYPE_XML_TEXT = 6;// [6,'el']
+	public static final int EL_XML_TEXT_TYPE = 6;// [6,'el']
 	public static final int ATTRIBUTE_TYPE = 7;// [7,'value','name']
-	public static final int ATTRIBUTE_VALUE_TYPE = 8;// [8,'value']
+//	public static final int EL_ATTRIBUTE_VALUE_TYPE = 8;// [8,'value']
 	public static final int CAPTRUE_TYPE = 9;// [1,[...],'var']
-	public static final int EL_ADD_ONS_TYPE =-1;// [1,[...],'var']
+	public static final int ADD_ONS_TYPE =-1;// [1,[...],'var']
 
 	public static final String FOR_KEY = "for";
 	public static final String IF_KEY = "if";
@@ -75,7 +75,7 @@ public class Template {
 					case EL_TYPE:// ":el":
 						processExpression(context, data, out, false);
 						break;
-					case EL_TYPE_XML_TEXT:// ":el":
+					case EL_XML_TEXT_TYPE:// ":el":
 						processExpression(context, data, out, true);
 						break;
 					case VAR_TYPE:// ":set"://var
@@ -92,9 +92,6 @@ public class Template {
 						break;
 					case FOR_TYPE:// ":for":
 						processFor(context, data, out);
-						break;
-					case ATTRIBUTE_VALUE_TYPE:
-						processAttributeValue(context, data, out);
 						break;
 					case ATTRIBUTE_TYPE:// ":attribute":
 						processAttribute(context, data, out);
@@ -145,7 +142,7 @@ public class Template {
 				cmd[0] = type;
 				// children
 				switch (type) {
-				case EL_ADD_ONS_TYPE:
+				case ADD_ONS_TYPE:
 					this.compileAddOns(createExpression(cmd[1]));
 					break;
 				case CAPTRUE_TYPE:
@@ -157,12 +154,11 @@ public class Template {
 					break;
 				}
 				switch (type) {
-				case ATTRIBUTE_VALUE_TYPE:
 				case ATTRIBUTE_TYPE:
 					if (cmd[2] != null) {
 						cmd[2] = " " + cmd[2] + "=\"";
 					}
-				case EL_TYPE_XML_TEXT:
+				case EL_XML_TEXT_TYPE:
 				case EL_TYPE:
 					cmd[1] = createExpression(cmd[1]);
 					break;
@@ -374,22 +370,14 @@ public class Template {
 	protected void processAttribute(Map context, Object[] data, Writer out)
 			throws IOException {
 		Object result = ((Expression) data[1]).evaluate(context);
-		if (result != null) {
-//			if (result instanceof String && ((String) result).length() == 0) {
-//				return;
-//			}
+		if(data[2] == null){
+			printXMLAttribute(String.valueOf(result), out, true);
+		}else if (result != null) {
 			out.write((String) data[2]);// prefix
 			printXMLAttribute(String.valueOf(result), out, false);
 			out.write('"');
 		}
 
-	}
-
-	@SuppressWarnings("unchecked")
-	protected void processAttributeValue(Map context, Object[] data, Writer out)
-			throws IOException {
-		printXMLAttribute(String.valueOf(((Expression) data[1])
-				.evaluate(context)), out, true);
 	}
 
 	protected void prossesBreak(Object[] data) {
