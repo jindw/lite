@@ -6,6 +6,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.xidea.el.Expression;
 import org.xidea.el.ExpressionFactory;
@@ -44,17 +45,6 @@ public class MathTest {
 		}
 	}
 
-	@Test
-	public void testPow() throws Exception {
-		for (int i = 0; i < 10; i++) {
-			double value1 = i * 10 * (Math.random() - 0.5);
-			double value2 = i * 10 * (Math.random() - 0.5);
-			// 15.8.2.13 pow(x, y)
-			test("parseInt(Math.pow(" + value1 + "," + value2 + ")*1000)");
-			// 15.8.2.8 exp(x)
-			test("parseInt(Math.exp(" + value1 + ")*1000)");
-		}
-	}
 
 	@Test
 	public void testAngle() throws Exception {
@@ -85,12 +75,39 @@ public class MathTest {
 		}
 	}
 
+	@Test
+	public void testPowExp() throws Exception {
+		for (int i = 0; i < 10; i++) {
+			double value1 = i * 10 * (Math.random() - 0.5);
+			double value2 = i * 10 * (Math.random() - 0.5);
+			// 15.8.2.13 pow(x, y)
+			testLike("Math.pow(" + value1 + "," + value2 + ")",0.01);
+			// 15.8.2.8 exp(x)
+			testLike("Math.exp(" + value1 + ")",0.01);
+		}
+	}
+
+	private void testLike(String exp, double max) throws ScriptException {
+		Expression el = factory.createEL(exp);
+		Number jsv = (Number) se.eval(exp);
+		Number elv = (Number) el.evaluate(null); 
+		
+		if(Double.isNaN(jsv.doubleValue()) != Double.isNaN(elv.doubleValue())){
+			Assert.fail("误差太大："+exp+"\n"+jsv+"\n"+elv);
+		}
+		max *= Math.max(jsv.doubleValue(),elv.doubleValue());
+		double offset = Math.abs(jsv.doubleValue()-elv.doubleValue());
+		if(offset>max){
+			Assert.fail("误差太大了："+exp+"\n"+jsv+"\n"+elv);
+		}
+		
+	}
 	private void test(String exp) throws ScriptException {
 		Expression el = factory.createEL(exp);
 		Object jsv = se.eval(exp);
 		Object elv = el.evaluate(null); 
-		System.out.println(exp +":"+jsv);
-		System.out.println(":"+elv);
+		//System.out.println(exp +":"+jsv);
+		//System.out.println(":"+elv);
 		// System.out.println(jsv.getClass());
 		assertEquals(jsv, elv);
 	}

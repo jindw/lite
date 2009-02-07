@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLStreamHandler;
 
 import org.junit.Test;
 
@@ -31,7 +33,14 @@ public class ClasspathTest {
 	public void testURL() throws Exception{
 		String cp = "classpath:///org/xidea/el/test/test.json";
 		URL parent = new URL("http://www.x.y");
-		URL url = new URL(parent,cp);
+		URL url = new URL(parent,cp,new URLStreamHandler(){
+			@Override
+			protected URLConnection openConnection(URL u) throws IOException {
+				System.out.println(u.getFile());
+				return this.getClass().getClassLoader().getResource(u.getFile().substring(1)).openConnection();
+			}
+			
+		});
 		System.out.println(url);
 		InputStream in = url.openStream();
 	}
