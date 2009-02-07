@@ -28,9 +28,8 @@ public class Template {
 
 	public static final int EL_XML_TEXT_TYPE = 6;// [6,'el']
 	public static final int ATTRIBUTE_TYPE = 7;// [7,'value','name']
-//	public static final int EL_ATTRIBUTE_VALUE_TYPE = 8;// [8,'value']
-	public static final int CAPTRUE_TYPE = 9;// [1,[...],'var']
-	public static final int ADD_ONS_TYPE =-1;// [1,[...],'var']
+	public static final int CAPTRUE_TYPE = 8;// [1,[...],'var']
+	public static final int ADD_ONS_TYPE =9;// [1,[...],'var']
 
 	public static final String FOR_KEY = "for";
 	public static final String IF_KEY = "if";

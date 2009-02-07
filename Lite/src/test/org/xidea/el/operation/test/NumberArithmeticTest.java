@@ -44,10 +44,23 @@ public class NumberArithmeticTest {
 
 	@Test
 	public void testCompare() {
+		System.out.println(Double.POSITIVE_INFINITY-Double.POSITIVE_INFINITY);
+		System.out.println(Double.NEGATIVE_INFINITY-Double.POSITIVE_INFINITY);
+		System.out.println(Double.POSITIVE_INFINITY-Double.NEGATIVE_INFINITY);
+		
 		assertEquals(100, na.compare(Double.NaN, Double.POSITIVE_INFINITY,100));
 		assertEquals(100, na.compare(Double.POSITIVE_INFINITY, Double.NaN,100));
+		
+
+		assertEquals(0, na.compare(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY,100));
+		assertEquals(0, na.compare(Double.NEGATIVE_INFINITY,Double.NEGATIVE_INFINITY, 100));
+		
 		assertEquals(-1, na.compare(1, Double.POSITIVE_INFINITY,100));
 		assertEquals(1, na.compare(Double.POSITIVE_INFINITY,1, 100));
+		
+		assertEquals(1, na.compare(1, Double.NEGATIVE_INFINITY,100));
+		assertEquals(-1, na.compare(Double.NEGATIVE_INFINITY,1, 100));
+
 	}
 
 	@Test
@@ -72,6 +85,9 @@ public class NumberArithmeticTest {
 	public void testDivide() {
 		assertEquals(0.5, na.divide(1, 2,true));
 		assertEquals(0, na.divide(1, 2,false));
+		assertEquals(Float.NaN, na.divide(0, 0,false));
+		assertEquals(Float.POSITIVE_INFINITY, na.divide(1, 0,false));
+		assertEquals(Float.NEGATIVE_INFINITY, na.divide(-1, 0,false));
 	}
 
 	@Test
