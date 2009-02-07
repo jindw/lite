@@ -13,7 +13,7 @@ import org.xidea.el.operation.ECMA262Impl;
 import org.xidea.el.operation.Invocable;
 
 
-public class ECMA262GlobalsTest {
+public class ECMA262FunctionTest {
 	ExpressionFactory factory = new ExpressionFactoryImpl();
 	Invocable encodeURI = new ECMA262Impl.EncodeURI();
 	Invocable decodeURI = new ECMA262Impl.DecodeURI();

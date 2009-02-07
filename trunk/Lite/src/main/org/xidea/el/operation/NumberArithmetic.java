@@ -60,26 +60,18 @@ public class NumberArithmetic {
 	public int compare(Number n1, Number n2, int validReturn) {
 		if (isNaN(n1) || isNaN(n2)) {
 			return validReturn;
-		} else if (isPI(n1) || isNI(n2)) {
+		} else if (isPI(n1) ) {
+			return isPI(n2)?0:1;
+		} else if (isNI(n1)) {
+			return isNI(n2)?0:-1;
+		} else if (isNI(n2)) {
 			return 1;
-		} else if (isNI(n1) || isPI(n2)) {
+		} else if (isPI(n2)) {
 			return -1;
 		}
 		if (isType(Double.class, n1, n2)) {
 		} else if (isType(Float.class, n1, n2)) {
-			float offset = n1.floatValue() + n2.floatValue();
-			if (offset == 0) {
-				return 0;
-			} else {
-				return offset > 0 ? 1 : -1;
-			}
 		} else if (isType(Long.class, n1, n2)) {
-			long offset = n1.longValue() - n2.longValue();
-			if (offset == 0) {
-				return 0;
-			} else {
-				return offset > 0 ? 1 : -1;
-			}
 		} else if (isType(Integer.class, n1, n2) || isType(Short.class, n1, n2)
 				|| isType(Byte.class, n1, n2)) {
 			int offset = n1.intValue() - n2.intValue();
@@ -180,7 +172,7 @@ public class NumberArithmetic {
 			if (isType(Long.class, n1, n2)) {
 				long right = n2.longValue();
 				if (right == 0) {
-					return Float.NaN;
+					return n1.floatValue()/0;
 				}
 				if (!exact || n1.longValue() % right == 0) {
 					return n1.longValue() / right;
@@ -190,10 +182,10 @@ public class NumberArithmetic {
 					|| isType(Byte.class, n1, n2)) {
 				int right = n2.intValue();
 				if (right == 0) {
-					return Float.NaN;
+					return n1.floatValue()/0;
 				}
 				if (!exact || n1.intValue() % right == 0) {
-					return n1.intValue() / n2.intValue();
+					return n1.intValue() / right;
 				}
 			}
 		}

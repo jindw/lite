@@ -33,6 +33,8 @@ public abstract class ECMA262Impl {
 		globalInvocableMap.put("parseFloat", new ParseFloat());
 		globalInvocableMap.put("parseInt", new ParseInt());
 		globalInvocableMap.put("Math", math);
+		globalInvocableMap.put("Infinity", Double.POSITIVE_INFINITY);
+		globalInvocableMap.put("NaN", Double.NaN);
 		globalInvocableMap.put("JSON", new JSON());
 	}
 
@@ -195,11 +197,12 @@ public abstract class ECMA262Impl {
 					n1 = n2;
 				} else {
 					switch (na.compare(n1, n2, 8)) {
-					case 1:
+					case 1://n1>n2
 						if (!max) {// min
 							n1 = n2;
 						}
-					case -1:
+						break;
+					case -1://n2>n1
 						if (max) {
 							n1 = n2;
 						}
