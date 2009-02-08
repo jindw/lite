@@ -2,9 +2,7 @@ package org.xidea.lite.parser;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringWriter;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.xidea.el.ExpressionFactory;
@@ -19,42 +17,17 @@ public class TextParser implements Parser {
 		this.expressionFactory = expressionFactory;
 	}
 
-	public List<Object> parse(Object text, ParseContext context) {
-		return parseText((String) text, Template.EL_TYPE, (char) 0);
+
+	public List<Object> parse(Object data) {
+		return parse(data, new ParseContextImpl());
+	}
+	public List<Object> parse(Object text,ParseContext context) {
+		//context.appendAll(parseText((String) text, Template.EL_TYPE, (char) 0));
+		return context.toResultTree();
 	}
 
 	protected InputStream getInputStream(URL url) throws IOException {
 		return url.openStream();
-	}
-
-	protected String encodeText(String text, int quteChar) {
-		StringWriter out = new StringWriter();
-		for (int i = 0; i < text.length(); i++) {
-			int c = text.charAt(i);
-			switch (c) {
-			case '<':
-				out.write("&lt;");
-				break;
-			case '>':
-				out.write("&gt;");
-				break;
-			case '&':
-				out.write("&amp;");
-				break;
-			case '\'':
-			case '"':
-				if (quteChar == c) {
-					out.write("&#39;");
-					break;
-				} else if (quteChar == c) {
-					out.write("&#34;");
-					break;
-				}
-			default:
-				out.write(c);
-			}
-		}
-		return out.toString();
 	}
 
 	/**
@@ -64,12 +37,12 @@ public class TextParser implements Parser {
 	 * @abstract
 	 * @return <Array> result
 	 */
-	public List<Object> parseText(final String text, final int defaultElType,
-			final int quteChar) {
+	protected void parseText(ParseContext context,final String text, final int defaultElType) {
 		int i = 0;
 		int start = 0;
 		int length = text.length();
-		ArrayList<Object> result = new ArrayList<Object>();
+		boolean encode = defaultElType!=Template.EL_TYPE;
+		char qute = '"';
 		do {
 			final int p$ = text.indexOf('$', start);
 			if (p$ < 0) {
@@ -79,7 +52,7 @@ public class TextParser implements Parser {
 				while (pre-- > 0 && text.charAt(pre) == '\\')
 					;
 				int count = p$ - pre;
-				result.add(text.substring(start, p$ - count % 2));
+				context.append(text.substring(start, p$ - count % 2),encode,qute);
 				start = p$;
 				if ((count & 1) == 0) {// escape
 					continue;
@@ -88,34 +61,14 @@ public class TextParser implements Parser {
 			String fn = findFN(text, p$);
 			// final int p1 = text.indexOf('{', p$);
 			if (fn != null) {
-				start = parseInstruction(result, text, fn, defaultElType,
-						start, p$);
+				start = parseInstruction(context, text, fn, defaultElType,
+						start, p$,encode,qute);
 			}
 
 		} while (++i < length);
 		if (start < length) {
-			result.add(text.substring(start));
+			context.append(text.substring(start),encode,qute);
 		}
-		return encodeResult(result, defaultElType, quteChar);
-	}
-
-	protected List<Object> encodeResult(ArrayList<Object> result,
-			int defaultElType, int quteChar) {
-		int i;
-		if (defaultElType != Template.EL_TYPE) {
-			i = result.size();
-			while (i-- > 0) {
-				Object item = result.get(i);
-				if (item instanceof String) {
-					if (((String) item).length() == 0) {
-						result.remove(i);
-					} else {
-						result.set(i, encodeText((String) item, quteChar));
-					}
-				}
-			}
-		}
-		return result;
 	}
 
 	protected String findFN(String text, int p$) {
@@ -132,41 +85,46 @@ public class TextParser implements Parser {
 		}
 	}
 
-	protected int parseInstruction(List<Object> result, String text, String fn,
-			int defaultElType, int start, final int p$) {
+	protected int parseInstruction(ParseContext context, String text, String fn,
+			int defaultElType, int start, final int p$,boolean encode,char qute){
 		if (start < p$) {
-			result.add(text.substring(start, p$));
+			context.append(text.substring(start, p$),encode,qute);
 			start = p$;
 		}
 		if ("end".equals(fn)) {
-			result.add(END_INSTRUCTION);
-			return p$ + fn.length();
+			context.appendEnd();
+			return p$ + fn.length()+1;
 		} else {
-			int elBegin = p$ + fn.length() + 1;
+			int elBegin = p$ + fn.length() + 2;
 			int elEnd = findELEnd(text, elBegin);
 			if (elEnd > 0) {
 				try {
-					Object el = optimizeEL(text.substring(elBegin, elEnd));
-					result.add(new Object[] { defaultElType, el });
+					Object type = fn.length() == 0?defaultElType:fn;
+					parseInstruction(context,type,text.substring(elBegin, elEnd));
 					return elEnd + 1;
 				} catch (Exception e) {
 				}
 			}
-			result.add(text.substring(start, start + 1));
+			context.append(text.substring(start, start + 1),encode,qute);
 			return start + 1;
 		}
 	}
-
+	protected void parseInstruction(ParseContext context,Object type,String eltext){
+		if("if".equals(type)){
+		}
+		Object el = optimizeEL(eltext);
+		context.appendEL(el);
+	}
 	public Object optimizeEL(String expression) {
 		return expressionFactory.optimizeEL(expression);
 	}
 
-	protected int findELEnd(String text, int p) {
+	protected int findELEnd(String text, int elBegin) {
 		int length = text.length();
-		if (p >= length) {
+		if (elBegin >= length) {
 			return -1;
 		}
-		int next = p;
+		int next = elBegin;
 		char stringChar = 0;
 		int depth = 0;
 		do {
@@ -191,7 +149,7 @@ public class TextParser implements Parser {
 			case '}':
 				if (stringChar == 0) {
 					depth--;
-					if (depth == 0) {
+					if (depth < 0) {
 						return next;
 					}
 				}

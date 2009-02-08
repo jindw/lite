@@ -69,10 +69,7 @@ public class XMLParser extends TextParser {
 		newParserList[length] = parser;
 		this.parserList = newParserList;
 	}
-	
-	public List<Object> parse(Object data) {
-		return parse(data, new ParseContextImpl());
-	}
+	@Override
 	public List<Object> parse(Object data,ParseContext context) {
 		try {
 			Node node = null;
