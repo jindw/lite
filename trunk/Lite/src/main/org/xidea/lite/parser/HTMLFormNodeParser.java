@@ -16,21 +16,12 @@ import org.xidea.el.json.JSONEncoder;
 import org.xidea.el.operation.TextContains;
 import org.xidea.lite.Template;
 
-public class HTMLFormNodeParser implements NodeParser {
-	public static final Pattern HTML_LEAF = Pattern.compile(
-			"^(?:meta|link|img|br|hr|input)$", Pattern.CASE_INSENSITIVE);
-	public static final Pattern PRE_LEAF = Pattern.compile(
-			"^(?:script|style|pre|textarea)$", Pattern.CASE_INSENSITIVE);
-	private static final Object[] END = new Object[0];
-	private static final String XHTMLNS = "http://www.w3.org/1999/xhtml";
+public class HTMLFormNodeParser extends HTMLNodeParser implements NodeParser {
 
-	private static final Map<String, String> BOOLEAN_ATTBUTE_MAP = new HashMap<String, String>();
-	static {
-		BOOLEAN_ATTBUTE_MAP.put("checked", "checked");
-		BOOLEAN_ATTBUTE_MAP.put("selected", "selected");
-		BOOLEAN_ATTBUTE_MAP.put("disabled", "disabled");
+
+	public HTMLFormNodeParser(XMLParser parser, boolean autoFillForm) {
+		super(parser, autoFillForm);
 	}
-
 	private static final String ATTRIBUTE_SELECTED = "selected";
 	private static final String ATTRIBUTE_CHECKED = "checked";
 	private static final String ATTRIBUTE_TYPE = "type";
@@ -39,49 +30,15 @@ public class HTMLFormNodeParser implements NodeParser {
 
 	private static final String TYPE_CHECKBOX = "checkbox";
 	private static final String TYPE_RADIO = "radio";
-	
-	private static final String EL_INPUT = "input";
-	private static final String EL_TEXTAREA = "textarea";
-	private static final String EL_SELECT = "select";
-	private static final String EL_OPTION = "option";
-
 	private static final Object KEY_SELECT = new Object();
 
-	private boolean autoFillForm;
-	private XMLParser parser;
 
-	public void setAutoFillForm(boolean autoFillForm) {
-		this.autoFillForm = autoFillForm;
+
+	protected Node parseSelect(Element el, ParseContext context) {
+		context.setAttribute(KEY_SELECT, el);
+		return parseHTMLElement(el, context, null);
 	}
 
-	public HTMLFormNodeParser(XMLParser parser, boolean autoFillForm) {
-		this.parser = parser;
-		this.setAutoFillForm(autoFillForm);
-	}
-
-	public Node parseNode(Node node, ParseContext context) {
-		String namespace = node.getNamespaceURI();
-		if (namespace == null || XHTMLNS.equals(namespace)) {
-			if (node instanceof Element) {
-				Element el = (Element) node;
-				String localName = el.getLocalName();
-				if (autoFillForm) {
-					if (EL_TEXTAREA.equals(localName)) {
-						return parseTextArea(el, context);
-					} else if (EL_SELECT.equals(localName)) {
-						context.setAttribute(KEY_SELECT, el);
-						return parseHTMLElement(node, context, null);
-					} else if (EL_INPUT.equals(localName)) {
-						return parseInput(el, context);
-					} else if (EL_OPTION.equals(localName)) {
-						return parseSelectOption(el, context);
-					}
-				}
-				return parseHTMLElement(node, context, null);
-			}
-		}
-		return node;
-	}
 
 	protected Node parseTextArea(Element el, ParseContext context) {
 		Document document = el.getOwnerDocument();
@@ -180,70 +137,4 @@ public class HTMLFormNodeParser implements NodeParser {
 		return id + "(" + collectionEL + "," + valueEL + ")";
 	}
 
-	protected Node parseHTMLElement(Node node, ParseContext context,
-			List<Object> exts) {
-		context.appendIndent();
-		Element el = (Element) node;
-		NamedNodeMap attributes = node.getAttributes();
-		String tagName = el.getTagName();
-		context.append("<" + tagName);
-		for (int i = 0; i < attributes.getLength(); i++) {
-			appendHTMLAttribute((Attr) attributes.item(i), context);
-		}
-		if (exts != null) {
-			context.appendAll(exts);
-		}
-		if (HTML_LEAF.matcher(tagName).find()) {
-			context.append("/>");
-		} else {
-			context.append(">");
-			Node next = node.getFirstChild();
-			if (next != null) {
-				boolean reserveSpace = PRE_LEAF.matcher(tagName).find();
-				boolean oldReserveSpace = context.isReserveSpace();
-				context.setReserveSpace(oldReserveSpace || reserveSpace);
-
-				boolean format = next.getNodeType() != Node.TEXT_NODE
-						|| next.getNextSibling() != null;
-				try {
-					do {
-						this.parser.parseNode(next, context);
-					} while ((next = next.getNextSibling()) != null);
-				} finally {
-					context.setReserveSpace(oldReserveSpace);
-				}
-				if (format) {
-					context.appendIndent();
-				}
-			}
-			context.append("</" + tagName + '>');
-		}
-		return null;
-	}
-
-	protected void appendHTMLAttribute(Attr node, ParseContext context) {
-		String name = node.getName();
-		String value = node.getValue();
-		String trueValue = BOOLEAN_ATTBUTE_MAP.get(name);
-		if (trueValue != null) {
-			value = value.trim();
-			if (value.length() == 0 || "false".equals(value)) {
-				return;
-			} else {
-				trueValue = " " + name + "=\"" + trueValue + "\"";
-				if (value.startsWith("${") && value.endsWith("}")) {
-					value = value.substring(2, value.length() - 1);
-					final Object el = this.parser.optimizeEL(value);
-					context.appendIf(el);
-					context.append(trueValue);
-					context.appendEnd();
-				} else {
-					context.append(trueValue);
-				}
-				return;
-			}
-		}
-		this.parser.parseNode(node, context);
-
-	}
 }
