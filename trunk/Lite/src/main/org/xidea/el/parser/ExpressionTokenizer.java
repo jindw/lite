@@ -49,7 +49,7 @@ public class ExpressionTokenizer extends JSONTokenizer {
 		this.expressions = right(this.tokens.iterator());
 	}
 
-	protected int getPriority(int type) {
+	private int getPriority(int type) {
 		switch (type) {
 		case BRACKET_BEGIN:
 		case BRACKET_END:
