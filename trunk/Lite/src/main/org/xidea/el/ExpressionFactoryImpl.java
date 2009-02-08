@@ -139,8 +139,8 @@ public class ExpressionFactoryImpl implements ExpressionFactory {
 		while(index-- >0){
 			ExpressionToken item = list[index];
 			int type = item.getType();
-			if(type>=3){
-				pos-=(type & 3)-1;
+			if(type> 0){
+				pos-=(type & 1);
 			}else{
 				if(type == ExpressionToken.VALUE_LAZY){
 					check((ExpressionToken[]) item.getParam());

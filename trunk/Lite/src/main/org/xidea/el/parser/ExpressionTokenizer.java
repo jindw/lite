@@ -72,7 +72,7 @@ public class ExpressionTokenizer extends JSONTokenizer {
 
 		while (tokens.hasNext()) {
 			final ExpressionToken item = tokens.next();
-			if (item.getType() > 3) {
+			if (item.getType() > 0) {
 				if (buffer.isEmpty()) {
 					buffer.addFirst(item);
 				} else if (item.getType() == BRACKET_BEGIN) {// ("(")
