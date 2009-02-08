@@ -56,7 +56,7 @@ public class ExpressionImpl implements Expression ,PrepareExpression {
 		while (i-- > 0) {
 			item = (ExpressionToken) tokens[i];
 			int type = item.getType();
-			if (type > 3) {
+			if (type > 0) {
 				Object arg2 = null;
 				Object arg1 = null;
 				if ((type & 1) == 1) {//length == 2
@@ -99,7 +99,7 @@ public class ExpressionImpl implements Expression ,PrepareExpression {
 		case ExpressionToken.VALUE_CONSTANTS:
 			return item.getParam();
 		}
-		throw new IllegalArgumentException();
+		throw new IllegalArgumentException("unknow token:"+Integer.toBinaryString(item.getType()));
 	}
 
 	protected Object createVariable(Object context, String key) {
