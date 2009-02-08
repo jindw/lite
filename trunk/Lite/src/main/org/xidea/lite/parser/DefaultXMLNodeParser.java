@@ -140,7 +140,7 @@ public class DefaultXMLNodeParser implements NodeParser {
 			if (format) {
 				context.appendIndent();
 			}
-			this.parser.parseText(context,text, Template.EL_XML_TEXT_TYPE);
+			this.parser.parseText(context,text, Template.XML_TEXT_TYPE);
 			// if (format) {
 			// context.appendFormatEnd();
 			// }
@@ -202,7 +202,7 @@ public class DefaultXMLNodeParser implements NodeParser {
 
 	private List<Object> parseAttributeValue(ParseContext context, String value) {
 		int mark = context.mark();
-		this.parser.parseText(context,value, Template.ATTRIBUTE_TYPE);
+		this.parser.parseText(context,value, Template.XML_ATTRIBUTE_TYPE);
 		return context.reset(mark);
 	}
 
