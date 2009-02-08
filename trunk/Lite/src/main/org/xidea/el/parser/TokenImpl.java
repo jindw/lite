@@ -74,7 +74,7 @@ public class TokenImpl implements ExpressionToken {
 		case VALUE_CONSTANTS:
 			return "#" + getParam();
 		case VALUE_VAR:
-			return "$" + type;
+			return "$" + getParam();
 		case VALUE_LAZY:
 			return "[" + getParam()+"]";
 		case VALUE_NEW_LIST:
