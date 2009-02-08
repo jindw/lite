@@ -59,11 +59,10 @@ public class ExpressionImpl implements Expression ,PrepareExpression {
 			if (type > 3) {
 				Object arg2 = null;
 				Object arg1 = null;
-				int length = type & 3;
-				if (length > 1) {
+				if ((type & 1) == 1) {//length == 2
 					arg2 = stack.pop();
 					arg1 = stack.pop();
-				} else {// if (length == 1) {
+				} else {//length == 1 {
 					arg1 = stack.pop();
 				}
 				Object result = calculater.compute(item, arg1, arg2);
