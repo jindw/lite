@@ -6,7 +6,6 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Collection;
 
-import org.junit.Test;
 import org.xidea.el.ExpressionFactoryImpl;
 import org.xidea.el.json.JSONDecoder;
 import org.xidea.el.json.JSONEncoder;
@@ -16,7 +15,9 @@ import org.xidea.el.parser.ExpressionTokenizer;
 public class ExpressionParseTimelTest {
 	private ExpressionFactoryImpl factory = new ExpressionFactoryImpl();
 
-	@Test
+	public static void main(String[] args) throws Exception {
+		new ExpressionParseTimelTest().testELTime();
+	}
 	public void testELTime() throws IOException {
 		test("\"123\"");
 		test("123444");

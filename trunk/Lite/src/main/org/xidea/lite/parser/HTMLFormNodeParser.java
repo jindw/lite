@@ -29,8 +29,8 @@ public class HTMLFormNodeParser extends HTMLNodeParser implements NodeParser {
 	private static final String TYPE_RADIO = "radio";
 	private static final Object KEY_SELECT = new Object();
 
-	public HTMLFormNodeParser(XMLParser parser, boolean autoFillForm) {
-		super(parser, autoFillForm);
+	public HTMLFormNodeParser(XMLParser parser) {
+		this.parser = parser;
 	}
 
 	protected Node parse(Node node, ParseContext context){

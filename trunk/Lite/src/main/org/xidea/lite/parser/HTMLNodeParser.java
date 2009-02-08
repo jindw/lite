@@ -29,9 +29,6 @@ public abstract class HTMLNodeParser implements NodeParser {
 	
 
 
-	public HTMLNodeParser(XMLParser parser, boolean autoFillForm) {
-		this.parser = parser;
-	}
 	public Node parseNode(Node node, ParseContext context) {
 		String namespace = node.getNamespaceURI();
 		if (namespace == null || XHTMLNS.equals(namespace)) {

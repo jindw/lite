@@ -16,6 +16,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.el.parser.ExpressionToken;
+import org.xidea.el.test.ExpressionParseTimelTest;
 import org.xidea.lite.Template;
 import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.ParseContextImpl;
@@ -32,7 +33,6 @@ public class TemplateTimeTest {
 	public void tearDown() throws Exception {
 	}
 
-	@Test
 	public void test2() throws Exception {
 		System.out.println(String[].class);
 		System.out.println(Object[][].class);
@@ -76,7 +76,6 @@ public class TemplateTimeTest {
 			}
 		}
 	};
-	@Test
 	public void test() throws Exception {
 		ParseContext2 xcontext = new ParseContext2();
 		XMLParser parser = new XMLParser();
@@ -135,6 +134,9 @@ public class TemplateTimeTest {
 		return out.toString();
 	}
 
+	public static void main(String[] args) throws Exception {
+		new TemplateTimeTest().test();
+	}
 }
 class ParseContext2 extends ParseContextImpl{
 	public List<Object> getResult(){

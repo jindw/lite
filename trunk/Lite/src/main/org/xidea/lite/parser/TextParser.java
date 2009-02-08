@@ -22,7 +22,7 @@ public class TextParser implements Parser {
 		return parse(data, new ParseContextImpl());
 	}
 	public List<Object> parse(Object text,ParseContext context) {
-		//context.appendAll(parseText((String) text, Template.EL_TYPE, (char) 0));
+		parseText(context, (String)text, Template.EL_TYPE);
 		return context.toResultTree();
 	}
 
