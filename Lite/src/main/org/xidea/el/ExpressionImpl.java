@@ -72,7 +72,7 @@ public class ExpressionImpl implements Expression ,PrepareExpression {
 					if (lazyToken.getType() == ExpressionToken.VALUE_LAZY) {
 						evaluate(stack, (ExpressionToken[]) lazyToken
 								.getParam(), context);
-						return;
+						continue;
 					}
 				}
 				stack.push(result);
