@@ -15,7 +15,6 @@ public abstract class HTMLNodeParser implements NodeParser {
 			"^(?:meta|link|img|br|hr|input)$", Pattern.CASE_INSENSITIVE);
 	protected static final Pattern PRE_LEAF = Pattern.compile(
 			"^(?:script|style|pre|textarea)$", Pattern.CASE_INSENSITIVE);
-	protected static final Object[] END = new Object[0];
 	protected static final String XHTMLNS = "http://www.w3.org/1999/xhtml";
 	
 

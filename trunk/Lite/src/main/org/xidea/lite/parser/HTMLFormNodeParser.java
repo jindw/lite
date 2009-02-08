@@ -1,5 +1,6 @@
 package org.xidea.lite.parser;
 
+import static org.xidea.lite.parser.Parser.END_INSTRUCTION;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -142,7 +143,7 @@ public class HTMLFormNodeParser extends HTMLNodeParser implements NodeParser {
 								valueEL)) });
 		attributes.add(" " + attributeName + "=\""
 				+ BOOLEAN_ATTBUTE_MAP.get(attributeName) + "\"");
-		attributes.add(END);
+		attributes.add(END_INSTRUCTION);
 		return attributes;
 	}
 
