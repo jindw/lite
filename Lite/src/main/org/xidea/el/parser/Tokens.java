@@ -50,7 +50,7 @@ class Token extends AbstractList<Object> {
 	@Override
 	public int size() {
 		int type = token.getType();
-		if (type >= 3) {// op
+		if (type > 0) {// op
 			switch (type) {
 			case ExpressionToken.OP_STATIC_GET_PROP:
 			case ExpressionToken.OP_MAP_PUSH:
