@@ -9,13 +9,13 @@ import java.util.LinkedList;
 import java.util.List;
 import org.xidea.el.ExpressionSyntaxException;
 import org.xidea.el.json.JSONTokenizer;
+import org.xidea.el.operation.NumberArithmetic;
 
 public class ExpressionTokenizer extends JSONTokenizer {
-	private static enum Status{
-		STATUS_BEGIN,
-		STATUS_EXPRESSION,
-		STATUS_OPERATOR
+	private static enum Status {
+		STATUS_BEGIN, STATUS_EXPRESSION, STATUS_OPERATOR
 	}
+	private static NumberArithmetic na = new NumberArithmetic();
 
 	private Status status = Status.STATUS_BEGIN;
 	private int previousType = Integer.MIN_VALUE;
@@ -28,14 +28,15 @@ public class ExpressionTokenizer extends JSONTokenizer {
 		parseEL();
 		this.expressions = right(this.tokens.iterator());
 	}
+
 	protected int getPriority(int type) {
 		switch (type) {
 		case BRACKET_BEGIN:
 		case BRACKET_END:
 			return Integer.MIN_VALUE;
 		case OP_GET_PROP:
-		//case OP_GET_METHOD:
-		//case OP_GET_GLOBAL_METHOD:
+			// case OP_GET_METHOD:
+			// case OP_GET_GLOBAL_METHOD:
 		case OP_INVOKE_METHOD:
 		case VALUE_NEW_LIST:
 		case VALUE_NEW_MAP:
@@ -81,7 +82,7 @@ public class ExpressionTokenizer extends JSONTokenizer {
 	}
 
 	private boolean rightEnd(ExpressionToken item, ExpressionToken privious) {
-		return getPriority(item.getType()) <= getPriority( privious.getType());
+		return getPriority(item.getType()) <= getPriority(privious.getType());
 	}
 
 	// 将中序表达式转换为右序表达式
@@ -138,12 +139,26 @@ public class ExpressionTokenizer extends JSONTokenizer {
 			List<ExpressionToken> list = rightStack.getFirst();
 			if (children.size() == 1) {
 				list.set(list.size() - 1, children.get(0));
-			} else {
-				ExpressionToken token = (ExpressionToken) list
-						.get(list.size() - 1);
-				((TokenImpl) token).setParam(reverseArray(children));
-
+				break;
 			}
+			if (children.size() == 2) {
+				ExpressionToken t1 = children.get(0);
+				ExpressionToken t2 = children.get(1);
+				if (t2.getType() == VALUE_CONSTANTS
+						&& t2.getParam() instanceof Number) {
+					if (t1.getType() == OP_POS) {
+						list.set(list.size() - 1, t2);
+						break;
+					} else if (t1.getType() == OP_NEG) {
+						t2 = new TokenImpl(OP_NEG, na.subtract(0,(Number)t2.getParam()));
+						list.set(list.size() - 1, t2);
+						break;
+					}
+				}
+			}
+			ExpressionToken token = (ExpressionToken) list.get(list.size() - 1);
+			((TokenImpl) token).setParam(reverseArray(children));
+
 		}
 		addRightToken(rightStack, operator);
 	}
@@ -151,17 +166,17 @@ public class ExpressionTokenizer extends JSONTokenizer {
 	private void addRightToken(LinkedList<List<ExpressionToken>> rightStack,
 			ExpressionToken token) {
 		List<ExpressionToken> list = rightStack.getFirst();
-		if(token.getType() == OP_GET_PROP){
-			int last = list.size()-1;
-			if(last>=0){
+		if (token.getType() == OP_GET_PROP) {
+			int last = list.size() - 1;
+			if (last >= 0) {
 				ExpressionToken previous = list.get(last);
-				if(previous.getType() == VALUE_CONSTANTS){
+				if (previous.getType() == VALUE_CONSTANTS) {
 					list.remove(last);
-					token = new TokenImpl(OP_STATIC_GET_PROP,previous.getParam());
+					token = new TokenImpl(OP_STATIC_GET_PROP, previous
+							.getParam());
 				}
 			}
-		}else 
-			if (token.getType() == VALUE_LAZY) {
+		} else if (token.getType() == VALUE_LAZY) {
 			rightStack.addFirst(new ArrayList<ExpressionToken>());
 		}
 		list.add(token);
@@ -196,8 +211,7 @@ public class ExpressionTokenizer extends JSONTokenizer {
 				if (constains == null) {
 					skipSpace(0);
 					if (previousType == OP_GET_PROP) {
-						addToken(new TokenImpl(VALUE_CONSTANTS,
-								id));
+						addToken(new TokenImpl(VALUE_CONSTANTS, id));
 					} else {
 						addKeyOrObject(id, true);
 					}
@@ -209,7 +223,7 @@ public class ExpressionTokenizer extends JSONTokenizer {
 				// if (value.startsWith(op, start))
 				if (op != null) {
 					parseOperator(op);
-				}else{
+				} else {
 					throw new ExpressionSyntaxException("语法错误:" + value + "@"
 							+ start);
 				}
@@ -264,8 +278,7 @@ public class ExpressionTokenizer extends JSONTokenizer {
 			ExpressionToken token = tokens.get(i);
 			int type = token.getType();
 			if (depth == 0) {
-				if (type == OP_MAP_PUSH
-						|| type == VALUE_NEW_MAP) {// (
+				if (type == OP_MAP_PUSH || type == VALUE_NEW_MAP) {// (
 					// <#newMap>
 					// <#push>
 					return true;
@@ -324,12 +337,14 @@ public class ExpressionTokenizer extends JSONTokenizer {
 				break;
 			case '+'://
 				addToken(new TokenImpl(
-						status == Status.STATUS_EXPRESSION ? OP_ADD:OP_POS, null));
+						status == Status.STATUS_EXPRESSION ? OP_ADD : OP_POS,
+						null));
 				// addToken(OperatorToken.getToken(SKIP_AND));
 				break;
 			case '-':
 				addToken(new TokenImpl(
-						status == Status.STATUS_EXPRESSION ?  OP_SUB:OP_NEG, null));
+						status == Status.STATUS_EXPRESSION ? OP_SUB : OP_NEG,
+						null));
 				// addToken(OperatorToken.getToken(SKIP_AND));
 				break;
 			case '?':// ?:

@@ -287,7 +287,7 @@ public class ParseContextImpl implements ParseContext {
 	}
 
 	public void appendEnd() {
-		this.append("");
+		this.result.add(END_INSTRUCTION);
 	}
 
 	public void appendVar(Object valueEL, String name) {
