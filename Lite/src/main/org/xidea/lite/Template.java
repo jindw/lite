@@ -20,16 +20,15 @@ public class Template {
 	private static Log log = LogFactory.getLog(Template.class);
 
 	public static final int EL_TYPE = 0;// [0,'el']
-	public static final int VAR_TYPE = 1;// [1,'value','name']
-	public static final int IF_TYPE = 2;// [2,[...],'test']
-	public static final int ELSE_TYPE = 3;// [3,[...],'test']//test opt?
-	public static final int FOR_TYPE = 4;// [4,[...],'var','items','status']//status
-	public static final int BREAK_TYPE = 5;// [1,depth]
-
-	public static final int EL_XML_TEXT_TYPE = 6;// [6,'el']
-	public static final int ATTRIBUTE_TYPE = 7;// [7,'value','name']
-	public static final int CAPTRUE_TYPE = 8;// [1,[...],'var']
-	public static final int ADD_ONS_TYPE =9;// [1,[...],'var']
+	public static final int XML_ATTRIBUTE_TYPE = 1;// [7,'value','name']
+	public static final int BREAK_TYPE = 2;// [1,depth]
+	public static final int IF_TYPE = 3;// [2,[...],'test']
+	public static final int ELSE_TYPE = 4;// [3,[...],'test']//test opt?
+	public static final int FOR_TYPE = 5;// [4,[...],'var','items','status']//status
+	public static final int XML_TEXT_TYPE = 6;// [6,'el']
+	public static final int ADD_ONS_TYPE =7;// [1,[...],'var']
+	public static final int VAR_TYPE = 8;// [1,'value','name']
+	public static final int CAPTRUE_TYPE = 9;// [1,[...],'var']
 
 	public static final String FOR_KEY = "for";
 	public static final String IF_KEY = "if";
@@ -76,7 +75,7 @@ public class Template {
 					case EL_TYPE:// ":el":
 						processExpression(context, data, out, false);
 						break;
-					case EL_XML_TEXT_TYPE:// ":el":
+					case XML_TEXT_TYPE:// ":el":
 						processExpression(context, data, out, true);
 						break;
 					case VAR_TYPE:// ":set"://var
@@ -94,7 +93,7 @@ public class Template {
 					case FOR_TYPE:// ":for":
 						processFor(context, data, out);
 						break;
-					case ATTRIBUTE_TYPE:// ":attribute":
+					case XML_ATTRIBUTE_TYPE:// ":attribute":
 						processAttribute(context, data, out);
 						break;
 					case BREAK_TYPE://
@@ -155,11 +154,11 @@ public class Template {
 					break;
 				}
 				switch (type) {
-				case ATTRIBUTE_TYPE:
+				case XML_ATTRIBUTE_TYPE:
 					if (cmd[2] != null) {
 						cmd[2] = " " + cmd[2] + "=\"";
 					}
-				case EL_XML_TEXT_TYPE:
+				case XML_TEXT_TYPE:
 				case EL_TYPE:
 					cmd[1] = createExpression(cmd[1]);
 					break;
