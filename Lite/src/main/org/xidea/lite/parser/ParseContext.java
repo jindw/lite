@@ -4,6 +4,9 @@ import java.net.URL;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * @see ParseContextImpl
+ */
 public interface ParseContext {
 	
 
