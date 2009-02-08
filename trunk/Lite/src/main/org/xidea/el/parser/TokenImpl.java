@@ -19,39 +19,31 @@ public class TokenImpl implements ExpressionToken {
 		}
 		return null;
 	}
-	private static Object[] OP_LIST = {
-	OP_ADD, "+", OP_SUB, "-", OP_MUL, "*", OP_DIV, "/",
-			OP_MOD,
+
+	private static Object[] OP_LIST = { OP_ADD, "+", OP_SUB, "-", OP_MUL, "*",
+			OP_DIV, "/", OP_MOD,
 			"%",// +-*/%
-			OP_LT, "<", OP_GT, ">", OP_LTEQ, "<=", OP_GTEQ, ">=",
-			OP_EQ,
+			OP_LT, "<", OP_GT, ">", OP_LTEQ, "<=", OP_GTEQ, ">=", OP_EQ,
 			"==",// relative
-			OP_NOTEQ, "!=", OP_NOT, "!", OP_AND, "&&",
-			OP_OR,
+			OP_NOTEQ, "!=", OP_NOT, "!", OP_AND, "&&", OP_OR,
 			"||",// boolean
-			OP_QUESTION, "?",
-			OP_QUESTION_SELECT,
+			OP_QUESTION, "?", OP_QUESTION_SELECT,
 			":",// 3op
-			OP_POS, "+",
-			OP_NEG,
+			OP_POS, "+", OP_NEG,
 			"-",// +-
-			BRACKET_BEGIN, "(",
-			BRACKET_END,
+			BRACKET_BEGIN, "(", BRACKET_END,
 			")", // group
 			VALUE_NEW_LIST, "[", VALUE_NEW_MAP, "{", OP_MAP_PUSH, ":",
-			OP_PARAM_JOIN,
-			",",// map list,
-			OP_GET_PROP,
-			".",// prop
-			OP_INVOKE_METHOD,
-			"#()" // , OP_GET_GLOBAL_METHOD, "#"//method call
+			OP_PARAM_JOIN, ",",// map list,
+			OP_GET_PROP, ".",// prop
+			OP_INVOKE_METHOD, "#()" // , OP_GET_GLOBAL_METHOD, "#"//method call
 
 	};
 
 	public static int findType(String op) {
 		for (int i = 1; i < OP_LIST.length; i += 2) {
 			if (op.equals(OP_LIST[i])) {
-				return ((Integer)OP_LIST[i-1]).intValue();
+				return ((Integer) OP_LIST[i - 1]).intValue();
 			}
 		}
 		return -1;
@@ -78,24 +70,26 @@ public class TokenImpl implements ExpressionToken {
 	}
 
 	public String toString() {
-		if(type == VALUE_CONSTANTS){
-			return "#" + type;
-		}else if(type == VALUE_VAR){
+		switch (type) {
+		case VALUE_CONSTANTS:
+			return "#" + getParam();
+		case VALUE_VAR:
 			return "$" + type;
-		}
-		for (int i = 0; i < OP_LIST.length; i += 2) {
-			if (type == ((Integer) OP_LIST[i]).intValue()) {
-				String text = (String) OP_LIST[i + 1];
-				if (text.charAt(0) == '#') {
-					text += this.getParam();
+		case VALUE_LAZY:
+			return "[" + getParam()+"]";
+		case VALUE_NEW_LIST:
+			return "[]";
+		case VALUE_NEW_MAP:
+			return "{}" ;
+		default:
+			for (int i = 0; i < OP_LIST.length; i += 2) {
+				if (type == ((Integer) OP_LIST[i]).intValue()) {
+					String text = (String) OP_LIST[i + 1];
+					return text;
 				}
-				return text;
 			}
 		}
 		return "?" + type;
 	}
-
-
-	
 
 }

@@ -1,12 +1,32 @@
 package org.xidea.el.parser;
 
-import static org.xidea.el.parser.ExpressionToken.*;
+import static org.xidea.el.parser.ExpressionToken.BRACKET_BEGIN;
+import static org.xidea.el.parser.ExpressionToken.BRACKET_END;
+import static org.xidea.el.parser.ExpressionToken.OP_ADD;
+import static org.xidea.el.parser.ExpressionToken.OP_AND;
+import static org.xidea.el.parser.ExpressionToken.OP_GET_PROP;
+import static org.xidea.el.parser.ExpressionToken.OP_INVOKE_METHOD;
+import static org.xidea.el.parser.ExpressionToken.OP_MAP_PUSH;
+import static org.xidea.el.parser.ExpressionToken.OP_NEG;
+import static org.xidea.el.parser.ExpressionToken.OP_OR;
+import static org.xidea.el.parser.ExpressionToken.OP_PARAM_JOIN;
+import static org.xidea.el.parser.ExpressionToken.OP_POS;
+import static org.xidea.el.parser.ExpressionToken.OP_QUESTION;
+import static org.xidea.el.parser.ExpressionToken.OP_QUESTION_SELECT;
+import static org.xidea.el.parser.ExpressionToken.OP_STATIC_GET_PROP;
+import static org.xidea.el.parser.ExpressionToken.OP_SUB;
+import static org.xidea.el.parser.ExpressionToken.VALUE_CONSTANTS;
+import static org.xidea.el.parser.ExpressionToken.VALUE_LAZY;
+import static org.xidea.el.parser.ExpressionToken.VALUE_NEW_LIST;
+import static org.xidea.el.parser.ExpressionToken.VALUE_NEW_MAP;
+import static org.xidea.el.parser.ExpressionToken.VALUE_VAR;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+
 import org.xidea.el.ExpressionSyntaxException;
 import org.xidea.el.json.JSONTokenizer;
 import org.xidea.el.operation.NumberArithmetic;
@@ -34,51 +54,9 @@ public class ExpressionTokenizer extends JSONTokenizer {
 		case BRACKET_BEGIN:
 		case BRACKET_END:
 			return Integer.MIN_VALUE;
-		case OP_GET_PROP:
-			// case OP_GET_METHOD:
-			// case OP_GET_GLOBAL_METHOD:
-		case OP_INVOKE_METHOD:
-		case VALUE_NEW_LIST:
-		case VALUE_NEW_MAP:
-			return 12;
-
-		case OP_NOT:
-		case OP_POS:
-		case OP_NEG:
-			return 8;
-
-		case OP_MUL:
-		case OP_DIV:
-		case OP_MOD:
-			return 4;
-
-		case OP_ADD:
-		case OP_SUB:
-			return 1;
-
-		case OP_LT:
-		case OP_GT:
-		case OP_LTEQ:
-		case OP_GTEQ:
-		case OP_EQ:
-		case OP_NOTEQ:
-			return 0;
-
-		case OP_AND:
-			return -1;
-		case OP_OR:
-			return -2;
-
-		case OP_QUESTION:
-		case OP_QUESTION_SELECT:
-			return -4;// !!
-
-		case OP_MAP_PUSH:
-			return -7;// !!
-		case OP_PARAM_JOIN:
-			return -8;
+		default:
+			return type & 30;
 		}
-		throw new RuntimeException("unsupport token:" + type);
 	}
 
 	private boolean rightEnd(ExpressionToken item, ExpressionToken privious) {
