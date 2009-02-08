@@ -1,20 +1,14 @@
 package org.xidea.lite.parser;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.w3c.dom.Attr;
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
-import org.w3c.dom.Text;
-import org.xidea.el.json.JSONEncoder;
-import org.xidea.el.operation.TextContains;
-import org.xidea.lite.Template;
 
 public abstract class HTMLNodeParser implements NodeParser {
 	protected static final Pattern HTML_LEAF = Pattern.compile(
@@ -24,10 +18,6 @@ public abstract class HTMLNodeParser implements NodeParser {
 	protected static final Object[] END = new Object[0];
 	protected static final String XHTMLNS = "http://www.w3.org/1999/xhtml";
 	
-	protected static final String EL_INPUT = "input";
-	protected static final String EL_TEXTAREA = "textarea";
-	protected static final String EL_SELECT = "select";
-	private static final String EL_OPTION = "option";
 
 	protected static final Map<String, String> BOOLEAN_ATTBUTE_MAP = new HashMap<String, String>();
 	static {
@@ -36,38 +26,24 @@ public abstract class HTMLNodeParser implements NodeParser {
 		BOOLEAN_ATTBUTE_MAP.put("disabled", "disabled");
 
 	}
-	protected boolean autoFillForm;
 	protected XMLParser parser;
+	
 
-	public void setAutoFillForm(boolean autoFillForm) {
-		this.autoFillForm = autoFillForm;
-	}
 
 	public HTMLNodeParser(XMLParser parser, boolean autoFillForm) {
 		this.parser = parser;
-		this.setAutoFillForm(autoFillForm);
 	}
 	public Node parseNode(Node node, ParseContext context) {
 		String namespace = node.getNamespaceURI();
 		if (namespace == null || XHTMLNS.equals(namespace)) {
 			if (node instanceof Element) {
-				Element el = (Element) node;
-				String localName = el.getLocalName();
-				if (autoFillForm) {
-					if (EL_INPUT.equals(localName)) {
-						return parseInput(el, context);
-					} else if (EL_TEXTAREA.equals(localName)) {
-						return parseTextArea(el, context);
-					} else if (EL_SELECT.equals(localName)) {
-						return parseSelect(el, context);
-					} else if (EL_OPTION.equals(localName)) {
-						return parseSelectOption(el, context);
-					}
-				}
-				return parseHTMLElement(node, context, null);
+				return parse(node, context);
 			}
 		}
 		return node;
+	}
+	protected Node parse(Node node, ParseContext context){
+		return parseHTMLElement(node, context, null);
 	}
 
 	protected Node parseHTMLElement(Node node, ParseContext context,
