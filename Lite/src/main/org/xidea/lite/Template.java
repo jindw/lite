@@ -52,6 +52,8 @@ public class Template {
 		Map<? extends Object, ? extends Object> contextMap;
 		if(context instanceof Map){
 			contextMap = (Map<? extends Object, ? extends Object>) context;
+		}else if(context == null){
+			contextMap = new HashMap<Object, Object>();
 		}else{
 			contextMap = ReflectUtil.map(context);
 		}

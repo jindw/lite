@@ -120,6 +120,9 @@ public class ExpressionFactoryImpl implements ExpressionFactory {
 				}
 			}
 		}
+		 if(buf.length()>0) {
+			throw new ExpressionSyntaxException("expression error : " + buf);
+		}
 		return expression;
 	}
 	public Object optimizeEL(String el) {

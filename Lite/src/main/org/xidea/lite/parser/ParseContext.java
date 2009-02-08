@@ -7,8 +7,12 @@ import java.util.Set;
 public interface ParseContext {
 	
 
+	public static final Object END_INSTRUCTION = new Object[0];
+
 	public void append(String text);
 
+	public void append(String text,boolean encode,char quteChar);
+	
 	public void appendIndent();
 
 	public void appendAll(List<Object> items);
@@ -61,18 +65,26 @@ public interface ParseContext {
 
 	public String addGlobalInvocable(Class<? extends Object> impl);
 
-	public void appendIf(Object testEL);
+
+	public int mark();
+	
+	public List<Object> reset(int mark);
+	
+	public void appendEL(Object testEL);
 
 	public void appendAttribute(Object el, String name);
 
-	public void appendEnd();
+	public void appendIf(Object testEL);
 
 	public void appendElse(Object testEL);
 
+	public void appendEnd();
+
+	public void appendVar(Object valueEL, String name);
+	
 	public void appendCaptrue(String varName);
 
 	public void appendFor(String var, Object itemsEL, String status);
 
-	public void appendVar(Object valueEL, String name);
 
 }

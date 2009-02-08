@@ -4,7 +4,6 @@ package org.xidea.lite.parser;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.List;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
@@ -349,8 +348,7 @@ public class CoreXMLNodeParser implements NodeParser {
 
 	Node parseOutTag(Node node, ParseContext context) {
 		String value = getAttribute(node, "value");
-		List<Object> result = this.parser.parseText(value, Template.EL_TYPE, 0);
-		context.appendAll(result);
+		this.parser.parseText(context,value, Template.EL_TYPE);
 		return null;
 	}
 

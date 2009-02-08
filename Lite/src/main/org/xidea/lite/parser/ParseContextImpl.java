@@ -1,5 +1,6 @@
 package org.xidea.lite.parser;
 
+import java.io.StringWriter;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,7 +15,6 @@ import org.xidea.lite.Template;
 
 public class ParseContextImpl implements ParseContext {
 	private static final long serialVersionUID = 1L;
-	private static final Object[] END = new Object[0];
 
 	private HashMap<Object, Object> variables = new HashMap<Object, Object>();
 	private URL currentURL;
@@ -82,8 +82,62 @@ public class ParseContextImpl implements ParseContext {
 		}
 	}
 
+	public void append(String text, boolean encode, char quteChar) {
+		if(encode){
+			text = encodeText(text, quteChar);
+		}
+		append(text);
+	}
+
+	private String encodeText(String text, int quteChar) {
+		StringWriter out = new StringWriter();
+		for (int i = 0; i < text.length(); i++) {
+			int c = text.charAt(i);
+			switch (c) {
+			case '<':
+				out.write("&lt;");
+				break;
+			case '>':
+				out.write("&gt;");
+				break;
+			case '&':
+				out.write("&amp;");
+				break;
+			case '\'':
+			case '"':
+				if (quteChar == c) {
+					out.write("&#39;");
+					break;
+				} else if (quteChar == c) {
+					out.write("&#34;");
+					break;
+				}
+			default:
+				out.write(c);
+			}
+		}
+		return out.toString();
+	}
+
 	private void append(Object[] object) {
 		result.add(object);
+	}
+
+	public int mark() {
+		return result.size();
+	}
+
+	public List<Object> reset(int mark) {
+		int end = result.size();
+		List<Object> pops = new ArrayList<Object>(end-mark);
+		int i = mark;
+		for (; i < end; i++) {
+			pops.add(result.get(i));
+		}
+		while (i-->mark) {
+			result.remove(i);
+		}
+		return pops;
 	}
 
 	public void appendIndent() {
@@ -233,7 +287,7 @@ public class ParseContextImpl implements ParseContext {
 	}
 
 	public void appendEnd() {
-		this.append(END);
+		this.append("");
 	}
 
 	public void appendVar(Object valueEL, String name) {
@@ -247,6 +301,11 @@ public class ParseContextImpl implements ParseContext {
 
 	public void appendFor(String var, Object itemsEL, String status) {
 		this.append(new Object[] { Template.FOR_TYPE, var, itemsEL, status });
+	}
+
+	public void appendEL(Object testEL) {
+		this.append(new Object[] { Template.EL_TYPE, testEL });
+		
 	}
 
 }

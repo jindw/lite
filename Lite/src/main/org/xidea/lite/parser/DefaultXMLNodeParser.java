@@ -73,8 +73,8 @@ public class DefaultXMLNodeParser implements NodeParser {
 			context.appendIndent();
 		}
 		context.append("<![CDATA[");
-		context.appendAll(this.parser.parseText(((CDATASection) node)
-				.getData(), Template.EL_TYPE, 0));
+		this.parser.parseText(context,((CDATASection) node)
+				.getData(), Template.EL_TYPE);
 		context.append("]]>");
 		// if (format) {
 		// context.appendFormatEnd();
@@ -140,7 +140,7 @@ public class DefaultXMLNodeParser implements NodeParser {
 			if (format) {
 				context.appendIndent();
 			}
-			context.appendAll(this.parser.parseText(text, Template.EL_XML_TEXT_TYPE, 0));
+			this.parser.parseText(context,text, Template.EL_XML_TEXT_TYPE);
 			// if (format) {
 			// context.appendFormatEnd();
 			// }
@@ -156,7 +156,7 @@ public class DefaultXMLNodeParser implements NodeParser {
 				.getPrefix(), value)) {
 			return null;
 		}
-		List<Object> buf = this.parser.parseText(value, Template.ATTRIBUTE_TYPE, '"');
+		List<Object> buf = parseAttributeValue(context,value);
 		boolean isStatic = false;
 		boolean isDynamic = false;
 		// hack parseText is void
@@ -199,6 +199,13 @@ public class DefaultXMLNodeParser implements NodeParser {
 		context.append("\"");
 		return null;
 	}
+
+	private List<Object> parseAttributeValue(ParseContext context, String value) {
+		int mark = context.mark();
+		this.parser.parseText(context,value, Template.ATTRIBUTE_TYPE);
+		return context.reset(mark);
+	}
+
 
 	private Node parseElement(Node node, ParseContext context) {
 		context.appendIndent();

@@ -1,6 +1,6 @@
 package org.xidea.lite.parser;
 
-import static org.xidea.lite.parser.Parser.END_INSTRUCTION;
+import static org.xidea.lite.parser.ParseContext.END_INSTRUCTION;
 import java.util.ArrayList;
 import java.util.List;
 
