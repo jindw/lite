@@ -3,16 +3,16 @@
 
 from Expression import evaluate
 
-EL_TYPE = 0
-VAR_TYPE = 1
-IF_TYPE = 2
-ELSE_TYPE = 3
-FOR_TYPE = 4
-BREAK_TYPE = 5
-EL_TYPE_XML_TEXT = 6
-ATTRIBUTE_TYPE = 7
-ATTRIBUTE_VALUE_TYPE = 8
-CAPTRUE_TYPE = 9
+EL_TYPE = 0;# [0,'el']
+IF_TYPE = 1;# [1,[...],'test']
+BREAK_TYPE = 2;# [2,depth]
+XML_ATTRIBUTE_TYPE = 3;# [3,'value','name']
+XML_TEXT_TYPE = 4;# [4,'el']
+FOR_TYPE = 5;# [5,[...],'var','items','status']#status
+ELSE_TYPE = 6;# [6,[...],'test']#test opt?
+ADD_ONS_TYPE =7;# [7,[...],'var']
+VAR_TYPE = 8;# [8,'value','name']
+CAPTRUE_TYPE = 9;# [9,[...],'var']
 FOR_KEY = "for"
 IF_KEY = "if"
 
@@ -33,7 +33,7 @@ def renderList(context, children, out):
             else:
                 if item[0] == EL_TYPE:
                     processExpression(context, item, out, False)
-                elif item[0] == EL_TYPE_XML_TEXT:
+                elif item[0] == XML_TEXT_TYPE:
                     processExpression(context, item, out, True)
                 elif item[0] == VAR_TYPE:
                     processVar(context, item)
@@ -45,9 +45,7 @@ def renderList(context, children, out):
                     processElse(context, item, out)
                 elif item[0] == FOR_TYPE:
                     processFor(context, item, out)
-                elif item[0] == ATTRIBUTE_VALUE_TYPE:
-                    processAttributeValue(context, item, out)
-                elif item[0] == ATTRIBUTE_TYPE:
+                elif item[0] == XML_ATTRIBUTE_TYPE:
                     processAttribute(context, item, out)
         except (Exception, ), e:
             print "aaaaa" 
@@ -166,12 +164,12 @@ def processCaptrue(context, data):
 
 def processAttribute(context, data, out):
     result = evaluate(data[1],context)
-    if result is not None:
+    if data[2] is None:
+        printXMLAttribute(str(result), context, out, True)
+    elif result is not None:
         out.write(" ")
         out.write(data[2])
         out.write("=\"")
         printXMLAttribute(str(result), context, out, False)
         out.write('"')
 
-def processAttributeValue(context, data, out):
-    printXMLAttribute(str(evaluate(data[1],context)), context, out, True)

@@ -6,50 +6,45 @@ BRACKET_END = 0xFFFF;#)]};
 	
 
 #value token（<=0）
-VALUE_VAR = -0x00;#n;
-#constants token（String,Number,Boolean,Null）
-VALUE_CONSTANTS = -0x01;#c;
+VALUE_CONSTANTS = -0x00;#c;
+VALUE_VAR = -0x01;#n;
 VALUE_LAZY = -0x02;
 VALUE_NEW_LIST = -0x03;#[;
 VALUE_NEW_MAP = -0x04;#{;
 	
-#op token ????? !!
-
-#+1+2
-OP_ADD = (1<<2) +2;#+;//6
-OP_SUB = (2<<2) +2;#-;
-	
-OP_MUL = (3<<2) +2;#*;
-OP_DIV = (4<<2) +2;#/;
-OP_MOD = (5<<2) +2;#%;
-OP_QUESTION = (6<<2) +2;#?;
-OP_QUESTION_SELECT = (7<<2) +2;#:;
-
-OP_GET_PROP = (8<<2) +2;#.;
-OP_STATIC_GET_PROP = (9<<2) +1;#.#;
-    
-OP_LT = (0xA<<2) +2;#<;
-OP_GT = (0xB<<2) +2;#>;
-OP_LTEQ = (0xC<<2) +2;#<=;
-OP_GTEQ = (0xD<<2) +2;#>=;
-OP_EQ = (0xE<<2) +2;#==;
-OP_NOTEQ = (0xF<<2) +2;#!=;
-OP_AND = (0x10<<2) +2;#&&;
-OP_OR = (0x11<<2) +2;#||;
-    
-    
-
-OP_NOT = (0x12<<2) +1;#!;
-OP_POS = (0x13<<2) +1;#+;
-OP_NEG = (0x14<<2) +1;#-;
-
-OP_INVOKE_METHOD = (0x15<<2) +2;#()
-
-
-#map_join
-OP_PARAM_JOIN = (0x16<<2) +2;#,
-#map,push
-OP_MAP_PUSH = (0x17<<2) +2;#:,
+#符号标记 ????? !!
+#9
+OP_GET_PROP = 17;#0 | 16 | 1;
+OP_STATIC_GET_PROP = 48;#32 | 16 | 0;
+OP_INVOKE_METHOD = 81;#64 | 16 | 1;
+#8
+OP_NOT = 14;#0 | 14 | 0;
+OP_POS = 46;#32 | 14 | 0;
+OP_NEG = 78;#64 | 14 | 0;
+#7
+OP_MUL = 13;#0 | 12 | 1;
+OP_DIV = 45;#32 | 12 | 1;
+OP_MOD = 77;#64 | 12 | 1;
+#6
+OP_ADD = 11;#0 | 10 | 1;
+#5
+OP_SUB = 41;#32 | 8 | 1;
+#4
+OP_LT = 7;#0 | 6 | 1;
+OP_GT = 39;#32 | 6 | 1;
+OP_LTEQ = 71;#64 | 6 | 1;
+OP_GTEQ = 103;#96 | 6 | 1;
+OP_EQ = 135;#128 | 6 | 1;
+OP_NOTEQ = 167;#160 | 6 | 1;
+#3
+OP_AND = 5;#0 | 4 | 1;
+OP_OR = 37;#32 | 4 | 1;
+#2
+OP_QUESTION = 3;#0 | 2 | 1;
+OP_QUESTION_SELECT = 35;#32 | 2 | 1;
+#1
+OP_PARAM_JOIN = 1;#0 | 0 | 1;
+OP_MAP_PUSH = 33;#32 | 0 | 1;
 
 globalMap = {
     "test":lambda x:x*3
