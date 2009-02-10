@@ -88,8 +88,7 @@ function appendCode(code,buf,idpool,depth){
                 printIndex(buf,depth);
 			    buf.push("_$0.push(",item[1],");")
                 break;
-            case ATTRIBUTE_VALUE_TYPE:
-            case EL_XML_TEXT_TYPE:
+            case XML_TEXT_TYPE:
 			    buf.push("_$0.push(String(",item[1],").replace(/[<>&'\"]/g,_$1));")
                 break;
             case VAR_TYPE:
@@ -191,16 +190,20 @@ function appendCode(code,buf,idpool,depth){
                 }
                 idpool.free(indexId);
                 break;
-            case ATTRIBUTE_TYPE:
+            case XML_ATTRIBUTE_TYPE:
                 //[7,[[0,"value"]],"attribute"]
                 var value = item[1];
                 var attributeName = item[2];
-                var testId = idpool.get();
-                printIndex(buf,depth,"var ",testId,"=",value);
-                printIndex(buf,depth,"if(",testId,"!=null&&",testId,"!=''){");
-                printIndex(buf,depth+1,"_$0.push(' ",attributeName,"=\"',String(",testId,").replace(/<>&'\"/g,_$1),'\"')");
-                printIndex(buf,depth,"}");
-                idpool.free(testId);
+                if(attributeName){
+	                var testId = idpool.get();
+	                printIndex(buf,depth,"var ",testId,"=",value);
+	                printIndex(buf,depth,"if(",testId,"!=null&&",testId,"!=''){");
+	                printIndex(buf,depth+1,"_$0.push(' ",attributeName,"=\"',String(",testId,").replace(/<>&'\"/g,_$1),'\"')");
+	                printIndex(buf,depth,"}");
+	                idpool.free(testId);
+                }else{
+                	buf.push("_$0.push(String(",item[1],").replace(/[<>&'\"]/g,_$1));")
+                }
             }
 		}
 	}

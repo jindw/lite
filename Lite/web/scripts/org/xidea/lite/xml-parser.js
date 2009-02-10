@@ -378,7 +378,7 @@ function parseAttribute(node){
             throw new Error("属性内只能有单一EL表达式！！");
         }else{//只考虑单一EL表达式的情况
             buf = buf[0];
-	        this.append( [ATTRIBUTE_TYPE,buf[1],name]);
+	        this.append( [XML_ATTRIBUTE_TYPE,buf[1],name]);
 	        return null;
         }
     }

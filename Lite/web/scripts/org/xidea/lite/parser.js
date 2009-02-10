@@ -5,26 +5,17 @@
  * @author jindw
  * @version $Id: template.js,v 1.4 2008/02/28 14:39:06 jindw Exp $
  */
-//parse
-//var EL_TYPE = 0;
-//var VAR_TYPE = 1;//":set"://var
-//var IF_TYPE = 2;//":if":
-//var ELSE_TYPE = 3;//":else":
-//var FOR_TYPE = 4;//":for":
-//
-//var EL_XML_TEXT_TYPE = 6;
-//var ATTRIBUTE_TYPE = 7;//":attribute":
-var EL_TYPE = 0;// [0,'el']
-var VAR_TYPE = 1;// [1,'value','name']
-var IF_TYPE = 2;// [2,[...],'test']
-var ELSE_TYPE = 3;// [3,[...],'test']//test opt?
-var FOR_TYPE = 4;// [4,[...],'var','items','status']//status
-var BREAK_TYPE = 5;// [1,depth]
 
-var EL_XML_TEXT_TYPE = 6;// [6,'el']
-var ATTRIBUTE_TYPE = 7;// [7,'value','name']
-var ATTRIBUTE_VALUE_TYPE = 8;// [8,'value']//js 实现中忽略该设置，与 EL_XML_TEXT_TYPE,行为一致
-var CAPTRUE_TYPE = 9;// [1,[...],'var']
+var EL_TYPE = 0;// [0,'el']
+var IF_TYPE = 1;// [1,[...],'test']
+var BREAK_TYPE = 2;// [2,depth]
+var XML_ATTRIBUTE_TYPE = 3;// [3,'value','name']
+var XML_TEXT_TYPE = 4;// [4,'el']
+var FOR_TYPE = 5;// [5,[...],'var','items','status']//status
+var ELSE_TYPE = 6;// [6,[...],'test']//test opt?
+var ADD_ONS_TYPE =7;// [7,[...],'var']
+var VAR_TYPE = 8;// [8,'value','name']
+var CAPTRUE_TYPE = 9;// [9,[...],'var']
 
 var IF_KEY = "if";
 var FOR_KEY = "for";

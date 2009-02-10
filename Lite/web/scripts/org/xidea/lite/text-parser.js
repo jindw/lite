@@ -69,9 +69,9 @@ TextParser.prototype.parseText = function(text,xmlText,xmlAttr){
                     var expression = text.substring(expressionBegin ,expressionEnd );
                     expression = this.parseEL(expression);
                     if(xmlAttr){
-                    	buf.push([ATTRIBUTE_VALUE_TYPE,expression]);
+                    	buf.push([XML_ATTRIBUTE_VTYPE,expression]);
                     }else{
-                    	buf.push([xmlText ? EL_XML_TEXT_TYPE : EL_TYPE,expression]);
+                    	buf.push([xmlText ? XML_TEXT_TYPE : EL_TYPE,expression]);
                     }
                     
                     text = text.substr(expressionEnd+1);

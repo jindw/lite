@@ -82,8 +82,7 @@ function renderList(context,data,out){
 	            case EL_TYPE:
 	                processExpression(context, item, out, false);
 	                break;
-	            case ATTRIBUTE_VALUE_TYPE:
-	            case EL_XML_TEXT_TYPE:
+	            case XML_TEXT_TYPE:
 	                processExpression(context, item, out, true);
 	                break;
 	            case VAR_TYPE:
@@ -101,10 +100,7 @@ function renderList(context,data,out){
 	            case FOR_TYPE:
 	                processFor(context, item, out);
 	                break;
-	            //case ATTRIBUTE_VALUE_TYPE:
-	                //processAttributeValue(context, item, out);
-	                //break;
-	            case ATTRIBUTE_TYPE:
+	            case XML_ATTRIBUTE_TYPE:
 	                processAttribute(context, item, out);
 	            }
         	}catch(e){
@@ -179,11 +175,13 @@ function processCaptrue(context, data) {
 }
 function processAttribute(context, data, out){
 	var result = evaluate(data[1],context);
-	if (result != null) {
+	if(!data[2]){
+		out.push(String(result).replace(/[<>&'"]/g,xmlReplacer));
+	}else if (result != null) {
 		out.push(' ');
 		out.push(data[2]);// prefix
 		out.push('="');
-		out.push(String(result).replace(/[<>&]/g,xmlReplacer));
+		out.push(String(result).replace(/[<>&'"]/g,xmlReplacer));
 		out.push('"');
 	}
 
