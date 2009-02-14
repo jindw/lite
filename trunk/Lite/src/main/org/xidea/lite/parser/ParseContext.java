@@ -66,7 +66,8 @@ public interface ParseContext {
 	@SuppressWarnings("unchecked")
 	public List<Object> toResultTree();
 
-	public String addGlobalInvocable(Class<? extends Object> impl,String key);
+	public String addGlobalObject(Class<? extends Object> impl,String key);
+	public String addGlobalObject(Object object,String key);
 
 	public int mark();
 	
