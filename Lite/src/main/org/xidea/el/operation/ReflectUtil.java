@@ -26,7 +26,7 @@ public abstract class ReflectUtil {
 						.getBeanInfo(clazz).getPropertyDescriptors();
 				for (int i = 0; i < properties.length; i++) {
 					PropertyDescriptor property = properties[i];
-					//property.getReadMethod().setAccessible(true);
+					// property.getReadMethod().setAccessible(true);
 					propertyMap.put(property.getName(), property);
 				}
 				// propertyMap = Collections.unmodifiableMap(propertyMap);
@@ -39,9 +39,8 @@ public abstract class ReflectUtil {
 
 	public static Map<String, ? extends Object> map(final Object context) {
 		Map<String, PropertyDescriptor> ps = getPropertyMap(context.getClass());
-		return new ProxyMap(context,ps);
+		return new ProxyMap(context, ps);
 	}
-
 
 	private static int toIndex(Object key) {
 		return key instanceof Number ? ((Number) key).intValue() : Integer
@@ -116,6 +115,13 @@ public abstract class ReflectUtil {
 			Class<? extends Object> type, String key) {
 		Map<String, PropertyDescriptor> pm = getPropertyMap(type);
 		return pm.get(key);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static void setValues(Object base, Map<String, Object> attributeMap) {
+		for (String key : attributeMap.keySet()) {
+			ReflectUtil.setValue(base, key, attributeMap.get(key));
+		}
 	}
 
 	@SuppressWarnings("unchecked")

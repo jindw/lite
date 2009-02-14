@@ -234,12 +234,14 @@ public class ParseContextImpl implements ParseContext {
 
 		assert (stackTop == 0);
 		if (!this.typeIdMap.isEmpty()) {
-			HashMap<String, String> idTypeMap = new HashMap<String, String>();
+			HashMap<String, String> instanceMap = new HashMap<String, String>();
 			for (Map.Entry<String, String> entry : typeIdMap.entrySet()) {
-				idTypeMap.put(entry.getValue(), entry.getKey());
+				instanceMap.put(entry.getValue(), entry.getKey());
 			}
+			HashMap<String, Object> attributeMap = new HashMap<String, Object>();
+			attributeMap.put("attributeMap", instanceMap);
 			current.add(Arrays.asList(Template.ADD_ON_TYPE,
-					new ArrayList<Object>(), JSONEncoder.encode(idTypeMap),
+					new ArrayList<Object>(), JSONEncoder.encode(attributeMap),
 					BuildInAdvice.class.getName()));
 		}
 		return current;

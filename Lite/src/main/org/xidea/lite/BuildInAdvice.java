@@ -5,24 +5,25 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.xidea.el.Expression;
 
 public class BuildInAdvice implements CompileAdvice {
 	private static Log log = LogFactory.getLog(BuildInAdvice.class);
+	private Map<String, ? extends Object> instanceMap = null;
 
-	public void execute(Map<String, Object> gloabls, Expression expression,
-			List<Object> result) {
-		@SuppressWarnings("unchecked")
-		Map<String, String> addOnMap = (Map<String, String>) expression
-				.evaluate(null);
-		for (Map.Entry<String, String> entry : addOnMap.entrySet()) {
-			String key = entry.getKey();
+	public void setInstanceMap(Map<String, ? extends Object> instanceMap) {
+		this.instanceMap = instanceMap;
+	}
+
+	public void compile(Map<String, Object> gloabls, List<Object> result) {
+		for (String key : instanceMap.keySet()) {
+			String type = (String) instanceMap.get(key);
 			try {
-				Object value = Class.forName(entry.getValue()).newInstance();
+				Object value = Class.forName(type).newInstance();
 				gloabls.put(key, value);
 			} catch (Exception e) {
-				log.error("无法装载扩展：" + entry.getValue(), e);
+				log.error("无法装载扩展：" + type, e);
 			}
 		}
 	}
+
 }

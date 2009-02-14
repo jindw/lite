@@ -71,7 +71,7 @@ public class Template {
 		// Object[] result = datas.toArray();// ;
 		// reverse(result);
 		List result = new ArrayList();
-		for (int i = datas.size()-1; i >= 0; i--) {
+		for (int i = datas.size() - 1; i >= 0; i--) {
 			final Object item = datas.get(i);
 			if (item instanceof List) {
 				final List data = (List) item;
@@ -114,7 +114,7 @@ public class Template {
 					break;
 				}
 				result.add(cmd);
-			}else{
+			} else {
 				result.add(item);
 			}
 		}
@@ -130,8 +130,10 @@ public class Template {
 					.valueOf(cmd[3]));
 			cmd[3] = addOnType;
 			if (CompileAdvice.class.isAssignableFrom(addOnType)) {
-				((CompileAdvice) addOnType.newInstance()).execute(gloabls, el,
-						result);
+				Map attributeMap = (Map) el.evaluate(null);
+				CompileAdvice addOnInstance = (CompileAdvice) addOnType.newInstance();
+				ReflectUtil.setValues(addOnInstance, attributeMap);
+				addOnInstance.compile(gloabls, result);
 			}
 			if (RuntimeAdvice.class.isAssignableFrom(addOnType)) {
 				result.add(cmd);
@@ -203,9 +205,7 @@ public class Template {
 		Map<String, Object> attributeMap = (Map) ((Expression) data[1])
 				.evaluate(context);
 		RuntimeAdvice tag = (RuntimeAdvice) ((Class) data[2]).newInstance();
-		for (String key : attributeMap.keySet()) {
-			ReflectUtil.setValue(tag, key, attributeMap.get(key));
-		}
+		ReflectUtil.setValues(tag, attributeMap);
 		tag.execute(context, out);
 	}
 

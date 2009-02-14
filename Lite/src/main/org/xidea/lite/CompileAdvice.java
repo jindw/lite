@@ -3,8 +3,10 @@ package org.xidea.lite;
 import java.util.List;
 import java.util.Map;
 
-import org.xidea.el.Expression;
-
-public interface CompileAdvice {
-	public void execute(Map<String, Object> gloabls,Expression expression, List<Object> result);
+/**
+ * @author jindw
+ * 接口尚不成熟，第三方库暂勿使用
+ */
+interface CompileAdvice {
+	public void compile(Map<String, Object> gloabls,List<Object> result);
 }
