@@ -24,6 +24,7 @@ public class ParseContextImpl implements ParseContext {
 	private HashMap<String, String> typeIdMap = new HashMap<String, String>();
 	private HashMap<Object, String> objectIdMap = new HashMap<Object, String>();
 	private int depth = -1;
+	private int inc = 0;
 	private boolean reserveSpace;
 	private boolean format = false;
 
@@ -293,7 +294,7 @@ public class ParseContextImpl implements ParseContext {
 	private String addGlobalObject(Map objectIdMap,Object object, String key) {
 		String id = (String) (key == null? objectIdMap.get(object):key);
 		if (id == null) {
-			id = "__" + objectIdMap.size() + "__";
+			id = "__" + inc++ + "__";
 			objectIdMap.put(object, id);
 		}
 		return id;
