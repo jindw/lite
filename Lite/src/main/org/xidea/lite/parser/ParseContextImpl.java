@@ -22,6 +22,7 @@ public class ParseContextImpl implements ParseContext {
 	private ArrayList<Object> result = new ArrayList<Object>();
 	private HashSet<URL> resources = new HashSet<URL>();
 	private HashMap<String, String> typeIdMap = new HashMap<String, String>();
+	private HashMap<Object, String> objectIdMap = new HashMap<Object, String>();
 	private int depth = -1;
 	private boolean reserveSpace;
 	private boolean format = false;
@@ -233,18 +234,30 @@ public class ParseContextImpl implements ParseContext {
 		}
 
 		assert (stackTop == 0);
-		if (!this.typeIdMap.isEmpty()) {
-			HashMap<String, String> instanceMap = new HashMap<String, String>();
-			for (Map.Entry<String, String> entry : typeIdMap.entrySet()) {
-				instanceMap.put(entry.getValue(), entry.getKey());
-			}
-			HashMap<String, Object> attributeMap = new HashMap<String, Object>();
+
+		HashMap<String, Object> attributeMap = new HashMap<String, Object>();
+		if (!this.typeIdMap.isEmpty() ){
+			Map instanceMap = toIdObject(typeIdMap);
 			attributeMap.put("attributeMap", instanceMap);
+		}
+		if(!this.objectIdMap.isEmpty()) {
+			Map instanceMap = toIdObject(objectIdMap);
+			attributeMap.put("objectMap", instanceMap);
+		}
+		if(!attributeMap.isEmpty()) {
 			current.add(Arrays.asList(Template.ADD_ON_TYPE,
 					new ArrayList<Object>(), JSONEncoder.encode(attributeMap),
 					BuildInAdvice.class.getName()));
 		}
 		return current;
+	}
+	@SuppressWarnings("unchecked")
+	private Map toIdObject(Map objectIdMap) {
+		HashMap instanceMap = new HashMap<String, String>();
+		for (Object key : objectIdMap.keySet()) {
+			instanceMap.put(objectIdMap.get(key), key);
+		}
+		return instanceMap;
 	}
 
 	protected List<Object> getResult() {
@@ -267,16 +280,25 @@ public class ParseContextImpl implements ParseContext {
 		return result2;
 	}
 
-	public String addGlobalInvocable(Class<? extends Object> class1, String key) {
+	public String addGlobalObject(Class<? extends Object> class1, String key) {
 		String name = class1.getName();
-		String id = typeIdMap.get(name);
+		return addGlobalObject(typeIdMap,name, key);
+	}
+
+	public String addGlobalObject(Object object, String key) {
+		return addGlobalObject(objectIdMap,object, key);
+	}
+
+	@SuppressWarnings("unchecked")
+	private String addGlobalObject(Map objectIdMap,Object object, String key) {
+		String id = (String) (key == null? objectIdMap.get(object):key);
 		if (id == null) {
-			id = "__" + typeIdMap.size() + "__";
-			typeIdMap.put(name, id);
+			id = "__" + objectIdMap.size() + "__";
+			objectIdMap.put(object, id);
 		}
 		return id;
 	}
-
+	
 	public void appendAttribute(Object el, String name) {
 		this.append(new Object[] { Template.XML_ATTRIBUTE_TYPE, el, name });
 
@@ -311,5 +333,6 @@ public class ParseContextImpl implements ParseContext {
 		this.append(new Object[] { Template.EL_TYPE, testEL });
 
 	}
+
 
 }
