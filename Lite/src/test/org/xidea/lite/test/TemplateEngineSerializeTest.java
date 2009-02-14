@@ -11,7 +11,7 @@ import org.junit.Test;
 import org.xidea.lite.TemplateEngine;
 
 public class TemplateEngineSerializeTest {
-	@Test
+	//@Test
 	public void test() throws IOException, ClassNotFoundException{
 		Object[] obj = new Object[]{new TemplateEngine(new File("."))};
 		ByteArrayOutputStream out = new ByteArrayOutputStream();

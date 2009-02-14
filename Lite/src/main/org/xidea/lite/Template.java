@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -26,15 +27,17 @@ public class Template {
 	public static final int XML_TEXT_TYPE = 4;// [4,'el']
 	public static final int FOR_TYPE = 5;// [5,[...],'var','items','status']//status
 	public static final int ELSE_TYPE = 6;// [6,[...],'test']//test opt?
-	public static final int ADD_ONS_TYPE =7;// [7,[...],'var']
+	public static final int ADD_ON_TYPE = 7;// [7,[...],el,type]
 	public static final int VAR_TYPE = 8;// [8,'value','name']
 	public static final int CAPTRUE_TYPE = 9;// [9,[...],'var']
 
 	public static final String FOR_KEY = "for";
 	public static final String IF_KEY = "if";
-	private Map<String, Object> gloabls = new HashMap<String, Object>(ExpressionFactoryImpl.DEFAULT_GLOBAL_MAP);
+	private Map<String, Object> gloabls = new HashMap<String, Object>(
+			ExpressionFactoryImpl.DEFAULT_GLOBAL_MAP);
 
-	private ExpressionFactory expressionFactory = new ExpressionFactoryImpl(gloabls);
+	private ExpressionFactory expressionFactory = new ExpressionFactoryImpl(
+			gloabls);
 
 	protected Object[] items;// transient＄1�7
 
@@ -46,21 +49,101 @@ public class Template {
 	}
 
 	@SuppressWarnings("unchecked")
-	public void render(Object context,
-			Writer out) throws IOException {
+	public void render(Object context, Writer out) throws IOException {
 		Map<? extends Object, ? extends Object> contextMap;
-		if(context instanceof Map){
+		if (context instanceof Map) {
 			contextMap = (Map<? extends Object, ? extends Object>) context;
-		}else if(context == null){
+		} else if (context == null) {
 			contextMap = new HashMap<Object, Object>();
-		}else{
+		} else {
 			contextMap = ReflectUtil.map(context);
 		}
 		renderList(contextMap, items, out);
 	}
 
-	protected void renderList(final Map<? extends Object, ? extends Object> context, final Object[] children,
-			final Writer out) {
+	/**
+	 * 编译模板数据,递归将元List数据转换为直接的数组，并编译el
+	 * 
+	 * @internal
+	 */
+	@SuppressWarnings("unchecked")
+	protected Object[] compile(List<Object> datas) {
+		// Object[] result = datas.toArray();// ;
+		// reverse(result);
+		List result = new ArrayList();
+		for (int i = datas.size()-1; i >= 0; i--) {
+			final Object item = datas.get(i);
+			if (item instanceof List) {
+				final List data = (List) item;
+				final Object[] cmd = data.toArray();
+				final int type = ((Number) cmd[0]).intValue();
+				cmd[0] = type;
+				// children
+				switch (type) {
+				case ADD_ON_TYPE:
+					compileAddOns(cmd, result);
+					continue;// for
+				case CAPTRUE_TYPE:
+				case IF_TYPE:
+				case ELSE_TYPE:
+				case FOR_TYPE:
+					// case IF_STRING_IN_TYPE:
+					cmd[1] = compile((List) cmd[1]);
+					break;
+				}
+				switch (type) {
+				case XML_ATTRIBUTE_TYPE:
+					if (cmd[2] != null) {
+						cmd[2] = " " + cmd[2] + "=\"";
+					}
+				case XML_TEXT_TYPE:
+				case EL_TYPE:
+					cmd[1] = createExpression(cmd[1]);
+					break;
+				// case VAR_TYPE:
+				case IF_TYPE:
+				case ELSE_TYPE:
+					if (cmd[2] != null) {
+						cmd[2] = createExpression(cmd[2]);
+					}
+					break;
+				// case IF_STRING_IN_TYPE:
+				// cmd[2] = createExpression(cmd[2]);
+				case FOR_TYPE:
+					cmd[3] = createExpression(cmd[3]);
+					break;
+				}
+				result.add(cmd);
+			}else{
+				result.add(item);
+			}
+		}
+		return result.toArray();
+	}
+
+	@SuppressWarnings("unchecked")
+	protected void compileAddOns(final Object[] cmd, List<Object> result) {
+		try {
+			cmd[1] = compile((List<Object>) cmd[1]);
+			Expression el = (Expression) (cmd[2] = createExpression(cmd[2]));
+			Class<? extends Object> addOnType = Class.forName(String
+					.valueOf(cmd[3]));
+			cmd[3] = addOnType;
+			if (CompileAdvice.class.isAssignableFrom(addOnType)) {
+				((CompileAdvice) addOnType.newInstance()).execute(gloabls, el,
+						result);
+			}
+			if (RuntimeAdvice.class.isAssignableFrom(addOnType)) {
+				result.add(cmd);
+			}
+		} catch (Exception e) {
+			log.error("装载扩展失败", e);
+		}
+	}
+
+	protected void renderList(
+			final Map<? extends Object, ? extends Object> context,
+			final Object[] children, final Writer out) {
 		int index = children.length;
 		// for (final Object item : children) {
 		while (index-- > 0) {
@@ -97,6 +180,8 @@ public class Template {
 						break;
 					case BREAK_TYPE://
 						prossesBreak(data);
+					case ADD_ON_TYPE://
+						prossesAddons(context, data, out);
 						break;
 					}
 				}
@@ -112,151 +197,16 @@ public class Template {
 		}
 	}
 
-	protected void reverse(Object[] result) {
-		int begin = 0;
-		int end = result.length - 1;
-		while (begin < end) {
-			Object item = result[begin];
-			result[begin] = result[end];
-			result[end--] = item;
-			begin++;
-		}
-	}
-
-	/**
-	 * 编译模板数据,递归将元List数据转换为直接的数组，并编译el
-	 * 
-	 * @internal
-	 */
 	@SuppressWarnings("unchecked")
-	protected Object[] compile(List<Object> datas) {
-		Object[] result = datas.toArray();// ;
-		reverse(result);
-		for (int i = 0; i < result.length; i++) {
-			final Object item = result[i];
-			if (item instanceof List) {
-				final List data = (List) item;
-				final Object[] cmd = data.toArray();
-				final int type =((Number) cmd[0]).intValue();
-				cmd[0] = type;
-				// children
-				switch (type) {
-				case ADD_ONS_TYPE:
-					this.compileAddOns(createExpression(cmd[1]));
-					break;
-				case CAPTRUE_TYPE:
-				case IF_TYPE:
-				case ELSE_TYPE:
-				case FOR_TYPE:
-					// case IF_STRING_IN_TYPE:
-					cmd[1] = compile((List) cmd[1]);
-					break;
-				}
-				switch (type) {
-				case XML_ATTRIBUTE_TYPE:
-					if (cmd[2] != null) {
-						cmd[2] = " " + cmd[2] + "=\"";
-					}
-				case XML_TEXT_TYPE:
-				case EL_TYPE:
-					cmd[1] = createExpression(cmd[1]);
-					break;
-				// case VAR_TYPE:
-				case IF_TYPE:
-				case ELSE_TYPE:
-					if (cmd[2] != null) {
-						cmd[2] = createExpression(cmd[2]);
-					}
-					break;
-				// case IF_STRING_IN_TYPE:
-				// cmd[2] = createExpression(cmd[2]);
-				case FOR_TYPE:
-					cmd[3] = createExpression(cmd[3]);
-					break;
-				}
-				result[i] = cmd;
-			}
+	private void prossesAddons(Map<? extends Object, ? extends Object> context,
+			Object[] data, Writer out) throws Exception {
+		Map<String, Object> attributeMap = (Map) ((Expression) data[1])
+				.evaluate(context);
+		RuntimeAdvice tag = (RuntimeAdvice) ((Class) data[2]).newInstance();
+		for (String key : attributeMap.keySet()) {
+			ReflectUtil.setValue(tag, key, attributeMap.get(key));
 		}
-		return result;
-	}
-
-	private void compileAddOns(Expression createExpression) {
-		@SuppressWarnings("unchecked")
-		Map<String, String> addOnMap = (Map<String, String>) createExpression.evaluate(null);
-		for(Map.Entry<String, String> entry : addOnMap.entrySet()){
-			String key = entry.getKey();
-			try {
-				Object value = Class.forName(entry.getValue()).newInstance();
-				gloabls.put(key, value);
-			} catch (Exception e) {
-				log.error("无法装载扩展："+entry.getValue(),e);
-			}
-		}
-	}
-
-	protected Expression createExpression(Object elo) {
-		return expressionFactory.createEL(elo);
-	}
-
-	@SuppressWarnings("unchecked")
-	protected void printXMLAttribute(String text, Writer out,
-			boolean escapeSingleChar) throws IOException {
-		for (int i = 0; i < text.length(); i++) {
-			int c = text.charAt(i);
-			switch (c) {
-			case '<':
-				out.write("&lt;");
-				break;
-			case '>':
-				out.write("&gt;");
-				break;
-			case '&':
-				out.write("&amp;");
-				break;
-			case '"':// 34
-				out.write("&#34;");
-				break;
-			case '\'':// 39
-				if (escapeSingleChar) {
-					out.write("&#39;");
-				}
-				break;
-			default:
-				out.write(c);
-			}
-		}
-	}
-
-	protected void printXMLText(String text, Writer out) throws IOException {
-		for (int i = 0; i < text.length(); i++) {
-			int c = text.charAt(i);
-			switch (c) {
-			case '<':
-				out.write("&lt;");
-				break;
-			case '>':
-				out.write("&gt;");
-				break;
-			case '&':
-				out.write("&amp;");
-				break;
-			default:
-				out.write(c);
-			}
-		}
-	}
-
-	protected boolean toBoolean(Object test) {
-		if (test == null) {
-			return false;
-		} else if (test instanceof Boolean) {
-			return (Boolean) test;
-		} else if (test instanceof String) {
-			return ((String) test).length() > 0;
-		} else if (test instanceof Number) {
-			return ((Number) test).floatValue() != 0;
-		}
-		return true;
+		tag.execute(context, out);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -369,9 +319,9 @@ public class Template {
 	protected void processAttribute(Map context, Object[] data, Writer out)
 			throws IOException {
 		Object result = ((Expression) data[1]).evaluate(context);
-		if(data[2] == null){
+		if (data[2] == null) {
 			printXMLAttribute(String.valueOf(result), out, true);
-		}else if (result != null) {
+		} else if (result != null) {
 			out.write((String) data[2]);// prefix
 			printXMLAttribute(String.valueOf(result), out, false);
 			out.write('"');
@@ -381,6 +331,70 @@ public class Template {
 
 	protected void prossesBreak(Object[] data) {
 		throw new Break(((Number) data[1]).intValue());
+	}
+
+	protected Expression createExpression(Object elo) {
+		return expressionFactory.createEL(elo);
+	}
+
+	protected void printXMLAttribute(String text, Writer out,
+			boolean escapeSingleChar) throws IOException {
+		for (int i = 0; i < text.length(); i++) {
+			int c = text.charAt(i);
+			switch (c) {
+			case '<':
+				out.write("&lt;");
+				break;
+			case '>':
+				out.write("&gt;");
+				break;
+			case '&':
+				out.write("&amp;");
+				break;
+			case '"':// 34
+				out.write("&#34;");
+				break;
+			case '\'':// 39
+				if (escapeSingleChar) {
+					out.write("&#39;");
+				}
+				break;
+			default:
+				out.write(c);
+			}
+		}
+	}
+
+	protected void printXMLText(String text, Writer out) throws IOException {
+		for (int i = 0; i < text.length(); i++) {
+			int c = text.charAt(i);
+			switch (c) {
+			case '<':
+				out.write("&lt;");
+				break;
+			case '>':
+				out.write("&gt;");
+				break;
+			case '&':
+				out.write("&amp;");
+				break;
+			default:
+				out.write(c);
+			}
+		}
+	}
+
+	protected boolean toBoolean(Object test) {
+		if (test == null) {
+			return false;
+		} else if (test instanceof Boolean) {
+			return (Boolean) test;
+		} else if (test instanceof String) {
+			return ((String) test).length() > 0;
+		} else if (test instanceof Number) {
+			return ((Number) test).floatValue() != 0;
+		}
+		return true;
 	}
 
 	@SuppressWarnings("serial")
