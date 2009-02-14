@@ -59,8 +59,7 @@ public class Template {
 		renderList(contextMap, items, out);
 	}
 
-	@SuppressWarnings("unchecked")
-	protected void renderList(final Map context, final Object[] children,
+	protected void renderList(final Map<? extends Object, ? extends Object> context, final Object[] children,
 			final Writer out) {
 		int index = children.length;
 		// for (final Object item : children) {
