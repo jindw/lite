@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.xidea.el.json.JSONEncoder;
+import org.xidea.lite.BuildInAdvice;
 import org.xidea.lite.Template;
 
 public class ParseContextImpl implements ParseContext {
@@ -83,7 +84,7 @@ public class ParseContextImpl implements ParseContext {
 	}
 
 	public void append(String text, boolean encode, char quteChar) {
-		if(encode){
+		if (encode) {
 			text = encodeText(text, quteChar);
 		}
 		append(text);
@@ -129,12 +130,12 @@ public class ParseContextImpl implements ParseContext {
 
 	public List<Object> reset(int mark) {
 		int end = result.size();
-		List<Object> pops = new ArrayList<Object>(end-mark);
+		List<Object> pops = new ArrayList<Object>(end - mark);
 		int i = mark;
 		for (; i < end; i++) {
 			pops.add(result.get(i));
 		}
-		while (i-->mark) {
+		while (i-- > mark) {
 			result.remove(i);
 		}
 		return pops;
@@ -237,8 +238,9 @@ public class ParseContextImpl implements ParseContext {
 			for (Map.Entry<String, String> entry : typeIdMap.entrySet()) {
 				idTypeMap.put(entry.getValue(), entry.getKey());
 			}
-			current.add(Arrays.asList(Template.ADD_ONS_TYPE, JSONEncoder
-					.encode(idTypeMap)));
+			current.add(Arrays.asList(Template.ADD_ON_TYPE,
+					new ArrayList<Object>(), JSONEncoder.encode(idTypeMap),
+					BuildInAdvice.class.getName()));
 		}
 		return current;
 	}
@@ -263,7 +265,7 @@ public class ParseContextImpl implements ParseContext {
 		return result2;
 	}
 
-	public String addGlobalInvocable(Class<? extends Object> class1) {
+	public String addGlobalInvocable(Class<? extends Object> class1, String key) {
 		String name = class1.getName();
 		String id = typeIdMap.get(name);
 		if (id == null) {
@@ -274,7 +276,7 @@ public class ParseContextImpl implements ParseContext {
 	}
 
 	public void appendAttribute(Object el, String name) {
-		this.append(new Object[] { Template.XML_ATTRIBUTE_TYPE,el, name });
+		this.append(new Object[] { Template.XML_ATTRIBUTE_TYPE, el, name });
 
 	}
 
@@ -305,7 +307,7 @@ public class ParseContextImpl implements ParseContext {
 
 	public void appendEL(Object testEL) {
 		this.append(new Object[] { Template.EL_TYPE, testEL });
-		
+
 	}
 
 }

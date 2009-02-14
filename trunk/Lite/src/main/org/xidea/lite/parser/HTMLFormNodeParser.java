@@ -149,7 +149,7 @@ public class HTMLFormNodeParser extends HTMLNodeParser implements NodeParser {
 
 	protected String buildCSEL(ParseContext context, final String collectionEL,
 			final String valueEL) {
-		String id = context.addGlobalInvocable(TextContains.class);
+		String id = context.addGlobalInvocable(TextContains.class,null);
 		return id + "(" + collectionEL + "," + valueEL + ")";
 	}
 
