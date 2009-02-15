@@ -1,9 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#compile time object
-BRACKET_BEGIN = 0xFFFE;#([{;
-BRACKET_END = 0xFFFF;#)]};
-	
 
 #value token（<=0）
 VALUE_CONSTANTS = -0x00;#c;
@@ -47,6 +43,8 @@ OP_PARAM_JOIN = 1;#0 | 0 | 1;
 OP_MAP_PUSH = 33;#32 | 0 | 1;
 
 globalMap = {
+    JSON:None,#TODO:JSON处理
+    encodeURIComponent:None,#TODO:URL编码处理
     "test":lambda x:x*3
 }
 

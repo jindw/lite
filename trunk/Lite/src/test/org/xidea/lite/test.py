@@ -11,8 +11,7 @@ class Test:
         return lambda x:x/2;
         
 #el = "object.test(123)"
-#el = [[VALUE_VAR,"object"],[VALUE_CONSTANTS,"test"],[OP_GET_PROP],[VALUE_NEW_LIST],[VALUE_CONSTANTS,123],[OP_PARAM_JOIN],[OP_INVOKE_METHOD]];
-el = [[0, "object"], [-1, "test"], [34], [-3], [-1, 123], [90], [86]];
+el = [[VALUE_VAR,"object"],[VALUE_CONSTANTS,"test"],[OP_GET_PROP],[VALUE_NEW_LIST],[VALUE_CONSTANTS,123],[OP_PARAM_JOIN],[OP_INVOKE_METHOD]];
 print(evaluate(el,{"object":Test()}))
 
 
