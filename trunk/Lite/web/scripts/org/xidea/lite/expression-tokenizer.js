@@ -85,7 +85,7 @@ var fns = {
     		}
 			return this.value.substring(this.start, this.start += 2);
 		}
-		alert(this.value.substring(this.start))
+		$log.error("未知符号",this.value,this.value.substring(this.start))
 		return null;
 	},
 

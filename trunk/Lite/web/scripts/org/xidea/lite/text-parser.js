@@ -69,7 +69,7 @@ TextParser.prototype.parseText = function(text,xmlText,xmlAttr){
                     var expression = text.substring(expressionBegin ,expressionEnd );
                     expression = this.parseEL(expression);
                     if(xmlAttr){
-                    	buf.push([XML_ATTRIBUTE_VTYPE,expression]);
+                    	buf.push([XML_ATTRIBUTE_TYPE,expression]);
                     }else{
                     	buf.push([xmlText ? XML_TEXT_TYPE : EL_TYPE,expression]);
                     }
@@ -78,7 +78,7 @@ TextParser.prototype.parseText = function(text,xmlText,xmlAttr){
                     pattern = text && new RegExp(pattern);
                     //continue seach;
                     break;
-                }catch(e){}
+                }catch(e){$log.debug("尝试表达式解析失败",expression,e)}
             }
         }
     }
