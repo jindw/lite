@@ -37,12 +37,10 @@ function _evaluate(stack, tokens,context){
                 stack.push(item[1]);
                 break;
             default:
-                switch(type & 3){
-                    case 2:
-                        arg1 = stack.pop();
-                    case 1:
-                        arg2=arg1;
-                        arg1 = stack.pop();
+                arg1 = stack.pop();
+                if(type & 1){
+                    arg2=arg1;
+                    arg1 = stack.pop();
                 }
                 arg1 = compute(item, arg1, arg2)
                 if(arg1 instanceof LazyToken){
@@ -55,7 +53,7 @@ function _evaluate(stack, tokens,context){
 }
 function realValue(arg1){
 	if(arg1 instanceof PropertyValue){
-    	return arg1.base[arg1.name];
+    	return arg1[0][arg1[1]];
     }
     return arg1;
 }
@@ -65,7 +63,7 @@ function compute(op,arg1,arg2){
     	if(arg1 instanceof Function){
             return arg1.apply(null,arg2);
     	}else if(arg1 instanceof PropertyValue){
-            return arg1.base[arg1.name].apply(arg1.base,arg2);
+            return arg1[0][arg1[1]].apply(arg1[0],arg2);
     	}else{
     		throw new Error("not a fn!!"+arg1)
     	}
@@ -137,7 +135,7 @@ function LazyToken(value){
     this.value = value;
 }
 function PropertyValue(base,name){
-    this.base = base;
-    this.name = name;
+    this[0] = base;
+    this[1] = name;
 }
 

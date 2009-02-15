@@ -55,20 +55,18 @@ SKIP_QUESTION = object();
 def evaluate(tokens, context):
     stack=[]
     _evaluate(stack, tokens, context)
-    return stack[0]
+    if(isinstance(stack = stack[0],PropertyValue )):
+        stack = stack.base[stack.name];
+    return stack
 def _evaluate(stack, tokens, context):
     for item in tokens:
         if isinstance(item,list):
             type = item[0];
-            if type > 3:
-                arg2 = None
-                arg1 = None
-                length = type & 3
-                if length > 1:
-                    arg2 = stack.pop()
+            if type > 0:
+                arg1 = stack.pop()
+                if type & 1:
+                    arg2 = arg1
                     arg1 = stack.pop()
-                elif length == 1:
-                    arg1 = stack.pop();
                 result = compute(item, arg1, arg2)
                 if isinstance(result, (LazyToken)):
                     _evaluate(stack, result.children, context)
