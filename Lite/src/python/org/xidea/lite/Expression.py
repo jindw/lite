@@ -66,8 +66,6 @@ def _evaluate(stack, tokens, context):
             if type > 0:
                 arg1 = stack.pop()
                 arg2 = arg1
-                print(type)
-                print(type & 1)
                 if type & 1:
                     arg1 = stack.pop()
                 result = compute(item, arg1, arg2)
