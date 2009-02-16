@@ -19,5 +19,6 @@ print(evaluate(el,{"object":Test()}))
 
 def test():
 	output = StringIO.StringIO();
-	Template(["12345",[0,[1,2,[6]]]]).render({},output)
+	Template(["12345",[0,[[0,1],[0,2],[11]]]]).render({},output)
 	print output.getvalue()
+test();
