@@ -43,8 +43,8 @@ OP_PARAM_JOIN = 1;#0 | 0 | 1;
 OP_MAP_PUSH = 33;#32 | 0 | 1;
 
 globalMap = {
-    JSON:None,#TODO:JSON处理
-    encodeURIComponent:None,#TODO:URL编码处理
+    "JSON":None,#TODO:JSON处理
+    "encodeURIComponent":None,#TODO:URL编码处理
     "test":lambda x:x*3
 }
 
@@ -55,8 +55,9 @@ SKIP_QUESTION = object();
 def evaluate(tokens, context):
     stack=[]
     _evaluate(stack, tokens, context)
-    if(isinstance(stack = stack[0],PropertyValue )):
-        stack = stack.base[stack.name];
+    stack = stack[0]
+    if(isinstance(stack,PropertyValue )):
+        stack = stack.getValue();
     return stack
 def _evaluate(stack, tokens, context):
     for item in tokens:
@@ -64,8 +65,10 @@ def _evaluate(stack, tokens, context):
             type = item[0];
             if type > 0:
                 arg1 = stack.pop()
+                arg2 = arg1
+                print(type)
+                print(type & 1)
                 if type & 1:
-                    arg2 = arg1
                     arg1 = stack.pop()
                 result = compute(item, arg1, arg2)
                 if isinstance(result, (LazyToken)):
@@ -89,18 +92,13 @@ def compute(op,arg1,arg2):
 
     if type == OP_INVOKE_METHOD:
         if(isinstance(arg1,PropertyValue )):
-            base = arg1.base;
-            name = arg1.name;
-            if(isinstance(arg1,dict ) and name in base):
-                return apply(base[name],arg2);
-            else:
-                return apply(getattr(base,name),arg2);
+            return apply(arg1.getValue(),arg2);
         else:
             return apply(arg1,arg2);
     if(isinstance(arg1,PropertyValue)):
-        arg1 = arg1.base[arg1.name];
+        arg1 = arg1.getValue();
     if(isinstance(arg2,PropertyValue)):
-        arg2 = arg2.base[arg2.name];
+        arg2 = arg2.getValue();
         
     if type == OP_STATIC_GET_PROP:
         return PropertyValue(arg1,op[1]);
@@ -195,3 +193,8 @@ class PropertyValue:
     def __init__(self, base,name):
         self.base = base;
         self.name = name;
+    def getValue(self):
+       if(isinstance(self.base,dict ) and name in self.base):
+            return self.base[self.name];
+       else:
+            return getattr(self.base,self.name);
