@@ -7,7 +7,7 @@ define('VALUE_LAZY', -0x02);
 define('VALUE_NEW_LIST', -0x03);#[;
 define('VALUE_NEW_MAP', -0x04);#{;
 	
-#·ûºÅ±ê¼Ç ????? !!
+#ï¿½ï¿½Å±ï¿½ï¿½ ????? !!
 #9
 define('OP_GET_PROP', 17);#0 | 16 | 1;
 define('OP_STATIC_GET_PROP', 48);#32 | 16 | 0;
@@ -41,7 +41,7 @@ define('OP_QUESTION_SELECT', 35);#32 | 2 | 1;
 define('OP_PARAM_JOIN', 1);#0 | 0 | 1;
 define('OP_MAP_PUSH', 33);#32 | 0 | 1;
 
-$globalMap = array('JSON'=>null, 'encodeURIComponent'=> null, 'test': 'testMap');
+$globalMap = array('JSON'=>null, 'encodeURIComponent'=> null, 'test'=> 'testMap');
 
 function evaluate($tokens, $context) {
 	$stack = array();
@@ -52,7 +52,7 @@ function evaluate($tokens, $context) {
 	return $stack;
 }
 
-function _evaluate(&$stack, $tokens, $content) {
+function _evaluate(&$stack, $tokens, $context) {
 	foreach($tokens as $item) {
 		if(is_array($item)) {
 			$type = $item[0];
@@ -61,8 +61,8 @@ function _evaluate(&$stack, $tokens, $content) {
 				if($type & 1) {
 					$arg2 = $arg1;
 					$arg1 = array_pop($stack);
-					$result = compute($item, $arg1, $arg2);
 				}
+				$result = compute($item, $arg1, $arg2);
 				if($result instanceof LazyToken) {
 					_evaluate($stack, $result->children, $context);
 				} else {
@@ -129,7 +129,7 @@ function compute($op, $arg1, $arg2) {
 		case OP_GTEQ:
 			return $arg1>=$arg2;
 		case OP_NOTEQ:
-			return $arg1!$arg2;
+			return $arg1!=$arg2;
 		case OP_EQ:
 			return $arg1==$arg2;
 		case OP_LT:
@@ -154,7 +154,7 @@ function getTokenValue($context, $item) {
 	global $globalMap;
 	$type = $item[0];
 	if ($type==VALUE_CONSTANTS) {
-		return item[1];
+		return $item[1];
 	} elseif($type==VALUE_VAR) {
 		$value = $item[1];
 		if ('this'==$value) {
@@ -191,3 +191,4 @@ class PropertyValue {
 		$this->name = $name;
 	}
 }
+?>
