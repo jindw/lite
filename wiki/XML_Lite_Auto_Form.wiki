@@ -29,7 +29,7 @@ AutoForm不是一个独立的实体，它只是XML_Lite语法设计上的一个�
     # 清除无效子节点
     # 添加文本子节点${name}(name 的解释如上)
 === select/option填充规则：=== 
-  option选中规类似《input name="test" type="checkbox"》。不同的是，name属性取的是上层select的name属性。
+  option选中规类似{{{<input name="test" type="checkbox">}}}。不同的是，name属性取的是上层select的name属性。
 
 == Auto Form 与Struts标记库,Velocity,JSTL等实现代码对比 ==
   ===对固定选项select的处理===
