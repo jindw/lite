@@ -100,7 +100,7 @@ function toTokenString(){
 
 
 function getTokenLength(type) {
-	if (type >= 3) {// op
+	if (type > 0) {// op
 		switch (type) {
 		case OP_STATIC_GET_PROP:
 		case OP_MAP_PUSH:

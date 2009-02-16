@@ -126,7 +126,7 @@ var fns = {
 			switch (op.charAt(0)) {
 			case '(':
 				if (this.status == STATUS_EXPRESSION) {
-					this.addToken([OP_INVOKE_METHOD, null]);
+					this.addToken([OP_INVOKE_METHOD]);
 					if (this.skipSpace(')')) {
 						this.addToken([VALUE_CONSTANTS,
 								[]]);
@@ -136,7 +136,7 @@ var fns = {
 					}
 
 				} else {
-					this.addToken([BRACKET_BEGIN, null]);
+					this.addToken([BRACKET_BEGIN]);
 				}
 				break;
 			case '[':
@@ -144,8 +144,8 @@ var fns = {
 					this.addList();
 
 				} else if (this.status == STATUS_EXPRESSION) {// getProperty
-					this.addToken([OP_GET_PROP, null]);
-					this.addToken([BRACKET_BEGIN, null]);
+					this.addToken([OP_GET_PROP]);
+					this.addToken([BRACKET_BEGIN]);
 				} else {
 					throw new Error("语法错误:" + this.value + "@"
 							+ this.start);
@@ -157,33 +157,33 @@ var fns = {
 			case '}':
 			case ']':
 			case ')':
-				this.addToken([BRACKET_END, null]);
+				this.addToken([BRACKET_END]);
 				break;
 			case '+'://
 				this.addToken([
 						this.status == STATUS_OPERATOR ? OP_POS
-								: OP_ADD, null]);
+								: OP_ADD]);
 				// this.addToken(OperatorToken.getToken(SKIP_AND));
 				break;
 			case '-':
 				this.addToken([
 						this.status == STATUS_OPERATOR ? OP_NEG
-								: OP_SUB, null]);
+								: OP_SUB]);
 				// this.addToken(OperatorToken.getToken(SKIP_AND));
 				break;
 			case '?':// ?:
-				this.addToken([OP_QUESTION, null]);
+				this.addToken([OP_QUESTION]);
 				// this.addToken(OperatorToken.getToken(SKIP_QUESTION));
-				this.addToken([VALUE_LAZY, null]);
+				this.addToken([VALUE_LAZY]);
 				break;
 			case ':':// :(object_setter is skiped)
-				this.addToken([OP_QUESTION_SELECT, null]);
-				this.addToken([VALUE_LAZY, null]);
+				this.addToken([OP_QUESTION_SELECT]);
+				this.addToken([VALUE_LAZY]);
 				break;
 			case ',':// :(object_setter is skiped,',' should
 				// be skip)
 				if (!this.isMapMethod()) {
-					this.addToken([OP_PARAM_JOIN, null]);
+					this.addToken([OP_PARAM_JOIN]);
 
 				}
 				break;
@@ -213,18 +213,18 @@ var fns = {
 					break;
 				}
 			default:
-				this.addToken([findTokenType(op), null]);
+				this.addToken([findTokenType(op)]);
 			}
 		} else if (op == "||") { // ||
-			this.addToken([OP_OR, null]);
-			this.addToken([VALUE_LAZY, null]);
+			this.addToken([OP_OR]);
+			this.addToken([VALUE_LAZY]);
 			// this.addToken(LazyToken.LAZY_TOKEN_END);
 		} else if (op == "&&") {// &&
-			this.addToken([OP_AND, null]);
-			this.addToken([VALUE_LAZY, null]);
+			this.addToken([OP_AND]);
+			this.addToken([VALUE_LAZY]);
 			// this.addToken(OperatorToken.getToken(SKIP_AND));
 		} else {
-			this.addToken([findTokenType(op), null]);
+			this.addToken([findTokenType(op)]);
 		}
 
 	},
@@ -260,16 +260,16 @@ var fns = {
 	},
 
 	addList :function() {
-		this.addToken([BRACKET_BEGIN, null]);
-		this.addToken([VALUE_NEW_LIST, null]);
+		this.addToken([BRACKET_BEGIN]);
+		this.addToken([VALUE_NEW_LIST]);
 		if (!this.skipSpace(']')) {
-			this.addToken([OP_PARAM_JOIN, null]);
+			this.addToken([OP_PARAM_JOIN]);
 		}
 	},
 
 	addMap :function() {
-		this.addToken([BRACKET_BEGIN, null]);
-		this.addToken([VALUE_NEW_MAP, null]);
+		this.addToken([BRACKET_BEGIN]);
+		this.addToken([VALUE_NEW_MAP]);
 	}
 };
 var pt = new JSONTokenizer('');
@@ -298,7 +298,7 @@ function right(tokens) {
 
 	for (var i = 0;i<tokens.length;i++) {
 		var item = tokens[i];
-		if (item[0] > 3) {
+		if (item[0] > 0) {
 			if (buffer.length == 0) {
 				buffer.push(item);
 			} else if (item[0] == BRACKET_BEGIN) {// ("(")
@@ -382,51 +382,9 @@ function getPriority(type) {
 	case BRACKET_BEGIN:
 	case BRACKET_END:
 		return Math.MIN_VALUE;
-	case OP_GET_PROP:
-	//case OP_GET_METHOD:
-	//case OP_GET_GLOBAL_METHOD:
-	case OP_INVOKE_METHOD:
-	case VALUE_NEW_LIST:
-	case VALUE_NEW_MAP:
-		return 12;
-
-	case OP_NOT:
-	case OP_POS:
-	case OP_NEG:
-		return 8;
-
-	case OP_MUL:
-	case OP_DIV:
-	case OP_MOD:
-		return 4;
-
-	case OP_ADD:
-	case OP_SUB:
-		return 1;
-
-	case OP_LT:
-	case OP_GT:
-	case OP_LTEQ:
-	case OP_GTEQ:
-	case OP_EQ:
-	case OP_NOTEQ:
-		return 0;
-
-	case OP_AND:
-		return -1;
-	case OP_OR:
-		return -2;
-
-	case OP_QUESTION:
-	case OP_QUESTION_SELECT:
-		return -4;// !!
-
-	case OP_MAP_PUSH:
-		return -7;// !!
-	case OP_PARAM_JOIN:
-		return -8;
+	default:
+	    return type & 30;
 	}
-	throw new Error("unsupport token:" + type);
 }
 
 function rightEnd(itemType, priviousType) {
