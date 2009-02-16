@@ -30,3 +30,82 @@ AutoForm不是一个独立的实体，它只是XML_Lite语法设计上的一个�
     # 添加文本子节点${name}(name 的解释如上)
 === select/option填充规则：=== 
   option选中规类似《input name="test" type="checkbox"》。不同的是，name属性取的是上层select的name属性。
+
+== Auto Form 与Struts标记库,Velocity,JSTL等实现代码对比 ==
+  ===对固定选项select的处理===
+  * XML Lite
+{{{
+<select name="keys">
+  <option value="23213">商品1</option>
+  <option value="2345">商品2</option>
+  <option value="235656">商品3</option>
+</select>
+}}}
+  * Struts1.x
+{{{
+<html:select property="keys">
+  <html:option value="23213">商品1</html:option>
+  <html:option value="2345">商品2</html:option>
+  <html:option value="235656">商品3</html:option>
+</html:select>
+}}}
+  * Struts2.x
+{{{
+<s:select label="keys"
+       name="keys"
+       list="#{'23213':'商品1', '2345':'商品2','235656':'商品3'}"
+/>
+}}}
+  * Velocity
+{{{
+<select name="keys">
+  <option value="23213" 
+#if(${ArrayUtil.contains($keys,23213)}) selected="selected"
+#end>商品1</option>
+  <option value="2345" 
+#if(${ArrayUtil.contains($keys,2345)}) selected="selected"
+#end>商品2</option>
+  <option value="235656" 
+#if(${ArrayUtil.contains($keys,235656)}) selected="selected"
+#end>商品3</option>
+</select>
+}}}
+  * JSTL
+{{{
+<select name="keys">
+  <option value="23213"
+ <c:if test="${myfn:contains(keys,23213)}">
+ selected="selected"</c:if>>商品1</option>
+  <option value="2345"
+ <c:if test="${myfn:contains(keys,2345)}">
+ selected="selected"</c:if>商品2</option>
+  <option value="235656"
+ <c:if test="${myfn:contains(keys,235656)}">
+ selected="selected"</c:if>>商品3</option>
+</select>
+}}}
+
+  ===对动态选项select的处理===
+  * XML Lite
+{{{
+<select name="keys">
+  <c:for var="item" items="${products}">
+    <option value="${item.id}">${item.name}</option>
+  </c:for>
+  </c:for>
+</select>
+}}}
+  * Struts1.x
+{{{
+<html:select property="keys">
+  <html:optionscollection="products" value="id" label="name" />
+</html:select>
+}}}
+  * Struts2.x
+{{{
+<s:select label="keys"
+       name="keys"
+       list="products"
+       listKey="id"
+       listValue="name"
+/>
