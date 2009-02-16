@@ -92,7 +92,6 @@ AutoForm不是一个独立的实体，它只是XML_Lite语法设计上的一个�
   <c:for var="item" items="${products}">
     <option value="${item.id}">${item.name}</option>
   </c:for>
-  </c:for>
 </select>
 }}}
   * Struts1.x
@@ -109,3 +108,8 @@ AutoForm不是一个独立的实体，它只是XML_Lite语法设计上的一个�
        listKey="id"
        listValue="name"
 />
+
+  ===对checkbox的处理===
+  ....
+  ===对input[@type =='text' or @type='hidden...']的处理===
+  ....
