@@ -26,7 +26,9 @@
     引入XML语法描述文件后，标准的通用编辑器可以轻松的支持XML_Lite自己的*语法提示* ，*语法检查* ，*代码高亮* 、*格式化* 。
 
 == 于Velocity对比 ==
-<table border="1" cellspacing="0" cellpadding="0"><tr><th>Lite XML</th><th>Velocity </th></tr>
+
+<a name="attributeExample"/>
+<table border="1" valign="top" cellspacing="0" cellpadding="0"><tr><th>Lite XML</th><th>Velocity </th></tr>
 <tr><td>
 {{{
 <input onclick = "${action.click}"
@@ -34,7 +36,6 @@
 }}}
 </td><td>
 {{{
-<a name="attributeExample"/>
 <input 
 #if(${action.click!=null})
 onclick= "${html.encode(action.click)}" 
