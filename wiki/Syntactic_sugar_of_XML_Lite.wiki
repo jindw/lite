@@ -95,8 +95,7 @@ ondblclick="${html.encode(action.dblclick)}"
 
 <tr valign="top"><th>填充select选中状态(启用 [XML_Lite_Auto_Form AutoForm])</th><td>
 {{{
-<select name="keys"
-        multiple="multiple">
+<select name="keys">
   <option value="23213">商品1</option>
   <option value="2345">商品2</option>
   <option value="235656">商品3</option>
@@ -105,8 +104,7 @@ ondblclick="${html.encode(action.dblclick)}"
 </td><td>
  * Velocity
 {{{
-<select name="keys"
-        multiple="multiple">
+<select name="keys">
   <option value="23213" 
 #if(${ArrayUtil.contains($keys,23213)}) selected="selected"
 #end>商品1</option>
@@ -120,8 +118,7 @@ ondblclick="${html.encode(action.dblclick)}"
 }}}
  * JSTL
 {{{
-<select name="keys"
-        multiple="multiple">
+<select name="keys">
   <option value="23213"
  <c:if test="${myfn:contains(keys,23213)}">
  selected="selected"</c:if>>商品1</option>
