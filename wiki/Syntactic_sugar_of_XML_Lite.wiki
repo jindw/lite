@@ -65,7 +65,7 @@ ondblclick="${html.encode(action.dblclick)}"
 </td>
 </tr>
 
-<tr valign="top"><th>填充checkbox选中状态(启用AutoForm)</th><td>
+<tr valign="top"><th>填充checkbox选中状态(启用 [XML_Lite_Auto_Form AutoForm])</th><td>
 {{{
 <input type="checkbox"
        name="flag" 
@@ -93,7 +93,7 @@ ondblclick="${html.encode(action.dblclick)}"
 }}}
 </td></tr>
 
-<tr valign="top"><th>填充select选中状态(启用AutoForm)</th><td>
+<tr valign="top"><th>填充select选中状态(启用 [XML_Lite_Auto_Form AutoForm])</th><td>
 {{{
 <select name="keys"
         multiple="multiple">
