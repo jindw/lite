@@ -10,7 +10,7 @@
     XML 本身的良好严谨的结构要求，使得输出结构的也更容易保持正确的结构，减少大量代码结构上的低级错误，*减少因个别程序员的粗心而导致的XSS漏洞*。
 
   * 简单的自动化的编码处理和语法优化。
-    [#attributeExample 见实例对比]
+    见实例对比
   * 开速安全的格式化和语法空白的自动压缩
     XML规范的语法，对于代码的正确格式化非常有利，而且，也不必担心源代码中过多的语法空白而导致输出内容的增加，因为xml语言知道标记语言的语法，可以自动优化无效的语法空白。
 
@@ -25,26 +25,117 @@
   * 通过XSD文件，可以很好的利用通用XML编辑器。
     引入XML语法描述文件后，标准的通用编辑器可以轻松的支持XML_Lite自己的*语法提示* ，*语法检查* ，*代码高亮* 、*格式化* 。
 
-== 于Velocity对比 ==
+== 与Velocity,JSTL 对比对比 ==
 
-<a name="attributeExample"/>
-<table border="1" valign="top" cellspacing="0" cellpadding="0"><tr><th>Lite XML</th><th>Velocity </th></tr>
-<tr><td>
+<table border="1" cellspacing="2" cellpadding="0"><tr>
+<th width="80">实现功能</th><th>Lite XML</th><th>Velocity / JSTL... </th></tr>
+
+<tr valign="top"><th>添加两个可选属性</th><td>
 {{{
-<input onclick = "${action.click}"
-       ondblclick= "${action.dblclick}" >
+<input
+  onclick ="${action.click}"
+  ondblclick="${action.dblclick}" >
 }}}
 </td><td>
+  * Velocity
 {{{
 <input 
 #if(${action.click!=null})
-onclick= "${html.encode(action.click)}" 
+onclick="${html.encode(action.click)}" 
 #end
 #if(${action.dblclick!=null})
-ondblclick= "${html.encode(action.dblclick)}"
+ondblclick="${html.encode(action.dblclick)}"
 #end>
 }}}
+  * JSTL
+{{{
+<input 
+  <c:if test="${action.click!=null}">
+    onclick= "<c:out
+                 value="${action.click}"
+                 escapeXml="true" />"
+  </c:if>
+  <c:if test="${action.dblclick!=null}">
+    onclick= "<c:out
+                 value="${action.dblclick}"
+                 escapeXml="true" />"
+  </c:if>
+>
+}}}
+</td>
+</tr>
+
+<tr valign="top"><th>填充checkbox选中状态(启用AutoForm)</th><td>
+{{{
+<input type="checkbox"
+       name="flag" 
+       value="true">
+}}}
+</td><td>
+ * Velocity
+{{{
+<input type="checkbox"
+       name="flag"  
+       value="true"
+       #if(${flag})
+       checked="checked"
+       #end>
+}}}
+ * JSTL
+{{{
+<input type="checkbox"
+       name="flag"  
+       value="true"
+       <c:if test="${checked}">
+       checked="checked"
+       </c:if>
+>
+}}}
 </td></tr>
+
+<tr valign="top"><th>填充select选中状态(启用AutoForm)</th><td>
+{{{
+<select name="keys"
+        multiple="multiple">
+  <option value="23213">商品1</option>
+  <option value="2345">商品2</option>
+  <option value="235656">商品3</option>
+</select>
+}}}
+</td><td>
+ * Velocity
+{{{
+<select name="keys"
+        multiple="multiple">
+  <option value="23213" 
+#if(${ArrayUtil.contains($keys,23213)}) selected="selected"
+#end>商品1</option>
+  <option value="2345" 
+#if(${ArrayUtil.contains($keys,2345)}) selected="selected"
+#end>商品2</option>
+  <option value="235656" 
+#if(${ArrayUtil.contains($keys,235656)}) selected="selected"
+#end>商品3</option>
+</select>
+}}}
+ * JSTL
+{{{
+<select name="keys"
+        multiple="multiple">
+  <option value="23213"
+ <c:if test="${myfn:contains(keys,23213)}">
+ selected="selected"</c:if>>商品1</option>
+  <option value="2345"
+ <c:if test="${myfn:contains(keys,2345)}">
+ selected="selected"</c:if>商品2</option>
+  <option value="235656"
+ <c:if test="${myfn:contains(keys,235656)}">
+ selected="selected"</c:if>>商品3</option>
+</select>
+}}}
+</td></tr>
+
+
 </table>
 == XML Lite 的其他语法亮点 ==
   * 设计简单
