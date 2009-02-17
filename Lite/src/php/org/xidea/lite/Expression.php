@@ -58,8 +58,8 @@ function _evaluate(&$stack, $tokens, $context) {
 			$type = $item[0];
 			if($type > 0) {
 				$arg1 = array_pop($stack);
+				$arg2 = $arg1;
 				if($type & 1) {
-					$arg2 = $arg1;
 					$arg1 = array_pop($stack);
 				}
 				$result = compute($item, $arg1, $arg2);
@@ -80,11 +80,11 @@ function compute($op, $arg1, $arg2) {
 	if ($type == OP_INVOKE_METHOD) {
 		if($arg1 instanceof PropertyValue) {
 			$base = $arg1->base;
-			$name = $arg2->name;
-			if (is_array($arg1) && in_array($name, $base)) {
-				return call_user_func($base[$name], $arg2);
+			$name = $arg1->name;
+			if (is_array($arg1) && array_key_exists($name, $base)) {
+				return call_user_func_array($base[$name], $arg2);
 			} else {
-				return call_user_func($base->$name, $arg2);
+				return call_user_func_array($base->$name, $arg2);
 			}
 		} else {
 			return call_user_func($arg1, $arg2);
@@ -160,9 +160,9 @@ function getTokenValue($context, $item) {
 		if ('this'==$value) {
 			return $context;
 		} else {
-			if (in_array($value, $context)) {
+			if (array_key_exists($value, $context)) {
 				return $context[$value];
-			} elseif (in_array($value, $globalMap)) {
+			} elseif (array_key_exists($value, $globalMap)) {
 				return $globalMap[$value];
 			}
 			return null;
