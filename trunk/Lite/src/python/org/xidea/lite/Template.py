@@ -16,15 +16,12 @@ CAPTRUE_TYPE = 9;# [9,[...],'var']
 FOR_KEY = "for"
 IF_KEY = "if"
 
-class ForStatus(object):
-    """ generated source for ForStatus
-
-    """
-    index = -1
-    lastIndex = 0
-
-    def __init__(self, end):
-        self.lastIndex = end - 1
+class Template:
+    def __init__(self, items):
+        self.items = items;
+    def render(self,context,out):
+        renderList(context, self.items, out)
+    
 def renderList(context, children, out):
     for item in children:
         try:
@@ -173,3 +170,12 @@ def processAttribute(context, data, out):
         printXMLAttribute(str(result), context, out, False)
         out.write('"')
 
+class ForStatus(object):
+    """ generated source for ForStatus
+
+    """
+    index = -1
+    lastIndex = 0
+
+    def __init__(self, end):
+        self.lastIndex = end - 1

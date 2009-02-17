@@ -186,8 +186,6 @@ class LazyToken:
         self.children = children
 
 class PropertyValue:
-    base = None;
-    name = None;
     def __init__(self, base,name):
         self.base = base;
         self.name = name;
