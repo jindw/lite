@@ -1,7 +1,10 @@
 <?php
 require('Expression.php');
 class TestBean {
-    var $test="test";
+    var $rate=100;
+    function test($arg1){
+       return $arg1 * $this->rate;
+    }
 }
 /* 难道php就没有办法动态调用对象方法吗？ */
 function test($v){

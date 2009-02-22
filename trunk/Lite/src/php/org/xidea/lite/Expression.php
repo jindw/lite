@@ -84,7 +84,7 @@ function compute($op, $arg1, $arg2) {
 			if (is_array($arg1) && array_key_exists($name, $base)) {
 				return call_user_func_array($base[$name], $arg2);
 			} else {
-				return call_user_func_array($base->$name, $arg2);
+				return call_user_func_array(array($base,$name),$arg2);
 			}
 		} else {
 			return call_user_func($arg1, $arg2);
