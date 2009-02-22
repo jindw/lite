@@ -50,7 +50,7 @@ def renderList(context, children, out):
             print e
             pass
 
-def printXMLAttribute(text, context, out, escapeSingleChar):
+def printXMLAttribute(text, out):
     ## for-while
     for c in text:
         if c == '<':
@@ -64,10 +64,6 @@ def printXMLAttribute(text, context, out, escapeSingleChar):
             break
         elif c == '"':
             out.write("&#34;")
-            break
-        elif c == '\'':
-            if escapeSingleChar:
-                out.write("&#39;")
             break
         else:
             out.write(c)
@@ -114,8 +110,7 @@ def processIf(context, data, out):
         else:
             test = True
     finally:
-        test = True
-    context[IF_KEY]=test
+        context[IF_KEY]=test
 
 def processElse(context, data, out):
     if not toBoolean(context[IF_KEY]):
@@ -152,22 +147,22 @@ def processFor(context, data, out):
         context[IF_KEY]= length > 0
 
 def processVar(context, data):
-    context.put(data[2], evaluate(data[1],context))
+    context[data[2]]= evaluate(data[1],context);
 
 def processCaptrue(context, data):
     buf = StringWriter()
     renderList(context, data[1], buf)
-    context.put(data[2], str(buf))
+    context[data[2]]= str(buf);
 
 def processAttribute(context, data, out):
     result = evaluate(data[1],context)
     if data[2] is None:
-        printXMLAttribute(str(result), context, out, True)
+        printXMLAttribute(str(result), out)
     elif result is not None:
         out.write(" ")
         out.write(data[2])
         out.write("=\"")
-        printXMLAttribute(str(result), context, out, False)
+        printXMLAttribute(str(result), out)
         out.write('"')
 
 class ForStatus(object):

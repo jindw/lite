@@ -7,17 +7,15 @@ class TestBean {
        return $arg1 * $this->rate;
     }
 }
-/* 难道php就没有办法动态调用对象方法吗？ */
-function test($v){
-    return $v * 3;
-}
 
 //print("object.test(123);#123*3=369")
 $el = json_decode('[[-1,"object"],[48,"test"],[-3],[0,123],[1,null],[81]]');
 $data = array("object"=>new TestBean());
-
-
 echo (evaluate($el,array("object"=>new TestBean())));
 
+
+echo ("v1 = 1;");
+$el= json_decode('[[-1,"v1"]]');
+//echo (evaluate($el,json_decode('{"v1":1}')));
 
 ?>
