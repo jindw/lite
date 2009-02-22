@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.xidea.lite.TempateEngine;
+import org.xidea.lite.TemplateEngine;
 import org.xidea.lite.parser.DecoratorMapper;
 import org.xidea.webwork.result.ServletDispatcherResult;
 
@@ -30,7 +30,7 @@ public class WebworkTempateServlet extends GenericServlet {
 	private static final Log log = LogFactory
 			.getLog(WebworkTempateServlet.class);
 
-	private TempateEngine tempateEngine;
+	private TemplateEngine templateEngine;
 	public WebworkTempateServlet() {
 	}
 
@@ -68,7 +68,7 @@ public class WebworkTempateServlet extends GenericServlet {
 			throws ServletException, IOException {
 		HttpServletRequest request = (HttpServletRequest) req;
 		String path = request.getServletPath();
-		tempateEngine.render(path, createDefaultModel(request), resp
+		templateEngine.render(path, createDefaultModel(request), resp
 				.getWriter());
 	}
 
@@ -77,7 +77,7 @@ public class WebworkTempateServlet extends GenericServlet {
 		super.init(config);
 		try {
 			final ServletContext context = config.getServletContext();
-			tempateEngine = new TempateEngine() {
+			templateEngine = new TemplateEngine() {
 				{
 					String decoratorPath = config
 							.getInitParameter("decoratorMapping");
