@@ -15,54 +15,32 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
+import ognl.OgnlContext;
+import ognl.OgnlException;
+import ognl.OgnlRuntime;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.lite.TemplateEngine;
 import org.xidea.lite.parser.DecoratorMapper;
-import org.xidea.webwork.result.ServletDispatcherResult;
 
-import com.opensymphony.xwork.ActionContext;
-import com.opensymphony.xwork.util.OgnlValueStack;
 
 public class WebworkTempateServlet extends GenericServlet {
 	private static final long serialVersionUID = 1L;
-	@SuppressWarnings("unused")
 	private static final Log log = LogFactory
 			.getLog(WebworkTempateServlet.class);
 
 	private TemplateEngine templateEngine;
+
 	public WebworkTempateServlet() {
 	}
 
 	protected Map<Object, Object> createDefaultModel(
 			final HttpServletRequest req) {
-		final OgnlValueStack stack = ActionContext.getContext().getValueStack();
-		@SuppressWarnings("unchecked")
-		Map<Object, Object> model = new HashMap<Object, Object>() {
-			/**
-			 * 
-			 */
-			private static final long serialVersionUID = 1L;
-
-			public Object get(Object key) {
-				if (super.containsKey(key)) {
-					return super.get(key);
-				} else if (key instanceof String) {
-					return stack.findValue((String) key);
-				}
-				return super.get(key);
-			}
-		};
-		// super.createDefaultModel(req);
-		model.put("params", req.getParameterMap());
-		Object uri = req
-				.getAttribute(ServletDispatcherResult.WEBWORK_REQUEST_URI);
-		if (uri == null) {
-			uri = req.getRequestURI();
-		}
-		model.put("requestURI", uri);
-		return model;
+		OgnlContext context = (OgnlContext) com.opensymphony.xwork.ActionContext.getContext().getValueStack().getContext();
+		return new OgnlContextMap(context);
 	}
+
 	@Override
 	public void service(ServletRequest req, ServletResponse resp)
 			throws ServletException, IOException {
@@ -75,26 +53,53 @@ public class WebworkTempateServlet extends GenericServlet {
 	@Override
 	public void init(final ServletConfig config) throws ServletException {
 		super.init(config);
-		try {
-			final ServletContext context = config.getServletContext();
-			templateEngine = new TemplateEngine() {
-				{
-					String decoratorPath = config
-							.getInitParameter("decoratorMapping");
-					if(decoratorPath == null){
-						decoratorPath = DEFAULT_DECORATOR_MAPPING;
-					}
-					this.decoratorMapper = new DecoratorMapper(context
-							.getResourceAsStream(decoratorPath));
-				}
-				protected URL getResource(String pagePath)
-						throws MalformedURLException {
-					return new File(context.getRealPath(pagePath)).toURI().toURL();
-				}
-			};
+		templateEngine = new ServletTemplateEngine(config.getServletContext());
 
-		} catch (Exception e) {
-			log.error("装载页面装饰配置信息失败", e);
+	}
+
+	static class ServletTemplateEngine extends TemplateEngine {
+		private ServletContext context;
+		public ServletTemplateEngine(ServletContext context) {
+			this.context = context;
+			try {
+				String decoratorPath = context
+						.getInitParameter("decoratorMapping");
+				if (decoratorPath == null) {
+					decoratorPath = DEFAULT_DECORATOR_MAPPING;
+				}
+				this.decoratorMapper = new DecoratorMapper(context
+						.getResourceAsStream(decoratorPath));
+			} catch (Exception e) {
+				log.error("装载页面装饰配置信息失败", e);
+			}
+		}
+
+		protected URL getResource(String pagePath) throws MalformedURLException {
+			return new File(context.getRealPath(pagePath)).toURI().toURL();
+		}
+	}
+
+	static class OgnlContextMap extends HashMap<Object, Object> {
+		private static final long serialVersionUID = 1L;
+		private OgnlContext context;
+
+		public OgnlContextMap(OgnlContext context) {
+			this.context = context;
+		}
+
+		public Object get(Object key) {
+			if (super.containsKey(key)) {
+				return super.get(key);
+			} else if (key instanceof String) {
+				try {
+					return OgnlRuntime.getProperty(context, context.getRoot(),
+							key);
+				} catch (OgnlException e) {
+					return null;
+				}
+				// return stack.findValue((String) key);
+			}
+			return super.get(key);
 		}
 	}
 }
