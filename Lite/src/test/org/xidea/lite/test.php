@@ -1,5 +1,6 @@
 <?php
 require('Expression.php');
+require('Template.php');
 class TestBean {
     var $rate=100;
     function test($arg1){

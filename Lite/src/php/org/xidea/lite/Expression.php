@@ -153,26 +153,27 @@ function compute($op, $arg1, $arg2) {
 function getTokenValue($context, $item) {
 	global $globalMap;
 	$type = $item[0];
-	if ($type==VALUE_CONSTANTS) {
-		return $item[1];
-	} elseif($type==VALUE_VAR) {
-		$value = $item[1];
-		if ('this'==$value) {
-			return $context;
-		} else {
-			if (array_key_exists($value, $context)) {
-				return $context[$value];
-			} elseif (array_key_exists($value, $globalMap)) {
-				return $globalMap[$value];
+	switch($type){
+		case VALUE_CONSTANTS:
+			return $item[1];
+		case VALUE_VAR:
+			$value = $item[1];
+			if ('this'==$value) {
+				return $context;
+			} else {
+				if (array_key_exists($value, $context)) {
+					return $context[$value];
+				} elseif (array_key_exists($value, $globalMap)) {
+					return $globalMap[$value];
+				}
+				return null;
 			}
-			return null;
-		}
-	} elseif($type==VALUE_NEW_LIST) {
-		return array();
-	} elseif($type==VALUE_NEW_MAP) {
-		return new stdClass();
-	} elseif($type==VALUE_LAZY) {
-		return LazyToken($item[1]);
+		case VALUE_NEW_LIST:
+			return array();
+		case VALUE_NEW_MAP:
+			return new stdClass();
+		case VALUE_LAZY:
+			return LazyToken($item[1]);
 	}
 }
 
