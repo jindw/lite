@@ -17,7 +17,7 @@ import org.xidea.lite.Template;
 public class ParseContextImpl implements ParseContext {
 	private static final long serialVersionUID = 1L;
 
-	private HashMap<Object, Object> variables = new HashMap<Object, Object>();
+	private HashMap<Object, Object> attributeMap = new HashMap<Object, Object>();
 	private URL currentURL;
 	private ArrayList<Object> result = new ArrayList<Object>();
 	private HashSet<URL> resources = new HashSet<URL>();
@@ -53,11 +53,11 @@ public class ParseContextImpl implements ParseContext {
 	}
 
 	public void setAttribute(Object key, Object value) {
-		this.variables.put(key, value);
+		this.attributeMap.put(key, value);
 	}
 
 	public Object getAttribute(Object key) {
-		return this.variables.get(key);
+		return this.attributeMap.get(key);
 	}
 
 	public URL getCurrentURL() {
@@ -237,21 +237,22 @@ public class ParseContextImpl implements ParseContext {
 		assert (stackTop == 0);
 
 		HashMap<String, Object> attributeMap = new HashMap<String, Object>();
-		if (!this.typeIdMap.isEmpty() ){
+		if (!this.typeIdMap.isEmpty()) {
 			Map instanceMap = toIdObject(typeIdMap);
-			attributeMap.put("attributeMap", instanceMap);
+			attributeMap.put(BuildInAdvice.INSTANCE_MAP, instanceMap);
 		}
-		if(!this.objectIdMap.isEmpty()) {
+		if (!this.objectIdMap.isEmpty()) {
 			Map instanceMap = toIdObject(objectIdMap);
-			attributeMap.put("objectMap", instanceMap);
+			attributeMap.put(BuildInAdvice.OBJECT_MAP, instanceMap);
 		}
-		if(!attributeMap.isEmpty()) {
-			current.add(Arrays.asList(Template.ADD_ON_TYPE,
+		if (!attributeMap.isEmpty()) {
+			current.add(Arrays.asList(new Object[] { Template.ADD_ON_TYPE,
 					new ArrayList<Object>(), JSONEncoder.encode(attributeMap),
-					BuildInAdvice.class.getName()));
+					BuildInAdvice.class.getName() }));
 		}
 		return current;
 	}
+
 	@SuppressWarnings("unchecked")
 	private Map toIdObject(Map objectIdMap) {
 		HashMap instanceMap = new HashMap<String, String>();
@@ -283,23 +284,23 @@ public class ParseContextImpl implements ParseContext {
 
 	public String addGlobalObject(Class<? extends Object> class1, String key) {
 		String name = class1.getName();
-		return addGlobalObject(typeIdMap,name, key);
+		return addGlobalObject(typeIdMap, name, key);
 	}
 
 	public String addGlobalObject(Object object, String key) {
-		return addGlobalObject(objectIdMap,object, key);
+		return addGlobalObject(objectIdMap, object, key);
 	}
 
 	@SuppressWarnings("unchecked")
-	private String addGlobalObject(Map objectIdMap,Object object, String key) {
-		String id = (String) (key == null? objectIdMap.get(object):key);
+	private String addGlobalObject(Map objectIdMap, Object object, String key) {
+		String id = (String) (key == null ? objectIdMap.get(object) : key);
 		if (id == null) {
 			id = "__" + inc++ + "__";
 			objectIdMap.put(object, id);
 		}
 		return id;
 	}
-	
+
 	public void appendAttribute(Object el, String name) {
 		this.append(new Object[] { Template.XML_ATTRIBUTE_TYPE, el, name });
 
@@ -334,6 +335,5 @@ public class ParseContextImpl implements ParseContext {
 		this.append(new Object[] { Template.EL_TYPE, testEL });
 
 	}
-
 
 }
