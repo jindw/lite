@@ -42,7 +42,7 @@ public class XWorkTempateServlet extends GenericServlet {
 			throws ServletException, IOException {
 		HttpServletRequest request = (HttpServletRequest) req;
 		String path = request.getServletPath();
-		templateEngine.render(path, createDefaultModel(request), resp
+		templateEngine.render(path, createModel(request), resp
 				.getWriter());
 	}
 
