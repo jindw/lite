@@ -46,7 +46,7 @@ public class XWorkTempateServlet extends GenericServlet {
 				.getWriter());
 	}
 
-	protected Map<Object, Object> createDefaultModel(
+	protected Map<Object, Object> createModel(
 			final HttpServletRequest req) {
 		//对XWork1.*,请将xwork2替换成xwork
 		OgnlContext context = (OgnlContext) com.opensymphony.xwork2.ActionContext.getContext().getValueStack().getContext();
