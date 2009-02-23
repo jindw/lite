@@ -2,7 +2,8 @@
 == 废话面谈，上代码 ==
 
 {{{
-package org.xxx.yyy;
+
+package org.xidea.lite.servlet;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,15 +30,12 @@ import org.xidea.lite.TemplateEngine;
 import org.xidea.lite.parser.DecoratorMapper;
 
 
-public class WebworkTempateServlet extends GenericServlet {
+public class XWorkTempateServlet extends GenericServlet {
 	private static final long serialVersionUID = 1L;
 	private static final Log log = LogFactory
 			.getLog(WebworkTempateServlet.class);
 
 	private TemplateEngine templateEngine;
-
-	public WebworkTempateServlet() {
-	}
 
 	protected Map<Object, Object> createDefaultModel(
 			final HttpServletRequest req) {
@@ -102,7 +100,6 @@ public class WebworkTempateServlet extends GenericServlet {
 				} catch (OgnlException e) {
 					return null;
 				}
-				// return stack.findValue((String) key);
 			}
 			return super.get(key);
 		}
