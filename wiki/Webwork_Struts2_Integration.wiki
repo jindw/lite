@@ -37,13 +37,6 @@ public class XWorkTempateServlet extends GenericServlet {
 
 	private TemplateEngine templateEngine;
 
-	protected Map<Object, Object> createDefaultModel(
-			final HttpServletRequest req) {
-		//对XWork1.*,请将xwork2替换成xwork
-		OgnlContext context = (OgnlContext) com.opensymphony.xwork2.ActionContext.getContext().getValueStack().getContext();
-		return new OgnlContextMap(context);
-	}
-
 	@Override
 	public void service(ServletRequest req, ServletResponse resp)
 			throws ServletException, IOException {
@@ -51,6 +44,13 @@ public class XWorkTempateServlet extends GenericServlet {
 		String path = request.getServletPath();
 		templateEngine.render(path, createDefaultModel(request), resp
 				.getWriter());
+	}
+
+	protected Map<Object, Object> createDefaultModel(
+			final HttpServletRequest req) {
+		//对XWork1.*,请将xwork2替换成xwork
+		OgnlContext context = (OgnlContext) com.opensymphony.xwork2.ActionContext.getContext().getValueStack().getContext();
+		return new OgnlContextMap(context);
 	}
 
 	@Override
@@ -91,17 +91,14 @@ public class XWorkTempateServlet extends GenericServlet {
 		}
 
 		public Object get(Object key) {
-			if (super.containsKey(key)) {
-				return super.get(key);
-			} else if (key instanceof String) {
+			Object value = super.get(key);
+			if (value== null && key instanceof String && !super.containsKey(key)) {
 				try {
-					return OgnlRuntime.getProperty(context, context.getRoot(),
-							key);
+					value = OgnlRuntime.getProperty(context, context.getRoot(),key);
 				} catch (OgnlException e) {
-					return null;
 				}
 			}
-			return super.get(key);
+			return value;
 		}
 	}
 }
