@@ -97,21 +97,25 @@ public class TemplateEngine{
 		}
 	}
 
-	private TemplateEntry createTemplateEntry(String path) {
-		ParseContext parseContext = new ParseContextImpl();
-		Template template = createTemplate(path, parseContext);
-		Set<URL> resources = parseContext.getResources();
+	protected List<File> getAssociatedFiles(Set<URL> resources) {
 		ArrayList<File> files = new ArrayList<File>();
 		for (URL url : resources) {
 			if ("file".equals(url.getProtocol())) {
 				files.add(new File(url.getFile()));
 			}
 		}
-		return new TemplateEntry(template, files.toArray(new File[files.size()]));
+		return files;
+	}
+
+	protected ParseContext createParseContext() {
+		return new ParseContextImpl();
 	}
 
 	protected Template createTemplate(String path, ParseContext parseContext) {
-		String decoratorPath = decoratorMapper.getDecotatorPage(path);
+		String decoratorPath = null;
+		if(decoratorMapper!=null){
+			decoratorPath = decoratorMapper.getDecotatorPage(path);
+		}
 		if(this.webRoot!=null){
 			try {
 				parseContext.addResource(new File(webRoot,path).toURI().toURL());
@@ -140,6 +144,13 @@ public class TemplateEngine{
 		}
 	}
 
+	private TemplateEntry createTemplateEntry(String path) {
+		ParseContext parseContext = createParseContext();
+		Template template = createTemplate(path, parseContext);
+		List<File> files = getAssociatedFiles(parseContext.getResources());
+		return new TemplateEntry(template, files.toArray(new File[files.size()]));
+	}
+	
 	private static class TemplateEntry {
 		private Template template;
 		private File[] files;

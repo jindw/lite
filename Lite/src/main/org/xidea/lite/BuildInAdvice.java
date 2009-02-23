@@ -8,6 +8,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class BuildInAdvice implements CompileAdvice {
+	public final static String INSTANCE_MAP = "instanceMap";
+	public final static String OBJECT_MAP = "objectMap";
 	private static Log log = LogFactory.getLog(BuildInAdvice.class);
 	private Map<String, ? extends Object> instanceMap = Collections.emptyMap();
 	private Map<String, ? extends Object> objectMap = Collections.emptyMap();

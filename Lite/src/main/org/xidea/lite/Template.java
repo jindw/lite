@@ -125,7 +125,8 @@ public class Template {
 	protected void compileAddOns(final Object[] cmd, List<Object> result) {
 		try {
 			cmd[1] = compile((List<Object>) cmd[1]);
-			Expression el = (Expression) (cmd[2] = createExpression(cmd[2]));
+			Expression el  = createExpression(cmd[2]);
+			cmd[2] = el;
 			Class<? extends Object> addOnType = Class.forName(String
 					.valueOf(cmd[3]));
 			cmd[3] = addOnType;
