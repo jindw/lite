@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="http://www.xidea.org/ns/template/core"
+	xmlns="http://www.xidea.org/ns/template/core"
+	elementFormDefault="qualified">
+	<xs:annotation>
+		<xs:documentation>Lite 模板引擎核心标记库xml语法描述文档</xs:documentation>
+	</xs:annotation>
+	<xs:simpleType name="EL" id="EL">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="$\{[\s\S]+\}" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:element name="var">
+		<xs:annotation>
+			<xs:documentation>
+				变量申明，可以通过value属性，也可以通过捕捉子节点内容
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType mixed="true">
+			<xs:sequence>
+				<xs:any minOccurs="0" maxOccurs="unbounded"
+					processContents="lax" />
+			</xs:sequence>
+			<xs:attribute name="name" type="xs:NMTOKEN" use="required" />
+			<xs:attribute name="value" type="xs:NMTOKEN" use="optional" />
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="out">
+		<xs:annotation>
+			<xs:documentation>
+				输出标签，用于输出无需经过转义的xml内容（${}输出的内容将被转义处理）
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType mixed="false">
+			<xs:attribute name="value" type="EL" use="optional" />
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="for">
+		<xs:annotation>
+			<xs:documentation>循环标签</xs:documentation>
+		</xs:annotation>
+		<xs:complexType mixed="true">
+			<xs:sequence>
+				<xs:any minOccurs="0" maxOccurs="unbounded"
+					processContents="lax" />
+			</xs:sequence>
+			<xs:attribute name="items" type="EL" use="required">
+				<xs:annotation>
+					<xs:documentation>用于指定循环的数据</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="var" type="xs:ID" use="required">
+				<xs:annotation>
+					<xs:documentation>指定循环元素映射的变量名</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="if">
+		<xs:complexType mixed="true">
+			<xs:sequence>
+				<xs:any minOccurs="0" maxOccurs="unbounded"
+					processContents="lax">
+				</xs:any>
+			</xs:sequence>
+			<xs:attribute name="test" type="EL" use="required">
+				<xs:annotation>
+					<xs:documentation>指定判断语句</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="else">
+		<xs:complexType mixed="true">
+			<xs:sequence>
+				<xs:any minOccurs="0" maxOccurs="unbounded"
+					processContents="lax">
+				</xs:any>
+			</xs:sequence>
+			<xs:attribute name="test" type="EL" use="optional">
+				<xs:annotation>
+					<xs:documentation>指定判断语句</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="choose">
+		<xs:annotation>
+			<xs:documentation>一组分支选择</xs:documentation>
+		</xs:annotation>
+		<xs:complexType mixed="false">
+			<xs:sequence>
+				<xs:element ref="when" minOccurs="1"
+					maxOccurs="unbounded">
+				</xs:element>
+				<xs:element ref="otherwise" minOccurs="0"
+					maxOccurs="1">
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="when">
+		<xs:annotation>
+			<xs:documentation>
+				分支选择中的分支之一（必须是choose的直接子节点）
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType mixed="true">
+			<xs:sequence>
+				<xs:any minOccurs="0" maxOccurs="unbounded"
+					processContents="lax">
+				</xs:any>
+			</xs:sequence>
+			<xs:attribute name="test" type="EL" use="required">
+				<xs:annotation>
+					<xs:documentation>指定判断语句</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="otherwise">
+		<xs:annotation>
+			<xs:documentation>
+				分支选择中五命中分支（当所有when未命中之后执行，必须是choose的直接子节点）
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType mixed="true">
+			<xs:sequence>
+				<xs:any minOccurs="0" maxOccurs="unbounded"
+					processContents="lax">
+				</xs:any>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="include">
+		<xs:complexType mixed="true">
+			<xs:sequence>
+				<xs:any minOccurs="0" maxOccurs="unbounded"
+					processContents="lax">
+				</xs:any>
+			</xs:sequence>
+			<xs:attribute name="path" type="xs:NMTOKEN" use="optional" />
+			<xs:attribute name="xpath" type="xs:NMTOKEN" use="optional" />
+			<xs:attribute name="var" type="xs:NMTOKEN" use="optional">
+				<xs:annotation>
+					<xs:documentation>
+						将该元素的子元素执行后作为一个字符串变量，以供以后使用
+					</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="name" type="xs:NMTOKEN"
+				use="optional">
+				<xs:annotation>
+					<xs:documentation>
+						在编译期间记录该节点，以供以后 include 时候指定path="#{name}
+						方式引用该节点"
+					</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>
