@@ -114,9 +114,9 @@ public class HTMLFormNodeParser extends HTMLNodeParser implements NodeParser {
 		Element selectNode = (Element) context.getAttribute(KEY_SELECT);
 		if (!element.hasAttribute(ATTRIBUTE_SELECTED)) {
 			if (selectNode.hasAttribute(ATTRIBUTE_NAME)
-					&& selectNode.hasAttribute(ATTRIBUTE_VALUE)) {
+					&& element.hasAttribute(ATTRIBUTE_VALUE)) {
 				String name = selectNode.getAttribute(ATTRIBUTE_NAME);
-				String value = selectNode.getAttribute(ATTRIBUTE_VALUE);
+				String value = element.getAttribute(ATTRIBUTE_VALUE);
 				List<Object> attributes = buildCheckedAttribute(context,
 						name, value, ATTRIBUTE_SELECTED);
 				return parseHTMLElement(element, context, attributes);
