@@ -30,6 +30,8 @@ public class TempateServlet extends GenericServlet {
 	@Override
 	public void service(ServletRequest req, ServletResponse resp)
 			throws ServletException, IOException {
+		req.setCharacterEncoding("utf-8");
+		resp.setCharacterEncoding("utf-8");
 		HttpServletRequest request = (HttpServletRequest) req;
 		String path = request.getServletPath();
 		templateEngine.render(path, createModel(request), resp.getWriter());

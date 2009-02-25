@@ -32,65 +32,28 @@ public class HelloWorld extends ActionSupport {
 	private final int[] numbers = new int[] { 1, 2, 3, 4, 5 };
 	private final String[] labels = new String[] { "金", "木", "水", "火", "土" };
 
-	private int[] myNumbers = new int[] { 3, 4 };
-	private String[] myLabels = new String[] { "水", "火" };
-
-	private int number1 = 3;
-	private String label1 = "水";
-
-	private int number2 = 4;
-	private String label2 = "火";
-
+	private boolean test = false;
+	private int testNumber = 2;
+	private String testString = "木";
+	
 	public String execute() throws Exception {
 		return SUCCESS;
 	}
 
-	public int[] getMyNumbers() {
-		return myNumbers;
+	public int getTestNumber() {
+		return testNumber;
 	}
 
-	public void setMyNumbers(int[] myNumbers) {
-		this.myNumbers = myNumbers;
+	public void setTestNumber(int testNumber) {
+		this.testNumber = testNumber;
 	}
 
-	public String[] getMyLabels() {
-		return myLabels;
+	public String getTestString() {
+		return testString;
 	}
 
-	public void setMyLabels(String[] myLabels) {
-		this.myLabels = myLabels;
-	}
-
-	public int getNumber1() {
-		return number1;
-	}
-
-	public void setNumber1(int number1) {
-		this.number1 = number1;
-	}
-
-	public String getLabel1() {
-		return label1;
-	}
-
-	public void setLabel1(String label1) {
-		this.label1 = label1;
-	}
-
-	public int getNumber2() {
-		return number2;
-	}
-
-	public void setNumber2(int number2) {
-		this.number2 = number2;
-	}
-
-	public String getLabel2() {
-		return label2;
-	}
-
-	public void setLabel2(String label2) {
-		this.label2 = label2;
+	public void setTestString(String testString) {
+		this.testString = testString;
 	}
 
 	public int[] getNumbers() {
@@ -100,5 +63,14 @@ public class HelloWorld extends ActionSupport {
 	public String[] getLabels() {
 		return labels;
 	}
+
+	public boolean isTest() {
+		return test;
+	}
+
+	public void setTest(boolean test) {
+		this.test = test;
+	}
+
 	
 }

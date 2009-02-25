@@ -1,0 +1,9 @@
+<decorators>
+    <excludes>
+		<pattern>/user/login.xhtml</pattern>
+		<pattern>/**-json.xhtml</pattern>
+	</excludes>
+    <decorator name="example" page="/example/page-layout.xhtml">
+        <pattern>/example/*.xhtml</pattern>
+    </decorator>
+</decorators>
