@@ -89,5 +89,7 @@ public interface ParseContext {
 
 	public void appendFor(String var, Object itemsEL, String status);
 
+	public URL createURL(URL parentURL, String file);
+
 
 }

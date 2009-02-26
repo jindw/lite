@@ -1,6 +1,7 @@
 package org.xidea.lite.parser;
 
 import java.io.StringWriter;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,6 +28,11 @@ public class ParseContextImpl implements ParseContext {
 	private int inc = 0;
 	private boolean reserveSpace;
 	private boolean format = false;
+	private URL base;
+
+	public ParseContextImpl(URL base) {
+		this.base = base;
+	}
 
 	public int getDepth() {
 		return depth;
@@ -334,6 +340,28 @@ public class ParseContextImpl implements ParseContext {
 	public void appendEL(Object testEL) {
 		this.append(new Object[] { Template.EL_TYPE, testEL });
 
+	}
+
+	public URL createURL(URL parentURL, String path) {
+		try {
+			if (this.base == null) {
+				return new URL(parentURL, path);
+			}
+			if (parentURL == null) {
+				if (path.startsWith("/")) {
+					path = path.substring(1);
+				}
+				return new URL(this.base, path);
+			}
+			//base !=null && parentURL != null
+			if (path.startsWith("/") && parentURL.toExternalForm().startsWith(this.base.toExternalForm())) {
+				return new URL(this.base, path.substring(1));
+			}
+			return new URL(parentURL,path);
+
+		} catch (MalformedURLException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 }

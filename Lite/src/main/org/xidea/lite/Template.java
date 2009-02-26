@@ -280,6 +280,7 @@ public class Template {
 				}
 			} else if (list instanceof Number) {
 				len = ((Number) list).intValue();
+				forStatus.setSize(len);
 				while (++forStatus.index < len) {
 					context.put(varName, forStatus.index + 1);
 					renderList(context, children, out);

@@ -34,7 +34,7 @@
 			</xs:documentation>
 		</xs:annotation>
 		<xs:complexType mixed="false">
-			<xs:attribute name="value" type="EL" use="optional" />
+			<xs:attribute name="value" default="${value}" type="EL" use="optional" />
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="for">
@@ -46,14 +46,19 @@
 				<xs:any minOccurs="0" maxOccurs="unbounded"
 					processContents="lax" />
 			</xs:sequence>
+			<xs:attribute name="var" type="xs:Name" use="required">
+				<xs:annotation>
+					<xs:documentation>指定循环元素映射的变量名</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
 			<xs:attribute name="items" type="EL" use="required">
 				<xs:annotation>
 					<xs:documentation>用于指定循环的数据</xs:documentation>
 				</xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="var" type="xs:ID" use="required">
+			<xs:attribute name="status" type="xs:Name" use="optional">
 				<xs:annotation>
-					<xs:documentation>指定循环元素映射的变量名</xs:documentation>
+					<xs:documentation>循环状态（for）别名。该对象可由有如下几个属性：depth,index,lastIndex</xs:documentation>
 				</xs:annotation>
 			</xs:attribute>
 		</xs:complexType>
