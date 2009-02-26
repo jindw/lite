@@ -140,15 +140,11 @@ var fns = {
 				}
 				break;
 			case '[':
-				if (this.status == STATUS_BEGIN || this.status == STATUS_OPERATOR) {// list
-					this.addList();
-
-				} else if (this.status == STATUS_EXPRESSION) {// getProperty
+				if (this.status == STATUS_EXPRESSION) {// getProperty
 					this.addToken([OP_GET_PROP]);
 					this.addToken([BRACKET_BEGIN]);
-				} else {
-					throw new Error("语法错误:" + this.value + "@"
-							+ this.start);
+				}else {// list
+					this.addList();
 				}
 				break;
 			case '{':
@@ -161,15 +157,12 @@ var fns = {
 				break;
 			case '+'://
 				this.addToken([
-						this.status == STATUS_OPERATOR ? OP_POS
-								: OP_ADD]);
-				// this.addToken(OperatorToken.getToken(SKIP_AND));
+						this.status == STATUS_EXPRESSION ? OP_ADD : OP_POS]);
 				break;
 			case '-':
 				this.addToken([
-						this.status == STATUS_OPERATOR ? OP_NEG
-								: OP_SUB]);
-				// this.addToken(OperatorToken.getToken(SKIP_AND));
+						this.status == STATUS_EXPRESSION ? OP_SUB
+								: OP_NEG]);
 				break;
 			case '?':// ?:
 				this.addToken([OP_QUESTION]);
