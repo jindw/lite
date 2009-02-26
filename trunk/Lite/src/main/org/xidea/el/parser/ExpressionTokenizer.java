@@ -294,15 +294,11 @@ public class ExpressionTokenizer extends JSONTokenizer {
 				}
 				break;
 			case '[':
-				if (status != Status.STATUS_EXPRESSION) {// list
-					addList();
-
-				} else if (status == Status.STATUS_EXPRESSION) {// getProperty
+				if (status == Status.STATUS_EXPRESSION) {// getProperty
 					addToken(new TokenImpl(OP_GET_PROP, null));
 					addToken(new TokenImpl(BRACKET_BEGIN, null));
-				} else {
-					throw new ExpressionSyntaxException("语法错误:" + value + "@"
-							+ start);
+				} else {// list
+					addList();
 				}
 				break;
 			case '{':

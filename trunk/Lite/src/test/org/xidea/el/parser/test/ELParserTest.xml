@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<java version="1.6.0_02" class="java.beans.XMLDecoder">
+	<object class="java.util.LinkedHashMap">
+		<void method="put">
+			<string>text1</string>
+			<string>t1</string>
+		</void>
+		<void method="put">
+			<string>boolean0</string>
+			<boolean>false</boolean>
+		</void>
+		<void method="put">
+			<string>number1</string>
+			<int>1</int>
+		</void>
+	</object>
+	<object class="java.util.LinkedHashMap">
+		<void method="put">
+			<string><![CDATA[-var1+2*3]]></string>
+			<string><![CDATA[[[-1,"var1"],[78],[0,2],[0,3],[13],[11]]]]></string>
+		</void>
+		<void method="put">
+			<string><![CDATA[+var1+2*3]]></string>
+			<string><![CDATA[[[-1,"var1"],[46],[0,2],[0,3],[13],[11]]]]></string>
+		</void>
+	</object>
+</java>
