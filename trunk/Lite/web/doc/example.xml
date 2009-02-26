@@ -2,11 +2,10 @@
 	xmlns:c="http://www.xidea.org/ns/template/core"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.xidea.org/ns/template/core core.xsd">
-	<c:for items="" var=""></c:for>
 	<c:for items="${[1,2,3,4]}">${item} - ${for.index}</c:for>
 	<c:choose>
-		<c:when test=""></c:when>
+		<c:when test="${i==1}">1</c:when>
+		<c:otherwise>2</c:otherwise>
 	</c:choose>
-	<c:if test="${dd}"></c:if>
-	<c:else test="${d}"></c:else>
+	<c:if test="${j=2}">x</c:if>
 </html>

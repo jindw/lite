@@ -132,13 +132,13 @@ public class CoreXMLNodeParser implements NodeParser {
 					}
 					if (uri != null) {
 						try {
-							context.setCurrentURL(new URL(uri));
+							context.setCurrentURL(context.createURL(null,uri));
 						} catch (Exception e) {
 						}
 					}
 				} else {
 					doc = this.parser
-							.loadXML(new URL(parentURL, path), context);
+							.loadXML(context.createURL(parentURL, path), context);
 				}
 			}
 
@@ -163,7 +163,7 @@ public class CoreXMLNodeParser implements NodeParser {
 							.getNode());
 				} else {
 					xsltSource = new javax.xml.transform.stream.StreamSource(
-							new URL(parentURL, xslt).openStream());
+							context.createURL(parentURL, xslt).openStream());
 				}
 
 				// create an instance of TransformerFactory
@@ -313,8 +313,8 @@ public class CoreXMLNodeParser implements NodeParser {
 		String content = getAttribute(node, "content");
 		if (file != null) {
 			try {
-				InputStream in = new URL(context.getCurrentURL(), file)
-						.openStream();
+				URL url = context.createURL(null,file);
+				InputStream in = url.openStream();
 				InputStreamReader reader = new InputStreamReader(in,
 						encoding == null ? "utf-8" : encoding);
 				StringBuilder sbuf = new StringBuilder();

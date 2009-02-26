@@ -19,7 +19,7 @@ public class TextParser implements Parser {
 
 
 	public List<Object> parse(Object data) {
-		return parse(data, new ParseContextImpl());
+		return parse(data, new ParseContextImpl(null));
 	}
 	public List<Object> parse(Object text,ParseContext context) {
 		parseText(context, (String)text, Template.EL_TYPE);

@@ -108,7 +108,11 @@ public class TemplateEngine{
 	}
 
 	protected ParseContext createParseContext() {
-		return new ParseContextImpl();
+		try {
+			return new ParseContextImpl(getResource("/"));
+		} catch (MalformedURLException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	protected Template createTemplate(String path, ParseContext parseContext) {
