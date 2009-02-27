@@ -14,30 +14,31 @@ ${user.name}。
     出现在XML文档的文本节点中，输出表达式值，并*编码*其xml特殊字符。
   * 说明:
     这个输出是自动编码的，若需要原始文本输出，需要使用：<c:out value="${html}"/>标签。
-    模版表达式求值，是一个基于模板上下文数据的读值和简单只读运算的过程。
-    在JavaScript中。其功能类似于
+    * 模版表达式求值行为：
+      个基于模板上下文数据的读值和简单只读运算的过程；在JavaScript中，其行为类似于：
 {{{
 function(el){with(context){return eval(el)})
 }}}
+ 
 
  ==== 输出标签 ====
   * 示例
 {{{
-<c:out value="${ user.name} "/>
+<c:out value="${ user.name} 不编码文本"/>
 }}}
   * value属性:
-    El表达式,描述需要输出的文本
+    El表达式和不编码字符串,描述需要输出的文本
   * 功能:
-    输出表达式值，但是*不编码*其xml标记。
+    输出文本和表达式值，但是*不编码*其xml标记。
   * 说明:
-    与直接的表达式唯一的区别是：*不编码*。
+    与直接的表达式输出最大的区别是：*不编码*。
 
  ==== 属性内表达式 ====
   * 示例:
 {{{
 <input type="button"
-onclick="${clickScript}"
-onmouseover="${overScript}"/>
+	onclick="${clickScript}"
+	onmouseover="${overScript}"/>
 }}}
   * 功能:
     输出表达式值（编码），但是如果整个属性节点的值为null，整个节点将不被输出。
@@ -57,9 +58,9 @@ onmouseover="${overScript}"/>
   * 示例:
 {{{
 <c:choose >
-<c:when test="${type == 1}">分支1</c:when >
-<c:when test="${type == 2}">分支2</c:when >
-<c:otherwise>分支3</c:otherwise>
+	<c:when test="${type == 1}">分支1</c:when >
+	<c:when test="${type == 2}">分支2</c:when >
+	<c:otherwise>分支3</c:otherwise>
 </c:choose >
 }}}
   * 功能:
@@ -71,7 +72,7 @@ onmouseover="${overScript}"/>
   * 示例:
 {{{
 <c:for var="item" items="${list}">
-${for.index}:${item}.
+	${for.index}:${item}.
 </c:for>
 <c:else>没有找到任何记录</c:else>
 }}}
@@ -106,7 +107,7 @@ ${for.index}:${item}.
   ==== 通过子节点申明变量====
     {{{
 <c:var name="myName" >
-${user.firstName} ${user.lastName}
+	${user.firstName} ${user.lastName}
 </c:var>
     }}}
     * 功能：
