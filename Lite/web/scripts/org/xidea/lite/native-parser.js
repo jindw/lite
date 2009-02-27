@@ -152,12 +152,9 @@ function appendCode(code,buf,idpool,depth){
                 
                 
                 printIndex(buf,depth,"var ",previousForValueId ,"=this['for']");
-                printIndex(buf,depth,"this['for'] = {lastIndex:",itemsId,".length-1,depth:",previousForValueId,"?",previousForValueId,".depth+1:0};" );
-                if(statusNameId){
-                    var previousStatusNameId = idpool.get();
-                    printIndex(buf,depth,"var ",previousStatusNameId ,"=",statusNameId);
-                	printIndex(buf,depth,"var ",statusNameId ,"=this['for'];" );
-                }
+                var forVar= statusNameId?["var ",statusNameId ,"="]:[];
+                forVar.push("this['for'] = {lastIndex:",itemsId,".length-1,depth:",previousForValueId,"?",previousForValueId,".depth+1:0};");
+                printIndex(buf,depth, forVar);
                 
                 printIndex(buf,depth,"for(;",indexId,"<",itemsId,".length;",indexId,"++){");
                 printIndex(buf,depth+1,"this['for'].index=",indexId,";");
@@ -167,10 +164,6 @@ function appendCode(code,buf,idpool,depth){
                 
                 
                 printIndex(buf,depth ,"this['for']=",previousForValueId);
-                if(statusNameId){
-                    idpool.free(previousStatusNameId)
-                    printIndex(buf,depth ,statusNameId,"=",previousStatusNameId);
-                }
                 
                 idpool.free(itemsId);;
                 idpool.free(previousForValueId);
