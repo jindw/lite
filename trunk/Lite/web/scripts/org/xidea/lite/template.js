@@ -210,8 +210,6 @@ function processFor(context, data, out) {
         var len = items.length;
 		var forStatus = {lastIndex:len-1,depth:preiousStatus?preiousStatus.depth+1:0};
 		context[FOR_KEY]= forStatus;
-		// context.put("for", forStatus);
-		// prepareFor(this);
 		if (statusName != null) {
 			context[statusName]=forStatus;
 		}
@@ -219,9 +217,6 @@ function processFor(context, data, out) {
 			forStatus.index = i;
 			context[varName]= items[i];
 			renderList(context, children, out);
-		}
-		if (statusName != null) {
-			context[statusName]= preiousStatus;
 		}
 	} finally {
 		// context.put("for", preiousStatus);

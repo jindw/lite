@@ -2,10 +2,22 @@
 	xmlns:c="http://www.xidea.org/ns/template/core"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.xidea.org/ns/template/core core.xsd">
-	<c:for items="${[1,2,3,4]}">${item} - ${for.index}</c:for>
+	<c:if test="${no==1}">No1</c:if>
+	<c:else>No2</c:else>
+
+
+	<c:for var="item" items="${[1,2,3,4]}">
+		${item} - ${for.index}
+		<c:for var="item2" items="${['a','b','c']}" status="status">
+			${item2} : ${status.index}
+		</c:for>
+	</c:for>
+
 	<c:choose>
-		<c:when test="${i==1}">1</c:when>
-		<c:otherwise>2</c:otherwise>
+		<c:when test="${test1}">test1</c:when>
+		<c:when test="${test2}">test2</c:when>
+		<c:otherwise>other</c:otherwise>
 	</c:choose>
-	<c:if test="${j=2}">x</c:if>
+
+	<c:var name="myname">${user.firstName}.${user.lastName}</c:var>
 </html>

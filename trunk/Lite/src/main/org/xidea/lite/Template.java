@@ -295,9 +295,6 @@ public class Template {
 					renderList(context, children, out);
 				}
 			}
-			if (statusName != null) {
-				context.put(statusName, preiousStatus);
-			}
 		} finally {
 			// context.put("for", preiousStatus);
 			context.put(FOR_KEY, preiousStatus);// for key

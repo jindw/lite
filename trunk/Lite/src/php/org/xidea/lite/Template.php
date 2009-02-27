@@ -123,14 +123,12 @@ function processFor($context, $data, $out){
             $context[$varName]=$item;
             renderList($context, $data, $out);
         }
-        if(isset($statusName)){
-            $context[$statusName]=$preiousStatus;
-        }
         $context[FOR_KEY]=$preiousStatus;
         $context[IF_KEY]= $length > 0;
     }catch(Exception $e){
         $context[FOR_KEY]=$preiousStatus;
         $context[IF_KEY]= $length > 0;
+        throw $e;
     }
 }
 

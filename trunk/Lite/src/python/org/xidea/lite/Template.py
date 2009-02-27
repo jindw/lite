@@ -140,8 +140,6 @@ def processFor(context, data, out):
             forStatus.index += 1
             context[varName]=item
             renderList(context, children, out)
-        if statusName is not None:
-            context[statusName]=preiousStatus
     finally:
         context[FOR_KEY]=preiousStatus
         context[IF_KEY]= length > 0
