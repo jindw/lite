@@ -17,9 +17,9 @@
 #include "json.h"
 
 
-json_value *json_new_value (const enum json_value_type type){
+struct json_value *json_new_value (const enum json_type type){
 	/* allocate memory to the new object */
-	json_value *new_object = malloc (sizeof (json_value));
+	struct json_value *new_object = malloc (sizeof (json_value));
 	if (new_object == NULL){
 		return NULL;
 	}
@@ -28,14 +28,14 @@ json_value *json_new_value (const enum json_value_type type){
 	return new_object;
 }
 
-void json_free (json_value ** value){
+void json_free (struct json_value ** value){
 	assert (value != NULL);
 	assert ((*value) != NULL);
 	switch ((*value)->type){
 	case JSON_ARRAY:
-		json_array* array = (*value)->array;
+		struct json_array* array = (*value)->array;
 		int len = array->length;
-		json_value values[] = array->values;
+		struct json_value values[] = array->values;
 		int i = len;
 		while (i--) {
 			json_free(&(&(values)[i]));
@@ -48,15 +48,15 @@ void json_free (json_value ** value){
 		json_free((*values)[size]);/* 这个语法可能有错？？*/
 		break;
 	case JSON_OBJECT:
-		json_object* array = (*value)->object;
+		struct json_object* array = (*value)->object;
 		int len = array->length;
-		json_key_value values[] = array->values;
+		struct json_key_value values[] = array->values;
 		int i = len;
 		while (i--) {
-			json_key_value * kv = &(*values)[i];
-			free(json_key_value->key);
-			json_free(json_key_value->value);
-			free(json_key_value);
+			struct json_key_value * kv = &(*values)[i];
+			free(kv->key);
+			json_free(kv->value);
+			free(kv);
 		}
 		int left = len/JSON_ARRAY_STEP;
 		int size =left * JSON_ARRAY_STEP;

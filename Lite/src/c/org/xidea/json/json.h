@@ -16,6 +16,7 @@
 
 #ifndef JSON_H
 #define JSON_H
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,6 +35,7 @@ enum json_type {
 	JSON_NULL
 };
 
+
 typedef struct json_value {
 	enum json_type type;
 	union {
@@ -41,37 +43,38 @@ typedef struct json_value {
 		int intValue;
 		float float_value;
 		float floatValue;
-		bool boolean_value;
-		bool booleanValue;
-		string* string;
-		json_object* object;
-		json_array* array;
+		int boolean_value;
+		int booleanValue;
+		const char* string;
+		struct json_object *object;
+		struct json_array *array;
 	};
-};
-typedef struct json_key_value {
-	string* key;
-	json_value* value;
-};
-typedef struct json_object {
-	int length;
-	json_key_value* values[];
-};
+} json_value;
+
+
 typedef struct json_array {
 	int length;
-	json_value* values[];
-};
+	struct json_value values[];
+} json_array;
+typedef struct json_key_value {
+	const char* key;
+	struct json_value* value;
+} json_key_value;
+typedef struct json_object {
+	int length;
+	struct json_key_value values[];
+} json_object;
+struct json_value* json_get_by_key (struct json_value * thiz,const char* key);
 
-json_value* json_get_value (json_object * object,string *key);
+struct json_value* json_put_value (struct json_value * thiz,const char* key, struct json_value * value);
 
-json_value* json_put_value (json_object * object,string *key, json_object * object);
+struct json_value* json_get_by_index (struct json_value * thiz,int index);
 
-json_value* json_get_value (json_object * object,int index);
+struct json_value* json_add_value (struct json_value * thiz,struct json_value * value);
 
-json_value* json_add_value (json_object * object,json_object * object);
+struct json_value* json_new(enum json_type type);
 
-json_value* json_new(json_type type);
-
-void json_free (json_object * object);
+void json_free (struct json_value ** value)
 
 #ifdef __cplusplus
 }

@@ -31,10 +31,10 @@
 #define LITE_IF_KEY "if"
 
 
-using namespace std;
 
 #ifdef __cplusplus
 
+using namespace std;
 namespace lite {
 
 class Template {
