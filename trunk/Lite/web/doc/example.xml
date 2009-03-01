@@ -2,8 +2,9 @@
 	xmlns:c="http://www.xidea.org/ns/template/core"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.xidea.org/ns/template/core core.xsd">
-	<c:if test="${no==1}">No1</c:if>
-	<c:else>No2</c:else>
+
+	<c:if test="${test}">SHUCHU</c:if>
+
 
 
 	<c:for var="item" items="${[1,2,3,4]}">
@@ -12,7 +13,12 @@
 			${item2} : ${status.index}
 		</c:for>
 	</c:for>
-
+	<c:for items="${item}" var="item">
+		${for.index}
+	</c:for>
+	
+	
+	
 	<c:choose>
 		<c:when test="${test1}">test1</c:when>
 		<c:when test="${test2}">test2</c:when>
