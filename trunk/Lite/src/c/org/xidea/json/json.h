@@ -64,13 +64,13 @@ typedef struct json_object {
 	int length;
 	struct json_key_value values[];
 } json_object;
-struct json_value* json_get_by_key (struct json_value * thiz,const char* key);
+struct json_value* json_get_by_key (struct json_object * thiz,const char* key);
 
-struct json_value* json_put_value (struct json_value * thiz,const char* key, struct json_value * value);
+struct json_value* json_put_value (struct json_object * thiz,const char* key, struct json_value * value);
 
-struct json_value* json_get_by_index (struct json_value * thiz,int index);
+struct json_value* json_get_by_index (struct json_array * thiz,int index);
 
-struct json_value* json_add_value (struct json_value * thiz,struct json_value * value);
+struct json_value* json_add_value (struct json_array * thiz,struct json_value * value);
 
 struct json_value* json_new(enum json_type type);
 
