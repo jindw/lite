@@ -60,7 +60,6 @@
 #define LITE_EL_OP_MAP_PUSH 33;/*32 | 0 | 1;*/
 
 #ifdef __cplusplus
-
 namespace lite {
 class Expression {
 public:
@@ -72,9 +71,7 @@ protected:
 };
 }
 #else
-extern "C" {
-	json_value* lite_evaluate (json_array *stack,json_object *context);
-}
+json_value* lite_evaluate (json_array *stack,json_object *context);
 #endif
 
 #endif /* EXPRESSION_H_ */
