@@ -1,7 +1,9 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:c="http://www.xidea.org/ns/template/core">
-	<!--
-		如果您的编辑器没有语法提示，清看设置：
+	xmlns:c="http://www.xidea.org/ns/template/core"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.xidea.org/ns/template/core core.xsd">
+	<!-- 
+		其实，不需要在源代码中现实申明 xsd文件，在eclipse下可以配置命名空间xsd
 		http://www.javaeye.com/topic/342483
 	-->
 	<c:if test="${test}">SHUCHU</c:if>
