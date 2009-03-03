@@ -10,7 +10,7 @@
 	<xs:simpleType name="EL" id="EL">
 		<xs:annotation>
 			<xs:documentation>
-				表达式，${合法JS表达式},如:${user.name},${age>25}
+				表达式，${合法JS表达式},如:${user.name},${age&gt;25}
 			</xs:documentation>
 		</xs:annotation>
 		<xs:restriction base="xs:string">
