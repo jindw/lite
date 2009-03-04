@@ -3,7 +3,7 @@
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
 	targetNamespace="http://www.xidea.org/ns/template/core"
 	xmlns="http://www.xidea.org/ns/template/core"
-	elementFormDefault="qualified">
+	elementFormDefault="unqualified">
 	<xs:annotation>
 		<xs:documentation>Lite 模板引擎核心标记库xml语法描述文档</xs:documentation>
 	</xs:annotation>
@@ -56,23 +56,6 @@
 			</xs:attribute>
 		</xs:complexType>
 	</xs:element>
-	<xs:element name="break">
-		<xs:annotation>
-			<xs:documentation>
-				跳出循环（Lite XML 1.0Alpha尚未实现对其的解析功能）
-			</xs:documentation>
-		</xs:annotation>
-		<xs:complexType mixed="false">
-			<xs:attribute name="for" type="VAR" use="optional">
-				<xs:annotation>
-					<xs:documentation>
-						通过与外层for循环
-						var属性的对比，查找具体需要跳出的外层for循环(默认跳出最近的for循环)。
-					</xs:documentation>
-				</xs:annotation>
-			</xs:attribute>
-		</xs:complexType>
-	</xs:element>
 	<xs:element name="for">
 		<xs:annotation>
 			<xs:documentation>
@@ -80,9 +63,34 @@
 			</xs:documentation>
 		</xs:annotation>
 		<xs:complexType mixed="true">
+			<xs:annotation>
+				<xs:documentation>
+					<![CDATA[
+				<xs:element name="break" form="qualified">
+					<xs:annotation>
+						<xs:documentation>
+							跳出循环（具体策略尚未明确，Lite XML 1.0Alpha尚未实现对其的解析功能）
+						</xs:documentation>
+					</xs:annotation>
+					<xs:complexType mixed="false">
+						<xs:attribute name="for" type="VAR"
+							use="optional">
+							<xs:annotation>
+								<xs:documentation>
+									通过与外层for循环
+									var属性的对比，查找具体需要跳出的外层for循环(默认跳出最近的for循环)。
+								</xs:documentation>
+							</xs:annotation>
+						</xs:attribute>
+					</xs:complexType>
+				</xs:element>
+					]]>
+				</xs:documentation>
+			</xs:annotation>
 			<xs:sequence>
 				<xs:any minOccurs="0" maxOccurs="unbounded"
 					processContents="lax" />
+
 			</xs:sequence>
 			<xs:attribute name="var" type="VAR" use="required">
 				<xs:annotation>
@@ -124,50 +132,51 @@
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="choose">
+
 		<xs:annotation>
 			<xs:documentation>一组分支选择</xs:documentation>
 		</xs:annotation>
+
 		<xs:complexType mixed="false">
 			<xs:sequence>
-				<xs:element ref="when" minOccurs="1"
+				<xs:element name="when" form="qualified" minOccurs="1"
 					maxOccurs="unbounded">
+					<xs:annotation>
+						<xs:documentation>
+							分支选择中的分支之一（必须是choose的直接子节点）
+						</xs:documentation>
+					</xs:annotation>
+					<xs:complexType mixed="true">
+						<xs:sequence>
+							<xs:any minOccurs="0" maxOccurs="unbounded"
+								processContents="lax">
+							</xs:any>
+						</xs:sequence>
+						<xs:attribute name="test" type="EL"
+							use="required">
+							<xs:annotation>
+								<xs:documentation>
+									指定判断语句
+								</xs:documentation>
+							</xs:annotation>
+						</xs:attribute>
+					</xs:complexType>
 				</xs:element>
-				<xs:element ref="otherwise" minOccurs="0"
-					maxOccurs="1">
+				<xs:element name="otherwise" form="qualified"
+					minOccurs="0" maxOccurs="1">
+					<xs:annotation>
+						<xs:documentation>
+							分支选择中五命中分支（当所有when未命中之后执行，必须是choose的直接子节点）
+						</xs:documentation>
+					</xs:annotation>
+					<xs:complexType mixed="true">
+						<xs:sequence>
+							<xs:any minOccurs="0" maxOccurs="unbounded"
+								processContents="lax">
+							</xs:any>
+						</xs:sequence>
+					</xs:complexType>
 				</xs:element>
-			</xs:sequence>
-		</xs:complexType>
-	</xs:element>
-	<xs:element name="when">
-		<xs:annotation>
-			<xs:documentation>
-				分支选择中的分支之一（必须是choose的直接子节点）
-			</xs:documentation>
-		</xs:annotation>
-		<xs:complexType mixed="true">
-			<xs:sequence>
-				<xs:any minOccurs="0" maxOccurs="unbounded"
-					processContents="lax">
-				</xs:any>
-			</xs:sequence>
-			<xs:attribute name="test" type="EL" use="required">
-				<xs:annotation>
-					<xs:documentation>指定判断语句</xs:documentation>
-				</xs:annotation>
-			</xs:attribute>
-		</xs:complexType>
-	</xs:element>
-	<xs:element name="otherwise">
-		<xs:annotation>
-			<xs:documentation>
-				分支选择中五命中分支（当所有when未命中之后执行，必须是choose的直接子节点）
-			</xs:documentation>
-		</xs:annotation>
-		<xs:complexType mixed="true">
-			<xs:sequence>
-				<xs:any minOccurs="0" maxOccurs="unbounded"
-					processContents="lax">
-				</xs:any>
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
