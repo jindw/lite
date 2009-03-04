@@ -6,7 +6,7 @@ Eclipse自带的XML 编辑器是个不错的选择，而且自己配上XSD后，
 [http://www.javaeye.com/topic/342483]
 
 === 演示界图 ===
-[http://www.javaeye.com/upload/attachment/80710/495fbbe7-1847-3663-a76a-6f3917851eee.jpg]
+[http://code.google.com/p/lite/wiki/IDE4Lite]
 
 === 设置步骤 ===
 [http://www.javaeye.com/upload/attachment/80695/1e6e6627-459c-3f69-9c98-89d845630672.jpg]
