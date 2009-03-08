@@ -67,7 +67,7 @@ function buildNativeJS(code){
     try{
         var result =  new Function("_$0","_$1",buf.join(''));
     }catch(e){
-    	$log(buf.join(''))
+    	$log.error(buf.join(''))
         throw e;
     }
     result.toString=function(){//_$1 encodeXML
@@ -154,7 +154,7 @@ function appendCode(code,buf,idpool,depth){
                 printIndex(buf,depth,"var ",previousForValueId ,"=this['for']");
                 var forVar= statusNameId?["var ",statusNameId ,"="]:[];
                 forVar.push("this['for'] = {lastIndex:",itemsId,".length-1,depth:",previousForValueId,"?",previousForValueId,".depth+1:0};");
-                printIndex(buf,depth, forVar);
+                printIndex(buf,depth, forVar.join(""));
                 
                 printIndex(buf,depth,"for(;",indexId,"<",itemsId,".length;",indexId,"++){");
                 printIndex(buf,depth+1,"this['for'].index=",indexId,";");
