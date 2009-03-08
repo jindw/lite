@@ -72,7 +72,7 @@ struct json_value* json_get_by_index (struct json_array * thiz,int index);
 
 struct json_value* json_add_value (struct json_array * thiz,struct json_value * value);
 
-struct json_value* json_new(enum json_type type);
+struct json_value* json_new(const enum json_type type);
 
 void json_free (struct json_value ** value)
 
