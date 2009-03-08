@@ -221,13 +221,13 @@
 
 	<entry key="PageMesh">
 		<description><![CDATA[<h3>页面装饰：</h3>
-		<p>改功能不便在此演示，希望了解更多，请参看：<a href="http://code.google.com/p/lite/wiki/XML_Lite_PageMesh">http://code.google.com/p/lite/wiki/XML_Lite_PageMesh</a>
+		<p>改功能不便在此演示，希望了解更多，请参看：<a href="http://code.google.com/p/lite/wiki/XML_Lite_PageMesh">XML_Lite_PageMesh</a>
 		</p>]]></description>
 		<context><![CDATA[
 {"url":"http://code.google.com/p/lite/wiki/XML_Lite_PageMesh"}
 		]]></context>
 		<source><![CDATA[<!-- 
-改功能不便在此演示，希望了解更多，请参看：<a href="http://code.google.com/p/lite/wiki/XML_Lite_PageMesh">http://code.google.com/p/lite/wiki/XML_Lite_PageMesh</a>
+改功能不便在此演示，希望了解更多，请参看：<a href="http://code.google.com/p/lite/wiki/XML_Lite_PageMesh">XML_Lite_PageMesh</a>
 -->
 <a href="${url}">${url}</a>]]></source>
 	</entry>
