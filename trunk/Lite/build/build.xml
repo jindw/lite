@@ -3,6 +3,8 @@
 	<tstamp>
 		<format property="version" pattern="yyyyMMdd" />
 	</tstamp>
+	<available file="../JSA/build/dest/JSA-CMD.jar" property="JSAPath" value="../JSA/build/dest/JSA-CMD.jar" />
+		
 	<target name="init">
 		<delete dir="build/temp">
 		</delete>
@@ -73,7 +75,7 @@
 	</target>
 
 	<target name="compress" depends="init">
-		<java classname="org.jside.jsi.tools.export.ExportAction" classpath="../JSA/build/dest/JSA-CMD.jar">
+		<java classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
 			<arg value="-scriptBase" />
 			<arg value="${basedir}/web/scripts" />
 
@@ -91,7 +93,7 @@
 			<arg value="-outputExported" />
 			<arg value="${basedir}/build/dest/jslite/template.js" />
 		</java>
-		<java classname="org.jside.jsi.tools.export.ExportAction" classpath="../JSA/build/dest/JSA-CMD.jar">
+		<java classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
 			<arg value="-scriptBase" />
 			<arg value="${basedir}/web/scripts" />
 
