@@ -23,17 +23,10 @@ function Template(data,parser){
             }
             parser = parser || "xml";
             if(typeof parser == "string"){
-                parser = new (inlineClass[parser] || $import(parser))();
+                parser = new (inlineClass[parser] || $import(parser))(true);
             }
             parser.parse(data);
             data = parser.buildResult();
-            var i = data.length;
-            while(i--){
-                var item = data[i];
-                while(item instanceof Array && item.length && item[item.length-1] == undefined){
-                    item.pop();
-                }
-            }
             this.compileData = data;
         }
     }

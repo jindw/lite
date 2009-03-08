@@ -109,7 +109,15 @@ Parser.prototype = {
         if(this.nativeJS){
             return buildNativeJS(buildTreeResult(this.result));
         }else{
-            return buildTreeResult(this.result);
+            var data = buildTreeResult(this.result);
+            var i = data.length;
+            while(i--){
+                var item = data[i];
+                while(item instanceof Array && item.length && item[item.length-1] == undefined){
+                    item.pop();
+                }
+            }
+            return data;
         }
     }
 }
