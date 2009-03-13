@@ -13,7 +13,6 @@ import org.w3c.dom.ProcessingInstruction;
 import org.w3c.dom.Text;
 import org.xidea.lite.Template;
 
-
 public class DefaultXMLNodeParser implements NodeParser {
 
 	public static final Pattern SCRIPT_TAG = Pattern.compile("^script$",
@@ -73,8 +72,8 @@ public class DefaultXMLNodeParser implements NodeParser {
 			context.appendIndent();
 		}
 		context.append("<![CDATA[");
-		this.parser.parseText(context,((CDATASection) node)
-				.getData(), Template.EL_TYPE);
+		this.parser.parseText(context, ((CDATASection) node).getData(),
+				Template.EL_TYPE);
 		context.append("]]>");
 		// if (format) {
 		// context.appendFormatEnd();
@@ -140,7 +139,7 @@ public class DefaultXMLNodeParser implements NodeParser {
 			if (format) {
 				context.appendIndent();
 			}
-			this.parser.parseText(context,text, Template.XML_TEXT_TYPE);
+			this.parser.parseText(context, text, Template.XML_TEXT_TYPE);
 			// if (format) {
 			// context.appendFormatEnd();
 			// }
@@ -156,7 +155,7 @@ public class DefaultXMLNodeParser implements NodeParser {
 				.getPrefix(), value)) {
 			return null;
 		}
-		List<Object> buf = parseAttributeValue(context,value);
+		List<Object> buf = parseAttributeValue(context, value);
 		boolean isStatic = false;
 		boolean isDynamic = false;
 		// hack parseText is void
@@ -182,30 +181,28 @@ public class DefaultXMLNodeParser implements NodeParser {
 				throw new RuntimeException("只能有单个EL表达式");
 			} else {// 只考虑单一EL表达式的情况
 				Object[] el = (Object[]) buf.get(0);
-				context.appendAttribute(el[1],
-						name);
-				return null;
+				context.appendAttribute(el[1], name);
 			}
-		}
-		context.append(" " + name + "=\"");
-		if (name.startsWith("xmlns")) {
-			if (buf.size() == 1
-					&& "http://www.xidea.org/ns/template/xhtml".equals(buf
-							.get(0))) {
-				buf.set(0, "http://www.w3.org/1999/xhtml");
+		} else {
+			context.append(" " + name + "=\"");
+			if (name.startsWith("xmlns")) {
+				if (buf.size() == 1
+						&& "http://www.xidea.org/ns/template/xhtml".equals(buf
+								.get(0))) {
+					buf.set(0, "http://www.w3.org/1999/xhtml");
+				}
 			}
+			context.appendAll(buf);
+			context.append("\"");
 		}
-		context.appendAll(buf);
-		context.append("\"");
 		return null;
 	}
 
 	private List<Object> parseAttributeValue(ParseContext context, String value) {
 		int mark = context.mark();
-		this.parser.parseText(context,value, Template.XML_ATTRIBUTE_TYPE);
+		this.parser.parseText(context, value, Template.XML_ATTRIBUTE_TYPE);
 		return context.reset(mark);
 	}
-
 
 	private Node parseElement(Node node, ParseContext context) {
 		context.appendIndent();

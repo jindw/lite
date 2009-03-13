@@ -96,11 +96,11 @@ public class Template {
 					if (cmd[2] != null) {
 						cmd[2] = " " + cmd[2] + "=\"";
 					}
+				case VAR_TYPE:
 				case XML_TEXT_TYPE:
 				case EL_TYPE:
 					cmd[1] = createExpression(cmd[1]);
 					break;
-				// case VAR_TYPE:
 				case IF_TYPE:
 				case ELSE_TYPE:
 					if (cmd[2] != null) {
@@ -125,14 +125,15 @@ public class Template {
 	protected void compileAddOns(final Object[] cmd, List<Object> result) {
 		try {
 			cmd[1] = compile((List<Object>) cmd[1]);
-			Expression el  = createExpression(cmd[2]);
+			Expression el = createExpression(cmd[2]);
 			cmd[2] = el;
 			Class<? extends Object> addOnType = Class.forName(String
 					.valueOf(cmd[3]));
 			cmd[3] = addOnType;
 			if (CompileAdvice.class.isAssignableFrom(addOnType)) {
 				Map attributeMap = (Map) el.evaluate(null);
-				CompileAdvice addOnInstance = (CompileAdvice) addOnType.newInstance();
+				CompileAdvice addOnInstance = (CompileAdvice) addOnType
+						.newInstance();
 				ReflectUtil.setValues(addOnInstance, attributeMap);
 				addOnInstance.compile(gloabls, result);
 			}
@@ -160,15 +161,6 @@ public class Template {
 					case EL_TYPE:// ":el":
 						processExpression(context, data, out, false);
 						break;
-					case XML_TEXT_TYPE:// ":el":
-						processExpression(context, data, out, true);
-						break;
-					case VAR_TYPE:// ":set"://var
-						processVar(context, data);
-						break;
-					case CAPTRUE_TYPE:// ":set"://var
-						processCaptrue(context, data);
-						break;
 					case IF_TYPE:// ":if":
 						processIf(context, data, out);
 						break;
@@ -178,6 +170,9 @@ public class Template {
 					case FOR_TYPE:// ":for":
 						processFor(context, data, out);
 						break;
+					case XML_TEXT_TYPE:// ":el":
+						processExpression(context, data, out, true);
+						break;
 					case XML_ATTRIBUTE_TYPE:// ":attribute":
 						processAttribute(context, data, out);
 						break;
@@ -185,6 +180,12 @@ public class Template {
 						prossesBreak(data);
 					case ADD_ON_TYPE://
 						prossesAddons(context, data, out);
+						break;
+					case VAR_TYPE:// ":set"://var
+						processVar(context, data);
+						break;
+					case CAPTRUE_TYPE:// ":set"://var
+						processCaptrue(context, data);
 						break;
 					}
 				}
@@ -319,7 +320,7 @@ public class Template {
 			throws IOException {
 		Object result = ((Expression) data[1]).evaluate(context);
 		if (data[2] == null) {
-			printXMLAttribute(String.valueOf(result), out, true);
+			printXMLAttribute(String.valueOf(result), out, false);
 		} else if (result != null) {
 			out.write((String) data[2]);// prefix
 			printXMLAttribute(String.valueOf(result), out, false);
@@ -356,8 +357,8 @@ public class Template {
 			case '\'':// 39
 				if (escapeSingleChar) {
 					out.write("&#39;");
+					break;
 				}
-				break;
 			default:
 				out.write(c);
 			}
