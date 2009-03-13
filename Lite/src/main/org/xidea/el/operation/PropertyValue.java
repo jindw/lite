@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.xidea.el.ExpressionResult;
 
-public class PropertyValue implements ExpressionResult{
+public class PropertyValue implements ExpressionResult {
 	private Object base;
 	private Object name;
 	private Class<? extends Object> type;
@@ -40,30 +40,33 @@ public class PropertyValue implements ExpressionResult{
 	}
 
 	public Class<? extends Object> getType() {
-		if(type != null){
-			return ReflectUtil.getType(type,name);
-		}else{
+		if (type != null) {
+			return ReflectUtil.getType(type, name);
+		} else {
 			Object value = getValue();
-			if(value!= null){
+			if (value != null) {
 				return value.getClass();
-			}else{
-				return ReflectUtil.getType(base.getClass(),name);
+			} else {
+				return ReflectUtil.getType(base.getClass(), name);
 			}
 		}
 	}
 
 	public Object setValue(Object value) {
-		ReflectUtil.setValue(base,name,value);
+		ReflectUtil.setValue(base, name, value);
 		return null;
 	}
-	public Invocable getInvocable(Map<String, Map<String, Invocable>> methodMap,Object[] args) {
-		Invocable invocable = createInvocable(methodMap,base,name.toString(),args);
-		if(invocable == null){
+
+	public Invocable getInvocable(
+			Map<String, Map<String, Invocable>> methodMap, Object[] args) {
+		Invocable invocable = createInvocable(methodMap, base, name.toString(),
+				args);
+		if (invocable == null) {
 			Object object = getValue();
-			if(object instanceof Invocable){
+			if (object instanceof Invocable) {
 				invocable = (Invocable) object;
-			}else if(object instanceof Method){
-				return createProxy((Method)object);
+			} else if (object instanceof Method) {
+				return createProxy((Method) object);
 			}
 		}
 		return invocable;
@@ -71,7 +74,7 @@ public class PropertyValue implements ExpressionResult{
 
 	static Invocable createInvocable(
 			Map<String, Map<String, Invocable>> methodMap,
-			final Object thisObject, final String name,Object[] args) {
+			final Object thisObject, final String name, Object[] args) {
 		Map<String, Invocable> invocableMap = methodMap.get(name);
 		Invocable invocable = null;
 		if (invocableMap != null) {
@@ -112,20 +115,33 @@ public class PropertyValue implements ExpressionResult{
 		return null;
 	}
 
-	static Invocable createProxy(final java.lang.reflect.Method method) {
+	static Invocable createProxy(final java.lang.reflect.Method... methods) {
 		return new Invocable() {
 			public Object invoke(Object thiz, Object... args) throws Exception {
-				Class<? extends Object> clazzs[] = method.getParameterTypes();
-				for (int i = 0; i < clazzs.length; i++) {
-					Class<? extends Object> type = clazzs[i];
-					Object value = args[i];
-					if(Number.class.isAssignableFrom(type)){
-						args[i] = NumberArithmetic.getValue(type, ECMA262Impl.ToNumber(value));
-					}else if(String.class.isAssignableFrom(type)){
-						args[i] = value == null?null:String.valueOf(value);
+				nextMethod: for (java.lang.reflect.Method method : methods) {
+					Class<? extends Object> clazzs[] = method
+							.getParameterTypes();
+					if (clazzs.length == args.length) {
+						for (int i = 0; i < clazzs.length; i++) {
+							Class<? extends Object> type = clazzs[i];
+							Object value = args[i];
+							if (Number.class.isAssignableFrom(type)) {
+								args[i] = NumberArithmetic.getValue(type,
+										ECMA262Impl.ToNumber(value));
+							} else if (String.class.isAssignableFrom(type)) {
+								args[i] = value == null ? null : String
+										.valueOf(value);
+							}
+							if (value != null) {
+								if (!type.isInstance(value)) {
+									continue nextMethod;
+								}
+							}
+						}
 					}
+					return method.invoke(thiz, args);
 				}
-				return method.invoke(thiz, args);
+				return null;
 			}
 		};
 	}

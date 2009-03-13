@@ -110,8 +110,22 @@ public class TextParser implements Parser {
 		}
 	}
 	protected void parseInstruction(ParseContext context,Object type,String eltext){
-		if("if".equals(type)){
+		if(type instanceof Number){
+			switch (((Number)type).intValue()) {
+			case Template.EL_TYPE:
+				Object el = optimizeEL(eltext);
+				context.appendEL(el);
+				return;
+			case Template.XML_ATTRIBUTE_TYPE:
+				el = optimizeEL(eltext);
+				context.appendAttribute(el,null);
+				return;
+			default:
+				break;
+			}
 		}
+//		if("if".equals(type)){
+//		}
 		Object el = optimizeEL(eltext);
 		context.appendEL(el);
 	}

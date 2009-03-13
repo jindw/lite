@@ -2,38 +2,40 @@
 	xmlns:c="http://www.xidea.org/ns/template/core"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.xidea.org/ns/template/core core.xsd">
-	<!-- 
-		其实，不需要在源代码中现实申明 xsd文件，在eclipse下可以配置命名空间xsd
-		http://www.javaeye.com/topic/342483
-		
-		获得语法提示的方法有如下三种：
-		1.输入 "<c:",按下 Alt +/ 有可选标记列表
-		2.在模版标记内可添加属性的地方，按下Alt + / 有可选属性列表
-		3.鼠标放在 模版标记或者标记属性上，有标记描述提示显示
-	-->
-	<c:if test="${test}">SHUCHU</c:if>
-	<c:for var="item" items="${[1,2,3,4]}">
-		<div>
+	<body>
+		<!-- 
+			其实，不需要在源代码中现实申明 xsd文件，在eclipse下可以配置命名空间xsd
+			http://www.javaeye.com/topic/342483
+			
+			获得语法提示的方法有如下三种：
+			1.输入 "<c:",按下 Alt +/ 有可选标记列表
+			2.在模版标记内可添加属性的地方，按下Alt + / 有可选属性列表
+			3.鼠标放在 模版标记或者标记属性上，有标记描述提示显示
+		-->
+		<c:if test="${test}">SHUCHU</c:if>
+		<c:for var="item" items="${[1,2,3,4]}">
+			<div>
 
-			${item} - ${for.index}
-			<c:for var="item2" items="${['a','b','c']}"
-				status="status">
-				<div>
-					${item2} : ${status.index}
+				${item} - ${for.index}
+				<c:for var="item2" items="${['a','b','c']}"
+					status="status">
+					<div>
+						${item2} : ${status.index}
 
-				</div>
-			</c:for>
-		</div>
-	</c:for>
-	<c:for items="${item}" var="item">${for.index}</c:for>
+					</div>
+				</c:for>
+			</div>
+		</c:for>
+		<c:for items="${item}" var="item">${for.index}</c:for>
 
 
 
-	<c:choose>
-		<c:when test="${test1}">test1</c:when>
-		<c:when test="${test2}">test2</c:when>
-		<c:otherwise>other</c:otherwise>
-	</c:choose>
+		<c:choose>
+			<c:when test="${test1}">test1</c:when>
+			<c:when test="${test2}">test2</c:when>
+			<c:otherwise>other</c:otherwise>
+		</c:choose>
 
-	<c:var name="myname">${user.firstName}.${user.lastName}</c:var>
+		<c:var name="myname">${user.firstName}.${user.lastName}</c:var>
+	</body>
 </html>

@@ -17,15 +17,11 @@ import org.xidea.lite.Template;
 import org.xidea.lite.parser.TextParser;
 import org.xidea.lite.parser.XMLParser;
 
-public class AutoFormTest {
+public class XMLTest {
 	protected Map<String, Object> context;
 	protected Map<String, String> templateResultMap;
 	@Before
 	public void setUp() throws Exception {
-		XMLDecoder de = new XMLDecoder(this.getClass().getResourceAsStream(
-				this.getClass().getSimpleName() + ".xml"));
-		this.context = (Map<String, Object>) de.readObject();
-		this.templateResultMap = (Map<String, String>) de.readObject();
 	}
 
 	@After
@@ -43,6 +39,14 @@ public class AutoFormTest {
 
 	@Test
 	public void runTest() throws Exception {
+		runTest("VarTest");
+		runTest("AutoFormTest");
+	}
+	public void runTest(String file) throws Exception {
+		XMLDecoder de = new XMLDecoder(this.getClass().getResourceAsStream(
+				file + ".xml"));
+		this.context = (Map<String, Object>) de.readObject();
+		this.templateResultMap = (Map<String, String>) de.readObject();
 		for (String key : templateResultMap.keySet()){
 			String value = templateResultMap.get(key);
 			test(key, value);
