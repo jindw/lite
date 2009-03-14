@@ -22,59 +22,48 @@
 extern "C" {
 #endif
 
-#define JSON_MAX_STRING_LENGTH SIZE_MAX-1
-#define JSON_ARRAY_STEP 8
-
-enum json_type {
-	JSON_INT = 0,
-	JSON_FLOAT,
-	JSON_BOOLEAN,
-	JSON_STRING,
-	JSON_OBJECT,
-	JSON_ARRAY,
-	JSON_NULL
-};
+#define JSON_BOOL 0
+#define JSON_INT 1
+#define JSON_FLOAT 2
+#define JSON_STRING 3
+#define JSON_OBJECT 4
+#define JSON_ARRAY 5
+#define JSON_NULL 6
 
 
 typedef struct json_value {
-	enum json_type type;
-	union {
-		int int_value;
-		int intValue;
-		float float_value;
-		float floatValue;
-		int boolean_value;
-		int booleanValue;
-		const char* string;
-		struct json_object *object;
-		struct json_array *array;
-	};
+	int type;
 } json_value;
 
+int json_get_type(struct json_value * thiz);
 
-typedef struct json_array {
-	int length;
-	struct json_value values[];
-} json_array;
-typedef struct json_key_value {
-	const char* key;
-	struct json_value* value;
-} json_key_value;
-typedef struct json_object {
-	int length;
-	struct json_key_value values[];
-} json_object;
-struct json_value* json_get_by_key (struct json_object * thiz,const char* key);
+struct json_value* json_get_by_key (struct json_value * thiz,const char* key);
 
-struct json_value* json_put_value (struct json_object * thiz,const char* key, struct json_value * value);
+void json_set_by_key (struct json_value * thiz,const char* key, struct json_value * value);
 
-struct json_value* json_get_by_index (struct json_array * thiz,int index);
+void json_remove_by_key (struct json_value * thiz,const char* key);
 
-struct json_value* json_add_value (struct json_array * thiz,struct json_value * value);
+struct json_value* json_get_by_index (struct json_value * thiz,int index);
 
-struct json_value* json_new(const enum json_type type);
+void json_set_by_index (struct json_value * thiz,int index,struct json_value * value);
 
-void json_free (struct json_value ** value)
+void json_remove_by_index (struct json_value * thiz,const char* key);
+
+void json_add_value (struct json_value * thiz,struct json_value * value);
+
+struct json_value* json_create(int type);
+
+void json_set_bool (struct json_value * thiz,int value);
+
+void json_set_int (struct json_value * thiz,const int value);
+
+void json_set_float (struct json_value * thiz,const float value);
+
+void json_set_string (struct json_value * thiz,const char* value);
+
+void json_set_null (struct json_value * thiz);
+
+int json_free(struct json_value * value);
 
 #ifdef __cplusplus
 }

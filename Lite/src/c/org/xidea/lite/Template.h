@@ -40,10 +40,11 @@ namespace lite {
 class Template {
 public:
 	Template();
-	void render(json_object *context);
+	void render(json_value *context);
 	virtual ~Template();
 };
 }
 #else/*C 实现*/
-void lite_render (json_array *stack,json_object *context);
+void lite_render (json_value *stack,json_value *context);
+#endif/*C 实现*/
 #endif /* TEMPLATE2_H_ */

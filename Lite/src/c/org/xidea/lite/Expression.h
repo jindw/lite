@@ -65,13 +65,13 @@ class Expression {
 public:
 	Expression();
 	virtual ~Expression();
-	Object evaluate(json_object *context);
+	Object evaluate(json_value *context);
 protected:
-	json_array *stack;
+	json_value *stack;
 };
 }
 #else
-json_value* lite_evaluate (json_array *stack,json_object *context);
+json_value* lite_evaluate (json_value *stack,json_value *context);
 #endif
 
 #endif /* EXPRESSION_H_ */
