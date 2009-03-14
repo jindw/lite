@@ -37,6 +37,8 @@ typedef struct json_value {
 
 int json_get_type(struct json_value * thiz);
 
+int json_get_length (struct json_value * thiz);
+
 struct json_value* json_get_by_key (struct json_value * thiz,const char* key);
 
 void json_set_by_key (struct json_value * thiz,const char* key, struct json_value * value);
