@@ -15,81 +15,71 @@
  */
 
 #include "json.h"
-
+#include "../../../json-c/json.h"
 #include <stdio.h>
 
-
-struct json_value* json_get_by_key (struct json_object * thiz, const char* key){
-	return NULL;
-}
-struct json_value* json_put_value (struct json_object * thiz, const char* key, struct json_value * value){
-	return NULL;
-}
-
-struct json_value* json_get_by_index (struct json_array * thiz,int index){
-	return NULL;
-}
-
-struct json_value* json_add_value (struct json_array * thiz,struct json_value * value){
-	return NULL;
-}
-
-
-
-struct json_value* json_new_value (const enum json_type type){
-	/* allocate memory to the new object */
-	json_value *new_object = malloc (sizeof(json_value));
-	if (new_object == NULL){
-		return NULL;
+int json_get_type(struct json_value * thiz){
+	switch(json_object_get_type(thiz)){
+	case json_type_boolean:
+		return JSON_BOOL;
+	case json_type_int:
+		return JSON_INT;
+	case json_type_double:
+		return JSON_FLOAT;
+	case json_type_string:
+		return JSON_STRING;
+	case json_type_object:
+		return JSON_OBJECT;
+	case json_type_array:
+		return JSON_ARRAY;
+	case json_type_null:
+		return JSON_NULL;
 	}
-	/* initialize members */
-	new_object->type = type;
-	new_object->intValue = 0;
-	return &new_object;
+	return -1;
+}
+struct json_value* json_get_by_key (struct json_value * thiz, const char* key){
+	return NULL;
+}
+
+void json_set_by_key (struct json_value * thiz,const char* key, struct json_value * value){
+}
+
+void json_remove_by_key (struct json_value * thiz,const char* key){
+}
+
+struct json_value* json_get_by_index (struct json_value * thiz,int index){
+	return NULL;
+}
+
+void json_set_by_index (struct json_value * thiz,int index,struct json_value * value){
+}
+
+void json_remove_by_index (struct json_value * thiz,const char* key){
+}
+
+void json_add_value (struct json_value * thiz,struct json_value * value){
 }
 
 
-void json_free (struct json_value ** value){
-	//	assert (value != NULL);
-	//	assert ((*value) != NULL);
-	//	switch ((*value)->type){
-	//	case JSON_ARRAY:
-	//		struct json_array* array = (*value)->array;
-	//		int len = array->length;
-	//		struct json_value values[] = array->values;
-	//		int i = len;
-	//		while (i--) {
-	//			json_free(&(&(values)[i]));
-	//		}
-	//		int left = len/JSON_ARRAY_STEP;
-	//		int size =left * JSON_ARRAY_STEP;
-	//		if(size!=len){
-	//			size+=JSON_ARRAY_STEP;
-	//		}
-	//		json_free((*values)[size]);/* 这个语法可能有错？？*/
-	//		break;
-	//	case JSON_OBJECT:
-	//		struct json_object* array = (*value)->object;
-	//		int len = array->length;
-	//		struct json_key_value values[] = array->values;
-	//		int i = len;
-	//		while (i--) {
-	//			struct json_key_value * kv = &(*values)[i];
-	//			free(kv->key);
-	//			json_free(kv->value);
-	//			free(kv);
-	//		}
-	//		int left = len/JSON_ARRAY_STEP;
-	//		int size =left * JSON_ARRAY_STEP;
-	//		if(size!=len){
-	//			size+=JSON_ARRAY_STEP;
-	//		}
-	//		json_free((*values)[size]);/* 这个语法可能有错？？*/
-	//		break;
-	//	case JSON_STRING:
-	//		free ((*value)->string);
-	//		break;
-	//	}
-	//	free (*value);		/* the json value */
-	//	(*value) = NULL;
+struct json_value* json_create(const int type){
+	return NULL;
+}
+
+void json_set_bool (struct json_value * thiz,int value){
+}
+
+void json_set_int (struct json_value * thiz,const int value){
+}
+
+void json_set_float (struct json_value * thiz,const float value){
+}
+
+void json_set_string (struct json_value * thiz,const char* value){
+}
+
+void json_set_null (struct json_value * thiz){
+}
+
+int json_free(struct json_value * value){
+	return 0;
 }
