@@ -16,10 +16,14 @@
 
 #include "json.h"
 #include "../../../json-c/json.h"
+#include "../../../json-c/json_object_private.h"
 #include <stdio.h>
 #include <string.h>
 
 int json_get_type(struct json_value * thiz){
+	if(!thiz){
+		return JSON_NULL;
+	}
 	switch(json_object_get_type(thiz)){
 	case json_type_boolean:
 		return JSON_BOOL;
@@ -39,6 +43,9 @@ int json_get_type(struct json_value * thiz){
 	return -1;
 }
 int json_get_length (struct json_value * thiz){
+	if(!thiz){
+		return -1;
+	}
 	switch(json_object_get_type(thiz)){
 	case json_type_string:
 		return strlen(json_object_get_string(thiz));
@@ -48,10 +55,25 @@ int json_get_length (struct json_value * thiz){
 		return json_object_array_length(thiz);
 	}
 	return -1;
-
 }
+int json_get_bool (struct json_value * thiz){
+	return json_object_get_boolean(thiz);
+}
+
+int json_get_int (struct json_value * thiz){
+	return json_object_get_int(thiz);
+}
+
+float json_get_float (struct json_value * thiz){
+	return json_object_get_float(thiz);
+}
+
+char* json_get_string (struct json_value * thiz){
+	return json_object_get_string(thiz);
+}
+
 struct json_value* json_get_by_key (struct json_value * thiz, const char* key){
-	return json_object_object_get(this,key);
+	return json_object_object_get(thiz,key);
 }
 
 void json_set_by_key (struct json_value * thiz,const char* key, struct json_value * value){
@@ -71,34 +93,47 @@ void json_set_by_index (struct json_value * thiz,int index,struct json_value * v
 }
 
 void json_remove_by_index (struct json_value * thiz,const char* key){
-	array* json_object_array_del_idx(thiz,index);
+	json_object_array_del_idx(thiz,index);
 
 }
 
 void json_add_value (struct json_value * thiz,struct json_value * value){
-	json_object_array_add(thiz,index,value);
+	json_object_array_add(thiz,value);
 }
 
 
-struct json_value* json_create(const int type){
+struct json_value* json_create_bool (const int value){
+	return json_object_new_boolean(value);
+}
+
+struct json_value* json_create_int (const int value){
+	return json_object_new_int(value);
+}
+
+struct json_value* json_create_float (const float value){
+	return json_object_new_doubel(value);
+}
+
+struct json_value* json_create_string (const char* value){
+	return json_object_new_string(value);
+}
+
+struct json_value* json_create_array (){
+	return json_object_new_array();
+}
+
+struct json_value* json_create_object (){
+	return json_object_new_object();
+}
+
+struct json_value* json_create_null (){
 	return NULL;
 }
 
-void json_set_bool (struct json_value * thiz,int value){
-}
-
-void json_set_int (struct json_value * thiz,const int value){
-}
-
-void json_set_float (struct json_value * thiz,const float value){
-}
-
-void json_set_string (struct json_value * thiz,const char* value){
-}
-
-void json_set_null (struct json_value * thiz){
-}
-
-int json_free(struct json_value * value){
-	return 0;
+int json_free(struct json_value * value,int force){
+	struct json_object* object = (struct json_object*)value;
+	do{
+		json_object_put(object);
+	}while(force && object->_ref_count);
+	return object->_ref_count;
 }

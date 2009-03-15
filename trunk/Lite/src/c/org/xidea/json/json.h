@@ -26,8 +26,8 @@ extern "C" {
 #define JSON_INT 1
 #define JSON_FLOAT 2
 #define JSON_STRING 3
-#define JSON_OBJECT 4
-#define JSON_ARRAY 5
+#define JSON_ARRAY 4
+#define JSON_OBJECT 5
 #define JSON_NULL 6
 
 
@@ -38,6 +38,14 @@ typedef struct json_value {
 int json_get_type(struct json_value * thiz);
 
 int json_get_length (struct json_value * thiz);
+
+int json_get_bool (struct json_value * thiz);
+
+int json_get_int (struct json_value * thiz);
+
+float json_get_float (struct json_value * thiz);
+
+char* json_get_string (struct json_value * thiz);
 
 struct json_value* json_get_by_key (struct json_value * thiz,const char* key);
 
@@ -53,19 +61,21 @@ void json_remove_by_index (struct json_value * thiz,const char* key);
 
 void json_add_value (struct json_value * thiz,struct json_value * value);
 
-struct json_value* json_create(int type);
+struct json_value* json_create_bool (const int value);
 
-void json_set_bool (struct json_value * thiz,int value);
+struct json_value* json_create_int (const int value);
 
-void json_set_int (struct json_value * thiz,const int value);
+struct json_value* json_create_float (const float value);
 
-void json_set_float (struct json_value * thiz,const float value);
+struct json_value* json_create_string (const char* value);
 
-void json_set_string (struct json_value * thiz,const char* value);
+struct json_value* json_create_array ();
 
-void json_set_null (struct json_value * thiz);
+struct json_value* json_create_object ();
 
-int json_free(struct json_value * value);
+struct json_value* json_create_null ();
+
+int json_free(struct json_value * value,const int force);
 
 #ifdef __cplusplus
 }

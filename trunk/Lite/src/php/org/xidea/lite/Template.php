@@ -26,7 +26,7 @@ class Template{
 function renderList($context, $children, $out){
     foreach($children as $item){
         try{
-            if($item instanceof string){
+            if(is_string($item)){
                 $out.write($item);
             }else{
                 switch($item[0]){
