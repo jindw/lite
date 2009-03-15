@@ -105,7 +105,7 @@ function compute($op, $arg1, $arg2) {
 		case OP_PARAM_JOIN:
 			$arg1[] = $arg2;return $arg1;
 		case OP_MAP_PUSH:
-			$arg1[] = $arg2;return $arg1;
+			$arg1[$op[1]] = $arg2;return $arg1;
 		case OP_NOT:
 			return !$arg1;
 		case OP_POS:

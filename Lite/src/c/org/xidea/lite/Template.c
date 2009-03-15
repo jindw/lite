@@ -8,5 +8,5 @@
 #include "../json/json.h"
 
 void lite_render (struct json_value *stack,struct json_value *context){
-	return NULL;
+	//return NULL;
 }
