@@ -3,6 +3,7 @@ package org.xidea.lite.parser;
 import static org.xidea.lite.parser.ParseContext.END_INSTRUCTION;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -14,7 +15,6 @@ import org.xidea.lite.Template;
 
 public class HTMLFormNodeParser extends HTMLNodeParser implements NodeParser {
 
-
 	private static final String EL_INPUT = "input";
 	private static final String EL_TEXTAREA = "textarea";
 	private static final String EL_SELECT = "select";
@@ -25,15 +25,15 @@ public class HTMLFormNodeParser extends HTMLNodeParser implements NodeParser {
 	private static final String ATTRIBUTE_NAME = "name";
 	private static final String ATTRIBUTE_VALUE = "value";
 
-	private static final String TYPE_CHECKBOX = "checkbox";
-	private static final String TYPE_RADIO = "radio";
+	private static final Pattern TYPE_CHECK_RADIO = Pattern.compile("^(?:checkbox|radio)$");
+	private static final Pattern TYPE_BUTTON = Pattern.compile("^(?:reset|button|submit)$");
 	private static final Object KEY_SELECT = new Object();
 
 	public HTMLFormNodeParser(XMLParser parser) {
 		this.parser = parser;
 	}
 
-	protected Node parse(Node node, ParseContext context){
+	protected Node parse(Node node, ParseContext context) {
 		Element el = (Element) node;
 		String localName = el.getLocalName();
 		if (EL_INPUT.equals(localName)) {
@@ -44,11 +44,10 @@ public class HTMLFormNodeParser extends HTMLNodeParser implements NodeParser {
 			return parseSelect(el, context);
 		} else if (EL_OPTION.equals(localName)) {
 			return parseSelectOption(el, context);
-		}else{
+		} else {
 			return parseHTMLElement(node, context, null);
 		}
 	}
-
 
 	protected Node parseSelect(Element el, ParseContext context) {
 		context.setAttribute(KEY_SELECT, el);
@@ -58,18 +57,18 @@ public class HTMLFormNodeParser extends HTMLNodeParser implements NodeParser {
 	protected Node parseInput(Element element, ParseContext context) {
 		element = (Element) element.cloneNode(true);// options 有值，textarea有值
 		String type = element.getAttribute(ATTRIBUTE_TYPE);
-		if (TYPE_CHECKBOX.equals(type) || TYPE_RADIO.equals(type)) {
+		if (TYPE_CHECK_RADIO.matcher(type).find()) {
 			if (element.hasAttribute(ATTRIBUTE_CHECKED)) {
 				return parseHTMLElement(element, context, null);
 			} else if (element.hasAttribute(ATTRIBUTE_NAME)
 					&& element.hasAttribute(ATTRIBUTE_VALUE)) {
 				String name = element.getAttribute(ATTRIBUTE_NAME);
 				String value = element.getAttribute(ATTRIBUTE_VALUE);
-				List<Object> attributes = buildCheckedAttribute(context,
-						name, value, ATTRIBUTE_CHECKED);
+				List<Object> attributes = buildCheckedAttribute(context, name,
+						value, ATTRIBUTE_CHECKED);
 				return parseHTMLElement(element, context, attributes);
 			}
-		} else {
+		} else if (!TYPE_BUTTON.matcher(type).find()) {
 			if (!element.hasAttribute(ATTRIBUTE_VALUE)
 					&& element.hasAttribute(ATTRIBUTE_NAME)) {
 				element.setAttribute(ATTRIBUTE_VALUE, "${"
@@ -77,9 +76,9 @@ public class HTMLFormNodeParser extends HTMLNodeParser implements NodeParser {
 				return parseHTMLElement(element, context, null);
 			}
 		}
+		//不能else啊：（！！上面还有漏网的
 		return parseHTMLElement(element, context, null);
 	}
-
 
 	protected Node parseTextArea(Element el, ParseContext context) {
 		Document document = el.getOwnerDocument();
@@ -117,8 +116,8 @@ public class HTMLFormNodeParser extends HTMLNodeParser implements NodeParser {
 					&& element.hasAttribute(ATTRIBUTE_VALUE)) {
 				String name = selectNode.getAttribute(ATTRIBUTE_NAME);
 				String value = element.getAttribute(ATTRIBUTE_VALUE);
-				List<Object> attributes = buildCheckedAttribute(context,
-						name, value, ATTRIBUTE_SELECTED);
+				List<Object> attributes = buildCheckedAttribute(context, name,
+						value, ATTRIBUTE_SELECTED);
 				return parseHTMLElement(element, context, attributes);
 			}
 		}
@@ -149,7 +148,7 @@ public class HTMLFormNodeParser extends HTMLNodeParser implements NodeParser {
 
 	protected String buildCSEL(ParseContext context, final String collectionEL,
 			final String valueEL) {
-		String id = context.addGlobalObject(TextContains.class,null);
+		String id = context.addGlobalObject(TextContains.class, null);
 		return id + "(" + collectionEL + "," + valueEL + ")";
 	}
 

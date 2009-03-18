@@ -31,6 +31,22 @@
 			<string><![CDATA[<input name="text1" value="t1"/>]]></string>
 		</void>
 		<void method="put">
+			<string><![CDATA[<input name="text1" type="submit"/>]]></string>
+			<string><![CDATA[<input name="text1" type="submit"/>]]></string>
+		</void>
+		<void method="put">
+			<string><![CDATA[<input name="text1" type="button"/>]]></string>
+			<string><![CDATA[<input name="text1" type="button"/>]]></string>
+		</void>
+		<void method="put">
+			<string><![CDATA[<input name="text1" type="submit"/>]]></string>
+			<string><![CDATA[<input name="text1" type="submit"/>]]></string>
+		</void>
+		<void method="put">
+			<string><![CDATA[<input name="text1" type="reset"/>]]></string>
+			<string><![CDATA[<input name="text1" type="reset"/>]]></string>
+		</void>
+		<void method="put">
 			<string><![CDATA[<input name="text1" type="checkbox" value="t1"/>]]></string>
 			<string><![CDATA[<input name="text1" type="checkbox" value="t1" checked="checked"/>]]></string>
 		</void>
