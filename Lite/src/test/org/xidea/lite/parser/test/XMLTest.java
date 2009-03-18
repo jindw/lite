@@ -39,6 +39,7 @@ public class XMLTest {
 
 	@Test
 	public void runTest() throws Exception {
+		runTest("XMLTest");
 		runTest("VarTest");
 		runTest("AutoFormTest");
 	}

@@ -77,6 +77,8 @@ public interface ParseContext {
 
 	public void appendAttribute(Object el, String name);
 
+	public void appendXmlText(Object el);
+	
 	public void appendIf(Object testEL);
 
 	public void appendElse(Object testEL);
@@ -90,6 +92,7 @@ public interface ParseContext {
 	public void appendFor(String var, Object itemsEL, String status);
 
 	public URL createURL(URL parentURL, String file);
+
 
 
 }

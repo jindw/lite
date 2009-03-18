@@ -337,11 +337,14 @@ public class ParseContextImpl implements ParseContext {
 		this.append(new Object[] { Template.FOR_TYPE, var, itemsEL, status });
 	}
 
-	public void appendEL(Object testEL) {
-		this.append(new Object[] { Template.EL_TYPE, testEL });
+	public void appendEL(Object el) {
+		this.append(new Object[] { Template.EL_TYPE, el });
 
 	}
 
+	public void appendXmlText(Object el) {
+		this.append(new Object[] { Template.XML_TEXT_TYPE, el });
+	}
 	public URL createURL(URL parentURL, String path) {
 		try {
 			if (this.base == null) {
@@ -363,5 +366,6 @@ public class ParseContextImpl implements ParseContext {
 			throw new RuntimeException(e);
 		}
 	}
+
 
 }

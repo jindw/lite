@@ -120,6 +120,10 @@ public class TextParser implements Parser {
 				el = optimizeEL(eltext);
 				context.appendAttribute(el,null);
 				return;
+			case Template.XML_TEXT_TYPE:
+				el = optimizeEL(eltext);
+				context.appendXmlText(el);
+				return;
 			default:
 				break;
 			}
