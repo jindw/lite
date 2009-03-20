@@ -19,12 +19,15 @@ import org.xidea.lite.test.webserver.RequestHandle;
 
 
 public class SimpleWebServer extends MutiThreadWebServer {
-	private static final String INDEX_XHTML = "index.xhtml";
-	private static final String POST_FIX_XHTML = ".xhtml";
-	private File webBase ;
-	private TemplateEngine engine;
-	private long lastAcessTime = System.currentTimeMillis();
+	public static final String INDEX_XHTML = "index.xhtml";
+	public static final String POST_FIX_XHTML = ".xhtml";
+	protected File webBase ;
+	protected TemplateEngine engine;
+	protected long lastAcessTime = System.currentTimeMillis();
 	public SimpleWebServer(File webBase){
+		reset(webBase);
+	}
+	public void reset(File webBase){
 		this.webBase = webBase;
 		engine = new TemplateEngine(webBase);
 	}
