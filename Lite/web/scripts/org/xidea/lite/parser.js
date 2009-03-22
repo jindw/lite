@@ -21,7 +21,7 @@ var IF_KEY = "if";
 var FOR_KEY = "for";
 
 var SAFE_FOR_KEY = "this['for']";
-var TEMPLATE_NS_REG = /^http:\/\/www.xidea.org\/ns\/template.*/;
+var TEMPLATE_NS_REG = /^http:\/\/www.xidea.org\/ns\/(?:template|lite)(?:\/core)?\/?$/;
 
 
 //add as default

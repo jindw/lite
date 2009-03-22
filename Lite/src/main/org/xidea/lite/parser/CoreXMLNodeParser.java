@@ -4,6 +4,7 @@ package org.xidea.lite.parser;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.regex.Pattern;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
@@ -20,13 +21,11 @@ import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.Template;
 
 public class CoreXMLNodeParser implements NodeParser {
-	private static final String TEMPLATE_NAMESPACE = "http://www.xidea.org/ns/template";
-	private static final String TEMPLATE_NAMESPACE_CORE = "http://www.xidea.org/ns/template/core";
+	private static final Pattern TEMPLATE_NAMESPACE_CORE = Pattern.compile("^http:\\/\\/www.xidea.org\\/ns\\/(?:template|lite)(?:\\/core)?\\/?$");
 
 	public static boolean isCoreNS(String prefix, String url) {
 		return ("c".equals(prefix) && ("#".equals(url) || "#core".equals(url)))
-				|| TEMPLATE_NAMESPACE.equals(url)
-				|| TEMPLATE_NAMESPACE_CORE.equals(url);
+				|| TEMPLATE_NAMESPACE_CORE.matcher(url).find();
 	}
 
 	private static Log log = LogFactory.getLog(CoreXMLNodeParser.class);

@@ -187,7 +187,7 @@ public class DefaultXMLNodeParser implements NodeParser {
 			context.append(" " + name + "=\"");
 			if (name.startsWith("xmlns")) {
 				if (buf.size() == 1
-						&& "http://www.xidea.org/ns/template/xhtml".equals(buf
+						&& "http://www.xidea.org/ns/lite/xhtml".equals(buf
 								.get(0))) {
 					buf.set(0, "http://www.w3.org/1999/xhtml");
 				}
