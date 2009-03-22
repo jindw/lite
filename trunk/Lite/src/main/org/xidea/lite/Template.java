@@ -264,10 +264,24 @@ public class Template {
 		int len = 0;
 		ForStatus forStatus = new ForStatus(preiousStatus == null ? 0
 				: preiousStatus.getDepth() + 1);
-		try {
+		try {//hack return 代替ifelse，减少一些判断
 			context.put(FOR_KEY, forStatus);
 			if (statusName != null) {
 				context.put(statusName, forStatus);
+			}
+			if (list instanceof Map) {
+				list = ((Map) list).entrySet();
+			}
+			if (list instanceof Collection) {
+				Collection<Object> items = (Collection<Object>) list;
+				len = items.size();
+				forStatus.setSize(len);
+				for (Object item : items) {
+					forStatus.index++;
+					context.put(varName, item);
+					renderList(context, children, out);
+				}
+				return;
 			}
 			if (list instanceof CharSequence) {
 				list = ((CharSequence) list).toString().toCharArray();
@@ -279,22 +293,17 @@ public class Template {
 					context.put(varName, Array.get(list, forStatus.index));
 					renderList(context, children, out);
 				}
-			} else if (list instanceof Number) {
+				return;
+			}
+
+			if (list instanceof Number) {//算是比较少见吧
 				len = ((Number) list).intValue();
 				forStatus.setSize(len);
 				while (++forStatus.index < len) {
 					context.put(varName, forStatus.index + 1);
 					renderList(context, children, out);
 				}
-			} else if (list instanceof Collection) {
-				Collection<Object> items = (Collection<Object>) list;
-				len = items.size();
-				forStatus.setSize(len);
-				for (Object item : items) {
-					forStatus.index++;
-					context.put(varName, item);
-					renderList(context, children, out);
-				}
+				return;
 			}
 		} finally {
 			// context.put("for", preiousStatus);
