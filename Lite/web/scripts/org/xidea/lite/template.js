@@ -196,7 +196,7 @@ function processFor(context, data, out) {
             forStatus = [];
             //hack len as key
             for(len in data){
-                forStatus.push(len);
+                forStatus.push({key:len,value:data[len]});
             }
             items = forStatus;
         }

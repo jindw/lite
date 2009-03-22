@@ -128,7 +128,6 @@ function appendCode(code,buf,idpool,depth){
                 throw Error('valid status')
                 break;
             case FOR_TYPE:
-                //TODO:没有处理else，for(Number),for(Object)
                 var indexId = idpool.get();
                 var itemsId = idpool.get();
                 var previousForValueId = idpool.get();
@@ -142,11 +141,12 @@ function appendCode(code,buf,idpool,depth){
                 printIndex(buf,depth+1,itemsId,"= new Array(",itemsId,");");
                 printIndex(buf,depth,"}else if(!(",itemsId," instanceof Array)){");
                 depth++
-                printIndex(buf,depth,"var ",varNameId,"= [];");
-                printIndex(buf,depth,"for(",itemsId," in ",itemsId,"){");
-                printIndex(buf,depth+1,varNameId,".push(",itemsId,");");
+                //hack 重用变量名：previousForValueId as temp itemsId，varNameId as temp key ID
+                printIndex(buf,depth,"var ",previousForValueId,"= [];");
+                printIndex(buf,depth,"for(",varNameId," in ",itemsId,"){");
+                printIndex(buf,depth+1,previousForValueId,".push({key:",varNameId,",value:",itemsId[varNameId],"});");
                 printIndex(buf,depth,"}");
-                printIndex(buf,depth,itemsId,"=",varNameId,";");
+                printIndex(buf,depth,itemsId,"=",previousForValueId,";");
                 depth--
                 printIndex(buf,depth,"}");
                 
