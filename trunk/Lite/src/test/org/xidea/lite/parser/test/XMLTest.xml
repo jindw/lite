@@ -20,6 +20,10 @@
 			<string><![CDATA[<input value="${xml}"/>]]></string>
 			<string><![CDATA[<input value="&lt;&#34;'&gt;"/>]]></string>
 		</void>
+		<void method="put">
+			<string><![CDATA[<input value="a${xml}b"/>]]></string>
+			<string><![CDATA[<input value="a&lt;&#34;'&gt;b"/>]]></string>
+		</void>
 		<!-- testAttribute -->
 		<void method='put'>
 			<string><![CDATA[<xml attr="${test}"/>]]></string>

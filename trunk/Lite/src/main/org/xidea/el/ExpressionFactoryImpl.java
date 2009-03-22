@@ -71,6 +71,7 @@ public class ExpressionFactoryImpl implements ExpressionFactory {
 		//check it
 		expression = expression.trim();
 		StringBuilder buf = new StringBuilder();
+		buf.append((char)0);
 		for (int i = 0; i < expression.length(); i++) {
 			char c = expression.charAt(i);
 			switch (c) {
@@ -120,7 +121,7 @@ public class ExpressionFactoryImpl implements ExpressionFactory {
 				}
 			}
 		}
-		 if(buf.length()>0) {
+		 if(buf.length()!=1) {
 			throw new ExpressionSyntaxException("expression error : " + buf);
 		}
 		return expression;

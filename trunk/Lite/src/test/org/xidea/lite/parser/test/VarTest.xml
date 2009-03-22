@@ -14,10 +14,6 @@
 			<boolean>true</boolean>
 		</void>
 		<void method="put">
-			<string>qts</string>
-			<string>qts"'</string>
-		</void>
-		<void method="put">
 			<string>texts1</string>
 			<array class="java.lang.String" length="2">
 				<void index="0">
@@ -30,17 +26,19 @@
 		</void>
 	</object>
 	<object class="java.util.LinkedHashMap">
+		<!-- var -->
 		<void method="put">
 			<string><![CDATA[<c:var name="var1" value="${123}"/>${var1+1}]]></string>
 			<string><![CDATA[124]]></string>
 		</void>
 		<void method="put">
-			<string><![CDATA[<xml v1="${qts}" v2="1${qts}"/>]]></string>
-			<string><![CDATA[<xml v1="qts&#34;'" v2="1qts&#34;'"></xml>]]></string>
+			<string><![CDATA[<c:var name="var1" value="${'123'}-${123}"/><xml v="${var1}"/>]]></string>
+			<string><![CDATA[<xml v="123-123"></xml>]]></string>
 		</void>
+		<!-- captrue -->
 		<void method="put">
-			<string><![CDATA[<c:var name="var1" value="${'123'}"/><xml v="${var1}"/>]]></string>
-			<string><![CDATA[<xml v="123"></xml>]]></string>
+			<string><![CDATA[<c:var name="var1">${300}&gt;<b>${200}</b></c:var>${var1}/<div><c:out value="${var1}"/></div>]]></string>
+			<string><![CDATA[300&amp;gt;&lt;b&gt;200&lt;/b&gt;/<div>300&gt;<b>200</b></div>]]></string>
 		</void>
 	</object>
 </java>
