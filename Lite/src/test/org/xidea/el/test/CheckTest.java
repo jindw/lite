@@ -18,7 +18,16 @@ public class CheckTest {
 			throw e;
 		} catch (Throwable e) {
 			e.printStackTrace();
-			Assert.fail("只能是抛ExpressionSyntaxException异常");
+			Assert.fail("只能是抛ExpressionSyntaxException异常:"+e.getMessage());
+		}
+	}
+	public void valid(String el) throws Exception {
+		try {
+			expressionFactory.createEL(el);
+			expressionFactory.optimizeEL(el);
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail("检查失败"+e.getMessage());
 		}
 	}
 
@@ -26,6 +35,10 @@ public class CheckTest {
 	public void testEL1() throws Exception {
 		invalid("1+");
 		invalid("1;+1");
-
+	}
+	@Test
+	public void testEL2() throws Exception {
+		valid("{}");
+		valid("[{}]");
 	}
 }

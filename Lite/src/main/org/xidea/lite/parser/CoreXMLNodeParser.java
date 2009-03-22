@@ -4,6 +4,7 @@ package org.xidea.lite.parser;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import javax.xml.transform.Source;
@@ -85,6 +86,7 @@ public class CoreXMLNodeParser implements NodeParser {
 		if (value.startsWith("${") && value.endsWith("}")) {
 			value = value.substring(2, value.length() - 1);
 		} else {
+			log.warn("输入的不是有效el，系统将字符串转换成el");
 			value = JSONEncoder.encode(value);
 		}
 		return parser.optimizeEL(value);
@@ -300,7 +302,17 @@ public class CoreXMLNodeParser implements NodeParser {
 			}
 			context.appendEnd();
 		} else {
-			context.appendVar(toEL(value), name);
+			int mark = context.mark();
+			this.parser.parseText(context, value, Template.EL_TYPE);
+			List<Object> temp = context.reset(mark);
+			if(temp.size()==1){
+				Object[] item = (Object[]) temp.get(0);
+				context.appendVar(item[1], name);
+			}else{
+				context.appendCaptrue(name);
+				context.appendAll(temp);
+				context.appendEnd();
+			}
 		}
 		return null;
 	}

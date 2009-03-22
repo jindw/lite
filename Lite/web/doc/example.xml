@@ -23,9 +23,9 @@
 			当前迭代元素为：${item} 、当前循环索引值为：${for.index}
 			<c:for var="item2" items="${['a','b','c']}"
 				status="status">
-				子循环的当前迭代元素为${item2} 、自循环当前索引值为：${status.index}
+				子循环的当前迭代元素为${item2} 、子循环当前索引值为：${status.index}
 			</c:for>
-			<c:else>子循环没有任何内容</c:else>
+			<c:else>子循环没有任何内容（else是可以直接接for的，for没有执行任何循环时，执行else）</c:else>
 		</c:for>
 
 		<c:choose>
