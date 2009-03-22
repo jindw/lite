@@ -4,7 +4,7 @@
 		<format property="version" pattern="yyyyMMdd" />
 	</tstamp>
 	<available file="../JSA/build/dest/JSA-CMD.jar" property="JSAPath" value="../JSA/build/dest/JSA-CMD.jar" />
-		
+
 	<target name="init">
 		<delete dir="build/temp">
 		</delete>
@@ -57,21 +57,21 @@
 		<delete file="build/dest/jslite/__package__.js" />
 		<copy tofile="build/dest/Template-${version}.jar" file="build/dest/Template.jar" />
 
-        <jar destfile="build/dest/Template-Test.jar">
-            <manifest>
-                <attribute name="Main-Class" value="org.xidea.lite.test.app.SimpleWebServer" />
-            </manifest>
-            <zipfileset src="build/dest/Template.jar">
-                <include name="**/*.class" />
-            </zipfileset>
-            <zipfileset src="web/WEB-INF/lib/commons-logging-1.0.4.jar">
-                <include name="**/*.class" />
-            </zipfileset>
-            <fileset dir="web/WEB-INF/classes" defaultexcludes="true">
-                <include name="org/xidea/lite/test/app/*.class" />
-                <include name="org/xidea/lite/test/webserver/*.class" />
-            </fileset>
-        </jar>
+		<jar destfile="build/dest/Template-Test.jar">
+			<manifest>
+				<attribute name="Main-Class" value="org.xidea.lite.test.app.SimpleWebServer" />
+			</manifest>
+			<zipfileset src="build/dest/Template.jar">
+				<include name="**/*.class" />
+			</zipfileset>
+			<zipfileset src="web/WEB-INF/lib/commons-logging-1.0.4.jar">
+				<include name="**/*.class" />
+			</zipfileset>
+			<fileset dir="web/WEB-INF/classes" defaultexcludes="true">
+				<include name="org/xidea/lite/test/app/*.class" />
+				<include name="org/xidea/lite/test/webserver/*.class" />
+			</fileset>
+		</jar>
 	</target>
 
 	<target name="compress" depends="init">
@@ -83,7 +83,7 @@
 			<arg value="false" />
 			<arg value="-config.features" />
 			<arg value="org.xidea.lite:compile" />
-			
+
 			<arg value="-exports" />
 			<arg value="org.xidea.lite:Template" />
 			<arg value="org.xidea.lite:Parser" />
@@ -112,7 +112,7 @@
 			<arg value="org.xidea.lite:XMLParser" />
 			<arg value="org.xidea.lite.demo:$log" />
 			<arg value="org.xidea.lite.demo:TestCase" />
-			
+
 			<arg value="-outputExported" />
 			<arg value="${basedir}/build/dest/jslite/demo.js" />
 		</java>

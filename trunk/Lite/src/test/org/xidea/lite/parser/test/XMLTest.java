@@ -47,6 +47,10 @@ public class XMLTest {
 	}
 
 	@Test
+	public void runELTest() throws Exception {
+		runTest("ELTest");
+	}
+	@Test
 	public void runXMLTest() throws Exception {
 		runTest("XMLTest");
 	}

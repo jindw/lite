@@ -1,16 +1,15 @@
 package org.xidea.el.operation;
 
-import java.beans.PropertyDescriptor;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.Set;
 
 public class ProxyMap extends HashMap<String, Object> {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	ProxyMap(Object base, Map<String, PropertyDescriptor> ps) {
-		for (String key : ps.keySet()) {
+	ProxyMap(Object base, Set<String> ps) {
+		for (String key : ps) {
 			super.put(key, new PropertyValue(base,key));
 		}
 	}
