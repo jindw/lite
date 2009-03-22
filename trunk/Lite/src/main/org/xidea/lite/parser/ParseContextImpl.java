@@ -113,14 +113,19 @@ public class ParseContextImpl implements ParseContext {
 				out.write("&amp;");
 				break;
 			case '\'':
-			case '"':
 				if (quteChar == c) {
 					out.write("&#39;");
-					break;
-				} else if (quteChar == c) {
-					out.write("&#34;");
-					break;
+				}else{
+					out.write("'");
 				}
+				break;
+			case '"':
+				if (quteChar == c) {
+					out.write("&#34;");
+				}else{
+					out.write("\"");
+				}
+				break;
 			default:
 				out.write(c);
 			}
