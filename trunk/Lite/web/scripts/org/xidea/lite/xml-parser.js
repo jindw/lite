@@ -384,7 +384,7 @@ function parseAttribute(node){
     }
     this.append(" "+name+'="');
     if(/^xmlns$/i.test(name)){
-        if(buf[0] == 'http://www.xidea.org/ns/template/xhtml'){
+        if(buf[0] == 'http://www.xidea.org/ns/lite/xhtml'){
             buf[0] = 'http://www.w3.org/1999/xhtml'
         }
     }
