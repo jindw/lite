@@ -1,12 +1,12 @@
 package org.xidea.el.operation;
 
-import java.beans.PropertyDescriptor;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.WeakHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -14,22 +14,50 @@ import org.apache.commons.logging.LogFactory;
 public abstract class ReflectUtil {
 	private static final Log log = LogFactory.getLog(ReflectUtil.class);
 	private static final String LENGTH = "length";
-	private static final Map<Class<?>, Map<String, PropertyDescriptor>> classPropertyMap = new HashMap<Class<?>, Map<String, PropertyDescriptor>>();
+	private static final Map<Class<?>, Map<String, AccessDescriptor>> classPropertyMap = new WeakHashMap<Class<?>, Map<String, AccessDescriptor>>();
 
-	private static Map<String, PropertyDescriptor> getPropertyMap(Class<?> clazz) {
-		Map<String, PropertyDescriptor> propertyMap = classPropertyMap
+	private static class AccessDescriptor{
+		private Method reader;
+		private Method writer;
+		private Class<? extends Object> type;
+		public AccessDescriptor(java.beans.PropertyDescriptor property) {
+			this.reader = property.getReadMethod();
+			this.writer = property.getWriteMethod();
+			this.type = property.getPropertyType();
+			try{
+				if(this.reader!=null){
+					this.reader.setAccessible(true);
+				}
+				if(this.writer!=null){
+					this.writer.setAccessible(true);
+				}
+			}catch (Exception e) {
+			}
+			
+		}
+		public Class<? extends Object> getPropertyType() {
+			return type;
+		}
+		public Method getReadMethod() {
+			return reader;
+		}
+		public Method getWriteMethod() {
+			return writer;
+		}
+		
+	}
+	private static Map<String, AccessDescriptor> getPropertyMap(Class<?> clazz) {
+		Map<String, AccessDescriptor> propertyMap = classPropertyMap
 				.get(clazz);
 		if (propertyMap == null) {
 			try {
-				propertyMap = new HashMap<String, PropertyDescriptor>();
-				PropertyDescriptor[] properties = java.beans.Introspector
+				propertyMap = new HashMap<String, AccessDescriptor>();
+				java.beans.PropertyDescriptor[] properties = java.beans.Introspector
 						.getBeanInfo(clazz).getPropertyDescriptors();
 				for (int i = 0; i < properties.length; i++) {
-					PropertyDescriptor property = properties[i];
-					// property.getReadMethod().setAccessible(true);
-					propertyMap.put(property.getName(), property);
+					java.beans.PropertyDescriptor property = properties[i];
+					propertyMap.put(property.getName(), new AccessDescriptor(property));
 				}
-				// propertyMap = Collections.unmodifiableMap(propertyMap);
 				classPropertyMap.put(clazz, propertyMap);
 			} catch (Exception e) {
 			}
@@ -38,8 +66,8 @@ public abstract class ReflectUtil {
 	}
 
 	public static Map<String, ? extends Object> map(final Object context) {
-		Map<String, PropertyDescriptor> ps = getPropertyMap(context.getClass());
-		return new ProxyMap(context, ps);
+		Map<String, AccessDescriptor> ps = getPropertyMap(context.getClass());
+		return new ProxyMap(context, ps.keySet());
 	}
 
 	private static int toIndex(Object key) {
@@ -64,7 +92,7 @@ public abstract class ReflectUtil {
 			} else if (Map.class.isAssignableFrom(type)) {
 				return Object.class;
 			} else {
-				PropertyDescriptor pd = getPropertyDescriptor(type, String
+				AccessDescriptor pd = getPropertyDescriptor(type, String
 						.valueOf(key));
 				if (pd != null) {
 					return pd.getPropertyType();
@@ -94,7 +122,7 @@ public abstract class ReflectUtil {
 				if (context instanceof Map) {
 					return ((Map<?, ?>) context).get(key);
 				}
-				PropertyDescriptor pd = getPropertyDescriptor(context
+				AccessDescriptor pd = getPropertyDescriptor(context
 						.getClass(), String.valueOf(key));
 				if (pd != null) {
 					Method method = pd.getReadMethod();
@@ -111,9 +139,9 @@ public abstract class ReflectUtil {
 		return null;
 	}
 
-	private static PropertyDescriptor getPropertyDescriptor(
+	private static AccessDescriptor getPropertyDescriptor(
 			Class<? extends Object> type, String key) {
-		Map<String, PropertyDescriptor> pm = getPropertyMap(type);
+		Map<String, AccessDescriptor> pm = getPropertyMap(type);
 		return pm.get(key);
 	}
 
@@ -136,7 +164,7 @@ public abstract class ReflectUtil {
 				if (base instanceof Map) {
 					((Map<Object, Object>) base).put(key, value);
 				}
-				PropertyDescriptor pd = getPropertyDescriptor(base.getClass(),
+				AccessDescriptor pd = getPropertyDescriptor(base.getClass(),
 						String.valueOf(key));
 				if (pd != null) {
 					Method method = pd.getWriteMethod();

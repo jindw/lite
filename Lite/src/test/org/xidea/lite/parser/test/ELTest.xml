@@ -7,21 +7,37 @@
 		</void>
 	</object>
 	<object class="java.util.LinkedHashMap">
+		<void method="put">
+			<string><![CDATA[<div>\${1+1}</div>]]></string>
+			<string><![CDATA[<div>${1+1}</div>]]></string>
+		</void>
+		<void method="put">
+			<string><![CDATA[<div>\\${1+1}</div>]]></string>
+			<string><![CDATA[<div>\2</div>]]></string>
+		</void>
+		<void method="put">
+			<string><![CDATA[<div>\\\\${1+1}</div>]]></string>
+			<string><![CDATA[<div>\\2</div>]]></string>
+		</void>
+		<void method="put">
+			<string><![CDATA[<div>\\\${1+1}</div>]]></string>
+			<string><![CDATA[<div>\${1+1}</div>]]></string>
+		</void>
 		<!-- test el -->
 		<void method="put">
-			<string><![CDATA["<div>${1+1}</div>]]></string>
+			<string><![CDATA[<div>${1+1}</div>]]></string>
 			<string><![CDATA[<div>2</div>]]></string>
 		</void>
 		<void method="put">
-			<string><![CDATA["<div>x${1+1}</div>]]></string>
+			<string><![CDATA[<div>x${1+1}</div>]]></string>
 			<string><![CDATA[<div>x2</div>]]></string>
 		</void>
 		<void method="put">
-			<string><![CDATA["<div>{1+1}</div>]]></string>
+			<string><![CDATA[<div>{1+1}</div>]]></string>
 			<string><![CDATA[<div>{1+1}</div>]]></string>
 		</void>
 		<void method="put">
-			<string><![CDATA["<div>x{1+1}</div>]]></string>
+			<string><![CDATA[<div>x{1+1}</div>]]></string>
 			<string><![CDATA[<div>x{1+1}</div>]]></string>
 		</void>
 	</object>

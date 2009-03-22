@@ -44,17 +44,19 @@ public class TextParser implements Parser {
 		boolean encode = defaultElType!=Template.EL_TYPE;
 		char qute = '"';
 		do {
-			final int p$ = text.indexOf('$', start);
+			final int p$ = text.indexOf("${", start);
 			if (p$ < 0) {
 				continue;
 			} else if (p$ > 0 && text.charAt(p$ - 1) == '\\') {
 				int pre = p$ - 1;
 				while (pre-- > 0 && text.charAt(pre) == '\\')
 					;
-				int count = p$ - pre;
-				context.append(text.substring(start, p$ - count % 2),encode,qute);
+				int countp1 = p$ - pre;
+				context.append(text.substring(start, p$ - countp1 / 2),encode,qute);
 				start = p$;
-				if ((count & 1) == 0) {// escape
+				if ((countp1 & 1) == 0) {// escape
+					context.append("${");
+					start=p$+2;
 					continue;
 				}
 			}
