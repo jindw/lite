@@ -32,12 +32,16 @@ public abstract class MutiThreadWebServer extends AbstractWebServer {
 				try {
 					InputStream in = remote.getInputStream();
 					OutputStream out = remote.getOutputStream();
-					processRequest(new RequestHandle(MutiThreadWebServer.this,in, out));
-					in.close();
-					out.close();;
+					try {
+						processRequest(new RequestHandle(
+								MutiThreadWebServer.this, in, out));
+					} finally {
+						in.close();
+						out.close();
+					}
 				} catch (IOException e) {
 					e.printStackTrace();
-				}finally{
+				} finally {
 					try {
 						remote.close();
 					} catch (IOException e) {
@@ -47,7 +51,7 @@ public abstract class MutiThreadWebServer extends AbstractWebServer {
 						requestThreads[++requestLastIndex] = thread;
 					}
 				}
-				
+
 			}
 		};
 		if (requestLastIndex >= 0) {
