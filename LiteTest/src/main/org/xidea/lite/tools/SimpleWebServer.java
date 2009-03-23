@@ -9,7 +9,9 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
@@ -33,7 +35,16 @@ public class SimpleWebServer extends MutiThreadWebServer {
 
 	public void reset(File webBase) {
 		this.webBase = webBase;
-		engine = new TemplateEngine(webBase);
+		engine = new TemplateEngine(webBase){
+			protected URL getResource(String pagePath) throws MalformedURLException {
+				File file = new File(webRoot, pagePath);
+				if(file.exists()){
+					return file.toURI().toURL();
+				}else{
+					return this.getClass().getResource(pagePath);
+				}
+			}
+		};
 	}
 
 	protected void processRequest(RequestHandle handle) throws IOException {
