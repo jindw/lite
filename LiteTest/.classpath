@@ -5,5 +5,5 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="web/WEB-INF/lib/Template.jar" sourcepath="/Lite/src/main"/>
 	<classpathentry kind="lib" path="web/WEB-INF/lib/commons-logging-1.0.4.jar"/>
-	<classpathentry kind="output" path="web/WEB-INF/classes"/>
+	<classpathentry kind="output" path="web_WEB-INF_classes"/>
 </classpath>
