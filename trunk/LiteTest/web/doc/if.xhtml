@@ -1,0 +1,37 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://www.xidea.org/ns/lite/core">
+	<head>
+		<title>If条件语法</title>
+	</head>
+	<body>
+		<h3>先看实例</h3>
+		<textarea style="height:180px;">
+		&lt;c:if test="\${test}"&gt;
+			当
+			&lt;var&gt;test&lt;/var&gt;
+			变量为真时，渲染该节点内容
+			&lt;c:if test="\${num>5}"&gt;
+				您也可以嵌套
+			&lt;/c:if&gt;
+		&lt;/c:if&gt;
+		&lt;c:else test="\${test2}"&gt;当前面的if节点不成立且test2成立时，渲染该节点内容&lt;/c:else&gt;
+		&lt;c:else&gt;当前面的if节点，和else节点都不成立时，渲染该节点内容&lt;/c:else&gt;
+		</textarea>
+		<h3>test属性</h3>
+		<ul>
+			<li>test属性必须是一个表达式</li>
+			<li>
+				test不限于boolean类型
+				<ul>
+					<li>boolean 类型</li>
+					<li>string 类型，空字符串时表现为假，其他时候为真</li>
+					<li>number 类型，值为0或者为NaN，+-Infinite时表现为假，其他时候为真</li>
+					<li>null 对象为假</li>
+					<li>其他对象均为真</li>
+				</ul>
+			</li>
+		</ul>
+		<h3>else 语法</h3>
+		<ul>好像没什么需要补充的。</ul>
+	</body>
+</html>
