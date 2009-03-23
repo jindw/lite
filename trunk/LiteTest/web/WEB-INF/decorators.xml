@@ -5,4 +5,7 @@
     <decorator name="page" layout="/doc/layout.xhtml">
         <pattern>/doc/*.xhtml</pattern>
     </decorator>
+    <decorator name="editable" layout="edit-layout.xhtml">
+        <pattern>**/*.xhtml</pattern>
+    </decorator>
 </decorators>
