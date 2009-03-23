@@ -15,7 +15,11 @@
 	</head>
 	<body>
 		<form method="POST">
-			<table>
+			<table border="1">
+				<tr>
+					<th>模版源代码</th>
+					<th>JSON模拟数据</th>
+				</tr>
 				<tr>
 					<td>
 						<textarea style="width:550px;height:500px"
@@ -35,12 +39,23 @@
   var i = codes.length;
   while(i--){
   	var code = codes[i];
-  	if(code.name="litecode"){
+  	if(code.name=="template"){
   	  var editor = CodeMirror.fromTextArea(code, {
   		readOnly:false,
    		//height: code.clientHeight+"px",
     	parserfile: "parsexml.js",
     	stylesheet: "/codemirror/css/xmlcolors.css",
+    	path: "/codemirror/js/",
+    	continuousScanning: 500,
+    	lineNumbers: true,
+    	textWrapping: false
+      });
+    }else if(code.name=="json"){
+  	  var editor = CodeMirror.fromTextArea(code, {
+  		readOnly:false,
+   		//height: code.clientHeight+"px",
+    	parserfile: ["tokenizejavascript.js", "parsejavascript.js"],
+    	stylesheet: "/codemirror/css/jscolors.css",
     	path: "/codemirror/js/",
     	continuousScanning: 500,
     	lineNumbers: true,

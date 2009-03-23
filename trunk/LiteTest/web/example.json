@@ -1,15 +1,15 @@
 {
-	"test":true,
-	"numberList":[1,2,3,4,5,6],
-	"stringList":["s1","s2","s3","s4","s5"],
-	"date":{"year":2009,"month":03,"date":22},
-	"unescapedText":"特殊字符：'\"</textarea>&",
-	"user":{
-		"name":"jindw",
-		"age":28,
-		"姓氏":"金",
-		"大名":"大为",
-		"firstName":"jin",
-		"lastName":"dw"
-	}
+  "test":true,
+  "numberList":[1,2,3,4,5,6],
+  "stringList":["s1","s2","s3","s4","s5"],
+  "date":{"year":2009,"month":03,"date":22},
+  "unescapedText":"特殊字符：'\"</textarea>&",
+  "user":{
+    "name":"jindw",
+    "age":28,
+    "姓氏":"金",
+    "大名":"大为",
+    "firstName":"jin",
+    "lastName":"dw"
+  }
 }
