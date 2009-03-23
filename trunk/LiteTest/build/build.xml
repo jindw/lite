@@ -33,18 +33,18 @@
 				<include name="**/*.class" />
 				<include name="**/*.ent" />
 				<include name="**/*.dtd" />
-				<include name="**/*.jar" />
 			</zipfileset>
 			<zipfileset src="web/WEB-INF/lib/commons-logging-1.0.4.jar">
 				<include name="**/*.class" />
 			</zipfileset>
 			<fileset dir="web/WEB-INF/classes" defaultexcludes="true">
 				<include name="org/xidea/lite/tools/**/*.class" />
+				<include name="**/*.jar" />
 			</fileset>
 		</jar>
 	</target>
 
-	<target name="build" depends="init,jar-template">
+	<target name="build" depends="init,jar-example,jar-template">
 
 	</target>
 
