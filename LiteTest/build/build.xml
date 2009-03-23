@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="GBK"?>
+<project name="Lite" default="build" basedir="../">
+	<tstamp>
+		<format property="version" pattern="yyyyMMdd" />
+	</tstamp>
+	<target name="init">
+		<delete dir="build/temp">
+		</delete>
+		<mkdir dir="build/dest" />
+		<mkdir dir="build/dest/jslite" />
+	</target>
+	<target name="jar-example">
+		<jar destfile="src/resource/org/xidea/lite/tools/web.jar">
+			<fileset dir="web/" defaultexcludes="true">
+				<include name="**/*.*" />
+				<exclude name="WEB-INF/lib/**/*.*" />
+				<exclude name="WEB-INF/classes/**/*.*" />
+			</fileset>
+		</jar>
+	</target>
+	<target name="jar-template" depends="init">
+		<delete>
+			<fileset dir="build/dest/">
+				<include name="Test-*.jar" />
+			</fileset>
+		</delete>
+
+		<jar destfile="build/dest/Test.jar">
+			<manifest>
+				<attribute name="Main-Class" value="org.xidea.lite.tools.SwingWebServer" />
+			</manifest>
+			<zipfileset src="web/WEB-INF/lib/Template.jar">
+				<include name="**/*.class" />
+				<include name="**/*.ent" />
+				<include name="**/*.dtd" />
+				<include name="**/*.jar" />
+			</zipfileset>
+			<zipfileset src="web/WEB-INF/lib/commons-logging-1.0.4.jar">
+				<include name="**/*.class" />
+			</zipfileset>
+			<fileset dir="web/WEB-INF/classes" defaultexcludes="true">
+				<include name="org/xidea/lite/tools/**/*.class" />
+			</fileset>
+		</jar>
+	</target>
+
+	<target name="build" depends="init,jar-template">
+
+	</target>
+
+</project>
