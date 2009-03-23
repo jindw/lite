@@ -130,7 +130,7 @@ public class TemplateEngine{
 				log.warn(e);
 			}
 		}
-		if (decoratorPath != null) {
+		if (decoratorPath != null && !decoratorPath.equals(path)) {
 			try {
 				Node node = parser.loadXML(getResource(path), parseContext);
 				parseContext.setAttribute("#page", node);
