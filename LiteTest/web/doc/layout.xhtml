@@ -2,9 +2,6 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:c="http://www.xidea.org/ns/lite/core">
 	<head>
-		<title>
-			<c:include path="#page" xpath="//xhtml:title/text()" />
-		</title>
 		<link href="../styles/default.css" rel="stylesheet"
 			type="text/css" />
 		<script src="/codemirror/js/codemirror.js"
@@ -63,7 +60,7 @@
 				</ul>
 			</div>
 			<div id="main">
-				<c:include path="#page" xpath="//xhtml:body/*" />
+				<c:include path="#page" xpath="//xhtml:body/node()" />
 			</div>
 		</div>
 		<div id="footer"></div>
