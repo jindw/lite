@@ -1,78 +1,86 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:c="http://www.xidea.org/ns/lite/core">
-	<head><style>div,form,body{border:1px solid blue;padding:10px;}</style></head>
-	<body>
-		<!-- 逻辑控制 -->
-		<c:if test="${test}">
-			<div>
-				当
-				<strong>test</strong>
-				变量为真时，渲染该节点内容
-			</div>
-		</c:if>
-		<c:else>
-			<div>当前面的if节点不成立时，渲染该节点内容</div>
-		</c:else>
+  xmlns:c="http://www.xidea.org/ns/lite/core">
+  <head>
+    <style>
+      div,form,body{border:1px solid blue;padding:10px;}
+    </style>
+  </head>
+  <body>
+    <!-- 逻辑控制 -->
+    <c:if test="${test}">
+      <div>
+        当
+        <strong>test</strong>
+        变量为真时，渲染该节点内容
+      </div>
+    </c:if>
+    <c:else>
+      <div>当前面的if节点不成立时，渲染该节点内容</div>
+    </c:else>
 
-		<c:for var="item" items="${[1,2,3,4]}">
-			<div>当前迭代元素为：${item} 、当前循环索引值为：${for.index}</div>
-			<c:for var="item2" items="${['a','b','c']}"
-				status="status">
-				<div>
-					子循环的当前迭代元素为${item2} 、子循环当前索引值为：${status.index}
-				</div>
-			</c:for>
-			<c:else>
-				<div>子循环没有任何内容（else是可以直接接for的，for没有执行任何循环时，执行else）</div>
-			</c:else>
-		</c:for>
-		<div>
-			<c:choose>
-				<c:when test="${date.getDay()==1}">星期一</c:when>
-				<c:when test="${date.getDay()==2}">周二</c:when>
-				<c:when test="${date.getDay()==3}">周三</c:when>
-				<c:when test="${date.getDay()==4}">周四</c:when>
-				<c:when test="${date.getDay()==5}">周五</c:when>
-				<c:when test="${date.getDay()==6}">周末</c:when>
-				<c:otherwise>周日</c:otherwise>
-			</c:choose>
-		</div>
+    <c:for var="item" items="${[1,2,3,4]}">
+      <div>当前迭代元素为：${item} 、当前循环索引值为：${for.index}</div>
+      <div>
+        <c:for var="item2" items="${for.index % 2? []:['a','b','c']}"
+          status="status">
+          <div>
+            子循环的当前迭代元素为${item2} 、子循环当前索引值为：${status.index}
+          </div>
+        </c:for>
+        <c:else>
+          <div>
+            子循环没有任何内容（else是可以直接接for的，for没有执行任何循环时，执行else）
+          </div>
+        </c:else>
+      </div>
+    </c:for>
+    <div>
+      <c:choose>
+        <c:when test="${date.day==1}">星期一</c:when>
+        <c:when test="${date.day==2}">周二</c:when>
+        <c:when test="${date.day==3}">周三</c:when>
+        <c:when test="${date.day==4}">周四</c:when>
+        <c:when test="${date.day==5}">周五</c:when>
+        <c:when test="${date.day==6}">周末</c:when>
+        <c:otherwise>周日</c:otherwise>
+      </c:choose>
+    </div>
 
-		<!-- 变量输出 和 xml 自动编码 -->
-		<div>
-			<input value="${unescapedText}" />
-			<textarea>${unescapedText}</textarea>
-		</div>
+    <!-- 变量输出 和 xml 自动编码 -->
+    <div>
+      <input value="${unescapedText}" />
+      <textarea>${unescapedText}</textarea>
+    </div>
 
-		<!-- 表单自动填充(可选功能) -->
-		<form>
-			<div>
-				<input name="user.name" />
-			</div>
-			<div>
-				等价于
-				<input name="user.name" value="${user.name}" />
-			</div>
-			<hr />
-			<div>
-				<select name="user.age">
-					<option value="1">一周岁</option>
-					<option value="2">两周岁</option>
-					<option value="28">二十八周岁</option>
-					....
-				</select>
-			</div>
-			<div>
-				等價于
-				<strong>很复杂很复杂.....</strong>
-			</div>
-		</form>
+    <!-- 表单自动填充(可选功能) -->
+    <form>
+      <div>
+        <input name="user.name" />
+      </div>
+      <div>
+        等价于
+        <input name="user.name" value="${user.name}" />
+      </div>
+      <hr />
+      <div>
+        <select name="user.age">
+          <option value="1">一周岁</option>
+          <option value="2">两周岁</option>
+          <option value="28">二十八周岁</option>
+          ....
+        </select>
+      </div>
+      <div>
+        等價于
+        <strong>很复杂很复杂!!!!.....</strong>
+      </div>
+    </form>
 
-		<!-- 模板內部变量申明 -->
-		<c:var name="中文名">${user.姓氏}${user.大名}</c:var>
-		<c:var name="englishName"
-			value="${user.firstName}.${user.lastName}" />
-		<div>我的中文名字是：${中文名}</div>
-		<div>我的英文名字是：${englishName}</div>
-	</body>
+    <!-- 模板內部变量申明 -->
+    <c:var name="中文名">${user.姓氏}${user.大名}</c:var>
+    <c:var name="englishName"
+      value="${user.firstName}.${user.lastName}" />
+    <div>我的中文名字是：${中文名}</div>
+    <div>我的英文名字是：${englishName}</div>
+  </body>
 </html>
