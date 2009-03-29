@@ -181,7 +181,7 @@ public class DefaultXMLNodeParser implements NodeParser {
 				throw new RuntimeException("只能有单个EL表达式");
 			} else {// 只考虑单一EL表达式的情况
 				Object[] el = (Object[]) buf.get(0);
-				context.appendAttribute(el[1], name);
+				context.appendAttribute(name, el[1]);
 			}
 		} else {
 			context.append(" " + name + "=\"");

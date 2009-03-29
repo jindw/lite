@@ -120,7 +120,7 @@ public class TextParser implements Parser {
 				return;
 			case Template.XML_ATTRIBUTE_TYPE:
 				el = optimizeEL(eltext);
-				context.appendAttribute(el,null);
+				context.appendAttribute(null,el);
 				return;
 			case Template.XML_TEXT_TYPE:
 				el = optimizeEL(eltext);

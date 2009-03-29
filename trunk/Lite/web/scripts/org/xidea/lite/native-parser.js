@@ -131,8 +131,8 @@ function appendCode(code,buf,idpool,depth){
                 var indexId = idpool.get();
                 var itemsId = idpool.get();
                 var previousForValueId = idpool.get();
-                var itemsEL = item[3];
-                var varNameId = item[2]; 
+                var itemsEL = item[2];
+                var varNameId = item[3]; 
                 var statusNameId = item[4]; 
                 var childCode = item[1];
                 printIndex(buf,depth,"var ",itemsId,"=",itemsEL,";");
@@ -144,7 +144,7 @@ function appendCode(code,buf,idpool,depth){
                 //hack 重用变量名：previousForValueId as temp itemsId，varNameId as temp key ID
                 printIndex(buf,depth,"var ",previousForValueId,"= [];");
                 printIndex(buf,depth,"for(",varNameId," in ",itemsId,"){");
-                printIndex(buf,depth+1,previousForValueId,".push({key:",varNameId,",value:",itemsId[varNameId],"});");
+                printIndex(buf,depth+1,previousForValueId,".push({key:",varNameId,",value:",itemsId,"[",varNameId,"]});");
                 printIndex(buf,depth,"}");
                 printIndex(buf,depth,itemsId,"=",previousForValueId,";");
                 depth--

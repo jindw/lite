@@ -281,7 +281,7 @@ function parseForTag(node){
     var var_ = getAttribute(this,node,'var');
     var status = getAttribute(this,node,'status');
     
-    this.append([FOR_TYPE,var_,items,status]);
+    this.append([FOR_TYPE,items,var_,status]);
     if(next){
         do{
             this.parseNode(next)

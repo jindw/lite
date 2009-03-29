@@ -307,7 +307,7 @@ public class CoreXMLNodeParser implements NodeParser {
 			List<Object> temp = context.reset(mark);
 			if(temp.size()==1){
 				Object[] item = (Object[]) temp.get(0);
-				context.appendVar(item[1], name);
+				context.appendVar(name, item[1]);
 			}else{
 				context.appendCaptrue(name);
 				context.appendAll(temp);
@@ -353,7 +353,7 @@ public class CoreXMLNodeParser implements NodeParser {
 			content = node.getTextContent();
 		}
 		context
-				.appendVar(parser.optimizeEL(content),var);
+				.appendVar(var,parser.optimizeEL(content));
 		return null;
 	}
 

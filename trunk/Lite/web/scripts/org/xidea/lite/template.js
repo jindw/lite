@@ -186,9 +186,9 @@ function processAttribute(context, data, out){
 //}
 function processFor(context, data, out) {
 	var children = data[1];
-	var varName = data[2];
+	var items = evaluate(data[2],context);
+	var varName = data[3];
 	var statusName = data[4];
-	var items = evaluate(data[3],context);
 	var preiousStatus = context[FOR_KEY];
 	try {
 	    if(!(items instanceof Array)){

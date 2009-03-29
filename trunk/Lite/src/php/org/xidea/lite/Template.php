@@ -107,9 +107,9 @@ function processElse($context, $data, $out){
 }
 function processFor($context, $data, $out){
     $children = $data[1];
-    $varName = $data[2];
+    $items = evaluate($data[2],$context);
+    $varName = $data[3];
     $statusName = $data[4];
-    $items = evaluate($data[3],$context);
     $length = count($items);
     $preiousStatus = array_key_exists(FOR_KEY,$context) && $context[FOR_KEY];
     try{
