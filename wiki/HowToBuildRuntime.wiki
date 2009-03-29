@@ -126,33 +126,56 @@ CAPTRUE_TYPE = 9;       // [9,[...],'var']
      功能类似于程序语言中的if控制语法
      # 判断 <test el>表达式是否为真（JS规则）
      # 为真则渲染子节点，否则跳过
-     # 更新上下文<if>状态
+     # 更新上下文[if]状态
    * 处理ELSE_TYPE 指令
      功能类似于程序语言中的else控制语法。
      # 查看当前上下文if状态
      # if状态为真，跳过处理
      # 如果有<test el> 且不为真，跳过处理
      # 处理子节点
-     # 更新上下文<if>状态
+     # 更新上下文[if]状态
    * 处理FOR_TYPE 指令
      功能类似于程序语言中的for控制语法。
      # 执行<items el>表达式
-     # 若<1> 为数值型，将其当作一个长为该值的数字看待
-     # 如<1> 为map，取其entrySet值代替
-     # 备份上下文<for> 状态
+     # 若{1} 为数值型，将其当作一个长为该值的数字看待
+     # 如{1} 为map，取其entrySet值代替
+     # 备份上下文[for] 状态
      # 初始化循环状态对象（index=0,lastIndex,depth）
-     # 迭代 <1>
+     # 迭代 {1}
        # index++
        # 处理子节点
      # 从for备份，恢复for状态
      # 更新if状态为 循环次数的bool值（>0为真 ，==0为假）
    * 处理EL_TYPE指令
      功能类似于 print(evaluate(el));
-     # 计算<el>值
+     # 计算< el>值
      # 直接文本化输出
    * 处理XML_TEXT_TYPE指令
-     根据表达式，计算<el>值，按XML文本方式输出编码后文本
+     功能类似于: print(xmlTextEncode(evaluate(el)));
+     # 根据表达式，计算< el>值
+     # 按XML文本方式输出编码后文本
    * 处理XML_ATTRIBUTE_TYPE指令
-     如果没有，根据表达式，计算<el>值，按XML文本方式输出编码后文本
+     功能类似于:
+{{{
+     if(name){
+          if(evaluate(el) !=null){
+              print(" "+name+"=\""+xmlAttributeEncode(evaluate(el))+"\"");
+          }
+     }else{
+          print(xmlAttributeEncode(evaluate(el)));
+     }
+}}}
+     # 如果没有属性名，直接按xml 属性编码后后输出文本。
+     # 如果属性值不为空，输出合法的xml属性内容。
 
+   * 处理 VAR_TYPE 指令
+     功能类似于 var varName = evaluate(el);
+     # 计算el值
+     # 将该el值按名称name添加进上下文
+   * 处理 CAPTRUE_TYPE 指令  
+     捕捉输出并申明变量
+     # 捕捉一段输出内容
+     # 将内容当变量name 添加进上下文，而不是直接输出
+   * 处理 ADD_ONS_TYPE 指令
+     待续
 [http://lite.googlecode.com/svn/trunk/Lite/resource/%E5%85%AB%E5%8D%A6.png 模版指令分布图]
