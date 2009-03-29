@@ -5,7 +5,7 @@ Lite运行时无需做模板编译工作，他通过JSON格式的中间代码初
 
 
 == 构建表达式 ==
-   Lite的表达式结构可概括为：五行通天地
+   Lite的表达式指令结构可概括为：[http://lite.googlecode.com/svn/trunk/Lite/resource/%E4%BA%94%E8%A1%8C.png 五行通天地]
    他包括5种数据节点类型，和九组（23种）操作符类型。
   === 计算模型 ===
     * 节点数组
@@ -99,10 +99,10 @@ OP_MAP_PUSH = 33;#32 | 0 | 1;
 }}}
 
 
-[http://lite.googlecode.com/svn/trunk/Lite/resource/%E4%BA%94%E8%A1%8C.png 表达式指令分布图]
 
 == 构建模板指令解释引擎 ==
-  模板指令共有10种，两种用于定义模板内零时中间，8中用于控制各种模板逻辑
+  Lite的模板指令结构可概括为：[http://lite.googlecode.com/svn/trunk/Lite/resource/%E5%85%AB%E5%8D%A6.png 八卦定乾坤]。
+  模板指令共有10种，八种用于控制各种模板逻辑，分布在八个方位，编号为(0-7)；两种用于定义模板内零时变量的，位于八卦的中心（阴阳二仪）。
   === 模版指令基本模式 ===
     * 基于嵌套数组的数据结构
     * 指令的第一个位置存放指令标示
@@ -179,4 +179,3 @@ CAPTRUE_TYPE = 9;       // [9,[...],'var']
       # 将内容当变量name 添加进上下文，而不是直接输出
     * 处理 ADD_ONS_TYPE 指令
       待续
-[http://lite.googlecode.com/svn/trunk/Lite/resource/%E5%85%AB%E5%8D%A6.png 模版指令分布图]
