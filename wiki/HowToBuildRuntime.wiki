@@ -98,21 +98,25 @@ OP_PARAM_JOIN = 1;#0 | 0 | 1;
 OP_MAP_PUSH = 33;#32 | 0 | 1;
 }}}
 
-表达式图例
-[http://lite.googlecode.com/svn/trunk/Lite/resource/%E4%BA%94%E8%A1%8C.png]
+
+[http://lite.googlecode.com/svn/trunk/Lite/resource/%E4%BA%94%E8%A1%8C.png 表达式指令分布图]
 
 == 模板指令介绍 ==
+  === 模版指令基本模式 ===
+    * 基于嵌套数组的数据结构
+    * 如果有子节点,子节点数组都出现在该指令的第二个元素位置
+    * 如果有表达式,表达式都以数组形式中间代码存在(如上述表达式格式)
 {{{
-EL_TYPE = 0;# [0,'el']
-IF_TYPE = 1;# [1,[...],'test']
-BREAK_TYPE = 2;# [2,depth]
-XML_ATTRIBUTE_TYPE = 3;# [3,'value','name']
-XML_TEXT_TYPE = 4;# [4,'el']
-FOR_TYPE = 5;# [5,[...],'var','items','status']#status
-ELSE_TYPE = 6;# [6,[...],'test']#test opt?
-ADD_ONS_TYPE =7;# [7,[...],'var']
-VAR_TYPE = 8;# [8,'value','name']
-CAPTRUE_TYPE = 9;# [9,[...],'var']
+EL_TYPE = 0;            // [0,<el>]
+IF_TYPE = 1;            // [1,[...],<test el>]
+BREAK_TYPE = 2;         // [2,depth]
+XML_ATTRIBUTE_TYPE = 3; // [3,<value el>,'name']
+XML_TEXT_TYPE = 4;      // [4,<el>]
+FOR_TYPE = 5;           // [5,[...],'varName',<items el>,'status']#status
+ELSE_TYPE = 6;          // [6,[...],<test el>]#test opt?
+ADD_ONS_TYPE =7;        // [7,[...],<add on el>,'<addon-class>']
+VAR_TYPE = 8;           // [8,<value el>,'name']
+CAPTRUE_TYPE = 9;       // [9,[...],'var']
 }}}
-图例
-[http://lite.googlecode.com/svn/trunk/Lite/resource/%E5%85%AB%E5%8D%A6.png]
+
+[http://lite.googlecode.com/svn/trunk/Lite/resource/%E5%85%AB%E5%8D%A6.png 模版指令分布图]
