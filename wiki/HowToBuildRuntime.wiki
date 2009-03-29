@@ -118,7 +118,7 @@ XML_ATTRIBUTE_TYPE = 3; // [3,<value el>,'name']
 XML_TEXT_TYPE = 4;      // [4,<el>]
 FOR_TYPE = 5;           // [5,[...],<items el>,'varName','status']// status 可为null
 ELSE_TYPE = 6;          // [6,[...],<test el>] //<test el> 可为null
-ADD_ONS_TYPE =7;        // [7,[...],<add on el>,'<addon-class>']
+ADD_ON_TYPE = 7;        // [7,[...],<add on el>,'<addon-class>']
 VAR_TYPE = 8;           // [8,<value el>,'name']
 CAPTRUE_TYPE = 9;       // [9,[...],'var']
 }}}
