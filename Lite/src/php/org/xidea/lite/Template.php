@@ -1,15 +1,16 @@
 <?php
 
-define('EL_TYPE',0);// [0,'el']
-define('IF_TYPE',1);// [1,[...],'test']
-define('BREAK_TYPE',2);// [2,depth]
-define('XML_ATTRIBUTE_TYPE',3);// [3,'value','name']
-define('XML_TEXT_TYPE',4);// [4,'el']
-define('FOR_TYPE',5);// [5,[...],'var','items','status']#status
-define('ELSE_TYPE',6);// [6,[...],'test']#test opt?
-define('ADD_ONS_TYPE',7);// [7,[...],'var']
-define('VAR_TYPE',8);// [8,'value','name']
-define('CAPTRUE_TYPE',9);// [9,[...],'var']
+define('EL_TYPE',0);            // [0,<el>]
+define('IF_TYPE',1);            // [1,[...],<test el>]
+define('BREAK_TYPE',2);         // [2,depth]
+define('XML_ATTRIBUTE_TYPE',3); // [3,<value el>,'name']
+define('XML_TEXT_TYPE',4);      // [4,<el>]
+define('FOR_TYPE',5);           // [5,[...],<items el>,'varName','status']// status 可为null
+define('ELSE_TYPE',6);          // [6,[...],<test el>] //<test el> 可为null
+define('ADD_ON_TYPE',7);        // [7,[...],<add on el>,'<addon-class>']
+define('VAR_TYPE',8);           // [8,<value el>,'name']
+define('CAPTRUE_TYPE',9);       // [9,[...],'var']
+
 
 define('FOR_KEY', "for");
 define('IF_KEY', "if");

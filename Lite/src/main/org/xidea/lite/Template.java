@@ -19,18 +19,17 @@ import org.xidea.el.operation.ReflectUtil;
 
 public class Template {
 	private static Log log = LogFactory.getLog(Template.class);
-
-	public static final int EL_TYPE = 0;// [0,'el']
-	public static final int IF_TYPE = 1;// [1,[...],'test']
-	public static final int BREAK_TYPE = 2;// [2,depth]
-	public static final int XML_ATTRIBUTE_TYPE = 3;// [3,'value','name']
-	public static final int XML_TEXT_TYPE = 4;// [4,'el']
-	public static final int FOR_TYPE = 5;// [5,[...],'var','items','status']//status
-	public static final int ELSE_TYPE = 6;// [6,[...],'test']//test opt?
-	public static final int ADD_ON_TYPE = 7;// [7,[...],el,type]
-	public static final int VAR_TYPE = 8;// [8,'value','name']
-	public static final int CAPTRUE_TYPE = 9;// [9,[...],'var']
-
+	public static final int EL_TYPE = 0;            // [0,<el>]
+	public static final int IF_TYPE = 1;            // [1,[...],<test el>]
+	public static final int BREAK_TYPE = 2;         // [2,depth]
+	public static final int XML_ATTRIBUTE_TYPE = 3; // [3,<value el>,'name']
+	public static final int XML_TEXT_TYPE = 4;      // [4,<el>]
+	public static final int FOR_TYPE = 5;           // [5,[...],<items el>,'varName','status']// status 可为null
+	public static final int ELSE_TYPE = 6;          // [6,[...],<test el>] //<test el> 可为null
+	public static final int ADD_ON_TYPE =7;        // [7,[...],<add on el>,'<addon-class>']
+	public static final int VAR_TYPE = 8;           // [8,<value el>,'name']
+	public static final int CAPTRUE_TYPE = 9;       // [9,[...],'var']
+	
 	public static final String FOR_KEY = "for";
 	public static final String IF_KEY = "if";
 	private Map<String, Object> gloabls = new HashMap<String, Object>(

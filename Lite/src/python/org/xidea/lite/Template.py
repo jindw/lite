@@ -3,16 +3,17 @@
 
 from Expression import evaluate
 
-EL_TYPE = 0;# [0,'el']
-IF_TYPE = 1;# [1,[...],'test']
-BREAK_TYPE = 2;# [2,depth]
-XML_ATTRIBUTE_TYPE = 3;# [3,'value','name']
-XML_TEXT_TYPE = 4;# [4,'el']
-FOR_TYPE = 5;# [5,[...],'items','var','status']#status
-ELSE_TYPE = 6;# [6,[...],'test']#test opt?
-ADD_ONS_TYPE =7;# [7,[...],'var']
-VAR_TYPE = 8;# [8,'value','name']
-CAPTRUE_TYPE = 9;# [9,[...],'var']
+EL_TYPE = 0;            #// [0,<el>]
+IF_TYPE = 1;            #// [1,[...],<test el>]
+BREAK_TYPE = 2;         #// [2,depth]
+XML_ATTRIBUTE_TYPE = 3; #// [3,<value el>,'name']
+XML_TEXT_TYPE = 4;      #// [4,<el>]
+FOR_TYPE = 5;           #// [5,[...],<items el>,'varName','status']// status 可为null
+ELSE_TYPE = 6;          #// [6,[...],<test el>] //<test el> 可为null
+ADD_ON_TYPE = 7;        #// [7,[...],<add on el>,'<addon-class>']
+VAR_TYPE = 8;           #// [8,<value el>,'name']
+CAPTRUE_TYPE = 9;       #// [9,[...],'var']
+
 FOR_KEY = "for"
 IF_KEY = "if"
 
