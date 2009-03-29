@@ -5,7 +5,7 @@ Lite运行时无需做模板编译工作，他通过JSON格式的中间代码初
 
 
 == 构建表达式 ==
-   Lite的表达式指令结构可概括为：[http://lite.googlecode.com/svn/trunk/Lite/resource/%E4%BA%94%E8%A1%8C.png 五行通天地]
+   Lite的表达式指令结构可概括为：[http://lite.googlecode.com/svn/trunk/Lite/resource/%E4%BA%94%E8%A1%8C.png 五行通天地]。
    他包括5种数据节点类型，和九组（23种）操作符类型。
   === 计算模型 ===
     * 节点数组
