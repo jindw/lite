@@ -24,13 +24,16 @@ var TestCase = {
 	    	parser.parse(templateSource);
 	    	var jsonCode = parser.buildResult();
 	        var jsonTemplate = new Template(jsonCode);
-	        jsonCode =JSON.encode(jsonCode);
 	    }catch(e){
 	        $log.error("模板解析失败（JSON）",e);
 	        return false;
 	    }
-	    E("templateCode").value = jsonCode;
+	    E("templateCode").value = liteFormat(jsonCode,true);
 	    E("optimizedResult").value = jsCode;
+	    try{
+	    E("liteFormat").onclick = doLiteFormat;
+	    }catch(e){}
+	    
 	    var templateResult = E("templateResult");
 	    var htmlResult = E("htmlResult");
 	    var step = 5;
@@ -124,6 +127,9 @@ var TestCase = {
 var data;
 function E(id){
 	return document.getElementById(id);
+}
+function doLiteFormat(){
+    prompt(liteFormat(JSON.decode(E("templateCode").value),true));
 }
 function getText(parentNode,tagName){
 	var node = parentNode.firstChild;
