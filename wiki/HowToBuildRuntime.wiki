@@ -104,19 +104,55 @@ OP_MAP_PUSH = 33;#32 | 0 | 1;
 == 模板指令介绍 ==
   === 模版指令基本模式 ===
     * 基于嵌套数组的数据结构
+    * 指令的第一个位置存放指令标示
     * 如果有子节点,子节点数组都出现在该指令的第二个元素位置
-    * 如果有表达式,表达式都以数组形式中间代码存在(如上述表达式格式)
+    * 如果有表达式，表达式紧随其后, 表达式都以数组形式中间代码存在(如上述表达式格式)
+    * 其他属性（文本id，数值）随后，必选属性靠前，可选属性靠后。
+    * Lite 中的10条指令结构伪码如下：
 {{{
 EL_TYPE = 0;            // [0,<el>]
 IF_TYPE = 1;            // [1,[...],<test el>]
 BREAK_TYPE = 2;         // [2,depth]
 XML_ATTRIBUTE_TYPE = 3; // [3,<value el>,'name']
 XML_TEXT_TYPE = 4;      // [4,<el>]
-FOR_TYPE = 5;           // [5,[...],'varName',<items el>,'status']#status
+FOR_TYPE = 5;           // [5,[...],<items el>,'varName','status']#status
 ELSE_TYPE = 6;          // [6,[...],<test el>]#test opt?
 ADD_ONS_TYPE =7;        // [7,[...],<add on el>,'<addon-class>']
 VAR_TYPE = 8;           // [8,<value el>,'name']
 CAPTRUE_TYPE = 9;       // [9,[...],'var']
 }}}
+  === 如何处理模板指令 ===
+   * 处理IF_TYPE指令
+     功能类似于程序语言中的if控制语法
+     # 判断 <test el>表达式是否为真（JS规则）
+     # 为真则渲染子节点，否则跳过
+     # 更新上下文<if>状态
+   * 处理ELSE_TYPE 指令
+     功能类似于程序语言中的else控制语法。
+     # 查看当前上下文if状态
+     # if状态为真，跳过处理
+     # 如果有<test el> 且不为真，跳过处理
+     # 处理子节点
+     # 更新上下文<if>状态
+   * 处理FOR_TYPE 指令
+     功能类似于程序语言中的for控制语法。
+     # 执行<items el>表达式
+     # 若<1> 为数值型，将其当作一个长为该值的数字看待
+     # 如<1> 为map，取其entrySet值代替
+     # 备份上下文<for> 状态
+     # 初始化循环状态对象（index=0,lastIndex,depth）
+     # 迭代 <1>
+       # index++
+       # 处理子节点
+     # 从for备份，恢复for状态
+     # 更新if状态为 循环次数的bool值（>0为真 ，==0为假）
+   * 处理EL_TYPE指令
+     功能类似于 print(evaluate(el));
+     # 计算<el>值
+     # 直接文本化输出
+   * 处理XML_TEXT_TYPE指令
+     根据表达式，计算<el>值，按XML文本方式输出编码后文本
+   * 处理XML_ATTRIBUTE_TYPE指令
+     如果没有，根据表达式，计算<el>值，按XML文本方式输出编码后文本
 
 [http://lite.googlecode.com/svn/trunk/Lite/resource/%E5%85%AB%E5%8D%A6.png 模版指令分布图]
