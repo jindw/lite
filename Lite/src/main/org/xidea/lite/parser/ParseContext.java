@@ -75,7 +75,7 @@ public interface ParseContext {
 	
 	public void appendEL(Object testEL);
 
-	public void appendAttribute(Object el, String name);
+	public void appendAttribute(String name, Object el);
 
 	public void appendXmlText(Object el);
 	
@@ -85,7 +85,7 @@ public interface ParseContext {
 
 	public void appendEnd();
 
-	public void appendVar(Object valueEL, String name);
+	public void appendVar(String name, Object valueEL);
 	
 	public void appendCaptrue(String varName);
 

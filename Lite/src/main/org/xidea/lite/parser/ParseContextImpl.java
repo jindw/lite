@@ -312,7 +312,7 @@ public class ParseContextImpl implements ParseContext {
 		return id;
 	}
 
-	public void appendAttribute(Object el, String name) {
+	public void appendAttribute(String name, Object el) {
 		this.append(new Object[] { Template.XML_ATTRIBUTE_TYPE, el, name });
 
 	}
@@ -329,7 +329,7 @@ public class ParseContextImpl implements ParseContext {
 		this.result.add(END_INSTRUCTION);
 	}
 
-	public void appendVar(Object valueEL, String name) {
+	public void appendVar(String name, Object valueEL) {
 		this.append(new Object[] { Template.VAR_TYPE, valueEL, name });
 	}
 
@@ -339,7 +339,7 @@ public class ParseContextImpl implements ParseContext {
 	}
 
 	public void appendFor(String var, Object itemsEL, String status) {
-		this.append(new Object[] { Template.FOR_TYPE, var, itemsEL, status });
+		this.append(new Object[] { Template.FOR_TYPE, itemsEL, var, status });
 	}
 
 	public void appendEL(Object el) {

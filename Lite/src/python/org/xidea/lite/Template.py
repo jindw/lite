@@ -8,7 +8,7 @@ IF_TYPE = 1;# [1,[...],'test']
 BREAK_TYPE = 2;# [2,depth]
 XML_ATTRIBUTE_TYPE = 3;# [3,'value','name']
 XML_TEXT_TYPE = 4;# [4,'el']
-FOR_TYPE = 5;# [5,[...],'var','items','status']#status
+FOR_TYPE = 5;# [5,[...],'items','var','status']#status
 ELSE_TYPE = 6;# [6,[...],'test']#test opt?
 ADD_ONS_TYPE =7;# [7,[...],'var']
 VAR_TYPE = 8;# [8,'value','name']
@@ -125,9 +125,9 @@ def processElse(context, data, out):
 
 def processFor(context, data, out):
     children = data[1]
-    varName = data[2]
+    items = evaluate(data[2],context)
+    varName = data[3]
     statusName = data[4]
-    items = evaluate(data[3],context)
     length = len(items)
     preiousStatus = hasattr(context,FOR_KEY) and context[FOR_KEY]
     try:

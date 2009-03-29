@@ -78,20 +78,11 @@ public class Template {
 				final Object[] cmd = data.toArray();
 				final int type = ((Number) cmd[0]).intValue();
 				cmd[0] = type;
-				// children
+				
 				switch (type) {
 				case ADD_ON_TYPE:
 					compileAddOns(cmd, result);
-					continue;// for
-				case CAPTRUE_TYPE:
-				case IF_TYPE:
-				case ELSE_TYPE:
-				case FOR_TYPE:
-					// case IF_STRING_IN_TYPE:
-					cmd[1] = compile((List) cmd[1]);
-					break;
-				}
-				switch (type) {
+					continue;// continue for
 				case XML_ATTRIBUTE_TYPE:
 					if (cmd[2] != null) {
 						cmd[2] = " " + cmd[2] + "=\"";
@@ -102,15 +93,14 @@ public class Template {
 					cmd[1] = createExpression(cmd[1]);
 					break;
 				case IF_TYPE:
+				case FOR_TYPE:
 				case ELSE_TYPE:
 					if (cmd[2] != null) {
 						cmd[2] = createExpression(cmd[2]);
 					}
-					break;
-				// case IF_STRING_IN_TYPE:
-				// cmd[2] = createExpression(cmd[2]);
-				case FOR_TYPE:
-					cmd[3] = createExpression(cmd[3]);
+				case CAPTRUE_TYPE:
+					// children
+					cmd[1] = compile((List) cmd[1]);
 					break;
 				}
 				result.add(cmd);
@@ -256,9 +246,9 @@ public class Template {
 
 	@SuppressWarnings("unchecked")
 	protected void processFor(Map context, Object[] data, Writer out) {
-		Object list = ((Expression) data[3]).evaluate(context);
 		final Object[] children = (Object[]) data[1];
-		final String varName = (String) data[2];
+		Object list = ((Expression) data[2]).evaluate(context);
+		final String varName = (String) data[3];
 		final String statusName = (String) data[4];
 		final ForStatus preiousStatus = (ForStatus) context.get(FOR_KEY);
 		int len = 0;
