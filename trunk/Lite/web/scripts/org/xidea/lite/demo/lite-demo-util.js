@@ -28,11 +28,8 @@ var TestCase = {
 	        $log.error("模板解析失败（JSON）",e);
 	        return false;
 	    }
-	    E("templateCode").value = liteFormat(jsonCode,true);
+	    E("templateCode").value = liteFormat(jsonCode,false);
 	    E("optimizedResult").value = jsCode;
-	    try{
-	    E("liteFormat").onclick = doLiteFormat;
-	    }catch(e){}
 	    
 	    var templateResult = E("templateResult");
 	    var htmlResult = E("htmlResult");
@@ -122,14 +119,14 @@ var TestCase = {
 				node.className = ""
 			}
 		}
+	},
+	liteFormat:function(text){
+	    confirm(liteFormat(JSON.decode(text),true));
 	}
 }
 var data;
 function E(id){
 	return document.getElementById(id);
-}
-function doLiteFormat(){
-    prompt(liteFormat(JSON.decode(E("templateCode").value),true));
 }
 function getText(parentNode,tagName){
 	var node = parentNode.firstChild;
