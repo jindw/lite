@@ -6,7 +6,6 @@
 	<classpathentry kind="lib" path="web/WEB-INF/lib/Template.jar" sourcepath="/Lite/src/main"/>
 	<classpathentry kind="lib" path="web/WEB-INF/lib/commons-logging-1.0.4.jar"/>
 	<classpathentry kind="lib" path="web/WEB-INF/lib/nekohtml.jar"/>
-	<classpathentry kind="lib" path="web/WEB-INF/lib/xercesMinimal.jar"/>
 	<classpathentry kind="lib" path="web/WEB-INF/lib/xercesImpl-2.8.1.jar"/>
 	<classpathentry kind="output" path="web/WEB-INF/classes"/>
 </classpath>
