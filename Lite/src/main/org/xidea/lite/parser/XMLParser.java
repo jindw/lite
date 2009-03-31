@@ -120,7 +120,8 @@ public class XMLParser extends TextParser {
 
 
 	public NamespaceContext createNamespaceContext(Document doc){
-		NamedNodeMap attributes = doc.getDocumentElement().getAttributes();
+		//nekohtml bug,not use doc.getDocumentElement()
+		NamedNodeMap attributes = doc.getFirstChild().getAttributes();
 		final HashMap<String, String> prefixMap = new HashMap<String, String>();
 		for (int i = 0; i < attributes.getLength(); i++) {
 			Attr attr = (Attr) attributes.item(i);
