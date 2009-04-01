@@ -110,7 +110,7 @@ public class XMLParser extends TextParser {
 		return loadXML(new URL(url), context);
 	}
 
-	public Node loadXML(URL url, ParseContext context) throws SAXException,
+	public Document loadXML(URL url, ParseContext context) throws SAXException,
 			IOException, XPathExpressionException {
 		context.setCurrentURL(url);
 		Document doc = documentBuilder.parse(getInputStream(url));
@@ -121,7 +121,11 @@ public class XMLParser extends TextParser {
 
 	public NamespaceContext createNamespaceContext(Document doc){
 		//nekohtml bug,not use doc.getDocumentElement()
-		NamedNodeMap attributes = doc.getFirstChild().getAttributes();
+		Node node = doc.getFirstChild();
+		while(!(node instanceof Element)){
+			node = node.getNextSibling();
+		}
+		NamedNodeMap attributes = node.getAttributes();
 		final HashMap<String, String> prefixMap = new HashMap<String, String>();
 		for (int i = 0; i < attributes.getLength(); i++) {
 			Attr attr = (Attr) attributes.item(i);
