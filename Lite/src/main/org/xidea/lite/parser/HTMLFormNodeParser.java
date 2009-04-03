@@ -10,6 +10,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.Text;
 import org.xidea.el.json.JSONEncoder;
+import org.xidea.el.operation.TextNullEmpty;
+import org.xidea.el.operation.TextContains;
 import org.xidea.lite.Template;
 
 public class HTMLFormNodeParser extends HTMLNodeParser implements NodeParser {
@@ -43,9 +45,8 @@ public class HTMLFormNodeParser extends HTMLNodeParser implements NodeParser {
 			return parseSelect(el, context);
 		} else if (EL_OPTION.equals(localName)) {
 			return parseSelectOption(el, context);
-		} else {
-			return parseHTMLElement(node, context, null);
 		}
+		return parseHTMLElement(node, context, null);
 	}
 
 	protected Node parseSelect(Element el, ParseContext context) {
@@ -136,7 +137,7 @@ public class HTMLFormNodeParser extends HTMLNodeParser implements NodeParser {
 		attributes
 				.add(new Object[] {
 						Template.IF_TYPE,
-						this.parser.optimizeEL(buildCSEL(context, collectionEL,
+						context.optimizeEL(buildCSEL(context, collectionEL,
 								valueEL)) });
 		attributes.add(" " + attributeName + "=\""
 				+ BOOLEAN_ATTBUTE_MAP.get(attributeName) + "\"");
@@ -146,11 +147,11 @@ public class HTMLFormNodeParser extends HTMLNodeParser implements NodeParser {
 
 	private String buildCSEL(ParseContext context, final String collectionEL,
 			final String valueEL) {
-		String id = context.addGlobalObject(HTMLTextContains.class, null);
+		String id = context.addGlobalObject(TextContains.class, null);
 		return id + "(" + collectionEL + "," + valueEL + ")";
 	}
 	private String buildNullEmptyEL(ParseContext context,final String valueEL) {
-		String id = context.addGlobalObject(HTMLNullEmptyText.class, null);
+		String id = context.addGlobalObject(TextNullEmpty.class, null);
 		return "${"+id + "(" + valueEL + ")}";
 	}
 

@@ -17,6 +17,9 @@
 			<xs:pattern value="$\{[\s\S]+\}" />
 		</xs:restriction>
 	</xs:simpleType>
+
+	
+	
 	<xs:simpleType name="VAR" id="VAR">
 		<xs:annotation>
 			<xs:documentation>
@@ -224,6 +227,29 @@
 					</xs:documentation>
 				</xs:annotation>
 			</xs:attribute>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="client">
+		<xs:annotation>
+			<xs:documentation>
+				插入客户端模板片段
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType mixed="true">
+			<xs:sequence>
+				<xs:any minOccurs="0" maxOccurs="unbounded"
+					processContents="lax">
+				</xs:any>
+			</xs:sequence>
+			<!-- 
+			<xs:attribute name="language" type="LANGUAGE" use="optional">
+				<xs:annotation>
+					<xs:documentation>
+						客户端编程语言
+					</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+			 -->
 		</xs:complexType>
 	</xs:element>
 </xs:schema>

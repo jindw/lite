@@ -1,5 +1,7 @@
 package org.xidea.lite.parser;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -11,12 +13,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.xidea.el.ExpressionFactory;
+import org.xidea.el.ExpressionFactoryImpl;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.BuildInAdvice;
 import org.xidea.lite.Template;
 
 public class ParseContextImpl implements ParseContext {
 	private static final long serialVersionUID = 1L;
+	private ExpressionFactory expressionFactory = ExpressionFactoryImpl
+			.getInstance();
+
+	public void setExpressionFactory(ExpressionFactory expressionFactory) {
+		this.expressionFactory = expressionFactory;
+	}
 
 	private HashMap<Object, Object> attributeMap = new HashMap<Object, Object>();
 	private URL currentURL;
@@ -56,6 +66,10 @@ public class ParseContextImpl implements ParseContext {
 
 	public void setReserveSpace(boolean keepSpace) {
 		this.reserveSpace = keepSpace;
+	}
+
+	public Object optimizeEL(String expression) {
+		return expressionFactory.optimizeEL(expression);
 	}
 
 	public void setAttribute(Object key, Object value) {
@@ -115,14 +129,14 @@ public class ParseContextImpl implements ParseContext {
 			case '\'':
 				if (quteChar == c) {
 					out.write("&#39;");
-				}else{
+				} else {
 					out.write("'");
 				}
 				break;
 			case '"':
 				if (quteChar == c) {
 					out.write("&#34;");
-				}else{
+				} else {
 					out.write("\"");
 				}
 				break;
@@ -350,6 +364,7 @@ public class ParseContextImpl implements ParseContext {
 	public void appendXmlText(Object el) {
 		this.append(new Object[] { Template.XML_TEXT_TYPE, el });
 	}
+
 	public URL createURL(URL parentURL, String path) {
 		try {
 			if (this.base == null) {
@@ -361,16 +376,25 @@ public class ParseContextImpl implements ParseContext {
 				}
 				return new URL(this.base, path);
 			}
-			//base !=null && parentURL != null
-			if (path.startsWith("/") && parentURL.toExternalForm().startsWith(this.base.toExternalForm())) {
+			// base !=null && parentURL != null
+			if (path.startsWith("/")
+					&& parentURL.toExternalForm().startsWith(
+							this.base.toExternalForm())) {
 				return new URL(this.base, path.substring(1));
 			}
-			return new URL(parentURL,path);
+			return new URL(parentURL, path);
 
 		} catch (MalformedURLException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
+	public InputStream getInputStream(URL url) {
+		try {
+			return url.openStream();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
 
 }

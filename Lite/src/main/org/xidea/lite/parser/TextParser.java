@@ -5,18 +5,9 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
 
-import org.xidea.el.ExpressionFactory;
-import org.xidea.el.ExpressionFactoryImpl;
 import org.xidea.lite.Template;
 
 public class TextParser implements Parser {
-	private ExpressionFactory expressionFactory = ExpressionFactoryImpl
-			.getInstance();
-
-	public void setExpressionFactory(ExpressionFactory expressionFactory) {
-		this.expressionFactory = expressionFactory;
-	}
-
 
 	public List<Object> parse(Object data) {
 		return parse(data, new ParseContextImpl(null));
@@ -26,9 +17,7 @@ public class TextParser implements Parser {
 		return context.toResultTree();
 	}
 
-	protected InputStream getInputStream(URL url) throws IOException {
-		return url.openStream();
-	}
+
 
 	/**
 	 * 解析指定文本
@@ -115,28 +104,23 @@ public class TextParser implements Parser {
 		if(type instanceof Number){
 			switch (((Number)type).intValue()) {
 			case Template.EL_TYPE:
-				Object el = optimizeEL(eltext);
+				Object el = context.optimizeEL(eltext);
 				context.appendEL(el);
 				return;
 			case Template.XML_ATTRIBUTE_TYPE:
-				el = optimizeEL(eltext);
+				el = context.optimizeEL(eltext);
 				context.appendAttribute(null,el);
 				return;
 			case Template.XML_TEXT_TYPE:
-				el = optimizeEL(eltext);
+				el = context.optimizeEL(eltext);
 				context.appendXmlText(el);
 				return;
 			default:
 				break;
 			}
 		}
-//		if("if".equals(type)){
-//		}
-		Object el = optimizeEL(eltext);
+		Object el = context.optimizeEL(eltext);
 		context.appendEL(el);
-	}
-	public Object optimizeEL(String expression) {
-		return expressionFactory.optimizeEL(expression);
 	}
 
 	protected int findELEnd(String text, int elBegin) {

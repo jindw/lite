@@ -1,7 +1,6 @@
-package org.xidea.lite.parser;
+package org.xidea.el.operation;
 
 
-import org.xidea.el.operation.Invocable;
 
 
 /**
@@ -9,8 +8,8 @@ import org.xidea.el.operation.Invocable;
  * 
  * @author jindw
  */
-public class HTMLNullEmptyText implements Invocable {
-	public HTMLNullEmptyText() {
+public class TextNullEmpty implements Invocable {
+	public TextNullEmpty() {
 	}
 
 	public Object invoke(Object thizz,Object... args) throws Exception {
