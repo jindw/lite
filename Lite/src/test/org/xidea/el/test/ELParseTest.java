@@ -9,7 +9,7 @@ public class ELParseTest {
 	private ExpressionFactoryImpl ef = new ExpressionFactoryImpl();
 	@Test
 	public void testMethod(){
-		Object el = ef.optimizeEL("object.test(123)");
+		Object el = ef.parse("object.test(123)");
 		el = JSONEncoder.encode(el);
 		Assert.assertEquals("[[-1,\"object\"],[48,\"test\"],[-3],[0,123],[1],[81]]", el);
 		//[[-1,"object"],[48,"test"],[-3],[0,123],[1,None],[81]]

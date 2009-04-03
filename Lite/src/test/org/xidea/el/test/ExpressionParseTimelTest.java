@@ -74,12 +74,12 @@ public class ExpressionParseTimelTest {
 			long m1 = System.currentTimeMillis();
 			count2 = 100;
 			while (count2-- > 0) {
-				factory.createEL(el);
+				factory.create(el);
 			}
 			long m2 = System.currentTimeMillis();
 			count2 = 100;
 			while (count2-- > 0) {
-				factory.createEL(JSONDecoder.decode(jsonel));
+				factory.create(JSONDecoder.decode(jsonel));
 			}
 			long m3 = System.currentTimeMillis();
 			t1 += m2 - m1;

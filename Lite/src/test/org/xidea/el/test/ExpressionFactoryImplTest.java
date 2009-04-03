@@ -10,16 +10,16 @@ public class ExpressionFactoryImplTest {
 	@Test
 	public void testOptimizeELString() {
 		System.out.println((ExpressionFactoryImplTest.class.getInterfaces()));
-		expressionFactory.optimizeEL("''");
-		expressionFactory.optimizeEL("'['");
+		expressionFactory.parse("''");
+		expressionFactory.parse("'['");
 		try{
-			expressionFactory.optimizeEL("'''");
+			expressionFactory.parse("'''");
 			fail("无效字符串状态");
 		}catch (Exception e) {
 		}
 
 		try{
-			expressionFactory.optimizeEL("[([)]]");
+			expressionFactory.parse("[([)]]");
 			fail("无效括弧状态");
 		}catch (Exception e) {
 		}

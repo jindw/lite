@@ -14,21 +14,34 @@ import org.xidea.el.operation.TextNullEmpty;
 import org.xidea.el.operation.TextContains;
 import org.xidea.lite.Template;
 
+/**
+ * 类似这种特别的编译模块(有扩展,可能导致其他运行环境无法解释)，最好带上双重开关。
+ * @author jindw
+ */
 public class HTMLFormNodeParser extends HTMLNodeParser implements NodeParser {
+	public static final Object AUTO = "auto";
+	public static final Object AUTO_IN_FORM = "auto_in_form";
 
-	private static final String EL_INPUT = "input";
-	private static final String EL_TEXTAREA = "textarea";
-	private static final String EL_SELECT = "select";
-	private static final String EL_OPTION = "option";
+	private static final String FORM_TAG = "form";
+	private static final String INPUT_TAG = "input";
+	private static final String TEXTAREA_TAG = "textarea";
+	private static final String SELECT_TAG = "select";
+	private static final String OPTION_TAG = "option";
+	
 	private static final String ATTRIBUTE_SELECTED = "selected";
 	private static final String ATTRIBUTE_CHECKED = "checked";
 	private static final String ATTRIBUTE_TYPE = "type";
 	private static final String ATTRIBUTE_NAME = "name";
 	private static final String ATTRIBUTE_VALUE = "value";
 
-	private static final Pattern TYPE_CHECK_RADIO = Pattern.compile("^(?:checkbox|radio)$");
-	private static final Pattern TYPE_BUTTON = Pattern.compile("^(?:reset|button|submit)$");
+	private static final Pattern TYPE_CHECK_RADIO = Pattern
+			.compile("^(?:checkbox|radio)$");
+	private static final Pattern TYPE_BUTTON = Pattern
+			.compile("^(?:reset|button|submit)$");
 	private static final Object KEY_SELECT = new Object();
+
+
+	private static final Object IN_FORM = "-in_form";
 
 	public HTMLFormNodeParser(XMLParser parser) {
 		this.parser = parser;
@@ -37,16 +50,37 @@ public class HTMLFormNodeParser extends HTMLNodeParser implements NodeParser {
 	protected Node parse(Node node, ParseContext context) {
 		Element el = (Element) node;
 		String localName = el.getLocalName();
-		if (EL_INPUT.equals(localName)) {
-			return parseInput(el, context);
-		} else if (EL_TEXTAREA.equals(localName)) {
-			return parseTextArea(el, context);
-		} else if (EL_SELECT.equals(localName)) {
-			return parseSelect(el, context);
-		} else if (EL_OPTION.equals(localName)) {
-			return parseSelectOption(el, context);
+		Object status = context.getAttribute(HTMLFormNodeParser.class);
+		if (AUTO.equals(status)) {
+			return processAutoForm(context, el, localName);
+		} else if (IN_FORM.equals(status)) {
+			if (FORM_TAG.equals(localName)) {
+				context.setAttribute(HTMLFormNodeParser.class, AUTO_IN_FORM);
+			}
+			return processAutoForm(context, el, localName);
+		} else if (AUTO_IN_FORM.equals(status)) {
+			if (FORM_TAG.equals(localName)) {
+				context.setAttribute(HTMLFormNodeParser.class, IN_FORM);
+			}
+			return parseHTMLElement(el, context, null);
+		} else {
+			return parseHTMLElement(el, context, null);
 		}
-		return parseHTMLElement(node, context, null);
+	}
+
+	private Node processAutoForm(ParseContext context, Element el,
+			String localName) {
+		if (INPUT_TAG.equals(localName)) {
+			return parseInput(el, context);
+		} else if (TEXTAREA_TAG.equals(localName)) {
+			return parseTextArea(el, context);
+		} else if (SELECT_TAG.equals(localName)) {
+			return parseSelect(el, context);
+		} else if (OPTION_TAG.equals(localName)) {
+			return parseSelectOption(el, context);
+		} else {
+			return parseHTMLElement(el, context, null);
+		}
 	}
 
 	protected Node parseSelect(Element el, ParseContext context) {
@@ -76,7 +110,7 @@ public class HTMLFormNodeParser extends HTMLNodeParser implements NodeParser {
 				return parseHTMLElement(element, context, null);
 			}
 		}
-		//不能else啊：（！！上面还有漏网的
+		// 不能else啊：（！！上面还有漏网的
 		return parseHTMLElement(element, context, null);
 	}
 
@@ -93,13 +127,17 @@ public class HTMLFormNodeParser extends HTMLNodeParser implements NodeParser {
 			String name = el.getAttribute(ATTRIBUTE_NAME);
 			if (child == null) {
 				if (name.length() > 0) {
-					el.appendChild(document.createTextNode(buildNullEmptyEL(context,name )));
+					el.appendChild(document.createTextNode(buildNullEmptyEL(
+							context, name)));
 				}
 			} else if (child.getNextSibling() == null) {
 				if (child instanceof Text) {
 					String value = ((Text) child).getData().trim();
 					if (value.length() == 0 && name.length() > 0) {
-						el.appendChild(document.createTextNode(buildNullEmptyEL(context,name)));
+						el
+								.appendChild(document
+										.createTextNode(buildNullEmptyEL(
+												context, name)));
 					}
 				}
 			}
@@ -150,9 +188,10 @@ public class HTMLFormNodeParser extends HTMLNodeParser implements NodeParser {
 		String id = context.addGlobalObject(TextContains.class, null);
 		return id + "(" + collectionEL + "," + valueEL + ")";
 	}
-	private String buildNullEmptyEL(ParseContext context,final String valueEL) {
+
+	private String buildNullEmptyEL(ParseContext context, final String valueEL) {
 		String id = context.addGlobalObject(TextNullEmpty.class, null);
-		return "${"+id + "(" + valueEL + ")}";
+		return "${" + id + "(" + valueEL + ")}";
 	}
 
 }

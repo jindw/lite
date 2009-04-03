@@ -69,7 +69,7 @@ public class ParseContextImpl implements ParseContext {
 	}
 
 	public Object optimizeEL(String expression) {
-		return expressionFactory.optimizeEL(expression);
+		return expressionFactory.parse(expression);
 	}
 
 	public void setAttribute(Object key, Object value) {

@@ -18,6 +18,7 @@ import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Node;
 import org.xidea.lite.Template;
 import org.xidea.lite.parser.DecoratorMapper;
+import org.xidea.lite.parser.HTMLFormNodeParser;
 import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.ParseContextImpl;
 import org.xidea.lite.parser.XMLParser;
@@ -109,7 +110,9 @@ public class TemplateEngine{
 
 	protected ParseContext createParseContext() {
 		try {
-			return new ParseContextImpl(getResource("/"));
+			ParseContext parseContext = new ParseContextImpl(getResource("/"));
+			parseContext.setAttribute(HTMLFormNodeParser.class, HTMLFormNodeParser.AUTO_IN_FORM);
+			return parseContext;
 		} catch (MalformedURLException e) {
 			throw new RuntimeException(e);
 		}

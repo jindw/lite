@@ -18,19 +18,28 @@ import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.xidea.el.Expression;
+import org.xidea.el.ExpressionFactory;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.Template;
 
 public class CoreXMLNodeParser implements NodeParser {
+	private static Log log = LogFactory.getLog(CoreXMLNodeParser.class);
 	private static final Pattern TEMPLATE_NAMESPACE_CORE = Pattern.compile("^http:\\/\\/www.xidea.org\\/ns\\/(?:template|lite)(?:\\/core)?\\/?$");
-
+	private XMLParser parser;
+	private ExpressionFactory clientExpressionFactory= new ExpressionFactory(){
+		public Expression create(Object el) {
+			throw new UnsupportedOperationException();
+		}
+		public Object parse(String expression) {
+			return expression;
+		}
+		
+	};
 	public static boolean isCoreNS(String prefix, String url) {
 		return ("c".equals(prefix) && ("#".equals(url) || "#core".equals(url)))
 				|| TEMPLATE_NAMESPACE_CORE.matcher(url).find();
 	}
-
-	private static Log log = LogFactory.getLog(CoreXMLNodeParser.class);
-	private XMLParser parser;
 
 	public CoreXMLNodeParser(XMLParser parser) {
 		this.parser = parser;
@@ -323,6 +332,7 @@ public class CoreXMLNodeParser implements NodeParser {
 		Node next = node.getFirstChild();
 		if (next != null) {
 			ParseContext context2 = new ParseContextImpl(context.getCurrentURL());
+			context2.setExpressionFactory(clientExpressionFactory);
 			do {
 				this.parser.parseNode(next, context2);
 			} while ((next = next.getNextSibling()) != null);

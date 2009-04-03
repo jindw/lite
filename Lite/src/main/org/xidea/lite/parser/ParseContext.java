@@ -5,6 +5,8 @@ import java.net.URL;
 import java.util.List;
 import java.util.Set;
 
+import org.xidea.el.ExpressionFactory;
+
 /**
  * @see ParseContextImpl
  */
@@ -50,6 +52,12 @@ public interface ParseContext {
 	 */
 	public void addResource(URL resource);
 	public Set<URL> getResources();
+	/**
+	 * 自定义表达式解析器
+	 * @param expressionFactory
+	 */
+	public void setExpressionFactory(ExpressionFactory expressionFactory);
+	public Object optimizeEL(String eltext);
 
 	public List<Object> toResultTree();
 	public int mark();
@@ -57,8 +65,6 @@ public interface ParseContext {
 	
 	public String addGlobalObject(Class<? extends Object> impl,String key);
 	public String addGlobalObject(Object object,String key);
-
-	public Object optimizeEL(String eltext);
 
 	public void append(String text);
 	public void append(String text,boolean encode,char quteChar);
@@ -74,5 +80,4 @@ public interface ParseContext {
 	public void appendVar(String name, Object valueEL);
 	public void appendCaptrue(String varName);
 	public void appendFor(String var, Object itemsEL, String status);
-
 }

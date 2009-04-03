@@ -88,7 +88,7 @@ public class MathTest {
 	}
 
 	private void testLike(String exp, double max) throws ScriptException {
-		Expression el = factory.createEL(exp);
+		Expression el = factory.create(exp);
 		Number jsv = (Number) se.eval(exp);
 		Number elv = (Number) el.evaluate(null); 
 		
@@ -103,7 +103,7 @@ public class MathTest {
 		
 	}
 	private void test(String exp) throws ScriptException {
-		Expression el = factory.createEL(exp);
+		Expression el = factory.create(exp);
 		Object jsv = se.eval(exp);
 		Object elv = el.evaluate(null); 
 		//System.out.println(exp +":"+jsv);
