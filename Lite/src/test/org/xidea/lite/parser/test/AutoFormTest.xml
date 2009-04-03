@@ -27,37 +27,41 @@
 	</object>
 	<object class="java.util.LinkedHashMap">
 		<void method="put">
+			<string><![CDATA[<form><input name="text1"/></form>]]></string>
+			<string><![CDATA[<form><input name="text1" value="t1"/></form>]]></string>
+		</void>
+		<void method="put">
 			<string><![CDATA[<input name="text1"/>]]></string>
-			<string><![CDATA[<input name="text1" value="t1"/>]]></string>
+			<string><![CDATA[<input name="text1"/>]]></string>
 		</void>
 		<void method="put">
-			<string><![CDATA[<input name="text1" type="submit"/>]]></string>
-			<string><![CDATA[<input name="text1" type="submit"/>]]></string>
+			<string><![CDATA[<form><input name="text1" type="submit"/></form>]]></string>
+			<string><![CDATA[<form><input name="text1" type="submit"/></form>]]></string>
 		</void>
 		<void method="put">
-			<string><![CDATA[<input name="text1" type="button"/>]]></string>
-			<string><![CDATA[<input name="text1" type="button"/>]]></string>
+			<string><![CDATA[<form><input name="text1" type="button"/></form>]]></string>
+			<string><![CDATA[<form><input name="text1" type="button"/></form>]]></string>
 		</void>
 		<void method="put">
-			<string><![CDATA[<input name="text1" type="submit"/>]]></string>
-			<string><![CDATA[<input name="text1" type="submit"/>]]></string>
+			<string><![CDATA[<form><input name="text1" type="submit"/></form>]]></string>
+			<string><![CDATA[<form><input name="text1" type="submit"/></form>]]></string>
 		</void>
 		<void method="put">
-			<string><![CDATA[<input name="text1" type="reset"/>]]></string>
-			<string><![CDATA[<input name="text1" type="reset"/>]]></string>
+			<string><![CDATA[<form><input name="text1" type="reset"/></form>]]></string>
+			<string><![CDATA[<form><input name="text1" type="reset"/></form>]]></string>
 		</void>
 		<void method="put">
-			<string><![CDATA[<input name="text1" type="checkbox" value="t1"/>]]></string>
-			<string><![CDATA[<input name="text1" type="checkbox" value="t1" checked="checked"/>]]></string>
+			<string><![CDATA[<form><input name="text1" type="checkbox" value="t1"/></form>]]></string>
+			<string><![CDATA[<form><input name="text1" type="checkbox" value="t1" checked="checked"/></form>]]></string>
 		</void>
 
 		<void method="put">
-			<string><![CDATA[<input name="text1" type="checkbox" value="t2"/>]]></string>
-			<string><![CDATA[<input name="text1" type="checkbox" value="t2"/>]]></string>
+			<string><![CDATA[<form><input name="text1" type="checkbox" value="t2"/></form>]]></string>
+			<string><![CDATA[<form><input name="text1" type="checkbox" value="t2"/></form>]]></string>
 		</void>
 		<void method="put">
-			<string><![CDATA[<select name="boolean1"><option value="false">0</option><option value="true">1</option></select>]]></string>
-			<string><![CDATA[<select name="boolean1"><option value="false">0</option><option value="true" selected="selected">1</option></select>]]></string>
+			<string><![CDATA[<form><select name="boolean1"><option value="false">0</option><option value="true">1</option></select></form>]]></string>
+			<string><![CDATA[<form><select name="boolean1"><option value="false">0</option><option value="true" selected="selected">1</option></select></form>]]></string>
 		</void>
 
 

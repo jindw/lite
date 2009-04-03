@@ -20,6 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.Template;
+import org.xidea.lite.parser.HTMLFormNodeParser;
 import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.ParseContextImpl;
 import org.xidea.lite.parser.TextParser;
@@ -89,11 +90,12 @@ public class XMLTest {
 
 	public void test(String text, String result) throws Exception {
 		XMLParser p = new XMLParser();
-		ParseContext pasreContext = new ParseContextImpl(this.getClass()
+		ParseContext parseContext = new ParseContextImpl(this.getClass()
 				.getResource("/"));
+		parseContext.setAttribute(HTMLFormNodeParser.class, HTMLFormNodeParser.AUTO_IN_FORM);
 		List<Object> insts = p.parse(
 				"<div xmlns:c=\"http://www.xidea.org/ns/template/core\">"
-						+ text + "</div>", pasreContext);
+						+ text + "</div>", parseContext);
 		System.out.println(JSONEncoder.encode(insts));
 		Template t = new Template(insts);
 		Writer out = new StringWriter();
