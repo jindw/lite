@@ -332,7 +332,7 @@ public class Template {
 	}
 
 	protected Expression createExpression(Object elo) {
-		return expressionFactory.createEL(elo);
+		return expressionFactory.create(elo);
 	}
 
 	protected void printXMLAttribute(String text, Writer out,

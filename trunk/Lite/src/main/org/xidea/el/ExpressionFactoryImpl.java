@@ -34,7 +34,7 @@ public class ExpressionFactoryImpl implements ExpressionFactory {
 	public ExpressionFactoryImpl(Map<String, Object> globals){
 		this.globals = globals;
 	}
-	public Expression createEL(Object el) {
+	public Expression create(Object el) {
 		if(el instanceof String){
 			return new ExpressionImpl((String)el);
 		}else{
@@ -126,7 +126,7 @@ public class ExpressionFactoryImpl implements ExpressionFactory {
 		}
 		return expression;
 	}
-	public Object optimizeEL(String el) {
+	public Object parse(String el) {
 		simpleCheckEL(el);
 		Tokens tokens = new ExpressionTokenizer(el).getTokens();
 		ExpressionToken[] list = tokens.getData();

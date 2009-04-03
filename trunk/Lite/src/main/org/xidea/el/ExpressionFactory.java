@@ -4,6 +4,16 @@ package org.xidea.el;
  * @see ExpressionFactoryImpl
  */
 public interface ExpressionFactory {
-	public Expression createEL(Object el);
-	public Object optimizeEL(String expression);
+	/**
+	 * 从中间代码或者直接的表达式文本解析成表达式对象
+	 * @param el
+	 * @return
+	 */
+	public Expression create(Object el);
+	/**
+	 * 将表达式解析成中间状态
+	 * @param expression
+	 * @return
+	 */
+	public Object parse(String expression);
 }

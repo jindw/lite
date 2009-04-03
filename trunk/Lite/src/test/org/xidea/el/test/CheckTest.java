@@ -10,8 +10,8 @@ public class CheckTest {
 
 	public void invalid(String el) throws Exception {
 		try {
-			expressionFactory.createEL(el);
-			expressionFactory.optimizeEL(el);
+			expressionFactory.create(el);
+			expressionFactory.parse(el);
 			Assert.fail("必须抛ExpressionSyntaxException异常");
 		} catch (org.xidea.el.ExpressionSyntaxException e) {
 		} catch (java.lang.AssertionError e) {
@@ -23,8 +23,8 @@ public class CheckTest {
 	}
 	public void valid(String el) throws Exception {
 		try {
-			expressionFactory.createEL(el);
-			expressionFactory.optimizeEL(el);
+			expressionFactory.create(el);
+			expressionFactory.parse(el);
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail("检查失败"+e.getMessage());
