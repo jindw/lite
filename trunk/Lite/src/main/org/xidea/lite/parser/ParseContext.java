@@ -1,5 +1,6 @@
 package org.xidea.lite.parser;
 
+import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
 import java.util.Set;
@@ -8,19 +9,8 @@ import java.util.Set;
  * @see ParseContextImpl
  */
 public interface ParseContext {
-	
 
 	public static final Object END_INSTRUCTION = new Object[0];
-
-	public void append(String text);
-
-	public void append(String text,boolean encode,char quteChar);
-	
-	public void appendIndent();
-
-	public void appendAll(List<Object> items);
-
-	public void removeLastEnd();
 
 	/**
 	 * 在XMLParser中判断平设置，Core标签将缩进做了回逄1�7处理
@@ -44,7 +34,6 @@ public interface ParseContext {
 	 */
 
 	public void setAttribute(Object key, Object value);
-
 	public Object getAttribute(Object key);
 
 	/**
@@ -53,7 +42,8 @@ public interface ParseContext {
 	 */
 	public URL getCurrentURL();
 	public void setCurrentURL(URL currentURL);
-
+	public URL createURL(URL parentURL, String file);
+	public InputStream getInputStream(URL url);
 	/**
 	 * 添加（记录）解析相关的资源
 	 * @param resource
@@ -61,38 +51,28 @@ public interface ParseContext {
 	public void addResource(URL resource);
 	public Set<URL> getResources();
 
-
-
-	@SuppressWarnings("unchecked")
 	public List<Object> toResultTree();
-
+	public int mark();
+	public List<Object> reset(int mark);
+	
 	public String addGlobalObject(Class<? extends Object> impl,String key);
 	public String addGlobalObject(Object object,String key);
 
-	public int mark();
-	
-	public List<Object> reset(int mark);
-	
+	public Object optimizeEL(String eltext);
+
+	public void append(String text);
+	public void append(String text,boolean encode,char quteChar);
+	public void appendIndent();
+	public void appendAll(List<Object> items);
+	public void removeLastEnd();
 	public void appendEL(Object testEL);
-
 	public void appendAttribute(String name, Object el);
-
 	public void appendXmlText(Object el);
-	
 	public void appendIf(Object testEL);
-
 	public void appendElse(Object testEL);
-
 	public void appendEnd();
-
 	public void appendVar(String name, Object valueEL);
-	
 	public void appendCaptrue(String varName);
-
 	public void appendFor(String var, Object itemsEL, String status);
-
-	public URL createURL(URL parentURL, String file);
-
-
 
 }

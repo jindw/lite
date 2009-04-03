@@ -95,7 +95,7 @@ public abstract class HTMLNodeParser implements NodeParser {
 				trueValue = " " + name + "=\"" + trueValue + "\"";
 				if (value.startsWith("${") && value.endsWith("}")) {
 					value = value.substring(2, value.length() - 1);
-					final Object el = this.parser.optimizeEL(value);
+					final Object el = context.optimizeEL(value);
 					context.appendIf(el);
 					context.append(trueValue);
 					context.appendEnd();

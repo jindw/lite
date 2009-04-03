@@ -29,7 +29,6 @@ public class XMLParserTest {
 	@Before
 	public void setUp() throws Exception {
 		parser = new XMLParser();
-		parser.setExpressionFactory(new ExpressionFactoryImpl());
 	}
 
 	@Test

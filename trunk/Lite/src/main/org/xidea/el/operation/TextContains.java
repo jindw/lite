@@ -1,8 +1,7 @@
-package org.xidea.lite.parser;
+package org.xidea.el.operation;
 
 import java.util.Collection;
 
-import org.xidea.el.operation.Invocable;
 
 
 /**
@@ -10,8 +9,8 @@ import org.xidea.el.operation.Invocable;
  * 
  * @author jindw
  */
-public class HTMLTextContains implements Invocable {
-	public HTMLTextContains() {
+public class TextContains implements Invocable {
+	public TextContains() {
 	}
 
 	public Object invoke(Object thizz,Object... args) throws Exception {

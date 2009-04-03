@@ -113,7 +113,7 @@ public class XMLParser extends TextParser {
 	public Document loadXML(URL url, ParseContext context) throws SAXException,
 			IOException, XPathExpressionException {
 		context.setCurrentURL(url);
-		Document doc = documentBuilder.parse(getInputStream(url));
+		Document doc = documentBuilder.parse(context.getInputStream(url));
 		// selectNodes(xpath, doc);
 		return doc;
 	}
