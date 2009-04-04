@@ -45,19 +45,18 @@ function Template(data,parser){
  * @public
  */
 Template.prototype.render = function(context){
-    var buf = [];
     var context2 = {};
     var data = this.data;
     for(var n in context){
         context2[n] = context[n];
     }
     if(data instanceof Function){
-        data.apply(context2,[buf,xmlReplacer]);
+        return data(context2);
     }else{
-        renderList(context2,data,buf)
+        var buf = [];
+        renderList(context2,data,buf);
+        return buf.join("");
     }
-    
-    return buf.join("");
 }
 
 /**
@@ -218,16 +217,5 @@ function processFor(context, data, out) {
 	}
 }
 function xmlReplacer(c){
-    switch(c){
-        case '<':
-          return '&lt;';
-        case '>':
-          return '&gt;';
-        case '&':
-          return '&amp;';
-        case "'":
-          return '&#39;';
-        case '"':
-          return '&#34;';
-    }
+    return "&#"+c.charCodeAt()+';';
 }

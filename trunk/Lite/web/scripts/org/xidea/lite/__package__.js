@@ -19,7 +19,7 @@ this.addScript("expression-tokenizer.js","ExpressionTokenizer"
                ,"JSONTokenizer"
                ,"expression-token.js");
 
-this.addScript("native-parser.js",["parseNativeEL","buildNativeJS"]
+this.addScript("native-compiler.js",["parseNativeEL","buildNativeJS"]
                ,0
                ,"parser.js");
 

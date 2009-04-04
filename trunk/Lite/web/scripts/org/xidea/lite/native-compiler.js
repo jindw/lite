@@ -60,78 +60,79 @@ function compileEL(el){
 }
 
 function buildNativeJS(code){
-    var buf = ["\twith(this){"];
+    var buf = [
+        '\tvar _$1=[];\n',
+        '\tfunction _$2(c){return "&#"+c.charCodeAt()+";";}\n',
+        "\twith(this){"
+    ];
     var idpool = new IDPool(2);
     appendCode(code,buf,idpool,2);
     buf.push("\n\t}");
-    try{
-        var result =  new Function("_$0","_$1",buf.join(''));
-    }catch(e){
-    	$log.error(buf.join(''))
-        throw e;
-    }
-    result.toString=function(){//_$1 encodeXML
-        return "function(_$0,_$1){\n"+buf.join('')+"\n}"
-    }
-    return result;
+    return buf.join('');
 }
-
+/**
+ * _$0 context
+ * _$1 buf
+ * _$2 xmlReplacer
+ */
 function appendCode(code,buf,idpool,depth){
 	for(var i=0;i<code.length;i++){
 		var item = code[i];
 		printIndex(buf,depth);
 		if(typeof item == 'string'){
-			buf.push("_$0.push(",encodeString(item),");")
+			buf.push("_$1.push(",encodeString(item),");")
 		}else{
 			switch(item[0]){
             case EL_TYPE:
                 printIndex(buf,depth);
-			    buf.push("_$0.push(",item[1],");")
+			    buf.push("_$1.push(",getEL(item[1]),");")
                 break;
             case XML_TEXT_TYPE:
-			    buf.push("_$0.push(String(",item[1],").replace(/[<>&]/g,_$1));")
+			    buf.push("_$1.push(String(",getEL(item[1]),").replace(/[<>&]/g,_$2));")
                 break;
                 break;
             case XML_ATTRIBUTE_TYPE:
                 //[7,[[0,"value"]],"attribute"]
-                var value = item[1];
+                var value = getEL(item[1]);
                 var attributeName = item[2];
                 if(attributeName){
 	                var testId = idpool.get();
 	                printIndex(buf,depth,"var ",testId,"=",value);
-	                printIndex(buf,depth,"if(",testId,"!=null&&",testId,"!=''){");
-	                printIndex(buf,depth+1,"_$0.push(' ",attributeName,"=\"',String(",testId,").replace(/<>&\"/g,_$1),'\"')");
+	                printIndex(buf,depth,"if(",testId,"!=null){");
+	                printIndex(buf,depth+1,"_$1.push(' ",attributeName,"=\"',String(",testId,").replace(/<>&\"/g,_$2),'\"')");
 	                printIndex(buf,depth,"}");
 	                idpool.free(testId);
                 }else{
-                	buf.push("_$0.push(String(",item[1],").replace(/[<>&\"]/g,_$1));")
+                	buf.push("_$1.push(String(",value,").replace(/[<>&\"]/g,_$2));")
                 }
             case VAR_TYPE:
-                buf.push("var ",item[2],"=",item[1],";")
+                buf.push("var ",item[2],"=",getEL(item[1]),";")
                 break;
             case CAPTRUE_TYPE:
                 var childCode = item[1];
                 var varName = item[2];
                 var bufbak = idpool.get();
-                buf.push("var ",bufbak,"=_$0;_$0=[];");
+                buf.push("var ",bufbak,"=_$1;_$1=[];");
                 appendCode(childCode,buf,idpool,depth);
-                buf.push("var ",varName,"=_$0.join('');_$0=",bufbak,";");
+                buf.push("var ",varName,"=_$1.join('');_$1=",bufbak,";");
                 idpool.free(bufbak);
                 break;
             case IF_TYPE:
                 var childCode = item[1];
-                var test = item[2];
+                var test = getEL(item[2]);
                 buf.push("if(",test,"){");
                 appendCode(childCode,buf,idpool,depth+1)
                 printIndex(buf,depth,"}");
                 var nextElse = code[i+1];
+                var notEnd = true;
                 while(nextElse && nextElse[0] == ELSE_TYPE){
                     i++;
                     var childCode = nextElse[1];
-                    var test = nextElse[2];
+                    var test = getEL(nextElse[2]);
                     if(test){
                         printIndex(buf,depth,"else if(",test,"){");
                     }else{
+                        notEnd = false;
                         printIndex(buf,depth,"else{");
                     }
                     appendCode(childCode,buf,idpool,depth+1)
@@ -146,7 +147,7 @@ function appendCode(code,buf,idpool,depth){
                 var indexId = idpool.get();
                 var itemsId = idpool.get();
                 var previousForValueId = idpool.get();
-                var itemsEL = item[2];
+                var itemsEL = getEL(item[2]);
                 var varNameId = item[3]; 
                 var statusNameId = item[4]; 
                 var childCode = item[1];
@@ -166,30 +167,32 @@ function appendCode(code,buf,idpool,depth){
                 printIndex(buf,depth,"}");
                 
                 
-                printIndex(buf,depth,"var ",previousForValueId ,"=this['for']");
+                printIndex(buf,depth,"var ",previousForValueId ,"=_$0['for']");
                 var forVar= statusNameId?["var ",statusNameId ,"="]:[];
-                forVar.push("this['for'] = {lastIndex:",itemsId,".length-1,depth:",previousForValueId,"?",previousForValueId,".depth+1:0};");
+                forVar.push("_$0['for'] = {lastIndex:",itemsId,".length-1,depth:",previousForValueId,"?",previousForValueId,".depth+1:0};");
                 printIndex(buf,depth, forVar.join(""));
                 
                 printIndex(buf,depth,"for(;",indexId,"<",itemsId,".length;",indexId,"++){");
-                printIndex(buf,depth+1,"this['for'].index=",indexId,";");
+                printIndex(buf,depth+1,"_$0['for'].index=",indexId,";");
                 printIndex(buf,depth+1,"var ",varNameId,"=",itemsId,"[",indexId,"];");
                 appendCode(childCode,buf,idpool,depth+1)
                 printIndex(buf,depth,"}");
                 
                 
-                printIndex(buf,depth ,"this['for']=",previousForValueId);
+                printIndex(buf,depth ,"_$0['for']=",previousForValueId);
                 
                 idpool.free(itemsId);;
                 idpool.free(previousForValueId);
                 var nextElse = code[i+1];
-                while(nextElse && nextElse[0] == ELSE_TYPE){
+                var notEnd = true;
+                while(notEnd && nextElse && nextElse[0] == ELSE_TYPE){
                     i++;
                     var childCode = nextElse[1];
-                    var test = nextElse[2];
+                    var test = getEL(nextElse[2]);
                     if(test){
                         printIndex(buf,depth,"if(!",indexId,"&&",test,"){");
                     }else{
+                        notEnd = false;
                         printIndex(buf,depth,"if(!",indexId,"){");
                     }
                     appendCode(childCode,buf,idpool,depth+1)
@@ -201,6 +204,13 @@ function appendCode(code,buf,idpool,depth){
             }
 		}
 	}
+}
+function getEL(el){
+    if(typeof el == 'string'){
+        return el;
+    }else{
+        throw new Error("json->el 尚未实现：（\n"+el);
+    }
 }
 function printIndex(buf,i){
     buf.push("\n");

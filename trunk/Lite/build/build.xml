@@ -53,6 +53,9 @@
 				<include name="template.js" />
 				<include name="__package__.js" />
 			</zipfileset>
+			<zipfileset prefix="org/xidea/lite/parser/" dir="build/dest/jslite/">
+				<include name="native-compiler.js" />
+			</zipfileset>
 		</jar>
 		<delete file="build/dest/jslite/__package__.js" />
 		<copy tofile="build/dest/Template-${version}.jar" file="build/dest/Template.jar" />
@@ -92,6 +95,21 @@
 
 			<arg value="-outputExported" />
 			<arg value="${basedir}/build/dest/jslite/template.js" />
+		</java>
+		<java classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
+			<arg value="-scriptBase" />
+			<arg value="${basedir}/web/scripts" />
+
+			<arg value="-config.ascii" />
+			<arg value="false" />
+			<arg value="-config.features" />
+			<arg value="org.xidea.lite:compile" />
+
+			<arg value="-exports" />
+			<arg value="org.xidea.lite:Parser" />
+
+			<arg value="-outputExported" />
+			<arg value="${basedir}/build/dest/jslite/native-parser.js" />
 		</java>
 		<java classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
 			<arg value="-scriptBase" />
