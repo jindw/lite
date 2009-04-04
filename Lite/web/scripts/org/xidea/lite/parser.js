@@ -13,10 +13,9 @@ var XML_ATTRIBUTE_TYPE = 3;// [3,'value','name']
 var XML_TEXT_TYPE = 4;// [4,'el']
 var FOR_TYPE = 5;// [5,[...],'items','var','status']//status
 var ELSE_TYPE = 6;// [6,[...],'test']//test opt?
-var ADD_ONS_TYPE =7;// [7,[...],'var']
+var ADD_ON_TYPE =7;// [7,[...],'var']
 var VAR_TYPE = 8;// [8,'value','name']
 var CAPTRUE_TYPE = 9;// [9,[...],'var']
-
 var IF_KEY = "if";
 var FOR_KEY = "for";
 
@@ -108,9 +107,9 @@ Parser.prototype = {
         if(this.nativeJS){
             var code = buildNativeJS(buildTreeResult(this.result));
             try{
-                var result =  new Function("_$0","_$1",code);
+                var result =  new Function("_$0","_$1","_$2",code);
                 result.toString=function(){//_$1 encodeXML
-                    return "function(_$0,_$1){\n"+code+"\n}"
+                    return "function(_$0,_$1,_$2){\n"+code+"\n}"
                 }
                 return result;
             }catch(e){

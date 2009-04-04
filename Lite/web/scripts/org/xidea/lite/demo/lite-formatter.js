@@ -7,7 +7,7 @@ TIT.XML_ATTRIBUTE_TYPE = 3;// [3,'value','name']
 TIT.XML_TEXT_TYPE = 4;// [4,'el']
 TIT.FOR_TYPE = 5;// [5,[...],'items','var','status']//status
 TIT.ELSE_TYPE = 6;// [6,[...],'test']//test opt?
-TIT.ADD_ONS_TYPE =7;// [7,[...],'var']
+TIT.ADD_ON_TYPE =7;// [7,[...],'var']
 TIT.VAR_TYPE = 8;// [8,'value','name']
 TIT.CAPTRUE_TYPE = 9;// [9,[...],'var']
 
