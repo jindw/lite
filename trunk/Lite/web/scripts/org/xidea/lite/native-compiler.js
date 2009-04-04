@@ -1,4 +1,7 @@
 var ID_PREFIX = "_$";
+
+var SAFE_FOR_KEY = "_$0['for']";
+
 /**
  * IE 好像容易出问题，可能是线程不安全导致。
  * @internal

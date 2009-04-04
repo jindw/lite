@@ -88,13 +88,10 @@
 			<arg value="org.xidea.lite:compile" />
 
 			<arg value="-exports" />
-			<arg value="org.xidea.lite:Template" />
-			<arg value="org.xidea.lite:Parser" />
-			<arg value="org.xidea.lite:TextParser" />
-			<arg value="org.xidea.lite:XMLParser" />
+			<arg value="org.xidea.lite:*" />
 
 			<arg value="-outputExported" />
-			<arg value="${basedir}/build/dest/jslite/template.js" />
+			<arg value="${basedir}/build/dest/jslite/native-compiler.js" />
 		</java>
 		<java classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
 			<arg value="-scriptBase" />
@@ -106,10 +103,13 @@
 			<arg value="org.xidea.lite:compile" />
 
 			<arg value="-exports" />
+			<arg value="org.xidea.lite:Template" />
 			<arg value="org.xidea.lite:Parser" />
+			<arg value="org.xidea.lite:TextParser" />
+			<arg value="org.xidea.lite:XMLParser" />
 
 			<arg value="-outputExported" />
-			<arg value="${basedir}/build/dest/jslite/native-parser.js" />
+			<arg value="${basedir}/build/dest/jslite/template.js" />
 		</java>
 		<java classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
 			<arg value="-scriptBase" />
