@@ -117,7 +117,7 @@ TextParser.prototype.parseEL = function(expression){
     new Function(expression.replace(/for\s*\./g,"_."));
     try{
         if(this.nativeJS){
-            return parseNativeEL(expression);
+            return expression;
         }else{
             return new ExpressionTokenizer(expression).toTokens();
         }

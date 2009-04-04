@@ -88,7 +88,7 @@
 			<arg value="org.xidea.lite:compile" />
 
 			<arg value="-exports" />
-			<arg value="org.xidea.lite:*" />
+			<arg value="org.xidea.lite:buildNativeJS" />
 
 			<arg value="-outputExported" />
 			<arg value="${basedir}/build/dest/jslite/native-compiler.js" />
