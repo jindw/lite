@@ -107,7 +107,17 @@ Parser.prototype = {
     },
     buildResult:function(){
         if(this.nativeJS){
-            return buildNativeJS(buildTreeResult(this.result));
+            var code = buildNativeJS(buildTreeResult(this.result));
+            try{
+                var result =  new Function("_$0","_$1",buf.join(''));
+                result.toString=function(){//_$1 encodeXML
+                    return "function(_$0,_$1){\n"+buf.join('')+"\n}"
+                }
+                return result;
+            }catch(e){
+            	$log.error(buf.join(''))
+                throw e;
+            }
         }else{
             var data = buildTreeResult(this.result);
             var i = data.length;

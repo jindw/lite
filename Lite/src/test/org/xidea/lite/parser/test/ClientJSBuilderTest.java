@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.parser.ClientJSBuilder;
 import org.xidea.lite.parser.XMLParser;
 
@@ -19,8 +20,9 @@ public class ClientJSBuilderTest {
 	public void testBuildJS() {
 		List<Object> liteCode = new XMLParser().parse(this.getClass()
 				.getResource("asciitable.xhtml"));
-		String result = new ClientJSBuilder().buildJS("testTemplate", liteCode);
-		System.out.println(result);
+//		String result = new ClientJSBuilder().buildJS("testTemplate", liteCode);
+		System.out.println("==JS Code==");
+		System.out.println(liteCode);
 	}
 
 }
