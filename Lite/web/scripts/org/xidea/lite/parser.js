@@ -20,7 +20,6 @@ var CAPTRUE_TYPE = 9;// [9,[...],'var']
 var IF_KEY = "if";
 var FOR_KEY = "for";
 
-var SAFE_FOR_KEY = "this['for']";
 var TEMPLATE_NS_REG = /^http:\/\/www.xidea.org\/ns\/(?:template|lite)(?:\/core)?\/?$/;
 
 
@@ -109,13 +108,13 @@ Parser.prototype = {
         if(this.nativeJS){
             var code = buildNativeJS(buildTreeResult(this.result));
             try{
-                var result =  new Function("_$0","_$1",buf.join(''));
+                var result =  new Function("_$0","_$1",code);
                 result.toString=function(){//_$1 encodeXML
-                    return "function(_$0,_$1){\n"+buf.join('')+"\n}"
+                    return "function(_$0,_$1){\n"+code+"\n}"
                 }
                 return result;
             }catch(e){
-            	$log.error(buf.join(''))
+            	$log.error(code)
                 throw e;
             }
         }else{

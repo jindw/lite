@@ -339,7 +339,7 @@ public class CoreXMLNodeParser implements NodeParser {
 				this.parser.parseNode(next, context2);
 			} while ((next = next.getNextSibling()) != null);
 			List<Object> result = context2.toResultTree();
-			context.append(jsbuilder.buildJS(el.getAttribute("id"), result));
+			context.append("/*<![CDATA[*/"+jsbuilder.buildJS(el.getAttribute("id"), result)+"/*]]>*/");
 		}
 		return null;
 	}
