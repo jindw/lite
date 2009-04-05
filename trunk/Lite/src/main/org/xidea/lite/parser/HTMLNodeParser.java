@@ -59,22 +59,27 @@ public abstract class HTMLNodeParser implements NodeParser {
 			context.append("/>");
 		} else {
 			context.append(">");
-			Node next = node.getFirstChild();
-			if (next != null) {
+			Node child = node.getFirstChild();
+			if (child != null) {
 				boolean reserveSpace = PRE_LEAF.matcher(tagName).find();
 				boolean oldReserveSpace = context.isReserveSpace();
 				context.setReserveSpace(oldReserveSpace || reserveSpace);
-
-				boolean format = next.getNodeType() != Node.TEXT_NODE
-						|| next.getNextSibling() != null;
+				boolean needFormatBeforeEnd = false;
 				try {
-					do {
-						this.parser.parseNode(next, context);
-					} while ((next = next.getNextSibling()) != null);
+					while(true) {
+						this.parser.parseNode(child, context);
+						Node next = child.getNextSibling();
+						if(next == null){
+							break;
+						}else{
+							child = next;
+							needFormatBeforeEnd = DefaultXMLNodeParser.needFormat(child);
+						}
+					}
 				} finally {
 					context.setReserveSpace(oldReserveSpace);
 				}
-				if (format) {
+				if (needFormatBeforeEnd) {
 					context.appendIndent();
 				}
 			}
