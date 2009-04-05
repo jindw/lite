@@ -61,21 +61,17 @@ public class DefaultXMLNodeParser implements NodeParser {
 	protected Node parseProcessingInstruction(Node node, ParseContext context) {
 		context.append("<?" + node.getNodeName() + " "
 				+ ((ProcessingInstruction) node).getData() + "?>");
-		// context.appendFormatEnd();
 		return null;
 	}
 
 	private Node parseCDATA(Node node, ParseContext context) {
-		if (needFormat(node)) {
-			context.appendIndent();
+		if(needFormat(node)){
+			context.beginIndent(false);
 		}
 		context.append("<![CDATA[");
 		this.parser.parseText(context, ((CDATASection) node).getData(),
 				Template.EL_TYPE);
 		context.append("]]>");
-		// if (format) {
-		// context.appendFormatEnd();
-		// }
 		return null;
 	}
 
@@ -140,13 +136,10 @@ public class DefaultXMLNodeParser implements NodeParser {
 			text = text.replaceAll("^(\\s)+|(\\s)+$", "$1$2");
 		}
 		if (text.length() > 0) {
-			if (needFormat(node)) {
-				context.appendIndent();
+			if(needFormat(node)){
+				context.beginIndent(false);
 			}
 			this.parser.parseText(context, text, Template.XML_TEXT_TYPE);
-			// if (format) {
-			// context.appendFormatEnd();
-			// }
 		}
 		return null;
 	}
@@ -209,45 +202,43 @@ public class DefaultXMLNodeParser implements NodeParser {
 	}
 
 	private Node parseElement(Node node, ParseContext context) {
-		context.appendIndent();
-		Element el = (Element) node;
-		NamedNodeMap attributes = node.getAttributes();
-		String tagName = el.getTagName();
-		context.append("<" + tagName);
-		for (int i = 0; i < attributes.getLength(); i++) {
-			this.parser.parseNode(attributes.item(i), context);
-		}
-		Node child = node.getFirstChild();
-		if (child != null) {
-			context.append(">");
-			boolean needFormatBeforeEnd = false;
-			// if (format) {
-			// context.appendFormatEnd();
-			// }
-			while(true) {
-				this.parser.parseNode(child, context);
-				Node next = child.getNextSibling();
-				if(next==null){
-					needFormatBeforeEnd = needFormat(child);
-					break;
-				}else{
-					child = next;
+		context.beginIndent(true);
+		String closeTag = null;
+		try {
+			Element el = (Element) node;
+			NamedNodeMap attributes = node.getAttributes();
+			String tagName = el.getTagName();
+			context.append("<" + tagName);
+			for (int i = 0; i < attributes.getLength(); i++) {
+				this.parser.parseNode(attributes.item(i), context);
+			}
+			Node child = node.getFirstChild();
+			if (child != null) {
+				context.append(">");
+				while (true) {
+					this.parser.parseNode(child, context);
+					Node next = child.getNextSibling();
+					if (next == null) {
+						break;
+					} else {
+						child = next;
+					}
 				}
-			}
-			if (needFormatBeforeEnd) {
-				context.appendIndent();
-			}
-			context.append("</" + tagName + '>');
-		} else {
-			context.append("/>");
-			return null;
-		}
 
+				closeTag = "</" + tagName + '>';
+			} else {
+				closeTag = "/>";
+			}
+		} finally {
+			context.endIndent();
+			context.append(closeTag);
+		}
 		return null;
 	}
 
 	/**
 	 * 有兄弟节点需要格式化，非文本节点需要格式化
+	 * 
 	 * @param next
 	 * @return
 	 */

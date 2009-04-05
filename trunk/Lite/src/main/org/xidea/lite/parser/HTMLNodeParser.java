@@ -16,7 +16,6 @@ public abstract class HTMLNodeParser implements NodeParser {
 	protected static final Pattern PRE_LEAF = Pattern.compile(
 			"^(?:script|style|pre|textarea)$", Pattern.CASE_INSENSITIVE);
 	protected static final String XHTMLNS = "http://www.w3.org/1999/xhtml";
-	
 
 	protected static final Map<String, String> BOOLEAN_ATTBUTE_MAP = new HashMap<String, String>();
 	static {
@@ -26,8 +25,6 @@ public abstract class HTMLNodeParser implements NodeParser {
 
 	}
 	protected XMLParser parser;
-	
-
 
 	public Node parseNode(Node node, ParseContext context) {
 		String namespace = node.getNamespaceURI();
@@ -38,52 +35,55 @@ public abstract class HTMLNodeParser implements NodeParser {
 		}
 		return node;
 	}
-	protected Node parse(Node node, ParseContext context){
+
+	protected Node parse(Node node, ParseContext context) {
 		return parseHTMLElement(node, context, null);
 	}
 
 	protected Node parseHTMLElement(Node node, ParseContext context,
 			List<Object> exts) {
-		context.appendIndent();
-		Element el = (Element) node;
-		NamedNodeMap attributes = node.getAttributes();
-		String tagName = el.getTagName();
-		context.append("<" + tagName);
-		for (int i = 0; i < attributes.getLength(); i++) {
-			appendHTMLAttribute((Attr) attributes.item(i), context);
-		}
-		if (exts != null) {
-			context.appendAll(exts);
-		}
-		if (HTML_LEAF.matcher(tagName).find()) {
-			context.append("/>");
-		} else {
-			context.append(">");
-			Node child = node.getFirstChild();
-			if (child != null) {
-				boolean reserveSpace = PRE_LEAF.matcher(tagName).find();
-				boolean oldReserveSpace = context.isReserveSpace();
-				context.setReserveSpace(oldReserveSpace || reserveSpace);
-				boolean needFormatBeforeEnd = false;
-				try {
-					while(true) {
-						this.parser.parseNode(child, context);
-						Node next = child.getNextSibling();
-						if(next == null){
-							break;
-						}else{
-							child = next;
-							needFormatBeforeEnd = DefaultXMLNodeParser.needFormat(child);
-						}
-					}
-				} finally {
-					context.setReserveSpace(oldReserveSpace);
-				}
-				if (needFormatBeforeEnd) {
-					context.appendIndent();
-				}
+		context.beginIndent(true);
+		String closeTag = null;
+		try {
+			Element el = (Element) node;
+			NamedNodeMap attributes = node.getAttributes();
+			String tagName = el.getTagName();
+			context.append("<" + tagName);
+			for (int i = 0; i < attributes.getLength(); i++) {
+				appendHTMLAttribute((Attr) attributes.item(i), context);
 			}
-			context.append("</" + tagName + '>');
+			if (exts != null) {
+				context.appendAll(exts);
+			}
+			if (HTML_LEAF.matcher(tagName).find()) {
+				closeTag = "/>";
+			} else {
+				context.append(">");
+				Node child = node.getFirstChild();
+				if (child != null) {
+					boolean reserveSpace = PRE_LEAF.matcher(tagName).find();
+					boolean oldReserveSpace = context.isReserveSpace();
+					context.setReserveSpace(oldReserveSpace || reserveSpace);
+					try {
+
+						while (true) {
+							this.parser.parseNode(child, context);
+							Node next = child.getNextSibling();
+							if (next == null) {
+								break;
+							} else {
+								child = next;
+							}
+						}
+					} finally {
+						context.setReserveSpace(oldReserveSpace);
+					}
+				}
+				closeTag = "</" + tagName + '>';
+			}
+		} finally {
+			context.endIndent();
+			context.append(closeTag);
 		}
 		return null;
 	}

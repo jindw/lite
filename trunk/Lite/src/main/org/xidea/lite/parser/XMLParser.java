@@ -194,17 +194,10 @@ public class XMLParser extends TextParser {
 
 	public void parseNode(Object node, ParseContext context) {
 		if (node instanceof Node) {
-			final int depth = context.getDepth();
-			if(node instanceof Element){
-				context.setDepth(depth+1);
-			}
 			int i = parserList.length;
 			Node newNode = (Node) node;
 			while (i-- > 0 && newNode!=null) {
 				newNode = parserList[i].parseNode(newNode, context);
-			}
-			if(node instanceof Element){
-				context.setDepth(depth);
 			}
 		} else if (node instanceof NodeList) {
 			NodeList list = (NodeList) node;

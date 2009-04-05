@@ -55,8 +55,6 @@ public class CoreXMLNodeParser implements NodeParser {
 			String namespaceURI = el.getNamespaceURI();
 			if (namespaceURI != null && isCoreNS(prefix, namespaceURI)) {
 				String name = el.getLocalName();
-				int depth = context.getDepth();
-				context.setDepth(depth - 1);
 				if ("include".equals(name)) {
 					return parseIncludeTag(el, context);
 				} else if ("client".equals(name)) {
@@ -82,7 +80,6 @@ public class CoreXMLNodeParser implements NodeParser {
 				} else if ("var".equals(name)) {
 					return parseVarTag(el, context);
 				}
-				context.setDepth(depth);
 			}
 		}
 		return node;
