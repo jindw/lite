@@ -38,6 +38,7 @@ public class ParseContextImpl implements ParseContext {
 	private int inc = 0;
 	private boolean reserveSpace;
 	private boolean format = false;
+	private boolean compress = false;
 	private URL base;
 
 	public ParseContextImpl(URL base) {
@@ -60,6 +61,14 @@ public class ParseContextImpl implements ParseContext {
 		this.format = format;
 	}
 
+	public boolean isCompress() {
+		return compress;
+	}
+
+	public void setCompress(boolean compress) {
+		this.compress = compress;
+	}
+	
 	public boolean isReserveSpace() {
 		return reserveSpace;
 	}
@@ -396,5 +405,6 @@ public class ParseContextImpl implements ParseContext {
 			throw new RuntimeException(e);
 		}
 	}
+
 
 }
