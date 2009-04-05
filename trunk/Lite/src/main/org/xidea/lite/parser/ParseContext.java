@@ -24,6 +24,12 @@ public interface ParseContext {
 	public void setDepth(int depth);
 
 	public boolean isFormat();
+	
+	public void setFormat(boolean format);
+	
+	public boolean isCompress();
+	
+	public void setCompress(boolean format);
 
 	public boolean isReserveSpace();
 

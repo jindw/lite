@@ -130,8 +130,15 @@ public class DefaultXMLNodeParser implements NodeParser {
 
 	private Node parseTextNode(Node node, ParseContext context) {
 		String text = ((Text) node).getData();
-		if (!context.isReserveSpace()) {
-			text = text.trim();
+		if (context.isCompress() && !context.isReserveSpace()) {
+//			String text2 = text.trim();
+//			if(text2.length()==0){
+//比较复杂，算了
+//				if(node.getPreviousSibling()!=null || node.getNextSibling()!=null){
+//				}
+//			}
+//			text = text2;
+			text = text.replaceAll("^(\\s)+|(\\s)+$", "$1$2");
 		}
 		if (text.length() > 0) {
 			boolean format = (node.getPreviousSibling() != null || node

@@ -10,6 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.stream.StreamSource;
@@ -82,16 +83,18 @@ public class XMLTest {
 		this.context = (Map<String, Object>) de.readObject();
 		System.out.println(JSONEncoder.encode(this.context));
 		this.templateResultMap = (Map<String, String>) de.readObject();
+		int i=0;
 		for (String key : templateResultMap.keySet()) {
 			String value = templateResultMap.get(key);
-			test(key, value);
+			test(i++,key, value);
 		}
 	}
 
-	public void test(String text, String result) throws Exception {
+	public void test(int index,String text, String result) throws Exception {
 		XMLParser p = new XMLParser();
-		ParseContext parseContext = new ParseContextImpl(this.getClass()
+		ParseContextImpl parseContext = new ParseContextImpl(this.getClass()
 				.getResource("/"));
+		parseContext.setCompress(true);
 		parseContext.setAttribute(HTMLFormNodeParser.class, HTMLFormNodeParser.AUTO_IN_FORM);
 		List<Object> insts = p.parse(
 				"<div xmlns:c=\"http://www.xidea.org/ns/template/core\">"
@@ -100,7 +103,7 @@ public class XMLTest {
 		Template t = new Template(insts);
 		Writer out = new StringWriter();
 		t.render(new HashMap(context), out);
-		assertXMLEquals(text+":\n"+result,"<div>" + result + "</div>", out.toString());
+		assertXMLEquals("第"+index+"个测试错误："+text+":\n"+result,"<div>" + result + "</div>", out.toString());
 	}
 
 	public static void assertXMLEquals(String msg,String expected, String acture) {
@@ -114,9 +117,10 @@ public class XMLTest {
 			StringWriter out = new StringWriter();
 			Result outputTarget = new javax.xml.transform.stream.StreamResult(
 					out);
+			//transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 			transformer.transform(new StreamSource(new StringReader(xml)),
 					outputTarget);
-			return out.toString();
+			return out.toString().replaceAll("(\\s)+", "");
 		} catch (Throwable e) {
 			e.printStackTrace();
 			throw new RuntimeException(e);

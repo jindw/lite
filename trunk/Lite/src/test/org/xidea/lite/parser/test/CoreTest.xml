@@ -60,7 +60,16 @@
 		<!-- Test include -->
 		<void method='put'>
 			<string><![CDATA[<c:include path='/org/xidea/lite/parser/test/include-test.xslt'></c:include>]]></string>
-			<string><![CDATA[<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"><xsl:template match="/"><div><xsl:apply-templates select="//meta"/></div></xsl:template><xsl:template match="meta"><xsl:value-of select="@name"/></xsl:template></xsl:stylesheet>]]></string>
+			<string><![CDATA[<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+			<xsl:template match="/">
+			<div>
+			<xsl:apply-templates select="//meta"/>
+			</div>
+			</xsl:template>
+			<xsl:template match="meta">
+			<xsl:value-of select="@name"/>
+			</xsl:template>
+			</xsl:stylesheet>]]></string>
 		</void>
 		<!-- testXsl-->
 		<!-- 无命名空间 -->
@@ -91,7 +100,13 @@
 			 	</xsl:stylesheet>
 			 </c:include>
 	</c:include>]]></string>
-			<string><![CDATA[<div><meta name="n1" value="v1"/><meta name="n2" value="v2"/></div><div>n1n2</div>]]></string>
+			<string><![CDATA[<div>
+			<meta name="n1" value="v1"/>
+			<meta name="n2" value="v2"/>
+		</div>
+		<div>
+		n1n2
+		</div>]]></string>
 		</void>
 		
 		<void method='put'>
