@@ -66,9 +66,7 @@ public class DefaultXMLNodeParser implements NodeParser {
 	}
 
 	private Node parseCDATA(Node node, ParseContext context) {
-		boolean format = (node.getPreviousSibling() != null || node
-				.getNextSibling() != null);
-		if (format) {
+		if (needFormat(node)) {
 			context.appendIndent();
 		}
 		context.append("<![CDATA[");
@@ -131,19 +129,18 @@ public class DefaultXMLNodeParser implements NodeParser {
 	private Node parseTextNode(Node node, ParseContext context) {
 		String text = ((Text) node).getData();
 		if (context.isCompress() && !context.isReserveSpace()) {
-//			String text2 = text.trim();
-//			if(text2.length()==0){
-//比较复杂，算了
-//				if(node.getPreviousSibling()!=null || node.getNextSibling()!=null){
-//				}
-//			}
-//			text = text2;
+			// String text2 = text.trim();
+			// if(text2.length()==0){
+			// 比较复杂，算了
+			// if(node.getPreviousSibling()!=null ||
+			// node.getNextSibling()!=null){
+			// }
+			// }
+			// text = text2;
 			text = text.replaceAll("^(\\s)+|(\\s)+$", "$1$2");
 		}
 		if (text.length() > 0) {
-			boolean format = (node.getPreviousSibling() != null || node
-					.getNextSibling() != null);
-			if (format) {
+			if (needFormat(node)) {
 				context.appendIndent();
 			}
 			this.parser.parseText(context, text, Template.XML_TEXT_TYPE);
@@ -220,28 +217,44 @@ public class DefaultXMLNodeParser implements NodeParser {
 		for (int i = 0; i < attributes.getLength(); i++) {
 			this.parser.parseNode(attributes.item(i), context);
 		}
-		Node next = node.getFirstChild();
-		if (next != null) {
+		Node child = node.getFirstChild();
+		if (child != null) {
 			context.append(">");
-			boolean format = next.getNodeType() != Node.TEXT_NODE
-					|| next.getNextSibling() != null;
+			boolean needFormatBeforeEnd = false;
 			// if (format) {
 			// context.appendFormatEnd();
 			// }
-			do {
-				this.parser.parseNode(next, context);
-			} while ((next = next.getNextSibling()) != null);
-			if (format) {
+			while(true) {
+				this.parser.parseNode(child, context);
+				Node next = child.getNextSibling();
+				if(next==null){
+					needFormatBeforeEnd = needFormat(child);
+					break;
+				}else{
+					child = next;
+				}
+			}
+			if (needFormatBeforeEnd) {
 				context.appendIndent();
 			}
 			context.append("</" + tagName + '>');
-			// context.appendFormatEnd();
 		} else {
 			context.append("/>");
-			// context.appendFormatEnd();
 			return null;
 		}
 
 		return null;
 	}
+
+	/**
+	 * 有兄弟节点需要格式化，非文本节点需要格式化
+	 * @param next
+	 * @return
+	 */
+	static boolean needFormat(Node node) {
+		return node.getNodeType() != Node.TEXT_NODE
+				|| node.getPreviousSibling() != null
+				|| node.getNextSibling() != null;
+	}
+
 }
