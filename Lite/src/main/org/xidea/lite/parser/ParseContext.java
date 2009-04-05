@@ -34,7 +34,7 @@ public interface ParseContext {
 	 */
 	public int getDepth();
 	public void beginIndent(boolean needClose);
-	public boolean endIndent();
+	public void endIndent();
 	
 	/**
 	 * 记录一下编译上下文状态

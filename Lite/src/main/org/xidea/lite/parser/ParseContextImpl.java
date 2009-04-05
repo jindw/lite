@@ -78,23 +78,25 @@ public class ParseContextImpl implements ParseContext {
 
 	public void beginIndent(boolean needClose) {
 		int size = indentStatus.size();
-		if(size == depth){
-			indentStatus.add(true);
-			indentStatus.add(false);
-		}else if(size == depth+2){
-			indentStatus.set(depth,true);
-			indentStatus.set(depth+1,false);
-		}else{
-			throw new IllegalStateException();
-		}
 		printIndent();
 		depth++;
+		switch(depth-size){
+		case 1:
+			indentStatus.add(null);
+		case 0:
+			indentStatus.add(null);
+		//case -1:
+		default:
+			indentStatus.set(depth-1,true);
+			indentStatus.set(depth,false);
+		}
 	}
 
-	public boolean endIndent() {
-		boolean needInd = false;
-		int index = depth+1;
-		return indentStatus.size()>index && Boolean.TRUE.equals(indentStatus.get(index));
+	public void endIndent() {
+		depth--;
+		if(Boolean.TRUE.equals(indentStatus.get(depth))){
+			printIndent();
+		}
 	}
 	private void printIndent() {
 		if (this.format && !this.reserveSpace) {
@@ -103,7 +105,7 @@ public class ParseContextImpl implements ParseContext {
 			if (depth > 0 && pos > 0) {
 				char[] data = new char[depth];
 				while (depth-- > 0) {
-					data[depth] = '\t';
+					data[depth] = ' ';
 				}
 				result.add("\r\n" + new String(data));
 			}

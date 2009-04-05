@@ -124,7 +124,7 @@ public class DefaultXMLNodeParser implements NodeParser {
 
 	private Node parseTextNode(Node node, ParseContext context) {
 		String text = ((Text) node).getData();
-		if (context.isCompress() && !context.isReserveSpace()) {
+		if (!context.isReserveSpace()) {
 			// String text2 = text.trim();
 			// if(text2.length()==0){
 			// 比较复杂，算了
@@ -133,7 +133,11 @@ public class DefaultXMLNodeParser implements NodeParser {
 			// }
 			// }
 			// text = text2;
-			text = text.replaceAll("^(\\s)+|(\\s)+$", "$1$2");
+			if(context.isFormat()){
+				text = text.trim();
+			}else if(context.isCompress()){
+				text = text.replaceAll("^(\\s)+|(\\s)+$", "$1$2");
+			}
 		}
 		if (text.length() > 0) {
 			if(needFormat(node)){

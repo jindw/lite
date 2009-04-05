@@ -19,7 +19,7 @@ public class ClientJSBuilderTest {
 	@Test
 	public void testBuildJS() {
 		List<Object> liteCode = new XMLParser().parse(this.getClass()
-				.getResource("asciitable.xhtml"));
+				.getResource("asciitable-client.xhtml"));
 //		String result = new ClientJSBuilder().buildJS("testTemplate", liteCode);
 		System.out.println("==JS Code==");
 		System.out.println(liteCode);
