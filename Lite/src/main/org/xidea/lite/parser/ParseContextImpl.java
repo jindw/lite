@@ -34,7 +34,7 @@ public class ParseContextImpl implements ParseContext {
 	private HashSet<URL> resources = new HashSet<URL>();
 	private HashMap<String, String> typeIdMap = new HashMap<String, String>();
 	private HashMap<Object, String> objectIdMap = new HashMap<Object, String>();
-	private int depth = -1;
+	private int depth = 0;
 	private int inc = 0;
 	private boolean reserveSpace;
 	private boolean format = false;
@@ -45,13 +45,6 @@ public class ParseContextImpl implements ParseContext {
 		this.base = base;
 	}
 
-	public int getDepth() {
-		return depth;
-	}
-
-	public void setDepth(int depth) {
-		this.depth = depth;
-	}
 
 	public boolean isFormat() {
 		return format;
@@ -68,7 +61,7 @@ public class ParseContextImpl implements ParseContext {
 	public void setCompress(boolean compress) {
 		this.compress = compress;
 	}
-	
+
 	public boolean isReserveSpace() {
 		return reserveSpace;
 	}
@@ -76,6 +69,48 @@ public class ParseContextImpl implements ParseContext {
 	public void setReserveSpace(boolean keepSpace) {
 		this.reserveSpace = keepSpace;
 	}
+
+	public int getDepth() {
+		return depth;
+	}
+	
+	private ArrayList<Boolean> indentStatus = new ArrayList<Boolean>();
+
+	public void beginIndent(boolean needClose) {
+		int size = indentStatus.size();
+		if(size == depth){
+			indentStatus.add(true);
+			indentStatus.add(false);
+		}else if(size == depth+2){
+			indentStatus.set(depth,true);
+			indentStatus.set(depth+1,false);
+		}else{
+			throw new IllegalStateException();
+		}
+		printIndent();
+		depth++;
+	}
+
+	public boolean endIndent() {
+		boolean needInd = false;
+		int index = depth+1;
+		return indentStatus.size()>index && Boolean.TRUE.equals(indentStatus.get(index));
+	}
+	private void printIndent() {
+		if (this.format && !this.reserveSpace) {
+			int pos = result.size() - 1;
+			int depth = this.depth;
+			if (depth > 0 && pos > 0) {
+				char[] data = new char[depth];
+				while (depth-- > 0) {
+					data[depth] = '\t';
+				}
+				result.add("\r\n" + new String(data));
+			}
+
+		}
+	}
+
 
 	public Object optimizeEL(String expression) {
 		return expressionFactory.parse(expression);
@@ -175,21 +210,6 @@ public class ParseContextImpl implements ParseContext {
 			result.remove(i);
 		}
 		return pops;
-	}
-
-	public void appendIndent() {
-		if (this.format && !this.reserveSpace) {
-			int pos = result.size() - 1;
-			int depth = this.depth;
-			if (depth > 0 && pos > 0) {
-				char[] data = new char[depth];
-				while (depth-- > 0) {
-					data[depth] = '\t';
-				}
-				result.add("\r\n" + new String(data));
-			}
-
-		}
 	}
 
 	public void appendAll(List<Object> items) {
@@ -405,6 +425,5 @@ public class ParseContextImpl implements ParseContext {
 			throw new RuntimeException(e);
 		}
 	}
-
 
 }

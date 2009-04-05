@@ -14,14 +14,6 @@ public interface ParseContext {
 
 	public static final Object END_INSTRUCTION = new Object[0];
 
-	/**
-	 * 在XMLParser中判断平设置，Core标签将缩进做了回逄1�7处理
-	 * 
-	 * @return
-	 */
-	public int getDepth();
-
-	public void setDepth(int depth);
 
 	public boolean isFormat();
 	
@@ -34,6 +26,15 @@ public interface ParseContext {
 	public boolean isReserveSpace();
 
 	public void setReserveSpace(boolean keepSpace);
+
+	/**
+	 * 在XMLParser中判断平设置，Core标签将缩进做了回逄1�7处理
+	 * 
+	 * @return
+	 */
+	public int getDepth();
+	public void beginIndent(boolean needClose);
+	public boolean endIndent();
 	
 	/**
 	 * 记录一下编译上下文状态
@@ -74,7 +75,6 @@ public interface ParseContext {
 
 	public void append(String text);
 	public void append(String text,boolean encode,char quteChar);
-	public void appendIndent();
 	public void appendAll(List<Object> items);
 	public void removeLastEnd();
 	public void appendEL(Object testEL);
