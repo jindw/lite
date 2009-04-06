@@ -7,5 +7,13 @@
 		</void>
 	</object>
 	<object class="java.util.LinkedHashMap">
+		<void method="put">
+			<string><![CDATA[<script title="'444">$import("org.xidea.*")</script>]]></string>
+			<string><![CDATA[<script title="'444">$import("org.xidea.*")</script>]]></string>
+		</void>
+		<void method="put">
+			<string><![CDATA[<script>$import("org.xidea.*")</script>]]></string>
+			<string><![CDATA[<script>$import("org.xidea.*")</script>]]></string>
+		</void>
 	</object>
 </java>
