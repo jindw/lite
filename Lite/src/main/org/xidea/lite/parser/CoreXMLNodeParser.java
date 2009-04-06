@@ -291,9 +291,19 @@ public class CoreXMLNodeParser implements NodeParser {
 			if (context.isCompress() && !context.isReserveSpace()) {
 				js = jsbuilder.compress(js);
 			}
-			context.append("/*<![CDATA[*/" + js + "/*]]>*/");
+			boolean needScript = needScript(el);
+			if(needScript){
+				context.append("<script>/*<![CDATA[*/" + js + "/*]]>*/</script>");
+			}else{
+				context.append("/*<![CDATA[*/" + js + "/*]]>*/");
+			}
+			
 		}
 		return null;
+	}
+
+	private boolean needScript(Element el) {
+		return true;
 	}
 
 	Node parseContextTag(Element el, ParseContext context) {
