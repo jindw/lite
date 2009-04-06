@@ -241,6 +241,13 @@
 					processContents="lax">
 				</xs:any>
 			</xs:sequence>
+			<xs:attribute name="id" type="xs:ID" use="required">
+				<xs:annotation>
+					<xs:documentation>
+						输出的模板函数名
+					</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
 			<!-- 
 			<xs:attribute name="language" type="LANGUAGE" use="optional">
 				<xs:annotation>
