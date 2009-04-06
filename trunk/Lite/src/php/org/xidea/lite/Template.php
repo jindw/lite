@@ -5,7 +5,7 @@ define('IF_TYPE',1);            // [1,[...],<test el>]
 define('BREAK_TYPE',2);         // [2,depth]
 define('XML_ATTRIBUTE_TYPE',3); // [3,<value el>,'name']
 define('XML_TEXT_TYPE',4);      // [4,<el>]
-define('FOR_TYPE',5);           // [5,[...],<items el>,'varName','status']// status 可为null
+define('FOR_TYPE',5);           // [5,[...],<items el>,'varName']
 define('ELSE_TYPE',6);          // [6,[...],<test el>] //<test el> 可为null
 define('ADD_ON_TYPE',7);        // [7,[...],<add on el>,'<addon-class>']
 define('VAR_TYPE',8);           // [8,<value el>,'name']
@@ -110,15 +110,11 @@ function processFor($context, $data, $out){
     $children = $data[1];
     $items = evaluate($data[2],$context);
     $varName = $data[3];
-    $statusName = $data[4];
     $length = count($items);
     $preiousStatus = array_key_exists(FOR_KEY,$context) && $context[FOR_KEY];
     try{
         $forStatus = ForStatus($length);
         $context[FOR_KEY]=$forStatus;
-        if(isset($statusName)){
-            $context[$statusName]=$forStatus;
-        }
         foreach($items as $item){
             $forStatus->index += 1;
             $context[$varName]=$item;

@@ -114,7 +114,7 @@ function parseFN(fn,expression){
  * 异常一定要抛出去，让parseText做回退处理
  */
 TextParser.prototype.parseEL = function(expression){
-    new Function(expression.replace(/for\s*\./g,"_."));
+    new Function(expression.replace(/\bfor\b/g,"f"));
     try{
         if(this.nativeJS){
             return expression;
