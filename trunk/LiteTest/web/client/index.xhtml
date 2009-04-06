@@ -44,6 +44,7 @@
 		function reset(id){ 
           var content = document.getElementById('content');
           var model = ${JSON.stringify({title:"客户端模板",data:data})}
+		  //我们对模型做一点简单的修改（当能你也可以XHR从服务断获取数据，或者从客户端数据模型获取）
 		  model.title +=id;
 		  for(var i=0;i!=model.data.length;i++){
 		    var item = model.data[i];
@@ -51,7 +52,6 @@
 		      item[n]+=id;
 		    }
 		  }
-		  //&&
 		  content.innerHTML = userTemplate(model);
         }/*]]>*/
         </script>
