@@ -24,7 +24,10 @@ import org.cyberneko.html.HTMLConfiguration;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xidea.el.json.JSONDecoder;
+import org.xidea.lite.Template;
 import org.xidea.lite.TemplateEngine;
+import org.xidea.lite.parser.HTMLNodeParser;
+import org.xidea.lite.parser.NodeParser;
 import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.XMLParser;
 import org.xidea.lite.tools.webserver.MutiThreadWebServer;
@@ -81,6 +84,32 @@ public class SimpleWebServer extends MutiThreadWebServer {
 					}
 
 				};
+				parser.addNodeParser(new HTMLNodeParser(parser){
+
+
+					protected Node parse(Node node, ParseContext context) {
+						if(node.getLocalName().equalsIgnoreCase("script")){
+							Node firstChild = node.getFirstChild();
+							if(firstChild!=null && firstChild.getNextSibling() ==null){
+								if(firstChild.getNodeType() == Node.TEXT_NODE){
+									String text = firstChild.getNodeValue().trim();
+									text = text.replaceAll("&lt;", "<").
+									replaceAll("&gt;", ">").
+									replaceAll("&amp;", "&");
+									context.beginIndent();
+									context.append("<script");
+									parser.parseNode(node.getAttributes(), context);
+									context.append(">");
+									parser.parseText(context, text, Template.EL_TYPE);
+									context.append("</script>");
+									context.endIndent();
+									return null;
+								}
+							}
+						}
+						return node;
+					}
+				});
 			}
 
 			protected URL getResource(String pagePath)
@@ -113,7 +142,7 @@ public class SimpleWebServer extends MutiThreadWebServer {
 			if (file.isDirectory()) {
 				File index = new File(file, INDEX_XHTML);
 				if (index.exists()) {
-					url = url.endsWith("/") ? INDEX_XHTML : "/" + INDEX_XHTML;
+					url = url.substring(0,url.lastIndexOf('/')+1) + INDEX_XHTML;
 					file = index;
 				}
 			}
@@ -128,7 +157,10 @@ public class SimpleWebServer extends MutiThreadWebServer {
 					if (text.startsWith("\uFEFF")) {
 						text = text.substring(1);
 					}
-					object = (Map) JSONDecoder.decode(text);
+					try{
+						object = (Map) JSONDecoder.decode(text);
+					}catch (Exception e) {
+					}
 				} else {
 					object = new HashMap<Object, Object>();
 				}
@@ -143,8 +175,12 @@ public class SimpleWebServer extends MutiThreadWebServer {
 				handle.printFile(file);
 			}
 		} else {
-			handle.printContext(loadText(this.getClass().getResourceAsStream(
-					url)), "text/html");
+			String text = loadText(this.getClass().getResourceAsStream(
+					url));
+			if(text== null){
+				System.out.println(url +"不存在");
+			}
+			handle.printContext(text, "text/html");
 		}
 	}
 
@@ -157,7 +193,7 @@ public class SimpleWebServer extends MutiThreadWebServer {
 				buf.append(cbuf, 0, len);
 			}
 			return buf.toString();
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
 		}

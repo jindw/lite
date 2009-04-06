@@ -1,0 +1,59 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://www.xidea.org/ns/lite/core">
+	<head>
+		<meta http-equiv="Content-Type"
+			content="text/html; charset=utf-8" />
+		<title>Welcome to Tablecloth</title>
+		<link href="tablecloth.css" rel="stylesheet" type="text/css"
+			media="screen" />
+	</head>
+	<body>
+
+		<div id="container">
+			<h1>统一前后端模板实例</h1>
+
+			<div id="content">
+				<h2>${title}</h2>
+				<table cellspacing="0" cellpadding="0">
+					<tr>
+						<th>姓名</th>
+						<th>公司</th>
+						<th>年龄</th>
+						<th>城市</th>
+					</tr>
+					<c:for var="item" items="${data}">
+					<tr>
+						<td>${item.name}</td>
+						<td>${item.company}</td>
+						<td>${item.age}</td>
+						<td>${item.city}</td>
+					</tr>
+					</c:for>
+				</table>
+			</div>
+			<div>
+				<c:for var="item" items="${[1,2,3,4,5,6]}">
+				   <a href="#" onclick="reset(${item});return false;">${item}</a>
+				</c:for>
+			</div>
+		</div>
+		<c:client id="userTemplate">
+		<c:include xpath="//*[@id='content']/*"/></c:client>
+		<script>/*<![CDATA[*/
+		function reset(id){ 
+          var content = document.getElementById('content');
+          var model = ${JSON.stringify({title:"客户端模板",data:data})}
+		  model.title +=id;
+		  for(var i=0;i!=model.data.length;i++){
+		    var item = model.data[i];
+		    for(var n in item){
+		      item[n]+=id;
+		    }
+		  }
+		  //&&
+		  content.innerHTML = userTemplate(model);
+        }/*]]>*/
+        </script>
+	</body>
+</html>

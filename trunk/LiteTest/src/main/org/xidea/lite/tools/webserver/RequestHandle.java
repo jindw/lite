@@ -253,7 +253,11 @@ public class RequestHandle {
 			String contentType = extIndex > 0 ? server.getContentType(name
 					.substring(extIndex + 1)) : "unknown/unknown";
 			writeln("Content-Type: " + contentType + ";charset=" + encoding);
-			writeln(new FileInputStream(file));
+			writeln("");
+			FileInputStream in = new FileInputStream(file);
+			writeln(in);
+			in.close();
+			
 		}
 	}
 
