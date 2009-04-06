@@ -24,6 +24,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -173,13 +174,38 @@ public class SwingWebServer extends SimpleWebServer {
 		final JButton changeHomeButton = new JButton("重定位网站根目录");
 		changeHomeButton.setBounds(184, 2, 138, 20);
 		frame.add(changeHomeButton);
-		final JLabel homeLabel = new JLabel("<html><a href='#'>网站首页</a></html>");
 
 		final JLabel toolsLabel = new JLabel(
 				"<html><a href='#'>管理首页</a></html>");
-		toolsLabel.setBounds(2, 32, 120, 20);
-		toolsLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		final JLabel homeLabel = new JLabel("<html><a href='#'>网站首页</a></html>");
+		final JCheckBox formatCheck = new JCheckBox("格式化");
+		final JCheckBox compressCheck = new JCheckBox("压缩");
+
+		formatCheck.setBounds(2, 32, 80, 20);
+		compressCheck.setBounds(84, 32, 100, 20);
+		frame.add(formatCheck);
+		frame.add(compressCheck);
+		formatCheck.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				format = formatCheck.isSelected();
+				reset(webBase);
+			}
+			
+		});
+		compressCheck.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				compress = compressCheck.isSelected();
+				reset(webBase);
+			}
+			
+		});
+		toolsLabel.setBounds(184, 32, 80, 20);
+		homeLabel.setBounds(264, 32, 100, 20);
+		frame.add(homeLabel);
 		frame.add(toolsLabel);
+		toolsLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		toolsLabel.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent e) {
 				try {
@@ -190,8 +216,6 @@ public class SwingWebServer extends SimpleWebServer {
 			}
 		});
 		homeLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		homeLabel.setBounds(184, 32, 120, 20);
-		frame.add(homeLabel);
 		homeLabel.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent e) {
 				try {

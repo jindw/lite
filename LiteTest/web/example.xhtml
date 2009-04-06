@@ -7,6 +7,35 @@
     </style>
   </head>
   <body>
+    <c:client id="userTemplate">
+      <table>
+        <tr>
+          <th>姓名</th>
+          <td>${name}</td>
+        </tr>
+        <tr>
+          <th>地址</th>
+          <td>${address}</td>
+        </tr>
+      </table>
+    </c:client>
+    <div id="user"><c:include xpath="//*[@id='userTemplate']/*"/></div>
+    <form onsubmit="
+          document.getElementById('user').innerHTML = 
+          userTemplate({name:this.name.value,address:this.address.value});
+          return false;">
+       <table>
+        <tr>
+          <td>姓名：<input name="name"/></td>
+        </tr>
+         <tr>
+           <td>地址:<input name="address"/></td>
+         </tr>
+         <tr>
+           <td><input type="submit" value="更新信息"/></td>
+         </tr>
+      </table>
+    </form>
     <!-- 逻辑控制 -->
     <c:if test="${test}">
       <div>
