@@ -65,13 +65,20 @@ public class DefaultXMLNodeParser implements NodeParser {
 	}
 
 	private Node parseCDATA(Node node, ParseContext context) {
-		if(needFormat(node)){
-			context.beginIndent(false);
+		boolean needFormat = needFormat(node);
+		if (needFormat) {
+			context.beginIndent();// false);
 		}
-		context.append("<![CDATA[");
-		this.parser.parseText(context, ((CDATASection) node).getData(),
-				Template.EL_TYPE);
-		context.append("]]>");
+		try {
+			context.append("<![CDATA[");
+			this.parser.parseText(context, ((CDATASection) node).getData(),
+					Template.EL_TYPE);
+			context.append("]]>");
+		} finally {
+			if (needFormat) {
+				context.endIndent();
+			}
+		}
 		return null;
 	}
 
@@ -133,17 +140,24 @@ public class DefaultXMLNodeParser implements NodeParser {
 			// }
 			// }
 			// text = text2;
-			if(context.isFormat()){
+			if (context.isFormat()) {
 				text = text.trim();
-			}else if(context.isCompress()){
+			} else if (context.isCompress()) {
 				text = text.replaceAll("^(\\s)+|(\\s)+$", "$1$2");
 			}
 		}
 		if (text.length() > 0) {
-			if(needFormat(node)){
-				context.beginIndent(false);
+			boolean needFormat = needFormat(node);
+			if (needFormat) {
+				context.beginIndent();// false);
 			}
-			this.parser.parseText(context, text, Template.XML_TEXT_TYPE);
+			try {
+				this.parser.parseText(context, text, Template.XML_TEXT_TYPE);
+			} finally {
+				if (needFormat) {
+					context.endIndent();
+				}
+			}
 		}
 		return null;
 	}
@@ -206,7 +220,7 @@ public class DefaultXMLNodeParser implements NodeParser {
 	}
 
 	private Node parseElement(Node node, ParseContext context) {
-		context.beginIndent(true);
+		context.beginIndent();// false);
 		String closeTag = null;
 		try {
 			Element el = (Element) node;

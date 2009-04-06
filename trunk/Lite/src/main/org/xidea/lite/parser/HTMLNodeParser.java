@@ -42,7 +42,7 @@ public abstract class HTMLNodeParser implements NodeParser {
 
 	protected Node parseHTMLElement(Node node, ParseContext context,
 			List<Object> exts) {
-		context.beginIndent(true);
+		context.beginIndent();//false);
 		String closeTag = null;
 		try {
 			Element el = (Element) node;

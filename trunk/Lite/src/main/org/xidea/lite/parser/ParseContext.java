@@ -33,7 +33,10 @@ public interface ParseContext {
 	 * @return
 	 */
 	public int getDepth();
-	public void beginIndent(boolean needClose);
+	public void beginIndent();
+	/**
+	 * @see ParseContextImpl#endIndent()
+	 */
 	public void endIndent();
 	
 	/**

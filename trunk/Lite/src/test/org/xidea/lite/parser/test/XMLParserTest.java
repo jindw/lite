@@ -43,7 +43,7 @@ public class XMLParserTest {
 
 	@Test
 	public void testFormat() throws Exception {
-		URL url = this.getClass().getResource("asciitable.xhtml");
+		URL url = this.getClass().getResource("format-test.xhtml");
 		ParseContextImpl parseContext = new ParseContextImpl(url); 
 		parseContext.setFormat(true);
 		HashMap context = new HashMap();
