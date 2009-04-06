@@ -27,8 +27,22 @@ public class TextParser implements Parser {
 		int i = 0;
 		int start = 0;
 		int length = text.length();
-		boolean encode = defaultElType!=Template.EL_TYPE;
-		char qute = '"';
+		final boolean encode;
+		final char qute;
+		switch(defaultElType){
+		case Template.XML_ATTRIBUTE_TYPE:
+			encode = true;
+			qute = '"';
+			break;
+		case Template.XML_TEXT_TYPE:
+			encode = true;
+			qute = 0;
+			break;
+		default:
+			encode = false;
+			qute = 0;
+			
+		}
 		do {
 			final int p$ = text.indexOf("${", start);
 			if (p$ < 0) {
