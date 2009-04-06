@@ -25,21 +25,28 @@
 			</fileset>
 		</delete>
 
-		<jar destfile="build/dest/Test.jar">
+		<jar destfile="build/dest/LiteTest.jar">
 			<manifest>
 				<attribute name="Main-Class" value="org.xidea.lite.tools.SwingWebServer" />
 			</manifest>
 			<zipfileset src="web/WEB-INF/lib/Template.jar">
-				<include name="**/*.class" />
-				<include name="**/*.ent" />
-				<include name="**/*.dtd" />
+				<include name="**/*.*" />
 			</zipfileset>
 			<zipfileset src="web/WEB-INF/lib/commons-logging-1.0.4.jar">
 				<include name="**/*.class" />
 			</zipfileset>
+			<zipfileset src="web/WEB-INF/lib/nekohtml.jar">
+				<include name="**/*.*" />
+			</zipfileset>
+			<zipfileset src="web/WEB-INF/lib/xercesImpl-2.8.1.jar">
+				<include name="**/*.*" />
+			</zipfileset>
 			<fileset dir="web/WEB-INF/classes" defaultexcludes="true">
 				<include name="org/xidea/lite/tools/**/*.class" />
 				<include name="**/*.jar" />
+			</fileset>
+			<fileset dir="src/resource" defaultexcludes="true">
+				<include name="**/*.*" />
 			</fileset>
 		</jar>
 	</target>

@@ -81,7 +81,10 @@ public abstract class MutiThreadWebServer extends AbstractWebServer {
 		public void run() {
 			while (true) {
 				if (this.task != null) {
+					try{
 					this.task.run();
+					}catch (Exception e) {
+					}
 				}
 				synchronized (lock) {
 					this.task = null;
