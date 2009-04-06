@@ -348,7 +348,7 @@ function printIndex(buf,depth){
 }
 function IDPool(index){
     this.map = {};
-    this.index = index||1
+    this.index = index?index:2
 }
 IDPool.prototype = {
     get:function(){

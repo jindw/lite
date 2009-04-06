@@ -78,6 +78,7 @@ public class ClientJSBuilder {
 		try {
 			code = (String) jsengine.eval("buildNativeJS(eval(" + source
 					+ "))+''", parentScope);
+			jsengine.eval("+function(){"+code+"}");
 		} catch (ScriptException e) {
 			code = "alert('生成js代码失败：'+" + JSONEncoder.encode(e.getMessage())
 					+ ")";
