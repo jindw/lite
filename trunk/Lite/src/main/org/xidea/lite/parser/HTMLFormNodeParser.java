@@ -44,7 +44,7 @@ public class HTMLFormNodeParser extends HTMLNodeParser implements NodeParser {
 	private static final Object IN_FORM = "-in_form";
 
 	public HTMLFormNodeParser(XMLParser parser) {
-		this.parser = parser;
+		super(parser);
 	}
 
 	protected Node parse(Node node, ParseContext context) {

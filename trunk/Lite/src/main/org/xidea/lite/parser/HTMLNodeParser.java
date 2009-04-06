@@ -25,6 +25,9 @@ public abstract class HTMLNodeParser implements NodeParser {
 
 	}
 	protected XMLParser parser;
+	public HTMLNodeParser(XMLParser parser){
+		this.parser = parser;
+	}
 
 	public Node parseNode(Node node, ParseContext context) {
 		String namespace = node.getNamespaceURI();

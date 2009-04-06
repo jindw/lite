@@ -204,6 +204,11 @@ public class XMLParser extends TextParser {
 			for (int i = 0; i < list.getLength(); i++) {
 				parseNode(list.item(i), context);
 			}
+		}else if (node instanceof NamedNodeMap) {
+			NamedNodeMap list = (NamedNodeMap) node;
+			for (int i = 0; i < list.getLength(); i++) {
+				parseNode(list.item(i), context);
+			}
 		}
 	}
 }

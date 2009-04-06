@@ -23,7 +23,7 @@ public class TextParser implements Parser {
 	 * @abstract
 	 * @return <Array> result
 	 */
-	protected void parseText(ParseContext context,final String text, final int defaultElType) {
+	public void parseText(ParseContext context,final String text, final int defaultElType) {
 		int i = 0;
 		int start = 0;
 		int length = text.length();
