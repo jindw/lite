@@ -10,6 +10,13 @@
 			2.在模版标记内可添加属性的地方，按下Alt + / 有可选属性列表
 			3.鼠标放在 模版标记或者标记属性上，有标记描述提示显示
 		-->
+		<c:client id="test">
+			<h3>${title}</h3>
+			<c:for var="item" items="${data}">
+				<p>${item}</p>
+			</c:for>
+		</c:client>
+		<hr/>
 
 		<!-- 逻辑控制 -->
 		<c:if test="${test}">
