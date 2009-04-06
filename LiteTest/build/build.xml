@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="GBK"?>
-<project name="Lite" default="build" basedir="../">
+<project name="LiteTest" default="build" basedir="../">
 	<tstamp>
 		<format property="version" pattern="yyyyMMdd" />
 	</tstamp>

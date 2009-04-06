@@ -4,15 +4,13 @@
 	<head>
 		<meta http-equiv="Content-Type"
 			content="text/html; charset=utf-8" />
-		<title>Welcome to Tablecloth</title>
+		<title>前后端统一模板实例</title>
 		<link href="tablecloth.css" rel="stylesheet" type="text/css"
 			media="screen" />
 	</head>
 	<body>
-
 		<div id="container">
-			<h1>统一前后端模板实例</h1>
-
+			<h1>前后端统一模板实例</h1>
 			<div id="content">
 				<h2>${title}</h2>
 				<table cellspacing="0" cellpadding="0">
@@ -23,37 +21,43 @@
 						<th>城市</th>
 					</tr>
 					<c:for var="item" items="${data}">
-					<tr>
-						<td>${item.name}</td>
-						<td>${item.company}</td>
-						<td>${item.age}</td>
-						<td>${item.city}</td>
-					</tr>
+						<tr>
+							<td>${item.name}</td>
+							<td>${item.company}</td>
+							<td>${item.age}</td>
+							<td>${item.city}</td>
+						</tr>
 					</c:for>
 				</table>
 			</div>
 			<div>
 				<c:for var="item" items="${[1,2,3,4,5,6]}">
-				   <a href="#" onclick="reset(${item});return false;">${item}</a>
+					<a href="#"
+						onclick="reset(${item});return false;">
+						${item}
+					</a>
 				</c:for>
 			</div>
 		</div>
+		<!-- 这里的内容会编译成JS函数 -->
 		<c:client id="userTemplate">
-		<c:include xpath="//*[@id='content']/*"/></c:client>
+			<!-- 偷懒有道，xpath直接包含前面那段模板片断 -->
+			<c:include xpath="//*[@id='content']/*" />
+		</c:client>
 		<script>/*<![CDATA[*/
 		function reset(id){ 
-          var content = document.getElementById('content');
-          var model = ${JSON.stringify({title:"客户端模板",data:data})}
-		  //我们对模型做一点简单的修改（当能你也可以XHR从服务断获取数据，或者从客户端数据模型获取）
-		  model.title +=id;
-		  for(var i=0;i!=model.data.length;i++){
-		    var item = model.data[i];
-		    for(var n in item){
-		      item[n]+=id;
-		    }
-		  }
-		  content.innerHTML = userTemplate(model);
-        }/*]]>*/
-        </script>
+			var content = document.getElementById('content');
+			var model = ${JSON.stringify({title:"客户端模板",data:data})}
+			//我们对模型做一点简单的修改（当能你也可以XHR从服务断获取数据，或者从客户端数据模型获取）
+			model.title +=id;
+			for(var i=0;i!=model.data.length;i++){
+				var item = model.data[i];
+				for(var n in item){
+					item[n]+=id;
+				}
+			}
+			content.innerHTML = userTemplate(model);
+		}/*]]>*/
+		</script>
 	</body>
 </html>
