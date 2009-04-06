@@ -23,47 +23,46 @@ public class ClientJSBuilder {
 	private static Log log = LogFactory.getLog(CoreXMLNodeParser.class);
 	private static Bindings parentScope;
 	private static ScriptEngine jsengine;
-	
 
 	static {
 		jsengine = new ScriptEngineManager().getEngineByExtension("js");
 		parentScope = jsengine.createBindings();
 		ClassLoader loader = ClientJSBuilder.class.getClassLoader();
-		InputStream nativeParser = loader
-				.getResourceAsStream("org/xidea/lite/parser/native-compiler.js");
 
 		try {
-			if (nativeParser != null) {
-				jsengine.eval(new InputStreamReader(nativeParser, "utf-8"),
+			InputStream uncompressedParser = loader
+					.getResourceAsStream("org/xidea/lite/parser.js");
+			InputStream uncompressedCompiler = loader
+					.getResourceAsStream("org/xidea/lite/native-compiler.js");
+			InputStream compressed = loader
+					.getResourceAsStream("org/xidea/lite/template.js");
+			if (uncompressedParser != null && uncompressedCompiler !=null) {
+				jsengine.eval(new InputStreamReader(uncompressedParser, "utf-8"),
+						parentScope);
+				jsengine.eval(new InputStreamReader(uncompressedCompiler, "utf-8"),
 						parentScope);
 			} else {
-				jsengine.eval(new InputStreamReader(loader
-						.getResourceAsStream("org/xidea/lite/parser.js"),
-						"utf-8"), parentScope);
-				jsengine
-						.eval(
-								new InputStreamReader(
-										loader
-												.getResourceAsStream("org/xidea/lite/native-compiler.js"),
-										"utf-8"), parentScope);
+				jsengine.eval(new InputStreamReader(compressed, "utf-8"),
+						parentScope);
 			}
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
-	
-	
+
 	private ErrorReporter reportor = new ErrorReporter() {
 		public void error(String arg0, String arg1, int arg2, String arg3,
 				int arg4) {
 			log.warn(arg0 + ":" + arg1 + ":" + arg3 + "@" + arg2);
 		}
+
 		public EvaluatorException runtimeError(String arg0, String arg1,
 				int arg2, String arg3, int arg4) {
 			return null;
 		}
-		public void warning(String arg0, String arg1, int arg2,
-				String arg3, int arg4) {
+
+		public void warning(String arg0, String arg1, int arg2, String arg3,
+				int arg4) {
 			log.warn(arg0 + ":" + arg1 + ":" + arg3 + "@" + arg2);
 		}
 	};
@@ -72,8 +71,6 @@ public class ClientJSBuilder {
 	{
 		penv.setReservedKeywordAsIdentifier(true);
 	}
-
-
 
 	public String buildJS(String id, Object liteCode) {
 		String source = JSONEncoder.encode(liteCode);
@@ -86,12 +83,12 @@ public class ClientJSBuilder {
 					+ ")";
 			log.warn("生成js代码失败：", e);
 		}
-		return "function " + id + "(){\n" + code + "\n}";
+		return "function " + id + "(_$0,_$1,_$2){\n" + code + "\n}";
 	}
 
 	public String compress(String source) {
-		//, int linebreakpos
-		Parser parser = new Parser(penv, reportor );
+		// , int linebreakpos
+		Parser parser = new Parser(penv, reportor);
 		parser.parse(source, "<script>", 1);
 		String encoded = parser.getEncodedSource();
 		UintMap setting = new UintMap();
