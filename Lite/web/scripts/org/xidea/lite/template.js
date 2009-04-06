@@ -187,7 +187,7 @@ function processFor(context, data, out) {
 	var children = data[1];
 	var items = evaluate(data[2],context);
 	var varName = data[3];
-	var statusName = data[4];
+	//var statusName = data[4];
 	var preiousStatus = context[FOR_KEY];
 	try {
 	    if(!(items instanceof Array)){
@@ -202,9 +202,9 @@ function processFor(context, data, out) {
         var len = items.length;
 		var forStatus = {lastIndex:len-1,depth:preiousStatus?preiousStatus.depth+1:0};
 		context[FOR_KEY]= forStatus;
-		if (statusName != null) {
-			context[statusName]=forStatus;
-		}
+		//if (statusName != null) {
+		//	context[statusName]=forStatus;
+		//}
 		for (var i=0;i<items.length;i++) {
 			forStatus.index = i;
 			context[varName]= items[i];

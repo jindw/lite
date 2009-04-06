@@ -279,9 +279,12 @@ function parseForTag(node){
     var next = node.firstChild;
     var items = getAttribute(this,node,'items',true);
     var var_ = getAttribute(this,node,'var');
-    var status = getAttribute(this,node,'status');
+    var status_ = getAttribute(this,node,'status');
     
-    this.append([FOR_TYPE,items,var_,status]);
+    this.append([FOR_TYPE,items,var_]);
+    if(status_){
+        this.append([VAR_TYPE,this.parseEL("for"),status_])
+    }
     if(next){
         do{
             this.parseNode(next)

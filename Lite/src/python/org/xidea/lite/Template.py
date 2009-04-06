@@ -8,7 +8,7 @@ IF_TYPE = 1;            #// [1,[...],<test el>]
 BREAK_TYPE = 2;         #// [2,depth]
 XML_ATTRIBUTE_TYPE = 3; #// [3,<value el>,'name']
 XML_TEXT_TYPE = 4;      #// [4,<el>]
-FOR_TYPE = 5;           #// [5,[...],<items el>,'varName','status']// status 可为null
+FOR_TYPE = 5;           #// [5,[...],<items el>,'varName']
 ELSE_TYPE = 6;          #// [6,[...],<test el>] //<test el> 可为null
 ADD_ON_TYPE = 7;        #// [7,[...],<add on el>,'<addon-class>']
 VAR_TYPE = 8;           #// [8,<value el>,'name']
@@ -128,15 +128,12 @@ def processFor(context, data, out):
     children = data[1]
     items = evaluate(data[2],context)
     varName = data[3]
-    statusName = data[4]
     length = len(items)
     preiousStatus = hasattr(context,FOR_KEY) and context[FOR_KEY]
     try:
         
         forStatus = ForStatus(length)
         context[FOR_KEY]=forStatus
-        if statusName is not None:
-            context[statusName]=forStatus
         for item in items:
             forStatus.index += 1
             context[varName]=item

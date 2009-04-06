@@ -11,7 +11,7 @@ var IF_TYPE = 1;// [1,[...],'test']
 var BREAK_TYPE = 2;// [2,depth]
 var XML_ATTRIBUTE_TYPE = 3;// [3,'value','name']
 var XML_TEXT_TYPE = 4;// [4,'el']
-var FOR_TYPE = 5;// [5,[...],'items','var','status']//status
+var FOR_TYPE = 5;// [5,[...],'items','var']
 var ELSE_TYPE = 6;// [6,[...],'test']//test opt?
 var ADD_ON_TYPE =7;// [7,[...],'var']
 var VAR_TYPE = 8;// [8,'value','name']
@@ -113,7 +113,7 @@ Parser.prototype = {
                 }
                 return result;
             }catch(e){
-            	$log.error(code)
+            	alert(code)
                 throw e;
             }
         }else{

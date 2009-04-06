@@ -24,7 +24,7 @@ public class Template {
 	public static final int BREAK_TYPE = 2;         // [2,depth]
 	public static final int XML_ATTRIBUTE_TYPE = 3; // [3,<value el>,'name']
 	public static final int XML_TEXT_TYPE = 4;      // [4,<el>]
-	public static final int FOR_TYPE = 5;           // [5,[...],<items el>,'varName','status']// status 可为null
+	public static final int FOR_TYPE = 5;           // [5,[...],<items el>,'varName']/
 	public static final int ELSE_TYPE = 6;          // [6,[...],<test el>] //<test el> 可为null
 	public static final int ADD_ON_TYPE =7;        // [7,[...],<add on el>,'<addon-class>']
 	public static final int VAR_TYPE = 8;           // [8,<value el>,'name']
@@ -248,16 +248,12 @@ public class Template {
 		final Object[] children = (Object[]) data[1];
 		Object list = ((Expression) data[2]).evaluate(context);
 		final String varName = (String) data[3];
-		final String statusName = (String) data[4];
 		final ForStatus preiousStatus = (ForStatus) context.get(FOR_KEY);
 		int len = 0;
 		ForStatus forStatus = new ForStatus(preiousStatus == null ? 0
 				: preiousStatus.getDepth() + 1);
 		try {//hack return 代替ifelse，减少一些判断
 			context.put(FOR_KEY, forStatus);
-			if (statusName != null) {
-				context.put(statusName, forStatus);
-			}
 			if (list instanceof Map) {
 				list = ((Map) list).entrySet();
 			}

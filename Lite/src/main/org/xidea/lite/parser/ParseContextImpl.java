@@ -389,7 +389,8 @@ public class ParseContextImpl implements ParseContext {
 	}
 
 	public void appendFor(String var, Object itemsEL, String status) {
-		this.append(new Object[] { Template.FOR_TYPE, itemsEL, var, status });
+		this.append(new Object[] { Template.FOR_TYPE, itemsEL, var});
+		this.appendVar(status, this.optimizeEL("for"));
 	}
 
 	public void appendEL(Object el) {

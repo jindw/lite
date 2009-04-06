@@ -1,6 +1,6 @@
 var ID_PREFIX = "_$";
 
-var SAFE_FOR_KEY = "_$0['for'].";
+var SAFE_FOR_KEY = "_$0['for']";
 
 /**
  * IE 好像容易出问题，可能是线程不安全导致。
@@ -48,7 +48,7 @@ function parseNativeEL(expression){
 }
 
 function checkForExpression(expression){
-    if(/\bfor\s*\./.test(expression)){
+    if(/\bfor\b/.test(expression)){
         try{
             new Function(expression);
         }catch(e){
@@ -62,22 +62,22 @@ function safeForKeyReplacer(){
 }
 function compileEL(el){
     if(!/['"\/]/.test(el)){
-        return el.replace(/\bfor\s*\./g,safeForKeyReplacer)
+        return el.replace(/\bfor\b/g,safeForKeyReplacer)
     }
     el = " "+el;//ie6 split buf
-    var forPattern = /\bfor\s*\./g;
+    var forPattern = /\bfor\b/g;
     var codeBuf = el.split(forPattern);
     var forBuf= el.match(forPattern);
     if(forBuf){
         try{
-            new Function(codeBuf.join("f."));
+            new Function(codeBuf.join("f"));
             while(codeBuf.length>1 ){
                 var codeTail = codeBuf.pop();
                 var codePre = codeBuf.pop();
                 var forTail = forBuf.pop();
                 codeBuf.push(codePre+forTail+codeTail);
                 try{
-                    new Function(codeBuf.join("f."));
+                    new Function(codeBuf.join("f"));
                 }catch(e){
                     codeBuf.pop();
                     codeBuf.push(codePre+SAFE_FOR_KEY+codeTail);
@@ -226,7 +226,7 @@ function processFor(code,i,buf,idpool,depth){
     var previousForValueId = idpool.get();
     var itemsEL = getEL(item[2]);
     var varNameId = item[3]; 
-    var statusNameId = item[4]; 
+    //var statusNameId = item[4]; 
     var childCode = item[1];
     var childInfo = {}
     buildForChildInfo(item[1],childInfo);
@@ -248,11 +248,11 @@ function processFor(code,i,buf,idpool,depth){
     //初始化 items 结束
     
     //初始化 for状态
-    var needForStatus = childInfo.hasForRef || childInfo.hasForChild || statusNameId;
+    var needForStatus = childInfo.hasForRef;
     if(needForStatus){
-        printIndex(buf,depth,"var ",previousForValueId ,"=_$0['for']");
-        var forVar= statusNameId?["var ",statusNameId ,"="]:[];
-        forVar.push("_$0['for'] = {lastIndex:",itemsId,".length-1,depth:",previousForValueId,"?",previousForValueId,".depth+1:0};");
+        printIndex(buf,depth,"var ",previousForValueId ,"=_$0['for'];");
+        var forVar= [];
+        forVar.push("_$0['for'] = {lastIndex:",itemsId,".length-1};");
         printIndex(buf,depth, forVar.join(""));
     }
     printIndex(buf,depth,"for(;",indexId,"<",itemsId,".length;",indexId,"++){");
@@ -308,6 +308,9 @@ function buildForChildInfo(code,childInfo){
 				break;
 			case FOR_TYPE:
 			    childInfo.hasForChild = true;
+			    if(!childInfo.hasForRef){
+		           childInfo.hasForRef = checkForExpression(item[2]);
+			    }
 			    if(childInfo.hasForRef){
 			        return;
 			    }
