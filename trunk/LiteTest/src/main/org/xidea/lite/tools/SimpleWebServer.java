@@ -39,6 +39,8 @@ public class SimpleWebServer extends MutiThreadWebServer {
 	public static final String POST_FIX_XHTML = ".xhtml";
 	protected File webBase;
 	protected TemplateEngine engine;
+	protected boolean compress;
+	protected boolean format;
 	protected long lastAcessTime = System.currentTimeMillis();
 
 	private org.cyberneko.html.parsers.DOMParser htmlParser = new org.cyberneko.html.parsers.DOMParser();
@@ -66,7 +68,7 @@ public class SimpleWebServer extends MutiThreadWebServer {
 			{
 				
 				parser = new XMLParser() {
-					public Node loadXML(URL url, ParseContext context)
+					public Document loadXML(URL url, ParseContext context)
 							throws SAXException, IOException,
 							XPathExpressionException {
 						context.setCurrentURL(url);
@@ -90,6 +92,15 @@ public class SimpleWebServer extends MutiThreadWebServer {
 					return this.getClass().getResource(pagePath);
 				}
 			}
+
+			@Override
+			protected ParseContext createParseContext() {
+				ParseContext context = super.createParseContext();
+				context.setCompress(compress);
+				context.setFormat(format);
+				return context;
+			}
+			
 		};
 	}
 
