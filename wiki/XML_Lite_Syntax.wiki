@@ -130,3 +130,23 @@ function(el){with(context){return eval(el)})
 
   * 说明：
     xpath确实有点烦琐,但毕竟事标准，标准永远不是最好的，但他是可行的。
+  ==== 客户端模板块标签 ====
+  * 示例：
+  {{{
+<!-- 这里的内容会编译成JS函数 -->
+<c:client id="userView">
+	<!-- 偷懒有道，xpath直接包含前面那段模板片断 -->
+	<c:include xpath="//*[@id='content']/*" />
+</c:client>
+<c:client id="userListView">
+	<!-- 没的偷懒，那就直接写模板吧 -->
+	<c:for items="${userList}" var="user">
+		<div>${user.name}/${user.company}/${user.city}</div>
+	</c:for>
+</c:client>
+  }}}
+  * 属性表：
+    * _ id _ ：生成的JavaScript函数的函数名字。
+
+  * 功能：
+    划出一段前端模板块，这段内容将直接翻译成前端函数（静态数据，编译之后再没有动态数据插入）。
