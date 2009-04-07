@@ -85,32 +85,32 @@ public class SimpleWebServer extends MutiThreadWebServer {
 					}
 
 				};
-//				parser.addNodeParser(new HTMLNodeParser(parser){
-//
-//
-//					protected Node parse(Node node, ParseContext context) {
-//						if(node.getLocalName().equalsIgnoreCase("script")){
-//							Node firstChild = node.getFirstChild();
-//							if(firstChild!=null && firstChild.getNextSibling() ==null){
-//								if(firstChild.getNodeType() == Node.TEXT_NODE){
-//									String text = firstChild.getNodeValue().trim();
-//									text = text.replaceAll("&lt;", "<").
-//									replaceAll("&gt;", ">").
-//									replaceAll("&amp;", "&");
-//									context.beginIndent();
-//									context.append("<script");
-//									parser.parseNode(node.getAttributes(), context);
-//									context.append(">");
-//									parser.parseText(context, text, Template.EL_TYPE);
-//									context.append("</script>");
-//									context.endIndent();
-//									return null;
-//								}
-//							}
-//						}
-//						return node;
-//					}
-//				});
+				parser.addNodeParser(new HTMLNodeParser(parser){
+
+
+					protected Node parse(Node node, ParseContext context) {
+						if(node.getLocalName().equalsIgnoreCase("script")){
+							Node firstChild = node.getFirstChild();
+							if(firstChild!=null && firstChild.getNextSibling() ==null){
+								if(firstChild.getNodeType() == Node.TEXT_NODE){
+									String text = firstChild.getNodeValue().trim();
+									text = text.replaceAll("&lt;", "<").
+									replaceAll("&gt;", ">").
+									replaceAll("&amp;", "&");
+									context.beginIndent();
+									context.append("<script");
+									parser.parseNode(node.getAttributes(), context);
+									context.append(">");
+									parser.parseText(context, text, Template.EL_TYPE);
+									context.append("</script>");
+									context.endIndent();
+									return null;
+								}
+							}
+						}
+						return node;
+					}
+				});
 			}
 
 			protected URL getResource(String pagePath)
