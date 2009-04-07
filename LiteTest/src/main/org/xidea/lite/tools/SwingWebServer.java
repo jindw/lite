@@ -186,7 +186,6 @@ public class SwingWebServer extends SimpleWebServer {
 		frame.add(formatCheck);
 		frame.add(compressCheck);
 		formatCheck.addActionListener(new ActionListener(){
-			@Override
 			public void actionPerformed(ActionEvent e) {
 				format = formatCheck.isSelected();
 				reset(webBase);
@@ -194,7 +193,6 @@ public class SwingWebServer extends SimpleWebServer {
 			
 		});
 		compressCheck.addActionListener(new ActionListener(){
-			@Override
 			public void actionPerformed(ActionEvent e) {
 				compress = compressCheck.isSelected();
 				reset(webBase);
