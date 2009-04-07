@@ -21,11 +21,11 @@
 	<target name="jar-template" depends="init">
 		<delete>
 			<fileset dir="build/dest/">
-				<include name="Test-*.jar" />
+				<include name="LiteTest-*.jar" />
 			</fileset>
 		</delete>
 
-		<jar destfile="build/dest/LiteTest.jar">
+		<jar destfile="build/dest/LiteTest-${version}.jar">
 			<manifest>
 				<attribute name="Main-Class" value="org.xidea.lite.tools.SwingWebServer" />
 			</manifest>
