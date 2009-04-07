@@ -1,0 +1,78 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://www.xidea.org/ns/lite/core">
+	<head>
+		<title>前后端统一模板实例</title>
+		<style>
+		body{
+			margin:auto;
+			width:600px;
+		}
+		#content{
+			float:left;
+		    width:240px;
+			border:1px solid #666;
+			padding:20px;
+			margin:20px;
+		}
+		div{
+		  padding:4px;
+		}
+		#menu{
+		    width:80px;
+			float:left;
+			border:1px solid #666;
+			padding:20px;
+			margin:20px;
+		}
+		#menu a{
+			display:block;
+		}
+		#menu a:hover{
+		    background:#EEE;
+		}
+		</style>
+	</head>
+	<body>
+		<div>
+			<h1>${title}</h1>
+			<c:var name="user" value="${userList[0]}"></c:var>
+			<div id="content">
+				<img src="${user.icon}" align="right"/>
+				<div>
+					<label>姓名</label>
+					<span>${user.name}</span>
+				</div>
+				<div>
+					<label>公司</label>
+					<span>${user.company}</span>
+				</div>
+				<div>
+					<label>年龄</label>
+					<span>${user.age}</span>
+				</div>
+				<div>
+					<label>城市</label>
+					<span>${user.city}</span>
+				</div>
+			</div>
+			<div id="menu">
+				<c:for items="${userList}" var="user">
+					<a href="#null" onclick="showUser(${for.index})">${user.name}</a>
+				</c:for>
+			</div>
+		</div>
+		<!-- 这里的内容会编译成JS函数 -->
+		<c:client id="userTemplate">
+			<!-- 偷懒有道，xpath直接包含前面那段模板片断 -->
+			<c:include xpath="//*[@id='content']/*" />
+		</c:client>
+		<script>/*<![CDATA[*/
+//用户资料数据模型
+var userList = ${JSON.stringify(userList)};
+function showUser(username){ 
+	var content = document.getElementById('content');
+    content.innerHTML = userTemplate({user:userList[username]});
+}/*]]>*/
+    </script>
+	</body>
+</html>
