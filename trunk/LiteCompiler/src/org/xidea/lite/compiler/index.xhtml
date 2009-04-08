@@ -1,0 +1,119 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://www.xidea.org/ns/lite/core">
+	<head>
+		<title>Lite XML编译平台</title>
+		<style>
+		body{
+			width:500px;
+			margin:auto;
+		}
+		textarea{
+			background-color:#ddd;
+			width:300px;
+			height:260px;
+		}
+		</style>
+	</head>
+	<body>
+		<div>
+			<h1>Lite XML编译平台</h1>
+			<form method="post" onsubmit="return validate(f)">
+				<div id="content">
+					<div>
+					<!--
+						<div
+							style="float:right;width:30px;height:30px;font-size:30px;"
+							title="删除">
+							X
+						</div>-->
+						<div>
+							<label>
+								文件相对路径（如:
+								<strong>/</strong>
+								index.html）
+							</label>
+						</div>
+						<div>
+							<input name="path" />
+						</div>
+						<div>
+							<label>文件内容（目前只支持Lite XML）</label>
+						</div>
+						<div>
+							<textarea name="source" />
+						</div>
+					</div>
+				</div>
+				<div style="text-align:right">
+					<input type="button" onclick="appendTemplate()"
+						value="添加被包含文件" />
+					<input type="submit" value="生成中间代码" />
+				</div>
+			</form>
+		</div>
+		<!-- 这里的内容会编译成JS函数 -->
+		<c:client id="newTemplate">
+			<!-- 偷懒有道，xpath直接包含前面那段模板片断 -->
+			<c:include xpath="//*[@id='content']/*/*" />
+		</c:client>
+		<script>
+			/*<![CDATA[*/
+function appendTemplate(name){ 
+	var content = document.getElementById('content');
+	var row = document.createElement("div");
+	content.appendChild(row);
+    row.innerHTML = newTemplate({});
+}
+function validate(f){
+	try{
+	var path = f.path;
+	var source = f.source;
+	if(path.value){
+		path = [path];
+		source = [source];
+	}
+	for(var i=0;i<path.length;i++){
+		if(invalidPath(path[i])){
+			doFocus(path[i])
+			return false;
+		}
+		if(invalidSource(source[i])){
+			doFocus(source[i])
+			return false;
+		}
+	}
+	}catch(e){
+		alert(e)
+	}
+}
+function invalidPath(path){
+	return !/(?:\/[\w\.\-])+/.test(path)
+}
+function invalidSource(){
+	try{
+		if(window.DOMParser){
+			var doc = new DOMParser().parseFromString(text,"text/xml");
+			var root = doc.documentElement;
+			if(root.tagName == "parsererror"){
+				var s = new XMLSerializer();
+				alert("解析xml失败:"+s.serializeToString(root))
+				return true;
+			}
+		}else{
+			//["Msxml2.DOMDocument.6.0", "Msxml2.DOMDocument.3.0", "MSXML2.DOMDocument", "MSXML.DOMDocument", "Microsoft.XMLDOM"];
+			var doc = new ActiveXObject("Microsoft.XMLDOM");
+			doc.loadXML(text);
+			doc.documentElement.tagName;
+		}
+	}catch(e){
+		return true;
+	}
+}
+function doFocus(e){
+	e.focus();
+	e.select();
+}
+/*]]>*/
+		</script>
+	</body>
+</html>
