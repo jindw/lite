@@ -10,14 +10,15 @@
 			<h2>Lite XML编译平台</h2>
 			<div id="sourceArea">
 				<h3>粘贴代码的方式</h3>
-				<form method="post" onsubmit="return validateSource(f)">
+				<form method="post"
+					onsubmit="return validateSource(f)">
 					<div>
 						<label>网站根目录:</label>
 					</div>
 					<div>
 						<input name="base" />
 					</div>
-					<hr/>
+					<hr />
 					<div id="sourceContent" class="content">
 						<div>
 							<a class="remove-row" href="#0" alt="X"
@@ -27,19 +28,19 @@
 								<label>文件相对路径:</label>
 							</div>
 							<div>
-								<input name="path" />
+								<input name="path" value="${path}" />
 							</div>
 							<div>
 								<label>文件内容（目前只支持Lite XML）:</label>
 							</div>
 							<div>
-								<textarea name="source" />
+								<textarea name="source">${source}</textarea>
 							</div>
 						</div>
 						<hr />
 					</div>
 					<div style="text-align:right">
-						<input type="button" onclick="appendTemplate()"
+						<input type="button" onclick="addSource()"
 							value="添加被包含文件" />
 						<input type="submit" value="生成中间代码" />
 					</div>
@@ -47,14 +48,15 @@
 			</div>
 			<div id="fileArea">
 				<h3>上传文件的方式</h3>
-				<form method="post" enctype="multipart/form-data" onsubmit="return validateFile(f)">
+				<form method="post" enctype="multipart/form-data"
+					onsubmit="return validateFile(f)">
 					<div>
 						<label>网站根目录:</label>
 					</div>
 					<div>
 						<input name="base" />
 					</div>
-					<hr/>
+					<hr />
 					<div id="fileContent" class="content">
 						<div>
 							<a class="remove-row" href="#0" alt="X"
@@ -64,11 +66,11 @@
 								<input type="hidden" name="path" />
 								<input type="file" name="file" />
 							</div>
-							</div>
+						</div>
 						<hr />
 					</div>
 					<div style="text-align:right">
-						<input type="button" onclick="appendTemplate()"
+						<input type="button" onclick="addFile()"
 							value="添加被包含文件" />
 						<input type="submit" value="生成中间代码" />
 					</div>
@@ -78,15 +80,26 @@
 		<!-- 这里的内容会编译成JS函数 -->
 		<c:client id="newSourceTemplate">
 			<!-- 偷懒有道，xpath直接包含前面那段模板片断 -->
-			<c:include xpath="//*[@id='sourceArea']/[@class='content']/*/*" />
+			<c:include xpath="//*[@id='sourceContent']/*" />
+		</c:client>
+		<!-- 这里的内容会编译成JS函数 -->
+		<c:client id="newFileTemplate">
+			<!-- 偷懒有道，xpath直接包含前面那段模板片断 -->
+			<c:include xpath="//*[@id='fileContent']/*" />
 		</c:client>
 		<script>
 			/*<![CDATA[*/
-function appendTemplate(name){ 
+function addSource(){ 
 	var sourceContent = document.getElementById('sourceContent');
 	var row = document.createElement("div");
 	sourceContent.appendChild(row);
     row.innerHTML = newSourceTemplate({path:"/inc.xhtml",source:"<div>这里放被包含文件内容</div>"});
+}
+function addFile(){ 
+	var fileContent = document.getElementById('fileContent');
+	var row = document.createElement("div");
+	fileContent.appendChild(row);
+    row.innerHTML = newSourceTemplate({});
 }
 function validateFile(f){
 	var file = f.file;
