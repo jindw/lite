@@ -1,0 +1,160 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://www.xidea.org/ns/lite/core">
+	<head>
+		<title>Lite XML编译平台</title>
+		<link rel="stylesheet" type="text/css"
+			href="/styles/compiler.css" title="style" />
+	</head>
+	<body>
+		<div>
+			<h2>Lite XML编译平台</h2>
+			<div id="sourceArea">
+				<h3>粘贴代码的方式</h3>
+				<form method="post" onsubmit="return validateSource(f)">
+					<div>
+						<label>网站根目录:</label>
+					</div>
+					<div>
+						<input name="base" />
+					</div>
+					<hr/>
+					<div id="sourceContent" class="content">
+						<div>
+							<a class="remove-row" href="#0" alt="X"
+								title="移除该条数据">
+							</a>
+							<div>
+								<label>文件相对路径:</label>
+							</div>
+							<div>
+								<input name="path" />
+							</div>
+							<div>
+								<label>文件内容（目前只支持Lite XML）:</label>
+							</div>
+							<div>
+								<textarea name="source" />
+							</div>
+						</div>
+						<hr />
+					</div>
+					<div style="text-align:right">
+						<input type="button" onclick="appendTemplate()"
+							value="添加被包含文件" />
+						<input type="submit" value="生成中间代码" />
+					</div>
+				</form>
+			</div>
+			<div id="fileArea">
+				<h3>上传文件的方式</h3>
+				<form method="post" enctype="multipart/form-data" onsubmit="return validateFile(f)">
+					<div>
+						<label>网站根目录:</label>
+					</div>
+					<div>
+						<input name="base" />
+					</div>
+					<hr/>
+					<div id="fileContent" class="content">
+						<div>
+							<a class="remove-row" href="#0" alt="X"
+								title="移除该条数据">
+							</a>
+							<div>
+								<input type="hidden" name="path" />
+								<input type="file" name="file" />
+							</div>
+							</div>
+						<hr />
+					</div>
+					<div style="text-align:right">
+						<input type="button" onclick="appendTemplate()"
+							value="添加被包含文件" />
+						<input type="submit" value="生成中间代码" />
+					</div>
+				</form>
+			</div>
+		</div>
+		<!-- 这里的内容会编译成JS函数 -->
+		<c:client id="newSourceTemplate">
+			<!-- 偷懒有道，xpath直接包含前面那段模板片断 -->
+			<c:include xpath="//*[@id='sourceArea']/[@class='content']/*/*" />
+		</c:client>
+		<script>
+			/*<![CDATA[*/
+function appendTemplate(name){ 
+	var sourceContent = document.getElementById('sourceContent');
+	var row = document.createElement("div");
+	sourceContent.appendChild(row);
+    row.innerHTML = newSourceTemplate({path:"/inc.xhtml",source:"<div>这里放被包含文件内容</div>"});
+}
+function validateFile(f){
+	var file = f.file;
+	if(file.value){
+		file = [file];
+	}
+	for(var i=0;i<path.length;i++){
+		var p = path[0];
+		var value = path[0].value;
+		while(p = p.previousSibling){
+			if(p.name="path"){
+				p.value = value;
+			}
+		}
+	}
+	return false;
+	
+}
+function validateSource(f){
+	try{
+	var path = f.path;
+	var source = f.source;
+	if(path.value){
+		path = [path];
+		source = [source];
+	}
+	for(var i=0;i<path.length;i++){
+		if(invalidPath(path[i])){
+			doFocus(path[i])
+			return false;
+		}
+		if(invalidSource(source[i])){
+			doFocus(source[i])
+			return false;
+		}
+	}
+	}catch(e){
+		alert(e)
+	}
+}
+function invalidPath(path){
+	return !/(?:\/[\w\.\-])+/.test(path)
+}
+function invalidSource(){
+	try{
+		if(window.DOMParser){
+			var doc = new DOMParser().parseFromString(text,"text/xml");
+			var root = doc.documentElement;
+			if(root.tagName == "parsererror"){
+				var s = new XMLSerializer();
+				alert("解析xml失败:"+s.serializeToString(root))
+				return true;
+			}
+		}else{
+			//["Msxml2.DOMDocument.6.0", "Msxml2.DOMDocument.3.0", "MSXML2.DOMDocument", "MSXML.DOMDocument", "Microsoft.XMLDOM"];
+			var doc = new ActiveXObject("Microsoft.XMLDOM");
+			doc.loadXML(text);
+			doc.documentElement.tagName;
+		}
+	}catch(e){
+		return true;
+	}
+}
+function doFocus(e){
+	e.focus();
+	e.select();
+}
+/*]]>*/
+		</script>
+	</body>
+</html>

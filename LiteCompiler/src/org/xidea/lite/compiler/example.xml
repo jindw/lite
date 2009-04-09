@@ -1,0 +1,43 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://www.xidea.org/ns/lite/core">
+	<head>
+		<title>实例模板</title>
+	</head>
+	<body>
+		<div>
+			<h1>${title}</h1>
+			<c:var name="user" value="${userList[0]}"></c:var>
+			<div id="content">
+				<img src="${user.icon}" align="right" />
+				<div>
+					<label>姓名</label>
+					<span>${user.name}</span>
+				</div>
+				<div>
+					<label>公司</label>
+					<span>${user.company}</span>
+				</div>
+				<div>
+					<label>年龄</label>
+					<span>${user.age}</span>
+				</div>
+				<div>
+					<label>城市</label>
+					<span>${user.city}</span>
+				</div>
+			</div>
+			<div id="menu">
+				<c:for items="${userList}" var="user">
+					<a href="#null" onclick="showUser(${for.index})">
+						${user.name}
+					</a>
+				</c:for>
+			</div>
+		</div>
+		<!-- 这里的内容会编译成JS函数 -->
+		<c:client id="userTemplate">
+			<!-- 偷懒有道，xpath直接包含前面那段模板片断 -->
+			<c:include xpath="//*[@id='content']/*" />
+		</c:client>
+	</body>
+</html>

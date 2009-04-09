@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.xidea.lite.parser.JSBuilder;
 import org.xidea.lite.parser.ParseContextImpl;
 
 public class ProxyParseContext extends ParseContextImpl {
@@ -24,9 +25,9 @@ public class ProxyParseContext extends ParseContextImpl {
 	private String encoding = "utf-8";
 	private ArrayList<String> missedResources = new ArrayList<String>();
 
-	public ProxyParseContext( Map<String, String> params,
-			String encoding) {
-		super(BASE);
+	public ProxyParseContext(String base, Map<String, String> params,
+			String encoding) throws MalformedURLException {
+		super(new URL(BASE,base));
 		this.params = params;
 		if(encoding!=null){
 			this.encoding = encoding;
@@ -39,7 +40,7 @@ public class ProxyParseContext extends ParseContextImpl {
 
 	@Override
 	public InputStream getInputStream(URL url) {
-		String path = url.getPath().substring(this.BASE.getPath().length()-1);
+		String path = url.getPath().substring(this.base.getPath().length()-1);
 		String result = params.get(path);
 		try {
 			if (result != null) {

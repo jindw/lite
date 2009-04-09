@@ -6,13 +6,26 @@
 <web-app xmlns="http://java.sun.com/xml/ns/javaee" version="2.5">
 	<servlet>
 		<servlet-name>litecompiler</servlet-name>
-		<servlet-class>org.xidea.lite.compiler.LiteCompilerServlet</servlet-class>
+		<servlet-class>
+			org.xidea.lite.compiler.LiteCompilerServlet
+		</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>XMLTemplate</servlet-name>
+		<servlet-class>
+			org.xidea.lite.servlet.TemplateServlet
+		</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>litecompiler</servlet-name>
 		<url-pattern>/litecompiler</url-pattern>
 	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>XMLTemplate</servlet-name>
+		<url-pattern>compiler.xhtml</url-pattern>
+	</servlet-mapping>
 	<welcome-file-list>
+		<welcome-file>index.xhtml</welcome-file>
 		<welcome-file>index.html</welcome-file>
 	</welcome-file-list>
 </web-app>
