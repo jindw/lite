@@ -268,11 +268,15 @@ public class XMLParser extends TextParser {
 
 	protected XPath createXPath() {
 		if (xpathFactory == null) {
-			try {
-				xpathFactory = XPathFactory.newInstance(
-						XPathFactory.DEFAULT_OBJECT_MODEL_URI,
-						xpathFactoryClass, this.getClass().getClassLoader());
-			} catch (Exception e) {
+			if (xpathFactoryClass != null) {
+				try {
+					xpathFactory = XPathFactory
+							.newInstance(XPathFactory.DEFAULT_OBJECT_MODEL_URI,
+									xpathFactoryClass, this.getClass()
+											.getClassLoader());
+				} catch (Exception e) {
+					log.error("自定义xpathFactory初始化失败", e);
+				}
 			}
 			if (xpathFactory == null) {
 				xpathFactory = XPathFactory.newInstance();
@@ -294,9 +298,9 @@ public class XMLParser extends TextParser {
 				} catch (Exception e) {
 					log.error("创建xslt转换器失败", e);
 				}
-				if (transformerFactory == null) {
-					transformerFactory = TransformerFactory.newInstance();
-				}
+			}
+			if (transformerFactory == null) {
+				transformerFactory = TransformerFactory.newInstance();
 			}
 		}
 		return transformerFactory.newTransformer();
