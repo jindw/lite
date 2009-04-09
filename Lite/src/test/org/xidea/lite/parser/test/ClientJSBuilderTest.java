@@ -14,7 +14,7 @@ import org.junit.Test;
 import org.xidea.el.Expression;
 import org.xidea.el.ExpressionFactory;
 import org.xidea.el.json.JSONEncoder;
-import org.xidea.lite.parser.ClientJSBuilder;
+import org.xidea.lite.parser.Java6JSBuilder;
 import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.ParseContextImpl;
 import org.xidea.lite.parser.XMLParser;
@@ -43,7 +43,7 @@ public class ClientJSBuilderTest {
 		context2.setCompress(true);
 		context2.setExpressionFactory(clientExpressionFactory);
 		List<Object> liteCode = new XMLParser().parse(url,context2);
-		String result = new ClientJSBuilder().buildJS("test", liteCode);
+		String result = new Java6JSBuilder().buildJS("test", liteCode);
 		System.out.println("==JS Code==");
 		System.out.println(result);
 		boolean isError = Pattern.compile("[\r\n]alert",Pattern.MULTILINE).matcher(result).find();
