@@ -13,6 +13,13 @@ import javax.xml.namespace.NamespaceContext;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactoryConfigurationError;
+import javax.xml.transform.dom.DOMResult;
+import javax.xml.transform.dom.DOMSource;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
@@ -34,8 +41,7 @@ public class XMLParser extends TextParser {
 
 	private DocumentBuilder documentBuilder;
 	private NodeParser[] parserList = { new DefaultXMLNodeParser(this),
-			new HTMLFormNodeParser(this),
-			new CoreXMLNodeParser(this) };
+			new HTMLFormNodeParser(this), new CoreXMLNodeParser(this) };
 
 	public XMLParser() {
 		try {
@@ -43,34 +49,37 @@ public class XMLParser extends TextParser {
 					.newInstance();
 			factory.setNamespaceAware(true);
 			factory.setValidating(false);
-			//factory.setExpandEntityReferences(false);
+			// factory.setExpandEntityReferences(false);
 			factory.setCoalescing(false);
-			//factory.setXIncludeAware(true);
+			// factory.setXIncludeAware(true);
 			documentBuilder = factory.newDocumentBuilder();
 			documentBuilder.setEntityResolver(new DefaultEntityResolver());
 		} catch (ParserConfigurationException e) {
 			throw new RuntimeException(e);
 		}
 	}
+
 	@SuppressWarnings("unchecked")
-	public <T extends NodeParser> T getNodeParser(Class<T> clazz){// extends NodeParser
-		for(NodeParser p : parserList){
-			if(clazz.isInstance(p)){
-				return (T)p;
+	public <T extends NodeParser> T getNodeParser(Class<T> clazz) {// extends
+																	// NodeParser
+		for (NodeParser p : parserList) {
+			if (clazz.isInstance(p)) {
+				return (T) p;
 			}
 		}
 		return null;
 	}
 
-	public void addNodeParser(NodeParser parser){
+	public void addNodeParser(NodeParser parser) {
 		int length = this.parserList.length;
-		NodeParser[] newParserList = new NodeParser[length+1];
+		NodeParser[] newParserList = new NodeParser[length + 1];
 		System.arraycopy(this.parserList, 0, newParserList, 0, length);
 		newParserList[length] = parser;
 		this.parserList = newParserList;
 	}
+
 	@Override
-	public List<Object> parse(Object data,ParseContext context) {
+	public List<Object> parse(Object data, ParseContext context) {
 		try {
 			Node node = null;
 			if (data instanceof String) {
@@ -118,11 +127,10 @@ public class XMLParser extends TextParser {
 		return doc;
 	}
 
-
-	public NamespaceContext createNamespaceContext(Document doc){
-		//nekohtml bug,not use doc.getDocumentElement()
+	public NamespaceContext createNamespaceContext(Document doc) {
+		// nekohtml bug,not use doc.getDocumentElement()
 		Node node = doc.getFirstChild();
-		while(!(node instanceof Element)){
+		while (!(node instanceof Element)) {
 			node = node.getNextSibling();
 		}
 		NamedNodeMap attributes = node.getAttributes();
@@ -130,18 +138,18 @@ public class XMLParser extends TextParser {
 		for (int i = 0; i < attributes.getLength(); i++) {
 			Attr attr = (Attr) attributes.item(i);
 			String value = attr.getNodeValue();
-			if("xmlns".equals(attr.getNodeName())){
+			if ("xmlns".equals(attr.getNodeName())) {
 				int p1 = value.lastIndexOf('/');
 				String prefix = value;
-				if(p1>0){
-					prefix = value.substring(p1+1);
-					if(prefix.length()==0){
-						int p2 = value.lastIndexOf('/',p1-1);
-						prefix = value.substring(p2+1,p1);
+				if (p1 > 0) {
+					prefix = value.substring(p1 + 1);
+					if (prefix.length() == 0) {
+						int p2 = value.lastIndexOf('/', p1 - 1);
+						prefix = value.substring(p2 + 1, p1);
 					}
 				}
 				prefixMap.put(prefix, value);
-			}else if("xmlns".equals(attr.getPrefix())){
+			} else if ("xmlns".equals(attr.getPrefix())) {
 				prefixMap.put(attr.getLocalName(), value);
 			}
 		}
@@ -149,6 +157,7 @@ public class XMLParser extends TextParser {
 			public String getNamespaceURI(String prefix) {
 				return prefixMap.get(prefix);
 			}
+
 			public String getPrefix(String namespaceURI) {
 				throw new UnsupportedOperationException("xpath not use");
 			}
@@ -178,6 +187,50 @@ public class XMLParser extends TextParser {
 		return frm;
 	}
 
+	public Node transform(ParseContext context, URL parentURL, Node doc,
+			String xslt) throws TransformerConfigurationException,
+			TransformerFactoryConfigurationError, TransformerException,
+			IOException {
+		Source xsltSource;
+		if (xslt.startsWith("#")) {
+			Node node1 = ((Node) context.getAttribute(xslt));
+			Transformer transformer = javax.xml.transform.TransformerFactory
+					.newInstance().newTransformer();
+			DOMResult result = new DOMResult();
+			if (node1.getNodeType() == Node.DOCUMENT_FRAGMENT_NODE) {
+				node1 = node1.getFirstChild();
+				while (node1.getNodeType() != Node.ELEMENT_NODE) {
+					node1 = node1.getNextSibling();
+				}
+			}
+			transformer.transform(new DOMSource(node1), result);
+			xsltSource = new javax.xml.transform.dom.DOMSource(result.getNode());
+		} else {
+			xsltSource = new javax.xml.transform.stream.StreamSource(context
+					.createURL(parentURL, xslt).openStream());
+		}
+
+		// create an instance of TransformerFactory
+		Transformer transformer = javax.xml.transform.TransformerFactory
+				.newInstance().newTransformer(xsltSource);
+		// javax.xml.transform.TransformerFactory
+		// .newInstance().set
+		// transformer.setNamespaceContext(parser.createNamespaceContext(doc.getOwnerDocument()));
+
+		Source xmlSource;
+		if (doc.getNodeType() == Node.DOCUMENT_FRAGMENT_NODE) {
+			Element root = doc.getOwnerDocument().createElement("root");
+			root.appendChild(doc);
+			xmlSource = new DOMSource(root);
+		} else {
+			xmlSource = new DOMSource(doc);
+		}
+		DOMResult result = new DOMResult();
+
+		transformer.transform(xmlSource, result);
+		return result.getNode();
+	}
+
 	public DocumentFragment toDocumentFragment(Node node, NodeList nodes) {
 		Document doc;
 		if (node instanceof Document) {
@@ -196,7 +249,7 @@ public class XMLParser extends TextParser {
 		if (node instanceof Node) {
 			int i = parserList.length;
 			Node newNode = (Node) node;
-			while (i-- > 0 && newNode!=null) {
+			while (i-- > 0 && newNode != null) {
 				newNode = parserList[i].parseNode(newNode, context);
 			}
 		} else if (node instanceof NodeList) {
@@ -204,7 +257,7 @@ public class XMLParser extends TextParser {
 			for (int i = 0; i < list.getLength(); i++) {
 				parseNode(list.item(i), context);
 			}
-		}else if (node instanceof NamedNodeMap) {
+		} else if (node instanceof NamedNodeMap) {
 			NamedNodeMap list = (NamedNodeMap) node;
 			for (int i = 0; i < list.getLength(); i++) {
 				parseNode(list.item(i), context);
