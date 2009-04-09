@@ -54,10 +54,12 @@ public class HTMLFormNodeParser extends HTMLNodeParser implements NodeParser {
 		if (AUTO.equals(status)) {
 			return processAutoForm(context, el, localName);
 		} else if (IN_FORM.equals(status)) {
+			//Warn 代码的坏味道
+			processAutoForm(context, el, localName);
 			if (FORM_TAG.equals(localName)) {
 				context.setAttribute(HTMLFormNodeParser.class, AUTO_IN_FORM);
 			}
-			return processAutoForm(context, el, localName);
+			return null;
 		} else if (AUTO_IN_FORM.equals(status)) {
 			if (FORM_TAG.equals(localName)) {
 				context.setAttribute(HTMLFormNodeParser.class, IN_FORM);
