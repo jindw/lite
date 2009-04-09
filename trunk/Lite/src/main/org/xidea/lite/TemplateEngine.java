@@ -38,10 +38,10 @@ public class TemplateEngine{
 	}
 
 	public TemplateEngine(File webRoot) {
-		this(webRoot, new File(webRoot, DEFAULT_DECORATOR_MAPPING));
+		this(new XMLParser(),webRoot, new File(webRoot, DEFAULT_DECORATOR_MAPPING));
 	}
 
-	public TemplateEngine(File webRoot, File config) {
+	public TemplateEngine(XMLParser parser,File webRoot, File config) {
 		try {
 			if(config != null && config.exists()){
 				this.decoratorMapper = new DecoratorMapper(new FileInputStream(config));
