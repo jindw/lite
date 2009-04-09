@@ -9,12 +9,36 @@
 		<servlet-class>
 			org.xidea.lite.compiler.LiteCompilerServlet
 		</servlet-class>
+		<init-param>
+			<param-name>transformerFactory</param-name>
+			<param-value>
+				org.apache.xalan.processor.TransformerFactoryImpl
+			</param-value>
+		</init-param>
+		<init-param>
+			<param-name>xpathFactory</param-name>
+			<param-value>
+				org.apache.xpath.jaxp.XPathFactoryImpl
+			</param-value>
+		</init-param>
 	</servlet>
 	<servlet>
 		<servlet-name>XMLTemplate</servlet-name>
 		<servlet-class>
 			org.xidea.lite.servlet.TemplateServlet
 		</servlet-class>
+		<init-param>
+			<param-name>transformerFactory</param-name>
+			<param-value>
+				org.apache.xalan.processor.TransformerFactoryImpl
+			</param-value>
+		</init-param>
+		<init-param>
+			<param-name>xpathFactory</param-name>
+			<param-value>
+				org.apache.xpath.jaxp.XPathFactoryImpl
+			</param-value>
+		</init-param>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>litecompiler</servlet-name>
@@ -22,7 +46,7 @@
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>XMLTemplate</servlet-name>
-		<url-pattern>compiler.xhtml</url-pattern>
+		<url-pattern>*.xhtml</url-pattern>
 	</servlet-mapping>
 	<welcome-file-list>
 		<welcome-file>index.xhtml</welcome-file>
