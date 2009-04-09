@@ -17,13 +17,17 @@ import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
@@ -36,8 +40,16 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 public class XMLParser extends TextParser {
+	private static Log log = LogFactory.getLog(XMLParser.class);
+
 	private static final Pattern XML_HEADER_SPACE_PATTERN = Pattern
 			.compile("^[\\s\\ufeff]*<");
+
+	private XPathFactory xpathFactory;
+	private TransformerFactory transformerFactory;
+
+	private String transformerFactoryClass = null;// "org.apache.xalan.processor.TransformerFactoryImpl";
+	private String xpathFactoryClass = null;// "org.apache.xpath.jaxp.XPathFactoryImpl";
 
 	private DocumentBuilder documentBuilder;
 	private NodeParser[] parserList = { new DefaultXMLNodeParser(this),
@@ -57,6 +69,12 @@ public class XMLParser extends TextParser {
 		} catch (ParserConfigurationException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	public XMLParser(String transformerFactory, String xpathFactory) {
+		this();
+		this.transformerFactoryClass = transformerFactory;
+		this.xpathFactoryClass = xpathFactory;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -132,6 +150,7 @@ public class XMLParser extends TextParser {
 			}
 		}
 	}
+
 	public Node loadXML(String url, ParseContext context) throws SAXException,
 			IOException, XPathExpressionException {
 		return loadXML(new URL(url), context);
@@ -203,6 +222,7 @@ public class XMLParser extends TextParser {
 		DocumentFragment frm = toDocumentFragment(doc, nodes);
 		return frm;
 	}
+
 	protected Node transform(ParseContext context, URL parentURL, Node doc,
 			String xslt) throws TransformerConfigurationException,
 			TransformerFactoryConfigurationError, TransformerException,
@@ -247,15 +267,39 @@ public class XMLParser extends TextParser {
 	}
 
 	protected XPath createXPath() {
-		XPath xpathEvaluator = javax.xml.xpath.XPathFactory.newInstance()
-				.newXPath();
+		if (xpathFactory == null) {
+			try {
+				xpathFactory = XPathFactory.newInstance(
+						XPathFactory.DEFAULT_OBJECT_MODEL_URI,
+						xpathFactoryClass, this.getClass().getClassLoader());
+			} catch (Exception e) {
+			}
+			if (xpathFactory == null) {
+				xpathFactory = XPathFactory.newInstance();
+			}
+		}
+		XPath xpathEvaluator = xpathFactory.newXPath();
 		return xpathEvaluator;
 	}
+
 	protected Transformer createTransformer()
 			throws TransformerConfigurationException,
 			TransformerFactoryConfigurationError {
-		return javax.xml.transform.TransformerFactory
-				.newInstance().newTransformer();
+		if (transformerFactory == null) {
+			if (transformerFactoryClass != null) {
+				try {
+					transformerFactory = TransformerFactory.newInstance(
+							transformerFactoryClass, this.getClass()
+									.getClassLoader());
+				} catch (Exception e) {
+					log.error("创建xslt转换器失败", e);
+				}
+				if (transformerFactory == null) {
+					transformerFactory = TransformerFactory.newInstance();
+				}
+			}
+		}
+		return transformerFactory.newTransformer();
 	}
 
 	DocumentFragment toDocumentFragment(Node node, NodeList nodes) {
