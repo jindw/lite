@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.lite.TemplateEngine;
 import org.xidea.lite.parser.DecoratorMapper;
+import org.xidea.lite.parser.XMLParser;
 
 public class TemplateServlet extends GenericServlet {
 	private static final long serialVersionUID = 1L;
@@ -30,6 +31,15 @@ public class TemplateServlet extends GenericServlet {
 	private static final Log log = LogFactory.getLog(TemplateServlet.class);
 
 	private TemplateEngine templateEngine;
+
+	@Override
+	public void init(final ServletConfig config) throws ServletException {
+		super.init(config);
+		String transformerFactory = config.getInitParameter("transformerFactory");
+		String xpathFactory = config.getInitParameter("xpathFactory");
+		XMLParser parser = new XMLParser(transformerFactory,xpathFactory);
+		templateEngine = new ServletTemplateEngine(parser,config.getServletContext());
+	}
 
 	@Override
 	public void service(ServletRequest req, ServletResponse resp)
@@ -45,17 +55,11 @@ public class TemplateServlet extends GenericServlet {
 		return new RequestMap(req);
 	}
 
-	@Override
-	public void init(final ServletConfig config) throws ServletException {
-		super.init(config);
-		templateEngine = new ServletTemplateEngine(config.getServletContext());
-
-	}
-
 	static class ServletTemplateEngine extends TemplateEngine {
 		private ServletContext context;
 
-		public ServletTemplateEngine(ServletContext context) {
+		public ServletTemplateEngine(XMLParser parser,ServletContext context) {
+			this.parser = parser;
 			this.context = context;
 			try {
 				String decoratorPath = context

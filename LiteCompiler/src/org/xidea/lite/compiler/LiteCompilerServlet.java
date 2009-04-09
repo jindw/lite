@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
 
@@ -29,8 +30,15 @@ import org.xidea.lite.parser.XMLParser;
 @SuppressWarnings("serial")
 public class LiteCompilerServlet extends HttpServlet {
 	private static Log log = LogFactory.getLog(LiteCompilerServlet.class);
-
-	private XMLParser parser = new XMLParser();
+	private XMLParser parser;
+	@Override
+	public void init(ServletConfig config) throws ServletException {
+		super.init(config);
+		String transformerFactory = config.getInitParameter("transformerFactory");
+		String xpathFactory = config.getInitParameter("xpathFactory");
+		parser = new XMLParser(transformerFactory,xpathFactory);
+		
+	}
 
 	public void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException, ServletException {
@@ -50,21 +58,21 @@ public class LiteCompilerServlet extends HttpServlet {
 		if (isMultiPart(req)) {
 
 			final HashMap<String, List<String>> params = getMutiParams(req);
-			req = new HttpServletRequestWrapper(req){
+			req = new HttpServletRequestWrapper(req) {
 
 				@Override
 				public String getParameter(String name) {
 					String[] v = getParameterValues(name);
-					return v==null ?null:v[0];
+					return v == null ? null : v[0];
 				}
 
 				@Override
 				public String[] getParameterValues(String name) {
 
 					List<String> v = params.get(name);
-					return v == null?null : v.toArray(new String[v.size()]);
+					return v == null ? null : v.toArray(new String[v.size()]);
 				}
-				
+
 			};
 			source = params.get("file").toArray(new String[0]);
 		} else {
@@ -117,28 +125,28 @@ public class LiteCompilerServlet extends HttpServlet {
 				if (log.isDebugEnabled()) {
 					log.debug("Found item " + item.getFieldName());
 				}
-				//if (!item.isFormField()) {
-					List<String> values;
-					if (params.get(item.getFieldName()) != null) {
-						values = params.get(item.getFieldName());
-					} else {
-						values = new ArrayList<String>();
-					}
-					// note: see http://jira.opensymphony.com/browse/WW-633
-					// basically, in some cases the charset may be null, so
-					// we're just going to try to "other" method (no idea if
-					// this
-					// will work)
-					String charset = req.getCharacterEncoding();
-					if (charset != null) {
-						values.add(item.getString(charset));
-					} else {
-						values.add(item.getString());
-					}
-					params.put(item.getFieldName(), values);
-					// } else if (item.getSize() == 0) {
-					// log.warn("Item is a file upload of 0 size, ignoring");
-				//}
+				// if (!item.isFormField()) {
+				List<String> values;
+				if (params.get(item.getFieldName()) != null) {
+					values = params.get(item.getFieldName());
+				} else {
+					values = new ArrayList<String>();
+				}
+				// note: see http://jira.opensymphony.com/browse/WW-633
+				// basically, in some cases the charset may be null, so
+				// we're just going to try to "other" method (no idea if
+				// this
+				// will work)
+				String charset = req.getCharacterEncoding();
+				if (charset != null) {
+					values.add(item.getString(charset));
+				} else {
+					values.add(item.getString());
+				}
+				params.put(item.getFieldName(), values);
+				// } else if (item.getSize() == 0) {
+				// log.warn("Item is a file upload of 0 size, ignoring");
+				// }
 			}
 		} catch (FileUploadException e) {
 			log.error(e, e);
@@ -160,7 +168,7 @@ public class LiteCompilerServlet extends HttpServlet {
 	}
 }
 
-class ByteFileItem implements FileItem{
+class ByteFileItem implements FileItem {
 
 	private String fieldName;
 	private String contentType;
@@ -179,6 +187,7 @@ class ByteFileItem implements FileItem{
 	public void delete() {
 		data = null;
 	}
+
 	public byte[] get() {
 		return data.toByteArray();
 	}
@@ -217,7 +226,7 @@ class ByteFileItem implements FileItem{
 
 	public String getString(String encoding)
 			throws UnsupportedEncodingException {
-		return new String(get(),encoding);
+		return new String(get(), encoding);
 	}
 
 	public boolean isFormField() {
