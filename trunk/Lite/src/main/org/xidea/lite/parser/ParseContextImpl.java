@@ -39,7 +39,7 @@ public class ParseContextImpl implements ParseContext {
 	private boolean reserveSpace;
 	private boolean format = false;
 	private boolean compress = false;
-	private URL base;
+	protected URL base;
 
 	public ParseContextImpl(URL base) {
 		this.base = base;
