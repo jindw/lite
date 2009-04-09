@@ -106,7 +106,7 @@ function buildNativeJS(code){
         '\t_$2=function(c){return "&#"+c.charCodeAt()+";";}\n',
         "\twith(_$0){"
     ];
-    var idpool = new IDPool(2);
+    var idpool = new IDPool(3);
     try{
         appendCode(code,buf,idpool,2);
     }catch(e){
@@ -348,7 +348,7 @@ function printIndex(buf,depth){
 }
 function IDPool(index){
     this.map = {};
-    this.index = index?index:2
+    this.index = index?index:3
 }
 IDPool.prototype = {
     get:function(){
