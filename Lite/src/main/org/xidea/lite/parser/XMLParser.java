@@ -60,8 +60,7 @@ public class XMLParser extends TextParser {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T extends NodeParser> T getNodeParser(Class<T> clazz) {// extends
-																	// NodeParser
+	public <T extends NodeParser> T getNodeParser(Class<T> clazz) {
 		for (NodeParser p : parserList) {
 			if (clazz.isInstance(p)) {
 				return (T) p;
@@ -114,6 +113,25 @@ public class XMLParser extends TextParser {
 		}
 	}
 
+	public void parseNode(Object node, ParseContext context) {
+		if (node instanceof Node) {
+			int i = parserList.length;
+			Node newNode = (Node) node;
+			while (i-- > 0 && newNode != null) {
+				newNode = parserList[i].parseNode(newNode, context);
+			}
+		} else if (node instanceof NodeList) {
+			NodeList list = (NodeList) node;
+			for (int i = 0; i < list.getLength(); i++) {
+				parseNode(list.item(i), context);
+			}
+		} else if (node instanceof NamedNodeMap) {
+			NamedNodeMap list = (NamedNodeMap) node;
+			for (int i = 0; i < list.getLength(); i++) {
+				parseNode(list.item(i), context);
+			}
+		}
+	}
 	public Node loadXML(String url, ParseContext context) throws SAXException,
 			IOException, XPathExpressionException {
 		return loadXML(new URL(url), context);
@@ -127,7 +145,7 @@ public class XMLParser extends TextParser {
 		return doc;
 	}
 
-	public NamespaceContext createNamespaceContext(Document doc) {
+	protected NamespaceContext createNamespaceContext(Document doc) {
 		// nekohtml bug,not use doc.getDocumentElement()
 		Node node = doc.getFirstChild();
 		while (!(node instanceof Element)) {
@@ -169,7 +187,7 @@ public class XMLParser extends TextParser {
 		};
 	}
 
-	public DocumentFragment selectNodes(String xpath, Node currentNode)
+	protected DocumentFragment selectNodes(String xpath, Node currentNode)
 			throws XPathExpressionException {
 		Document doc;
 		if (currentNode instanceof Document) {
@@ -177,8 +195,7 @@ public class XMLParser extends TextParser {
 		} else {
 			doc = currentNode.getOwnerDocument();
 		}
-		XPath xpathEvaluator = javax.xml.xpath.XPathFactory.newInstance()
-				.newXPath();
+		XPath xpathEvaluator = createXPath();
 		xpathEvaluator.setNamespaceContext(createNamespaceContext(doc));
 		NodeList nodes = (NodeList) xpathEvaluator.evaluate(xpath, currentNode,
 				XPathConstants.NODESET);
@@ -186,16 +203,14 @@ public class XMLParser extends TextParser {
 		DocumentFragment frm = toDocumentFragment(doc, nodes);
 		return frm;
 	}
-
-	public Node transform(ParseContext context, URL parentURL, Node doc,
+	protected Node transform(ParseContext context, URL parentURL, Node doc,
 			String xslt) throws TransformerConfigurationException,
 			TransformerFactoryConfigurationError, TransformerException,
 			IOException {
 		Source xsltSource;
 		if (xslt.startsWith("#")) {
 			Node node1 = ((Node) context.getAttribute(xslt));
-			Transformer transformer = javax.xml.transform.TransformerFactory
-					.newInstance().newTransformer();
+			Transformer transformer = createTransformer();
 			DOMResult result = new DOMResult();
 			if (node1.getNodeType() == Node.DOCUMENT_FRAGMENT_NODE) {
 				node1 = node1.getFirstChild();
@@ -231,7 +246,19 @@ public class XMLParser extends TextParser {
 		return result.getNode();
 	}
 
-	public DocumentFragment toDocumentFragment(Node node, NodeList nodes) {
+	protected XPath createXPath() {
+		XPath xpathEvaluator = javax.xml.xpath.XPathFactory.newInstance()
+				.newXPath();
+		return xpathEvaluator;
+	}
+	protected Transformer createTransformer()
+			throws TransformerConfigurationException,
+			TransformerFactoryConfigurationError {
+		return javax.xml.transform.TransformerFactory
+				.newInstance().newTransformer();
+	}
+
+	DocumentFragment toDocumentFragment(Node node, NodeList nodes) {
 		Document doc;
 		if (node instanceof Document) {
 			doc = (Document) node;
@@ -245,23 +272,4 @@ public class XMLParser extends TextParser {
 		return frm;
 	}
 
-	public void parseNode(Object node, ParseContext context) {
-		if (node instanceof Node) {
-			int i = parserList.length;
-			Node newNode = (Node) node;
-			while (i-- > 0 && newNode != null) {
-				newNode = parserList[i].parseNode(newNode, context);
-			}
-		} else if (node instanceof NodeList) {
-			NodeList list = (NodeList) node;
-			for (int i = 0; i < list.getLength(); i++) {
-				parseNode(list.item(i), context);
-			}
-		} else if (node instanceof NamedNodeMap) {
-			NamedNodeMap list = (NamedNodeMap) node;
-			for (int i = 0; i < list.getLength(); i++) {
-				parseNode(list.item(i), context);
-			}
-		}
-	}
 }
