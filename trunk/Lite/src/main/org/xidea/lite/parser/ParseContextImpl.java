@@ -45,7 +45,6 @@ public class ParseContextImpl implements ParseContext {
 		this.base = base;
 	}
 
-
 	public boolean isFormat() {
 		return format;
 	}
@@ -73,37 +72,38 @@ public class ParseContextImpl implements ParseContext {
 	public int getDepth() {
 		return depth;
 	}
-	
+
 	private ArrayList<Boolean> indentStatus = new ArrayList<Boolean>();
 
-	public void beginIndent(){//boolean needClose) {
+	public void beginIndent() {// boolean needClose) {
 		int size = indentStatus.size();
 		printIndent();
 		depth++;
-		switch(depth-size){
+		switch (depth - size) {
 		case 1:
 			indentStatus.add(null);
 		case 0:
 			indentStatus.add(null);
-		//case -1:
+			// case -1:
 		default:
-			indentStatus.set(depth-1,true);
-			indentStatus.set(depth,false);
+			indentStatus.set(depth - 1, true);
+			indentStatus.set(depth, false);
 		}
 	}
 
 	public void endIndent() {
-		if(Boolean.TRUE.equals(indentStatus.get(depth))){
+		if (Boolean.TRUE.equals(indentStatus.get(depth))) {
 			depth--;
 			printIndent();
-		}else{
+		} else {
 			depth--;
 		}
-		
+
 	}
+
 	private void printIndent() {
 		if (this.format && !this.reserveSpace) {
-			if(result.size() > 0){
+			if (result.size() > 0) {
 				result.add("\r\n");
 			}
 			int depth = this.depth;
@@ -117,7 +117,6 @@ public class ParseContextImpl implements ParseContext {
 
 		}
 	}
-
 
 	public Object optimizeEL(String expression) {
 		return expressionFactory.parse(expression);
@@ -389,8 +388,8 @@ public class ParseContextImpl implements ParseContext {
 	}
 
 	public void appendFor(String var, Object itemsEL, String status) {
-		this.append(new Object[] { Template.FOR_TYPE, itemsEL, var});
-		if(status != null && status.length()>0){
+		this.append(new Object[] { Template.FOR_TYPE, itemsEL, var });
+		if (status != null && status.length() > 0) {
 			this.appendVar(status, this.optimizeEL("for"));
 		}
 	}

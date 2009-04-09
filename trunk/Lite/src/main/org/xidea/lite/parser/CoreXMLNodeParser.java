@@ -26,17 +26,8 @@ public class CoreXMLNodeParser implements NodeParser {
 	private static Log log = LogFactory.getLog(CoreXMLNodeParser.class);
 	private static final Pattern TEMPLATE_NAMESPACE_CORE = Pattern
 			.compile("^http:\\/\\/www.xidea.org\\/ns\\/(?:template|lite)(?:\\/core)?\\/?$");
-	private ClientJSBuilder jsbuilder = new ClientJSBuilder();
-	private ExpressionFactory clientExpressionFactory = new ExpressionFactory() {
-		public Expression create(Object el) {
-			throw new UnsupportedOperationException();
-		}
-
-		public Object parse(String expression) {
-			return expression;
-		}
-
-	};
+	private JSBuilder jsBuilder;
+	private ExpressionFactory jselFactory;
 	private XMLParser parser;
 
 	public static boolean isCoreNS(String prefix, String url) {
@@ -46,6 +37,31 @@ public class CoreXMLNodeParser implements NodeParser {
 
 	public CoreXMLNodeParser(XMLParser parser) {
 		this.parser = parser;
+		this.jselFactory = new ExpressionFactory() {
+				public Expression create(Object el) {
+					throw new UnsupportedOperationException();
+				}
+
+				public Object parse(String expression) {
+					return expression;
+				}
+
+			};
+		try {
+			jsBuilder = new Java6JSBuilder();
+		} catch (NoClassDefFoundError e) {
+			try {
+				jsBuilder = new RhinoJSBuilder();
+			} catch (NoClassDefFoundError e2) {
+				log.error("找不到您的JS运行环境，不能为您编译前端js", e);
+
+			}
+		}
+	}
+	public CoreXMLNodeParser(XMLParser parser,ExpressionFactory jselFactory,JSBuilder jsbuilder) {
+		this.parser = parser;
+		this.jselFactory = jselFactory;
+		this.jsBuilder = jsbuilder;
 	}
 
 	public Node parseNode(final Node node, ParseContext context) {
@@ -187,7 +203,7 @@ public class CoreXMLNodeParser implements NodeParser {
 	Node parseIfTag(Element el, ParseContext context) {
 		Object test = getAttributeEL(context, el, "test");
 		context.appendIf(test);
-		parseChild(el.getFirstChild(),context);
+		parseChild(el.getFirstChild(), context);
 		context.appendEnd();
 		return null;
 	}
@@ -202,7 +218,7 @@ public class CoreXMLNodeParser implements NodeParser {
 		} else {
 			context.appendElse(null);
 		}
-		parseChild(el.getFirstChild(),context);
+		parseChild(el.getFirstChild(), context);
 		context.appendEnd();
 		return null;
 	}
@@ -210,7 +226,7 @@ public class CoreXMLNodeParser implements NodeParser {
 	Node parseElseTag(Element el, ParseContext context) {
 		context.removeLastEnd();
 		context.appendElse(null);
-		parseChild(el.getFirstChild(),context);
+		parseChild(el.getFirstChild(), context);
 		context.appendEnd();
 		return null;
 	}
@@ -276,28 +292,29 @@ public class CoreXMLNodeParser implements NodeParser {
 
 	Node parseClientTag(Element el, ParseContext context) {
 		Node next = el.getFirstChild();
-		if (next != null) {
+		if (next != null && jsBuilder != null) {
+			// new Java6JSBuilder();
 			ParseContext context2 = new ParseContextImpl(context
 					.getCurrentURL());
 			// 前端直接压缩吧？反正保留那些空白也没有调试价值
 			// context2.setCompress(context.isCompress());
 			context2.setCompress(true);
-			context2.setExpressionFactory(clientExpressionFactory);
+			context2.setExpressionFactory(jselFactory);
 			do {
 				this.parser.parseNode(next, context2);
 			} while ((next = next.getNextSibling()) != null);
 			List<Object> result = context2.toResultTree();
-			String js = jsbuilder.buildJS(el.getAttribute("id"), result);
+			String js = jsBuilder.buildJS(el.getAttribute("id"), result);
 			if (context.isCompress() && !context.isReserveSpace()) {
-				js = jsbuilder.compress(js);
+				js = jsBuilder.compress(js);
 			}
 			boolean needScript = needScript(el);
-			if(needScript){
-				context.append("<script>/*<![CDATA[*/" + js + "/*]]>*/</script>");
-			}else{
+			if (needScript) {
+				context.append("<script>/*<![CDATA[*/" + js
+						+ "/*]]>*/</script>");
+			} else {
 				context.append("/*<![CDATA[*/" + js + "/*]]>*/");
 			}
-			
 		}
 		return null;
 	}
@@ -362,6 +379,7 @@ public class CoreXMLNodeParser implements NodeParser {
 			child = child.getNextSibling();
 		}
 	}
+
 	private String getAttribute(Element el, String... keys) {
 		for (String key : keys) {
 			if (el.hasAttribute(key)) {
