@@ -29,7 +29,7 @@ public class ServletTemplateEngine extends TemplateEngine {
 		this.context = config.getServletContext();
 		this.compress = "true".equals(this.getParam("compress", "false"));
 		this.format = "true".equals(this.getParam("format", "false"));
-		this.featrues = buildFeatrues(config);
+		this.featrues = buildFeatrueMap(config);
 		
 		try {
 			String decoratorPath = getParam("decoratorMapping",DEFAULT_DECORATOR_MAPPING);
@@ -40,7 +40,7 @@ public class ServletTemplateEngine extends TemplateEngine {
 		}
 	}
 
-	private Map<String, String> buildFeatrues(ServletConfig config) {
+	protected Map<String, String> buildFeatrueMap(ServletConfig config) {
 		@SuppressWarnings("unchecked")
 		Enumeration<String> names = config.getInitParameterNames();
 		HashMap<String, String> featrues = new HashMap<String, String>();
