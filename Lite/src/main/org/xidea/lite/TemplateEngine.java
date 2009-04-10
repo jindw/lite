@@ -18,7 +18,6 @@ import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Node;
 import org.xidea.lite.Template;
 import org.xidea.lite.parser.DecoratorMapper;
-import org.xidea.lite.parser.HTMLFormNodeParser;
 import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.ParseContextImpl;
 import org.xidea.lite.parser.XMLParser;
@@ -30,9 +29,12 @@ public class TemplateEngine{
 	private HashMap<String, Object> lock = new HashMap<String, Object>();
 	private Map<String, TemplateEntry> cachedMap = new HashMap<String, TemplateEntry>();
 
+	protected Map<String, String> featrues = new HashMap<String, String>();
+	protected boolean compress;
+	protected boolean format;
 	protected File webRoot;
 	protected DecoratorMapper decoratorMapper;
-	protected XMLParser parser = new XMLParser();
+	protected XMLParser parser;
 
 	protected TemplateEngine() {
 	}
@@ -43,6 +45,7 @@ public class TemplateEngine{
 
 	public TemplateEngine(XMLParser parser,File webRoot, File config) {
 		try {
+			this.parser = parser;
 			if(config != null && config.exists()){
 				this.decoratorMapper = new DecoratorMapper(new FileInputStream(config));
 			}else{
@@ -110,9 +113,12 @@ public class TemplateEngine{
 
 	protected ParseContext createParseContext() {
 		try {
-			ParseContext parseContext = new ParseContextImpl(getResource("/"));
-			parseContext.setAttribute(HTMLFormNodeParser.class, HTMLFormNodeParser.AUTO_IN_FORM);
-			return parseContext;
+			ParseContext context = new ParseContextImpl(getResource("/"));
+			context.setCompress(compress);
+			context.setFormat(format);
+			context.setFeatrueMap(featrues);
+			//context.setAttribute(HTMLFormNodeParser.AUTO_FORM_FEATRUE_URL, HTMLFormNodeParser.AUTO_IN_FORM);
+			return context;
 		} catch (MalformedURLException e) {
 			throw new RuntimeException(e);
 		}

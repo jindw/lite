@@ -7,6 +7,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -32,6 +33,9 @@ public class ParseContextImpl implements ParseContext {
 	private URL currentURL;
 	private ArrayList<Object> result = new ArrayList<Object>();
 	private HashSet<URL> resources = new HashSet<URL>();
+	private ArrayList<Boolean> indentStatus = new ArrayList<Boolean>();
+	private Map<String, String> featrues = Collections.emptyMap();
+
 	private HashMap<String, String> typeIdMap = new HashMap<String, String>();
 	private HashMap<Object, String> objectIdMap = new HashMap<Object, String>();
 	private int depth = 0;
@@ -72,8 +76,6 @@ public class ParseContextImpl implements ParseContext {
 	public int getDepth() {
 		return depth;
 	}
-
-	private ArrayList<Boolean> indentStatus = new ArrayList<Boolean>();
 
 	public void beginIndent() {// boolean needClose) {
 		int size = indentStatus.size();
@@ -433,6 +435,15 @@ public class ParseContextImpl implements ParseContext {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	public String getFeatrue(String key) {
+		return featrues.get(key);
+	}
+
+	public void setFeatrueMap(Map<String, String> featrues) {
+		this.featrues = featrues;
+		
 	}
 
 }

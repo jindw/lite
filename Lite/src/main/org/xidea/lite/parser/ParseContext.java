@@ -3,6 +3,7 @@ package org.xidea.lite.parser;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.xidea.el.ExpressionFactory;
@@ -21,7 +22,7 @@ public interface ParseContext {
 	
 	public boolean isCompress();
 	
-	public void setCompress(boolean format);
+	public void setCompress(boolean compress);
 
 	public boolean isReserveSpace();
 
@@ -38,13 +39,19 @@ public interface ParseContext {
 	 * @see ParseContextImpl#endIndent()
 	 */
 	public void endIndent();
+
+	/**
+	 * 记录一下编译上下文特征变量，该对象不可被修改
+	 * @param featrues {url,value}
+	 */
+	public void setFeatrueMap(Map<String, String> featrues);
+	public String getFeatrue(String key);
 	
 	/**
 	 * 记录一下编译上下文状态
 	 * @param key
 	 * @param value
 	 */
-
 	public void setAttribute(Object key, Object value);
 	public Object getAttribute(Object key);
 
