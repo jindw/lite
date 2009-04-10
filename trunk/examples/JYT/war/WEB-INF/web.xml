@@ -20,10 +20,8 @@
 			</param-value>
 		</init-param>
 		<init-param>
-			<param-name>xpathFactory</param-name>
-			<param-value>
-				org.apache.xpath.jaxp.XPathFactoryImpl
-			</param-value>
+			<param-name>http://www.xidea.org/ns/lite/autoform</param-name>
+			<param-value>form</param-value>
 		</init-param>
 	</servlet>
 	<servlet-mapping>
