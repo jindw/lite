@@ -1,0 +1,12 @@
+#labels Featured,Phase-Support
+== AppEngine支持 ==
+
+目前的1.0 Alpha7对AppEngine支持还有一些问题，不过已经修复，将在Alpha8中发布。
+
+=== AppEngine问题及对策 ===
+  * 前端脚本编译问题
+    LiteXML 自Alpha 7开始，支持前端脚本编译，但是，需要javax.script的JS引擎支持，但是AppEngine不支持该引擎，这个问题导致Alpha 7在AppEngine中启动失败。
+    解决该问题，我们添加了对Rhino的支持，使用Rhino引擎解析前端模板编译的问题。这需要你在WEB-INF/lib中添加js.jar这个js库。
+
+  * c:include XPath支持问题
+    AppEngine默认不支持XPath，这导致Alpha7在GAE无法实现xpath include。解决办法是使用第三方xpath库。
