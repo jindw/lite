@@ -42,7 +42,12 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>litecompiler</servlet-name>
+		<url-pattern>/</url-pattern>
 		<url-pattern>/litecompiler</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>litecompiler</servlet-name>
+		<url-pattern>/</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>XMLTemplate</servlet-name>
@@ -50,6 +55,5 @@
 	</servlet-mapping>
 	<welcome-file-list>
 		<welcome-file>index.xhtml</welcome-file>
-		<welcome-file>index.html</welcome-file>
 	</welcome-file-list>
 </web-app>
