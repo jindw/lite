@@ -44,7 +44,7 @@ public class ServletTemplateEngine extends TemplateEngine {
 		@SuppressWarnings("unchecked")
 		Enumeration<String> names = config.getInitParameterNames();
 		HashMap<String, String> featrues = new HashMap<String, String>();
-		if(names.hasMoreElements()){
+		while(names.hasMoreElements()){
 			String name = names.nextElement();
 			if(name.startsWith("http://")){
 				featrues.put(name,config.getInitParameter(name));
