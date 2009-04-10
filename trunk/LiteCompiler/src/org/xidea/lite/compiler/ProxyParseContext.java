@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.xidea.lite.parser.JSBuilder;
 import org.xidea.lite.parser.ParseContextImpl;
 
 public class ProxyParseContext extends ParseContextImpl {
@@ -29,6 +28,8 @@ public class ProxyParseContext extends ParseContextImpl {
 			String encoding) throws MalformedURLException {
 		super(new URL(BASE,base));
 		this.params = params;
+		this.setCompress(true);
+		//this.setFormat(false);
 		if(encoding!=null){
 			this.encoding = encoding;
 		}
