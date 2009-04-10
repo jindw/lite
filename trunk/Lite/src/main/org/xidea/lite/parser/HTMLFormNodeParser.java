@@ -16,18 +16,22 @@ import org.xidea.lite.Template;
 
 /**
  * 类似这种特别的编译模块(有扩展,可能导致其他运行环境无法解释)，最好带上双重开关。
+ * 
  * @author jindw
  */
 public class HTMLFormNodeParser extends HTMLNodeParser implements NodeParser {
-	public static final Object AUTO = "auto";
-	public static final Object AUTO_IN_FORM = "auto_in_form";
+	public static final String AUTO_FORM_FEATRUE_URL = "http://www.xidea.org/ns/lite/autoform";
+	public static final String NO_AUTO = "none";
+	public static final String AUTO_ANYWAY = "anyway";
+	public static final String AUTO_IN_FORM = "form";
+	private static final Object IN_FORM_KEY = new Object();
 
 	private static final String FORM_TAG = "form";
 	private static final String INPUT_TAG = "input";
 	private static final String TEXTAREA_TAG = "textarea";
 	private static final String SELECT_TAG = "select";
 	private static final String OPTION_TAG = "option";
-	
+
 	private static final String ATTRIBUTE_SELECTED = "selected";
 	private static final String ATTRIBUTE_CHECKED = "checked";
 	private static final String ATTRIBUTE_TYPE = "type";
@@ -40,9 +44,6 @@ public class HTMLFormNodeParser extends HTMLNodeParser implements NodeParser {
 			.compile("^(?:reset|button|submit)$");
 	private static final Object KEY_SELECT = new Object();
 
-
-	private static final Object IN_FORM = "-in_form";
-
 	public HTMLFormNodeParser(XMLParser parser) {
 		super(parser);
 	}
@@ -50,21 +51,27 @@ public class HTMLFormNodeParser extends HTMLNodeParser implements NodeParser {
 	protected Node parse(Node node, ParseContext context) {
 		Element el = (Element) node;
 		String localName = el.getLocalName();
-		Object status = context.getAttribute(HTMLFormNodeParser.class);
-		if (AUTO.equals(status)) {
+		Object status = context.getFeatrue(AUTO_FORM_FEATRUE_URL);
+		if (AUTO_ANYWAY.equals(status)) {
 			return processAutoForm(context, el, localName);
-		} else if (IN_FORM.equals(status)) {
-			//Warn 代码的坏味道
-			processAutoForm(context, el, localName);
-			if (FORM_TAG.equals(localName)) {
-				context.setAttribute(HTMLFormNodeParser.class, AUTO_IN_FORM);
-			}
-			return null;
 		} else if (AUTO_IN_FORM.equals(status)) {
+			// Warn 代码的坏味道
 			if (FORM_TAG.equals(localName)) {
-				context.setAttribute(HTMLFormNodeParser.class, IN_FORM);
+				context.setAttribute(IN_FORM_KEY, IN_FORM_KEY);
+				node = processAutoForm(context, el, localName);
+				context.setAttribute(IN_FORM_KEY, null);
+				if(node != null){
+					throw new RuntimeException();
+				}
+				return null;
+			} else {
+				Object in = context.getAttribute(IN_FORM_KEY);
+				if(in == null){
+					return parseHTMLElement(el, context, null);
+				}else{
+					return processAutoForm(context, el, localName);
+				}
 			}
-			return parseHTMLElement(el, context, null);
 		} else {
 			return parseHTMLElement(el, context, null);
 		}
