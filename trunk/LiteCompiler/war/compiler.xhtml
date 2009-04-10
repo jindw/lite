@@ -22,7 +22,7 @@
 					<div id="sourceContent" class="content">
 						<div>
 							<a class="remove-row" href="#0" alt="X"
-								title="移除该条数据">
+								onclick="removeRow(this)" title="移除该条数据">
 							</a>
 							<div>
 								<label>文件相对路径:</label>
@@ -34,10 +34,12 @@
 								<label>文件内容（目前只支持Lite XML）:</label>
 							</div>
 							<div>
-								<textarea name="source">${source}</textarea>
+								<textarea name="source">
+									${source}
+								</textarea>
 							</div>
+							<hr />
 						</div>
-						<hr />
 					</div>
 					<div style="text-align:right">
 						<input type="button" onclick="addSource()"
@@ -59,15 +61,15 @@
 					<hr />
 					<div id="fileContent" class="content">
 						<div>
-							<a class="remove-row" href="#0" alt="X"
-								title="移除该条数据">
+							<a class="remove-row" href="#0"
+								onclick="removeRow(this)" alt="X" title="移除该条数据">
 							</a>
 							<div>
 								<input type="hidden" name="path" />
 								<input type="file" name="file" />
 							</div>
+							<hr />
 						</div>
-						<hr />
 					</div>
 					<div style="text-align:right">
 						<input type="button" onclick="addFile()"
@@ -89,6 +91,9 @@
 		</c:client>
 		<script>
 			/*<![CDATA[*/
+function removeRow(a){
+	a.parentNode.parentNode.removeChild(a.parentNode)
+}
 function addSource(){ 
 	var sourceContent = document.getElementById('sourceContent');
 	var row = document.createElement("div");
