@@ -39,6 +39,14 @@
 				org.apache.xpath.jaxp.XPathFactoryImpl
 			</param-value>
 		</init-param>
+		<init-param>
+			<param-name>compress</param-name>
+			<param-value>true</param-value>
+		</init-param>
+		<init-param>
+			<param-name>http://www.xidea.org/ns/lite/autoform</param-name>
+			<param-value>form</param-value>
+		</init-param>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>litecompiler</servlet-name>
