@@ -42,10 +42,10 @@ public class CoreXMLNodeParser implements NodeParser {
 
 			};
 		try {
-			jsBuilder = new Java6JSBuilder();
+			jsBuilder = new RhinoJSBuilder();
 		} catch (NoClassDefFoundError e) {
 			try {
-				jsBuilder = new RhinoJSBuilder();
+				jsBuilder = new Java6JSBuilder();
 			} catch (NoClassDefFoundError e2) {
 				log.error("找不到您的JS运行环境，不能为您编译前端js", e);
 

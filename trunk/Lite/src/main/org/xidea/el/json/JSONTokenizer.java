@@ -15,6 +15,9 @@ public class JSONTokenizer {
 
 	public JSONTokenizer(String value) {
 		this.value = value.trim();
+		if(value.startsWith("\uFEFF")){
+			value = value.substring(1);
+		}
 		this.end = this.value.length();
 	}
 
