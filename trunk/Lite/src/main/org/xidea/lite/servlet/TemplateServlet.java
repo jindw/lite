@@ -21,7 +21,7 @@ public class TemplateServlet extends GenericServlet {
 	@SuppressWarnings("unused")
 	private static final Log log = LogFactory.getLog(TemplateServlet.class);
 
-	private TemplateEngine templateEngine;
+	protected TemplateEngine templateEngine;
 
 	@Override
 	public void init(final ServletConfig config) throws ServletException {
@@ -32,8 +32,6 @@ public class TemplateServlet extends GenericServlet {
 	@Override
 	public void service(ServletRequest req, ServletResponse resp)
 			throws ServletException, IOException {
-		req.setCharacterEncoding("utf-8");
-		resp.setCharacterEncoding("utf-8");
 		HttpServletRequest request = (HttpServletRequest) req;
 		String path = request.getServletPath();
 		templateEngine.render(path, createModel(request), resp.getWriter());
