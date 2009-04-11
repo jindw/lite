@@ -11,7 +11,7 @@
 			<div id="sourceArea">
 				<h3>粘贴代码的方式</h3>
 				<form method="post"
-					onsubmit="return validateSource(f)">
+					onsubmit="return validateSource(this)">
 					<div>
 						<label>网站根目录:</label>
 					</div>
@@ -49,7 +49,7 @@
 			<div id="fileArea">
 				<h3>上传文件的方式</h3>
 				<form method="post" enctype="multipart/form-data"
-					onsubmit="return validateFile(f)">
+					onsubmit="return validateFile(this)">
 					<div>
 						<label>网站根目录:</label>
 					</div>
