@@ -45,3 +45,11 @@
 </web-app>
 
 }}}
+  * WEB-INF/lib下类库
+{{{
+    Template.jar            //Lite XML 模板实现
+    commons-logging.jar     //Lite XML 模板实现
+    //For Google AppEngine
+    js.jar                  //Mozilla Rhino JS支持
+    xalan.jar               //Mozilla xalan XPath 支持
+}}}
