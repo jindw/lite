@@ -130,11 +130,11 @@ function validateSource(f){
 		source = [source];
 	}
 	for(var i=0;i<path.length;i++){
-		if(invalidPath(path[i])){
+		if(invalidPath(path[i].value)){
 			doFocus(path[i])
 			return false;
 		}
-		if(invalidSource(source[i])){
+		if(invalidSource(source[i].value)){
 			doFocus(source[i])
 			return false;
 		}
@@ -144,9 +144,12 @@ function validateSource(f){
 	}
 }
 function invalidPath(path){
-	return !/(?:\/[\w\.\-])+/.test(path)
+	if(!/^(?:\/[\w\.\-]+)+\/?$/.test(path)){
+		alert("路径不太正常："+path)
+		return true;
+	}
 }
-function invalidSource(){
+function invalidSource(text){
 	try{
 		if(window.DOMParser){
 			var doc = new DOMParser().parseFromString(text,"text/xml");
@@ -163,6 +166,7 @@ function invalidSource(){
 			doc.documentElement.tagName;
 		}
 	}catch(e){
+		alert("解析xml失败:"+e)
 		return true;
 	}
 }
