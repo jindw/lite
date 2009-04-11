@@ -205,7 +205,8 @@ public class XMLParser extends TextParser {
 		}
 		return new NamespaceContext() {
 			public String getNamespaceURI(String prefix) {
-				return prefixMap.get(prefix);
+				String url = prefixMap.get(prefix);
+				return url == null? prefix : url;
 			}
 
 			public String getPrefix(String namespaceURI) {
