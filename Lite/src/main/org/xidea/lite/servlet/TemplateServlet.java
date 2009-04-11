@@ -22,10 +22,13 @@ public class TemplateServlet extends GenericServlet {
 	private static final Log log = LogFactory.getLog(TemplateServlet.class);
 
 	protected TemplateEngine templateEngine;
+	protected String contentType;
+	
 
 	@Override
 	public void init(final ServletConfig config) throws ServletException {
 		super.init(config);
+		contentType = config.getInitParameter("contentType");
 		templateEngine = new ServletTemplateEngine(config);
 	}
 
@@ -34,6 +37,9 @@ public class TemplateServlet extends GenericServlet {
 			throws ServletException, IOException {
 		HttpServletRequest request = (HttpServletRequest) req;
 		String path = request.getServletPath();
+		if(contentType!=null){
+			resp.setContentType(contentType);
+		}
 		templateEngine.render(path, createModel(request), resp.getWriter());
 	}
 

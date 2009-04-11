@@ -1,7 +1,9 @@
 package org.xidea.lite.parser;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.net.URL;
 import java.util.HashMap;
@@ -159,7 +161,18 @@ public class XMLParser extends TextParser {
 	public Document loadXML(URL url, ParseContext context) throws SAXException,
 			IOException, XPathExpressionException {
 		context.setCurrentURL(url);
-		Document doc = documentBuilder.parse(context.getInputStream(url));
+		InputStream in = context.getInputStream(url);
+		in = new BufferedInputStream(in,1);
+		int c;
+		do{//bugfix \ufeff
+			in.mark(1);
+			c = in.read();
+			if(c == '<'){
+				in.reset();
+				break;
+			}
+		}while(c>=0);
+		Document doc = documentBuilder.parse(in,url.toString());
 		// selectNodes(xpath, doc);
 		return doc;
 	}
@@ -274,16 +287,16 @@ public class XMLParser extends TextParser {
 							.newInstance(XPathFactory.DEFAULT_OBJECT_MODEL_URI,
 									xpathFactoryClass, this.getClass()
 											.getClassLoader());
+					return xpathFactory.newXPath();
 				} catch (Exception e) {
-					log.error("自定义xpathFactory初始化失败", e);
+					log.error("自定义xpathFactory初始化失败<"+xpathFactoryClass+">", e);
 				}
 			}
 			if (xpathFactory == null) {
 				xpathFactory = XPathFactory.newInstance();
 			}
 		}
-		XPath xpathEvaluator = xpathFactory.newXPath();
-		return xpathEvaluator;
+		return xpathFactory.newXPath();
 	}
 
 	protected Transformer createTransformer()
@@ -295,8 +308,9 @@ public class XMLParser extends TextParser {
 					transformerFactory = TransformerFactory.newInstance(
 							transformerFactoryClass, this.getClass()
 									.getClassLoader());
+					return transformerFactory.newTransformer();
 				} catch (Exception e) {
-					log.error("创建xslt转换器失败", e);
+					log.error("创建xslt转换器失败<"+transformerFactoryClass+">", e);
 				}
 			}
 			if (transformerFactory == null) {

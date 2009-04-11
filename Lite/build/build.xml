@@ -30,6 +30,7 @@
 			<zipfileset src="build/dest/JSEL.jar" />
 			<fileset dir="src/main">
 				<include name="org/xidea/el/**/*.java" />
+				<include name="org/xidea/lite/servlet/*.java" />
 				<exclude name="**/test/**/*.*" />
 			</fileset>
 		</jar>

@@ -23,38 +23,35 @@ public class Java6JSBuilder implements JSBuilder {
 	private static Log log = LogFactory.getLog(CoreXMLNodeParser.class);
 	private static Bindings parentScope;
 	private static ScriptEngine jsengine;
-	
+
 	static {
 		jsengine = new ScriptEngineManager().getEngineByExtension("js");
-		
-		if(jsengine==null){
-			log.error("您的环境不支持js");
-		}else{
-			parentScope = jsengine.createBindings();
-			ClassLoader loader = Java6JSBuilder.class.getClassLoader();
 
-			try {
-				InputStream uncompressedParser = loader
-						.getResourceAsStream("org/xidea/lite/parser.js");
-				InputStream uncompressedCompiler = loader
-						.getResourceAsStream("org/xidea/lite/native-compiler.js");
-				InputStream compressed = loader
-						.getResourceAsStream("org/xidea/lite/template.js");
-				if (uncompressedParser != null && uncompressedCompiler !=null) {
-					jsengine.eval(new InputStreamReader(uncompressedParser, "utf-8"),
-							parentScope);
-					jsengine.eval(new InputStreamReader(uncompressedCompiler, "utf-8"),
-							parentScope);
-				} else {
-					jsengine.eval(new InputStreamReader(compressed, "utf-8"),
-							parentScope);
-				}
-			} catch (Exception e) {
-				log.error("初始化JS引擎失败",e);
-				throw new RuntimeException(e);
+		parentScope = jsengine.createBindings();
+		ClassLoader loader = Java6JSBuilder.class.getClassLoader();
+
+		try {
+			InputStream uncompressedParser = loader
+					.getResourceAsStream("org/xidea/lite/parser.js");
+			InputStream uncompressedCompiler = loader
+					.getResourceAsStream("org/xidea/lite/native-compiler.js");
+			InputStream compressed = loader
+					.getResourceAsStream("org/xidea/lite/template.js");
+			if (uncompressedParser != null && uncompressedCompiler != null) {
+				jsengine.eval(
+						new InputStreamReader(uncompressedParser, "utf-8"),
+						parentScope);
+				jsengine.eval(new InputStreamReader(uncompressedCompiler,
+						"utf-8"), parentScope);
+			} else {
+				jsengine.eval(new InputStreamReader(compressed, "utf-8"),
+						parentScope);
 			}
+		} catch (Exception e) {
+			log.error("初始化JS引擎失败", e);
+			throw new RuntimeException(e);
 		}
-		
+
 	}
 
 	private ErrorReporter reportor = new ErrorReporter() {
@@ -85,7 +82,7 @@ public class Java6JSBuilder implements JSBuilder {
 		try {
 			code = (String) jsengine.eval("buildNativeJS(eval(" + source
 					+ "))+''", parentScope);
-			jsengine.eval("+function(){"+code+"}");
+			jsengine.eval("+function(){" + code + "}");
 		} catch (ScriptException e) {
 			code = "alert('生成js代码失败：'+" + JSONEncoder.encode(e.getMessage())
 					+ ")";
