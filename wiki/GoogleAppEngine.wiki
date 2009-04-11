@@ -1,12 +1,20 @@
 #labels Featured,Phase-Support
 === AppEngine问题及对策 ===
   * GAE 没有JDK自带的JavaScript支持
-    LiteXML 自Alpha 7开始，支持前端脚本编译，但是，需要javax.script的JS引擎支持，AppEngine不支持该引擎，这个问题导致Alpha 7在AppEngine中启动失败。Alpha9之后启动能成功，但是如果模板中存在前端模板编译需求时，编译过程会失败。
+    LiteXML 自1.0 Alpha 7开始，支持前端脚本编译，但是，需要javax.script的JS引擎支持，AppEngine不支持该引擎，1.0 Alpha9之后，虽然可以启动成功，但是如果模板中存在前端模板编译需求时，编译过程会失败。
     解决该问题，我们添加了对Rhino的支持，使用Rhino引擎解析前端模板编译的问题。这需要你在WEB-INF/lib中添加js.jar这个js库。
 
   * GAE 没有JDK自带的XPath支持
     这导致c:include XPath支持问题，同时，因为LiteXML自带的SiteMesh支持依赖xpath include，所以，这也导致使用decorator配置生效的页面，编译都会失败。
     解决办法是使用第三方xpath库，这需要你在WEB-INF/lib 中添加xalan.jar并且在Servlet初始参数中设置XPathFactory实现类：org.apache.xpath.jaxp.XPathFactoryImpl，当能，你也可以选择其他xpath实现。
+  * WEB-INF/lib下类库
+{{{
+    Template.jar            //Lite XML 模板实现
+    commons-logging.jar     //Lite XML 模板实现
+    //For Google AppEngine
+    js.jar                  //Mozilla Rhino JS支持
+    xalan.jar               //Mozilla xalan XPath 支持
+}}}
   * web.xml 代码实例
 {{{
 <?xml version="1.0" encoding="utf-8"?>
@@ -44,12 +52,4 @@
 	</welcome-file-list>
 </web-app>
 
-}}}
-  * WEB-INF/lib下类库
-{{{
-    Template.jar            //Lite XML 模板实现
-    commons-logging.jar     //Lite XML 模板实现
-    //For Google AppEngine
-    js.jar                  //Mozilla Rhino JS支持
-    xalan.jar               //Mozilla xalan XPath 支持
 }}}
