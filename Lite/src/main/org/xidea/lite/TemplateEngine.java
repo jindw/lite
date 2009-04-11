@@ -27,7 +27,7 @@ public class TemplateEngine{
 	private static final Log log = LogFactory.getLog(TemplateEngine.class);
 
 	private HashMap<String, Object> lock = new HashMap<String, Object>();
-	private Map<String, TemplateEntry> cachedMap = new HashMap<String, TemplateEntry>();
+	protected Map<String, TemplateEntry> templateMap = new java.util.WeakHashMap<String, TemplateEntry>();
 
 	protected Map<String, String> featrues = new HashMap<String, String>();
 	protected boolean compress;
@@ -71,7 +71,7 @@ public class TemplateEngine{
 	 * @return
 	 */
 	protected Template getTemplate(String path) {
-		TemplateEntry templateEntry = cachedMap.get(path);
+		TemplateEntry templateEntry = templateMap.get(path);
 		if (templateEntry == null) {
 			Object lock2 = null;
 			synchronized (lock) {
@@ -82,18 +82,18 @@ public class TemplateEngine{
 			}
 			TemplateEntry entry;
 			synchronized (lock2) {
-				if (this.cachedMap.containsKey(path)) {
-					entry = this.cachedMap.get(path);
+				if (this.templateMap.containsKey(path)) {
+					entry = this.templateMap.get(path);
 				} else {
 					entry = createTemplateEntry(path);
-					this.cachedMap.put(path, entry);
+					this.templateMap.put(path, entry);
 				}
 			}
 			lock.remove(path);
 			return entry.getTemplate();
 		} else {
 			if (templateEntry.isModified()) {
-				cachedMap.remove(path);
+				templateMap.remove(path);
 				return getTemplate(path);
 			} else {
 				return templateEntry.getTemplate();
@@ -163,8 +163,21 @@ public class TemplateEngine{
 		List<File> files = getAssociatedFiles(parseContext.getResources());
 		return new TemplateEntry(template, files.toArray(new File[files.size()]));
 	}
-	
-	private static class TemplateEntry {
+
+	protected long getLastModified(File[] files) {
+		long i = 0;
+		long j = 0;
+		for (File file : files) {
+			long k = file.lastModified();
+			if(k == 0){
+				j++;
+			}
+			j*=2;
+			i = Math.max(k, i);
+		}
+		return i+j;
+	}
+	protected class TemplateEntry {
 		private Template template;
 		private File[] files;
 		private long lastModified;
@@ -183,19 +196,6 @@ public class TemplateEngine{
 			return template;
 		}
 
-		private long getLastModified(File[] files) {
-			long i = 0;
-			long j = 0;
-			for (File file : files) {
-				long k = file.lastModified();
-				if(k == 0){
-					j++;
-				}
-				j*=2;
-				i = Math.max(k, i);
-			}
-			return i+j;
-		}
 	}
 
 }
