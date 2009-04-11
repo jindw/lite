@@ -90,7 +90,7 @@ body{
 /*-----------------------------left-------------------------------*/
 #side {
     float:left;
-    width:16%;
+    width:18%;
     padding-bottom:100px;
 }
 
@@ -99,7 +99,7 @@ body{
     font-size:12px;
     font-family:Verdana;
     padding:0px;
-    text-indent:12px;
+    text-indent:0;
     display:block;
     width:100%;
     padding-top:5px;
