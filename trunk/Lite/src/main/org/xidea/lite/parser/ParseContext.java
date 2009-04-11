@@ -19,7 +19,10 @@ public interface ParseContext {
 	public boolean isFormat();
 	
 	public void setFormat(boolean format);
-	
+	/**
+	 * 如果format为真，则该属性意义不大
+	 * @return
+	 */
 	public boolean isCompress();
 	
 	public void setCompress(boolean compress);
