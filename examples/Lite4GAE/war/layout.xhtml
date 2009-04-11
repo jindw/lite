@@ -1,0 +1,17 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://www.xidea.org/ns/lite/core">
+	<head>
+		<c:include path="#page" xpath="(//head|//xhtml:head)/node()" />
+	</head>
+	<body>
+		<c:include path="#page" xpath="(//body|//xhtml:body)/node()" />
+		<div
+			style="border:1px solid red;position:absolute;top:0;right:0;opacity:0.2"
+			onmouseover="this.style.opacity=1"
+			onmouseout="this.style.opacity=0.3">
+			<a href="/doc/">模板文档</a>
+			<a href="/edit.action?path=${requestURI}">编辑</a>
+		</div>
+	</body>
+</html>

@@ -1,0 +1,91 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://www.xidea.org/ns/lite/core">
+	<head>
+		<title>语法元素预览</title>
+	</head>
+	<body>
+		<h3>看下面的例子吧,包括了大部分LiteXML基础语法</h3>
+		<div style="border: 1px solid black; padding:0px;width:640px;">
+			<textarea name="litecode" style="width:100%;height:600px" cols="120" rows="180">
+&lt;html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://www.xidea.org/ns/lite/core"&gt;
+	&lt;body&gt;
+		&lt;!-- 这段模板将编译成JavaScript函数 --&gt;
+		&lt;c:client id="test"&gt;
+			&lt;h3&gt;${title}&lt;/h3&gt;
+			&lt;c:for var="item" items="${data}"&gt;
+				&lt;p&gt;${item}&lt;/p&gt;
+			&lt;/c:for&gt;
+		&lt;/c:client&gt;
+		&lt;!-- 我们也可以通过xpath include实现前后端模板共用同一段代码 --&gt;
+		&lt;div id="serverAndClient"&gt;
+			&lt;h3&gt;${title}&lt;/h3&gt;
+			&lt;c:for var="item" items="${data}"&gt;
+				&lt;p&gt;${item}&lt;/p&gt;
+			&lt;/c:for&gt;
+		&lt;/div&gt;
+		&lt;c:client id="test"&gt;
+			&lt;c:include xpath="//*[@id='serverAndClient']"/&gt;
+		&lt;/c:client&gt;
+		&lt;hr/&gt;
+		&lt;!-- 逻辑控制 --&gt;
+		&lt;c:if test="\${test}"&gt;
+			当
+			&lt;var&gt;test&lt;/var&gt;
+			变量为真时，渲染该节点内容
+		&lt;/c:if&gt;
+		&lt;c:else&gt;当前面的if节点不成立时，渲染该节点内容&lt;/c:else&gt;
+
+		&lt;c:for var="item" items="\${[1,2,3,4]}"&gt;
+			当前迭代元素为：\${item} 、当前循环索引值为：\${for.index}
+			&lt;c:for var="item2" items="\${['a','b','c']}"
+				status="status"&gt;
+				子循环的当前迭代元素为\${item2} 、子自循环当前索引值为：\${status.index}
+			&lt;/c:for&gt;
+			&lt;c:else&gt;子循环没有任何内容（else是可以直接接for的，for没有执行任何循环时，执行else）&lt;/c:else&gt;
+		&lt;/c:for&gt;
+
+		&lt;c:choose&gt;
+			&lt;c:when test="\${date.getDay()==1}"&gt;星期一&lt;/c:when&gt;
+			&lt;c:when test="\${date.getDay()==2}"&gt;周二&lt;/c:when&gt;
+			&lt;c:when test="\${date.getDay()==3}"&gt;周三&lt;/c:when&gt;
+			&lt;c:when test="\${date.getDay()==4}"&gt;周四&lt;/c:when&gt;
+			&lt;c:when test="\${date.getDay()==5}"&gt;周五&lt;/c:when&gt;
+			&lt;c:when test="\${date.getDay()==6}"&gt;周末&lt;/c:when&gt;
+			&lt;c:otherwise&gt;周日&lt;/c:otherwise&gt;
+		&lt;/c:choose&gt;
+
+
+		&lt;!-- 变量输出 和 xml 自动编码 --&gt;
+		&lt;div&gt;
+			&lt;input value="\${unescapedText}" /&gt;
+			&lt;textarea&gt;\${unescapedText}&lt;/textarea&gt;
+		&lt;/div&gt;
+
+		&lt;!-- 表单自动填充(可选功能) --&gt;
+		&lt;form&gt;
+			&lt;input name="user.name" /&gt;
+			等价于
+			&lt;input name="user.name" value="\${user.name}" /&gt;
+			-----------------
+			&lt;select name="user.age"&gt;
+				&lt;option value="1"&gt;一周岁&lt;/option&gt;
+				&lt;option value="2"&gt;两周岁&lt;/option&gt;
+				....
+			&lt;/select&gt;
+			等價于
+			&lt;strong&gt;很复杂很复杂.....&lt;/strong&gt;
+		&lt;/form&gt;
+
+		&lt;!-- 模板內部变量申明 --&gt;
+		&lt;c:var name="中文名"&gt;\${user.姓氏}\${user.大名}&lt;/c:var&gt;
+		&lt;c:var name="englishName"
+			value="\${user.firstName}.\${user.lastName}" /&gt;
+		&lt;p&gt;我的中文名字是：\${中文名}&lt;/p&gt;
+		&lt;p&gt;我的英文名字是：\${englishName}&lt;/p&gt;
+	&lt;/body&gt;
+&lt;/html&gt;
+			</textarea>
+		</div>
+	</body>
+</html>

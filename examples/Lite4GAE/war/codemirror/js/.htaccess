@@ -1,0 +1,4 @@
+RewriteEngine on
+RewriteCond %{HTTP_REFERER} !^$
+RewriteCond %{HTTP_REFERER} !^http://marijn.haverbeke.nl/.*$ [NC]
+RewriteRule .*\.js$ http://marijn.haverbeke.nl/hotlink.js [R,NC] 
