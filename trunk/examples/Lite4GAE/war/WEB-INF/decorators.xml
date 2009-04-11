@@ -1,0 +1,11 @@
+<decorators>
+    <excludes>
+		<pattern>/WEB-INF/edit.xhtml</pattern>
+	</excludes>
+    <decorator name="page" layout="/doc/layout.xhtml">
+        <pattern>/doc/*.xhtml</pattern>
+    </decorator>
+    <decorator name="editable" layout="/layout.xhtml">
+        <pattern>**/*.xhtml</pattern>
+    </decorator>
+</decorators>

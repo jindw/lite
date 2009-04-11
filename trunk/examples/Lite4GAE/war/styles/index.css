@@ -1,0 +1,29 @@
+body{
+	margin:auto;
+	width:600px;
+	font-size:13px
+}
+hr{clear:both}
+#content{
+	float:left;
+    width:280px;
+	border:1px solid #666;
+	padding:20px;
+	margin:20px;
+}
+div{
+  padding:4px;
+}
+#menu{
+    width:80px;
+	float:left;
+	border:1px solid #666;
+	padding:20px;
+	margin:20px;
+}
+#menu a{
+	display:block;
+}
+#menu a:hover{
+    background:#EEE;
+}

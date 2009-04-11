@@ -1,0 +1,33 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:c="http://www.xidea.org/ns/lite/core">
+  <head>
+    <title>For条件语法</title>
+  </head>
+  <body>
+    <h3>先看实例</h3>
+    <textarea name="litecode" style="height:180px;">
+    &lt;c:for var="item" items="\${[1,2,3,4]}"&gt;
+      当前迭代元素为：\${item} 、当前循环索引值为：\${for.index}
+      &lt;c:for var="item2" items="\${['a','b','c']}"
+        status="status"&gt;
+        子循环的当前迭代元素为\${item2} 、子循环当前索引值为：\${status.index}
+      &lt;/c:for&gt;
+      &lt;c:else&gt;子循环没有任何内容（else是可以直接接for的，for没有执行任何循环时，执行else）&lt;/c:else&gt;
+    &lt;/c:for&gt;
+    </textarea>
+    <h3>var属性</h3>
+    <ul>
+      迭代出来的元素变量
+    </ul>
+    <h3>items属性</h3>
+    <ul>
+      需要迭代的集合
+    </ul>
+    <h3>status属性</h3>
+    <ul>
+      循环状态for的别名
+    </ul>
+    <h3>else 语法</h3>
+    <ul>空循环的处理。</ul>
+  </body>
+</html>
