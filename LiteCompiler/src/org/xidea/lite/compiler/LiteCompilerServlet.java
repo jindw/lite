@@ -82,6 +82,12 @@ public class LiteCompilerServlet extends HttpServlet {
 		}
 		ProxyParseContext context = new ProxyParseContext(base, sourceMap, req
 				.getCharacterEncoding());
+		try {
+			if(path.length > 1){
+				context.setAttribute("#page", parser.loadXML(path[1], context));
+			}
+		} catch (Exception e) {
+		}
 		context.setCompress(true);
 		parser.parse(context.createURL(null, url), context);
 		resp.getWriter().println(JSONEncoder.encode(context.toResultTree()));
