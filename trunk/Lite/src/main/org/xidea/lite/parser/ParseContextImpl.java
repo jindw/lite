@@ -43,7 +43,7 @@ public class ParseContextImpl implements ParseContext {
 	private boolean reserveSpace;
 	private boolean format = false;
 	private boolean compress = false;
-	protected URL base;
+	protected final URL base;
 
 	public ParseContextImpl(URL base) {
 		this.base = base;
@@ -407,22 +407,11 @@ public class ParseContextImpl implements ParseContext {
 
 	public URL createURL(URL parentURL, String path) {
 		try {
-			if (this.base == null) {
-				return new URL(parentURL, path);
+			if (path.startsWith("/")) {
+				return new URL(this.base,path.substring(1));
+			} else {
+				return new URL(parentURL != null?parentURL:this.base, path);
 			}
-			if (parentURL == null) {
-				if (path.startsWith("/")) {
-					path = path.substring(1);
-				}
-				return new URL(this.base, path);
-			}
-			// base !=null && parentURL != null
-			if (path.startsWith("/")
-					&& parentURL.toExternalForm().startsWith(
-							this.base.toExternalForm())) {
-				return new URL(this.base, path.substring(1));
-			}
-			return new URL(parentURL, path);
 
 		} catch (MalformedURLException e) {
 			throw new RuntimeException(e);
@@ -443,7 +432,7 @@ public class ParseContextImpl implements ParseContext {
 
 	public void setFeatrueMap(Map<String, String> featrues) {
 		this.featrues = featrues;
-		
+
 	}
 
 }

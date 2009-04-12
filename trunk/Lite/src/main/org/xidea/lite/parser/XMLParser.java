@@ -113,7 +113,7 @@ public class XMLParser extends TextParser {
 						xpath = path.substring(pos + 1);
 						path = path.substring(0, pos);
 					}
-					node = loadXML(path, context);
+					node = loadXML(context.createURL(null, path), context);
 					if (xpath != null) {
 						node = selectNodes(xpath, node);
 					}
@@ -155,7 +155,7 @@ public class XMLParser extends TextParser {
 
 	public Node loadXML(String url, ParseContext context) throws SAXException,
 			IOException, XPathExpressionException {
-		return loadXML(new URL(url), context);
+		return loadXML(context.createURL(null,url), context);
 	}
 
 	public Document loadXML(URL url, ParseContext context) throws SAXException,

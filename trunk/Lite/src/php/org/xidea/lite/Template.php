@@ -33,26 +33,32 @@ function renderList($context, $children){
             }else{
                 switch($item[0]){
                 	case EL_TYPE:
-                    	return processExpression($context, $item, 0);
+                    	processExpression($context, $item, 0);
+                    	break;
 	                case XML_TEXT_TYPE:
-	                    return processExpression($context, $item, 1);
+	                    processExpression($context, $item, 1);
+                    	break;
 	                case VAR_TYPE:
-	                    return processVar($context, $item);
+	                    processVar($context, $item);
+                    	break;
 	                case CAPTRUE_TYPE:
-	                    return processCaptrue($context, $item);
+	                    processCaptrue($context, $item);
+                    	break;
 	                case IF_TYPE:
-	                    return processIf($context, $item);
+	                    processIf($context, $item);
+                    	break;
 	                case ELSE_TYPE:
-	                    return processElse($context, $item);
+	                    processElse($context, $item);
+                    	break;
 	                case FOR_TYPE:
-	                    return processFor($context, $item);
+	                    processFor($context, $item);
+                    	break;
 	                case XML_ATTRIBUTE_TYPE:
-	                    return processAttribute($context, $item);
+	                    processAttribute($context, $item);
+                    	break;
 	            }
 	        }
         }catch(Exception $e){
-            echo "Exception:"; 
-            echo $item[0];
             echo $e;
         }
     }
@@ -114,12 +120,20 @@ function processFor($context, $data){
     $length = count($items);
     $preiousStatus = array_key_exists(FOR_KEY,$context) && $context[FOR_KEY];
     try{
-        $forStatus = ForStatus($length);
+        $forStatus = new ForStatus($length);
         $context[FOR_KEY]=$forStatus;
-        foreach($items as $item){
-            $forStatus->index += 1;
-            $context[$varName]=$item;
-            renderList($context, $data);
+        if(is_numeric($items)){
+	        for($i=0;$i<$items;$i++){
+	            $forStatus->index += 1;
+	            $context[$varName]=$i+1;
+	            renderList($context, $data);
+	        }
+        }else if(is_array($items)){
+	        foreach($items as $item){
+	            $forStatus->index += 1;
+	            $context[$varName]=$item;
+	            renderList($context, $data);
+	        }
         }
         $context[FOR_KEY]=$preiousStatus;
         $context[IF_KEY]= $length > 0;

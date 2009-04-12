@@ -64,6 +64,14 @@ public interface ParseContext {
 	 */
 	public URL getCurrentURL();
 	public void setCurrentURL(URL currentURL);
+	/**
+	 * 如果file相于根目录（/path/...），以base作为根目录处理
+	 * 否则以parentURL，或者base作为parent直接new URL处理。
+	 * @see org.xidea.lite.parser.ParseContextImpl#createURL
+	 * @param parentURL
+	 * @param file
+	 * @return
+	 */
 	public URL createURL(URL parentURL, String file);
 	public InputStream getInputStream(URL url);
 	/**
