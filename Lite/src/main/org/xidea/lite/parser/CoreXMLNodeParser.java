@@ -146,7 +146,7 @@ public class CoreXMLNodeParser implements NodeParser {
 			this.parser.parseNode(doc, context);
 			return null;
 		} catch (Exception e) {
-			log.error(e);
+			log.warn(e);
 			return null;
 		} finally {
 			context.setCurrentURL(parentURL);

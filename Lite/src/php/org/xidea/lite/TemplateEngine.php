@@ -1,25 +1,21 @@
 <?php
 require_once("Template.php");
-$base = "C:/Users/jindw/workspace/Lite/web/";
-$compileDir = "$base/WEB-INF/classes/phplite/";
-if(!file_exists($compileDir)){
-	mkdir($compileDir);
-}
+$base = $_SERVER["DOCUMENT_ROOT"];
 $exportService = "http://litecompiler.appspot.com"; 
 function compileLite($paths){
     global $base;
     global $exportService;
 	$sources = array();
-	$i=count($paths);
-	while($i--){
+	$count=count($paths);
+	for($i=0;$i<$count;$i++){
 		$sources[$i] = file_get_contents(realpath("$base$paths[$i]"));
 	}
 	$postdata = http_build_query(
 		array(
 		    "source"=>$sources,
 		    "path"=>$paths,
-		    "base"=>"/"
-	    ),"key"
+		    "base"=>"/" //file:///".$base
+	    )
 	);
 	$postdata = preg_replace('/%5B(?:[0-9]+)%5D=/', '=', $postdata);
 	$opts = array('http' =>
@@ -45,8 +41,11 @@ function writeCache ($file, $word) {
 }
 function getLite($paths){
     global $base;
-    global $compileDir;
-    $liteFile = $compileDir.rawurlencode($paths[0]);
+    $compileDir = "$base/WEB-INF/classes/phplite/";
+	if(!file_exists($compileDir)){
+		mkdir($compileDir);
+	}
+    $liteFile = $compileDir.rawurlencode(join(",",$paths));
     if(file_exists($liteFile)){
     	$liteTime = filemtime($liteFile);
     	$fileTime = $liteTime;
@@ -62,6 +61,4 @@ function getLite($paths){
     writeCache($liteFile,$lite);
     return $lite;
 }
-$template = new Template(json_decode(getLite(array("/index.xhtml"))));
-echo $template->render(array());
 ?>
