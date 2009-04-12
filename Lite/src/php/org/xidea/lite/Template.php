@@ -1,4 +1,5 @@
 <?php
+require_once("Expression.php");
 
 define('EL_TYPE',0);            // [0,<el>]
 define('IF_TYPE',1);            // [1,[...],<test el>]
@@ -19,34 +20,34 @@ class Template{
     function Template($items){
         $this->items = $items;
     }
-    function render($context,$out){
-        renderList($context, $this->items, $out);
+    function render($context){
+        renderList($context, $this->items);
     }
 }
     
-function renderList($context, $children, $out){
+function renderList($context, $children){
     foreach($children as $item){
         try{
             if(is_string($item)){
-                $out.write($item);
+                echo $item;
             }else{
                 switch($item[0]){
                 	case EL_TYPE:
-                    	return processExpression($context, $item, $out, 0);
+                    	return processExpression($context, $item, 0);
 	                case XML_TEXT_TYPE:
-	                    return processExpression($context, $item, $out, 1);
+	                    return processExpression($context, $item, 1);
 	                case VAR_TYPE:
 	                    return processVar($context, $item);
 	                case CAPTRUE_TYPE:
 	                    return processCaptrue($context, $item);
 	                case IF_TYPE:
-	                    return processIf($context, $item, $out);
+	                    return processIf($context, $item);
 	                case ELSE_TYPE:
-	                    return processElse($context, $item, $out);
+	                    return processElse($context, $item);
 	                case FOR_TYPE:
-	                    return processFor($context, $item, $out);
+	                    return processFor($context, $item);
 	                case XML_ATTRIBUTE_TYPE:
-	                    return processAttribute($context, $item, $out);
+	                    return processAttribute($context, $item);
 	            }
 	        }
         }catch(Exception $e){
@@ -56,31 +57,31 @@ function renderList($context, $children, $out){
         }
     }
 }
-function printXMLAttribute($text, $out){
-    $out.write(htmlspecialchars($text));
+function printXMLAttribute($text){
+    echo htmlspecialchars("".$text);
 }
 
-function printXMLText($text, $out){
-    $out.write(htmlspecialchars($text));
+function printXMLText($text){
+    echo htmlspecialchars("".$text);
 }
 
 function toBoolean($test){
     return !!$test;
 }
 
-function processExpression($context, $data, $out, $encodeXML){
+function processExpression($context, $data, $encodeXML){
     $value = evaluate($data[1],$context);
     if($encodeXML && isset($value)){
         printXMLText("$value", out);
     }else{
-        out.write("$value");
+        echo $value;
     }
 }
-function processIf($context, $data, $out){
+function processIf($context, $data){
     try{
         if(toBoolean(evaluate($data[2],$context))){
         	$test = 1;
-            renderList($context, $data[1], $out);
+            renderList($context, $data[1]);
         }else{
             $test = 0;
         }
@@ -90,12 +91,12 @@ function processIf($context, $data, $out){
         throw $e;
     }
 }
-function processElse($context, $data, $out){
+function processElse($context, $data){
     if(!toBoolean($context[IF_KEY])){
         try{
             if(isnull($data[2]) || toBoolean(evaluate($data[2],$context))){
                 $test = 1;
-                renderList($context, $data[1], $out);
+                renderList($context, $data[1]);
             }else{
             	$test = 0;
             }
@@ -106,7 +107,7 @@ function processElse($context, $data, $out){
         }
     }
 }
-function processFor($context, $data, $out){
+function processFor($context, $data){
     $children = $data[1];
     $items = evaluate($data[2],$context);
     $varName = $data[3];
@@ -118,7 +119,7 @@ function processFor($context, $data, $out){
         foreach($items as $item){
             $forStatus->index += 1;
             $context[$varName]=$item;
-            renderList($context, $data, $out);
+            renderList($context, $data);
         }
         $context[FOR_KEY]=$preiousStatus;
         $context[IF_KEY]= $length > 0;
@@ -136,18 +137,18 @@ function processVar($context, $data){
 function processCaptrue($context, $data){
     $buf = StringWriter();
     renderList($context, $data[1], $buf);
-    $context[$data[2]]= "$buf";
+    $context[$data[2]]= $buf;
 }
 
-function processAttribute($context, $data, $out){
+function processAttribute($context, $data){
     $result = evaluate($data[1],$context);
     if(isnull($data[2])){
-        printXMLAttribute("$result",  $out, 1);
+        printXMLAttribute($result);
     }elseif(isset($result)){
         out.write(" ");
         out.write($data[2]);
         out.write("=\"");
-        printXMLAttribute("$result",$out, 0);
+        printXMLAttribute($result);
         out.write('"');
     }
 }
