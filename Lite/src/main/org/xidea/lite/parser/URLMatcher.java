@@ -158,7 +158,7 @@ public abstract class URLMatcher implements Comparable<URLMatcher> {
 
 		public PatternMatcher(String pattern) {
 			length = pattern.length();
-			Matcher matcher = Pattern.compile("\\*+|[^\\*]+").matcher(pattern);
+			Matcher matcher = Pattern.compile("\\*\\*+/?|\\*+|[^\\*]+").matcher(pattern);
 			StringBuilder buf = new StringBuilder("^");
 			while (matcher.find()) {
 				String item = matcher.group();
