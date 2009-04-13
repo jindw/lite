@@ -140,10 +140,10 @@ public class DefaultXMLNodeParser implements NodeParser {
 			// }
 			// }
 			// text = text2;
-			if (context.isFormat()) {
-				text = text.trim();
-			} else if (context.isCompress()) {
+			if (context.isCompress()) {
 				text = text.replaceAll("^(\\s)+|(\\s)+$", "$1$2");
+			} else if (context.isFormat()) {
+				text = text.trim();
 			}
 		}
 		if (text.length() > 0) {

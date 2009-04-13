@@ -259,7 +259,7 @@ public class CoreXMLNodeParser implements NodeParser {
 			} while ((next = next.getNextSibling()) != null);
 			List<Object> result = context2.toResultTree();
 			String js = jsBuilder.buildJS(el.getAttribute("id"), result);
-			if (context.isCompress() && !context.isReserveSpace()) {
+			if (context.isCompress()) {
 				js = jsBuilder.compress(js);
 			}
 			boolean needScript = needScript(el);

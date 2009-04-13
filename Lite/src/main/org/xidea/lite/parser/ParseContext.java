@@ -16,19 +16,24 @@ public interface ParseContext {
 	public static final Object END_INSTRUCTION = new Object[0];
 
 
+	/**
+	 * 如果compress为真，或者 reserveSpace为真 则该属性失效
+	 * @param format
+	 */
 	public boolean isFormat();
-	
 	public void setFormat(boolean format);
 	/**
-	 * 如果format为真，则该属性意义不大
+	 * 如果 reserveSpace为真 则该属性失效
 	 * @return
 	 */
 	public boolean isCompress();
-	
 	public void setCompress(boolean compress);
 
+	/**
+	 * 该属性为真时，compress 和 format都将失效
+	 * @return
+	 */
 	public boolean isReserveSpace();
-
 	public void setReserveSpace(boolean keepSpace);
 
 	/**
