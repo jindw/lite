@@ -3,7 +3,7 @@
         <pattern>/index.xhtml</pattern>
 		<pattern>/**-json.xhtml</pattern>
 	</excludes>
-    <decorator name="page" layout="/example/page-layout.xhtml">
+    <decorator name="page" layout="/example/layout.xhtml">
         <pattern>/example/**/*.xhtml</pattern>
     </decorator>
 </decorators>
