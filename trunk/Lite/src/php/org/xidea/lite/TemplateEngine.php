@@ -38,9 +38,17 @@ function liteCompile($path){
 		array_push($paths,$decoratorPath);
 	}
 	while(true){
-		$result = json_decode(liteHttpLoad($paths,$sources));
+		$code = liteHttpLoad($paths,$sources);
+		if(!$code){
+			continue;
+		}
+		$result = json_decode($code);
+		if(!$result){
+			//echo "<hr>".$code."<hr>";
+			continue;
+		}
 		if(!is_array($result)){
-			//print_r($missed);
+			//echo "<hr>".$code."<hr>";
 			$missed = $result->missed;
 			$retry = false;
 			foreach($missed as $path){
@@ -79,7 +87,7 @@ function liteHttpLoad($paths,$sources){
 	    )
 	);
 	$context  = stream_context_create($opts);
-	return file_get_contents($liteService, false, $context);
+	return file_get_contents($liteService, false, $context,0,1024*1024);
 }
 /**
  * 写入文件缓存
