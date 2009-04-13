@@ -34,15 +34,14 @@ function liteCompile($path){
 	$decoratorPath = "/WEB-INF/decorators.xml";
 	$decoratorXml = file_get_contents(realpath("$liteBase$decoratorPath"));
 	if($decoratorXml){
-	echo $decoratorXml;
 		array_push($sources,$decoratorXml);
 		array_push($paths,$decoratorPath);
 	}
 	while(true){
 		$result = json_decode(liteHttpLoad($paths,$sources));
-		if(array_key_exists("missed",$result)){
-			$missed = $result["missed"];
+		if(!is_array($result)){
 			//print_r($missed);
+			$missed = $result->missed;
 			$retry = false;
 			foreach($missed as $path){
 				if(!in_array($path,$paths)){
