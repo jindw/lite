@@ -67,11 +67,9 @@ function getTokenValue($context, $item) {
 					return "urlencode";
 				case "decodeURIComponent": 
 					return "urldecode";
-				case "parseInt": 
-					return "parseInt";
 				}
 			}
-			return null;
+			return $value;//您如果需要仅用默认函数，那么 return null吧
 		case VALUE_CONSTANTS:
 			return $item[1];
 		case VALUE_NEW_LIST:
