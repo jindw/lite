@@ -23,7 +23,7 @@ import org.xidea.lite.parser.ParseContextImpl;
 import org.xidea.lite.parser.XMLParser;
 
 public class TemplateEngine{
-	protected static final String DEFAULT_DECORATOR_MAPPING = "/WEB-INF/decorators.xml";
+	public static final String DEFAULT_DECORATOR_MAPPING = "/WEB-INF/decorators.xml";
 	private static final Log log = LogFactory.getLog(TemplateEngine.class);
 
 	private HashMap<String, Object> lock = new HashMap<String, Object>();
