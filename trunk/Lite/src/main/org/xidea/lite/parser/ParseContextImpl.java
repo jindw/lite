@@ -104,7 +104,7 @@ public class ParseContextImpl implements ParseContext {
 	}
 
 	private void printIndent() {
-		if (this.format && !this.reserveSpace) {
+		if (!this.isCompress() && !this.isReserveSpace() && this.isFormat()) {
 			if (result.size() > 0) {
 				result.add("\r\n");
 			}
