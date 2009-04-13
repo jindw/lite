@@ -78,7 +78,7 @@ function toBoolean($test){
 function processExpression($context, $data, $encodeXML){
     $value = evaluate($data[1],$context);
     if($encodeXML && isset($value)){
-        printXMLText("$value", out);
+        printXMLText("$value");
     }else{
         echo $value;
     }

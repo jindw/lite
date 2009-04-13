@@ -41,7 +41,19 @@ define('OP_QUESTION_SELECT', 35);#32 | 2 | 1;
 define('OP_PARAM_JOIN', 1);#0 | 0 | 1;
 define('OP_MAP_PUSH', 33);#32 | 0 | 1;
 
-$globalMap = array('JSON'=>null, 'encodeURIComponent'=> null, 'test'=> 'testMap');
+class JSON{
+	function stringify($o){
+		return json_encode($o);
+	}
+	function parse($t){
+		return json_decode($t);
+	}
+}
+$globalMap = array(
+	"JSON"=>new JSON(),
+	"encodeURIComponent"=>"urlencode", 
+	"decodeURIComponent"=>"urldecode"
+);
 
 function evaluate($tokens, $context) {
 	$stack = array();
@@ -87,7 +99,7 @@ function compute($op, $arg1, $arg2) {
 				return call_user_func_array(array($base,$name),$arg2);
 			}
 		} else {
-			return call_user_func($arg1, $arg2);
+			return call_user_func_array($arg1, $arg2);
 		}
 	}
 	if ($arg1 instanceof PropertyValue) {
@@ -105,7 +117,8 @@ function compute($op, $arg1, $arg2) {
 		case OP_PARAM_JOIN:
 			$arg1[] = $arg2;return $arg1;
 		case OP_MAP_PUSH:
-			$arg1[$op[1]] = $arg2;return $arg1;
+			$arg1->$op[1] = $arg2;
+			return $arg1;
 		case OP_NOT:
 			return !$arg1;
 		case OP_POS:
@@ -158,16 +171,12 @@ function getTokenValue($context, $item) {
 			return $item[1];
 		case VALUE_VAR:
 			$value = $item[1];
-			if ('this'==$value) {
-				return $context;
-			} else {
-				if (array_key_exists($value, $context)) {
-					return $context[$value];
-				} elseif (array_key_exists($value, $globalMap)) {
-					return $globalMap[$value];
-				}
-				return null;
+			if (array_key_exists($value, $context)) {
+				return $context[$value];
+			} elseif (array_key_exists($value, $globalMap)) {
+				return $globalMap[$value];
 			}
+			return null;
 		case VALUE_NEW_LIST:
 			return array();
 		case VALUE_NEW_MAP:
