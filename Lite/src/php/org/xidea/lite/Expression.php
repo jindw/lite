@@ -62,11 +62,13 @@ function getTokenValue($context, $item) {
 			} else {
 				switch ($value) {
 				case "JSON":
-					return new JSON();
+					return "JSON";
 				case "encodeURIComponent": 
 					return "urlencode";
 				case "decodeURIComponent": 
 					return "urldecode";
+				case "parseInt": 
+					return "parseInt";
 				}
 			}
 			return null;
