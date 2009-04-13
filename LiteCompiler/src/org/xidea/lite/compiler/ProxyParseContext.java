@@ -38,6 +38,9 @@ public class ProxyParseContext extends ParseContextImpl {
 	public List<String> getMissedResources() {
 		return missedResources;
 	}
+	public void addMissedResource(String path) {
+		missedResources.add(path);
+	}
 
 	@Override
 	public InputStream getInputStream(URL url) {

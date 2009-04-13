@@ -3,6 +3,7 @@ package org.xidea.lite.compiler;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -22,7 +23,6 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.el.json.JSONEncoder;
-import org.xidea.lite.TemplateEngine;
 import org.xidea.lite.parser.DecoratorMapper;
 import org.xidea.lite.parser.XMLParser;
 
@@ -39,6 +39,7 @@ public class LiteCompilerServlet extends HttpServlet {
 		String xpathFactory = config.getInitParameter("xpathFactory");
 		parser = new XMLParser(transformerFactory, xpathFactory);
 	}
+
 	public void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException, ServletException {
 		resp.setContentType("text/html;charset=utf-8");
@@ -62,6 +63,7 @@ public class LiteCompilerServlet extends HttpServlet {
 					String[] v = getParameterValues(name);
 					return v == null ? null : v[0];
 				}
+
 				@Override
 				public String[] getParameterValues(String name) {
 					List<String> v = params.get(name);
@@ -70,36 +72,86 @@ public class LiteCompilerServlet extends HttpServlet {
 			};
 			source = params.get("file").toArray(new String[0]);
 		} else {
-			source = req.getParameterValues("source");
+			source = getPhpParams(req, "source");
 		}
 		String base = req.getParameter("base");
 		String url = "/";
-		String[] path = req.getParameterValues("path");
+		String[] path = getPhpParams(req, "path");
 		int i = source.length;
 		while (i-- > 0) {
 			if (path != null && path.length > i) {
 				url = path[i];
 			}
 			sourceMap.put(url, source[i]);
-
 		}
 		ProxyParseContext context = new ProxyParseContext(base, sourceMap, req
 				.getCharacterEncoding());
 		try {
 			String decoratorxml = sourceMap.get("/WEB-INF/decorators.xml");
-			if(decoratorxml != null){
-				DecoratorMapper mapper = new DecoratorMapper(new StringReader(decoratorxml));
+			if (decoratorxml != null) {
+				DecoratorMapper mapper = new DecoratorMapper(new StringReader(
+						decoratorxml));
 				String layout = mapper.getDecotatorPage(url);
-				if(layout != null){
-					context.setAttribute("#page", parser.loadXML(url, context));
-					layout = url;
+				if (layout != null) {
+					if (sourceMap.containsKey(layout)) {
+						context.setAttribute("#page", parser.loadXML(url,
+								context));
+						url = layout;
+					}else{
+						context.addMissedResource(layout);
+					}
 				}
+
 			}
 		} catch (Exception e) {
 		}
-		context.setCompress(true);
-		parser.parse(context.createURL(null, url), context);
-		resp.getWriter().println(JSONEncoder.encode(context.toResultTree()));
+		context.setCompress("true".equals(req.getParameter("compress")));
+		context.setFormat("true".equals(req.getParameter("format")));
+		PrintWriter out = resp.getWriter();
+		printResult(context, url, out);
+	}
+
+	private void printResult(ProxyParseContext context,String url, 
+			PrintWriter out) {
+		String error = null;
+		try{
+		    parser.parse(context.createURL(null, url), context);
+		}catch (Throwable e) {
+			error = e.getMessage();
+			error = error==null?"unknow error":error;
+			log.info(e);
+		}finally{
+			List<String> missed = context.getMissedResources();
+			if(error != null || !missed.isEmpty()){
+				HashMap<Object, Object> map = new LinkedHashMap<Object, Object>();
+				map.put("missed",missed);
+				if(error!=null){
+					map.put("error",error);
+				}
+				out.print(JSONEncoder.encode(map));
+			}else{
+				out.println(JSONEncoder.encode(context.toResultTree()));
+			}
+		}
+	}
+
+	private String[] getPhpParams(HttpServletRequest req, String name) {
+		String[] source = req.getParameterValues(name);
+		if (source == null) {
+			ArrayList<String> values = new ArrayList<String>();
+			int i = 0;
+			name = name + '[';
+			while (true) {
+				String value = req.getParameter(name + (i++) + ']');
+				if (value == null) {
+					break;
+				} else {
+					values.add(value);
+				}
+			}
+			source = values.toArray(new String[i]);
+		}
+		return source;
 	}
 
 	public static boolean isMultiPart(HttpServletRequest request) {
@@ -138,7 +190,7 @@ public class LiteCompilerServlet extends HttpServlet {
 				if (charset == null) {
 					charset = "utf-8";
 				}
-				values.add(getString(item.openStream(),charset));
+				values.add(getString(item.openStream(), charset));
 				params.put(item.getFieldName(), values);
 				// } else if (item.getSize() == 0) {
 				// log.warn("Item is a file upload of 0 size, ignoring");
