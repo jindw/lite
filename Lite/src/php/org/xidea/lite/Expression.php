@@ -49,12 +49,37 @@ class JSON{
 		return json_decode($t);
 	}
 }
-$globalMap = array(
-	"JSON"=>new JSON(),
-	"encodeURIComponent"=>"urlencode", 
-	"decodeURIComponent"=>"urldecode"
-);
 
+
+function getTokenValue($context, $item) {
+	global $globalMap;
+	$type = $item[0];
+	switch($type){
+		case VALUE_VAR:
+			$value = $item[1];
+			if (array_key_exists($value, $context)) {
+				return $context[$value];
+			} else {
+				switch ($value) {
+				case "JSON":
+					return new JSON();
+				case "encodeURIComponent": 
+					return "urlencode";
+				case "decodeURIComponent": 
+					return "urldecode";
+				}
+			}
+			return null;
+		case VALUE_CONSTANTS:
+			return $item[1];
+		case VALUE_NEW_LIST:
+			return array();
+		case VALUE_NEW_MAP:
+			return new stdClass();
+		case VALUE_LAZY:
+			return LazyToken($item[1]);
+	}
+}
 function evaluate($tokens, $context) {
 	$stack = array();
 	_evaluate($stack, $tokens, $context);
@@ -163,28 +188,6 @@ function compute($op, $arg1, $arg2) {
 	}
 }
 
-function getTokenValue($context, $item) {
-	global $globalMap;
-	$type = $item[0];
-	switch($type){
-		case VALUE_CONSTANTS:
-			return $item[1];
-		case VALUE_VAR:
-			$value = $item[1];
-			if (array_key_exists($value, $context)) {
-				return $context[$value];
-			} elseif (array_key_exists($value, $globalMap)) {
-				return $globalMap[$value];
-			}
-			return null;
-		case VALUE_NEW_LIST:
-			return array();
-		case VALUE_NEW_MAP:
-			return new stdClass();
-		case VALUE_LAZY:
-			return LazyToken($item[1]);
-	}
-}
 
 class LazyToken {
 	var $children = 0;
