@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -21,6 +22,8 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.el.json.JSONEncoder;
+import org.xidea.lite.TemplateEngine;
+import org.xidea.lite.parser.DecoratorMapper;
 import org.xidea.lite.parser.XMLParser;
 
 @SuppressWarnings("serial")
@@ -83,8 +86,14 @@ public class LiteCompilerServlet extends HttpServlet {
 		ProxyParseContext context = new ProxyParseContext(base, sourceMap, req
 				.getCharacterEncoding());
 		try {
-			if(path.length > 1){
-				context.setAttribute("#page", parser.loadXML(path[1], context));
+			String decoratorxml = sourceMap.get("/WEB-INF/decorators.xml");
+			if(decoratorxml != null){
+				DecoratorMapper mapper = new DecoratorMapper(new StringReader(decoratorxml));
+				String layout = mapper.getDecotatorPage(url);
+				if(layout != null){
+					context.setAttribute("#page", parser.loadXML(url, context));
+					layout = url;
+				}
 			}
 		} catch (Exception e) {
 		}
