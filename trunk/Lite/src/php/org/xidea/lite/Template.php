@@ -25,7 +25,7 @@ class Template{
     }
 }
     
-function renderList($context, $children){
+function renderList(&$context, &$children){
     foreach($children as $item){
         try{
             if(is_string($item)){
@@ -63,27 +63,29 @@ function renderList($context, $children){
         }
     }
 }
-function printXMLAttribute($text){
+function printXMLAttribute(&$text){
     echo htmlspecialchars("".$text);
 }
 
-function printXMLText($text){
+function printXMLText(&$text){
     echo htmlspecialchars("".$text);
 }
 
-function toBoolean($test){
+function toBoolean(&$test){
     return !!$test;
 }
 
-function processExpression($context, $data, $encodeXML){
-    $value = evaluate($data[1],$context);
+function processExpression(&$context, &$data, $encodeXML){
+	$stack = $data[1];
+    $value = evaluate($stack,$context);
     if($encodeXML && isset($value)){
-        printXMLText("$value");
+    	$value = "$value";
+        printXMLText($value);
     }else{
         echo $value;
     }
 }
-function processIf($context, $data){
+function processIf(&$context, &$data){
     try{
         if(toBoolean(evaluate($data[2],$context))){
         	$test = 1;
@@ -97,10 +99,10 @@ function processIf($context, $data){
         throw $e;
     }
 }
-function processElse($context, $data){
-    if(!toBoolean($context[IF_KEY])){
+function processElse(&$context, &$data){
+    if(array_key_exists(IF_KEY,$context) && !toBoolean($context[IF_KEY])){
         try{
-            if(isnull($data[2]) || toBoolean(evaluate($data[2],$context))){
+            if(is_null($data[2]) || toBoolean(evaluate($data[2],$context))){
                 $test = 1;
                 renderList($context, $data[1]);
             }else{
@@ -113,7 +115,7 @@ function processElse($context, $data){
         }
     }
 }
-function processFor($context, $data){
+function processFor(&$context, &$data){
     $children = $data[1];
     $items = evaluate($data[2],$context);
     $varName = $data[3];
@@ -132,7 +134,7 @@ function processFor($context, $data){
 	        foreach($items as $item){
 	            $forStatus->index += 1;
 	            $context[$varName]=$item;
-	            renderList($context, $data);
+	            renderList($context, $children);
 	        }
         }
         $context[FOR_KEY]=$preiousStatus;
@@ -144,17 +146,18 @@ function processFor($context, $data){
     }
 }
 
-function processVar($context, $data){
+function processVar(&$context, &$data){
     $context[$data[2]]= evaluate($data[1],$context);
 } 
 
-function processCaptrue($context, $data){
-    $buf = StringWriter();
-    renderList($context, $data[1], $buf);
-    $context[$data[2]]= $buf;
+function processCaptrue(&$context, &$data){
+    ob_start();
+    renderList($context, $data[1]);
+    $context[$data[2]]= ob_get_contents();
+    ob_end_clean();
 }
 
-function processAttribute($context, $data){
+function processAttribute(&$context, &$data){
     $result = evaluate($data[1],$context);
     if(isnull($data[2])){
         printXMLAttribute($result);
