@@ -24,6 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xidea.lite.Template;
+import org.xidea.lite.parser.AbstractParser;
 import org.xidea.lite.parser.TextParser;
 import org.xml.sax.InputSource;
 
@@ -53,7 +54,7 @@ public class TextParserTest {
 	}
 
 	public void test(String text, String result) throws Exception {
-		TextParser p = new TextParser();
+		AbstractParser p = new TextParser();
 		List<Object> insts = p.parse(text);
 		Template t = new Template(insts);
 		Writer out = new StringWriter();

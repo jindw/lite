@@ -31,9 +31,11 @@ import org.xidea.lite.parser.XMLParser;
 public class XMLTest {
 	protected Map<String, Object> context;
 	protected Map<String, String> templateResultMap;
-
+	XMLParser parser;
 	@Before
 	public void setUp() throws Exception {
+		parser = new XMLParser();
+		
 	}
 
 	@After
@@ -92,12 +94,15 @@ public class XMLTest {
 	}
 
 	public void test(int index,String text, String result) throws Exception {
-		XMLParser p = new XMLParser();
+
 		ParseContextImpl parseContext = new ParseContextImpl(this.getClass()
 				.getResource("/"));
+		Map<String, String> map = new HashMap<String, String>();
+		map.put(HTMLFormNodeParser.AUTO_FORM_FEATRUE_URL, HTMLFormNodeParser.AUTO_IN_FORM);
+		parseContext.setFeatrueMap(map);
+		
 		parseContext.setCompress(true);
-		parseContext.setAttribute(HTMLFormNodeParser.class, HTMLFormNodeParser.AUTO_IN_FORM);
-		List<Object> insts = p.parse(
+		List<Object> insts = parser.parse(
 				"<div xmlns:c=\"http://www.xidea.org/ns/template/core\">"
 						+ text + "</div>", parseContext);
 		System.out.println(JSONEncoder.encode(insts));
@@ -125,14 +130,14 @@ public class XMLTest {
 		Assert.assertTrue("多属性",mutiAttr.matcher("<a\tx=''\n\ty=\"3\"").find());
 		Assert.assertTrue("单属性",!mutiAttr.matcher("<a\t\n\ty=\"3 b=''\"").find());
 	}
-	public static int sumText(String xml){
-		int sum = 0;
+	public static String sumText(String xml){
+		StringBuilder sum = new StringBuilder();
 		for(char c:xml.toCharArray()){
 			if(!Character.isWhitespace(c)){
-				sum+=c;
+				sum.append(c);
 			}
 		}
-		return sum;
+		return sum.toString();
 	}
 	public static String rexml(String xml) {
 		try {
