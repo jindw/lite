@@ -1,14 +1,52 @@
-<html xmlns='http://www.w3.org/1999/xhtml'>
+<html xmlns='http://www.w3.org/1999/xhtml'
+	xmlns:c="http://www.xidea.org/ns/lite/core">
 	<head>
 		<title>脚本管理框架JSI2.5预览版发布</title>
 	</head>
 	<body>
 		<h3>测试</h3>
 		<p>\${1+1}:${1+1}</p>
-		<p>\${parseInt(1+1)}:${parseInt(1+1)}</p>
+		<p>
+			if true:
+			<c:if test="${true}">if</c:if>
+			<c:else>else</c:else>
+		</p>
+		<p>
+			if false:
+			<c:if test="${false}">if</c:if>
+			<c:else>else</c:else>
+		</p>
+		<p>
+			if false:
+			<c:if test="${false}">if</c:if>
+			<c:else test="${true}">else if</c:else>
+			<c:else>else</c:else>
+		</p>
+		<p>
+			for 1-3:
+			<c:for items="${[1,2,3]}" var="item">${item}-${for.index},</c:for><c:else>else</c:else>
+		</p>
+		<p>
+			for else:
+			<c:for items="${[]}" var="item">${item}-${for.index},${for.lastIndex}</c:for><c:else>else</c:else>
+		</p>
+		<p>
+			var:xx=1+1
+			<c:var name="xx" value="${1+1}"/>
+			${xx}
+		</p>
+		<p>
+			var:xx=1+1
+			<c:var name="xx"><div>${1+1}</div></c:var>
+			${xx}
+		</p>
 		<p>\${int1+1}:${int1+1}</p>
 		<p>\${text1*1}:${text1*1}</p>
-		<p>\${encodeURIComponent("12@#$&amp;22=d$")}:${encodeURIComponent("12@#$&amp;22=d$")}</p>
-		<p>\${JSON.stringify({text:"text","array":[1,2,3]})}:${JSON.stringify({text:"text","array":[1,2,3]})}</p>
+		<p>
+			\${encodeURIComponent("12@#$&amp;22=d$")}:${encodeURIComponent("12@#$&amp;22=d$")}
+		</p>
+		<p>
+			\${JSON.stringify({text:"text","array":[1,2,3]})}:${JSON.stringify({text:"text","array":[1,2,3]})}
+		</p>
 	</body>
 </html>

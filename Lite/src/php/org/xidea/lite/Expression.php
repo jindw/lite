@@ -80,16 +80,16 @@ function getTokenValue($context, $item) {
 			return LazyToken($item[1]);
 	}
 }
-function evaluate($tokens, $context) {
+function evaluate(&$tokens, &$context) {
 	$stack = array();
 	_evaluate($stack, $tokens, $context);
 	$stack=$stack[0];
 	if ($stack instanceof PropertyValue) 
-		$stack = $stack->base[$stack->name];
+		$stack = $stack->get();
 	return $stack;
 }
 
-function _evaluate(&$stack, $tokens, $context) {
+function _evaluate(&$stack, &$tokens, &$context) {
 	foreach($tokens as $item) {
 		if(is_array($item)) {
 			$type = $item[0];
@@ -116,22 +116,16 @@ function compute($op, $arg1, $arg2) {
 	$type = $op[0];
 	if ($type == OP_INVOKE_METHOD) {
 		if($arg1 instanceof PropertyValue) {
-			$base = $arg1->base;
-			$name = $arg1->name;
-			if (is_array($arg1) && array_key_exists($name, $base)) {
-				return call_user_func_array($base[$name], $arg2);
-			} else {
-				return call_user_func_array(array($base,$name),$arg2);
-			}
+			return $arg1->call($arg2);
 		} else {
 			return call_user_func_array($arg1, $arg2);
 		}
 	}
 	if ($arg1 instanceof PropertyValue) {
-		$arg1 = $arg1->base[$arg1->name];
+		$arg1 = $arg1->get();
 	}
 	if ($arg2 instanceof PropertyValue) {
-		$arg2 = $arg2->base[$arg2->name];
+		$arg2 = $arg2->get();
 	}
 
 	switch($type) {
@@ -140,7 +134,7 @@ function compute($op, $arg1, $arg2) {
 		case OP_GET_PROP:
 			return new PropertyValue($arg1, $arg2);
 		case OP_PARAM_JOIN:
-			$arg1[] = $arg2;return $arg1;
+			$arg1[]=$arg2;return $arg1;
 		case OP_MAP_PUSH:
 			$arg1->$op[1] = $arg2;
 			return $arg1;
@@ -202,6 +196,26 @@ class PropertyValue {
 	function PropertyValue($base, $name) {
 		$this->base = $base;
 		$this->name = $name;
+	}
+	function get(){
+		$base = $this->base;
+		$name = $this->name;
+		if(is_array($base)) {
+			if(array_key_exists($name, $base)){
+				return $base[$name];
+			}
+		}else{
+			return $base->$name;
+		}
+	}
+	function call($arg){
+		$base = $this->base;
+		$name = $this->name;
+		if (is_array($base) && array_key_exists($name, $base)) {
+			return call_user_func_array($base[$name], $arg);
+		} else {
+			return call_user_func_array(array($base,$name),$arg);
+		}
 	}
 }
 ?>
