@@ -12,6 +12,14 @@
 			<string><![CDATA[<div>${1+1}</div>]]></string>
 		</void>
 		<void method="put">
+			<string><![CDATA[<div>\${"123$2{34"}${"123$23}4"}</div>]]></string>
+			<string><![CDATA[<div>${"123$2{34"}123$23}4</div>]]></string>
+		</void>
+		<void method="put">
+			<string><![CDATA[<div>\${"123$234"}${"123$234"}</div>]]></string>
+			<string><![CDATA[<div>${"123$234"}123$234</div>]]></string>
+		</void>
+		<void method="put">
 			<string><![CDATA[<div>\\${1+1}</div>]]></string>
 			<string><![CDATA[<div>\2</div>]]></string>
 		</void>
