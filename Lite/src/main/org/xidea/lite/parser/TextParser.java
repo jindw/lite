@@ -6,8 +6,10 @@ import org.xidea.lite.Template;
 public class TextParser extends AbstractParser implements Parser {
 	protected class ELParser implements InstructionParser {
 		private int type;
+		private String fn = "";
 
-		public ELParser() {
+		public ELParser(String fn) {
+			this.fn = fn;
 		}
 
 		public ELParser(int type) {
@@ -17,11 +19,14 @@ public class TextParser extends AbstractParser implements Parser {
 		public int parse(ParseContext context, String text, int p$) {
 			int begin = text.indexOf('{', p$);
 			if (begin > 0) {
-				int end = findELEnd(text, begin);
-				if (end > 0) {
-					String el = text.substring(begin + 1, end);
-					addEl(context, el);
-					return end + 1;
+				String fn2 = text.substring(p$ + 1, begin);
+				if (fn2.trim().equals(fn)) {
+					int end = findELEnd(text, begin);
+					if (end > 0) {
+						String el = text.substring(begin + 1, end);
+						addEl(context, el);
+						return end + 1;
+					}
 				}
 			}
 			throw new ExpressionSyntaxException(type + ":" + text.substring(p$));
@@ -56,7 +61,7 @@ public class TextParser extends AbstractParser implements Parser {
 				return p$ + 4;
 			}
 		});
-		tagParser.put("if", new ELParser() {
+		tagParser.put("if", new ELParser("if") {
 			protected void addEl(ParseContext context, String text) {
 				context.appendIf(context.optimizeEL(text));
 			}
@@ -76,14 +81,14 @@ public class TextParser extends AbstractParser implements Parser {
 				return p$ + 5;// "else".length+1
 			}
 		});
-		tagParser.put("for", new ELParser() {
+		tagParser.put("for", new ELParser("for") {
 			protected void addEl(ParseContext context, String text) {
 				int p = text.indexOf(':');
 				context.appendFor(text.substring(0, p).trim(), context
 						.optimizeEL(text.substring(p + 1)), null);
 			}
 		});
-		tagParser.put("var", new ELParser() {
+		tagParser.put("var", new ELParser("var") {
 			protected void addEl(ParseContext context, String text) {
 				int p = text.indexOf('=');
 				if (p > 0) {
