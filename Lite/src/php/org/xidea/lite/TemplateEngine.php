@@ -86,7 +86,7 @@ class TemplateEngine{
 			}
 		}
 	}
-	function &httpLoad($paths,&$sources){
+	function httpLoad($paths,&$sources){
 		$postdata = http_build_query(
 			array(
 			    "source"=>$sources,
