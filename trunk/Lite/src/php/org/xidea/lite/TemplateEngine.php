@@ -3,7 +3,7 @@
  * Lite 使用实例代码：
  * <?php
  * require_once("../WEB-INF/template.php");
- * $engine = new TemplateEngine(realpath("../"));
+ * $engine = new TemplateEngine();
  *
  * ## 通过上下文数据方式传递模板参数：
  * #$engine->render("/example/test.xhtml",array("int1"=>1,"text1"=>'1'));
@@ -18,16 +18,33 @@ require_once("Template.php");
 
 class TemplateEngine{
 	var $liteBase;
+	var $liteCached;
 	var $liteService; 
 	function TemplateEngine($liteBase=NULL,$liteService="http://litecompiler.appspot.com"){
 		if($liteBase == NULL){
 			$liteBase = $_SERVER["DOCUMENT_ROOT"];
+			$dir = $_SERVER["SCRIPT_FILENAME"];
+			while($dir){
+				$dir = dirname($dir);
+				if(file_exists("$dir/WEB-INF")){
+					$liteBase = $dir;
+					break;
+				}
+			}
 		}
-		$this->liteBase = realpath($liteBase);
-		$this->liteService = $liteService;
+		$liteBase = realpath($liteBase);
 		if(!file_exists($liteBase)){
 			echo "liteBase not found:$this->liteBase";
 			exit();
+		}
+		$this->liteService = $liteService;
+		$this->liteBase = $liteBase;
+		$this->liteCached = "$liteBase/WEB-INF/litecached/";
+		if(!file_exists($this->liteCached)){
+			if(!file_exists("$liteBase/WEB-INF")){
+				mkdir("$liteBase/WEB-INF");
+			}
+			mkdir($this->liteCached);
 		}
 	}
 	function render($path,$context=NULL){
@@ -39,11 +56,7 @@ class TemplateEngine{
 		$template->render($context);
 	}
 	function &load($path){
-	    $compileDir = "$this->liteBase/WEB-INF/litecached/";
-		if(!file_exists($compileDir)){
-			mkdir($compileDir,0700,true);
-		}
-	    $liteFile = $compileDir.rawurlencode($path);
+	    $liteFile = $this->liteCached.urlencode($path);
 	    if(file_exists($liteFile)){
 	    	$lite = &json_decode(file_get_contents($liteFile));
 	    	$paths = $lite[0];
