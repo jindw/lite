@@ -22,10 +22,15 @@ class TemplateEngine{
 	var $liteService; 
 	function TemplateEngine($liteBase=NULL,$liteService="http://litecompiler.appspot.com"){
 		if($liteBase == NULL){
+			//自动探测虚拟目录
 			$liteBase = $_SERVER["DOCUMENT_ROOT"];
 			$dir = $_SERVER["SCRIPT_FILENAME"];
-			while($dir){
-				$dir = dirname($dir);
+			$path = $_SERVER["REQUEST_URI"];
+			$dns = split('/',$path);
+			array_pop($dns);
+			$dir = dirname($dir);
+			while(array_pop($dns)==basename($dir)){
+			    $dir = dirname($dir);
 				if(file_exists("$dir/WEB-INF")){
 					$liteBase = $dir;
 					break;
@@ -107,7 +112,7 @@ class TemplateEngine{
 					}
 				}
 				if(!$retry){
-					return array($paths,$result);
+					return array($paths,array($code));
 				}
 			}else{
 				return array($paths,$result);
