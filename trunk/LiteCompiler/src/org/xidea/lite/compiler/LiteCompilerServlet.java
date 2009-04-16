@@ -122,7 +122,7 @@ public class LiteCompilerServlet extends HttpServlet {
 			PrintWriter pbuf = new PrintWriter(buf);
 			e.printStackTrace(pbuf);
 			pbuf.flush();
-			error = buf.toString();
+			error = "±‡“Î ß∞‹£∫"+buf.toString();
 			error = error==null?"unknow error":error;
 			log.info(e);
 		}finally{
