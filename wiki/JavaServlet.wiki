@@ -29,10 +29,8 @@
       * servlet 类名：
         org.xidea.lite.servlet.TemplateServlet
       * servlet 参数：
-        # format 参数
-          格式化输出内容，格式化是在编译期间完成，所以，不必担心性能问题。
         # compress 参数
-          设置是否需要压缩输出,自动压缩html，js语法空白;如果format为真，则该属性失效。
+          设置是否需要压缩输出,自动压缩html，js语法空白。
           压缩是在编译期间完成，所以，不必担心性能问题。
         # contentType 参数，设置该参数后，将帮你输出指定的contentType，当然你也可以用Filter完成该工作
         # xpathFactory 参数，如果你的JDK没有默认的XPath支持，那么你需要添加相关类库，并设置相应类名。
@@ -55,12 +53,7 @@
 			<param-name>contentType</param-name>
 			<param-value>text/html;charset=UTF-8</param-value>
 		</init-param>
-		<!-- 设置格式化编译属性 -->
-		<init-param>
-			<param-name>format</param-name>
-			<param-value>false</param-value>
-		</init-param>
-		<!-- 设置压缩编译属性（如果format为真，则压缩属性失效） -->
+		<!-- 设置压缩编译属性 -->
 		<init-param>
 			<param-name>compress</param-name>
 			<param-value>true</param-value>
