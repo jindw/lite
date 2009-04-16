@@ -11,6 +11,7 @@
 		<mkdir dir="build/dest/jslite" />
 		<mkdir dir="build/dest" />
 	</target>
+	
 	<target name="join-php">
 		<concat destfile="web/WEB-INF/template.php">
 			<path path="src/php/org/xidea/lite/TemplateEngine.php" />
@@ -27,30 +28,12 @@
 			<replacefilter token="&#10;?&gt;&lt;?php" value="&#10;//?&gt;&lt;?php" />
 		</replace>
 	</target>
-	<target name="jar-template" depends="init">
+	<target name="jar-template" depends="init,join-php">
 		<delete>
 			<fileset dir="build/dest/">
-				<include name="JSEL-*.jar" />
 				<include name="Template-*.jar" />
 			</fileset>
 		</delete>
-		<jar destfile="build/dest/JSEL.jar">
-			<fileset dir="web/WEB-INF/classes">
-				<include name="org/xidea/el/**/*.class" />
-				<exclude name="**/test/**/*.*" />
-			</fileset>
-		</jar>
-		<copy tofile="build/dest/JSEL-${version}.jar" file="build/dest/JSEL.jar" />
-
-		<jar destfile="build/dest/JSEL-Source.jar">
-			<zipfileset src="build/dest/JSEL.jar" />
-			<fileset dir="src/main">
-				<include name="org/xidea/el/**/*.java" />
-				<include name="org/xidea/lite/servlet/*.java" />
-				<exclude name="**/test/**/*.*" />
-			</fileset>
-		</jar>
-
 
 		<echo file="build/dest/jslite/__package__.js">this.addScript("template.js",["XMLParser","Template"])</echo>
 		<jar destfile="build/dest/Template.jar" compress="true">
@@ -74,21 +57,20 @@
 		<delete file="build/dest/jslite/__package__.js" />
 		<copy tofile="build/dest/Template-${version}.jar" file="build/dest/Template.jar" />
 
-		<jar destfile="build/dest/Template-Test.jar">
-			<manifest>
-				<attribute name="Main-Class" value="org.xidea.lite.test.app.SimpleWebServer" />
-			</manifest>
-			<zipfileset src="build/dest/Template.jar">
-				<include name="**/*.class" />
+		<zip destfile="build/dest/Example.zip">
+			<zipfileset dir="build/dest/" prefix="WEB-INF/lib/">
+				<include name="Template.jar" />
 			</zipfileset>
-			<zipfileset src="web/WEB-INF/lib/commons-logging-1.0.4.jar">
-				<include name="**/*.class" />
+			<zipfileset dir="web/">
+				<include name="WEB-INF/lib/commons-logging-1.0.4.jar" />
+				<include name="WEB-INF/decorators.xml" />
+				<include name="WEB-INF/template.php" />
+				<include name="example/*.xhtml" />
+				<include name="example/test.php" />
 			</zipfileset>
-			<fileset dir="web/WEB-INF/classes" defaultexcludes="true">
-				<include name="org/xidea/lite/test/app/*.class" />
-				<include name="org/xidea/lite/test/webserver/*.class" />
-			</fileset>
-		</jar>
+		</zip>
+		<copy tofile="build/dest/Example-${version}.zip" file="build/dest/Example.zip" />
+
 	</target>
 
 	<target name="compress" depends="init">
