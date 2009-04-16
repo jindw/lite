@@ -64,6 +64,7 @@
 			<zipfileset dir="web/">
 				<include name="WEB-INF/lib/commons-logging-1.0.4.jar" />
 				<include name="WEB-INF/decorators.xml" />
+				<include name="WEB-INF/web.xml" />
 				<include name="WEB-INF/template.php" />
 				<include name="example/*.xhtml" />
 				<include name="example/test.php" />
