@@ -1,4 +1,19 @@
 <?php
+/**
+ * Lite 使用实例代码：
+ * <?php
+ * require_once("../WEB-INF/template.php");
+ * $engine = new TemplateEngine(realpath("../"));
+ *
+ * ## 通过上下文数据方式传递模板参数：
+ * #$engine->render("/example/test.xhtml",array("int1"=>1,"text1"=>'1'));
+ * 
+ * # 直接通过全局变量传递模板参数：
+ * $int1 = 1;
+ * $text1 = '1';
+ * $engine->render("/example/test.xhtml");
+ * ?>
+ */
 require_once("Template.php");
 
 class TemplateEngine{
@@ -8,7 +23,7 @@ class TemplateEngine{
 		if($liteBase == NULL){
 			$liteBase = $_SERVER["DOCUMENT_ROOT"];
 		}
-		$this->liteBase = &$liteBase;
+		$this->liteBase = realpath($liteBase);
 		$this->liteService = $liteService;
 		if(!file_exists($liteBase)){
 			echo "liteBase not found:$this->liteBase";
