@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -117,7 +118,11 @@ public class LiteCompilerServlet extends HttpServlet {
 		try{
 		    parser.parse(context.createURL(null, url), context);
 		}catch (Throwable e) {
-			error = e.getMessage();
+			StringWriter buf = new StringWriter();
+			PrintWriter pbuf = new PrintWriter(buf);
+			e.printStackTrace(pbuf);
+			pbuf.flush();
+			error = buf.toString();
 			error = error==null?"unknow error":error;
 			log.info(e);
 		}finally{
