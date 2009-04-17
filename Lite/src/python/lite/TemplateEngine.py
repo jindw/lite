@@ -35,8 +35,9 @@ class TemplateEngine:
 	    self.writeCache(liteFile,json_encode(lite));
 	    return lite[1];
 	def readFile(self,path):
-	    open
+		return None;
 	def writeFile(self,file,context):
+		return None;
 	    
 def json_decode(text):
-    return eval(text,None,{'true':True,'false':False});
+    return eval(text,None,{'true':True,'false':False,'null',None});
