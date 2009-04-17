@@ -194,3 +194,18 @@ class PropertyValue:
             return self.base[self.name];
        else:
             return getattr(self.base,self.name);
+
+class Expression:
+    """ generated source for ExpressionImpl
+
+    """
+    source = ""
+    expression = []
+
+    def __init__(self, el):
+        self.expression = el
+
+    def evaluate(self, context):
+        if context is None:
+            context = {}
+        return evaluate(self.expression, context)

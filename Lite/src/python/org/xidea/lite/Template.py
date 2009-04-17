@@ -18,11 +18,12 @@ FOR_KEY = "for"
 IF_KEY = "if"
 
 class Template:
-    def __init__(self, items):
-        self.items = items;
-    def render(self,context,out):
+    items = None
+    def __init__(self, list):
+        self.items = list
+        
+    def render(self, context, out):
         renderList(context, self.items, out)
-    
 def renderList(context, children, out):
     for item in children:
         try:
