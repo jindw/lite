@@ -13,7 +13,7 @@
 	</target>
 	
 	<target name="join-php">
-		<concat destfile="web/WEB-INF/template.php">
+		<concat destfile="web/WEB-INF/template.php" encoding="utf-8">
 			<path path="src/php/org/xidea/lite/TemplateEngine.php" />
 			<path path="src/php/org/xidea/lite/Template.php" />
 			<path path="src/php/org/xidea/lite/Expression.php" />
@@ -23,7 +23,7 @@
 		<replaceregexp file="web/WEB-INF/template.php"
 			match="^require_once|^\?&gt;&lt;\?php" replace="//\0" byline="true" encoding="utf-8"/>
 		-->
-		<replace file="web/WEB-INF/template.php">
+		<replace file="web/WEB-INF/template.php" encoding="utf-8">
 			<replacefilter token="&#10;require_once" value="&#10;//require_once" />
 			<replacefilter token="&#10;?&gt;&lt;?php" value="&#10;//?&gt;&lt;?php" />
 		</replace>
