@@ -1,13 +1,12 @@
 <?php
-#value token
-define('LITE_VALUE_CONSTANTS', -0x00);#c;
-
-define('LITE_VALUE_VAR', -0x01);#n;
-define('LITE_VALUE_LAZY', -0x02);
-define('LITE_VALUE_NEW_LIST', -0x03);#[;
-define('LITE_VALUE_NEW_MAP', -0x04);#{;
+# 值标示定义
+define('LITE_VALUE_CONSTANTS', 0);#c;
+define('LITE_VALUE_VAR', -1);#n;
+define('LITE_VALUE_LAZY', -2);
+define('LITE_VALUE_NEW_LIST', -3);#[;
+define('LITE_VALUE_NEW_MAP', -4);#{;
 	
-#��ű�� ????? !!
+# 操作符标示定义
 #9
 define('LITE_OP_GET_PROP', 17);#0 | 16 | 1;
 define('LITE_OP_STATIC_GET_PROP', 48);#32 | 16 | 0;
@@ -55,7 +54,7 @@ class Expression{
 	function &evaluate(&$context,$tokens = NULL) {
 		$stack = array();
 		if($tokens == NULL){
-			$tokens = $this->tokens;
+			$tokens = &$this->tokens;
 		}
 		Expression::_evaluate($stack, $context, $tokens);
 		$stack=$stack[0];
@@ -64,15 +63,17 @@ class Expression{
 		return $stack;
 	}
 	function _evaluate(&$stack, &$context, &$tokens) {
-		foreach($tokens as $item) {
+		foreach($tokens as &$item) {
 			if(is_array($item)) {
 				$type = $item[0];
 				if($type > 0) {
 					if($type & 1) {
 						$result = Expression::compute($item, array_pop($stack), array_pop($stack));
 					}else{
-						$result = Expression::compute($item,NULL,array_pop($stack));
+						$arg2 = null;
+						$result = Expression::compute($item, $arg2, array_pop($stack));
 					}
+					
 					if($result instanceof _LiteLazyToken) {
 						Expression::_evaluate($stack, $context, $result->children);
 					} else {
@@ -115,11 +116,12 @@ class Expression{
 	}
 	
 	/**
-	 * $op
-	 * $arg1
-	 * $arg2 等等，都不能随便修改的：（
+	 * 丑陋的PHP引用：（，引用传递，传入前的变量不能随便修改，都不能随便修改的：（
+	 * @param $op
+	 * @param $arg1
+	 * @param $arg2 
 	 */
-	function compute(&$op, $arg2, &$arg1) {
+	function compute(&$op, &$arg2, &$arg1) {
 		$type = $op[0];
 		if ($type == LITE_OP_INVOKE_METHOD) {
 			if($arg1 instanceof _LitePropertyValue) {

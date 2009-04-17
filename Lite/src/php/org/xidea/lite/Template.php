@@ -1,23 +1,11 @@
 <?php
 require_once("Expression.php");
-/*
-define('LITE_EL_TYPE',0);            // [0,<el>]
-define('LITE_IF_TYPE',1);            // [1,[...],<test el>]
-define('LITE_BREAK_TYPE',2);         // [2,depth]
-define('LITE_XML_ATTRIBUTE_TYPE',3); // [3,<value el>,'name']
-define('LITE_XML_TEXT_TYPE',4);      // [4,<el>]
-define('LITE_FOR_TYPE',5);           // [5,[...],<items el>,'varName']
-define('LITE_ELSE_TYPE',6);          // [6,[...],<test el>] //<test el> 可为null
-define('LITE_ADD_ON_TYPE',7);        // [7,[...],<add on el>,'<addon-class>']
-define('LITE_VAR_TYPE',8);           // [8,<value el>,'name']
-define('LITE_CAPTRUE_TYPE',9);       // [9,[...],'var']
-*/
 define('LITE_FOR_KEY', "for");
 define('LITE_IF_KEY', "if");
 
 class Template{
 
-    function Template(&$items){
+    function Template($items){
         $this->items = &$items;
     }
     function render($context){
@@ -75,7 +63,6 @@ class Template{
 	
 	function processExpression(&$context, &$data, $encodeXML){
 		$stack = &$data[1];
-		//$el = new Expression($stack);
 	    $value = Expression::evaluate($context,$stack);
 	    if($encodeXML && isset($value)){
 	    	$value = "$value";
