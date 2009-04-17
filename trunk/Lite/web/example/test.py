@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import sys
-sys.path.append('C:/Users/jindw/workspace/Lite/src/python/org/xidea/');
-#print (sys.path)
+import sys,os
+sys.path.append(os.path.realpath('../WEB-INF/classes/'));
+print (sys.path)
 
 
 from lite import Expression
