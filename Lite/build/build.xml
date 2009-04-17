@@ -14,9 +14,9 @@
 	
 	<target name="join-php">
 		<concat destfile="web/WEB-INF/template.php" encoding="utf-8">
-			<path path="src/php/org/xidea/lite/TemplateEngine.php" />
-			<path path="src/php/org/xidea/lite/Template.php" />
-			<path path="src/php/org/xidea/lite/Expression.php" />
+			<path path="src/php/lite/TemplateEngine.php" />
+			<path path="src/php/lite/Template.php" />
+			<path path="src/php/lite/Expression.php" />
 		</concat>
 		<!-- 合并之后替换掉多余的require_once  -->
 		<!--
