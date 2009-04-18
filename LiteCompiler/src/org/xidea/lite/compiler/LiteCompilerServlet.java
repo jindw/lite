@@ -115,14 +115,15 @@ public class LiteCompilerServlet extends HttpServlet {
 	private void printResult(ProxyParseContext context,String url, 
 			PrintWriter out) {
 		String error = null;
+		List<Object> result = null;
 		try{
-		    parser.parse(context.createURL(null, url), context);
+			result = parser.parse(context.createURL(null, url), context);
 		}catch (Throwable e) {
 			StringWriter buf = new StringWriter();
 			PrintWriter pbuf = new PrintWriter(buf);
 			e.printStackTrace(pbuf);
 			pbuf.flush();
-			error = "±àÒëÊ§°Ü£º"+buf.toString();
+			error = "ç¼–è¯‘å¤±è´¥ï¼š"+buf.toString();
 			error = error==null?"unknow error":error;
 			log.info(e);
 		}finally{
@@ -135,7 +136,7 @@ public class LiteCompilerServlet extends HttpServlet {
 				}
 				out.print(JSONEncoder.encode(map));
 			}else{
-				out.println(JSONEncoder.encode(context.toResultTree()));
+				out.println(JSONEncoder.encode(result));
 			}
 		}
 	}
