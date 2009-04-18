@@ -2,7 +2,7 @@
 /**
  * Lite 使用实例代码：
  * <?php
- * require_once("../WEB-INF/template.php");
+ * require_once("../WEB-INF/classes/TemplateEngine.php");
  * $engine = new TemplateEngine();
  *
  * ## 通过上下文数据方式传递模板参数：
@@ -14,24 +14,24 @@
  * $engine->render("/example/test.xhtml");
  * ?>
  */
-require_once("Template.php");
+require_once('Template.php');
 
 class TemplateEngine{
 	var $liteBase;
 	var $liteCached;
 	var $liteService; 
-	function TemplateEngine($liteBase=NULL,$liteService="http://litecompiler.appspot.com"){
+	function TemplateEngine($liteBase=NULL,$liteService='http://litecompiler.appspot.com'){
 		if($liteBase == NULL){
 			//自动探测虚拟目录
-			$liteBase = $_SERVER["DOCUMENT_ROOT"];
-			$dir = $_SERVER["SCRIPT_FILENAME"];
-			$path = $_SERVER["REQUEST_URI"];
+			$liteBase = $_SERVER['DOCUMENT_ROOT'];
+			$dir = $_SERVER['SCRIPT_FILENAME'];
+			$path = $_SERVER['REQUEST_URI'];
 			$dns = split('/',$path);
 			array_pop($dns);
 			$dir = dirname($dir);
 			while(array_pop($dns)==basename($dir)){
 			    $dir = dirname($dir);
-				if(file_exists("$dir/WEB-INF")){
+				if(file_exists($dir.'/WEB-INF')){
 					$liteBase = $dir;
 					break;
 				}
@@ -39,15 +39,15 @@ class TemplateEngine{
 		}
 		$liteBase = realpath($liteBase);
 		if(!file_exists($liteBase)){
-			echo "liteBase not found:$this->liteBase";
+			echo 'liteBase not found:'.$liteBase;
 			exit();
 		}
 		$this->liteService = $liteService;
 		$this->liteBase = $liteBase;
-		$this->liteCached = "$liteBase/WEB-INF/litecached/";
+		$this->liteCached = $liteBase.'/WEB-INF/litecached/';
 		if(!file_exists($this->liteCached)){
-			if(!file_exists("$liteBase/WEB-INF")){
-				mkdir("$liteBase/WEB-INF");
+			if(!file_exists($liteBase.'/WEB-INF')){
+				mkdir($liteBase.'/WEB-INF');
 			}
 			mkdir($this->liteCached);
 		}
@@ -63,27 +63,27 @@ class TemplateEngine{
 	function &load($path){
 	    $liteFile = $this->liteCached.urlencode($path);
 	    if(file_exists($liteFile)){
-	    	$lite = &json_decode(file_get_contents($liteFile));
+	    	$lite = json_decode(file_get_contents($liteFile));
 	    	$paths = $lite[0];
 	    	$liteTime = filemtime($liteFile);
 	    	$fileTime = $liteTime;
 	    	$i=count($paths);
 			while($i--){
-				$fileTime = max($fileTime,filemtime("$this->liteBase$paths[$i]"));
+				$fileTime = max($fileTime,filemtime($this->liteBase.$paths[$i]));
 			}
 			if($fileTime<=$liteTime){
 				return $lite[1];
 			}
 	    }
-	    $lite = &$this->compile($path);
+	    $lite = $this->compile($path);
 	    $this->writeCache($liteFile,json_encode($lite));
 	    return $lite[1];
 	}
 	function compile($path){
 		$paths = array($path);
-		$sources = array(file_get_contents(realpath("$this->liteBase$path")));
-		$decoratorPath = "/WEB-INF/decorators.xml";
-		$decoratorXml = file_get_contents(realpath("$this->liteBase$decoratorPath"));
+		$sources = array(file_get_contents(realpath($this->liteBase.$path)));
+		$decoratorPath = '/WEB-INF/decorators.xml';
+		$decoratorXml = file_get_contents(realpath($this->liteBase.$decoratorPath));
 		if($decoratorXml){
 			array_push($sources,$decoratorXml);
 			array_push($paths,$decoratorPath);
@@ -95,16 +95,14 @@ class TemplateEngine{
 			}
 			$result = json_decode($code);
 			if(!$result){
-				//echo "<hr>".$code."<hr>";
 				continue;
 			}
 			if(!is_array($result)){
-				//echo "<hr>".$code."<hr>";
 				$missed = $result->missed;
 				$retry = false;
 				foreach($missed as $path){
 					if(!in_array($path,$paths)){
-						$content = file_get_contents(realpath("$this->liteBase$path"));
+						$content = file_get_contents(realpath($this->liteBase.$path));
 						
 						array_push($sources,$content);
 						array_push($paths,$path);
@@ -122,12 +120,14 @@ class TemplateEngine{
 	function httpLoad($paths,&$sources){
 		$postdata = http_build_query(
 			array(
-			    "source"=>$sources,
-			    "path"=>$paths,
-			    "compress"=>"true",
-			    "base"=>"/"
+			    'source'=>$sources,
+			    'path'=>$paths,
+			    'compress'=>'true',
+			    'base'=>'/'
 		    )
 		);
+		
+		//echo $postdata;
 		//$postdata = preg_replace('/%5B(?:[0-9]+)%5D=/', '=', $postdata);
 		$opts = array('http' =>
 		    array(
@@ -145,6 +145,9 @@ class TemplateEngine{
 	 * @param $word 缓存文件内容
 	 */
 	function writeCache ($file, &$word) {
+		if(!file_exists($file)){
+			
+		}
 		$toFile = fopen($file, 'w+');
 		$lockState = flock($toFile,LOCK_EX);
 		fwrite($toFile, $word);

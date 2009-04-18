@@ -1,7 +1,7 @@
 <?php
-require_once("Expression.php");
-define('LITE_FOR_KEY', "for");
-define('LITE_IF_KEY', "if");
+require_once('Expression.php');
+define('LITE_FOR_KEY', 'for');
+define('LITE_IF_KEY', 'if');
 
 class Template{
 
@@ -50,11 +50,11 @@ class Template{
 	    }
 	}
 	function printXMLAttribute(&$text){
-	    echo htmlspecialchars("".$text);
+	    echo htmlspecialchars($text);
 	}
 	
 	function printXMLText(&$text){
-	    echo htmlspecialchars("".$text);
+	    echo htmlspecialchars($text);
 	}
 	
 	function toBoolean(&$test){
@@ -110,17 +110,17 @@ class Template{
 	    	$preiousStatus =  &$context[LITE_FOR_KEY];
 	    }
 	    try{
-	        $forStatus = array("index"=>-1,"lastIndex"=>$length-1);
+	        $forStatus = array('index'=>-1,'lastIndex'=>$length-1);
 	        $context[LITE_FOR_KEY]=&$forStatus;
 	        if(is_numeric($items)){
 		        for($i=0;$i<$items;$i++){
-		            $forStatus["index"] += 1;
+		            $forStatus['index'] += 1;
 		            $context[$varName]=$i+1;
 		            $this->renderList($context, $data);
 		        }
 	        }else if(is_array($items)){
 		        foreach($items as &$item){
-		            $forStatus["index"] += 1;
+		            $forStatus['index'] += 1;
 		            $context[$varName]=$item;
 		            $this->renderList($context, $children);
 		        }
@@ -150,9 +150,9 @@ class Template{
 	    if(isnull($data[2])){
 	        $this->printXMLAttribute($result);
 	    }elseif(isset($result)){
-	        echo " ";
+	        echo ' ';
 	        echo $data[2];
-	        echo "=\"";
+	        echo '="';
 	        $this->printXMLAttribute($result);
 	        echo '"';
 	    }
