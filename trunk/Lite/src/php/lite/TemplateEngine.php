@@ -137,7 +137,7 @@ class TemplateEngine{
 		    )
 		);
 		$context  = stream_context_create($opts);
-		return file_get_contents($this->liteService, false, $context,0,1024*1024);
+		return file_get_contents($this->liteService, false, $context);
 	}
 	/**
 	 * 写入文件缓存
