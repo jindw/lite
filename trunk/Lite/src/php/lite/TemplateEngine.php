@@ -137,8 +137,6 @@ class TemplateEngine{
 		    )
 		);
 		$context  = stream_context_create($opts);
-		echo $this->liteService;
-		echo $postdata;
 		return file_get_contents($this->liteService, false, $context,0,1024*1024);
 	}
 	/**
