@@ -7,6 +7,8 @@
    * 仿照example/layout.xhtml 编写模板布局页（可选）
      见：[http://code.google.com/p/lite/wiki/XML_Lite_SiteMesh]
    * 仿照example/test.php 使用模板
+   * 查看模板运行效果：
+     [http://www.xidea.org/project/lite/php/example/test.php]
 {{{
 <?php
 require_once("../WEB-INF/classes/lite/TemplateEngine.php");
