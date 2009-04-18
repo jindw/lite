@@ -1,5 +1,5 @@
 <?php
-require_once("../WEB-INF/classes/org/xidea/lite/TemplateEngine.php");
+require_once("../WEB-INF/classes/lite/TemplateEngine.php");
 $engine = new TemplateEngine(realpath("../"));
 
 //$liteService = "http://localhost:8080"; 

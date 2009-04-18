@@ -13,7 +13,7 @@
 	</target>
 	
 	<target name="join-php">
-		<concat destfile="web/WEB-INF/template.php" encoding="utf-8">
+		<concat destfile="build/dest/TemplateEngine.php" encoding="utf-8">
 			<path path="src/php/lite/TemplateEngine.php" />
 			<path path="src/php/lite/Template.php" />
 			<path path="src/php/lite/Expression.php" />
@@ -23,7 +23,7 @@
 		<replaceregexp file="web/WEB-INF/template.php"
 			match="^require_once|^\?&gt;&lt;\?php" replace="//\0" byline="true" encoding="utf-8"/>
 		-->
-		<replace file="web/WEB-INF/template.php" encoding="utf-8">
+		<replace file="build/dest/TemplateEngine.php" encoding="utf-8">
 			<replacefilter token="&#10;require_once" value="&#10;//require_once" />
 			<replacefilter token="&#10;?&gt;&lt;?php" value="&#10;//?&gt;&lt;?php" />
 		</replace>
@@ -61,11 +61,13 @@
 			<zipfileset dir="build/dest/" prefix="WEB-INF/lib/">
 				<include name="Template.jar" />
 			</zipfileset>
+			<zipfileset dir="build/dest/" prefix="WEB-INF/classes/lite/">
+				<include name="TemplateEngine.php" />
+			</zipfileset>
 			<zipfileset dir="web/">
 				<include name="WEB-INF/lib/commons-logging-1.0.4.jar" />
 				<include name="WEB-INF/decorators.xml" />
 				<include name="WEB-INF/web.xml" />
-				<include name="WEB-INF/template.php" />
 				<include name="example/*.xhtml" />
 				<include name="example/test.php" />
 			</zipfileset>
