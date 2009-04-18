@@ -42,9 +42,14 @@ OP_QUESTION_SELECT = 35;#32 | 2 | 1;
 OP_PARAM_JOIN = 1;#0 | 0 | 1;
 OP_MAP_PUSH = 33;#32 | 0 | 1;
 
+
+
+import urllib
+
+
 globalMap = {
     "JSON":None,#TODO:JSON处理
-    "encodeURIComponent":None,#TODO:URL编码处理
+    "encodeURIComponent":lambda t:urllib.quote_plus(t),#TODO:URL编码处理
     "test":lambda x:x*3
 }
 
@@ -79,23 +84,14 @@ def _evaluate(stack, tokens, context):
             stack.append(item)
 def compute(op,arg1,arg2):
     type = op[0];
-    """
-    if type == OP_GET_METHOD:
-        #TODO...
-        if(isinstance(arg1,dict ) and arg2 in arg1):
-            return lambda *args:apply(arg1[arg2],args);
-        else:
-            return lambda *args:apply(getattr(arg1,arg2),args);
-    """
-
     if type == OP_INVOKE_METHOD:
-        if(isinstance(arg1,PropertyValue )):
+        if isinstance(arg1,PropertyValue):
             return apply(arg1.getValue(),arg2);
         else:
             return apply(arg1,arg2);
-    if(isinstance(arg1,PropertyValue)):
+    if isinstance(arg1,PropertyValue):
         arg1 = arg1.getValue();
-    if(isinstance(arg2,PropertyValue)):
+    if isinstance(arg2,PropertyValue):
         arg2 = arg2.getValue();
         
     if type == OP_STATIC_GET_PROP:
@@ -116,12 +112,19 @@ def compute(op,arg1,arg2):
         return -arg1;
         #/* +-*%/ */
     elif type == OP_ADD:
-        return arg1+arg2;
+        if isinstance(arg1,str):
+            return arg1 + str(arg2);
+        elif isinstance(arg2, str):
+            return str(arg1) + arg2;
+        else:
+            return arg1+arg2;
     elif type == OP_SUB:
         return arg1-arg2;
     elif type == OP_MUL:
         return arg1*arg2;
     elif type == OP_DIV:
+        if arg1 % arg2:
+            return float(arg1)/arg2;
         return arg1/arg2;
     elif type == OP_MOD:
         return arg1%arg2;

@@ -79,11 +79,10 @@ class TemplateEngine{
 				return $lite[1];
 			}
 	    }
-	    $lite = $this->compile($path);
-	    $this->writeCache($liteFile,json_encode($lite));
+	    $lite = $this->compile($liteFile,$path);
 	    return $lite[1];
 	}
-	function compile($path){
+	function compile($liteFile,$path){
 		$paths = array($path);
 		$sources = array(file_get_contents(realpath($this->liteBase.$path)));
 		$decoratorPath = '/WEB-INF/decorators.xml';
@@ -119,7 +118,8 @@ class TemplateEngine{
 					return array($paths,array($code));
 				}
 			}else{
-				return array($paths,$result);
+	            $this->writeCache($liteFile,$paths,$code);
+				return array($paths,$result,$code);
 			}
 		}
 		echo "编译失败...";
@@ -152,12 +152,10 @@ class TemplateEngine{
 	 * @param $file 缓存文件路径
 	 * @param $word 缓存文件内容
 	 */
-	function writeCache ($file, &$word) {
-		if(!file_exists($file)){
-			
-		}
+	function writeCache($file, &$paths, &$liteCode) {
 		$toFile = fopen($file, 'w+');
 		$lockState = flock($toFile,LOCK_EX);
+		$word = '['.json_encode($paths).','.$liteCode.']';
 		fwrite($toFile, $word);
 		fclose($toFile);
 	}
