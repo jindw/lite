@@ -1,6 +1,7 @@
 package org.xidea.lite.servlet;
 
 import java.io.File;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Enumeration;
@@ -33,8 +34,7 @@ public class ServletTemplateEngine extends TemplateEngine {
 		
 		try {
 			String decoratorPath = getParam("decoratorMapping",DEFAULT_DECORATOR_MAPPING);
-			this.decoratorMapper = new DecoratorMapper(context
-					.getResourceAsStream(decoratorPath));
+			this.decoratorMapper = new DecoratorMapper(context.getResourceAsStream(decoratorPath));
 		} catch (Exception e) {
 			log.error("装载页面装饰配置信息失败", e);
 		}

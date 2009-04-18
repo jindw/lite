@@ -25,12 +25,16 @@ public class DecoratorMapper {
 	}
 
 	public DecoratorMapper(InputStream config) {
-		this(new InputSource(config));
+		if(config!=null){
+			initialize(new InputSource(config));
+		}
 	}
 	public DecoratorMapper(Reader config) {
-		this(new InputSource(config));
+		if(config!=null){
+			initialize(new InputSource(config));
+		}
 	}
-	protected DecoratorMapper(InputSource config) {
+	protected void initialize(InputSource config) {
 		try {
 			Document configDoc = DocumentBuilderFactory.newInstance()
 					.newDocumentBuilder().parse(config);

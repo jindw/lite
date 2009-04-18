@@ -18,10 +18,10 @@ require_once('Template.php');
 
 class TemplateEngine{
 	var $liteBase;
+	var $liteService='http://litecompiler.appspot.com';
 	var $liteCached;
-	var $liteService; 
-	function TemplateEngine($liteBase=NULL,$liteService='http://localhost:8080/'){
-		if($liteBase == NULL){
+	function TemplateEngine($liteBase=null,$liteService=null){
+		if($liteBase == null){
 			//自动探测虚拟目录
 			$liteBase = $_SERVER['DOCUMENT_ROOT'];
 			$dir = $_SERVER['SCRIPT_FILENAME'];
@@ -42,7 +42,11 @@ class TemplateEngine{
 			echo 'liteBase not found:'.$liteBase;
 			exit();
 		}
-		$this->liteService = $liteService;
+		if($liteService == null){
+			$liteService = $this->liteService;
+		}else{
+			$this->liteService = $liteService;
+		}
 		$this->liteBase = $liteBase;
 		$this->liteCached = $liteBase.'/WEB-INF/litecached/';
 		if(!file_exists($this->liteCached)){
@@ -52,10 +56,10 @@ class TemplateEngine{
 			mkdir($this->liteCached);
 		}
 	}
-	function render($path,$context=NULL){
+	function render($path,$context=null){
 		$liteCode = &$this->load($path);
 		$template = new Template($liteCode);
-		if($context == NULL){
+		if($context == null){
 			$context = $GLOBALS;
 		}
 		$template->render($context);
@@ -88,7 +92,9 @@ class TemplateEngine{
 			array_push($sources,$decoratorXml);
 			array_push($paths,$decoratorPath);
 		}
-		while(true){
+		//最多尝试6次
+		$test = 6;
+		while($test--){
 			$code = $this->httpLoad($paths,$sources);
 			if(!$code){
 				continue;
@@ -116,6 +122,8 @@ class TemplateEngine{
 				return array($paths,$result);
 			}
 		}
+		echo "编译失败...";
+		exit();
 	}
 	function httpLoad($paths,&$sources){
 		$postdata = http_build_query(

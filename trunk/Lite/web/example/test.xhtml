@@ -1,17 +1,15 @@
 <html xmlns='http://www.w3.org/1999/xhtml'
 	xmlns:c="http://www.xidea.org/ns/lite/core">
 	<head>
-		<title>脚本管理框架JSI2.5预览版发布</title>
+		<title>简单表达式和简单模板控制指令测试</title>
 	</head>
 	<body>
 		<h3>测试</h3>
-		<c:var name="msg2" value="134"/>
-		${msg2}
 		<c:var name="msg"> value="'12\n3'"</c:var>
-		<p title="測試：${123+345}" onclick="alert(${JSON.stringify(msg)})">\${1+1}:${1+1}</p>
+		<p title="測試属性，onclick 弹出消息：${msg}" onclick="alert(${JSON.stringify(msg)})">\${1+1}:${1+1}</p>
 		
 		<p>\${1/2}:${1/2}</p>
-		<p>\${1+'ddd'}:${1/2}</p>
+		<p>\${1+'ddd'}:${1+'ddd'}</p>
 		<p>
 			if true:
 			<c:if test="${true}">if</c:if>
