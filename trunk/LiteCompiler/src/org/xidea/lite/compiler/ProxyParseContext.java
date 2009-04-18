@@ -12,10 +12,10 @@ import java.util.Map;
 import org.xidea.lite.parser.ParseContextImpl;
 
 public class ProxyParseContext extends ParseContextImpl {
-	private static final URL BASE ;
-	static{
+	private static final URL BASE;
+	static {
 		try {
-			BASE = new URL("http://litecompiler.appspot.com/");
+			BASE = new URL("http://localhost/");
 		} catch (MalformedURLException e) {
 			throw new IllegalStateException();
 		}
@@ -26,11 +26,11 @@ public class ProxyParseContext extends ParseContextImpl {
 
 	public ProxyParseContext(String base, Map<String, String> params,
 			String encoding) throws MalformedURLException {
-		super(new URL(BASE,base));
+		super(new URL(BASE, base));
 		this.params = params;
 		this.setCompress(true);
-		//this.setFormat(false);
-		if(encoding!=null){
+		// this.setFormat(false);
+		if (encoding != null) {
 			this.encoding = encoding;
 		}
 	}
@@ -38,28 +38,30 @@ public class ProxyParseContext extends ParseContextImpl {
 	public List<String> getMissedResources() {
 		return missedResources;
 	}
+
 	public void addMissedResource(String path) {
 		missedResources.add(path);
 	}
 
 	@Override
 	public InputStream getInputStream(URL url) {
-		String path = url.getPath().substring(this.base.getPath().length()-1);
+		String path = url.getPath().substring(this.base.getPath().length() - 1);
 		String result = params.get(path);
 		try {
 			if (result != null) {
-				if(result.trim().length() == 0){
-					result = "<body><div>empty : "+url+"</div></body>";
+				if (result.trim().length() == 0) {
+					result = "<body><div>empty : " + url + "</div></body>";
 				}
 				return new ByteArrayInputStream(result.getBytes(encoding));
 			}
-			InputStream in = super.getInputStream(url);
-			if(in == null){
-				return in;
-			}else{
-				this.missedResources .add(path);
-				return new ByteArrayInputStream("<empty/>".getBytes());
+			if (!url.getHost().equals(this.base.getHost())) {
+				InputStream in = super.getInputStream(url);
+				if (in == null) {
+					return in;
+				}
 			}
+			this.missedResources.add(path);
+			return new ByteArrayInputStream("<empty/>".getBytes());
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}
