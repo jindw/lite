@@ -9,7 +9,7 @@
    * 仿照example/test.php 使用模板
 {{{
 <?php
-require_once("../WEB-INF/classes/TemplateEngine.php");
+require_once("../WEB-INF/classes/lite/TemplateEngine.php");
 $engine = new TemplateEngine();
 # 通过上下文数据方式传递模板参数：
 $context = array(
