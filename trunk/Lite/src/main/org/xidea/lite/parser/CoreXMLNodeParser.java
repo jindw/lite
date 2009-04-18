@@ -3,6 +3,7 @@ package org.xidea.lite.parser;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -96,11 +97,11 @@ public class CoreXMLNodeParser implements NodeParser {
 	}
 
 	public Node parseIncludeTag(final Element el, ParseContext context) {
-		String var = getAttribute(el, "var");
-		String path = getAttribute(el, "path");
-		String xpath = getAttribute(el, "xpath");
-		String xslt = getAttribute(el, "xslt");
-		String name = getAttribute(el, "name");
+		String var = getAttributeOrNull(el, "var");
+		String path = getAttributeOrNull(el, "path");
+		String xpath = getAttributeOrNull(el, "xpath");
+		String xslt = getAttributeOrNull(el, "xslt");
+		String name = getAttributeOrNull(el, "name");
 		Node doc = el.getOwnerDocument();
 		final URL parentURL = context.getCurrentURL();
 		try {
@@ -213,8 +214,8 @@ public class CoreXMLNodeParser implements NodeParser {
 
 	protected Node parseForTag(Element el, ParseContext context) {
 		Object items = getAttributeEL(context, el, "items");
-		String var = getAttribute(el, "var");
-		String status = getAttribute(el, "status");
+		String var = getAttributeOrNull(el, "var");
+		String status = getAttributeOrNull(el, "status");
 		context.appendFor(var, items, status);
 		parseChild(el.getFirstChild(), context);
 		context.appendEnd();
@@ -222,8 +223,8 @@ public class CoreXMLNodeParser implements NodeParser {
 	}
 
 	protected Node parseVarTag(Element el, ParseContext context) {
-		String name = getAttribute(el, "name");
-		String value = getAttribute(el, "value");
+		String name = getAttributeOrNull(el, "name");
+		String value = getAttributeOrNull(el, "value");
 		if (value == null) {
 			context.appendCaptrue(name);
 			parseChild(el.getFirstChild(), context);
@@ -233,8 +234,12 @@ public class CoreXMLNodeParser implements NodeParser {
 			this.parser.parseText(context, value, Template.EL_TYPE);
 			List<Object> temp = context.reset(mark);
 			if (temp.size() == 1) {
-				Object[] item = (Object[]) temp.get(0);
-				context.appendVar(name, item[1]);
+				Object item = temp.get(0);
+				if(item instanceof Object[]){//EL_TYPE
+					context.appendVar(name, ((Object[])item)[1]);
+				}else{
+					context.appendVar(name, context.optimizeEL(JSONEncoder.encode(item)));
+				}
 			} else {
 				context.appendCaptrue(name);
 				context.appendAll(temp);
@@ -283,10 +288,10 @@ public class CoreXMLNodeParser implements NodeParser {
 	}
 
 	protected Node parseJSONTag(final Element el, ParseContext context) {
-		String var = getAttribute(el, "var");
-		String file = getAttribute(el, "file");
-		String encoding = getAttribute(el, "encoding", "charset");
-		String content = getAttribute(el, "content");
+		String var = getAttributeOrNull(el, "var");
+		String file = getAttributeOrNull(el, "file");
+		String encoding = getAttributeOrNull(el, "encoding", "charset");
+		String content = getAttributeOrNull(el, "content");
 		if (file != null) {
 			try {
 				URL url = context.createURL(null, file);
@@ -322,7 +327,7 @@ public class CoreXMLNodeParser implements NodeParser {
 	}
 
 	protected Node parseOutTag(Element el, ParseContext context) {
-		String value = getAttribute(el, "value");
+		String value = getAttributeOrNull(el, "value");
 		this.parser.parseText(context, value, Template.EL_TYPE);
 		return null;
 	}
@@ -334,7 +339,7 @@ public class CoreXMLNodeParser implements NodeParser {
 		}
 	}
 
-	private String getAttribute(Element el, String... keys) {
+	private String getAttributeOrNull(Element el, String... keys) {
 		for (String key : keys) {
 			if (el.hasAttribute(key)) {
 				return el.getAttribute(key);
@@ -355,7 +360,7 @@ public class CoreXMLNodeParser implements NodeParser {
 	}
 
 	private Object getAttributeEL(ParseContext context, Element el, String key) {
-		String value = getAttribute(el, key);
+		String value = getAttributeOrNull(el, key);
 		return toEL(context, value);
 
 	}

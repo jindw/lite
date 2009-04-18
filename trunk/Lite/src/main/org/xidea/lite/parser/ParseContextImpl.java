@@ -209,15 +209,13 @@ public class ParseContextImpl implements ParseContext {
 
 	public List<Object> reset(int mark) {
 		int end = result.size();
-		List<Object> pops = new ArrayList<Object>(end - mark);
-		int i = mark;
-		for (; i < end; i++) {
-			pops.add(result.get(i));
-		}
+		//好像是关联的，所以，希望尽早解除关联
+		List<Object> pops = new ArrayList<Object>(result.subList(mark, end));
+		int i = end;
 		while (i-- > mark) {
 			result.remove(i);
 		}
-		return pops;
+		return optimizeResult(pops);
 	}
 
 	public void appendAll(List<Object> items) {
@@ -247,7 +245,7 @@ public class ParseContextImpl implements ParseContext {
 
 	@SuppressWarnings("unchecked")
 	public List<Object> toResultTree() {
-		List<Object> result2 = getResult();
+		List<Object> result2 = optimizeResult(this.result);
 		ArrayList<ArrayList<Object>> stack = new ArrayList<ArrayList<Object>>();
 		ArrayList<Object> current = new ArrayList<Object>();
 		stack.add(current);
@@ -324,24 +322,24 @@ public class ParseContextImpl implements ParseContext {
 		return instanceMap;
 	}
 
-	protected List<Object> getResult() {
-		ArrayList<Object> result2 = new ArrayList<Object>(result.size());
+	protected List<Object> optimizeResult(List<Object> result) {
+		ArrayList<Object> optimizeResult = new ArrayList<Object>(result.size());
 		StringBuilder buf = new StringBuilder();
 		for (Object item : result) {
 			if (item instanceof String) {
 				buf.append(item);
 			} else {
 				if (buf.length() > 0) {
-					result2.add(buf.toString());
+					optimizeResult.add(buf.toString());
 					buf.setLength(0);
 				}
-				result2.add((Object[]) item);
+				optimizeResult.add(item);
 			}
 		}
 		if (buf.length() > 0) {
-			result2.add(buf.toString());
+			optimizeResult.add(buf.toString());
 		}
-		return result2;
+		return optimizeResult;
 	}
 
 	public String addGlobalObject(Class<? extends Object> class1, String key) {

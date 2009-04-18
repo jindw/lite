@@ -1,6 +1,8 @@
 package org.xidea.lite.parser.test;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URL;
@@ -43,6 +45,22 @@ public class XMLParserTest {
 
 	}
 
+	@Test
+	public void testError() throws Exception {
+		URL url = new URL("http://test/");
+		ParseContextImpl context = new ParseContextImpl(url){
+			@Override
+			public InputStream getInputStream(URL url) {
+				return new ByteArrayInputStream("<xml".getBytes());
+			}
+			
+		}; 
+		try{
+			org.w3c.dom.Document doc = new XMLParser().loadXML(url, context);
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 	@Test
 	public void testSelect() throws Exception {
 		URL url = this.getClass().getResource("include-test.xml");
