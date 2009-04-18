@@ -40,6 +40,7 @@ define('LITE_OP_QUESTION_SELECT', 35);#32 | 2 | 1;
 define('LITE_OP_PARAM_JOIN', 1);#0 | 0 | 1;
 define('LITE_OP_MAP_PUSH', 33);#32 | 0 | 1;
 
+$LITE_QUESTION_NEXT = new stdClass();
 class Expression{
 	var $tokens;
 	function stringify(&$o){
@@ -122,6 +123,7 @@ class Expression{
 	 * @param $arg2 
 	 */
 	function compute(&$op, &$arg2, &$arg1) {
+	    global $LITE_QUESTION_NEXT;
 		$type = $op[0];
 		if ($type == LITE_OP_INVOKE_METHOD) {
 			if($arg1 instanceof _LitePropertyValue) {
@@ -191,9 +193,9 @@ class Expression{
 			case LITE_OP_OR:
 				return $arg1 || $arg2;
 			case LITE_OP_QUESTION:
-				return $arg1 ? $arg2 : _LiteLazyToken;
+				return $arg1 ? $arg2 : $LITE_QUESTION_NEXT;
 			case LITE_OP_QUESTION_SELECT:
-				return $arg1 == _LiteLazyToken?arg2:arg1;
+				return $arg1 == $LITE_QUESTION_NEXT ? $arg2:$arg1;
 			case LITE_OP_MAP_PUSH:
 				$arg1[$op[1]] = $arg2;return $arg1;
 			default:break;
@@ -201,7 +203,6 @@ class Expression{
 	}
 		
 }
-
 
 
 class _LiteLazyToken {
@@ -239,4 +240,5 @@ class _LitePropertyValue {
 		}
 	}
 }
+
 ?>

@@ -50,11 +50,15 @@ class Template{
 	    }
 	}
 	function printXMLAttribute(&$text){
-	    echo htmlspecialchars($text);
+	    $this->printXMLText($text);
 	}
 	
 	function printXMLText(&$text){
-	    echo htmlspecialchars($text);
+	    if(is_bool($text)){
+	        echo $text?'true':'false';
+	    }else{
+	        echo htmlspecialchars($text);
+	    }
 	}
 	
 	function toBoolean(&$test){
@@ -65,7 +69,6 @@ class Template{
 		$stack = &$data[1];
 	    $value = Expression::evaluate($context,$stack);
 	    if($encodeXML && isset($value)){
-	    	$value = "$value";
 	        $this->printXMLText($value);
 	    }else{
 	        echo $value;

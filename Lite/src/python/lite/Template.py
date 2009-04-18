@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from Expression import evaluate
+from StringIO import StringIO
 
 EL_TYPE = 0;            #// [0,<el>]
 IF_TYPE = 1;            #// [1,[...],<test el>]
@@ -47,43 +48,46 @@ def renderList(context, children, out):
                 elif item[0] == XML_ATTRIBUTE_TYPE:
                     processAttribute(context, item, out)
         except (Exception, ), e:
-            print "aaaaa" 
-            print item[0]
-            print e
+            #print item[0]
+            out.write(str(e))
             pass
 
 def printXMLAttribute(text, out):
-    ## for-while
-    for c in text:
-        if c == '<':
-            out.write("&lt;")
-            break
-        elif c == '>':
-            out.write("&gt;")
-            break
-        elif c == '&':
-            out.write("&amp;")
-            break
-        elif c == '"':
-            out.write("&#34;")
-            break
-        else:
-            out.write(c)
+    if isinstance(text,bool):
+        out.write(text and 'true' or 'false');
+    else:
+	    for c in str(text):
+	        if c == '<':
+	            out.write("&lt;")
+	            break
+	        elif c == '>':
+	            out.write("&gt;")
+	            break
+	        elif c == '&':
+	            out.write("&amp;")
+	            break
+	        elif c == '"':
+	            out.write("&#34;")
+	            break
+	        else:
+	            out.write(c)
 
 def printXMLText(text, out):
-    ## for-while
-    for c in text:
-        if c == '<':
-            out.write("&lt;")
-            break
-        elif c == '>':
-            out.write("&gt;")
-            break
-        elif c == '&':
-            out.write("&amp;")
-            break
-        else:
-            out.write(c)
+    if isinstance(text,bool):
+        out.write(text and 'true' or 'false');
+    else:
+	    for c in str(text):
+	        if c == '<':
+	            out.write("&lt;")
+	            break
+	        elif c == '>':
+	            out.write("&gt;")
+	            break
+	        elif c == '&':
+	            out.write("&amp;")
+	            break
+	        else:
+	            out.write(c)
 
 def toBoolean(test):
     if test is None:
@@ -100,9 +104,9 @@ def toBoolean(test):
 def processExpression(context, data, out, encodeXML):
     value = evaluate(data[1],context)
     if encodeXML and value is not None:
-        printXMLText(str(value), out)
+        printXMLText(value, out)
     else:
-        out.write(str(value))
+        out.write(value)
 
 def processIf(context, data, out):
     test = True
@@ -119,11 +123,11 @@ def processElse(context, data, out):
         try:
             if data[2] is None or toBoolean(evaluate(data[2],context)):
                 renderList(context, data[1], out)
-                context[IF_KEY] = Boolean.TRUE
+                context[IF_KEY] = True
         except (Exception, ), e:
-            if log.isDebugEnabled():
-                log.debug(e)
-            context[IF_KEY] = Boolean.TRUE
+            #if log.isDebugEnabled():
+            #    log.debug(e)
+            context[IF_KEY] = True
 
 def processFor(context, data, out):
     children = data[1]
@@ -132,7 +136,6 @@ def processFor(context, data, out):
     length = len(items)
     preiousStatus = hasattr(context,FOR_KEY) and context[FOR_KEY]
     try:
-        
         forStatus = ForStatus(length)
         context[FOR_KEY]=forStatus
         for item in items:
@@ -147,19 +150,19 @@ def processVar(context, data):
     context[data[2]]= evaluate(data[1],context);
 
 def processCaptrue(context, data):
-    buf = StringWriter()
+    buf = StringIO();
     renderList(context, data[1], buf)
-    context[data[2]]= str(buf);
+    context[data[2]]= buf.getvalue();
 
 def processAttribute(context, data, out):
     result = evaluate(data[1],context)
     if data[2] is None:
-        printXMLAttribute(str(result), out)
+        printXMLAttribute(result, out)
     elif result is not None:
         out.write(" ")
         out.write(data[2])
         out.write("=\"")
-        printXMLAttribute(str(result), out)
+        printXMLAttribute(result, out)
         out.write('"')
 
 class ForStatus(object):

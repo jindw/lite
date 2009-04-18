@@ -9,7 +9,7 @@ from mod_python import apache
 engine = TemplateEngine("D:/workspace/Lite/web/",None);
 
 def handler(req):
-    req.content_type = "text/plain";
+    req.content_type = "text/html";
     context = {
     	"int1":1,
     	"text1":'1'
