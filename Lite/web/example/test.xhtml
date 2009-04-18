@@ -25,20 +25,29 @@
 		</p>
 		<p>
 			for 1-3:
-			<c:for items="${[1,2,3]}" var="item">${item}-${for.index},</c:for><c:else>else</c:else>
+			<c:for items="${[1,2,3]}" var="item">
+				${item}-${for.index}(${1+'ddd'})
+				<c:if test="${for.lastIndex != for.index}">,</c:if>
+			</c:for>
+			<c:else>else</c:else>
 		</p>
 		<p>
 			for else:
-			<c:for items="${[]}" var="item">${item}-${for.index},${for.lastIndex}</c:for><c:else>else</c:else>
+			<c:for items="${[]}" var="item">
+				${item}-${for.index},${for.lastIndex}
+			</c:for>
+			<c:else>else</c:else>
 		</p>
 		<p>
 			var:xx=1+1
-			<c:var name="xx" value="${1+1}"/>
+			<c:var name="xx" value="${1+1}" />
 			${xx}
 		</p>
 		<p>
 			var:xx=1+1
-			<c:var name="xx"><div>${1+1}</div></c:var>
+			<c:var name="xx">
+				<div>${1+1}</div>
+			</c:var>
 			${xx}
 		</p>
 		<p>\${int1+1}:${int1+1}</p>

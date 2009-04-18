@@ -155,12 +155,19 @@ class Expression{
 				return -$arg1;
 			/* +-*%/ */
 			case LITE_OP_ADD:
-				return $arg1+$arg2;
+				if(is_string($arg1)||is_string($arg2)){
+					return $arg1.$arg2;
+				}else{
+					return $arg1+$arg2;
+				}
 			case LITE_OP_SUB:
 				return $arg1-$arg2;
 			case LITE_OP_MUL:
 				return $arg1*$arg2;
 			case LITE_OP_DIV:
+				if($arg2==0){
+					return 'NaN';
+				}
 				return $arg1/$arg2;
 			case LITE_OP_MOD:
 				return $arg1%$arg2;
