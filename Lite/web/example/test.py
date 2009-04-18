@@ -5,7 +5,8 @@ import StringIO
 
 from lite import TemplateEngine
 from mod_python import apache
-engine = new TemplateEngine("../");
+
+engine = TemplateEngine("D:/workspace/Lite/web/",None);
 
 def handler(req):
     req.content_type = "text/plain";
