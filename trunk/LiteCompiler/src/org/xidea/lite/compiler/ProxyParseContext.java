@@ -15,7 +15,7 @@ public class ProxyParseContext extends ParseContextImpl {
 	private static final URL BASE ;
 	static{
 		try {
-			BASE = new URL("http://localhost/");
+			BASE = new URL("http://litecompiler.appspot.com/");
 		} catch (MalformedURLException e) {
 			throw new IllegalStateException();
 		}
@@ -48,6 +48,9 @@ public class ProxyParseContext extends ParseContextImpl {
 		String result = params.get(path);
 		try {
 			if (result != null) {
+				if(result.trim().length() == 0){
+					result = "<body><div>empty : "+url+"</div></body>";
+				}
 				return new ByteArrayInputStream(result.getBytes(encoding));
 			}
 			InputStream in = super.getInputStream(url);
