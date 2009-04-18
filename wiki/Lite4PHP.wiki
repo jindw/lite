@@ -2,9 +2,28 @@
 == 使用方法 ==
    在[http://code.google.com/p/lite/downloads/list 下载页] 下载PHP 实例程序，解压到自己虚拟目录根下。
    * 仿照example/test.xhtml 编写模板
+     见：[http://code.google.com/p/lite/wiki/XML_Lite_Syntax]
    * 仿照WEB-INF/decorators.xml 设置模板布局（可选）
    * 仿照example/layout.xhtml 编写模板布局页（可选）
+     见：[http://code.google.com/p/lite/wiki/XML_Lite_SiteMesh]
    * 仿照example/test.php 使用模板
+{{{
+<?php
+require_once("../WEB-INF/classes/TemplateEngine.php");
+$engine = new TemplateEngine();
+# 通过上下文数据方式传递模板参数：
+$context = array(
+	"int1"=>1,
+	"text1"=>'1'
+);
+$engine->render("/example/test.xhtml",$context);
+
+//# 直接通过全局变量传递模板参数：
+//$int1 = 1;
+//$text1 = '1';
+//$engine->render("/example/test.xhtml");
+?>
+}}}
 
 == 工作方式 ==
 
