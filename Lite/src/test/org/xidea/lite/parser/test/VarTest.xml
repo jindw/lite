@@ -32,6 +32,22 @@
 			<string><![CDATA[124]]></string>
 		</void>
 		<void method="put">
+			<string><![CDATA[<c:var name="var1" value="${123}4"/>${var1+1}]]></string>
+			<string><![CDATA[12341]]></string>
+		</void>
+		<void method="put">
+			<string><![CDATA[<c:var name="var1" value="${1234"/>${var1+1}]]></string>
+			<string><![CDATA[${12341]]></string>
+		</void>
+		<void method="put">
+			<string><![CDATA[<c:var name="var1" value="$1234"/>${var1+1}]]></string>
+			<string><![CDATA[$12341]]></string>
+		</void>
+		<void method="put">
+			<string><![CDATA[<c:var name="var1" value="1234"/>${var1+1}]]></string>
+			<string><![CDATA[12341]]></string>
+		</void>
+		<void method="put">
 			<string><![CDATA[<c:var name="var1" value="${'123'}-${123}"/><xml v="${var1}"/>]]></string>
 			<string><![CDATA[<xml v="123-123"></xml>]]></string>
 		</void>

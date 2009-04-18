@@ -91,9 +91,15 @@ public interface ParseContext {
 	 */
 	public void setExpressionFactory(ExpressionFactory expressionFactory);
 	public Object optimizeEL(String eltext);
-
+	/**
+	 * @return 经过优化后的树形结果集
+	 */
 	public List<Object> toResultTree();
 	public int mark();
+	/**
+	 * @param mark
+	 * @return 经过优化后的一维结果集
+	 */
 	public List<Object> reset(int mark);
 	
 	public String addGlobalObject(Class<? extends Object> impl,String key);

@@ -147,7 +147,7 @@ class Template{
 	
 	function processAttribute(&$context, &$data){
 	    $result = Expression::evaluate($context,$data[1]);
-	    if(isnull($data[2])){
+	    if(is_null($data[2])){
 	        $this->printXMLAttribute($result);
 	    }elseif(isset($result)){
 	        echo ' ';

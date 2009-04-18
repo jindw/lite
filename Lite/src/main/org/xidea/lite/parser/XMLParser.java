@@ -40,6 +40,7 @@ import org.w3c.dom.NodeList;
 import org.xidea.lite.dtd.DefaultEntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 public class XMLParser extends TextParser {
 	private static Log log = LogFactory.getLog(XMLParser.class);
@@ -47,14 +48,14 @@ public class XMLParser extends TextParser {
 	private static final Pattern XML_HEADER_SPACE_PATTERN = Pattern
 			.compile("^[\\s\\ufeff]*<");
 
-	private XPathFactory xpathFactory;
-	private TransformerFactory transformerFactory;
-
 	private String transformerFactoryClass = null;// "org.apache.xalan.processor.TransformerFactoryImpl";
 	private String xpathFactoryClass = null;// "org.apache.xpath.jaxp.XPathFactoryImpl";
 
-	private DocumentBuilder documentBuilder;
-	private NodeParser[] parserList = { new DefaultXMLNodeParser(this),
+	protected XPathFactory xpathFactory;
+	protected TransformerFactory transformerFactory;
+
+	protected DocumentBuilder documentBuilder;
+	protected NodeParser[] parserList = { new DefaultXMLNodeParser(this),
 			new HTMLFormNodeParser(this), new CoreXMLNodeParser(this) };
 
 	public XMLParser() {
@@ -154,27 +155,32 @@ public class XMLParser extends TextParser {
 	}
 
 	public Node loadXML(String url, ParseContext context) throws SAXException,
-			IOException, XPathExpressionException {
-		return loadXML(context.createURL(null,url), context);
+			IOException {
+		return loadXML(context.createURL(null, url), context);
 	}
 
 	public Document loadXML(URL url, ParseContext context) throws SAXException,
-			IOException, XPathExpressionException {
+			IOException {
 		context.setCurrentURL(url);
 		InputStream in = context.getInputStream(url);
-		in = new BufferedInputStream(in,1);
+		in = new BufferedInputStream(in, 1);
 		int c;
-		do{//bugfix \ufeff
+		do {// bugfix \ufeff
 			in.mark(1);
 			c = in.read();
-			if(c == '<'){
+			if (c == '<') {
 				in.reset();
 				break;
 			}
-		}while(c>=0);
-		Document doc = documentBuilder.parse(in,url.toString());
-		// selectNodes(xpath, doc);
-		return doc;
+		} while (c >= 0);
+		try {
+			Document doc = documentBuilder.parse(in, url.toString());
+			return doc;
+		} catch (SAXParseException e) {
+			throw new IOException("XML Parser Error:"+url+"(" + e.getLineNumber() + ","
+					+ e.getColumnNumber() + ")\r\n" + e.getMessage()
+					);
+		}
 	}
 
 	protected NamespaceContext createNamespaceContext(Document doc) {
@@ -206,7 +212,7 @@ public class XMLParser extends TextParser {
 		return new NamespaceContext() {
 			public String getNamespaceURI(String prefix) {
 				String url = prefixMap.get(prefix);
-				return url == null? prefix : url;
+				return url == null ? prefix : url;
 			}
 
 			public String getPrefix(String namespaceURI) {
@@ -290,7 +296,9 @@ public class XMLParser extends TextParser {
 											.getClassLoader());
 					return xpathFactory.newXPath();
 				} catch (Exception e) {
-					log.error("自定义xpathFactory初始化失败<"+xpathFactoryClass+">", e);
+					log.error(
+							"自定义xpathFactory初始化失败<" + xpathFactoryClass + ">",
+							e);
 				}
 			}
 			if (xpathFactory == null) {
@@ -311,7 +319,9 @@ public class XMLParser extends TextParser {
 									.getClassLoader());
 					return transformerFactory.newTransformer();
 				} catch (Exception e) {
-					log.error("创建xslt转换器失败<"+transformerFactoryClass+">", e);
+					log
+							.error("创建xslt转换器失败<" + transformerFactoryClass
+									+ ">", e);
 				}
 			}
 			if (transformerFactory == null) {

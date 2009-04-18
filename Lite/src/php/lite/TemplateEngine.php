@@ -20,7 +20,7 @@ class TemplateEngine{
 	var $liteBase;
 	var $liteCached;
 	var $liteService; 
-	function TemplateEngine($liteBase=NULL,$liteService='http://litecompiler.appspot.com'){
+	function TemplateEngine($liteBase=NULL,$liteService='http://localhost:8080/'){
 		if($liteBase == NULL){
 			//自动探测虚拟目录
 			$liteBase = $_SERVER['DOCUMENT_ROOT'];
@@ -137,6 +137,8 @@ class TemplateEngine{
 		    )
 		);
 		$context  = stream_context_create($opts);
+		echo $this->liteService;
+		echo $postdata;
 		return file_get_contents($this->liteService, false, $context,0,1024*1024);
 	}
 	/**
