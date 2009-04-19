@@ -11,3 +11,13 @@ public abstract interface Parser {
      */
     public abstract List<Object> parse(Object node,ParseContext context);
 }
+interface Parser2<T>{
+	public abstract void parse(ParseContext context,ParserChain chain,T node);
+}
+interface ParserChain{
+	public abstract void parse(Object node);
+}
+
+interface ParseContext2 extends ResultContext {
+	public abstract void parse(Object node);
+}

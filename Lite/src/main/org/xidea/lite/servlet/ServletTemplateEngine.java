@@ -1,7 +1,6 @@
 package org.xidea.lite.servlet;
 
 import java.io.File;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Enumeration;
