@@ -109,24 +109,28 @@ function lite_process_for(&$context, &$data){
     $children = &$data[1];
     $items = lite_evaluate($context,$data[2]);
     $varName = &$data[3];
-    $length = count($items);
     if(array_key_exists(LITE_FOR_KEY,$context)){
     	$preiousStatus =  &$context[LITE_FOR_KEY];
     }
     try{
-        $forStatus = array('index'=>-1,'lastIndex'=>$length-1);
+        $length = 0;
+        $forStatus = array('index'=>-1);
         $context[LITE_FOR_KEY]=&$forStatus;
         if(is_numeric($items)){
         	$i=0;
-	        while($i<$items){
+        	$length = $items;
+        	$forStatus['lastIndex']=$length-1;
+	        while($i<$length){
 	            $forStatus['index'] = $i++;
 	            $context[$varName] = $i;
 	            lite_render_list($context, $data);
 	        }
         }else if(is_array($items)){
+            $length = count($items);
+        	$forStatus['lastIndex'] = $length-1;
 	        foreach($items as &$item){
 	            $forStatus['index'] += 1;
-	            $context[$varName]=$item;
+	            $context[$varName] = $item;
 	            lite_render_list($context, $children);
 	        }
         }
