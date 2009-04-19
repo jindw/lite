@@ -24,13 +24,9 @@ class TemplateEngine{
 		if($liteBase == null){
 			//自动探测虚拟目录
 			$liteBase = $_SERVER['DOCUMENT_ROOT'];
-			$dir = $_SERVER['SCRIPT_FILENAME'];
-			$path = $_SERVER['REQUEST_URI'];
-			$dns = split('/',$path);
-			array_pop($dns);
-			$dir = dirname($dir);
-			while(array_pop($dns)==basename($dir)){
-			    $dir = dirname($dir);
+			$dir = realpath($_SERVER['SCRIPT_FILENAME']);
+			while($dir!=($dir2 = dirname($dir))){
+				$dir=$dir2;
 				if(file_exists($dir.'/WEB-INF')){
 					$liteBase = $dir;
 					break;
@@ -96,10 +92,12 @@ class TemplateEngine{
 		while($test--){
 			$code = $this->httpLoad($paths,$sources);
 			if(!$code){
+				sleep(10);
 				continue;
 			}
 			$result = json_decode($code);
 			if(!$result){
+				sleep(10);
 				continue;
 			}
 			if(!is_array($result)){
@@ -117,6 +115,7 @@ class TemplateEngine{
 				if(!$retry){
 					return array($paths,array($code));
 				}
+				sleep(5);
 			}else{
 	            $this->writeCache($liteFile,$paths,$code);
 				return array($paths,$result,$code);
