@@ -58,7 +58,7 @@ function lite_print_xml_text(&$text){
     if(is_bool($text)){
         echo $text?'true':'false';
     }else{
-        echo $text;
+        echo htmlspecialchars($text);
     }
 }
 
