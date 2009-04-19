@@ -52,157 +52,162 @@ class Expression{
 	function Expression(&$tokens){
 		$this->tokens = &$tokens;
 	}
-	function &evaluate(&$context,$tokens = NULL) {
-		$stack = array();
-		if($tokens == NULL){
-			$tokens = &$this->tokens;
-		}
-		Expression::_evaluate($stack, $context, $tokens);
-		$stack=$stack[0];
-		if ($stack instanceof _LitePropertyValue) 
-			$stack = &$stack->get();
-		return $stack;
+	function &evaluate(&$context) {
+		return lite_evaluate($context,$this->tokens);
 	}
-	function _evaluate(&$stack, &$context, &$tokens) {
-		foreach($tokens as &$item) {
-			if(is_array($item)) {
-				$type = $item[0];
-				if($type > 0) {
-					if($type & 1) {
-						$result = Expression::compute($item, array_pop($stack), array_pop($stack));
-					}else{
-						$arg2 = null;
-						$result = Expression::compute($item, $arg2, array_pop($stack));
-					}
-					
-					if($result instanceof _LiteLazyToken) {
-						Expression::_evaluate($stack, $context, $result->children);
-					} else {
-						$stack[] = $result;
-					}
-				} else {
-					$stack[] = Expression::value($context, $item);
-				}
-			}
-		}
-	}
-	function value(&$context, &$item) {
-		global $globalMap;
-		$type = $item[0];
-		switch($type){
-			case LITE_VALUE_VAR:
-				$value = $item[1];
-				if (array_key_exists($value, $context)) {
-					return $context[$value];
-				} else {
-					switch ($value) {
-					case "JSON":
-						return "Expression";
-					case "encodeURIComponent": 
-						return "urlencode";
-					case "decodeURIComponent": 
-						return "urldecode";
-					}
-				}
-				return null;//您如果需要仅用默认函数，那么 return null吧
-			case LITE_VALUE_CONSTANTS:
-				return $item[1];
-			case LITE_VALUE_NEW_LIST:
-				return array();
-			case LITE_VALUE_NEW_MAP:
-				return new stdClass();
-			case LITE_VALUE_LAZY:
-				return new _LiteLazyToken($item[1]);
-		}
-	}
-	
-	/**
-	 * 丑陋的PHP引用：（，引用传递，传入前的变量不能随便修改，都不能随便修改的：（
-	 * @param $op
-	 * @param $arg1
-	 * @param $arg2 
-	 */
-	function compute(&$op, &$arg2, &$arg1) {
-	    global $LITE_QUESTION_NEXT;
-		$type = $op[0];
-		if ($type == LITE_OP_INVOKE_METHOD) {
-			if($arg1 instanceof _LitePropertyValue) {
-				return $arg1->call($arg2);
-			} else {
-				return call_user_func_array($arg1, $arg2);
-			}
-		}
-		//echo get_class ( $arg1);
-		if ($arg1 instanceof _LitePropertyValue) {
-			$arg1 = &$arg1->get();
-		}
-		if ($arg2 instanceof _LitePropertyValue) {
-			$arg2 = &$arg2->get();
-		}
-		switch($type) {
-			case LITE_OP_STATIC_GET_PROP:
-				return new _LitePropertyValue($arg1, $op[1]);
-			case LITE_OP_GET_PROP:
-				return new _LitePropertyValue($arg1, $arg2);
-			case LITE_OP_PARAM_JOIN:
-				$arg1[]=$arg2;return $arg1;
-			case LITE_OP_MAP_PUSH:
-				$arg1->$op[1] = $arg2;
-				return $arg1;
-			case LITE_OP_NOT:
-				return !$arg1;
-			case LITE_OP_POS:
-				return +$arg1;
-			case LITE_OP_NEG:
-				return -$arg1;
-			/* +-*%/ */
-			case LITE_OP_ADD:
-				if(is_string($arg1)||is_string($arg2)){
-					return $arg1.$arg2;
-				}else{
-					return $arg1+$arg2;
-				}
-			case LITE_OP_SUB:
-				return $arg1-$arg2;
-			case LITE_OP_MUL:
-				return $arg1*$arg2;
-			case LITE_OP_DIV:
-				if($arg2==0){
-					return 'NaN';
-				}
-				return $arg1/$arg2;
-			case LITE_OP_MOD:
-				return $arg1%$arg2;
-			/* boolean */
-			case LITE_OP_GT:
-				return $arg1>$arg2;
-			case LITE_OP_GTEQ:
-				return $arg1>=$arg2;
-			case LITE_OP_NOTEQ:
-				return $arg1!=$arg2;
-			case LITE_OP_EQ:
-				return $arg1==$arg2;
-			case LITE_OP_LT:
-				return $arg1<$arg2;
-			case LITE_OP_LTEQ:
-				return $arg1<=$arg2;
-	
-			/* and or */
-			case LITE_OP_AND:
-				return $arg2 && $arg1;
-			case LITE_OP_OR:
-				return $arg1 || $arg2;
-			case LITE_OP_QUESTION:
-				return $arg1 ? $arg2 : $LITE_QUESTION_NEXT;
-			case LITE_OP_QUESTION_SELECT:
-				return $arg1 == $LITE_QUESTION_NEXT ? $arg2:$arg1;
-			case LITE_OP_MAP_PUSH:
-				$arg1[$op[1]] = $arg2;return $arg1;
-			default:break;
-		}
-	}
-		
 }
+
+function lite_evaluate(&$context,$tokens) {
+	if(count($tokens)==1){
+	    $stack = lite_value($context,$tokens[0]);
+	}else{
+		$stack = array();
+		_lite_evaluate($stack, $context, $tokens);
+		$stack=$stack[0];
+		if ($stack instanceof _LitePropertyValue){
+			$stack = &$stack->get();
+		}
+	}
+	return $stack;
+}
+function _lite_evaluate(&$stack, &$context, &$tokens) {
+	foreach($tokens as &$item) {
+		if(is_array($item)) {
+			$type = &$item[0];
+			if($type > 0) {
+				if($type & 1) {
+					$result = lite_compute($item, array_pop($stack), array_pop($stack));
+				}else{
+					$arg2 = null;
+					$result = lite_compute($item, $arg2, array_pop($stack));
+				}
+				
+				if($result instanceof _LiteLazyToken) {
+					_lite_evaluate($stack, $context, $result->children);
+				} else {
+					$stack[] = $result;
+				}
+			} else {
+				$stack[] = lite_value($context, $item);
+			}
+		}
+	}
+}
+function lite_value(&$context, &$item) {
+	#return $context[$item[1]];
+	switch($item[0]){
+		case LITE_VALUE_VAR:
+			$value = $item[1];
+			if (array_key_exists($value, $context)) {
+				return $context[$value];
+			} else {
+				switch ($value) {
+				case "JSON":
+					return "Expression";
+				case "encodeURIComponent": 
+					return "urlencode";
+				case "decodeURIComponent": 
+					return "urldecode";
+				}
+			}
+			return null;//您如果需要仅用默认函数，那么 return null吧
+		case LITE_VALUE_CONSTANTS:
+			return $item[1];
+		case LITE_VALUE_NEW_LIST:
+			return array();
+		case LITE_VALUE_NEW_MAP:
+			return new stdClass();
+		case LITE_VALUE_LAZY:
+			return new _LiteLazyToken($item[1]);
+	}
+}
+
+/**
+ * 丑陋的PHP引用：（，引用传递，传入前的变量不能随便修改，都不能随便修改的：（
+ * @param $op
+ * @param $arg1
+ * @param $arg2 
+ */
+function lite_compute(&$op, &$arg2, &$arg1) {
+    global $LITE_QUESTION_NEXT;
+	$type = $op[0];
+	if ($type == LITE_OP_INVOKE_METHOD) {
+		if($arg1 instanceof _LitePropertyValue) {
+			return $arg1->call($arg2);
+		} else {
+			return call_user_func_array($arg1, $arg2);
+		}
+	}
+	//echo get_class ( $arg1);
+	if ($arg1 instanceof _LitePropertyValue) {
+		$arg1 = &$arg1->get();
+	}
+	if ($arg2 instanceof _LitePropertyValue) {
+		$arg2 = &$arg2->get();
+	}
+	switch($type) {
+		case LITE_OP_STATIC_GET_PROP:
+			return new _LitePropertyValue($arg1, $op[1]);
+		case LITE_OP_GET_PROP:
+			return new _LitePropertyValue($arg1, $arg2);
+		case LITE_OP_PARAM_JOIN:
+			$arg1[]=$arg2;return $arg1;
+		case LITE_OP_MAP_PUSH:
+			$arg1->$op[1] = $arg2;
+			return $arg1;
+		case LITE_OP_NOT:
+			return !$arg1;
+		case LITE_OP_POS:
+			return +$arg1;
+		case LITE_OP_NEG:
+			return -$arg1;
+		/* +-*%/ */
+		case LITE_OP_ADD:
+			if(is_string($arg1)||is_string($arg2)){
+				return $arg1.$arg2;
+			}else{
+				return $arg1+$arg2;
+			}
+		case LITE_OP_SUB:
+			return $arg1-$arg2;
+		case LITE_OP_MUL:
+			return $arg1*$arg2;
+		case LITE_OP_DIV:
+			if($arg2==0){
+				return 'NaN';
+			}
+			return $arg1/$arg2;
+		case LITE_OP_MOD:
+			return $arg1%$arg2;
+		/* boolean */
+		case LITE_OP_GT:
+			return $arg1>$arg2;
+		case LITE_OP_GTEQ:
+			return $arg1>=$arg2;
+		case LITE_OP_NOTEQ:
+			return $arg1!=$arg2;
+		case LITE_OP_EQ:
+			return $arg1==$arg2;
+		case LITE_OP_LT:
+			return $arg1<$arg2;
+		case LITE_OP_LTEQ:
+			return $arg1<=$arg2;
+
+		/* and or */
+		case LITE_OP_AND:
+			return $arg2 && $arg1;
+		case LITE_OP_OR:
+			return $arg1 || $arg2;
+		case LITE_OP_QUESTION:
+			return $arg1 ? $arg2 : $LITE_QUESTION_NEXT;
+		case LITE_OP_QUESTION_SELECT:
+			return $arg1 == $LITE_QUESTION_NEXT ? $arg2:$arg1;
+		case LITE_OP_MAP_PUSH:
+			$arg1[$op[1]] = $arg2;return $arg1;
+		default:break;
+	}
+}
+		
 
 
 class _LiteLazyToken {
@@ -240,5 +245,4 @@ class _LitePropertyValue {
 		}
 	}
 }
-
 ?>
