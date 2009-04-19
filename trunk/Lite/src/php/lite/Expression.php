@@ -94,7 +94,6 @@ function _lite_evaluate(&$stack, &$context, &$tokens) {
 	}
 }
 function lite_value(&$context, &$item) {
-	#return $context[$item[1]];
 	switch($item[0]){
 		case LITE_VALUE_VAR:
 			$value = $item[1];
