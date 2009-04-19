@@ -42,7 +42,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
-public class XMLParser extends TextParser {
+public class XMLParser extends TextParser implements Parser {
 	private static Log log = LogFactory.getLog(XMLParser.class);
 
 	private static final Pattern XML_HEADER_SPACE_PATTERN = Pattern
@@ -98,7 +98,6 @@ public class XMLParser extends TextParser {
 		this.parserList = newParserList;
 	}
 
-	@Override
 	public List<Object> parse(Object data, ParseContext context) {
 		try {
 			Node node = null;
@@ -344,5 +343,4 @@ public class XMLParser extends TextParser {
 		}
 		return frm;
 	}
-
 }

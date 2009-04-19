@@ -10,5 +10,4 @@ public abstract interface Parser {
      * @return <Array> result
      */
     public abstract List<Object> parse(Object node,ParseContext context);
-    public List<Object> parse(Object data);
 }

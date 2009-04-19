@@ -9,5 +9,9 @@ public interface NodeParser {
 	 * @param context
 	 * @return 如果返回 null，说明处理结束了
 	 */
-	public Node parseNode(Node node, ParseContext context);
+	public Node parseNode(Node node, ParseContext context
+			/*,NodeParserChain chain*/);
+}
+interface NodeParserChain{
+	void parse(Node node, ParseContext context);
 }

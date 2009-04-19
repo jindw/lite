@@ -95,6 +95,11 @@ public interface ParseContext {
 	 * @return 经过优化后的树形结果集
 	 */
 	public List<Object> toResultTree();
+
+	/**
+	 * 记录一下当前位置，reset的参考位置
+	 * @return
+	 */
 	public int mark();
 	/**
 	 * @param mark
@@ -103,7 +108,7 @@ public interface ParseContext {
 	public List<Object> reset(int mark);
 	
 	public String addGlobalObject(Class<? extends Object> impl,String key);
-	public String addGlobalObject(Object object,String key);
+//	public String addGlobalObject(Object object,String key);
 
 	public void append(String text);
 	public void append(String text,boolean encode,char quteChar);

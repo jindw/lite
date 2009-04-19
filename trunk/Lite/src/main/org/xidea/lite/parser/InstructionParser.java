@@ -4,8 +4,8 @@ public interface InstructionParser {
 	/**
 	 * @param context
 	 * @param text
-	 * @param p$
-	 * @return 返回值一定要 大于 p$ 否则安失败算
+	 * @param start 对jsel来说 就是 $出现的位置
+	 * @return 返回值一定要 大于 start 否则安失败算
 	 */
-	int parse(ParseContext context,String text,int p$);
+	int parse(ParseContext context,String text,int start);
 }
