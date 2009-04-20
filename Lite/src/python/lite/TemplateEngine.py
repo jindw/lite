@@ -11,7 +11,7 @@ from os.path import getmtime,exists,realpath
 class TemplateEngine:
     liteBase = None;
     liteService = "http://litecompiler.appspot.com";
-    def __init__(self,liteBase,liteService):
+    def __init__(self,liteBase=None,liteService=None):
         self.liteBase = realpath(liteBase);
         if liteService:
             self.liteService = liteService;
