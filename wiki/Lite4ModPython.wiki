@@ -1,0 +1,50 @@
+#labels Featured,Phase-Implementation
+== 安装软件 ==
+=== 下载mod_python ===
+http://httpd.apache.org/modules/python-download.cgi
+=== 安装说明 ===
+windows 上有个安装向导，选择Python目录和Apache目录后即安装完成，非常方便。
+其他操作系统见文档：http://www.modpython.org/
+=== 配置Apache ===
+{{{
+LoadModule python_module modules/mod_python.so
+Alias /project/lite "D:\workspace\Lite\web"
+<Directory "D:\workspace\Lite\web">
+#   添加url映射
+    AddHandler mod_python .py
+#   设置python响应程序（这里直接指向了一个具体程序，您可以写一个控制器）
+    PythonHandler example/test
+    PythonDebug On
+#   添加python类路径
+    PythonPath "sys.path+['D:\workspace\Lite\web\WEB-INF\classes']"
+    Options Indexes FollowSymLinks
+    AllowOverride None
+    Order allow,deny
+    Allow from all
+</Directory>
+}}}
+== 模板使用实例代码 ===
+{{{
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+import sys,os
+import StringIO
+
+from lite import TemplateEngine
+from mod_python import apache
+
+engine = TemplateEngine("D:/workspace/Lite/web/",None);
+
+def handler(req):
+    req.content_type = "text/html";
+    context = {
+    	"int1":1,
+    	"text1":'1'
+    }
+    engine.render("/example/test.xhtml",context,req);
+    return apache.OK
+}}}
+== 其他参考 ==
+
+http://code.google.com/p/lite/wiki/Lite4PHP
+http://code.google.com/p/lite/wiki/Lite4JavaServlet
