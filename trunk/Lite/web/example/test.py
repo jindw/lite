@@ -4,6 +4,7 @@ import sys,os
 import StringIO
 
 from lite import TemplateEngine
+#from TemplateEngine import TemplateEngine
 from mod_python import apache
 
 engine = TemplateEngine("D:/workspace/Lite/web/",None);

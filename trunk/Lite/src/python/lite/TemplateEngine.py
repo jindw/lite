@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from Expression import json_decode
 from Template import Template
 from urllib import *
 from StringIO import StringIO
 from stat import *
 from os.path import getmtime,exists,realpath
-import re
     
 class TemplateEngine:
     liteBase = None;
@@ -101,21 +101,6 @@ class TemplateEngine:
         f.write(']');
         f.flush() 
         f.close() 
-        
 
-jsonFinder = re.compile(r'"(?:\\"|[^\"])*"|true|false|null');
-def jsonReplacer( match ):
-    text = match.group(0);
-    if text == 'true':
-        return "True";
-    elif text == 'false':
-        return "False";
-    elif text == 'null':
-        return "None";
-    else:
-        return text.replace('\\/','/');
-def json_decode(text):
-    text = jsonFinder.sub(jsonReplacer,text)
-    return eval(text,None,{'true':True,'false':False,'null':None});
     
     

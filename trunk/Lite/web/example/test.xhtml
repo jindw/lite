@@ -44,12 +44,12 @@
 			<c:else>else</c:else>
 		</p>
 		<p>
-			var:xx=1+1
+			var:xx=\${1+1}
 			<c:var name="xx" value="${1+1}" />
 			${xx}
 		</p>
 		<p>
-			var:xx=1+1
+			var:xx=&lt;div&gt;\${1+1}&lt;/div&gt;
 			<c:var name="xx">
 				<div>${1+1}</div>
 			</c:var>

@@ -46,10 +46,14 @@ OP_MAP_PUSH = 33;#32 | 0 | 1;
 
 import urllib
 
-
+from json import json_encode,json_decode;
 globalMap = {
-    "JSON":None,#TODO:JSON处理
+    "JSON":{
+        "stringify":json_encode,#TODO:还是用通用json 库吧
+        "parse":json_decode    #TODO:还是用通用json 库吧
+    },#TODO:JSON处理
     "encodeURIComponent":lambda t:urllib.quote_plus(t),#TODO:URL编码处理
+    "decodeURIComponent":lambda t:urllib.unquote_plus(t),#TODO:URL编码处理
     "test":lambda x:x*3
 }
 
@@ -102,7 +106,7 @@ def compute(op,arg1,arg2):
         arg1.append(arg2)
         return arg1;
     elif type == OP_MAP_PUSH:
-        arg1[item[1]]= arg2;
+        arg1[op[1]]= arg2;
         return arg1;
     elif type == OP_NOT:
         return not arg1;
@@ -169,14 +173,11 @@ def getTokenValue(context, item):
         return item[1];
     elif type == VALUE_VAR:
         value = item[1]
-        if "this" == value:
-            return context
-        else:
-            if value in context:
-                return context[value]
-            elif value in globalMap:
-                return globalMap[value]
-            return None
+        if value in context:
+            return context[value]
+        elif value in globalMap:
+            return globalMap[value]
+        return None
     elif type == VALUE_NEW_LIST:
         return []
     elif type == VALUE_NEW_MAP:
@@ -193,7 +194,7 @@ class PropertyValue:
         self.base = base;
         self.name = name;
     def getValue(self):
-       if(isinstance(self.base,dict ) and name in self.base):
+       if(isinstance(self.base,dict ) and self.name in self.base):
             return self.base[self.name];
        else:
             return getattr(self.base,self.name);
