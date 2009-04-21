@@ -57,7 +57,7 @@ def print_xml_attribute(text, out):
     if isinstance(text,bool):
         out.write(text and 'true' or 'false');
     else:
-        out.write(escape(str(text),true));
+        out.write(escape(str(text),True));
 
 def print_xml_text(text, out):
     if isinstance(text,bool):
@@ -67,7 +67,7 @@ def print_xml_text(text, out):
 
 def to_bool(test):
     if isinstance(test, list) or isinstance(test, dict):
-        return true
+        return True
     else:
         return bool(test);
 
