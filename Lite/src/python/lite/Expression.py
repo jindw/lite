@@ -83,7 +83,7 @@ def _evaluate(stack, tokens, context):
                 else:
                     stack.append(result);
             else:
-                stack.append(getTokenValue(context, item));
+                stack.append(value(context, item));
         else:
             stack.append(item)
 def compute(op,arg1,arg2):
