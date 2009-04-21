@@ -9,7 +9,7 @@ try:
     print(str(Exception)+"???")
 except Exception,e:
     import re
-    jsonFinder = re.compile(r'"(?:\\"|[^\"])*"|true|false|null');
+    json_finder = re.compile(r'"(?:\\"|[^\"])*"|true|false|null');
     def jsonReplacer( match ):
         text = match.group(0);
         if text == 'true':
@@ -21,7 +21,7 @@ except Exception,e:
         else:
             return text.replace('\\/','/');
     def json_decode(text):
-        text = jsonFinder.sub(jsonReplacer,text)
+        text = json_finder.sub(jsonReplacer,text)
         return eval(text,None);
     def json_encode(o):
         return repr(o);
