@@ -4,7 +4,7 @@
     * 目前mod_python 最高只支持2.5,这点比较郁闷
     * 下载地址：http://python.org/
   === 安装mod_python ===
-    * 下载地址
+    * 下载地址（测试过 Mod_python 3.3.1）
       http://httpd.apache.org/modules/python-download.cgi
     * 安装说明
       windows 上有个安装向导，选择Python目录和Apache目录后即安装完成，非常方便。
