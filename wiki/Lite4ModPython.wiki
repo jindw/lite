@@ -50,6 +50,5 @@ def handler(req):
     return apache.OK
 }}}
 == 其他参考 ==
-
-http://code.google.com/p/lite/wiki/Lite4PHP
-http://code.google.com/p/lite/wiki/Lite4JavaServlet
+  # http://code.google.com/p/lite/wiki/Lite4PHP
+  # http://code.google.com/p/lite/wiki/Lite4JavaServlet
