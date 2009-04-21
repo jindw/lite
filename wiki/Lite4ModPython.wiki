@@ -1,6 +1,7 @@
 #labels Featured,Phase-Implementation
 == 安装软件 ==
   ===  安装Python2.5 ===
+    * 目前mod_python 最高只支持2.5,这点比较郁闷
     * 下载地址：http://python.org/
   === 安装mod_python ===
     * 下载地址
