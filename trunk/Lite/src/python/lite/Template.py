@@ -25,118 +25,118 @@ class Template:
         self.items = list
         
     def render(self, context, out):
-        renderList(context, self.items, out)
-def renderList(context, children, out):
+        render_list(context, self.items, out)
+def render_list(context, children, out):
     for item in children:
         try:
             if isinstance(item, str):
                 out.write(item)
             else:
                 if item[0] == EL_TYPE:
-                    processExpression(context, item, out, False)
+                    process_el(context, item, out, False)
                 elif item[0] == XML_TEXT_TYPE:
-                    processExpression(context, item, out, True)
+                    process_el(context, item, out, True)
                 elif item[0] == VAR_TYPE:
-                    processVar(context, item)
+                    process_var(context, item)
                 elif item[0] == CAPTRUE_TYPE:
-                    processCaptrue(context, item)
+                    process_captrue(context, item)
                 elif item[0] == IF_TYPE:
-                    processIf(context, item, out)
+                    process_if(context, item, out)
                 elif item[0] == ELSE_TYPE:
-                    processElse(context, item, out)
+                    process_else(context, item, out)
                 elif item[0] == FOR_TYPE:
-                    processFor(context, item, out)
+                    process_for(context, item, out)
                 elif item[0] == XML_ATTRIBUTE_TYPE:
-                    processAttribute(context, item, out)
+                    process_attribute(context, item, out)
         except Exception,e:
             out.write(str(item))
             out.write(str(e))
             pass
 
-def printXMLAttribute(text, out):
+def print_xml_attribute(text, out):
     if isinstance(text,bool):
         out.write(text and 'true' or 'false');
     else:
         out.write(escape(str(text),true));
 
-def printXMLText(text, out):
+def print_xml_text(text, out):
     if isinstance(text,bool):
         out.write(text and 'true' or 'false');
     else:
         out.write(escape(str(text)));
 
-def toBoolean(test):
+def to_bool(test):
     if isinstance(test, list) or isinstance(test, dict):
         return true
     else:
         return bool(test);
 
-def processExpression(context, data, out, encodeXML):
+def process_el(context, data, out, encodeXML):
     value = evaluate(data[1],context)
     if encodeXML and value is not None:
-        printXMLText(value, out)
+        print_xml_text(value, out)
     else:
         out.write(value)
 
-def processIf(context, data, out):
+def process_if(context, data, out):
     test = True
     try:
-        if toBoolean(evaluate(data[2],context)):
-            renderList(context, data[1], out)
+        if to_bool(evaluate(data[2],context)):
+            render_list(context, data[1], out)
         else:
             test = False
     finally:
         context[IF_KEY]=test
 
-def processElse(context, data, out):
-    if not toBoolean(context[IF_KEY]):
+def process_else(context, data, out):
+    if not to_bool(context[IF_KEY]):
         try:
-            if data[2] is None or toBoolean(evaluate(data[2],context)):
-                renderList(context, data[1], out)
+            if data[2] is None or to_bool(evaluate(data[2],context)):
+                render_list(context, data[1], out)
                 context[IF_KEY] = True
         except Exception,e:
             #out.write(e)
             context[IF_KEY] = True
 
-def processFor(context, data, out):
+def process_for(context, data, out):
     items = evaluate(data[2],context)
     if items == None :
         context[IF_KEY]=False;
         return;
     try:
         children = data[1]
-        varName = data[3]
+        var_name = data[3]
         length = len(items)
-        preiousStatus = hasattr(context,FOR_KEY) and context[FOR_KEY]
+        preious_status = hasattr(context,FOR_KEY) and context[FOR_KEY]
      
-        forStatus = ForStatus(length)
-        context[FOR_KEY]=forStatus
+        for_status = ForStatus(length)
+        context[FOR_KEY]=for_status
         for item in items:
-            forStatus.index += 1
-            context[varName]=item
-            renderList(context, children, out)
+            for_status.index += 1
+            context[var_name]=item
+            render_list(context, children, out)
     finally:
-        context[FOR_KEY]=preiousStatus
+        context[FOR_KEY]=preious_status
         context[IF_KEY]= length > 0
 
-def processVar(context, data):
+def process_var(context, data):
     context[data[2]]= evaluate(data[1],context);
 
-def processCaptrue(context, data):
+def process_captrue(context, data):
     buf = StringIO();
-    renderList(context, data[1], buf);
+    render_list(context, data[1], buf);
     context[data[2]]= buf.getvalue();
     buf.close();
 
-def processAttribute(context, data, out):
+def process_attribute(context, data, out):
     result = evaluate(data[1],context)
     if data[2] is None:
-        printXMLAttribute(result, out)
+        print_xml_attribute(result, out)
     elif result is not None:
         out.write(" ")
         out.write(data[2])
         out.write("=\"")
-        printXMLAttribute(result, out)
+        print_xml_attribute(result, out)
         out.write('"')
 
 class ForStatus(object):

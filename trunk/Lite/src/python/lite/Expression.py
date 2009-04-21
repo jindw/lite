@@ -47,7 +47,7 @@ OP_MAP_PUSH = 33;#32 | 0 | 1;
 import urllib
 
 from json import json_encode,json_decode;
-globalMap = {
+global_map = {
     "JSON":{
         "stringify":json_encode,#TODO:还是用通用json 库吧
         "parse":json_decode    #TODO:还是用通用json 库吧
@@ -66,7 +66,7 @@ def evaluate(tokens, context):
     _evaluate(stack, tokens, context)
     stack = stack[0]
     if(isinstance(stack,PropertyValue )):
-        stack = stack.getValue();
+        stack = stack.value();
     return stack
 def _evaluate(stack, tokens, context):
     for item in tokens:
@@ -90,13 +90,13 @@ def compute(op,arg1,arg2):
     type = op[0];
     if type == OP_INVOKE_METHOD:
         if isinstance(arg1,PropertyValue):
-            return apply(arg1.getValue(),arg2);
+            return apply(arg1.value(),arg2);
         else:
             return apply(arg1,arg2);
     if isinstance(arg1,PropertyValue):
-        arg1 = arg1.getValue();
+        arg1 = arg1.value();
     if isinstance(arg2,PropertyValue):
-        arg2 = arg2.getValue();
+        arg2 = arg2.value();
         
     if type == OP_STATIC_GET_PROP:
         return PropertyValue(arg1,op[1]);
@@ -167,7 +167,7 @@ def compute(op,arg1,arg2):
     elif type == OP_MAP_PUSH:
         arg1[op[1]] =arg2;
         return arg1;
-def getTokenValue(context, item):
+def value(context, item):
     type = item[0];
     if  type == VALUE_CONSTANTS:
         return item[1];
@@ -175,8 +175,8 @@ def getTokenValue(context, item):
         value = item[1]
         if value in context:
             return context[value]
-        elif value in globalMap:
-            return globalMap[value]
+        elif value in global_map:
+            return global_map[value]
         return None
     elif type == VALUE_NEW_LIST:
         return []
@@ -193,17 +193,13 @@ class PropertyValue:
     def __init__(self, base,name):
         self.base = base;
         self.name = name;
-    def getValue(self):
+    def value(self):
        if(isinstance(self.base,dict ) and self.name in self.base):
             return self.base[self.name];
        else:
             return getattr(self.base,self.name);
 
 class Expression:
-    """ generated source for ExpressionImpl
-
-    """
-    source = ""
     expression = []
 
     def __init__(self, el):
