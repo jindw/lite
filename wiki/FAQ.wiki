@@ -1,0 +1,15 @@
+== 表达式注意事项 ==
+  * 表达式界限
+    # 表达式不需要也不能嵌套
+      ${...}中间括起来的部分是表达式，表达式中的变量无需再次 ${...}
+      比如： ${JSON.stringify(object)},而不是：${JSON.stringify(${object})}
+    # 转义
+  * 变量和字面量
+    # 和js语法一致
+  * 引号问题
+    表达式中双引号和单引号都表示字符串
+    在xml属性中使用时要分外注意，属性内不能有和属性括弧一致的括弧。
+    如 <c:var name="var1" value="${encodeURIComponent('金大为')}">
+    或者 <c:var name="var1" value="${encodeURIComponent(&#34;金大为&#34;)}">
+    而不能写成 <c:var name="var1" value="${encodeURIComponent("金大为")}">
+  
