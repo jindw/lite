@@ -97,9 +97,7 @@ public class XMLTest {
 
 		ParseContextImpl parseContext = new ParseContextImpl(this.getClass()
 				.getResource("/"));
-		Map<String, String> map = new HashMap<String, String>();
-		map.put(HTMLFormNodeParser.AUTO_FORM_FEATRUE_URL, HTMLFormNodeParser.AUTO_IN_FORM);
-		parseContext.setFeatrueMap(map);
+		parseContext.setFeatrue(HTMLFormNodeParser.AUTO_FORM_FEATRUE_URL, HTMLFormNodeParser.AUTO_IN_FORM);
 		
 		parseContext.setCompress(true);
 		List<Object> insts = parser.parse(

@@ -8,10 +8,10 @@ import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -101,14 +101,14 @@ public class TemplateEngine{
 		}
 	}
 
-	protected List<File> getAssociatedFiles(Set<URL> resources) {
+	protected File[] getAssociatedFiles(Collection<URL> resources) {
 		ArrayList<File> files = new ArrayList<File>();
 		for (URL url : resources) {
 			if ("file".equals(url.getProtocol())) {
 				files.add(new File(url.getFile()));
 			}
 		}
-		return files;
+		return files.toArray(new File[files.size()]);
 	}
 
 	protected ParseContext createParseContext() {
@@ -116,8 +116,9 @@ public class TemplateEngine{
 			ParseContext context = new ParseContextImpl(getResource("/"));
 			context.setCompress(compress);
 			context.setFormat(format);
-			context.setFeatrueMap(featrues);
-			//context.setAttribute(HTMLFormNodeParser.AUTO_FORM_FEATRUE_URL, HTMLFormNodeParser.AUTO_IN_FORM);
+			for(String key :featrues.keySet()){
+				context.setFeatrue(key, featrues.get(key));
+			}
 			return context;
 		} catch (MalformedURLException e) {
 			throw new RuntimeException(e);
@@ -128,16 +129,6 @@ public class TemplateEngine{
 		String decoratorPath = null;
 		if(decoratorMapper!=null){
 			decoratorPath = decoratorMapper.getDecotatorPage(path);
-		}
-		if(this.webRoot!=null){
-			try {
-				parseContext.addResource(new File(webRoot,path).toURI().toURL());
-				if(decoratorPath!=null){
-					parseContext.addResource(new File(webRoot,decoratorPath).toURI().toURL());
-				}
-			} catch (MalformedURLException e) {
-				log.warn(e);
-			}
 		}
 		if (decoratorPath != null && !decoratorPath.equals(path)) {
 			try {
@@ -151,17 +142,19 @@ public class TemplateEngine{
 		try {
 			List<Object> items = parser.parse(getResource(path), parseContext);
 			return new Template(items);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			log.error(e);
-			throw new RuntimeException(e);
+			ArrayList<Object> errors = new ArrayList<Object>();
+			errors.add(e.getMessage());
+			return new Template(errors);
 		}
 	}
 
 	private TemplateEntry createTemplateEntry(String path) {
 		ParseContext parseContext = createParseContext();
 		Template template = createTemplate(path, parseContext);
-		List<File> files = getAssociatedFiles(parseContext.getResources());
-		return new TemplateEntry(template, files.toArray(new File[files.size()]));
+		File[] files = getAssociatedFiles(parseContext.getResources());
+		return new TemplateEntry(template, files);
 	}
 
 	protected long getLastModified(File[] files) {
