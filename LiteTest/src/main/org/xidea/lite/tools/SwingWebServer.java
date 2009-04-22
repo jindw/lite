@@ -201,7 +201,7 @@ public class SwingWebServer extends SimpleWebServer {
 		});
 		xhtmlCheck.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e) {
-				xhtml = compressCheck.isSelected();
+				xhtml = xhtmlCheck.isSelected();
 				reset(webBase);
 			}
 		});

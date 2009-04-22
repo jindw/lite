@@ -133,8 +133,8 @@ public class SimpleWebServer extends MutiThreadWebServer {
 			@Override
 			protected ParseContext createParseContext() {
 				ParseContext context = super.createParseContext();
-				context.setCompress(compress);
-				context.setFormat(format);
+				context.setCompress(SimpleWebServer.this.compress);
+				context.setFormat(SimpleWebServer.this.format);
 				return context;
 			}
 
