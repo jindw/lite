@@ -48,7 +48,7 @@ public class Java6JSBuilder implements JSBuilder {
 						parentScope);
 			}
 		} catch (Exception e) {
-			log.error("初始化JS引擎失败", e);
+			log.error("初始化Java6 JS引擎失败", e);
 			throw new RuntimeException(e);
 		}
 
