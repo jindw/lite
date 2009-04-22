@@ -2,8 +2,7 @@ package org.xidea.lite.parser;
 
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Map;
-import java.util.Set;
+import java.util.Collection;
 
 import org.xidea.el.ExpressionFactory;
 
@@ -16,7 +15,7 @@ public interface ParseContext extends ResultContext, XMLContext {
 	 * 记录一下编译上下文特征变量，该对象不可被修改
 	 * @param featrues {url,value}
 	 */
-	public void setFeatrueMap(Map<String, String> featrues);
+	public void setFeatrue(String key, String value);
 	public String getFeatrue(String key);
 	
 	/**
@@ -32,6 +31,12 @@ public interface ParseContext extends ResultContext, XMLContext {
 	 * @return
 	 */
 	public URL getCurrentURL();
+
+	/**
+	 * 获取当前正在解析的模版URL
+	 * 同事将该url记录在资源列表中
+	 * @return
+	 */
 	public void setCurrentURL(URL currentURL);
 	/**
 	 * 如果file相于根目录（/path/...），以base作为根目录处理
@@ -48,7 +53,7 @@ public interface ParseContext extends ResultContext, XMLContext {
 	 * @param resource
 	 */
 	public void addResource(URL resource);
-	public Set<URL> getResources();
+	public Collection<URL> getResources();
 	/**
 	 * 自定义表达式解析器
 	 * @param expressionFactory

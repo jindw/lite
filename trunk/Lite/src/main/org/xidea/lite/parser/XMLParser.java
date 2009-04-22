@@ -176,7 +176,7 @@ public class XMLParser extends TextParser implements Parser {
 			Document doc = documentBuilder.parse(in, url.toString());
 			return doc;
 		} catch (SAXParseException e) {
-			throw new IOException("XML Parser Error:"+url+"(" + e.getLineNumber() + ","
+			throw new SAXException("XML Parser Error:"+url+"(" + e.getLineNumber() + ","
 					+ e.getColumnNumber() + ")\r\n" + e.getMessage()
 					);
 		}
