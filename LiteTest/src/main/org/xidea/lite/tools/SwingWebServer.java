@@ -177,7 +177,8 @@ public class SwingWebServer extends SimpleWebServer {
 		final JLabel homeLabel = new JLabel("<html><a href='#'>网站首页</a></html>");
 		final JCheckBox formatCheck = new JCheckBox("格式化");
 		final JCheckBox compressCheck = new JCheckBox("压缩");
-		final JCheckBox xhtmlCheck = new JCheckBox("严谨的xhtml语法",true);
+		final JCheckBox xhtmlCheck = new JCheckBox("严谨语法",true);
+		xhtmlCheck.setToolTipText("采用严谨的xhtml语法");
 
 		formatCheck.setBounds(2, 32, 68, 20);
 		compressCheck.setBounds(70, 32, 60, 20);
@@ -204,23 +205,8 @@ public class SwingWebServer extends SimpleWebServer {
 				reset(webBase);
 			}
 		});
-		//toolsLabel.setBounds(214, 32, 80, 20);
 		homeLabel.setBounds(264, 32, 100, 20);
 		frame.add(homeLabel);
-
-//		final JLabel toolsLabel = new JLabel(
-//				"<html><a href='#'>管理首页</a></html>");
-//		frame.add(toolsLabel);
-//		toolsLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-//		toolsLabel.addMouseListener(new MouseAdapter() {
-//			public void mouseClicked(MouseEvent e) {
-//				try {
-//					JOptionPane.showConfirmDialog(frame, "还没写完呢,等等把!");
-//				} catch (Exception e1) {
-//					e1.printStackTrace();
-//				}
-//			}
-//		});
 		homeLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		homeLabel.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent e) {
