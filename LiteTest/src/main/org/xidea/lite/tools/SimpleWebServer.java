@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -80,7 +81,8 @@ public class SimpleWebServer extends MutiThreadWebServer {
 								context.append("<script");
 								parser.parseNode(node.getAttributes(), context);
 								context.append(">");
-								parser.parseText(context, text, Template.EL_TYPE);
+								parser.parseText(context, text,
+										Template.EL_TYPE);
 								context.append("</script>");
 								context.endIndent();
 								return null;
@@ -112,7 +114,7 @@ public class SimpleWebServer extends MutiThreadWebServer {
 		this.webBase = webBase;
 		engine = new TemplateEngine(webBase) {
 			{
-				if(!xhtml){
+				if (!xhtml) {
 					this.parser = htmlParser;
 				}
 
@@ -167,6 +169,11 @@ public class SimpleWebServer extends MutiThreadWebServer {
 					try {
 						object = (Map) JSONDecoder.decode(text);
 					} catch (Exception e) {
+						PrintWriter pout = new PrintWriter(out);
+						pout.print("<!--");
+						e.printStackTrace(pout);
+						pout.print("-->");
+						pout.close();
 					}
 				}
 				object.put("requestURI", url);
