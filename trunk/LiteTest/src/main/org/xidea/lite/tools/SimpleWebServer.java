@@ -17,25 +17,18 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.xpath.XPathExpressionException;
-
-import org.cyberneko.html.HTMLConfiguration;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xidea.el.json.JSONDecoder;
 import org.xidea.lite.Template;
 import org.xidea.lite.TemplateEngine;
 import org.xidea.lite.parser.HTMLNodeParser;
-import org.xidea.lite.parser.NodeParser;
 import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.XMLParser;
 import org.xidea.lite.tools.webserver.MutiThreadWebServer;
 import org.xidea.lite.tools.webserver.RequestHandle;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.xml.sax.SAXNotRecognizedException;
-import org.xml.sax.SAXNotSupportedException;
 
 public class SimpleWebServer extends MutiThreadWebServer {
 	public static final String INDEX_XHTML = "index.xhtml";
@@ -44,73 +37,85 @@ public class SimpleWebServer extends MutiThreadWebServer {
 	protected TemplateEngine engine;
 	protected boolean compress;
 	protected boolean format;
+	protected boolean xhtml = true;
 	protected long lastAcessTime = System.currentTimeMillis();
 
-	private org.cyberneko.html.parsers.DOMParser htmlParser = new org.cyberneko.html.parsers.DOMParser();
+	XMLParser xmlParser = new XMLParser();
+	XMLParser htmlParser = new XMLParser() {
+		private org.cyberneko.html.parsers.DOMParser htmlParser = new org.cyberneko.html.parsers.DOMParser();
+		{
+			try {
+				htmlParser.setFeature("http://xml.org/sax/features/namespaces",
+						true);
+				htmlParser
+						.setFeature(
+								"http://cyberneko.org/html/features/scanner/cdata-sections",
+								true);
+				htmlParser.setProperty(
+						"http://cyberneko.org/html/properties/names/elems",
+						"default");
+				htmlParser.setProperty(
+						"http://cyberneko.org/html/properties/names/attrs",
+						"default");
+				htmlParser
+						.setProperty(
+								"http://cyberneko.org/html/properties/default-encoding",
+								"utf-8");
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+			this.addNodeParser(new HTMLNodeParser(this) {
+
+				protected Node parse(Node node, ParseContext context) {
+					if (node.getLocalName().equalsIgnoreCase("script")) {
+						Node firstChild = node.getFirstChild();
+						if (firstChild != null
+								&& firstChild.getNextSibling() == null) {
+							if (firstChild.getNodeType() == Node.TEXT_NODE) {
+								String text = firstChild.getNodeValue().trim();
+								text = text.replaceAll("&lt;", "<").replaceAll(
+										"&gt;", ">").replaceAll("&amp;", "&");
+								context.beginIndent();
+								context.append("<script");
+								parser.parseNode(node.getAttributes(), context);
+								context.append(">");
+								parser.parseText(context, text, Template.EL_TYPE);
+								context.append("</script>");
+								context.endIndent();
+								return null;
+							}
+						}
+					}
+					return node;
+				}
+			});
+		}
+
+		public Document loadXML(URL url, ParseContext context)
+				throws SAXException, IOException {
+			context.setCurrentURL(url);
+			InputSource in = new InputSource(url.openStream());
+			synchronized (htmlParser) {
+				htmlParser.parse(in);
+				Document doc = htmlParser.getDocument();
+				return doc;
+			}
+		}
+	};
 
 	public SimpleWebServer(File webBase) {
 		reset(webBase);
-		try {
-			htmlParser.setFeature("http://xml.org/sax/features/namespaces", true);
-			htmlParser.setFeature("http://cyberneko.org/html/features/scanner/cdata-sections", true);
-			htmlParser.setProperty("http://cyberneko.org/html/properties/names/elems", "default");
-			htmlParser.setProperty("http://cyberneko.org/html/properties/names/attrs", "default");
-			htmlParser.setProperty("http://cyberneko.org/html/properties/default-encoding", "utf-8");
-		} catch (SAXNotRecognizedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SAXNotSupportedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
 	}
 
 	public void reset(File webBase) {
 		this.webBase = webBase;
 		engine = new TemplateEngine(webBase) {
 			{
-				
-				parser = new XMLParser() {
-					public Document loadXML(URL url, ParseContext context)
-							throws SAXException, IOException,
-							XPathExpressionException {
-						context.setCurrentURL(url);
-						InputSource in = new InputSource(url.openStream());
-						synchronized (htmlParser) {
-							htmlParser.parse(in);
-							Document doc = htmlParser.getDocument();
-							return doc;
-						}
-					}
+				if(!xhtml){
+					this.parser = htmlParser;
+				}
 
-				};
-				parser.addNodeParser(new HTMLNodeParser(parser){
-
-
-					protected Node parse(Node node, ParseContext context) {
-						if(node.getLocalName().equalsIgnoreCase("script")){
-							Node firstChild = node.getFirstChild();
-							if(firstChild!=null && firstChild.getNextSibling() ==null){
-								if(firstChild.getNodeType() == Node.TEXT_NODE){
-									String text = firstChild.getNodeValue().trim();
-									text = text.replaceAll("&lt;", "<").
-									replaceAll("&gt;", ">").
-									replaceAll("&amp;", "&");
-									context.beginIndent();
-									context.append("<script");
-									parser.parseNode(node.getAttributes(), context);
-									context.append(">");
-									parser.parseText(context, text, Template.EL_TYPE);
-									context.append("</script>");
-									context.endIndent();
-									return null;
-								}
-							}
-						}
-						return node;
-					}
-				});
 			}
 
 			protected URL getResource(String pagePath)
@@ -130,7 +135,7 @@ public class SimpleWebServer extends MutiThreadWebServer {
 				context.setFormat(format);
 				return context;
 			}
-			
+
 		};
 	}
 
@@ -143,7 +148,8 @@ public class SimpleWebServer extends MutiThreadWebServer {
 			if (file.isDirectory()) {
 				File index = new File(file, INDEX_XHTML);
 				if (index.exists()) {
-					url = url.substring(0,url.lastIndexOf('/')+1) + INDEX_XHTML;
+					url = url.substring(0, url.lastIndexOf('/') + 1)
+							+ INDEX_XHTML;
 					file = index;
 				}
 			}
@@ -158,9 +164,9 @@ public class SimpleWebServer extends MutiThreadWebServer {
 					if (text.startsWith("\uFEFF")) {
 						text = text.substring(1);
 					}
-					try{
+					try {
 						object = (Map) JSONDecoder.decode(text);
-					}catch (Exception e) {
+					} catch (Exception e) {
 					}
 				} else {
 					object = new HashMap<Object, Object>();
@@ -176,10 +182,9 @@ public class SimpleWebServer extends MutiThreadWebServer {
 				handle.printFile(file);
 			}
 		} else {
-			String text = loadText(this.getClass().getResourceAsStream(
-					url));
-			if(text== null){
-				System.out.println(url +"不存在");
+			String text = loadText(this.getClass().getResourceAsStream(url));
+			if (text == null) {
+				System.out.println(url + "不存在");
 			}
 			handle.printContext(text, "text/html");
 		}

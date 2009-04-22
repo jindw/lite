@@ -13,7 +13,6 @@ import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -175,16 +174,17 @@ public class SwingWebServer extends SimpleWebServer {
 		changeHomeButton.setBounds(184, 2, 138, 20);
 		frame.add(changeHomeButton);
 
-		final JLabel toolsLabel = new JLabel(
-				"<html><a href='#'>管理首页</a></html>");
 		final JLabel homeLabel = new JLabel("<html><a href='#'>网站首页</a></html>");
 		final JCheckBox formatCheck = new JCheckBox("格式化");
 		final JCheckBox compressCheck = new JCheckBox("压缩");
+		final JCheckBox xhtmlCheck = new JCheckBox("严谨的xhtml语法",true);
 
-		formatCheck.setBounds(2, 32, 80, 20);
-		compressCheck.setBounds(84, 32, 100, 20);
+		formatCheck.setBounds(2, 32, 68, 20);
+		compressCheck.setBounds(70, 32, 60, 20);
+		xhtmlCheck.setBounds(130, 32, 120, 20);
 		frame.add(formatCheck);
 		frame.add(compressCheck);
+		frame.add(xhtmlCheck);
 		formatCheck.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e) {
 				format = formatCheck.isSelected();
@@ -197,22 +197,30 @@ public class SwingWebServer extends SimpleWebServer {
 				compress = compressCheck.isSelected();
 				reset(webBase);
 			}
-			
 		});
-		toolsLabel.setBounds(184, 32, 80, 20);
-		homeLabel.setBounds(264, 32, 100, 20);
-		frame.add(homeLabel);
-		frame.add(toolsLabel);
-		toolsLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		toolsLabel.addMouseListener(new MouseAdapter() {
-			public void mouseClicked(MouseEvent e) {
-				try {
-					JOptionPane.showConfirmDialog(frame, "还没写完呢,等等把!");
-				} catch (Exception e1) {
-					e1.printStackTrace();
-				}
+		xhtmlCheck.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e) {
+				xhtml = compressCheck.isSelected();
+				reset(webBase);
 			}
 		});
+		//toolsLabel.setBounds(214, 32, 80, 20);
+		homeLabel.setBounds(264, 32, 100, 20);
+		frame.add(homeLabel);
+
+//		final JLabel toolsLabel = new JLabel(
+//				"<html><a href='#'>管理首页</a></html>");
+//		frame.add(toolsLabel);
+//		toolsLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+//		toolsLabel.addMouseListener(new MouseAdapter() {
+//			public void mouseClicked(MouseEvent e) {
+//				try {
+//					JOptionPane.showConfirmDialog(frame, "还没写完呢,等等把!");
+//				} catch (Exception e1) {
+//					e1.printStackTrace();
+//				}
+//			}
+//		});
 		homeLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		homeLabel.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent e) {
