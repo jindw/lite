@@ -17,6 +17,8 @@ public class DefaultXMLNodeParser implements NodeParser {
 
 	public static final Pattern SCRIPT_TAG = Pattern.compile("^script$",
 			Pattern.CASE_INSENSITIVE);
+	final static Pattern PRIM_PATTERN = Pattern
+			.compile("^\\s*([\\r\\n])\\s*|\\s*([\\r\\n])\\s*$|^(\\s)+|(\\s)+$");
 
 	private XMLParser parser;
 
@@ -141,7 +143,7 @@ public class DefaultXMLNodeParser implements NodeParser {
 			// }
 			// text = text2;
 			if (context.isCompress()) {
-				text = text.replaceAll("^(\\s)+|(\\s)+$", "$1$2");
+				text = safeTrim(text);
 			} else if (context.isFormat()) {
 				text = text.trim();
 			}
@@ -160,6 +162,11 @@ public class DefaultXMLNodeParser implements NodeParser {
 			}
 		}
 		return null;
+	}
+
+	protected String safeTrim(String text) {
+		text = PRIM_PATTERN.matcher(text).replaceAll("$1$2$3$4");
+		return text;
 	}
 
 	private Node parseAttribute(Node node, ParseContext context) {
