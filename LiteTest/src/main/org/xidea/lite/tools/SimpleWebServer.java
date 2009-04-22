@@ -158,7 +158,7 @@ public class SimpleWebServer extends MutiThreadWebServer {
 				File json = new File(webBase, url.substring(0, url
 						.lastIndexOf('.'))
 						+ ".json");
-				Map<Object, Object> object = null;
+				Map<Object, Object> object = new HashMap<Object, Object>();
 				if (json.exists()) {
 					String text = loadText(new FileInputStream(json));
 					if (text.startsWith("\uFEFF")) {
@@ -168,8 +168,6 @@ public class SimpleWebServer extends MutiThreadWebServer {
 						object = (Map) JSONDecoder.decode(text);
 					} catch (Exception e) {
 					}
-				} else {
-					object = new HashMap<Object, Object>();
 				}
 				object.put("requestURI", url);
 				engine.render(url, object, out);
