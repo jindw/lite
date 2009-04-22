@@ -44,7 +44,7 @@ public class RhinoJSBuilder implements JSBuilder {
 				eval(new InputStreamReader(compressed, "utf-8"));
 			}
 		} catch (Exception e) {
-			log.error("初始化JS引擎失败", e);
+			log.error("初始化Rhino JS引擎失败", e);
 		}
 	}
 
