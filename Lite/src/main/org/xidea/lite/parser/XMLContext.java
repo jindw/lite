@@ -27,15 +27,14 @@ public interface XMLContext {
 	public void setReserveSpace(boolean keepSpace);
 
 	/**
-	 * 在XMLParser中判断平设置，Core标签将缩进做了回逄1�7处理
-	 * 
-	 * @return
+	 * 开始缩进(当压缩属性和reserveSpace都不为真的时候有效)
+	 * @see ParseContextImpl#beginIndent()
 	 */
-	//public int getDepth();
-
 	public void beginIndent();
 
+
 	/**
+	 * 开始缩进(当压缩属性和reserveSpace都不为真的时候有效)
 	 * @see ParseContextImpl#endIndent()
 	 */
 	public void endIndent();
