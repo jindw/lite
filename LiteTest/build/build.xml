@@ -18,6 +18,16 @@
 			</fileset>
 		</jar>
 	</target>
+	<target name="jar-source">
+		<jar destfile="build/dest/source.jar">
+			<fileset dir="src/main" defaultexcludes="true">
+				<include name="**/*.java" />
+			</fileset>
+			<fileset dir="../Lite/src/main" defaultexcludes="true">
+				<include name="**/*.java" />
+			</fileset>
+		</jar>
+	</target>
 	<target name="jar-template" depends="init">
 		<delete>
 			<fileset dir="build/dest/">
