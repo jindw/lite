@@ -24,7 +24,6 @@ public class HTMLFormNodeParser extends HTMLNodeParser implements NodeParser {
 	public static final String NO_AUTO = "none";
 	public static final String AUTO_ANYWAY = "anyway";
 	public static final String AUTO_IN_FORM = "form";
-	private static final Object IN_FORM_KEY = new Object();
 
 	private static final String FORM_TAG = "form";
 	private static final String INPUT_TAG = "input";
@@ -54,24 +53,14 @@ public class HTMLFormNodeParser extends HTMLNodeParser implements NodeParser {
 		Object status = context.getFeatrue(AUTO_FORM_FEATRUE_URL);
 		if (AUTO_ANYWAY.equals(status)) {
 			return processAutoForm(context, el, localName);
-		} else if (AUTO_IN_FORM.equals(status)) {
-			// Warn 代码的坏味道
-			if (FORM_TAG.equals(localName)) {
-				context.setAttribute(IN_FORM_KEY, IN_FORM_KEY);
-				node = processAutoForm(context, el, localName);
-				context.setAttribute(IN_FORM_KEY, null);
-				if(node != null){
-					throw new RuntimeException();
-				}
-				return null;
-			} else {
-				Object in = context.getAttribute(IN_FORM_KEY);
-				if(in == null){
-					return parseHTMLElement(el, context, null);
-				}else{
-					return processAutoForm(context, el, localName);
-				}
+		} else if (AUTO_IN_FORM.equals(status) && FORM_TAG.equals(localName)) {
+			context.setFeatrue(AUTO_FORM_FEATRUE_URL, AUTO_ANYWAY);
+			node = parseHTMLElement(el,context,  null);
+			if (node != null) {
+				throw new RuntimeException();
 			}
+			context.setFeatrue(AUTO_FORM_FEATRUE_URL, AUTO_ANYWAY);
+			return null;
 		} else {
 			return parseHTMLElement(el, context, null);
 		}
