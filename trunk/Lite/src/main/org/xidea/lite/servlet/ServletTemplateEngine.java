@@ -21,8 +21,6 @@ public class ServletTemplateEngine extends TemplateEngine {
 	private ServletContext context;
 
 	public ServletTemplateEngine(ServletConfig config) {
-		String transformerFactory = config.getInitParameter("transformerFactory");
-		String xpathFactory = config.getInitParameter("xpathFactory");
 		//this.parser = new XMLParser(transformerFactory,xpathFactory);
 		this.config = config;
 		this.context = config.getServletContext();
@@ -44,9 +42,12 @@ public class ServletTemplateEngine extends TemplateEngine {
 		HashMap<String, String> featrues = new HashMap<String, String>();
 		while(names.hasMoreElements()){
 			String name = names.nextElement();
-			if(name.startsWith("http://")){
-				featrues.put(name,config.getInitParameter(name));
-			}
+			//String transformerFactory = config.getInitParameter("javax.xml.transform.TransformerFactory");
+			//String xpathFactory = config.getInitParameter("javax.xml.xpath.XPathFactory");
+			//if(name.startsWith("http://") || name.startsWith("javax.")){
+			featrues.put(name,config.getInitParameter(name));
+			//}
+			
 		}
 		return featrues;
 	}

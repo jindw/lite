@@ -12,7 +12,6 @@ import org.xidea.el.ExpressionFactoryImpl;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.BuildInAdvice;
 import org.xidea.lite.Template;
-import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.ResultContext;
 
 public class ResultContextImpl implements ResultContext {

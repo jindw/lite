@@ -8,10 +8,6 @@ import java.io.StringWriter;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.xidea.el.json.JSONEncoder;
-import org.xidea.lite.parser.impl.CoreXMLNodeParser;
-import org.xidea.lite.parser.impl.JSBuilder;
-
 import org.mozilla.javascript.CompilerEnvirons;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Decompiler;
@@ -21,6 +17,7 @@ import org.mozilla.javascript.Parser;
 import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.UintMap;
+import org.xidea.el.json.JSONEncoder;
 
 public class RhinoJSBuilder implements JSBuilder {
 	private static Log log = LogFactory.getLog(CoreXMLNodeParser.class);

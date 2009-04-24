@@ -111,7 +111,6 @@ public class CoreXMLNodeParser implements Parser<Element> {
 				context.setAttribute("#" + name, cachedNode);
 			}
 			if (var != null) {
-				Node next = el.getFirstChild();
 				context.appendCaptrue(var);
 				context.parse(el.getChildNodes());
 				context.appendEnd();
