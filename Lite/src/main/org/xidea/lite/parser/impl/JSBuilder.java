@@ -1,4 +1,4 @@
-package org.xidea.lite.parser;
+package org.xidea.lite.parser.impl;
 
 public interface JSBuilder {
 	public String buildJS(String id, Object liteCode);

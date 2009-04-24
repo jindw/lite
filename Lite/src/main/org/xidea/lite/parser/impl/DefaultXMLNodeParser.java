@@ -1,4 +1,4 @@
-package org.xidea.lite.parser;
+package org.xidea.lite.parser.impl;
 
 import java.util.List;
 import java.util.regex.Pattern;
@@ -12,83 +12,84 @@ import org.w3c.dom.Node;
 import org.w3c.dom.ProcessingInstruction;
 import org.w3c.dom.Text;
 import org.xidea.lite.Template;
+import org.xidea.lite.parser.ParseChain;
+import org.xidea.lite.parser.ParseContext;
+import org.xidea.lite.parser.Parser;
 
-public class DefaultXMLNodeParser implements NodeParser {
+public class DefaultXMLNodeParser implements Parser<Node> {
 
 	public static final Pattern SCRIPT_TAG = Pattern.compile("^script$",
 			Pattern.CASE_INSENSITIVE);
 	final static Pattern PRIM_PATTERN = Pattern
 			.compile("^\\s*([\\r\\n])\\s*|\\s*([\\r\\n])\\s*$|^(\\s)+|(\\s)+$");
 
-	private XMLParser parser;
-
-	public DefaultXMLNodeParser(XMLParser parser) {
-		this.parser = parser;
-	}
-
-	public Node parseNode(Node node, ParseContext context) {
+	public void parse(ParseContext context,ParseChain chain,Node node) {
 		switch (node.getNodeType()) {
 		case 1: // NODE_ELEMENT
-			return parseElement(node, context);
+			parseElement(node, context);
+			break;
 		case 2: // NODE_ATTRIBUTE
-			return parseAttribute(node, context);
+			parseAttribute(node, context);
+			break;
 		case 3: // NODE_TEXT
-			return parseTextNode(node, context);
+			parseTextNode(node, context);
+			break;
 		case 4: // NODE_CDATA_SECTION
-			return parseCDATA(node, context);
+			parseCDATA(node, context);
+			break;
 		case 5: // NODE_ENTITY_REFERENCE
-			return parseEntityReference(node, context);
+			parseEntityReference(node, context);
+			break;
 		case 6: // NODE_ENTITY
-			return parseEntity(node, context);
+			parseEntity(node, context);
+			break;
 		case 7: // NODE_PROCESSING_INSTRUCTION
-			return parseProcessingInstruction(node, context);
+			parseProcessingInstruction(node, context);
+			break;
 		case 8: // NODE_COMMENT
-			return parseComment(node, context);
+			parseComment(node, context);
+			break;
 		case 9: // NODE_DOCUMENT
 		case 11:// NODE_DOCUMENT_FRAGMENT
-			return parseDocument(node, context);
+			parseDocument(node, context);
+			break;
 		case 10:// NODE_DOCUMENT_TYPE
-			return parseDocumentType(node, context);
+			parseDocumentType(node, context);
+			break;
 			// case 11://NODE_DOCUMENT_FRAGMENT
 			// return parseDocumentFragment(node,context);
 		case 12:// NODE_NOTATION
-			return parseNotation(node, context);
-		default:// 文本节点
-			// this.println("<!-- ERROR＄1�7 UNKNOW
-			// nodeType:"+node.nodeType+"-->")
-			return node;
+			parseNotation(node, context);
+			break;
 		}
 	}
 
-	protected Node parseProcessingInstruction(Node node, ParseContext context) {
+	protected void parseProcessingInstruction(Node node, ParseContext context) {
 		context.append("<?" + node.getNodeName() + " "
 				+ ((ProcessingInstruction) node).getData() + "?>");
-		return null;
 	}
 
-	private Node parseCDATA(Node node, ParseContext context) {
+	private void parseCDATA(Node node, ParseContext context) {
 		boolean needFormat = needFormat(node);
 		if (needFormat) {
 			context.beginIndent();// false);
 		}
 		try {
 			context.append("<![CDATA[");
-			this.parser.parseText(context, ((CDATASection) node).getData(),
-					Template.EL_TYPE);
+			context.parse(((CDATASection) node).getData());
 			context.append("]]>");
 		} finally {
 			if (needFormat) {
 				context.endIndent();
 			}
 		}
-		return null;
 	}
 
-	private Node parseNotation(Node node, ParseContext context) {
+	private void parseNotation(Node node, ParseContext context) {
 		throw new UnsupportedOperationException("parseNotation not support");
 	}
 
-	private Node parseDocumentType(Node node0, ParseContext context) {
+	private void parseDocumentType(Node node0, ParseContext context) {
 		DocumentType node = (DocumentType) node0;
 		if (node.getPublicId() != null) {
 			context.append("<!DOCTYPE ");
@@ -106,32 +107,29 @@ public class DefaultXMLNodeParser implements NodeParser {
 			context.append("]>");
 		}
 		// context.appendFormatEnd();
-		return null;
 	}
 
-	private Node parseDocument(Node node, ParseContext context) {
+	private void parseDocument(Node node, ParseContext context) {
 		for (Node n = node.getFirstChild(); n != null; n = n.getNextSibling()) {
-			this.parser.parseNode(n, context);
+			context.parse(n);
 		}
-		return null;
 	}
 
-	private Node parseComment(Node node, ParseContext context) {
-		return null;
+	private void parseComment(Node node, ParseContext context) {
+		return;
 	}
 
-	private Node parseEntity(Node node, ParseContext context) {
+	private void parseEntity(Node node, ParseContext context) {
 		throw new UnsupportedOperationException("parseNotation not support");
 	}
 
-	private Node parseEntityReference(Node node, ParseContext context) {
+	private void parseEntityReference(Node node, ParseContext context) {
 		context.append("&");
 		context.append(node.getNodeName());
 		context.append(";");
-		return null;
 	}
 
-	private Node parseTextNode(Node node, ParseContext context) {
+	private void parseTextNode(Node node, ParseContext context) {
 		String text = ((Text) node).getData();
 		if (!context.isReserveSpace()) {
 			// String text2 = text.trim();
@@ -154,14 +152,14 @@ public class DefaultXMLNodeParser implements NodeParser {
 				context.beginIndent();// false);
 			}
 			try {
-				this.parser.parseText(context, text, Template.XML_TEXT_TYPE);
+				context.parse(text,Template.XML_TEXT_TYPE);
 			} finally {
 				if (needFormat) {
 					context.endIndent();
 				}
 			}
 		}
-		return null;
+		return;
 	}
 
 	protected String safeTrim(String text) {
@@ -169,13 +167,13 @@ public class DefaultXMLNodeParser implements NodeParser {
 		return text;
 	}
 
-	private Node parseAttribute(Node node, ParseContext context) {
+	private void parseAttribute(Node node, ParseContext context) {
 		Attr attr = (Attr) node;
 		String name = attr.getName();
 		String value = attr.getValue();
 		if (CoreXMLNodeParser.isCoreNS("xmlns:c".equals(name) ? "c" : attr
 				.getPrefix(), value)) {
-			return null;
+			return;
 		}
 		List<Object> buf = parseAttributeValue(context, value);
 		boolean isStatic = false;
@@ -217,16 +215,16 @@ public class DefaultXMLNodeParser implements NodeParser {
 			context.appendAll(buf);
 			context.append("\"");
 		}
-		return null;
+		return;
 	}
 
 	private List<Object> parseAttributeValue(ParseContext context, String value) {
 		int mark = context.mark();
-		this.parser.parseText(context, value, Template.XML_ATTRIBUTE_TYPE);
+		context.parse(value,Template.XML_ATTRIBUTE_TYPE);
 		return context.reset(mark);
 	}
 
-	private Node parseElement(Node node, ParseContext context) {
+	private void parseElement(Node node, ParseContext context) {
 		context.beginIndent();// false);
 		String closeTag = null;
 		try {
@@ -235,13 +233,13 @@ public class DefaultXMLNodeParser implements NodeParser {
 			String tagName = el.getTagName();
 			context.append("<" + tagName);
 			for (int i = 0; i < attributes.getLength(); i++) {
-				this.parser.parseNode(attributes.item(i), context);
+				context.parse(attributes.item(i));
 			}
 			Node child = node.getFirstChild();
 			if (child != null) {
 				context.append(">");
 				while (true) {
-					this.parser.parseNode(child, context);
+					context.parse(child);
 					Node next = child.getNextSibling();
 					if (next == null) {
 						break;
@@ -258,7 +256,6 @@ public class DefaultXMLNodeParser implements NodeParser {
 			context.endIndent();
 			context.append(closeTag);
 		}
-		return null;
 	}
 
 	/**

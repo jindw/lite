@@ -27,10 +27,9 @@ import org.w3c.dom.DocumentType;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xidea.lite.Template;
-import org.xidea.lite.parser.NodeParser;
 import org.xidea.lite.parser.ParseContext;
-import org.xidea.lite.parser.ParseContextImpl;
-import org.xidea.lite.parser.XMLParser;
+import org.xidea.lite.parser.impl.ParseContextImpl;
+import org.xidea.lite.parser.impl.XMLContextImpl;
 import org.xml.sax.SAXException;
 
 
@@ -67,7 +66,7 @@ public class XMLParserTest {
 		ParseContextImpl context = new ParseContextImpl(url); 
 		org.w3c.dom.Document doc = new XMLParser().loadXML(url, context);
 		
-		DocumentFragment node = new XMLParser(){
+		Node node = new XMLContextImpl(null){
 			@Override
 			public DocumentFragment selectNodes(String xpath,
 					Node currentNode) throws XPathExpressionException {

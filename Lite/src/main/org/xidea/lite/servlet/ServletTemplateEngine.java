@@ -13,8 +13,7 @@ import javax.servlet.ServletContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.lite.TemplateEngine;
-import org.xidea.lite.parser.DecoratorMapper;
-import org.xidea.lite.parser.XMLParser;
+import org.xidea.lite.parser.impl.DecoratorImpl;
 
 public class ServletTemplateEngine extends TemplateEngine {
 	private static final Log log = LogFactory.getLog(ServletTemplateEngine.class);
@@ -24,7 +23,7 @@ public class ServletTemplateEngine extends TemplateEngine {
 	public ServletTemplateEngine(ServletConfig config) {
 		String transformerFactory = config.getInitParameter("transformerFactory");
 		String xpathFactory = config.getInitParameter("xpathFactory");
-		this.parser = new XMLParser(transformerFactory,xpathFactory);
+		//this.parser = new XMLParser(transformerFactory,xpathFactory);
 		this.config = config;
 		this.context = config.getServletContext();
 		this.compress = "true".equals(this.getParam("compress", "false"));
@@ -33,7 +32,7 @@ public class ServletTemplateEngine extends TemplateEngine {
 		
 		try {
 			String decoratorPath = getParam("decoratorMapping",DEFAULT_DECORATOR_MAPPING);
-			this.decoratorMapper = new DecoratorMapper(context.getResourceAsStream(decoratorPath));
+			this.decoratorMapper = new DecoratorImpl(context.getResourceAsStream(decoratorPath));
 		} catch (Exception e) {
 			log.error("装载页面装饰配置信息失败", e);
 		}

@@ -22,11 +22,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.Template;
-import org.xidea.lite.parser.HTMLFormNodeParser;
 import org.xidea.lite.parser.ParseContext;
-import org.xidea.lite.parser.ParseContextImpl;
-import org.xidea.lite.parser.TextParser;
-import org.xidea.lite.parser.XMLParser;
+import org.xidea.lite.parser.impl.HTMLNodeParser;
+import org.xidea.lite.parser.impl.ParseContextImpl;
+import org.xidea.lite.parser.impl.TextParser;
 
 public class XMLTest {
 	protected Map<String, Object> context;
@@ -97,7 +96,7 @@ public class XMLTest {
 
 		ParseContextImpl parseContext = new ParseContextImpl(this.getClass()
 				.getResource("/"));
-		parseContext.setFeatrue(HTMLFormNodeParser.AUTO_FORM_FEATRUE_URL, HTMLFormNodeParser.AUTO_IN_FORM);
+		parseContext.setFeatrue(HTMLNodeParser.AUTO_FORM_FEATRUE_URL, HTMLNodeParser.AUTO_IN_FORM);
 		
 		parseContext.setCompress(true);
 		List<Object> insts = parser.parse(

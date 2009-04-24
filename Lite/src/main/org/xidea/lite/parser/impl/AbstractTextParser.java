@@ -1,4 +1,4 @@
-package org.xidea.lite.parser;
+package org.xidea.lite.parser.impl;
 
 import java.util.HashMap;
 import java.util.List;
@@ -6,33 +6,18 @@ import java.util.Map;
 
 import org.xidea.el.ExpressionSyntaxException;
 import org.xidea.lite.Template;
+import org.xidea.lite.parser.ParseChain;
+import org.xidea.lite.parser.ParseContext;
+import org.xidea.lite.parser.Parser;
 
-public abstract class AbstractParser {
+public abstract class AbstractTextParser implements Parser<String>  {
 
 	protected Map<Object, InstructionParser> tagParser = new HashMap<Object, InstructionParser>();
 	protected String elStart = "$";
-
-	public List<Object> parse(Object data) {
-		return parse(data, new ParseContextImpl(null));
-	}
-
-	public List<Object> parse(Object text, ParseContext context) {
-		parseText(context, (String) text, Template.EL_TYPE);
-		return context.toResultTree();
-	}
-
-	/**
-	 * 解析指定文本
-	 * 
-	 * @public
-	 * @abstract
-	 * @return <Array> result
-	 */
-	public void parseText(ParseContext context, final String text,
-			final int defaultElType) {
+	public void parse(ParseContext context, ParseChain chain, String text) {
 		final boolean encode;
 		final char qute;
-		switch (defaultElType) {
+		switch (context.getELType()) {
 		case Template.XML_ATTRIBUTE_TYPE:
 			encode = true;
 			qute = '"';
@@ -44,10 +29,20 @@ public abstract class AbstractParser {
 		default:
 			encode = false;
 			qute = 0;
-
 		}
-		int length = text.length();
+		parse(context, text, encode, qute);
+	}
 
+	/**
+	 * 解析指定文本
+	 * 
+	 * @public
+	 * @abstract
+	 * @return <Array> result
+	 */
+	protected void parse(ParseContext context, final String text,
+			final boolean encode,final char qute) {
+		int length = text.length();
 		int start = 0;
 		do {
 			int p$ = appendToElStart(context, text, start, encode, qute);
@@ -56,7 +51,7 @@ public abstract class AbstractParser {
 				// final int p1 = text.indexOf('{', p$);
 				start = p$;
 				// start == p$
-				start = parseInstruction(context, defaultElType, text, fn,
+				start = parseInstruction(context, text, fn,
 						start, encode, qute);
 			} else {
 				break;
@@ -67,15 +62,10 @@ public abstract class AbstractParser {
 		}
 	}
 
-	protected int parseInstruction(ParseContext context, int defaultElType,
+	protected int parseInstruction(ParseContext context,
 			String text, String fn, final int start, boolean encode, char qute) {
 		try {
-			int next;
-			if (fn.length() == 0) {// el parse
-				next = tagParser.get(defaultElType).parse(context, text, start);
-			} else {
-				next = tagParser.get(fn).parse(context, text, start);
-			}
+			int next = tagParser.get(fn).parse(context, text, start);
 			if (next > start) {
 				return next;
 			} else {
@@ -111,5 +101,6 @@ public abstract class AbstractParser {
 	}
 
 	protected abstract String findFN(String text, int p$);
+
 
 }

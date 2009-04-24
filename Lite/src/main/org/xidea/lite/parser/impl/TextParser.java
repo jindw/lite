@@ -1,19 +1,19 @@
-package org.xidea.lite.parser;
+package org.xidea.lite.parser.impl;
 
 import org.xidea.el.ExpressionSyntaxException;
 import org.xidea.lite.Template;
+import org.xidea.lite.parser.ParseContext;
+import org.xidea.lite.parser.Parser;
 
-public class TextParser extends AbstractParser implements Parser {
+public class TextParser extends AbstractTextParser{
 	protected class ELParser implements InstructionParser {
-		private int type;
 		private String fn = "";
 
 		public ELParser(String fn) {
 			this.fn = fn;
 		}
 
-		public ELParser(int type) {
-			this.type = type;
+		public ELParser() {
 		}
 
 		public int parse(ParseContext context, String text, int p$) {
@@ -29,12 +29,12 @@ public class TextParser extends AbstractParser implements Parser {
 					}
 				}
 			}
-			throw new ExpressionSyntaxException(type + ":" + text.substring(p$));
+			throw new ExpressionSyntaxException(fn + ":" + text.substring(p$));
 		}
 
 		protected void addEl(ParseContext context, String text) {
 			Object el = context.optimizeEL(text);
-			switch (type) {
+			switch (context.getELType()) {
 			case Template.EL_TYPE:
 				context.appendEL(el);
 				break;
@@ -49,12 +49,7 @@ public class TextParser extends AbstractParser implements Parser {
 	}
 
 	public TextParser() {
-		tagParser.put("", null);
-		tagParser.put(Template.EL_TYPE, new ELParser(Template.EL_TYPE));
-		tagParser.put(Template.XML_TEXT_TYPE, new ELParser(
-				Template.XML_TEXT_TYPE));
-		tagParser.put(Template.XML_ATTRIBUTE_TYPE, new ELParser(
-				Template.XML_ATTRIBUTE_TYPE));
+		tagParser.put("", new ELParser());
 		tagParser.put("end", new InstructionParser() {
 			public int parse(ParseContext context, String text, int p$) {
 				context.appendEnd();
