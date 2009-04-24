@@ -1,14 +1,12 @@
-package org.xidea.lite.parser;
+package org.xidea.lite.parser.impl;
 
 import java.io.BufferedInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringReader;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.regex.Pattern;
 
 import javax.xml.namespace.NamespaceContext;
@@ -38,15 +36,24 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xidea.lite.dtd.DefaultEntityResolver;
-import org.xml.sax.InputSource;
+import org.xidea.lite.parser.ParseContext;
+import org.xidea.lite.parser.ResultContext;
+import org.xidea.lite.parser.XMLContext;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
-public class XMLParser extends TextParser implements Parser {
-	private static Log log = LogFactory.getLog(XMLParser.class);
+public class XMLContextImpl implements XMLContext{
+	private static Log log = LogFactory.getLog(XMLContextImpl.class);
 
-	private static final Pattern XML_HEADER_SPACE_PATTERN = Pattern
-			.compile("^[\\s\\ufeff]*<");
+	private ArrayList<Boolean> indentStatus = new ArrayList<Boolean>();
+	private int depth = 0;
+	private int eltype = 0;
+	private boolean reserveSpace;
+	private boolean format = false;
+	private boolean compress = false;
+	private final ParseContext context;
+	
+
 
 	private String transformerFactoryClass = null;// "org.apache.xalan.processor.TransformerFactoryImpl";
 	private String xpathFactoryClass = null;// "org.apache.xpath.jaxp.XPathFactoryImpl";
@@ -55,10 +62,10 @@ public class XMLParser extends TextParser implements Parser {
 	protected TransformerFactory transformerFactory;
 
 	protected DocumentBuilder documentBuilder;
-	protected NodeParser[] parserList = { new DefaultXMLNodeParser(this),
-			new HTMLFormNodeParser(this), new CoreXMLNodeParser(this) };
-
-	public XMLParser() {
+	
+	
+	public XMLContextImpl(ParseContext result){
+		this.context = result;
 		try {
 			DocumentBuilderFactory factory = DocumentBuilderFactory
 					.newInstance();
@@ -74,91 +81,8 @@ public class XMLParser extends TextParser implements Parser {
 		}
 	}
 
-	public XMLParser(String transformerFactory, String xpathFactory) {
-		this();
-		this.transformerFactoryClass = transformerFactory;
-		this.xpathFactoryClass = xpathFactory;
-	}
 
-	@SuppressWarnings("unchecked")
-	public <T extends NodeParser> T getNodeParser(Class<T> clazz) {
-		for (NodeParser p : parserList) {
-			if (clazz.isInstance(p)) {
-				return (T) p;
-			}
-		}
-		return null;
-	}
-
-	public void addNodeParser(NodeParser parser) {
-		int length = this.parserList.length;
-		NodeParser[] newParserList = new NodeParser[length + 1];
-		System.arraycopy(this.parserList, 0, newParserList, 0, length);
-		newParserList[length] = parser;
-		this.parserList = newParserList;
-	}
-
-	public List<Object> parse(Object data, ParseContext context) {
-		try {
-			Node node = null;
-			if (data instanceof String) {
-				String path = (String) data;
-				if (XML_HEADER_SPACE_PATTERN.matcher(path).find()) {
-					node = documentBuilder.parse(new InputSource(
-							new StringReader(path)));
-				} else {
-					int pos = path.indexOf('#');
-					String xpath = null;
-					if (pos > 0) {
-						xpath = path.substring(pos + 1);
-						path = path.substring(0, pos);
-					}
-					node = loadXML(context.createURL(null, path), context);
-					if (xpath != null) {
-						node = selectNodes(xpath, node);
-					}
-				}
-
-			} else if (data instanceof URL) {
-				node = loadXML((URL) data, context);
-			} else if (data instanceof File) {
-				node = loadXML(((File) data).toURI().toURL(), context);
-			}
-			if (node != null) {
-				parseNode(node, context);
-			}
-			return context.toResultTree();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	public void parseNode(Object node, ParseContext context) {
-		if (node instanceof Node) {
-			int i = parserList.length;
-			Node newNode = (Node) node;
-			while (i-- > 0 && newNode != null) {
-				newNode = parserList[i].parseNode(newNode, context);
-			}
-		} else if (node instanceof NodeList) {
-			NodeList list = (NodeList) node;
-			for (int i = 0; i < list.getLength(); i++) {
-				parseNode(list.item(i), context);
-			}
-		} else if (node instanceof NamedNodeMap) {
-			NamedNodeMap list = (NamedNodeMap) node;
-			for (int i = 0; i < list.getLength(); i++) {
-				parseNode(list.item(i), context);
-			}
-		}
-	}
-
-	public Node loadXML(String url, ParseContext context) throws SAXException,
-			IOException {
-		return loadXML(context.createURL(null, url), context);
-	}
-
-	public Document loadXML(URL url, ParseContext context) throws SAXException,
+	public Document loadXML(URL url) throws SAXException,
 			IOException {
 		context.setCurrentURL(url);
 		InputStream in = context.getInputStream(url);
@@ -225,7 +149,7 @@ public class XMLParser extends TextParser implements Parser {
 		};
 	}
 
-	protected DocumentFragment selectNodes(String xpath, Node currentNode)
+	public DocumentFragment selectNodes(String xpath, Node currentNode)
 			throws XPathExpressionException {
 		Document doc;
 		if (currentNode instanceof Document) {
@@ -242,7 +166,7 @@ public class XMLParser extends TextParser implements Parser {
 		return frm;
 	}
 
-	protected Node transform(ParseContext context, URL parentURL, Node doc,
+	public Node transform(URL parentURL, Node doc,
 			String xslt) throws TransformerConfigurationException,
 			TransformerFactoryConfigurationError, TransformerException,
 			IOException {
@@ -330,7 +254,7 @@ public class XMLParser extends TextParser implements Parser {
 		return transformerFactory.newTransformer();
 	}
 
-	DocumentFragment toDocumentFragment(Node node, NodeList nodes) {
+	public static DocumentFragment toDocumentFragment(Node node, NodeList nodes) {
 		Document doc;
 		if (node instanceof Document) {
 			doc = (Document) node;
@@ -343,4 +267,90 @@ public class XMLParser extends TextParser implements Parser {
 		}
 		return frm;
 	}
+	
+	
+	public boolean isFormat() {
+		return format;
+	}
+
+	public void setFormat(boolean format) {
+		this.format = format;
+	}
+
+	public boolean isCompress() {
+		return compress;
+	}
+
+	public void setCompress(boolean compress) {
+		this.compress = compress;
+	}
+
+	public boolean isReserveSpace() {
+		return reserveSpace;
+	}
+
+	public void setReserveSpace(boolean keepSpace) {
+		this.reserveSpace = keepSpace;
+	}
+
+	public int getDepth() {
+		return depth;
+	}
+
+	public void beginIndent() {// boolean needClose) {
+		int size = indentStatus.size();
+		printIndent();
+		depth++;
+		switch (depth - size) {
+		case 1:
+			indentStatus.add(null);
+		case 0:
+			indentStatus.add(null);
+			// case -1:
+		default:
+			indentStatus.set(depth - 1, true);
+			indentStatus.set(depth, false);
+		}
+	}
+
+	public void endIndent() {
+		if (Boolean.TRUE.equals(indentStatus.get(depth))) {
+			depth--;
+			printIndent();
+		} else {
+			depth--;
+		}
+
+	}
+
+	private void printIndent() {
+		if (!this.isCompress() && !this.isReserveSpace() && this.isFormat()) {
+			int i = context.mark();
+			if (i > 0) {
+				context.append("\r\n");
+			}
+			int depth = this.depth;
+			if (depth > 0) {
+				char[] data = new char[depth];
+				while (depth-- > 0) {
+					data[depth] = ' ';
+				}
+				context.append(new String(data));
+			}
+
+		}
+	}
+
+
+	public int getELType() {
+		return eltype;
+	}
+
+
+	public void setELType(int type) {
+		eltype = type;
+	}
+
+
+
 }

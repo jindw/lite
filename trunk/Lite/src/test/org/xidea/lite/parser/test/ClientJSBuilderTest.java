@@ -2,6 +2,7 @@ package org.xidea.lite.parser.test;
 
 import static org.junit.Assert.*;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -14,10 +15,10 @@ import org.junit.Test;
 import org.xidea.el.Expression;
 import org.xidea.el.ExpressionFactory;
 import org.xidea.el.json.JSONEncoder;
-import org.xidea.lite.parser.Java6JSBuilder;
 import org.xidea.lite.parser.ParseContext;
-import org.xidea.lite.parser.ParseContextImpl;
-import org.xidea.lite.parser.XMLParser;
+import org.xidea.lite.parser.impl.Java6JSBuilder;
+import org.xidea.lite.parser.impl.ParseContextImpl;
+import org.xml.sax.SAXException;
 
 public class ClientJSBuilderTest {
 	private ExpressionFactory clientExpressionFactory = new ExpressionFactory() {
@@ -35,14 +36,15 @@ public class ClientJSBuilderTest {
 	}
 
 	@Test
-	public void testBuildJS() {
+	public void testBuildJS() throws SAXException, IOException {
 		URL url = this.getClass().getResource("format-test.xhtml");
 		ParseContext context2 = new ParseContextImpl(url);
 		// 前端直接压缩吧？反正保留那些空白也没有调试价值
 		// context2.setCompress(context.isCompress());
 		context2.setCompress(true);
 		context2.setExpressionFactory(clientExpressionFactory);
-		List<Object> liteCode = new XMLParser().parse(url,context2);
+		context2.parse(context2.loadXML(url));
+		List<Object> liteCode = context2.toResultTree();
 		String result = new Java6JSBuilder().buildJS("test", liteCode);
 		System.out.println("==JS Code==");
 		System.out.println(result);
@@ -50,9 +52,16 @@ public class ClientJSBuilderTest {
 		Assert.assertTrue("生成失败"+result,!isError);
 	}
 	@Test
-	public void testClient() {
-		List<Object> clientLiteCode = new XMLParser().parse(this.getClass()
-				.getResource("asciitable-client.xhtml"));
+	public void testClient() throws SAXException, IOException {
+		URL url = this.getClass().getResource("asciitable-client.xhtml");
+		ParseContext context2 = new ParseContextImpl(url);
+		// 前端直接压缩吧？反正保留那些空白也没有调试价值
+		// context2.setCompress(context.isCompress());
+		context2.setCompress(true);
+		context2.setExpressionFactory(clientExpressionFactory);
+		context2.parse(context2.loadXML(url));
+		
+		List<Object> clientLiteCode = context2.toResultTree();
 		System.out.println("==JS Code==");
 		System.out.println(clientLiteCode);
 		String result = (String)clientLiteCode.get(0);

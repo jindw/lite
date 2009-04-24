@@ -17,10 +17,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Node;
 import org.xidea.lite.Template;
-import org.xidea.lite.parser.DecoratorMapper;
+import org.xidea.lite.parser.DecoratorContext;
 import org.xidea.lite.parser.ParseContext;
-import org.xidea.lite.parser.ParseContextImpl;
-import org.xidea.lite.parser.XMLParser;
+import org.xidea.lite.parser.impl.DecoratorImpl;
+import org.xidea.lite.parser.impl.ParseContextImpl;
 
 public class TemplateEngine{
 	public static final String DEFAULT_DECORATOR_MAPPING = "/WEB-INF/decorators.xml";
@@ -33,21 +33,19 @@ public class TemplateEngine{
 	protected boolean compress;
 	protected boolean format;
 	protected File webRoot;
-	protected DecoratorMapper decoratorMapper;
-	protected XMLParser parser;
+	protected DecoratorContext decoratorMapper;
 
 	protected TemplateEngine() {
 	}
 
 	public TemplateEngine(File webRoot) {
-		this(new XMLParser(),webRoot, new File(webRoot, DEFAULT_DECORATOR_MAPPING));
+		this(webRoot, new File(webRoot, DEFAULT_DECORATOR_MAPPING));
 	}
 
-	public TemplateEngine(XMLParser parser,File webRoot, File config) {
+	public TemplateEngine(File webRoot, File config) {
 		try {
-			this.parser = parser;
 			if(config != null && config.exists()){
-				this.decoratorMapper = new DecoratorMapper(new FileInputStream(config));
+				this.decoratorMapper = new DecoratorImpl(new FileInputStream(config));
 			}else{
 				log.warn("找不到装饰器配置信息:"+config.getAbsolutePath());
 			}
@@ -132,7 +130,7 @@ public class TemplateEngine{
 		}
 		if (decoratorPath != null && !decoratorPath.equals(path)) {
 			try {
-				Node node = parser.loadXML(getResource(path), parseContext);
+				Node node = parseContext.loadXML(getResource(path));
 				parseContext.setAttribute("#page", node);
 				path = decoratorPath;
 			} catch (Exception e) {
@@ -140,7 +138,8 @@ public class TemplateEngine{
 			}
 		}
 		try {
-			List<Object> items = parser.parse(getResource(path), parseContext);
+			parseContext.parse(getResource(path));
+			List<Object> items = parseContext.toResultTree();
 			return new Template(items);
 		} catch (Exception e) {
 			log.error(e);

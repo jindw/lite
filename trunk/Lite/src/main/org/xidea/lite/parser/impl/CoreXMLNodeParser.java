@@ -1,4 +1,4 @@
-package org.xidea.lite.parser;
+package org.xidea.lite.parser.impl;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -15,22 +15,23 @@ import org.xidea.el.Expression;
 import org.xidea.el.ExpressionFactory;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.Template;
+import org.xidea.lite.parser.ParseChain;
+import org.xidea.lite.parser.ParseContext;
+import org.xidea.lite.parser.Parser;
 
-public class CoreXMLNodeParser implements NodeParser {
+public class CoreXMLNodeParser implements Parser<Element> {
 	private static Log log = LogFactory.getLog(CoreXMLNodeParser.class);
 	private static final Pattern TEMPLATE_NAMESPACE_CORE = Pattern
 			.compile("^http:\\/\\/www.xidea.org\\/ns\\/(?:template|lite)(?:\\/core)?\\/?$");
 	private JSBuilder jsBuilder;
 	private ExpressionFactory jselFactory;
-	private XMLParser parser;
 
 	public static boolean isCoreNS(String prefix, String url) {
 		return ("c".equals(prefix) && ("#".equals(url) || "#core".equals(url)))
 				|| TEMPLATE_NAMESPACE_CORE.matcher(url).find();
 	}
 
-	public CoreXMLNodeParser(XMLParser parser) {
-		this.parser = parser;
+	public CoreXMLNodeParser() {
 		this.jselFactory = new ExpressionFactory() {
 				public Expression create(Object el) {
 					throw new UnsupportedOperationException();
@@ -52,50 +53,50 @@ public class CoreXMLNodeParser implements NodeParser {
 			}
 		}
 	}
-	public CoreXMLNodeParser(XMLParser parser,ExpressionFactory jselFactory,JSBuilder jsbuilder) {
-		this.parser = parser;
+	public CoreXMLNodeParser(ExpressionFactory jselFactory,JSBuilder jsbuilder) {
 		this.jselFactory = jselFactory;
 		this.jsBuilder = jsbuilder;
 	}
 
-	public Node parseNode(final Node node, ParseContext context) {
-		if (node.getNodeType() == Node.ELEMENT_NODE) {
-			final Element el = (Element) node;
+	public void parse( ParseContext context,ParseChain chain,final Element el) {
 			String prefix = el.getPrefix();
 			String namespaceURI = el.getNamespaceURI();
 			if (namespaceURI != null && isCoreNS(prefix, namespaceURI)) {
 				String name = el.getLocalName();
 				if ("include".equals(name)) {
-					return parseIncludeTag(el, context);
+					 parseIncludeTag(el, context);
 				} else if ("client".equals(name)) {
-					return parseClientTag(el, context);
+					parseClientTag(el, context);
 				} else if ("group".equals(name) || "context".equals(name)) {
-					return parseContextTag(el, context);
+					parseContextTag(el, context);
 				} else if ("json".equals(name)) {
-					return parseJSONTag(el, context);
+					parseJSONTag(el, context);
 				} else if ("choose".equals(name)) {
-					return parseChooseTag(el, context);
+					parseChooseTag(el, context);
 				} else if ("elseif".equals(name) || "else-if".equals(name)
 						|| "elif".equals(name)) {
-					return parseElseIfTag(el, context, true);
+					parseElseIfTag(el, context, true);
 				} else if ("else".equals(name)) {
-					return parseElseIfTag(el, context, false);
+					parseElseIfTag(el, context, false);
 				} else if ("if".equals(name)) {
-					return parseIfTag(el, context);
+					parseIfTag(el, context);
 				} else if ("out".equals(name)) {
-					return parseOutTag(el, context);
+					parseOutTag(el, context);
 				} else if ("for".equals(name) || "forEach".equals(name)
 						|| "for-each".equals(name)) {
-					return parseForTag(el, context);
+					parseForTag(el, context);
 				} else if ("var".equals(name)) {
-					return parseVarTag(el, context);
+					parseVarTag(el, context);
+				}else{
+					log.error("未知核心标记" +name);
+					chain.process(el);
 				}
+			}else{
+				chain.process(el);
 			}
-		}
-		return node;
 	}
 
-	public Node parseIncludeTag(final Element el, ParseContext context) {
+	public void parseIncludeTag(final Element el, ParseContext context) {
 		String var = getAttributeOrNull(el, "var");
 		String path = getAttributeOrNull(el, "path");
 		String xpath = getAttributeOrNull(el, "xpath");
@@ -105,18 +106,14 @@ public class CoreXMLNodeParser implements NodeParser {
 		final URL parentURL = context.getCurrentURL();
 		try {
 			if (name != null) {
-				Node cachedNode = parser.toDocumentFragment(el, el
+				Node cachedNode = XMLContextImpl.toDocumentFragment(el, el
 						.getChildNodes());
 				context.setAttribute("#" + name, cachedNode);
 			}
 			if (var != null) {
 				Node next = el.getFirstChild();
 				context.appendCaptrue(var);
-				if (next != null) {
-					do {
-						this.parser.parseNode(next, context);
-					} while ((next = next.getNextSibling()) != null);
-				}
+				context.parse(el.getChildNodes());
 				context.appendEnd();
 			}
 			if (path != null) {
@@ -132,22 +129,20 @@ public class CoreXMLNodeParser implements NodeParser {
 						context.setCurrentURL(context.createURL(null, uri));
 					}
 				} else {
-					doc = this.parser.loadXML(context
-							.createURL(parentURL, path), context);
+					doc = context.loadXML(context
+							.createURL(parentURL, path));
 				}
 			}
 
 			if (xpath != null) {
-				doc = this.parser.selectNodes(xpath, doc);
+				doc = context.selectNodes(xpath, doc);
 			}
 			if (xslt != null) {
-				doc = this.parser.transform(context, parentURL, doc, xslt);
+				doc = context.transform(parentURL, doc, xslt);
 			}
-			this.parser.parseNode(doc, context);
-			return null;
+			context.parse(doc);
 		} catch (Exception e) {
 			log.warn(e);
-			return null;
 		} finally {
 			context.setCurrentURL(parentURL);
 		}
@@ -230,7 +225,7 @@ public class CoreXMLNodeParser implements NodeParser {
 			context.appendEnd();
 		} else {
 			int mark = context.mark();
-			this.parser.parseText(context, value, Template.EL_TYPE);
+			context.parse(value, Template.EL_TYPE);
 			List<Object> temp = context.reset(mark);
 			if (temp.size() == 1) {
 				Object item = temp.get(0);
@@ -248,7 +243,7 @@ public class CoreXMLNodeParser implements NodeParser {
 		return null;
 	}
 
-	protected Node parseClientTag(Element el, ParseContext context) {
+	protected void parseClientTag(Element el, ParseContext context) {
 		Node next = el.getFirstChild();
 		if (next != null && jsBuilder != null) {
 			// new Java6JSBuilder();
@@ -259,7 +254,7 @@ public class CoreXMLNodeParser implements NodeParser {
 			context2.setCompress(true);
 			context2.setExpressionFactory(jselFactory);
 			do {
-				this.parser.parseNode(next, context2);
+				context2.parse(next);
 			} while ((next = next.getNextSibling()) != null);
 			List<Object> result = context2.toResultTree();
 			String js = jsBuilder.buildJS(el.getAttribute("id"), result);
@@ -274,19 +269,17 @@ public class CoreXMLNodeParser implements NodeParser {
 				context.append("/*<![CDATA[*/" + js + "/*]]>*/");
 			}
 		}
-		return null;
 	}
 
 	private boolean needScript(Element el) {
 		return true;
 	}
 
-	protected Node parseContextTag(Element el, ParseContext context) {
+	protected void parseContextTag(Element el, ParseContext context) {
 		parseChild(el.getFirstChild(), context);
-		return null;
 	}
 
-	protected Node parseJSONTag(final Element el, ParseContext context) {
+	protected void parseJSONTag(final Element el, ParseContext context) {
 		String var = getAttributeOrNull(el, "var");
 		String file = getAttributeOrNull(el, "file");
 		String encoding = getAttributeOrNull(el, "encoding", "charset");
@@ -322,18 +315,16 @@ public class CoreXMLNodeParser implements NodeParser {
 			content = el.getTextContent();
 		}
 		context.appendVar(var, context.optimizeEL(content));
-		return null;
 	}
 
-	protected Node parseOutTag(Element el, ParseContext context) {
+	protected void parseOutTag(Element el, ParseContext context) {
 		String value = getAttributeOrNull(el, "value");
-		this.parser.parseText(context, value, Template.EL_TYPE);
-		return null;
+		context.parse(value,Template.EL_TYPE);
 	}
 
 	private void parseChild(Node child, ParseContext context) {
 		while (child != null) {
-			this.parser.parseNode(child, context);
+			context.parse(child);
 			child = child.getNextSibling();
 		}
 	}

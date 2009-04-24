@@ -23,16 +23,14 @@ import org.xidea.el.ExpressionFactoryImpl;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.Template;
 import org.xidea.lite.dtd.DefaultEntityResolver;
-import org.xidea.lite.parser.ParseContextImpl;
-import org.xidea.lite.parser.XMLParser;
+import org.xidea.lite.parser.impl.ParseContextImpl;
+import org.xidea.lite.parser.test.XMLParser;
 
 public class XMLParserTest {
 
-	private XMLParser parser;
 
 	@Before
 	public void setUp() throws Exception {
-		parser = new XMLParser();
 	}
 
 	@Test

@@ -1,4 +1,4 @@
-package org.xidea.lite.parser;
+package org.xidea.lite.parser.impl;
 
 import java.util.HashMap;
 import java.util.List;
@@ -9,8 +9,11 @@ import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
+import org.xidea.lite.parser.ParseChain;
+import org.xidea.lite.parser.ParseContext;
+import org.xidea.lite.parser.Parser;
 
-public abstract class HTMLNodeParser implements NodeParser {
+public abstract class AbstractHTMLNodeParser implements Parser<Element> {
 	protected static final Pattern HTML_LEAF = Pattern.compile(
 			"^(?:meta|link|img|br|hr|input)$", Pattern.CASE_INSENSITIVE);
 	protected static final Pattern PRE_LEAF = Pattern.compile(
@@ -24,19 +27,16 @@ public abstract class HTMLNodeParser implements NodeParser {
 		BOOLEAN_ATTBUTE_MAP.put("disabled", "disabled");
 
 	}
-	protected XMLParser parser;
-	public HTMLNodeParser(XMLParser parser){
-		this.parser = parser;
+	public AbstractHTMLNodeParser(){
 	}
 
-	public Node parseNode(Node node, ParseContext context) {
+	public void parse(ParseContext context,ParseChain chain,Element node) {
 		String namespace = node.getNamespaceURI();
 		if (namespace == null || XHTMLNS.equals(namespace)) {
-			if (node instanceof Element) {
-				return parse(node, context);
-			}
+			parse(node, context);
+		}else{
+			chain.process(node);
 		}
-		return node;
 	}
 
 	protected Node parse(Node node, ParseContext context) {
@@ -70,7 +70,7 @@ public abstract class HTMLNodeParser implements NodeParser {
 					try {
 
 						while (true) {
-							this.parser.parseNode(child, context);
+							context.parse(child);
 							Node next = child.getNextSibling();
 							if (next == null) {
 								break;
@@ -113,7 +113,7 @@ public abstract class HTMLNodeParser implements NodeParser {
 				return;
 			}
 		}
-		this.parser.parseNode(node, context);
+		context.parse(node);
 
 	}
 }

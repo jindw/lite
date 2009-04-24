@@ -1,15 +1,21 @@
 package org.xidea.lite.parser;
 
-import java.io.InputStream;
+import java.io.IOException;
 import java.net.URL;
-import java.util.Collection;
 
-import org.xidea.el.ExpressionFactory;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactoryConfigurationError;
+import javax.xml.xpath.XPathExpressionException;
+
+import org.w3c.dom.Node;
+import org.xidea.lite.parser.impl.ParseContextImpl;
+import org.xml.sax.SAXException;
 
 /**
  * @see ParseContextImpl
  */
-public interface ParseContext extends ResultContext, XMLContext {
+public interface ParseContext extends ResourceContext,ResultContext, XMLContext {
 
 	/**
 	 * 记录一下编译上下文特征变量，该对象不可被修改
@@ -17,52 +23,12 @@ public interface ParseContext extends ResultContext, XMLContext {
 	 */
 	public void setFeatrue(String key, String value);
 	public String getFeatrue(String key);
-	
 	/**
-	 * 记录一下编译上下文状态
-	 * @param key
-	 * @param value
+	 * 给出文件内容或url，解析模版源文件
 	 */
-	public void setAttribute(Object key, Object value);
-	public Object getAttribute(Object key);
-
+	public void parse(Object source);
 	/**
-	 * 获取当前正在解析的模版URL
-	 * @return
+	 * 给出文件内容或url，解析模版源文件
 	 */
-	public URL getCurrentURL();
-
-	/**
-	 * 获取当前正在解析的模版URL
-	 * 同事将该url记录在资源列表中
-	 * @return
-	 */
-	public void setCurrentURL(URL currentURL);
-	/**
-	 * 如果file相于根目录（/path/...），以base作为根目录处理
-	 * 否则以parentURL，或者base作为parent直接new URL处理。
-	 * @see org.xidea.lite.parser.ParseContextImpl#createURL
-	 * @param parentURL
-	 * @param file
-	 * @return
-	 */
-	public URL createURL(URL parentURL, String file);
-	public InputStream getInputStream(URL url);
-	/**
-	 * 添加（记录）解析相关的资源
-	 * @param resource
-	 */
-	public void addResource(URL resource);
-	public Collection<URL> getResources();
-	/**
-	 * 自定义表达式解析器
-	 * @param expressionFactory
-	 */
-	public void setExpressionFactory(ExpressionFactory expressionFactory);
-	public Object optimizeEL(String eltext);
-
-	public String addGlobalObject(Class<? extends Object> impl,String key);
-	public String addGlobalObject(Object object,String key);
-
-
+	public void parse(Object source,int defaultType);
 }

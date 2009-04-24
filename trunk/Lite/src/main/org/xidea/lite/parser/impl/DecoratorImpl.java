@@ -1,4 +1,4 @@
-package org.xidea.lite.parser;
+package org.xidea.lite.parser.impl;
 
 import java.io.InputStream;
 import java.io.Reader;
@@ -14,22 +14,23 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+import org.xidea.lite.parser.DecoratorContext;
 import org.xml.sax.InputSource;
 
-public class DecoratorMapper {
+public class DecoratorImpl implements DecoratorContext {
 	private URLMatcher excludeMatcher;
 	private Map<URLMatcher, String> decoratorMap;
 
-	protected DecoratorMapper() {
+	protected DecoratorImpl() {
 
 	}
 
-	public DecoratorMapper(InputStream config) {
+	public DecoratorImpl(InputStream config) {
 		if(config!=null){
 			initialize(new InputSource(config));
 		}
 	}
-	public DecoratorMapper(Reader config) {
+	public DecoratorImpl(Reader config) {
 		if(config!=null){
 			initialize(new InputSource(config));
 		}
@@ -74,6 +75,9 @@ public class DecoratorMapper {
 				.toArray(new URLMatcher[excludes.size()]));
 	}
 
+	/* (non-Javadoc)
+	 * @see org.xidea.lite.parser.DecoratorMapperI#getDecotatorPage(java.lang.String)
+	 */
 	public String getDecotatorPage(String path) {
 		if (this.excludeMatcher != null) {
 			if (this.excludeMatcher.match(path)) {

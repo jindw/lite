@@ -5,14 +5,15 @@ import static org.junit.Assert.assertNull;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.xidea.lite.parser.DecoratorMapper;
+import org.xidea.lite.parser.DecoratorContext;
+import org.xidea.lite.parser.impl.DecoratorImpl;
 
 public class DecoratorMapperTest {
-	DecoratorMapper mapper;
+	DecoratorContext mapper;
 
 	@Before
 	public void setUp() throws Exception {
-		mapper = new DecoratorMapper(this.getClass().getResourceAsStream(
+		mapper = new DecoratorImpl(this.getClass().getResourceAsStream(
 				"decorators.xml"));
 	}
 

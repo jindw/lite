@@ -1,4 +1,6 @@
-package org.xidea.lite.parser;
+package org.xidea.lite.parser.impl;
+
+import org.xidea.lite.parser.ParseContext;
 
 public interface InstructionParser {
 	/**

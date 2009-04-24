@@ -1,5 +1,17 @@
 package org.xidea.lite.parser;
 
+import java.io.IOException;
+import java.net.URL;
+
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactoryConfigurationError;
+import javax.xml.xpath.XPathExpressionException;
+
+import org.w3c.dom.Node;
+import org.xidea.lite.parser.impl.ParseContextImpl;
+import org.xml.sax.SAXException;
+
 public interface XMLContext {
 
 	/**
@@ -9,6 +21,8 @@ public interface XMLContext {
 	public boolean isFormat();
 
 	public void setFormat(boolean format);
+	
+	public int getELType();
 
 	/**
 	 * 如果 reserveSpace为真 则该属性失效
@@ -38,5 +52,11 @@ public interface XMLContext {
 	 * @see ParseContextImpl#endIndent()
 	 */
 	public void endIndent();
+	
+	public Node selectNodes(String xpath, Node doc) throws XPathExpressionException;
+	
+	public Node transform(URL parentURL, Node doc, String xslt) throws TransformerConfigurationException, TransformerFactoryConfigurationError, TransformerException, IOException;
+	
+	public Node loadXML(URL createURL) throws SAXException, IOException;
 
 }

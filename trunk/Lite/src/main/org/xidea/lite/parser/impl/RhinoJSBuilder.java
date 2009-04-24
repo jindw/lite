@@ -1,4 +1,4 @@
-package org.xidea.lite.parser;
+package org.xidea.lite.parser.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,8 +9,8 @@ import java.io.StringWriter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.el.json.JSONEncoder;
-import org.xidea.lite.parser.CoreXMLNodeParser;
-import org.xidea.lite.parser.JSBuilder;
+import org.xidea.lite.parser.impl.CoreXMLNodeParser;
+import org.xidea.lite.parser.impl.JSBuilder;
 
 import org.mozilla.javascript.CompilerEnvirons;
 import org.mozilla.javascript.Context;

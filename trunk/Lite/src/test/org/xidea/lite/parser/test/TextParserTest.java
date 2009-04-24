@@ -4,6 +4,7 @@ import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -24,8 +25,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xidea.lite.Template;
-import org.xidea.lite.parser.AbstractParser;
-import org.xidea.lite.parser.TextParser;
+import org.xidea.lite.parser.impl.AbstractTextParser;
+import org.xidea.lite.parser.impl.ParseContextImpl;
+import org.xidea.lite.parser.impl.TextParser;
 import org.xml.sax.InputSource;
 
 public class TextParserTest {
@@ -54,8 +56,10 @@ public class TextParserTest {
 	}
 
 	public void test(String text, String result) throws Exception {
-		AbstractParser p = new TextParser();
-		List<Object> insts = p.parse(text);
+		TextParser p = new TextParser();
+		ParseContextImpl context = new ParseContextImpl(new URL("http://localhost:8080/"));
+		p.parse(context, null, text);
+		List<Object> insts = context.toResultTree();
 		Template t = new Template(insts);
 		Writer out = new StringWriter();
 		t.render(new HashMap<Object, Object>(), out);

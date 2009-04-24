@@ -1,4 +1,4 @@
-package org.xidea.lite.parser;
+package org.xidea.lite.parser.impl;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
