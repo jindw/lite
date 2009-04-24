@@ -55,24 +55,14 @@ public class HTMLNodeParser extends AbstractHTMLNodeParser {
 		Object status = context.getFeatrue(AUTO_FORM_FEATRUE_URL);
 		if (AUTO_ANYWAY.equals(status)) {
 			return processAutoForm(context, el, localName);
-		} else if (AUTO_IN_FORM.equals(status)) {
-			// Warn 代码的坏味道
-			if (FORM_TAG.equals(localName)) {
-				context.setAttribute(IN_FORM_KEY, IN_FORM_KEY);
-				node = processAutoForm(context, el, localName);
-				context.setAttribute(IN_FORM_KEY, null);
-				if(node != null){
-					throw new RuntimeException();
-				}
-				return null;
-			} else {
-				Object in = context.getAttribute(IN_FORM_KEY);
-				if(in == null){
-					return parseHTMLElement(el, context, null);
-				}else{
-					return processAutoForm(context, el, localName);
-				}
+		} else if (AUTO_IN_FORM.equals(status) && FORM_TAG.equals(localName)) {
+			context.setFeatrue(AUTO_FORM_FEATRUE_URL, AUTO_ANYWAY);
+			node = parseHTMLElement(el,context,  null);
+			if (node != null) {
+				throw new RuntimeException();
 			}
+			context.setFeatrue(AUTO_FORM_FEATRUE_URL, AUTO_ANYWAY);
+			return null;
 		} else {
 			return parseHTMLElement(el, context, null);
 		}
