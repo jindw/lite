@@ -1,6 +1,7 @@
 package org.xidea.lite.parser.impl;
 
-import static org.xidea.lite.parser.ParseContext.END_INSTRUCTION;
+import static org.xidea.lite.parser.ResultContext.END_INSTRUCTION;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -10,8 +11,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.Text;
 import org.xidea.el.json.JSONEncoder;
-import org.xidea.el.operation.TextNullEmpty;
 import org.xidea.el.operation.TextContains;
+import org.xidea.el.operation.TextNullEmpty;
 import org.xidea.lite.Template;
 import org.xidea.lite.parser.ParseContext;
 
@@ -25,7 +26,6 @@ public class HTMLNodeParser extends AbstractHTMLNodeParser {
 	public static final String NO_AUTO = "none";
 	public static final String AUTO_ANYWAY = "anyway";
 	public static final String AUTO_IN_FORM = "form";
-	private static final Object IN_FORM_KEY = new Object();
 
 	private static final String FORM_TAG = "form";
 	private static final String INPUT_TAG = "input";

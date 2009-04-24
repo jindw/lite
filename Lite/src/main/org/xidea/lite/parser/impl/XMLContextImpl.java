@@ -7,7 +7,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.regex.Pattern;
 
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.parsers.DocumentBuilder;
@@ -37,7 +36,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xidea.lite.dtd.DefaultEntityResolver;
 import org.xidea.lite.parser.ParseContext;
-import org.xidea.lite.parser.ResultContext;
 import org.xidea.lite.parser.XMLContext;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
@@ -53,10 +51,6 @@ public class XMLContextImpl implements XMLContext{
 	private boolean compress = false;
 	private final ParseContext context;
 	
-
-
-	private String transformerFactoryClass = null;// "org.apache.xalan.processor.TransformerFactoryImpl";
-	private String xpathFactoryClass = null;// "org.apache.xpath.jaxp.XPathFactoryImpl";
 
 	protected XPathFactory xpathFactory;
 	protected TransformerFactory transformerFactory;
@@ -211,6 +205,7 @@ public class XMLContextImpl implements XMLContext{
 
 	protected XPath createXPath() {
 		if (xpathFactory == null) {
+			String  xpathFactoryClass = context.getFeatrue(XPathFactory.DEFAULT_PROPERTY_NAME);
 			if (xpathFactoryClass != null) {
 				try {
 					xpathFactory = XPathFactory
@@ -235,6 +230,7 @@ public class XMLContextImpl implements XMLContext{
 			throws TransformerConfigurationException,
 			TransformerFactoryConfigurationError {
 		if (transformerFactory == null) {
+			String transformerFactoryClass = context.getFeatrue(TransformerFactory.class.getName());
 			if (transformerFactoryClass != null) {
 				try {
 					transformerFactory = TransformerFactory.newInstance(

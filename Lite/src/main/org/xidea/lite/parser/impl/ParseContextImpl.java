@@ -14,6 +14,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.xpath.XPathExpressionException;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -28,9 +29,9 @@ import org.xml.sax.SAXException;
 public class ParseContextImpl implements ParseContext {
 	private static final long serialVersionUID = 1L;
 	@SuppressWarnings("unchecked")
-	protected static Parser[] DEFAULT_PARSER_LIST = { 
-		new HTMLNodeParser(),new CoreXMLNodeParser(),
-			new DefaultXMLNodeParser(),new TextParser() };
+	protected static Parser[] DEFAULT_PARSER_LIST = { new HTMLNodeParser(),
+			new CoreXMLNodeParser(), new DefaultXMLNodeParser(),
+			new TextParser() };
 
 	protected ResourceContext resourceContext;
 	protected XMLContext xmlContext;
@@ -44,21 +45,22 @@ public class ParseContextImpl implements ParseContext {
 
 	@SuppressWarnings("unchecked")
 	public ParseContextImpl(URL base) {
-		this(base, new HashMap<String, String>(), DEFAULT_PARSER_LIST);
+		this(base, new HashMap<String, String>(), null);
 	}
 
+	@SuppressWarnings("unchecked")
 	public ParseContextImpl(URL base, Map<String, String> featrues,
 			Parser<? extends Object>[] parsers) {
 		this.featrues = featrues;
-		if (parsers != null) {
-			ParseChainImpl current = topChain = new ParseChainImpl(this,
-					parsers[0]);
-			for (int i = 1; i < parsers.length; i++) {
-				ParseChainImpl chain = new ParseChainImpl(this, parsers[i]);
-				current.insertAfter(chain);
-				current = chain;
+		if (parsers == null) {
+			parsers = DEFAULT_PARSER_LIST;
+		}
+		ParseChainImpl current = topChain = new ParseChainImpl(this, parsers[0]);
+		for (int i = 1; i < parsers.length; i++) {
+			ParseChainImpl chain = new ParseChainImpl(this, parsers[i]);
+			current.insertAfter(chain);
+			current = chain;
 
-			}
 		}
 		resourceContext = new ResourceContextImpl(base);
 		resultContext = new ResultContextImpl(new ArrayList<Object>());
@@ -67,9 +69,9 @@ public class ParseContextImpl implements ParseContext {
 
 	public void parse(Object source, int defaultType) {
 		int type = xmlContext.getELType();
-		((XMLContextImpl)xmlContext).setELType(defaultType);
+		((XMLContextImpl) xmlContext).setELType(defaultType);
 		parse(source);
-		((XMLContextImpl)xmlContext).setELType(type);
+		((XMLContextImpl) xmlContext).setELType(type);
 	}
 
 	public void parse(Object source) {
@@ -247,7 +249,7 @@ public class ParseContextImpl implements ParseContext {
 		return xmlContext.getELType();
 	}
 
-	public Node loadXML(URL url) throws SAXException, IOException {
+	public Document loadXML(URL url) throws SAXException, IOException {
 		return xmlContext.loadXML(url);
 	}
 

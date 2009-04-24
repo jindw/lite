@@ -7,5 +7,4 @@ public abstract interface Parser<T extends Object>{
      * @return <Array> result
      */
 	public abstract void parse(ParseContext context,ParseChain chain,T node);
-
 }

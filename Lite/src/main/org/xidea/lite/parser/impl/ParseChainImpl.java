@@ -2,14 +2,12 @@ package org.xidea.lite.parser.impl;
 
 import java.lang.reflect.Method;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.xidea.lite.parser.ParseChain;
 import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.Parser;
-
+@SuppressWarnings("unchecked")
 public class ParseChainImpl implements ParseChain {
-	private static Log log = LogFactory.getLog(ParseChainImpl.class);
+	//private static Log log = LogFactory.getLog(ParseChainImpl.class);
 	private ParseChainImpl pre;
 	private ParseChainImpl next;
 	private ParseContext context;

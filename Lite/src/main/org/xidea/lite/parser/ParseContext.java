@@ -1,16 +1,6 @@
 package org.xidea.lite.parser;
 
-import java.io.IOException;
-import java.net.URL;
-
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactoryConfigurationError;
-import javax.xml.xpath.XPathExpressionException;
-
-import org.w3c.dom.Node;
 import org.xidea.lite.parser.impl.ParseContextImpl;
-import org.xml.sax.SAXException;
 
 /**
  * @see ParseContextImpl

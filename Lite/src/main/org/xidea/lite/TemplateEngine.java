@@ -16,7 +16,6 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Node;
-import org.xidea.lite.Template;
 import org.xidea.lite.parser.DecoratorContext;
 import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.impl.DecoratorImpl;
@@ -111,12 +110,9 @@ public class TemplateEngine{
 
 	protected ParseContext createParseContext() {
 		try {
-			ParseContext context = new ParseContextImpl(getResource("/"));
+			ParseContext context = new ParseContextImpl(getResource("/"),featrues,null);
 			context.setCompress(compress);
 			context.setFormat(format);
-			for(String key :featrues.keySet()){
-				context.setFeatrue(key, featrues.get(key));
-			}
 			return context;
 		} catch (MalformedURLException e) {
 			throw new RuntimeException(e);
