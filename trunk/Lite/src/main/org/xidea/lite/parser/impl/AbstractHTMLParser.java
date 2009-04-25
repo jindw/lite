@@ -9,9 +9,9 @@ import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
+import org.xidea.lite.parser.NodeParser;
 import org.xidea.lite.parser.ParseChain;
 import org.xidea.lite.parser.ParseContext;
-import org.xidea.lite.parser.NodeParser;
 
 public abstract class AbstractHTMLParser implements NodeParser<Element> {
 	protected static final Pattern HTML_LEAF = Pattern.compile(
