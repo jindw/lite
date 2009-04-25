@@ -27,7 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.parser.DecoratorContext;
-import org.xidea.lite.parser.impl.DecoratorImpl;
+import org.xidea.lite.parser.impl.DecoratorContextImpl;
 
 /**
  * @author jindw
@@ -65,28 +65,28 @@ public class LiteCompilerServlet extends HttpServlet {
 			throws IOException {
 		resp.setContentType("text/plain;charset=utf-8");
 		req = wrapRequest(req);
-		final HashMap<String, String> sourceMap = new HashMap<String, String>();
 		String base = req.getParameter("base");
 		String[] paths = req.getParameterValues("path");
 		String[] sources = req.getParameterValues("source");
 		int i = sources.length;
 		String templateURL = "/";
+		HashMap<String, String> resourceMap = new HashMap<String, String>();
 		while (i-- > 0) {
 			if (paths != null && paths.length > i) {
 				templateURL = paths[i];
 			}
-			sourceMap.put(templateURL, sources[i]);
+			resourceMap.put(templateURL, sources[i]);
 		}
 		ProxyParseContext context = new ProxyParseContext(base,
-				buildFeatrueMap(req), sourceMap, req.getCharacterEncoding());
+				buildFeatrueMap(req), resourceMap,req.getParameter("plugin"));
 		try {
-			String decoratorxml = sourceMap.get("/WEB-INF/decorators.xml");
+			String decoratorxml = resourceMap.get("/WEB-INF/decorators.xml");
 			if (decoratorxml != null) {
-				DecoratorContext mapper = new DecoratorImpl(new StringReader(
+				DecoratorContext mapper = new DecoratorContextImpl(new StringReader(
 						decoratorxml));
 				String layout = mapper.getDecotatorPage(templateURL);
 				if (layout != null) {
-					if (sourceMap.containsKey(layout)) {
+					if (resourceMap.containsKey(layout)) {
 						context.setAttribute("#page", context.loadXML(context
 								.createURL(null, templateURL)));
 						templateURL = layout;
