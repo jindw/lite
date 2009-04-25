@@ -1,171 +1,104 @@
 package org.xidea.lite.parser.impl;
 
-import org.xidea.el.ExpressionSyntaxException;
 import org.xidea.lite.Template;
 import org.xidea.lite.parser.InstructionParser;
+import org.xidea.lite.parser.ParseChain;
 import org.xidea.lite.parser.ParseContext;
+import org.xidea.lite.parser.NodeParser;
 
-public class TextParser extends AbstractTextParser {
-	public static InstructionParser EL = new ELParser("", true);
-	public static InstructionParser IF = new ELParser("if", true) {
-		protected void addEl(ParseContext context, String text) {
-			context.appendIf(context.optimizeEL(text));
-		}
-	};
-	public static InstructionParser ELSE = new ELParser("else", false) {
-		public int parse(ParseContext context, String text, int p$) {
-			int begin = text.indexOf('{', p$);
-			if (begin > 0) {
-				int end = findELEnd(text, begin);
-				if (end > 0) {
-					String el = text.substring(begin + 1, end);
-					context.appendElse(context.optimizeEL(el));
-					return end + 1;
-				}
-			}
-			context.appendElse(null);
-			return p$ + 5;// "else".length+1
-		}
-	};
-	public static InstructionParser FOR = new ELParser("for", true) {
-		protected void addEl(ParseContext context, String text) {
-			int p = text.indexOf(':');
-			context.appendFor(text.substring(0, p).trim(), context
-					.optimizeEL(text.substring(p + 1)), null);
-		}
-	};
-	public static InstructionParser END = new ELParser("end", false) {
-		public int parse(ParseContext context, String text, int p$) {
-			context.appendEnd();
-			return p$ + 4;
-		}
-	};
-	public static InstructionParser VAR = new ELParser("var", true) {
-		protected void addEl(ParseContext context, String text) {
-			int p = text.indexOf('=');
-			if (p > 0) {
-				context.appendVar(text.substring(0, p).trim(), context
-						.optimizeEL(text.substring(p + 1)));
-			} else {
-				context.appendCaptrue(text.trim());
-			}
-		}
-	};
+public class TextParser implements NodeParser<String> {
+
 
 	public TextParser() {
-		instructionParser = new InstructionParser[] { EL, IF, ELSE, FOR, FOR,
-				END, FOR };
+//		protected InstructionParser[] instructionParser = { new DefaultELParser("",
+//				true) };
+//		instructionParser = new InstructionParser[] { DefaultELParser.EL,
+//				DefaultELParser.IF, DefaultELParser.FOR, DefaultELParser.ELSE,
+//				DefaultELParser.END, DefaultELParser.VAR };
 	}
 
-}
-
-class ELParser implements InstructionParser {
-	private String fn = "";
-	private boolean requireEL;
-	private String prefix;
-	private int length;
-
-	public ELParser(String fn, boolean requireEL) {
-		this.fn = fn;
-		this.prefix = '$' + fn;
-		this.requireEL = requireEL;
-		this.length = prefix.length();
-	}
-
-	public int findStart(ParseContext context, String text, int start) {
-		int i;
-		while ((i = text.indexOf(this.prefix, start)) >= start) {
-			if (i < text.length()) {
-				int j = i + length;
-				if (j < text.length()
-						&& !Character.isJavaIdentifierPart(text.charAt(j))) {
-					return i;
-				}
-				if (j == text.length() && !this.requireEL) {
-					return i;
-				}
-
-			}
-			start = i + 1;
-		}
-		return -1;
-	}
-
-	public int parse(ParseContext context, String text, int p$) {
-		int begin = text.indexOf('{', p$);
-		if (begin > 0) {
-			String fn2 = text.substring(p$ + 1, begin);
-			if (fn2.trim().equals(fn)) {
-				int end = findELEnd(text, begin);
-				if (end > 0) {
-					String el = text.substring(begin + 1, end);
-					addEl(context, el);
-					return end + 1;
-				}
-			}
-		}
-		throw new ExpressionSyntaxException(fn + ":" + text.substring(p$));
-	}
-
-	protected void addEl(ParseContext context, String text) {
-		Object el = context.optimizeEL(text);
+	public void parse(ParseContext context, ParseChain chain, String text) {
+		final boolean encode;
+		final char qute;
 		switch (context.getELType()) {
-		case Template.EL_TYPE:
-			context.appendEL(el);
+		case Template.XML_ATTRIBUTE_TYPE:
+			encode = true;
+			qute = '"';
 			break;
 		case Template.XML_TEXT_TYPE:
-			context.appendXmlText(el);
+			encode = true;
+			qute = 0;
 			break;
-		case Template.XML_ATTRIBUTE_TYPE:
-			context.appendAttribute(null, el);
-			break;
+		default:
+			encode = false;
+			qute = 0;
 		}
+		parse(context, text, encode, qute);
 	}
 
 	/**
+	 * 解析指定文本
 	 * 
-	 * @param text
-	 * @param elBegin
-	 *            {的位置
-	 * @return }的位置
+	 * @public
+	 * @abstract
+	 * @return <Array> result
 	 */
-	protected int findELEnd(String text, int elBegin) {
+	protected void parse(ParseContext context, final String text,
+			final boolean encode, final char qute) {
+		InstructionParser[] instructionParser = context.getInstructionParsers();
 		int length = text.length();
-		if (elBegin >= length) {
-			return -1;
-		}
-		int next = elBegin + 1;
-		char stringChar = 0;
-		int depth = 0;
+		int start = 0;
 		do {
-			char c = text.charAt(next);
-			switch (c) {
-			case '\\':
-				next++;
-				break;
-			case '\'':
-			case '"':
-				if (stringChar == c) {
-					stringChar = 0;
-				} else if (stringChar == 0) {
-					stringChar = c;
-				}
-				break;
-			case '{':
-				if (stringChar == 0) {
-					depth++;
-				}
-				break;
-			case '}':
-				if (stringChar == 0) {
-					depth--;
-					if (depth < 0) {
-						return next;
-					}
+			InstructionParser nip = null;
+			int p$ = length + 1;
+			for (InstructionParser ip : instructionParser) {
+				int p$2 = ip.findStart(context, text, start);
+				if (p$2 >= start && p$2 < p$) {
+					p$ = p$2;
+					nip = ip;
 				}
 			}
-		} while (++next < length);
-		return -1;
+			if (nip != null) {
+				int escapeCount = countEescape(text, p$);
+				context.append(text
+						.substring(start, p$ - (escapeCount + 1) / 2), encode,
+						qute);
+				if ((escapeCount & 1) == 1) {// escapsed
+					start = nextPosition(context, text, p$);
+				} else {
+					start = p$;
+					int mark = context.mark();
+					try {
+						start = nip.parse(context, text, start);
+					} catch (Exception e) {
+					}
+					if (start <= p$) {
+						context.reset(mark);
+						start = nextPosition(context, text, p$);
+					}
+
+				}
+			} else {
+				break;
+			}
+		} while (start < length);
+		if (start < length) {
+			context.append(text.substring(start), encode, qute);
+		}
 	}
 
+	protected int nextPosition(ParseContext context, final String text, int p$) {
+		context.append(text.substring(p$, p$ + 1));
+		return p$ + 1;
+	}
+
+	protected int countEescape(final String text, int p$) {
+		if (p$ > 0 && text.charAt(p$ - 1) == '\\') {
+			int pre = p$ - 1;
+			while (pre-- > 0 && text.charAt(pre) == '\\')
+				;
+			return p$ - pre - 1;
+		}
+		return 0;
+	}
 }

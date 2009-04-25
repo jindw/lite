@@ -20,5 +20,10 @@ public interface ParseContext extends ResourceContext,ResultContext, XMLContext 
 	/**
 	 * 给出文件内容或url，解析模版源文件
 	 */
-	public void parse(Object source,int defaultType);
+	public void parseText(String source,int defaultType);
+
+	public InstructionParser[] getInstructionParsers();
+	
+	public void addInstructionParser(InstructionParser iparser);
+	public void addNodeParser(NodeParser<? extends Object> iparser);
 }

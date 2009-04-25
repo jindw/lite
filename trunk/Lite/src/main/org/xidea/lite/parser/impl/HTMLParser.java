@@ -21,7 +21,7 @@ import org.xidea.lite.parser.ParseContext;
  * 
  * @author jindw
  */
-public class HTMLNodeParser extends AbstractHTMLNodeParser {
+public class HTMLParser extends AbstractHTMLParser {
 	public static final String AUTO_FORM_FEATRUE_URL = "http://www.xidea.org/ns/lite/autoform";
 	public static final String NO_AUTO = "none";
 	public static final String AUTO_ANYWAY = "anyway";
@@ -45,76 +45,69 @@ public class HTMLNodeParser extends AbstractHTMLNodeParser {
 			.compile("^(?:reset|button|submit)$");
 	private static final Object KEY_SELECT = new Object();
 
-	public HTMLNodeParser() {
+	public HTMLParser() {
 		super();
 	}
 
-	protected Node parse(Node node, ParseContext context) {
+	protected void parse(Node node, ParseContext context) {
 		Element el = (Element) node;
 		String localName = el.getLocalName();
 		Object status = context.getFeatrue(AUTO_FORM_FEATRUE_URL);
 		if (AUTO_ANYWAY.equals(status)) {
-			return processAutoForm(context, el, localName);
+			processAutoForm(context, el, localName);
 		} else if (AUTO_IN_FORM.equals(status) && FORM_TAG.equals(localName)) {
 			context.setFeatrue(AUTO_FORM_FEATRUE_URL, AUTO_ANYWAY);
-			node = parseHTMLElement(el,context,  null);
-			if (node != null) {
-				throw new RuntimeException();
-			}
+			parseHTMLElement(el, context, null);
 			context.setFeatrue(AUTO_FORM_FEATRUE_URL, AUTO_ANYWAY);
-			return null;
 		} else {
-			return parseHTMLElement(el, context, null);
+			parseHTMLElement(el, context, null);
 		}
 	}
 
-	private Node processAutoForm(ParseContext context, Element el,
+	private void processAutoForm(ParseContext context, Element el,
 			String localName) {
 		if (INPUT_TAG.equals(localName)) {
-			return parseInput(el, context);
+			parseInput(el, context);
 		} else if (TEXTAREA_TAG.equals(localName)) {
-			return parseTextArea(el, context);
+			parseTextArea(el, context);
 		} else if (SELECT_TAG.equals(localName)) {
-			return parseSelect(el, context);
+			parseSelect(el, context);
 		} else if (OPTION_TAG.equals(localName)) {
-			return parseSelectOption(el, context);
+			parseSelectOption(el, context);
 		} else {
-			return parseHTMLElement(el, context, null);
+			parseHTMLElement(el, context, null);
 		}
 	}
 
-	protected Node parseSelect(Element el, ParseContext context) {
+	protected void parseSelect(Element el, ParseContext context) {
 		context.setAttribute(KEY_SELECT, el);
-		return parseHTMLElement(el, context, null);
+		parseHTMLElement(el, context, null);
 	}
 
-	protected Node parseInput(Element element, ParseContext context) {
+	protected void parseInput(Element element, ParseContext context) {
 		element = (Element) element.cloneNode(true);// options 有值，textarea有值
 		String type = element.getAttribute(ATTRIBUTE_TYPE);
+		List<Object> attributes = null;
 		if (TYPE_CHECK_RADIO.matcher(type).find()) {
-			if (element.hasAttribute(ATTRIBUTE_CHECKED)) {
-				return parseHTMLElement(element, context, null);
-			} else if (element.hasAttribute(ATTRIBUTE_NAME)
+			if (!element.hasAttribute(ATTRIBUTE_CHECKED)
+					&& element.hasAttribute(ATTRIBUTE_NAME)
 					&& element.hasAttribute(ATTRIBUTE_VALUE)) {
 				String name = element.getAttribute(ATTRIBUTE_NAME);
 				String value = element.getAttribute(ATTRIBUTE_VALUE);
-				List<Object> attributes = buildCheckedAttribute(context, name,
-						value, ATTRIBUTE_CHECKED);
-				return parseHTMLElement(element, context, attributes);
+				attributes = buildCheckedAttribute(context, name, value,
+						ATTRIBUTE_CHECKED);
 			}
 		} else if (!TYPE_BUTTON.matcher(type).find()) {
 			if (!element.hasAttribute(ATTRIBUTE_VALUE)
 					&& element.hasAttribute(ATTRIBUTE_NAME)) {
 				element.setAttribute(ATTRIBUTE_VALUE, "${"
 						+ element.getAttribute(ATTRIBUTE_NAME) + "}");
-				return parseHTMLElement(element, context, null);
 			}
 		}
-		// 不能else啊：（！！上面还有漏网的
-		return parseHTMLElement(element, context, null);
+		parseHTMLElement(element, context, attributes);
 	}
 
-	protected Node parseTextArea(Element el, ParseContext context) {
+	protected void parseTextArea(Element el, ParseContext context) {
 		Document document = el.getOwnerDocument();
 		if (el.hasAttribute(ATTRIBUTE_VALUE)) {
 			el = (Element) el.cloneNode(false);
@@ -142,23 +135,23 @@ public class HTMLNodeParser extends AbstractHTMLNodeParser {
 				}
 			}
 		}
-		return parseHTMLElement(el, context, null);
+		parseHTMLElement(el, context, null);
 	}
 
-	protected Node parseSelectOption(Element element, ParseContext context) {
+	protected void parseSelectOption(Element element, ParseContext context) {
 		element = (Element) element.cloneNode(true);// options 有值，textarea有值
 		Element selectNode = (Element) context.getAttribute(KEY_SELECT);
+		List<Object> attributes = null;
 		if (!element.hasAttribute(ATTRIBUTE_SELECTED)) {
 			if (selectNode.hasAttribute(ATTRIBUTE_NAME)
 					&& element.hasAttribute(ATTRIBUTE_VALUE)) {
 				String name = selectNode.getAttribute(ATTRIBUTE_NAME);
 				String value = element.getAttribute(ATTRIBUTE_VALUE);
-				List<Object> attributes = buildCheckedAttribute(context, name,
-						value, ATTRIBUTE_SELECTED);
-				return parseHTMLElement(element, context, attributes);
+				attributes = buildCheckedAttribute(context, name, value,
+						ATTRIBUTE_SELECTED);
 			}
 		}
-		return parseHTMLElement(element, context, null);
+		parseHTMLElement(element, context, attributes);
 	}
 
 	protected List<Object> buildCheckedAttribute(ParseContext context,

@@ -13,5 +13,12 @@ public interface InstructionParser {
 	 * @return 返回值一定要 大于 start 否则安失败算
 	 */
 	public int parse(ParseContext context,String text,int start);
+	/**
+	 * 查找EL或者模板指令的开始位置
+	 * @param context
+	 * @param text
+	 * @param start
+	 * @return 返回EL起始位置
+	 */
 	public int findStart(ParseContext context,String text,int start);
 }

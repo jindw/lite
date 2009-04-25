@@ -14,9 +14,9 @@ import org.w3c.dom.Text;
 import org.xidea.lite.Template;
 import org.xidea.lite.parser.ParseChain;
 import org.xidea.lite.parser.ParseContext;
-import org.xidea.lite.parser.Parser;
+import org.xidea.lite.parser.NodeParser;
 
-public class DefaultXMLNodeParser implements Parser<Node> {
+public class DefaultXMLParser implements NodeParser<Node> {
 
 	public static final Pattern SCRIPT_TAG = Pattern.compile("^script$",
 			Pattern.CASE_INSENSITIVE);
@@ -76,7 +76,7 @@ public class DefaultXMLNodeParser implements Parser<Node> {
 		}
 		try {
 			context.append("<![CDATA[");
-			context.parse(((CDATASection) node).getData());
+			context.parseText(((CDATASection) node).getData(),Template.EL_TYPE);
 			context.append("]]>");
 		} finally {
 			if (needFormat) {
@@ -152,7 +152,7 @@ public class DefaultXMLNodeParser implements Parser<Node> {
 				context.beginIndent();// false);
 			}
 			try {
-				context.parse(text,Template.XML_TEXT_TYPE);
+				context.parseText(text,Template.XML_TEXT_TYPE);
 			} finally {
 				if (needFormat) {
 					context.endIndent();
@@ -171,7 +171,7 @@ public class DefaultXMLNodeParser implements Parser<Node> {
 		Attr attr = (Attr) node;
 		String name = attr.getName();
 		String value = attr.getValue();
-		if (CoreXMLNodeParser.isCoreNS("xmlns:c".equals(name) ? "c" : attr
+		if (CoreXMLParser.isCoreNS("xmlns:c".equals(name) ? "c" : attr
 				.getPrefix(), value)) {
 			return;
 		}
@@ -220,7 +220,7 @@ public class DefaultXMLNodeParser implements Parser<Node> {
 
 	private List<Object> parseAttributeValue(ParseContext context, String value) {
 		int mark = context.mark();
-		context.parse(value,Template.XML_ATTRIBUTE_TYPE);
+		context.parseText(value,Template.XML_ATTRIBUTE_TYPE);
 		return context.reset(mark);
 	}
 

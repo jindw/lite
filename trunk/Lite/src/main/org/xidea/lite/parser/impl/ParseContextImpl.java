@@ -19,8 +19,9 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xidea.el.ExpressionFactory;
+import org.xidea.lite.parser.InstructionParser;
 import org.xidea.lite.parser.ParseContext;
-import org.xidea.lite.parser.Parser;
+import org.xidea.lite.parser.NodeParser;
 import org.xidea.lite.parser.ResourceContext;
 import org.xidea.lite.parser.ResultContext;
 import org.xidea.lite.parser.XMLContext;
@@ -29,8 +30,8 @@ import org.xml.sax.SAXException;
 public class ParseContextImpl implements ParseContext {
 	private static final long serialVersionUID = 1L;
 	@SuppressWarnings("unchecked")
-	protected static Parser[] DEFAULT_PARSER_LIST = { new HTMLNodeParser(),
-			new CoreXMLNodeParser(), new DefaultXMLNodeParser(),
+	protected static NodeParser[] DEFAULT_PARSER_LIST = { new HTMLParser(),
+			new CoreXMLParser(), new DefaultXMLParser(),
 			new TextParser() };
 
 	protected ResourceContext resourceContext;
@@ -39,39 +40,82 @@ public class ParseContextImpl implements ParseContext {
 
 	private Map<String, String> featrues;
 	protected ParseChainImpl topChain;
+	protected InstructionParser[] ips = {ELParserImpl.EL};
 
 	protected ParseContextImpl() {
 	}
 
-	@SuppressWarnings("unchecked")
 	public ParseContextImpl(URL base) {
-		this(base, new HashMap<String, String>(), null);
+		initialize(base, null, null,null);
+	}
+
+	public ParseContextImpl(URL base, Map<String, String> featrues,
+			NodeParser<? extends Object>[] parsers,InstructionParser[] ips) {
+		initialize(base, featrues, parsers, ips);
 	}
 
 	@SuppressWarnings("unchecked")
-	public ParseContextImpl(URL base, Map<String, String> featrues,
-			Parser<? extends Object>[] parsers) {
-		this.featrues = featrues;
+	protected void initialize(URL base, Map<String, String> featrues,
+			NodeParser<? extends Object>[] parsers, InstructionParser[] ips) {
+		resourceContext = new ResourceContextImpl(base);
+		resultContext = new ResultContextImpl(new ArrayList<Object>());
+		xmlContext = new XMLContextImpl(this);
+
+		if(featrues!=null){
+			this.featrues = featrues;
+			String v = featrues.get("compress");
+			if(v!=null){
+				this.setCompress("true".equalsIgnoreCase(v));
+			}
+			v = featrues.get("reserveSpace");
+			if(v!=null){
+				this.setReserveSpace("true".equalsIgnoreCase(v));
+			}
+			v = featrues.get("format");
+			if(v!=null){
+				this.setFormat("true".equalsIgnoreCase(v));
+			}
+		}else{
+			this.featrues = new HashMap<String, String>();
+		}
+		
 		if (parsers == null) {
 			parsers = DEFAULT_PARSER_LIST;
 		}
 		ParseChainImpl current = topChain = new ParseChainImpl(this, parsers[0]);
 		for (int i = 1; i < parsers.length; i++) {
 			ParseChainImpl chain = new ParseChainImpl(this, parsers[i]);
-			current.insertAfter(chain);
+			chain.insertBefore(current);
 			current = chain;
-
 		}
-		resourceContext = new ResourceContextImpl(base);
-		resultContext = new ResultContextImpl(new ArrayList<Object>());
-		xmlContext = new XMLContextImpl(this);
+		if(ips != null){
+			this.ips = ips;
+		}
 	}
 
-	public void parse(Object source, int defaultType) {
+	public void parseText(String source, int defaultType) {
 		int type = xmlContext.getELType();
 		((XMLContextImpl) xmlContext).setELType(defaultType);
 		parse(source);
 		((XMLContextImpl) xmlContext).setELType(type);
+	}
+
+	public void addInstructionParser(InstructionParser iparser) {
+		int length = ips.length;
+		InstructionParser[] ips2 = new InstructionParser[length + 1];
+		System.arraycopy(this.ips, 0, ips2, 0, length);
+		ips2[length] = iparser;
+		this.ips = ips2;
+	}
+
+	public void addNodeParser(NodeParser<? extends Object> iparser) {
+		ParseChainImpl chain = new ParseChainImpl(this,iparser);
+		topChain.insertBefore(chain);
+		topChain = chain;
+	}
+
+	public InstructionParser[] getInstructionParsers() {
+		return ips;
 	}
 
 	public void parse(Object source) {

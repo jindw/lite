@@ -20,7 +20,7 @@ import org.mozilla.javascript.UintMap;
 import org.xidea.el.json.JSONEncoder;
 
 public class RhinoJSBuilder implements JSBuilder {
-	private static Log log = LogFactory.getLog(CoreXMLNodeParser.class);
+	private static Log log = LogFactory.getLog(CoreXMLParser.class);
 	private static Context context = Context.enter();
 	private static Scriptable scope = ScriptRuntime.getGlobal(context);
 

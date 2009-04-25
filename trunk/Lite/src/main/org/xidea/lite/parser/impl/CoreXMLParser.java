@@ -17,10 +17,10 @@ import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.Template;
 import org.xidea.lite.parser.ParseChain;
 import org.xidea.lite.parser.ParseContext;
-import org.xidea.lite.parser.Parser;
+import org.xidea.lite.parser.NodeParser;
 
-public class CoreXMLNodeParser implements Parser<Element> {
-	private static Log log = LogFactory.getLog(CoreXMLNodeParser.class);
+public class CoreXMLParser implements NodeParser<Element> {
+	private static Log log = LogFactory.getLog(CoreXMLParser.class);
 	private static final Pattern TEMPLATE_NAMESPACE_CORE = Pattern
 			.compile("^http:\\/\\/www.xidea.org\\/ns\\/(?:template|lite)(?:\\/core)?\\/?$");
 	private JSBuilder jsBuilder;
@@ -31,7 +31,7 @@ public class CoreXMLNodeParser implements Parser<Element> {
 				|| TEMPLATE_NAMESPACE_CORE.matcher(url).find();
 	}
 
-	public CoreXMLNodeParser() {
+	public CoreXMLParser() {
 		this.jselFactory = new ExpressionFactory() {
 				public Expression create(Object el) {
 					throw new UnsupportedOperationException();
@@ -53,7 +53,7 @@ public class CoreXMLNodeParser implements Parser<Element> {
 			}
 		}
 	}
-	public CoreXMLNodeParser(ExpressionFactory jselFactory,JSBuilder jsbuilder) {
+	public CoreXMLParser(ExpressionFactory jselFactory,JSBuilder jsbuilder) {
 		this.jselFactory = jselFactory;
 		this.jsBuilder = jsbuilder;
 	}
@@ -224,7 +224,7 @@ public class CoreXMLNodeParser implements Parser<Element> {
 			context.appendEnd();
 		} else {
 			int mark = context.mark();
-			context.parse(value, Template.EL_TYPE);
+			context.parseText(value, Template.EL_TYPE);
 			List<Object> temp = context.reset(mark);
 			if (temp.size() == 1) {
 				Object item = temp.get(0);
@@ -318,7 +318,7 @@ public class CoreXMLNodeParser implements Parser<Element> {
 
 	protected void parseOutTag(Element el, ParseContext context) {
 		String value = getAttributeOrNull(el, "value");
-		context.parse(value,Template.EL_TYPE);
+		context.parseText(value,Template.EL_TYPE);
 	}
 
 	private void parseChild(Node child, ParseContext context) {
