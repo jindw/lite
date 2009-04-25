@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.stream.StreamSource;
@@ -22,10 +21,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.Template;
-import org.xidea.lite.parser.ParseContext;
-import org.xidea.lite.parser.impl.HTMLNodeParser;
+import org.xidea.lite.parser.impl.HTMLParser;
 import org.xidea.lite.parser.impl.ParseContextImpl;
-import org.xidea.lite.parser.impl.TextParser;
 
 public class XMLTest {
 	protected Map<String, Object> context;
@@ -96,7 +93,7 @@ public class XMLTest {
 
 		ParseContextImpl parseContext = new ParseContextImpl(this.getClass()
 				.getResource("/"));
-		parseContext.setFeatrue(HTMLNodeParser.AUTO_FORM_FEATRUE_URL, HTMLNodeParser.AUTO_IN_FORM);
+		parseContext.setFeatrue(HTMLParser.AUTO_FORM_FEATRUE_URL, HTMLParser.AUTO_IN_FORM);
 		
 		parseContext.setCompress(true);
 		List<Object> insts = parser.parse(

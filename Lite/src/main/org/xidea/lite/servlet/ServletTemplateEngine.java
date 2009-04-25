@@ -13,7 +13,7 @@ import javax.servlet.ServletContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.lite.TemplateEngine;
-import org.xidea.lite.parser.impl.DecoratorImpl;
+import org.xidea.lite.parser.impl.DecoratorContextImpl;
 
 public class ServletTemplateEngine extends TemplateEngine {
 	private static final Log log = LogFactory.getLog(ServletTemplateEngine.class);
@@ -24,13 +24,11 @@ public class ServletTemplateEngine extends TemplateEngine {
 		//this.parser = new XMLParser(transformerFactory,xpathFactory);
 		this.config = config;
 		this.context = config.getServletContext();
-		this.compress = "true".equals(this.getParam("compress", "false"));
-		this.format = "true".equals(this.getParam("format", "false"));
 		this.featrues = buildFeatrueMap(config);
 		
 		try {
 			String decoratorPath = getParam("decoratorMapping",DEFAULT_DECORATOR_MAPPING);
-			this.decoratorMapper = new DecoratorImpl(context.getResourceAsStream(decoratorPath));
+			this.decoratorMapper = new DecoratorContextImpl(context.getResourceAsStream(decoratorPath));
 		} catch (Exception e) {
 			log.error("装载页面装饰配置信息失败", e);
 		}
@@ -42,12 +40,7 @@ public class ServletTemplateEngine extends TemplateEngine {
 		HashMap<String, String> featrues = new HashMap<String, String>();
 		while(names.hasMoreElements()){
 			String name = names.nextElement();
-			//String transformerFactory = config.getInitParameter("javax.xml.transform.TransformerFactory");
-			//String xpathFactory = config.getInitParameter("javax.xml.xpath.XPathFactory");
-			//if(name.startsWith("http://") || name.startsWith("javax.")){
 			featrues.put(name,config.getInitParameter(name));
-			//}
-			
 		}
 		return featrues;
 	}

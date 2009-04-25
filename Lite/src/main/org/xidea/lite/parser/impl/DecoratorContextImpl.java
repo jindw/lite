@@ -17,20 +17,20 @@ import org.w3c.dom.NodeList;
 import org.xidea.lite.parser.DecoratorContext;
 import org.xml.sax.InputSource;
 
-public class DecoratorImpl implements DecoratorContext {
+public class DecoratorContextImpl implements DecoratorContext {
 	private URLMatcher excludeMatcher;
 	private Map<URLMatcher, String> decoratorMap;
 
-	protected DecoratorImpl() {
+	protected DecoratorContextImpl() {
 
 	}
 
-	public DecoratorImpl(InputStream config) {
+	public DecoratorContextImpl(InputStream config) {
 		if(config!=null){
 			initialize(new InputSource(config));
 		}
 	}
-	public DecoratorImpl(Reader config) {
+	public DecoratorContextImpl(Reader config) {
 		if(config!=null){
 			initialize(new InputSource(config));
 		}

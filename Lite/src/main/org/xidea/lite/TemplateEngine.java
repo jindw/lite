@@ -18,7 +18,7 @@ import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Node;
 import org.xidea.lite.parser.DecoratorContext;
 import org.xidea.lite.parser.ParseContext;
-import org.xidea.lite.parser.impl.DecoratorImpl;
+import org.xidea.lite.parser.impl.DecoratorContextImpl;
 import org.xidea.lite.parser.impl.ParseContextImpl;
 
 public class TemplateEngine{
@@ -29,8 +29,6 @@ public class TemplateEngine{
 	protected Map<String, TemplateEntry> templateMap = new java.util.WeakHashMap<String, TemplateEntry>();
 
 	protected Map<String, String> featrues = new HashMap<String, String>();
-	protected boolean compress;
-	protected boolean format;
 	protected File webRoot;
 	protected DecoratorContext decoratorMapper;
 
@@ -44,7 +42,7 @@ public class TemplateEngine{
 	public TemplateEngine(File webRoot, File config) {
 		try {
 			if(config != null && config.exists()){
-				this.decoratorMapper = new DecoratorImpl(new FileInputStream(config));
+				this.decoratorMapper = new DecoratorContextImpl(new FileInputStream(config));
 			}else{
 				log.warn("找不到装饰器配置信息:"+config.getAbsolutePath());
 			}
@@ -110,10 +108,7 @@ public class TemplateEngine{
 
 	protected ParseContext createParseContext() {
 		try {
-			ParseContext context = new ParseContextImpl(getResource("/"),featrues,null);
-			context.setCompress(compress);
-			context.setFormat(format);
-			return context;
+			return new ParseContextImpl(getResource("/"),featrues,null,null);
 		} catch (MalformedURLException e) {
 			throw new RuntimeException(e);
 		}

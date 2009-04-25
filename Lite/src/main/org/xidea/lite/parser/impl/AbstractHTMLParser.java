@@ -11,9 +11,9 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.xidea.lite.parser.ParseChain;
 import org.xidea.lite.parser.ParseContext;
-import org.xidea.lite.parser.Parser;
+import org.xidea.lite.parser.NodeParser;
 
-public abstract class AbstractHTMLNodeParser implements Parser<Element> {
+public abstract class AbstractHTMLParser implements NodeParser<Element> {
 	protected static final Pattern HTML_LEAF = Pattern.compile(
 			"^(?:meta|link|img|br|hr|input)$", Pattern.CASE_INSENSITIVE);
 	protected static final Pattern PRE_LEAF = Pattern.compile(
@@ -25,9 +25,6 @@ public abstract class AbstractHTMLNodeParser implements Parser<Element> {
 		BOOLEAN_ATTBUTE_MAP.put("checked", "checked");
 		BOOLEAN_ATTBUTE_MAP.put("selected", "selected");
 		BOOLEAN_ATTBUTE_MAP.put("disabled", "disabled");
-
-	}
-	public AbstractHTMLNodeParser(){
 	}
 
 	public void parse(ParseContext context,ParseChain chain,Element node) {
@@ -39,11 +36,11 @@ public abstract class AbstractHTMLNodeParser implements Parser<Element> {
 		}
 	}
 
-	protected Node parse(Node node, ParseContext context) {
-		return parseHTMLElement(node, context, null);
+	protected void parse(Node node, ParseContext context) {
+		parseHTMLElement(node, context, null);
 	}
 
-	protected Node parseHTMLElement(Node node, ParseContext context,
+	protected void parseHTMLElement(Node node, ParseContext context,
 			List<Object> exts) {
 		context.beginIndent();//false);
 		String closeTag = null;
@@ -88,32 +85,29 @@ public abstract class AbstractHTMLNodeParser implements Parser<Element> {
 			context.endIndent();
 			context.append(closeTag);
 		}
-		return null;
 	}
 
 	protected void appendHTMLAttribute(Attr node, ParseContext context) {
-		String name = node.getName();
-		String value = node.getValue();
-		String trueValue = BOOLEAN_ATTBUTE_MAP.get(name);
+		String attributeName = node.getName();
+		String attributeValue = node.getValue();
+		String trueValue = BOOLEAN_ATTBUTE_MAP.get(attributeName);
 		if (trueValue != null) {
-			value = value.trim();
-			if (value.length() == 0 || "false".equals(value)) {
-				return;
-			} else {
-				trueValue = " " + name + "=\"" + trueValue + "\"";
-				if (value.startsWith("${") && value.endsWith("}")) {
-					value = value.substring(2, value.length() - 1);
-					final Object el = context.optimizeEL(value);
+			attributeValue = attributeValue.trim();
+			if (attributeValue.length() > 0 && ! "false".equals(attributeValue)) {
+				String trueAttr = " " + attributeName + "=\"" + trueValue + "\"";
+				if (attributeValue.startsWith("${") && attributeValue.endsWith("}")) {
+					attributeValue = attributeValue.substring(2, attributeValue.length() - 1);
+					final Object el = context.optimizeEL(attributeValue);
 					context.appendIf(el);
-					context.append(trueValue);
+					context.append(trueAttr);
 					context.appendEnd();
 				} else {
-					context.append(trueValue);
+					context.append(trueAttr);
 				}
-				return;
+				
 			}
+		}else{
+			context.parse(node);
 		}
-		context.parse(node);
-
 	}
 }

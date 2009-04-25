@@ -20,7 +20,7 @@ import sun.org.mozilla.javascript.internal.Parser;
 import sun.org.mozilla.javascript.internal.UintMap;
 
 public class Java6JSBuilder implements JSBuilder {
-	private static Log log = LogFactory.getLog(CoreXMLNodeParser.class);
+	private static Log log = LogFactory.getLog(CoreXMLParser.class);
 	private static Bindings parentScope;
 	private static ScriptEngine jsengine;
 

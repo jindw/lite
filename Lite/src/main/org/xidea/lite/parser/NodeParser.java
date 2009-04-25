@@ -1,7 +1,7 @@
 package org.xidea.lite.parser;
 
 
-public abstract interface Parser<T extends Object>{
+public abstract interface NodeParser<T extends Object>{
 	/**
      * @public
      * @return <Array> result

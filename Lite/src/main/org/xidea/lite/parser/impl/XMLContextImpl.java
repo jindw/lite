@@ -48,7 +48,7 @@ public class XMLContextImpl implements XMLContext{
 	private int eltype = 0;
 	private boolean reserveSpace;
 	private boolean format = false;
-	private boolean compress = false;
+	private boolean compress = true;
 	private final ParseContext context;
 	
 

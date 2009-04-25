@@ -1,36 +1,24 @@
 package org.xidea.lite.parser.test;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 
-import javax.xml.namespace.NamespaceContext;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactoryConfigurationError;
-import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
-import org.w3c.dom.DocumentType;
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xidea.lite.Template;
-import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.impl.ParseContextImpl;
 import org.xidea.lite.parser.impl.XMLContextImpl;
-import org.xml.sax.SAXException;
 
 
 public class XMLParserTest {

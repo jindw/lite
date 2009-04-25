@@ -1,20 +1,15 @@
 package org.xidea.lite.parser.test;
 
-import static org.junit.Assert.*;
-
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.regex.Pattern;
-
-import javax.swing.JScrollBar;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.xidea.el.Expression;
 import org.xidea.el.ExpressionFactory;
-import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.impl.Java6JSBuilder;
 import org.xidea.lite.parser.impl.ParseContextImpl;
