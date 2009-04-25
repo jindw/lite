@@ -1,10 +1,8 @@
 package org.xidea.lite.parser;
+import org.w3c.dom.Node;
+import org.xidea.lite.parser.Parser;
 
 
-public abstract interface NodeParser<T extends Object>{
-	/**
-     * @public
-     * @return <Array> result
-     */
-	public abstract void parse(ParseContext context,ParseChain chain,T node);
+public interface NodeParser extends Parser<Node>{
+
 }

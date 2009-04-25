@@ -4,17 +4,17 @@ import java.lang.reflect.Method;
 
 import org.xidea.lite.parser.ParseChain;
 import org.xidea.lite.parser.ParseContext;
-import org.xidea.lite.parser.NodeParser;
+import org.xidea.lite.parser.Parser;
 @SuppressWarnings("unchecked")
 public class ParseChainImpl implements ParseChain {
 	//private static Log log = LogFactory.getLog(ParseChainImpl.class);
 	private ParseChainImpl pre;
 	private ParseChainImpl next;
 	private ParseContext context;
-	private NodeParser parser;
+	private Parser parser;
 	private Class<?> nodeType = Object.class;
 
-	ParseChainImpl(ParseContext context, NodeParser<? extends Object> parser) {
+	ParseChainImpl(ParseContext context, Parser<? extends Object> parser) {
 		this.context = context;
 		this.parser = parser;
 		try {

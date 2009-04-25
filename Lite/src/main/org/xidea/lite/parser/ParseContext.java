@@ -25,5 +25,5 @@ public interface ParseContext extends ResourceContext,ResultContext, XMLContext 
 	public InstructionParser[] getInstructionParsers();
 	
 	public void addInstructionParser(InstructionParser iparser);
-	public void addNodeParser(NodeParser<? extends Object> iparser);
+	public void addNodeParser(Parser<? extends Object> iparser);
 }
