@@ -1,8 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE web-app PUBLIC
- "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
- "http://java.sun.com/dtd/web-app_2_3.dtd">
-
 <web-app xmlns="http://java.sun.com/xml/ns/javaee" version="2.5">
 	<servlet>
 		<servlet-name>litecompiler</servlet-name>
@@ -10,13 +6,13 @@
 			org.xidea.lite.compiler.LiteCompilerServlet
 		</servlet-class>
 		<init-param>
-			<param-name>transformerFactory</param-name>
+			<param-name>javax.xml.transform.TransformerFactory</param-name>
 			<param-value>
 				org.apache.xalan.processor.TransformerFactoryImpl
 			</param-value>
 		</init-param>
 		<init-param>
-			<param-name>xpathFactory</param-name>
+			<param-name>javax.xml.xpath.XPathFactory</param-name>
 			<param-value>
 				org.apache.xpath.jaxp.XPathFactoryImpl
 			</param-value>
@@ -28,13 +24,13 @@
 			org.xidea.lite.servlet.TemplateServlet
 		</servlet-class>
 		<init-param>
-			<param-name>transformerFactory</param-name>
+			<param-name>javax.xml.transform.TransformerFactory</param-name>
 			<param-value>
 				org.apache.xalan.processor.TransformerFactoryImpl
 			</param-value>
 		</init-param>
 		<init-param>
-			<param-name>xpathFactory</param-name>
+			<param-name>javax.xml.xpath.XPathFactory</param-name>
 			<param-value>
 				org.apache.xpath.jaxp.XPathFactoryImpl
 			</param-value>
@@ -50,7 +46,6 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>litecompiler</servlet-name>
-		<url-pattern>/</url-pattern>
 		<url-pattern>/litecompiler</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>

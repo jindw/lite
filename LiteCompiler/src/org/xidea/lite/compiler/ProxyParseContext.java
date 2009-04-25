@@ -9,11 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.xidea.lite.parser.ParseContextImpl;
 
-public class ProxyParseContext extends ParseContextImpl {
-	private static final URL BASE;
-	static {
+public class ProxyParseContext extends org.xidea.lite.parser.impl.ParseContextImpl {
+	private static final URL BASE ;
+	static{
 		try {
 			BASE = new URL("http://localhost/");
 		} catch (MalformedURLException e) {
@@ -23,8 +22,9 @@ public class ProxyParseContext extends ParseContextImpl {
 	private Map<String, String> params;
 	private String encoding = "utf-8";
 	private ArrayList<String> missedResources = new ArrayList<String>();
+	private URL base;
 
-	public ProxyParseContext(String base, Map<String, String> params,
+	public ProxyParseContext(String base,Map<String, String> featrueMap, Map<String, String> params,
 			String encoding) throws MalformedURLException {
 		super(new URL(BASE, base));
 		this.params = params;
