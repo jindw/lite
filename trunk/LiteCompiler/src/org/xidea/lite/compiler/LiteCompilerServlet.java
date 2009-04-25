@@ -8,12 +8,14 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
 import javax.servlet.http.*;
 
 import org.apache.commons.fileupload.FileItemIterator;
@@ -24,27 +26,35 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.el.json.JSONEncoder;
-import org.xidea.lite.parser.DecoratorMapper;
-import org.xidea.lite.parser.XMLParser;
+import org.xidea.lite.parser.DecoratorContext;
+import org.xidea.lite.parser.impl.DecoratorImpl;
 
+/**
+ * @author jindw
+ *
+ */
 @SuppressWarnings("serial")
 public class LiteCompilerServlet extends HttpServlet {
+	private static final String[] FEATRUES_KEY = {"compress","format"};
 	private static Log log = LogFactory.getLog(LiteCompilerServlet.class);
-	private XMLParser parser;
+	private HashMap<String, String> defaultFeatrues;
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
-		String transformerFactory = config
-				.getInitParameter("transformerFactory");
-		String xpathFactory = config.getInitParameter("xpathFactory");
-		parser = new XMLParser(transformerFactory, xpathFactory);
+		@SuppressWarnings("unchecked")
+		Enumeration<String> names = config.getInitParameterNames();
+		HashMap<String, String> featrues = new HashMap<String, String>();
+		while (names.hasMoreElements()) {
+			String name = names.nextElement();
+			featrues.put(name, config.getInitParameter(name));
+		}
+		this.defaultFeatrues = featrues;
 	}
 
 	public void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException, ServletException {
 		resp.setContentType("text/html;charset=utf-8");
-
 		req.setAttribute("source", getExampleSource());
 		req.setAttribute("path", "/index.html");
 		req.setAttribute("base", "/");
@@ -54,8 +64,85 @@ public class LiteCompilerServlet extends HttpServlet {
 	public void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
 		resp.setContentType("text/plain;charset=utf-8");
+		req = wrapRequest(req);
 		final HashMap<String, String> sourceMap = new HashMap<String, String>();
-		String[] source;
+		String base = req.getParameter("base");
+		String[] paths = req.getParameterValues("path");
+		String[] sources = req.getParameterValues("source");
+		int i = sources.length;
+		String templateURL = "/";
+		while (i-- > 0) {
+			if (paths != null && paths.length > i) {
+				templateURL = paths[i];
+			}
+			sourceMap.put(templateURL, sources[i]);
+		}
+		ProxyParseContext context = new ProxyParseContext(base,
+				buildFeatrueMap(req), sourceMap, req.getCharacterEncoding());
+		try {
+			String decoratorxml = sourceMap.get("/WEB-INF/decorators.xml");
+			if (decoratorxml != null) {
+				DecoratorContext mapper = new DecoratorImpl(new StringReader(
+						decoratorxml));
+				String layout = mapper.getDecotatorPage(templateURL);
+				if (layout != null) {
+					if (sourceMap.containsKey(layout)) {
+						context.setAttribute("#page", context.loadXML(context
+								.createURL(null, templateURL)));
+						templateURL = layout;
+					} else {
+						context.addMissedResource(layout);
+					}
+				}
+
+			}
+		} catch (Exception e) {
+		}
+
+		PrintWriter out = resp.getWriter();
+		printResult(context, templateURL, out);
+	}
+
+	private void printResult(ProxyParseContext context, String url,
+			PrintWriter out) {
+		String error = null;
+		List<Object> result = null;
+		try {
+			context.parse(context.createURL(null, url));
+			result = context.toResultTree();
+		} catch (Throwable e) {
+			StringWriter buf = new StringWriter();
+			PrintWriter pbuf = new PrintWriter(buf);
+			e.printStackTrace(pbuf);
+			pbuf.flush();
+			error = "编译失败：" + buf.toString();
+			error = error == null ? "unknow error" : error;
+			log.info(e);
+		} finally {
+			List<String> missed = context.getMissedResources();
+			if (error != null || !missed.isEmpty()) {
+				HashMap<Object, Object> map = new LinkedHashMap<Object, Object>();
+				map.put("missed", missed);
+				if (error != null) {
+					map.put("error", error);
+				}
+				out.print(JSONEncoder.encode(map));
+			} else {
+				out.println(JSONEncoder.encode(result));
+			}
+		}
+	}
+
+	private HashMap<String, String> buildFeatrueMap(ServletRequest req) {
+		HashMap<String, String> featrue = new HashMap<String, String>(defaultFeatrues);
+		for(String name : FEATRUES_KEY){
+			featrue.put(name,featrue.get(name));
+		}
+		return featrue;
+	}
+
+	private HttpServletRequest wrapRequest(HttpServletRequest req)
+			throws IOException {
 		if (isMultiPart(req)) {
 			final HashMap<String, List<String>> params = getMutiParams(req);
 			req = new HttpServletRequestWrapper(req) {
@@ -68,80 +155,31 @@ public class LiteCompilerServlet extends HttpServlet {
 				@Override
 				public String[] getParameterValues(String name) {
 					List<String> v = params.get(name);
-					return v == null ? null : v.toArray(new String[v.size()]);
-				}
-			};
-			source = params.get("file").toArray(new String[0]);
-		} else {
-			source = getPhpParams(req, "source");
-		}
-		String base = req.getParameter("base");
-		String url = "/";
-		String[] path = getPhpParams(req, "path");
-		int i = source.length;
-		while (i-- > 0) {
-			if (path != null && path.length > i) {
-				url = path[i];
-			}
-			sourceMap.put(url, source[i]);
-		}
-		ProxyParseContext context = new ProxyParseContext(base, sourceMap, req
-				.getCharacterEncoding());
-		try {
-			String decoratorxml = sourceMap.get("/WEB-INF/decorators.xml");
-			if (decoratorxml != null) {
-				DecoratorMapper mapper = new DecoratorMapper(new StringReader(
-						decoratorxml));
-				String layout = mapper.getDecotatorPage(url);
-				if (layout != null) {
-					if (sourceMap.containsKey(layout)) {
-						context.setAttribute("#page", parser.loadXML(url,
-								context));
-						url = layout;
+					if(v == null){
+						return findPhpParams(this, name);
 					}else{
-						context.addMissedResource(layout);
+						return v.toArray(new String[v.size()]);
 					}
 				}
+			};
+		}else{
+			req = new HttpServletRequestWrapper(req) {
 
-			}
-		} catch (Exception e) {
-		}
-		context.setCompress("true".equals(req.getParameter("compress")));
-		context.setFormat("true".equals(req.getParameter("format")));
-		PrintWriter out = resp.getWriter();
-		printResult(context, url, out);
-	}
-
-	private void printResult(ProxyParseContext context,String url, 
-			PrintWriter out) {
-		String error = null;
-		List<Object> result = null;
-		try{
-			result = parser.parse(context.createURL(null, url), context);
-		}catch (Throwable e) {
-			StringWriter buf = new StringWriter();
-			PrintWriter pbuf = new PrintWriter(buf);
-			e.printStackTrace(pbuf);
-			pbuf.flush();
-			error = "编译失败："+buf.toString();
-			error = error==null?"unknow error":error;
-			log.info(e);
-		}finally{
-			List<String> missed = context.getMissedResources();
-			if(error != null || !missed.isEmpty()){
-				HashMap<Object, Object> map = new LinkedHashMap<Object, Object>();
-				map.put("missed",missed);
-				if(error!=null){
-					map.put("error",error);
+				@Override
+				public String[] getParameterValues(String name) {
+					String[] v = super.getParameterValues(name);
+					if(v == null){
+						return findPhpParams(this, name);
+					}else{
+						return v;
+					}
 				}
-				out.print(JSONEncoder.encode(map));
-			}else{
-				out.println(JSONEncoder.encode(result));
-			}
+			};
 		}
+		return req;
 	}
 
-	private String[] getPhpParams(HttpServletRequest req, String name) {
+	private String[] findPhpParams(HttpServletRequest req, String name) {
 		String[] source = req.getParameterValues(name);
 		if (source == null) {
 			ArrayList<String> values = new ArrayList<String>();
@@ -159,14 +197,13 @@ public class LiteCompilerServlet extends HttpServlet {
 		}
 		return source;
 	}
-
 	public static boolean isMultiPart(HttpServletRequest request) {
 		String content_type = request.getContentType();
 		return content_type != null
 				&& content_type.indexOf("multipart/form-data") != -1;
 	}
 
-	public HashMap<String, List<String>> getMutiParams(HttpServletRequest req)
+	private HashMap<String, List<String>> getMutiParams(HttpServletRequest req)
 			throws IOException {
 		DiskFileItemFactory fac = new DiskFileItemFactory();
 		// fac.setSizeThreshold(0);
