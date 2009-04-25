@@ -108,7 +108,7 @@ public class ParseContextImpl implements ParseContext {
 		this.ips = ips2;
 	}
 
-	public void addNodeParser(Parser<? extends Object> iparser) {
+	public void addNodeParser(Parser<? extends Node> iparser) {
 		ParseChainImpl chain = new ParseChainImpl(this,iparser);
 		topChain.insertBefore(chain);
 		topChain = chain;
