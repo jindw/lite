@@ -12,11 +12,11 @@ import org.w3c.dom.Node;
 import org.w3c.dom.ProcessingInstruction;
 import org.w3c.dom.Text;
 import org.xidea.lite.Template;
-import org.xidea.lite.parser.NodeParser;
+import org.xidea.lite.parser.Parser;
 import org.xidea.lite.parser.ParseChain;
 import org.xidea.lite.parser.ParseContext;
 
-public class DefaultXMLParser implements NodeParser {
+public class DefaultXMLParser implements Parser<Node> {
 
 	public static final Pattern SCRIPT_TAG = Pattern.compile("^script$",
 			Pattern.CASE_INSENSITIVE);
