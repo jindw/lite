@@ -4,9 +4,9 @@ import org.xidea.lite.Template;
 import org.xidea.lite.parser.InstructionParser;
 import org.xidea.lite.parser.ParseChain;
 import org.xidea.lite.parser.ParseContext;
-import org.xidea.lite.parser.NodeParser;
+import org.xidea.lite.parser.Parser;
 
-public class TextParser implements NodeParser<String> {
+public class TextParser implements Parser<String> {
 
 
 	public TextParser() {

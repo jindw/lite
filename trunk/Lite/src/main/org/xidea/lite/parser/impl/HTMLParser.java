@@ -14,6 +14,7 @@ import org.xidea.el.json.JSONEncoder;
 import org.xidea.el.operation.TextContains;
 import org.xidea.el.operation.TextNullEmpty;
 import org.xidea.lite.Template;
+import org.xidea.lite.parser.ElementParser;
 import org.xidea.lite.parser.ParseContext;
 
 /**
@@ -21,7 +22,7 @@ import org.xidea.lite.parser.ParseContext;
  * 
  * @author jindw
  */
-public class HTMLParser extends AbstractHTMLParser {
+public class HTMLParser extends AbstractHTMLParser implements ElementParser{
 	public static final String AUTO_FORM_FEATRUE_URL = "http://www.xidea.org/ns/lite/autoform";
 	public static final String NO_AUTO = "none";
 	public static final String AUTO_ANYWAY = "anyway";

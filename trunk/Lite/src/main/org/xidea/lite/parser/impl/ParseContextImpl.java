@@ -21,7 +21,7 @@ import org.w3c.dom.NodeList;
 import org.xidea.el.ExpressionFactory;
 import org.xidea.lite.parser.InstructionParser;
 import org.xidea.lite.parser.ParseContext;
-import org.xidea.lite.parser.NodeParser;
+import org.xidea.lite.parser.Parser;
 import org.xidea.lite.parser.ResourceContext;
 import org.xidea.lite.parser.ResultContext;
 import org.xidea.lite.parser.XMLContext;
@@ -30,7 +30,7 @@ import org.xml.sax.SAXException;
 public class ParseContextImpl implements ParseContext {
 	private static final long serialVersionUID = 1L;
 	@SuppressWarnings("unchecked")
-	protected static NodeParser[] DEFAULT_PARSER_LIST = { new HTMLParser(),
+	protected static Parser[] DEFAULT_PARSER_LIST = { new HTMLParser(),
 			new CoreXMLParser(), new DefaultXMLParser(),
 			new TextParser() };
 
@@ -50,13 +50,13 @@ public class ParseContextImpl implements ParseContext {
 	}
 
 	public ParseContextImpl(URL base, Map<String, String> featrues,
-			NodeParser<? extends Object>[] parsers,InstructionParser[] ips) {
+			Parser<? extends Object>[] parsers,InstructionParser[] ips) {
 		initialize(base, featrues, parsers, ips);
 	}
 
 	@SuppressWarnings("unchecked")
 	protected void initialize(URL base, Map<String, String> featrues,
-			NodeParser<? extends Object>[] parsers, InstructionParser[] ips) {
+			Parser<? extends Object>[] parsers, InstructionParser[] ips) {
 		resourceContext = new ResourceContextImpl(base);
 		resultContext = new ResultContextImpl(new ArrayList<Object>());
 		xmlContext = new XMLContextImpl(this);
@@ -108,7 +108,7 @@ public class ParseContextImpl implements ParseContext {
 		this.ips = ips2;
 	}
 
-	public void addNodeParser(NodeParser<? extends Object> iparser) {
+	public void addNodeParser(Parser<? extends Object> iparser) {
 		ParseChainImpl chain = new ParseChainImpl(this,iparser);
 		topChain.insertBefore(chain);
 		topChain = chain;
