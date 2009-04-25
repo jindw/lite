@@ -1,5 +1,6 @@
 package org.xidea.lite.parser;
 
+import org.w3c.dom.Node;
 import org.xidea.lite.parser.impl.ParseContextImpl;
 
 /**
@@ -25,5 +26,5 @@ public interface ParseContext extends ResourceContext,ResultContext, XMLContext 
 	public InstructionParser[] getInstructionParsers();
 	
 	public void addInstructionParser(InstructionParser iparser);
-	public void addNodeParser(Parser<? extends Object> iparser);
+	public void addNodeParser(Parser<? extends Node> iparser);
 }
