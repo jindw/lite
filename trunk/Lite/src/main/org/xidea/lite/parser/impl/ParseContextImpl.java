@@ -40,7 +40,7 @@ public class ParseContextImpl implements ParseContext {
 
 	private Map<String, String> featrues;
 	protected ParseChainImpl topChain;
-	protected InstructionParser[] ips = {ELParserImpl.EL};
+	protected InstructionParser[] ips = {ELParser.EL};
 
 	protected ParseContextImpl() {
 	}
