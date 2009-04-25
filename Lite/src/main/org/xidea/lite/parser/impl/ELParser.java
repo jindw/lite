@@ -5,21 +5,21 @@ import org.xidea.lite.Template;
 import org.xidea.lite.parser.InstructionParser;
 import org.xidea.lite.parser.ParseContext;
 
-public class ELParserImpl implements InstructionParser {
-	public static InstructionParser EL = new ELParserImpl("", true);
-	public static InstructionParser IF = new ELParserImpl("if", true) {
+public class ELParser implements InstructionParser {
+	public static InstructionParser EL = new ELParser("", true);
+	public static InstructionParser IF = new ELParser("if", true) {
 		protected void addEl(ParseContext context, String text) {
 			context.appendIf(context.optimizeEL(text));
 		}
 	};
-	public static InstructionParser FOR = new ELParserImpl("for", true) {
+	public static InstructionParser FOR = new ELParser("for", true) {
 		protected void addEl(ParseContext context, String text) {
 			int p = text.indexOf(':');
 			context.appendFor(text.substring(0, p).trim(), context
 					.optimizeEL(text.substring(p + 1)), null);
 		}
 	};
-	public static InstructionParser ELSE = new ELParserImpl("else", false) {
+	public static InstructionParser ELSE = new ELParser("else", false) {
 		public int parse(ParseContext context, String text, int p$) {
 			int begin = text.indexOf('{', p$);
 			if (begin > 0) {
@@ -34,13 +34,13 @@ public class ELParserImpl implements InstructionParser {
 			return p$ + 5;
 		}
 	};
-	public static InstructionParser END = new ELParserImpl("end", false) {
+	public static InstructionParser END = new ELParser("end", false) {
 		public int parse(ParseContext context, String text, int p$) {
 			context.appendEnd();
 			return p$ + 4;
 		}
 	};
-	public static InstructionParser VAR = new ELParserImpl("var", true) {
+	public static InstructionParser VAR = new ELParser("var", true) {
 		protected void addEl(ParseContext context, String text) {
 			int p = text.indexOf('=');
 			if (p > 0) {
@@ -56,7 +56,7 @@ public class ELParserImpl implements InstructionParser {
 	private String prefix;
 	private int length;
 
-	protected ELParserImpl(String fn, boolean requireEL) {
+	protected ELParser(String fn, boolean requireEL) {
 		this.fn = fn;
 		this.prefix = '$' + fn;
 		this.requireEL = requireEL;
