@@ -9,11 +9,11 @@ import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
-import org.xidea.lite.parser.ElementParser;
+import org.xidea.lite.parser.Parser;
 import org.xidea.lite.parser.ParseChain;
 import org.xidea.lite.parser.ParseContext;
 
-public abstract class AbstractHTMLParser implements ElementParser {
+public abstract class AbstractHTMLParser implements Parser<Element> {
 	protected static final Pattern HTML_LEAF = Pattern.compile(
 			"^(?:meta|link|img|br|hr|input)$", Pattern.CASE_INSENSITIVE);
 	protected static final Pattern PRE_LEAF = Pattern.compile(

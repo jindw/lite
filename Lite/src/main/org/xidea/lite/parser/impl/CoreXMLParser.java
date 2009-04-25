@@ -15,11 +15,11 @@ import org.xidea.el.Expression;
 import org.xidea.el.ExpressionFactory;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.Template;
-import org.xidea.lite.parser.ElementParser;
+import org.xidea.lite.parser.Parser;
 import org.xidea.lite.parser.ParseChain;
 import org.xidea.lite.parser.ParseContext;
 
-public class CoreXMLParser implements ElementParser {
+public class CoreXMLParser implements Parser<Element> {
 	private static Log log = LogFactory.getLog(CoreXMLParser.class);
 	private static final Pattern TEMPLATE_NAMESPACE_CORE = Pattern
 			.compile("^http:\\/\\/www.xidea.org\\/ns\\/(?:template|lite)(?:\\/core)?\\/?$");
