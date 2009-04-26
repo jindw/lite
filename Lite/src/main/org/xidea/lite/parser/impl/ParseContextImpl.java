@@ -95,23 +95,25 @@ public class ParseContextImpl implements ParseContext {
 	public void parse(Object source) {
 		if (source instanceof Node || source instanceof String) {
 			getTopChain().process(source);
-		} else if (source instanceof NodeList) {
+		}else if (source instanceof NodeList) {
 			NodeList list = (NodeList) source;
-			for (int i = 0; i < list.getLength(); i++) {
+			int len = list.getLength();
+			for (int i = 0; i < len; i++) {
 				parse(list.item(i));
 			}
 		} else if (source instanceof NamedNodeMap) {
 			NamedNodeMap list = (NamedNodeMap) source;
-			for (int i = 0; i < list.getLength(); i++) {
+			int len = list.getLength();
+			for (int i = 0; i < len; i++) {
 				parse(list.item(i));
 			}
 		} else if (source instanceof URL) {
 			try {
-				//parse(loadXML((URL) source));
+				parse(loadXML((URL) source));
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
-		} else {
+		}else{
 			getTopChain().process(source);
 		}
 	}
