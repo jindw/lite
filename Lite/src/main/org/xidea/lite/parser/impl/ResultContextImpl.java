@@ -121,6 +121,10 @@ public class ResultContextImpl implements ResultContext {
 	}
 
 	public void appendElse(Object testEL) {
+		this.clearPreviousText();
+		if(this.getType(this.result.size()-1) != -1){
+			this.appendEnd();
+		}
 		this.append(new Object[] { Template.ELSE_TYPE, testEL });
 	}
 
