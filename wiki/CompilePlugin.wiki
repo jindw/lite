@@ -1,6 +1,6 @@
 #labels Phase-Design,Phase-Support
-=== 工作模式 ===
-Lite Compiler的插件体系简单表示如下：
+=== 解析链结构 ===
+Lite Compiler的解析链结构简单表示如下：
 
 {{{
  
@@ -24,38 +24,44 @@ Lite Compiler的插件体系简单表示如下：
                                                   【添加自定义指令计息节点】..
                     
 }}}
-
-=== 指令解析器编写实例 ===
-{{{
-//{{if test}}....{{/endif}}
-var $if = {
-	parse : function(context,text,start){
-		var end = text.indexOf("}}",start);
-		var el = text.substring(start+5,end);
-		el = context.parseEL(el);
-		context.appendIf(el);
-		return end+2;
-	},
-	findStart : function(context,text,start){
-		return text.indexOf("{{if",start);
+=== 基本用法 ===
+  * 添加节点解析器
+    用于控制节点解析，新的解析器将添加在解析链的顶端。
+    接口代码：
+    {{{
+var pagerParser = {
+	parse:function(context,chain,pagerNode){
 	}
 }
-var $endif = {
-	parse : function(context,text,start){
-		context.appendEnd();
-		return start+10;
+    }}}
+    # 独立处理模式
+      如果事您的解析器能处理的节点，调用append??? 序列方法，添加中间代码。
+    # 合作模式
+      可以将当前节点克隆后，做适当修改，能后交由后续解析器处理【chain.process(node)】。
+      不能处理的节点，直接让后续节点处理。
+  * 添加指令解析器
+    用于解析文本节点中的动态内容，如表达式，也可以是文本格式的控制指令。
+    接口代码：
+    {{{
+var pagerParser = {
+	findStart:function(context,text,start){
+		rerurn <el begin>
 	},
-	findStart : function(context,text,start){
-		return text.indexOf("{{/endif}}",start);
+	parse:function(context,text,start){
+		rerurn <el end>
 	}
 }
-//将文本指令解析器添加到解析上下文
-context.addInstructionParser($if);
-context.addInstructionParser($endif);
-}}}
-
-
-=== 节点解析器示例 ===
+    }}}
+    # 查找指令开始位置
+      findStart查找当前指令解析器相关指令最早出现的闻之
+    # 优先级
+      如果有多个指令解析器都发现有效起始位置，选最先出现的一个。
+    # 自动处理转义
+      系统自动处理转义
+    # 解析指令
+      解析完成后，返回指令结束后位置。
+=== JS扩展示例 ===
+  ==== 节点解析器示例 ====
 {{{
 //我们也可以添加纯js实现的节点解析器或者文本指令解析器
 //下面的例子中 我们演示了一个简单的自定义if语法：
@@ -92,4 +98,32 @@ var pagerParser = {
 //将节点解析器添加到解析上下文
 context.addNodeParser(pagerParser );
 
+}}}
+  ==== 指令解析器编写实例 ====
+{{{
+//{{if test}}....{{/endif}}
+var $if = {
+	parse : function(context,text,start){
+		var end = text.indexOf("}}",start);
+		var el = text.substring(start+5,end);
+		el = context.parseEL(el);
+		context.appendIf(el);
+		return end+2;
+	},
+	findStart : function(context,text,start){
+		return text.indexOf("{{if",start);
+	}
+}
+var $endif = {
+	parse : function(context,text,start){
+		context.appendEnd();
+		return start+10;
+	},
+	findStart : function(context,text,start){
+		return text.indexOf("{{/endif}}",start);
+	}
+}
+//将文本指令解析器添加到解析上下文
+context.addInstructionParser($if);
+context.addInstructionParser($endif);
 }}}
