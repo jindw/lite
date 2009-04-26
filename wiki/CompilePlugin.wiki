@@ -49,7 +49,7 @@ var $endif = {
 		return text.indexOf("{{/endif}}",start);
 	}
 }
-
+//将文本指令解析器添加到解析上下文
 context.addInstructionParser($if);
 context.addInstructionParser($endif);
 }}}
@@ -66,11 +66,11 @@ context.addInstructionParser($endif);
  *
  */
 var pagerParser = {
-	parser:function(context,chain,pagerNode){
+	parse:function(context,chain,pagerNode){
 	    if(pagerNode.nodeName == 'ui:pager'){
-	        var electedEl = pagerNode.getAttribute("selectedIndex").replace(/^\$\{|\}$/,'');
-	        var listEl = pagerNode.getAttribute("list");
-	        context.appendFor(listEl,"link");
+	        var selectedEl = (pagerNode.getAttribute("selectedIndex")+'').replace(/^\$\{|\}$/g,'');
+	        var listEl = pagerNode.getAttribute("list")+'';
+	        context.appendFor(listEl,context.parseEL("link"),null);
 	        
 	        context.appendIf(context.parseEL("for.index>0"));
 	        context.append(",");
@@ -89,5 +89,7 @@ var pagerParser = {
 	}
 }
 
+//将节点解析器添加到解析上下文
+context.addNodeParser(pagerParser );
 
 }}}
