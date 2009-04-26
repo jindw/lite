@@ -20,6 +20,7 @@ public class ProxyParseContext extends
 	private ArrayList<String> missedResources = new ArrayList<String>();
 	private URL base;
 
+	@SuppressWarnings("unchecked")
 	public ProxyParseContext(String base,
 			Map<String, String> featrueMap,
 			Map<String, String> resourceMap,String pluginSource)

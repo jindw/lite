@@ -26,7 +26,7 @@ public class RhinoContext {
 	static {
 		try {
 			INITIALIZE_SCRIPT = PluginLoader.loadText(new InputStreamReader(
-					PluginLoader.class.getResourceAsStream("ParserLoader.js"),
+					PluginLoader.class.getResourceAsStream("PluginLoader.js"),
 					"utf-8"));
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
@@ -44,7 +44,7 @@ public class RhinoContext {
 
 	public void setUp(String source) {
 		scope.put("context", scope, this);
-		// scope.put("Node", scope,Node);
+		scope.put("Node", scope,new NativeJavaClass(scope,Node.class));
 		context.evaluateString(scope, source, "data:" + source, 1, null);
 	}
 
@@ -81,6 +81,7 @@ public class RhinoContext {
 		this.addNodeParser(parser, Node.ELEMENT_NODE);
 	}
 
+	@SuppressWarnings("unchecked")
 	public void addNodeParser(Object parser, int type) {
 		Parser<Node> nodeParser;
 		if (parser instanceof Scriptable) {
@@ -89,7 +90,7 @@ public class RhinoContext {
 			nodeParser = new RhinoParserProxy(context, (Scriptable) parser,
 					parse, type);
 		} else {
-			nodeParser = (Parser) parser;
+			nodeParser = (Parser<Node>) parser;
 		}
 		initializer.addNodeParser(nodeParser);
 	}

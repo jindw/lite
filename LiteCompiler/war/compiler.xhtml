@@ -17,15 +17,34 @@
 					</div>
 					<div>
 						<label>
-							<input style="width:40px" name="compress" type="checkbox"
-								value="true" checked="true" onclick="this.form.format.disabled=this.checked"/>
-								压缩
+							<input style="width:40px" name="compress"
+								type="checkbox" value="true" checked="true"
+								onclick="this.form.format.disabled=this.checked" />
+							压缩
 						</label>
 						<label>
-							<input style="width:40px"  name="format" type="checkbox"
-								value="true" disabled="true"/>
-								格式化
+							<input style="width:40px" name="format"
+								type="checkbox" value="true" disabled="true" />
+							格式化
 						</label>
+					</div>
+					<div>
+						<label>
+							<input style="width:40px" name="model"
+								type="radio" value="text"/>
+							文本模式
+						</label>
+						<label>
+							<input style="width:40px" name="model"
+								type="radio" checked="true" value="xml"/>
+							XML模式
+						</label>
+					</div>
+					<div>
+						<label>编译插件(<a href="http://lite.googlecode.com">跟多实例</a>):</label>
+					</div>
+					<div>
+						<textarea name="plugin" xml:space="preserve">${plugin}</textarea>
 					</div>
 					<div>
 						<label>网站根目录:</label>
@@ -49,9 +68,7 @@
 								<label>文件内容（目前只支持Lite XML）:</label>
 							</div>
 							<div>
-								<textarea name="source">
-									${source}
-								</textarea>
+								<textarea name="source" xml:space="preserve">${source}</textarea>
 							</div>
 							<hr />
 						</div>
@@ -83,6 +100,12 @@
 						</label>
 					</div>
 					<div>
+						<label>编译插件:</label>
+					</div>
+					<div>
+						<textarea name="plugin" xml:space="preserve">${plugin}</textarea>
+					</div>
+					<div>
 						<label>网站根目录:</label>
 					</div>
 					<div>
@@ -96,7 +119,7 @@
 							</a>
 							<div>
 								<input type="hidden" name="path" />
-								<input type="file" name="file" />
+								<input type="source" name="file" />
 							</div>
 							<hr />
 						</div>
@@ -120,7 +143,7 @@
 			<c:include xpath="//*[@id='fileContent']/*" />
 		</c:client>
 		<script>
-			/*<![CDATA[*/
+			/*<![CDATA[*/ 
 function removeRow(a){
 	a.parentNode.parentNode.removeChild(a.parentNode)
 }
@@ -137,13 +160,17 @@ function addFile(){
     row.innerHTML = newFileTemplate({});
 }
 function validateFile(f){
-	var file = f.file;
-	if(file.value){
-		file = [file];
+	if(invalidPlugin(f.plugin.value)){
+		doFocus(f.plugin);
+		return false;
 	}
-	for(var i=0;i<path.length;i++){
-		var p = path[0];
-		var value = path[0].value;
+	var files = f.source;
+	if(file.value){
+		files = [source];
+	}
+	for(var i=0;i<files.length;i++){
+		var p = files[0];
+		var value = p.value;
 		while(p = p.previousSibling){
 			if(p.name="path"){
 				p.value = value;
@@ -155,6 +182,10 @@ function validateFile(f){
 }
 function validateSource(f){
 	try{
+	if(invalidPlugin(f.plugin.value)){
+		doFocus(f.plugin);
+		return false;
+	}
 	var path = f.path;
 	var source = f.source;
 	if(path.value){
@@ -173,6 +204,14 @@ function validateSource(f){
 	}
 	}catch(e){
 		alert(e)
+	}
+}
+function invalidPlugin(plugin){
+	try{
+		new Function(plugin);
+	}catch(e){
+		alert("plugin 语法错误："+e.message)
+		return true;
 	}
 }
 function invalidPath(path){
