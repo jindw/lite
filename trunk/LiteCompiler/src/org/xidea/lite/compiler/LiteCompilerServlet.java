@@ -7,6 +7,7 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -31,11 +32,11 @@ import org.xidea.lite.parser.impl.DecoratorContextImpl;
 
 /**
  * @author jindw
- *
+ * 
  */
 @SuppressWarnings("serial")
 public class LiteCompilerServlet extends HttpServlet {
-	private static final String[] FEATRUES_KEY = {"compress","format"};
+	private static final String[] FEATRUES_KEY = { "compress", "format" };
 	private static Log log = LogFactory.getLog(LiteCompilerServlet.class);
 	private HashMap<String, String> defaultFeatrues;
 
@@ -55,7 +56,8 @@ public class LiteCompilerServlet extends HttpServlet {
 	public void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException, ServletException {
 		resp.setContentType("text/html;charset=utf-8");
-		req.setAttribute("source", getExampleSource());
+		req.setAttribute("source", getExampleSource("example-lite.xml"));
+		req.setAttribute("plugin", getExampleSource("example-plugin.js"));
 		req.setAttribute("path", "/index.html");
 		req.setAttribute("base", "/");
 		req.getRequestDispatcher("/compiler.xhtml").forward(req, resp);
@@ -78,38 +80,47 @@ public class LiteCompilerServlet extends HttpServlet {
 			resourceMap.put(templateURL, sources[i]);
 		}
 		ProxyParseContext context = new ProxyParseContext(base,
-				buildFeatrueMap(req), resourceMap,req.getParameter("plugin"));
-		try {
-			String decoratorxml = resourceMap.get("/WEB-INF/decorators.xml");
-			if (decoratorxml != null) {
-				DecoratorContext mapper = new DecoratorContextImpl(new StringReader(
-						decoratorxml));
-				String layout = mapper.getDecotatorPage(templateURL);
-				if (layout != null) {
-					if (resourceMap.containsKey(layout)) {
-						context.setAttribute("#page", context.loadXML(context
-								.createURL(null, templateURL)));
-						templateURL = layout;
-					} else {
-						context.addMissedResource(layout);
+				buildFeatrueMap(req), resourceMap, req.getParameter("plugin"));
+		String model = req.getParameter("model");
+		if ("text".equals(model)) {
+			PrintWriter out = resp.getWriter();
+			printResult(context, resourceMap.get(templateURL), out);
+		} else {
+			try {
+				String decoratorxml = resourceMap
+						.get("/WEB-INF/decorators.xml");
+				if (decoratorxml != null) {
+					DecoratorContext mapper = new DecoratorContextImpl(
+							new StringReader(decoratorxml));
+					String layout = mapper.getDecotatorPage(templateURL);
+					if (layout != null) {
+						if (resourceMap.containsKey(layout)) {
+							context.setAttribute("#page", context
+									.loadXML(context.createURL(null,
+											templateURL)));
+							templateURL = layout;
+						} else {
+							context.addMissedResource(layout);
+						}
 					}
+
 				}
-
+			} catch (Exception e) {
 			}
-		} catch (Exception e) {
-		}
 
-		PrintWriter out = resp.getWriter();
-		printResult(context, templateURL, out);
+			PrintWriter out = resp.getWriter();
+			URL source = context.createURL(null, templateURL);
+			printResult(context, source, out);
+		}
 	}
 
-	private void printResult(ProxyParseContext context, String url,
+	private void printResult(ProxyParseContext context, Object source,
 			PrintWriter out) {
 		String error = null;
 		List<Object> result = null;
 		try {
-			context.parse(context.createURL(null, url));
-			result = context.toResultTree();
+			context.parse(source);
+			result = context.toList();
 		} catch (Throwable e) {
 			StringWriter buf = new StringWriter();
 			PrintWriter pbuf = new PrintWriter(buf);
@@ -134,9 +145,10 @@ public class LiteCompilerServlet extends HttpServlet {
 	}
 
 	private HashMap<String, String> buildFeatrueMap(ServletRequest req) {
-		HashMap<String, String> featrue = new HashMap<String, String>(defaultFeatrues);
-		for(String name : FEATRUES_KEY){
-			featrue.put(name,featrue.get(name));
+		HashMap<String, String> featrue = new HashMap<String, String>(
+				defaultFeatrues);
+		for (String name : FEATRUES_KEY) {
+			featrue.put(name, featrue.get(name));
 		}
 		return featrue;
 	}
@@ -155,22 +167,22 @@ public class LiteCompilerServlet extends HttpServlet {
 				@Override
 				public String[] getParameterValues(String name) {
 					List<String> v = params.get(name);
-					if(v == null){
+					if (v == null) {
 						return findPhpParams(this, name);
-					}else{
+					} else {
 						return v.toArray(new String[v.size()]);
 					}
 				}
 			};
-		}else{
+		} else {
 			req = new HttpServletRequestWrapper(req) {
 
 				@Override
 				public String[] getParameterValues(String name) {
 					String[] v = super.getParameterValues(name);
-					if(v == null){
+					if (v == null) {
 						return findPhpParams(this, name);
-					}else{
+					} else {
 						return v;
 					}
 				}
@@ -197,6 +209,7 @@ public class LiteCompilerServlet extends HttpServlet {
 		}
 		return source;
 	}
+
 	public static boolean isMultiPart(HttpServletRequest request) {
 		String content_type = request.getContentType();
 		return content_type != null
@@ -245,9 +258,8 @@ public class LiteCompilerServlet extends HttpServlet {
 		return params;
 	}
 
-	private String getExampleSource() throws IOException {
-		return getString(this.getClass().getResourceAsStream("example.xml"),
-				"utf-8");
+	private String getExampleSource(String fileName) throws IOException {
+		return getString(this.getClass().getResourceAsStream(fileName), "utf-8");
 
 	}
 

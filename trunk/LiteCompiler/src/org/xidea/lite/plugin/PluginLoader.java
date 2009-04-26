@@ -40,7 +40,7 @@ public class PluginLoader{
 		parserList.add(parser);
 	}
 
-	static String loadText(Reader in) {
+	public static String loadText(Reader in) {
 		//Reader in = new InputStreamReader(sin, "utf-8");
 		StringWriter out = new StringWriter();
 		int count;
