@@ -44,7 +44,7 @@ public class TextParserTest {
 		TextParser p = new TextParser();
 		ParseContextImpl context = new ParseContextImpl(new URL("http://localhost:8080/"));
 		p.parse(context, null, text);
-		List<Object> insts = context.toResultTree();
+		List<Object> insts = context.toList();
 		Template t = new Template(insts);
 		Writer out = new StringWriter();
 		t.render(new HashMap<Object, Object>(), out);

@@ -11,51 +11,23 @@ import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.xidea.el.Expression;
-import org.xidea.el.ExpressionFactory;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.Template;
-import org.xidea.lite.parser.Parser;
 import org.xidea.lite.parser.ParseChain;
 import org.xidea.lite.parser.ParseContext;
+import org.xidea.lite.parser.Parser;
 
 public class CoreXMLParser implements Parser<Element> {
 	private static Log log = LogFactory.getLog(CoreXMLParser.class);
 	private static final Pattern TEMPLATE_NAMESPACE_CORE = Pattern
 			.compile("^http:\\/\\/www.xidea.org\\/ns\\/(?:template|lite)(?:\\/core)?\\/?$");
-	private JSBuilder jsBuilder;
-	private ExpressionFactory jselFactory;
-
 	public static boolean isCoreNS(String prefix, String url) {
 		return ("c".equals(prefix) && ("#".equals(url) || "#core".equals(url)))
 				|| TEMPLATE_NAMESPACE_CORE.matcher(url).find();
 	}
 
 	public CoreXMLParser() {
-		this.jselFactory = new ExpressionFactory() {
-				public Expression create(Object el) {
-					throw new UnsupportedOperationException();
-				}
 
-				public Object parse(String expression) {
-					return expression;
-				}
-
-			};
-		try {
-			jsBuilder = new RhinoJSBuilder();
-		} catch (NoClassDefFoundError e) {
-			try {
-				jsBuilder = new Java6JSBuilder();
-			} catch (NoClassDefFoundError e2) {
-				log.error("找不到您的JS运行环境，不能为您编译前端js", e);
-
-			}
-		}
-	}
-	public CoreXMLParser(ExpressionFactory jselFactory,JSBuilder jsbuilder) {
-		this.jselFactory = jselFactory;
-		this.jsBuilder = jsbuilder;
 	}
 
 	public void parse( ParseContext context,ParseChain chain,final Element el) {
@@ -244,22 +216,15 @@ public class CoreXMLParser implements Parser<Element> {
 
 	protected void parseClientTag(Element el, ParseContext context) {
 		Node next = el.getFirstChild();
-		if (next != null && jsBuilder != null) {
+		if (next != null) {
 			// new Java6JSBuilder();
-			ParseContext context2 = new ParseContextImpl(context
-					.getCurrentURL());
+			ParseContext context2 = context.createClientContext(el.getAttribute("id"));
 			// 前端直接压缩吧？反正保留那些空白也没有调试价值
-			// context2.setCompress(context.isCompress());
-			context2.setCompress(true);
-			context2.setExpressionFactory(jselFactory);
 			do {
 				context2.parse(next);
 			} while ((next = next.getNextSibling()) != null);
-			List<Object> result = context2.toResultTree();
-			String js = jsBuilder.buildJS(el.getAttribute("id"), result);
-			if (context.isCompress()) {
-				js = jsBuilder.compress(js);
-			}
+			List<Object> result = context2.toList();
+			String js = (String)result.get(0);
 			boolean needScript = needScript(el);
 			if (needScript) {
 				context.append("<script>/*<![CDATA[*/" + js

@@ -15,8 +15,8 @@ public class ELParser implements InstructionParser {
 	public static InstructionParser FOR = new ELParser("for", true) {
 		protected void addEl(ParseContext context, String text) {
 			int p = text.indexOf(':');
-			context.appendFor(text.substring(0, p).trim(), context
-					.parseEL(text.substring(p + 1)), null);
+			context.appendFor(text.substring(0, p).trim(), context.parseEL(text
+					.substring(p + 1)), null);
 		}
 	};
 	public static InstructionParser ELSE = new ELParser("else", false) {
@@ -34,8 +34,35 @@ public class ELParser implements InstructionParser {
 			return p$ + 5;
 		}
 	};
+	public static InstructionParser CLIENT = new ELParser("client", true) {
+		public int parse(ParseContext context, String text, int p$) {
+			int p1 = text.indexOf('{', p$);
+			int p2 = text.indexOf('}', p1);
+			String id = text.substring(p1 + 1, p2);
+			ParseContext clientContext = context.createClientContext(id);
+			String subtext = text.substring(p2 + 1);
+			clientContext.setAttribute(CLIENT, context);
+			clientContext.parseText(subtext, context.getSourceType());
+			return text.length();
+
+		}
+	};
 	public static InstructionParser END = new ELParser("end", false) {
 		public int parse(ParseContext context, String text, int p$) {
+			ParseContext parentContext = (ParseContext) context
+					.getAttribute(CLIENT);
+			if (parentContext != null) {
+				int depth = context.getDepth();
+				if (depth == 0) {
+					String js = (String) context.toList().get(0);
+					parentContext.append("<script>/*<![CDATA[*/" + js
+							+ "/*]]>*/</script>");
+					String subtext = text.substring(p$ + 4);
+					parentContext.parseText(subtext, parentContext
+							.getSourceType());
+					return text.length();
+				}
+			}
 			context.appendEnd();
 			return p$ + 4;
 		}
@@ -101,7 +128,7 @@ public class ELParser implements InstructionParser {
 
 	protected void addEl(ParseContext context, String text) {
 		Object el = context.parseEL(text);
-		switch (context.getELType()) {
+		switch (context.getSourceType()) {
 		case Template.EL_TYPE:
 			context.appendEL(el);
 			break;

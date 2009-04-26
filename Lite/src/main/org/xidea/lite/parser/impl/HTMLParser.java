@@ -14,8 +14,8 @@ import org.xidea.el.json.JSONEncoder;
 import org.xidea.el.operation.TextContains;
 import org.xidea.el.operation.TextNullEmpty;
 import org.xidea.lite.Template;
-import org.xidea.lite.parser.Parser;
 import org.xidea.lite.parser.ParseContext;
+import org.xidea.lite.parser.Parser;
 
 /**
  * 类似这种特别的编译模块(有扩展,可能导致其他运行环境无法解释)，最好带上双重开关。

@@ -8,10 +8,10 @@ import org.xidea.lite.parser.Parser;
 @SuppressWarnings("unchecked")
 public class ParseChainImpl implements ParseChain {
 	//private static Log log = LogFactory.getLog(ParseChainImpl.class);
-	private ParseChainImpl pre;
-	private ParseChainImpl next;
-	private ParseContext context;
-	private Parser parser;
+	ParseChainImpl pre;
+	ParseChainImpl next;
+	ParseContext context;
+	Parser parser;
 	private Class<?> nodeType = Object.class;
 
 	ParseChainImpl(ParseContext context, Parser<? extends Object> parser) {
@@ -47,17 +47,9 @@ public class ParseChainImpl implements ParseChain {
 			}
 		} else {
 			parser.parse(context, next, node);
-			//log.warn("unprocessed node:" + node);
 		}
 	}
 
-	void remove() {
-
-	}
-
-	ParseChainImpl getNextSibling() {
-		return next;
-	}
 
 	void insertBefore(ParseChainImpl chain) {
 		if (pre != null) {

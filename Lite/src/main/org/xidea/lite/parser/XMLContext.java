@@ -24,7 +24,6 @@ public interface XMLContext {
 
 	public void setFormat(boolean format);
 
-	public int getELType();
 
 	/**
 	 * 如果 reserveSpace为真 则该属性失效

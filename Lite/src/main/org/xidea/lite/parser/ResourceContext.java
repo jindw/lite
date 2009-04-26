@@ -48,4 +48,14 @@ public interface ResourceContext{
 	public void setAttribute(Object key, Object value);
 	public Object getAttribute(Object key);
 
+	/**
+	 * 当前代码类型；
+	 * 直接使用Template中的常量定义：
+	 * Template.XML_TEXT_TYPE
+	 * Template.XML_ATTRIBUTE_TYPE
+	 * Template.EL_TYPE
+	 * @return
+	 */
+	public int getSourceType();
+
 }

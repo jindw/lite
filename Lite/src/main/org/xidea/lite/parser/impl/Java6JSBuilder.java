@@ -2,6 +2,7 @@ package org.xidea.lite.parser.impl;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.List;
 
 import javax.script.Bindings;
 import javax.script.ScriptEngine;
@@ -76,7 +77,7 @@ public class Java6JSBuilder implements JSBuilder {
 		penv.setReservedKeywordAsIdentifier(true);
 	}
 
-	public String buildJS(String id, Object liteCode) {
+	public String buildJS(List<Object> liteCode,String name) {
 		String source = JSONEncoder.encode(liteCode);
 		String code;
 		try {
@@ -88,7 +89,7 @@ public class Java6JSBuilder implements JSBuilder {
 					+ ")";
 			log.warn("生成js代码失败：", e);
 		}
-		return "function " + id + "(_$0,_$1,_$2){\n" + code + "\n}";
+		return "function " + name + "(_$0,_$1,_$2){\n" + code + "\n}";
 	}
 
 	public String compress(String source) {

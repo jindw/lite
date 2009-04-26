@@ -20,7 +20,7 @@ public class TextParser implements Parser<String> {
 	public void parse(ParseContext context, ParseChain chain, String text) {
 		final boolean encode;
 		final char qute;
-		switch (context.getELType()) {
+		switch (context.getSourceType()) {
 		case Template.XML_ATTRIBUTE_TYPE:
 			encode = true;
 			qute = '"';

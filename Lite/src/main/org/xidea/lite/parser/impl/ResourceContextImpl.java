@@ -13,6 +13,8 @@ import org.xidea.lite.parser.ResourceContext;
 public class ResourceContextImpl implements ResourceContext {
 	private URL currentURL;
 	protected final URL base;
+	private int sourceType = 0;
+	
 	private HashMap<Object, Object> attributeMap = new HashMap<Object, Object>();
 	private HashSet<URL> resources = new HashSet<URL>();
 
@@ -26,6 +28,14 @@ public class ResourceContextImpl implements ResourceContext {
 
 	public Object getAttribute(Object key) {
 		return this.attributeMap.get(key);
+	}
+
+	public int getSourceType() {
+		return sourceType;
+	}
+
+	public void setSourceType(int sourceType) {
+		this.sourceType = sourceType;
 	}
 
 	public URL getCurrentURL() {

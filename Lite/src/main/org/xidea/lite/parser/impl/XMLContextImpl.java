@@ -45,7 +45,6 @@ public class XMLContextImpl implements XMLContext{
 
 	private ArrayList<Boolean> indentStatus = new ArrayList<Boolean>();
 	private int depth = 0;
-	private int eltype = 0;
 	private boolean reserveSpace;
 	private boolean format = false;
 	private boolean compress = true;
@@ -335,16 +334,6 @@ public class XMLContextImpl implements XMLContext{
 			}
 
 		}
-	}
-
-
-	public int getELType() {
-		return eltype;
-	}
-
-
-	public void setELType(int type) {
-		eltype = type;
 	}
 
 
