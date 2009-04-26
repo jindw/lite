@@ -77,7 +77,7 @@ class XMLParser extends TextParser{
 			if (node != null) {
 				parseNode(node, context);
 			}
-			return context.toResultTree();
+			return context.toList();
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

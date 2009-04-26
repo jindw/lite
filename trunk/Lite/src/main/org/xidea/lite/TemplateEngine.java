@@ -130,7 +130,7 @@ public class TemplateEngine{
 		}
 		try {
 			parseContext.parse(getResource(path));
-			List<Object> items = parseContext.toResultTree();
+			List<Object> items = parseContext.toList();
 			return new Template(items);
 		} catch (Exception e) {
 			log.error(e);

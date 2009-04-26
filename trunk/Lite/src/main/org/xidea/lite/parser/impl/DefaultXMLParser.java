@@ -12,9 +12,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.ProcessingInstruction;
 import org.w3c.dom.Text;
 import org.xidea.lite.Template;
-import org.xidea.lite.parser.Parser;
 import org.xidea.lite.parser.ParseChain;
 import org.xidea.lite.parser.ParseContext;
+import org.xidea.lite.parser.Parser;
 
 public class DefaultXMLParser implements Parser<Node> {
 

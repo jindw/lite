@@ -21,9 +21,35 @@ public interface ResultContext {
 	public List<Object> reset(int mark);
 
 	/**
+	 * 获取结束节点
+	 * @return
+	 */
+	public int getDepth();
+	/**
+	 * 获取结束当前状态的开始节点位置
+	 * @return
+	 */
+	public int findBegin();
+	/**
+	 * 获取结束当前状态的开始节点位置
+	 * @return
+	 */
+	public int findBeginType();
+	
+	/**
+	 * 获取指定位置的节点类别
+	 * @return
+	 */
+	public int getType(int offset);
+
+	/**
 	 * @return 经过优化后的树形结果集
 	 */
-	public List<Object> toResultTree();
+	public List<Object> toList();
+	/**
+	 * @return 经过优化后的树形结果集
+	 */
+	public String toJSON();
 
 	/**
 	 * 添加静态文本（不编码）

@@ -19,12 +19,11 @@ public class ResultContextImpl implements ResultContext {
 	private HashMap<Object, String> objectIdMap = new HashMap<Object, String>();
 	private int inc = 0;
 
-	private final List<Object> result;
+	private final ArrayList<Object> result = new ArrayList<Object>();
 	private ExpressionFactory expressionFactory = ExpressionFactoryImpl
 			.getInstance();
 
-	ResultContextImpl(List<Object> result) {
-		this.result = result;
+	ResultContextImpl() {
 	}
 
 	public void setExpressionFactory(ExpressionFactory expressionFactory) {
@@ -105,10 +104,10 @@ public class ResultContextImpl implements ResultContext {
 			Object item = result.get(i);
 			if (item instanceof String) {
 				result.remove(i);
-			}else{
+			} else {
 				break;
 			}
-			
+
 		}
 	}
 
@@ -170,7 +169,7 @@ public class ResultContextImpl implements ResultContext {
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<Object> toResultTree() {
+	public List<Object> toList() {
 		List<Object> result2 = optimizeResult(this.result);
 		ArrayList<ArrayList<Object>> stack = new ArrayList<ArrayList<Object>>();
 		ArrayList<Object> current = new ArrayList<Object>();
@@ -278,6 +277,69 @@ public class ResultContextImpl implements ResultContext {
 			optimizeResult.add(buf.toString());
 		}
 		return optimizeResult;
+	}
+
+	public String toJSON() {
+		return JSONEncoder.encode(toList());
+	}
+
+	public int findBeginType() {
+		int begin = findBegin();
+		if(begin>=0){
+			return this.getType(begin);
+		}
+		return -3;//no begin
+	}
+	public int findBegin() {
+		int depth = 0;
+		int i = this.result.size();
+		while (i-->0) {
+			switch (getType(i)) {
+			case Template.CAPTRUE_TYPE:
+			case Template.IF_TYPE:
+			case Template.ELSE_TYPE:
+			case Template.FOR_TYPE:
+				depth--;
+				break;
+			case -1:
+				depth++;
+			}
+			if(depth == -1){
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	public int getDepth() {
+		int depth = 0;
+		int length = this.result.size();
+		for (int i = 0; i < length; i++) {
+			switch (getType(i)) {
+			case Template.CAPTRUE_TYPE:
+			case Template.IF_TYPE:
+			case Template.ELSE_TYPE:
+			case Template.FOR_TYPE:
+				depth++;
+				break;
+			case -1:
+				depth--;
+			}
+		}
+		return depth;
+	}
+
+	public int getType(int offset) {
+		Object item = this.result.get(offset);
+		if (item instanceof Object[]) {
+			Object[] ins = (Object[]) item;
+			if (ins.length == 0) {
+				return -1;//end token
+			} else {
+				return ((Number) ins[0]).intValue();
+			}
+		}
+		return -2;//string type
 	}
 
 }
