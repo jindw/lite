@@ -33,8 +33,8 @@
           设置是否需要压缩输出,自动压缩html，js语法空白。
           压缩是在编译期间完成，所以，不必担心性能问题。
         # contentType 参数，设置该参数后，将帮你输出指定的contentType，当然你也可以用Filter完成该工作
-        # xpathFactory 参数，如果你的JDK没有默认的XPath支持，那么你需要添加相关类库，并设置相应类名。
-        # transformerFactory 参数，如果你的JDK没有默认的XPath支持，那么你需要添加相关类库，并设置相应类名。
+        # javax.xml.xpath.XPathFactory 参数，如果你的JDK没有默认的XPath支持，那么你需要添加相关类库，并设置相应类名。
+        # javax.xml.transform.TransformerFactory 参数，如果你的JDK没有默认的XPath支持，那么你需要添加相关类库，并设置相应类名。
         # http://www.xidea.org/ns/lite/autoform
           如果您需要模板处理自动表单填充，那么您需要设置该参数：
           * anyway 任何时候都自动填充
@@ -64,7 +64,7 @@
 		</init-param>
 		<init-param>
 			<!-- 如果您的服务器Java环境不支持XPath,那么，您需要添加第三方XPath-->
-			<param-name>xpathFactory</param-name>
+			<param-name>javax.xml.xpath.XPathFactory</param-name>
 			<param-value>
 				org.apache.xpath.jaxp.XPathFactoryImpl
 			</param-value>
