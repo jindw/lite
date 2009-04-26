@@ -1,0 +1,93 @@
+#labels Phase-Design,Phase-Support
+=== 工作模式 ===
+Lite Compiler的插件体系简单表示如下：
+
+{{{
+ 
+[ParseChain]                     [Parser]    
+    |                               |
+    |                               |
+    |                        /------^-------\
+    |                        |              |  
+    |                   [NodeParser]    [TextParser]
+    |----【解析链顶】         ^              ^
+    |                         |              |
+    |-----[HTMLParser] -------/              |
+    |                         |              |
+    |-----[CoreXMLParser]-----/              |
+    |                         |              |
+    |-----[DefaultXMLParser]--/              |
+    |                                        |
+    |                                        |
+    |--------------------------------[TextParserImpl]-------[InstructionParser]
+                                                                   |
+                                                  【添加自定义指令计息节点】..
+                    
+}}}
+
+=== 指令解析器编写实例 ===
+{{{
+//{{if test}}....{{/endif}}
+var $if = {
+	parse : function(context,text,start){
+		var end = text.indexOf("}}",start);
+		var el = text.substring(start+5,end);
+		el = context.parseEL(el);
+		context.appendIf(el);
+		return end+2;
+	},
+	findStart : function(context,text,start){
+		return text.indexOf("{{if",start);
+	}
+}
+var $endif = {
+	parse : function(context,text,start){
+		context.appendEnd();
+		return start+10;
+	},
+	findStart : function(context,text,start){
+		return text.indexOf("{{/endif}}",start);
+	}
+}
+
+context.addInstructionParser($if);
+context.addInstructionParser($endif);
+}}}
+
+
+=== 节点解析器示例 ===
+{{{
+//我们也可以添加纯js实现的节点解析器或者文本指令解析器
+//下面的例子中 我们演示了一个简单的自定义if语法：
+/**
+ * 以一个翻页组件为例:
+ * <ui:pager selectedIndex="${selected}" list="${links}"/>
+ * 解析函数:
+ *
+ */
+var pagerParser = {
+	parser:function(context,chain,pagerNode){
+	    if(pagerNode.nodeName == 'ui:pager'){
+	        var electedEl = pagerNode.getAttribute("selectedIndex").replace(/^\$\{|\}$/,'');
+	        var listEl = pagerNode.getAttribute("list");
+	        context.appendFor(listEl,"link");
+	        
+	        context.appendIf(context.parseEL("for.index>0"));
+	        context.append(",");
+	        context.appendEnd();//end else
+	        
+	        context.appendIf(context.parseEL(selectedEl+ " == for.index"));
+	        context.parse("<a href='${link}'>[${for.index+1}]</a>");
+	        context.appendElse(null);
+	        context.parse("[${for.index+1}]");
+	        context.appendEnd();//end else
+	        
+	        context.appendEnd();//end for
+	    }else{
+	    	chain.process(pagerNode);
+	    }
+	}
+}
+
+
+}}}
