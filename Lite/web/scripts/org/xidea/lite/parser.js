@@ -70,16 +70,20 @@ Parser.prototype = {
         //alert(result)
     },
     /**
-     * 移除结尾数据直到上一个end为止（包括该end标记）
+     * 移除结尾数据直到上一个end为止（不包括该end标记）
      * @public
      */
-    removeLastEnd:function(){
+    clearPreviousText:function(){
         var result = this.result;
-        var item;
-        while((item = result.pop())!=null){
-            if(item instanceof Array && item.length ==0){//end
-                break;
+        var i = result.length;
+        while(i--){
+        	var item = result[i];
+            if(typeof item == 'string'){//end
+                result.pop();
+            }else{
+            	break;
             }
+            
         }
     },
     /**
@@ -144,11 +148,6 @@ function buildTreeResult(result){
 				current[current.length - 1][1]=children;
 			} else {
 				var type = item[0];
-				if(type == ELSE_TYPE){
-					var children = stack.pop();
-					current = stack[stack.length-1];
-					current[current.length - 1][1]=children;
-				}
 				var cmd2 =[];
 				cmd2.push(item[0]);
 				current.push(cmd2);

@@ -41,7 +41,7 @@ public interface ResultContext {
 	 */
 	public void appendAll(List<Object> instruction);
 
-	public void removeLastEnd();
+	public void clearPreviousText();
 
 	public void appendEL(Object el);
 

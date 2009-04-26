@@ -219,7 +219,7 @@ function parseIfTag(node){
 }
 
 function parseElseIfTag(node){
-    this.removeLastEnd();
+    this.clearPreviousText();
     var next = node.firstChild;
     var test = getAttribute(this,node,'test',true,false);
     if(test){
@@ -237,7 +237,7 @@ function parseElseIfTag(node){
 
 
 function parseElseTag(node){
-    this.removeLastEnd();
+    this.clearPreviousText();
     var next = node.firstChild;
     this.append([ELSE_TYPE]);
     if(next){

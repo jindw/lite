@@ -31,8 +31,7 @@ public class ParseContextImpl implements ParseContext {
 	private static final long serialVersionUID = 1L;
 	@SuppressWarnings("unchecked")
 	protected static Parser[] DEFAULT_PARSER_LIST = { new HTMLParser(),
-			new CoreXMLParser(), new DefaultXMLParser(),
-			new TextParser() };
+			new CoreXMLParser(), new DefaultXMLParser(), new TextParser() };
 
 	protected ResourceContext resourceContext;
 	protected XMLContext xmlContext;
@@ -40,17 +39,17 @@ public class ParseContextImpl implements ParseContext {
 
 	private Map<String, String> featrues;
 	protected ParseChainImpl topChain;
-	protected InstructionParser[] ips = {ELParser.EL};
+	protected InstructionParser[] ips = { ELParser.EL };
 
 	protected ParseContextImpl() {
 	}
 
 	public ParseContextImpl(URL base) {
-		initialize(base, null, null,null);
+		initialize(base, null, null, null);
 	}
 
 	public ParseContextImpl(URL base, Map<String, String> featrues,
-			Parser<? extends Object>[] parsers,InstructionParser[] ips) {
+			Parser<? extends Object>[] parsers, InstructionParser[] ips) {
 		initialize(base, featrues, parsers, ips);
 	}
 
@@ -61,24 +60,24 @@ public class ParseContextImpl implements ParseContext {
 		resultContext = new ResultContextImpl(new ArrayList<Object>());
 		xmlContext = new XMLContextImpl(this);
 
-		if(featrues!=null){
+		if (featrues != null) {
 			this.featrues = featrues;
 			String v = featrues.get("compress");
-			if(v!=null){
+			if (v != null) {
 				this.setCompress("true".equalsIgnoreCase(v));
 			}
 			v = featrues.get("reserveSpace");
-			if(v!=null){
+			if (v != null) {
 				this.setReserveSpace("true".equalsIgnoreCase(v));
 			}
 			v = featrues.get("format");
-			if(v!=null){
+			if (v != null) {
 				this.setFormat("true".equalsIgnoreCase(v));
 			}
-		}else{
+		} else {
 			this.featrues = new HashMap<String, String>();
 		}
-		
+
 		if (parsers == null) {
 			parsers = DEFAULT_PARSER_LIST;
 		}
@@ -88,7 +87,7 @@ public class ParseContextImpl implements ParseContext {
 			chain.insertBefore(current);
 			current = chain;
 		}
-		if(ips != null){
+		if (ips != null) {
 			this.ips = ips;
 		}
 	}
@@ -98,24 +97,6 @@ public class ParseContextImpl implements ParseContext {
 		((XMLContextImpl) xmlContext).setELType(defaultType);
 		parse(source);
 		((XMLContextImpl) xmlContext).setELType(type);
-	}
-
-	public void addInstructionParser(InstructionParser iparser) {
-		int length = ips.length;
-		InstructionParser[] ips2 = new InstructionParser[length + 1];
-		System.arraycopy(this.ips, 0, ips2, 0, length);
-		ips2[length] = iparser;
-		this.ips = ips2;
-	}
-
-	public void addNodeParser(Parser<? extends Node> iparser) {
-		ParseChainImpl chain = new ParseChainImpl(this,iparser);
-		topChain.insertBefore(chain);
-		topChain = chain;
-	}
-
-	public InstructionParser[] getInstructionParsers() {
-		return ips;
 	}
 
 	public void parse(Object source) {
@@ -133,13 +114,31 @@ public class ParseContextImpl implements ParseContext {
 			}
 		} else if (source instanceof URL) {
 			try {
-				parse(loadXML((URL)source));
+				parse(loadXML((URL) source));
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
 		} else {
 			topChain.process(source);
 		}
+	}
+
+	public void addInstructionParser(InstructionParser iparser) {
+		int length = ips.length;
+		InstructionParser[] ips2 = new InstructionParser[length + 1];
+		System.arraycopy(this.ips, 0, ips2, 0, length);
+		ips2[length] = iparser;
+		this.ips = ips2;
+	}
+
+	public void addNodeParser(Parser<? extends Node> iparser) {
+		ParseChainImpl chain = new ParseChainImpl(this, iparser);
+		topChain.insertBefore(chain);
+		topChain = chain;
+	}
+
+	public InstructionParser[] getInstructionParsers() {
+		return ips;
 	}
 
 	public String getFeatrue(String key) {
@@ -247,8 +246,8 @@ public class ParseContextImpl implements ParseContext {
 		return resultContext.parseEL(eltext);
 	}
 
-	public void removeLastEnd() {
-		resultContext.removeLastEnd();
+	public void clearPreviousText() {
+		resultContext.clearPreviousText();
 	}
 
 	public List<Object> reset(int mark) {

@@ -99,16 +99,16 @@ public class ResultContextImpl implements ResultContext {
 		}
 	}
 
-	public void removeLastEnd() {
+	public void clearPreviousText() {
 		int i = result.size();
 		while (i-- > 0) {
 			Object item = result.get(i);
-			result.remove(i);
-			if (item instanceof Object[]) {
-				if (((Object[]) item).length == 0) {
-					break;
-				}
+			if (item instanceof String) {
+				result.remove(i);
+			}else{
+				break;
 			}
+			
 		}
 	}
 
@@ -191,13 +191,6 @@ public class ResultContextImpl implements ResultContext {
 							children);
 				} else {
 					int type = (Integer) cmd[0];
-					if (type == Template.ELSE_TYPE) {
-						ArrayList<Object> children = stack.remove(stackTop--);
-						current = stack.get(stackTop);
-						((ArrayList) current.get(current.size() - 1)).set(1,
-								children);
-					}
-
 					ArrayList<Object> cmd2 = new ArrayList<Object>(
 							cmd.length + 1);
 					cmd2.add(cmd[0]);
