@@ -9,14 +9,14 @@ public class ELParser implements InstructionParser {
 	public static InstructionParser EL = new ELParser("", true);
 	public static InstructionParser IF = new ELParser("if", true) {
 		protected void addEl(ParseContext context, String text) {
-			context.appendIf(context.optimizeEL(text));
+			context.appendIf(context.parseEL(text));
 		}
 	};
 	public static InstructionParser FOR = new ELParser("for", true) {
 		protected void addEl(ParseContext context, String text) {
 			int p = text.indexOf(':');
 			context.appendFor(text.substring(0, p).trim(), context
-					.optimizeEL(text.substring(p + 1)), null);
+					.parseEL(text.substring(p + 1)), null);
 		}
 	};
 	public static InstructionParser ELSE = new ELParser("else", false) {
@@ -26,7 +26,7 @@ public class ELParser implements InstructionParser {
 				int end = findELEnd(text, begin);
 				if (end > 0) {
 					String el = text.substring(begin + 1, end);
-					context.appendElse(context.optimizeEL(el));
+					context.appendElse(context.parseEL(el));
 					return end + 1;
 				}
 			}
@@ -45,7 +45,7 @@ public class ELParser implements InstructionParser {
 			int p = text.indexOf('=');
 			if (p > 0) {
 				context.appendVar(text.substring(0, p).trim(), context
-						.optimizeEL(text.substring(p + 1)));
+						.parseEL(text.substring(p + 1)));
 			} else {
 				context.appendCaptrue(text.trim());
 			}
@@ -100,7 +100,7 @@ public class ELParser implements InstructionParser {
 	}
 
 	protected void addEl(ParseContext context, String text) {
-		Object el = context.optimizeEL(text);
+		Object el = context.parseEL(text);
 		switch (context.getELType()) {
 		case Template.EL_TYPE:
 			context.appendEL(el);

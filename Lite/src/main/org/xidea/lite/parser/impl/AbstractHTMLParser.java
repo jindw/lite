@@ -97,7 +97,7 @@ public abstract class AbstractHTMLParser implements Parser<Element> {
 				String trueAttr = " " + attributeName + "=\"" + trueValue + "\"";
 				if (attributeValue.startsWith("${") && attributeValue.endsWith("}")) {
 					attributeValue = attributeValue.substring(2, attributeValue.length() - 1);
-					final Object el = context.optimizeEL(attributeValue);
+					final Object el = context.parseEL(attributeValue);
 					context.appendIf(el);
 					context.append(trueAttr);
 					context.appendEnd();

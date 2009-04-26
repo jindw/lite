@@ -72,5 +72,5 @@ public interface ResultContext {
 	 */
 	public void setExpressionFactory(ExpressionFactory expressionFactory);
 
-	public Object optimizeEL(String eltext);
+	public Object parseEL(String eltext);
 }

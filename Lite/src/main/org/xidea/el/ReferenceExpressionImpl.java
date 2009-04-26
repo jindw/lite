@@ -8,21 +8,21 @@ import org.xidea.el.operation.ProxyMap;
 import org.xidea.el.operation.ReflectUtil;
 import org.xidea.el.parser.ExpressionToken;
 
-public class PrepareExpressionImpl extends ExpressionImpl {
+class ReferenceExpressionImpl extends ExpressionImpl {
 
-	public PrepareExpressionImpl(String source, ExpressionToken[] expression,
+	public ReferenceExpressionImpl(String source, ExpressionToken[] expression,
 			Calculater calculater, Map<String, Object> globalMap) {
 		super(source, expression, calculater, globalMap);
 	}
-	public ExpressionResult prepare(Object context) {
+	public Reference prepare(Object context) {
 		if (context == null) {
 			context = Collections.emptyMap();
 		}
 		ValueStack stack = new ValueStack();
 		evaluate(stack, expression, context);
 		Object result = stack.pop();
-		if (result instanceof ExpressionResult) {
-			return (ExpressionResult) result;
+		if (result instanceof Reference) {
+			return (Reference) result;
 		}
 		return wrapResult(calculater.realValue(result));
 	}
@@ -36,7 +36,7 @@ public class PrepareExpressionImpl extends ExpressionImpl {
 			}else{
 				value = contextMap.get(key);
 			}
-			if(value instanceof ExpressionResult){
+			if(value instanceof Reference){
 				return value;
 			}
 			if (value== null && !contextMap.containsKey(key)) {
@@ -53,8 +53,8 @@ public class PrepareExpressionImpl extends ExpressionImpl {
 		return calculater.createRefrence(context, key);
 	}
 
-	protected ExpressionResult wrapResult(final Object realValue) {
-		return new ExpressionResult() {
+	protected Reference wrapResult(final Object realValue) {
+		return new Reference() {
 			public Class<? extends Object> getType() {
 				return realValue == null? null:realValue.getClass();
 			}
@@ -64,6 +64,9 @@ public class PrepareExpressionImpl extends ExpressionImpl {
 			}
 
 			public Object setValue(Object value) {
+				throw new UnsupportedOperationException();
+			}
+			public Reference next(Object key) {
 				throw new UnsupportedOperationException();
 			}
 		};

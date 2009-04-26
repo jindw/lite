@@ -31,7 +31,7 @@ public class ResultContextImpl implements ResultContext {
 		this.expressionFactory = expressionFactory;
 	}
 
-	public Object optimizeEL(String expression) {
+	public Object parseEL(String expression) {
 		return expressionFactory.parse(expression);
 	}
 
@@ -141,7 +141,7 @@ public class ResultContextImpl implements ResultContext {
 	public void appendFor(String var, Object itemsEL, String status) {
 		this.append(new Object[] { Template.FOR_TYPE, itemsEL, var });
 		if (status != null && status.length() > 0) {
-			this.appendVar(status, this.optimizeEL("for"));
+			this.appendVar(status, this.parseEL("for"));
 		}
 	}
 
