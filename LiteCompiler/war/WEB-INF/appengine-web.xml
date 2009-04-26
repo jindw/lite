@@ -11,7 +11,7 @@
 	<static-files>
 		<include path="/**.js" />
 		<include path="/**.css" />
-		<include path="/**.gfi" />
+		<include path="/**.gif" />
 		<include path="/**.json" />
 		<exclude path="/**.xhtml" />
 	</static-files>
