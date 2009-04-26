@@ -231,7 +231,7 @@ public class CoreXMLParser implements Parser<Element> {
 				if(item instanceof Object[]){//EL_TYPE
 					context.appendVar(name, ((Object[])item)[1]);
 				}else{
-					context.appendVar(name, context.optimizeEL(JSONEncoder.encode(item)));
+					context.appendVar(name, context.parseEL(JSONEncoder.encode(item)));
 				}
 			} else {
 				context.appendCaptrue(name);
@@ -313,7 +313,7 @@ public class CoreXMLParser implements Parser<Element> {
 			// context.appendEnd();
 			content = el.getTextContent();
 		}
-		context.appendVar(var, context.optimizeEL(content));
+		context.appendVar(var, context.parseEL(content));
 	}
 
 	protected void parseOutTag(Element el, ParseContext context) {
@@ -345,7 +345,7 @@ public class CoreXMLParser implements Parser<Element> {
 			log.warn("输入的不是有效el，系统将字符串转换成el");
 			value = JSONEncoder.encode(value);
 		}
-		return context.optimizeEL(value);
+		return context.parseEL(value);
 	}
 
 	private Object getAttributeEL(ParseContext context, Element el, String key) {

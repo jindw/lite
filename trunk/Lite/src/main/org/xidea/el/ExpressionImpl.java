@@ -5,26 +5,27 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.xidea.el.json.JSONEncoder;
 import org.xidea.el.operation.Calculater;
 import org.xidea.el.operation.ReflectUtil;
 import org.xidea.el.parser.ExpressionToken;
 import org.xidea.el.parser.ExpressionTokenizer;
 
-public class ExpressionImpl implements Expression ,PrepareExpression {
+public class ExpressionImpl implements Expression ,ReferenceExpression {
 	protected final Calculater calculater;
 	protected final Map<String, Object> globalMap;
 	
 	
 	protected final ExpressionToken[] expression;
 	protected final String source;
-	private PrepareExpression pe;
+	private ReferenceExpression rel;
 
 
-	public ExpressionResult prepare(Object context) {
-		if(pe == null){
-			pe = new PrepareExpressionImpl(source, expression, calculater, globalMap);
+	public Reference prepare(Object context) {
+		if(rel == null){
+			rel = new ReferenceExpressionImpl(source, expression, calculater, globalMap);
 		}
-		return pe.prepare(context);
+		return rel.prepare(context);
 	}
 	public ExpressionImpl(String el) {
 		this(el, new ExpressionTokenizer(el).getTokens().getData(),
@@ -120,7 +121,7 @@ public class ExpressionImpl implements Expression ,PrepareExpression {
 
 	@Override
 	public String toString() {
-		return source;
+		return source == null?JSONEncoder.encode(expression):source;
 	}
 
 }

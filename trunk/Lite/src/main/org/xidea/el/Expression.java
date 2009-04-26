@@ -11,7 +11,7 @@ public interface Expression{
 	 */
 	public Object evaluate(Object context);
 	/**
-	 * 返回表达式的源代码
+	 * 返回表达式的源代码(JSON)
 	 * @return
 	 */
 	public String toString();

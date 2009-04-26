@@ -169,7 +169,7 @@ public class HTMLParser extends AbstractHTMLParser implements Parser<Element>{
 		attributes
 				.add(new Object[] {
 						Template.IF_TYPE,
-						context.optimizeEL(buildCSEL(context, collectionEL,
+						context.parseEL(buildCSEL(context, collectionEL,
 								valueEL)) });
 		attributes.add(" " + attributeName + "=\""
 				+ BOOLEAN_ATTBUTE_MAP.get(attributeName) + "\"");

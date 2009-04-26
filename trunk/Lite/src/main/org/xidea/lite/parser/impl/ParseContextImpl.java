@@ -131,6 +131,12 @@ public class ParseContextImpl implements ParseContext {
 			for (int i = 0; i < list.getLength(); i++) {
 				parse(list.item(i));
 			}
+		} else if (source instanceof URL) {
+			try {
+				parse(loadXML((URL)source));
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
 		} else {
 			topChain.process(source);
 		}
@@ -237,8 +243,8 @@ public class ParseContextImpl implements ParseContext {
 		return resultContext.mark();
 	}
 
-	public Object optimizeEL(String eltext) {
-		return resultContext.optimizeEL(eltext);
+	public Object parseEL(String eltext) {
+		return resultContext.parseEL(eltext);
 	}
 
 	public void removeLastEnd() {

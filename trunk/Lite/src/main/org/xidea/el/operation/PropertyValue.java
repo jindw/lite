@@ -3,9 +3,9 @@ package org.xidea.el.operation;
 import java.lang.reflect.Method;
 import java.util.Map;
 
-import org.xidea.el.ExpressionResult;
+import org.xidea.el.Reference;
 
-public class PropertyValue implements ExpressionResult {
+class PropertyValue implements Reference {
 	private Object base;
 	private Object name;
 	private Class<? extends Object> type;
@@ -15,7 +15,7 @@ public class PropertyValue implements ExpressionResult {
 		this.name = name;
 	}
 
-	public Object next(Object key) {
+	public Reference next(Object key) {
 		if (base != null) {
 			Object context2 = getValue();
 			if (context2 == null) {
