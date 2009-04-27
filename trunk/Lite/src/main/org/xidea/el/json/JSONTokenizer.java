@@ -34,16 +34,24 @@ public class JSONTokenizer {
 			return findMap();
 		} else {
 			String key = findId();
-			if ("true".equals(key)) {
-				return Boolean.TRUE;
-			} else if ("false".equals(key)) {
-				return Boolean.FALSE;
-			} else if ("null".equals(key)) {
-				return null;
-			} else {
-				throw new ExpressionSyntaxException("语法错误:" + value + "@"
-						+ start);
+			switch (key.charAt(0)) {
+			case 't':
+				if ("true".equals(key)) {
+					return Boolean.TRUE;
+				}
+				break;
+			case 'f':
+				if ("false".equals(key)) {
+					return Boolean.FALSE;
+				}
+				break;
+			case 'n':
+				if ("null".equals(key)) {
+					return null;
+				}
 			}
+			throw new ExpressionSyntaxException("语法错误:" + value + "@"
+						+ start);
 		}
 	}
 
@@ -310,12 +318,18 @@ public class JSONTokenizer {
 						start = this.end;
 					}
 				} else if (next == '*') {
-					int cend = this.value.indexOf("*/", start);
-					if (cend > 0) {
-						start = cend + 2;
-					} else {
-						throw new ExpressionSyntaxException("未結束注釋:" + value
-								+ "@" + start);
+					int cend = start+1;
+					while(true){
+						cend = this.value.indexOf('/', cend);
+						if(cend>0){
+							if(this.value.charAt(cend-1) == '*'){
+								start = cend + 1;
+								break;
+							}
+						}else{
+							throw new ExpressionSyntaxException("未結束注釋:" + value
+									+ "@" + start);
+						}
 					}
 				}
 			} else {
