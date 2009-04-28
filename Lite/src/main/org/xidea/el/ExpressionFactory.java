@@ -1,5 +1,7 @@
 package org.xidea.el;
 
+import org.xidea.el.impl.ExpressionFactoryImpl;
+
 /**
  * @see ExpressionFactoryImpl
  */

@@ -3,7 +3,7 @@ package org.xidea.el.test;
 import org.junit.Assert;
 import org.junit.Test;
 import org.xidea.el.ExpressionFactory;
-import org.xidea.el.ExpressionFactoryImpl;
+import org.xidea.el.impl.ExpressionFactoryImpl;
 
 public class CheckTest {
 	ExpressionFactory expressionFactory = ExpressionFactoryImpl.getInstance();

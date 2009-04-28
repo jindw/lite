@@ -19,7 +19,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.CDATASection;
 import org.w3c.dom.Document;
-import org.xidea.el.ExpressionFactoryImpl;
+import org.xidea.el.impl.ExpressionFactoryImpl;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.Template;
 import org.xidea.lite.dtd.DefaultEntityResolver;

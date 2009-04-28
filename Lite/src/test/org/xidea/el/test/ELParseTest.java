@@ -2,7 +2,7 @@ package org.xidea.el.test;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.xidea.el.ExpressionFactoryImpl;
+import org.xidea.el.impl.ExpressionFactoryImpl;
 import org.xidea.el.json.JSONEncoder;
 
 public class ELParseTest {

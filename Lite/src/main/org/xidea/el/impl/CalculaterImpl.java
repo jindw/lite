@@ -1,4 +1,4 @@
-package org.xidea.el.operation;
+package org.xidea.el.impl;
 
 import java.util.HashMap;
 import java.util.List;
@@ -6,7 +6,10 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.xidea.el.Calculater;
+import org.xidea.el.Invocable;
 import org.xidea.el.Reference;
+import org.xidea.el.ResultStack;
 import org.xidea.el.parser.ExpressionToken;
 
 public class CalculaterImpl implements Calculater {
@@ -75,27 +78,20 @@ public class CalculaterImpl implements Calculater {
 		return arithmetic.compare(n1, n2, validReturn);
 	}
 
-	public Object realValue(Object result) {
-		if (result instanceof Reference) {
-			return ((Reference) result).getValue();
-		}
-		return result;
-	}
 
-	public Object createRefrence(Object base, Object name) {
-		return new PropertyValue(base, name);
-	}
 	@SuppressWarnings("unchecked")
-	public Object compute(ExpressionToken op, Object arg1, Object arg2) {
+	public Object compute(ExpressionToken op,ResultStack stack) {
 		final int type = op.getType();
+		Object arg2 = (type & 1) == 1 ? stack.pop():null;
+		Object arg1 = stack.get();
 		switch (type) {
 		case ExpressionToken.OP_STATIC_GET_PROP:
 		    arg2 = op.getParam();
 		case ExpressionToken.OP_GET_PROP:
 			if (arg1 instanceof Reference) {
-				return ((Reference) arg1).next(realValue(arg2));
+				return ((Reference) arg1).next(ExpressionImpl.realValue(arg2));
 			} else {
-				return createRefrence(arg1, realValue(arg2));
+				return ExpressionImpl.createRefrence(arg1, ExpressionImpl.realValue(arg2));
 			}
 		case ExpressionToken.OP_INVOKE_METHOD:
 			try {
@@ -123,8 +119,8 @@ public class CalculaterImpl implements Calculater {
 				return null;
 			}
 		}
-		arg1 = realValue(arg1);
-		arg2 = realValue(arg2);
+		arg1 = ExpressionImpl.realValue(arg1);
+		arg2 = ExpressionImpl.realValue(arg2);
 		switch (type) {
 		case ExpressionToken.OP_NOT:
 			return !ECMA262Impl.ToBoolean(arg1);

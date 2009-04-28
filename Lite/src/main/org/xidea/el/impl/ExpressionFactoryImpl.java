@@ -1,13 +1,14 @@
-package org.xidea.el;
+package org.xidea.el.impl;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.xidea.el.operation.Calculater;
-import org.xidea.el.operation.CalculaterImpl;
-import org.xidea.el.operation.ECMA262Impl;
+import org.xidea.el.Calculater;
+import org.xidea.el.Expression;
+import org.xidea.el.ExpressionFactory;
+import org.xidea.el.ExpressionSyntaxException;
 import org.xidea.el.parser.ExpressionToken;
 import org.xidea.el.parser.ExpressionTokenizer;
 import org.xidea.el.parser.TokenImpl;
@@ -26,6 +27,14 @@ public class ExpressionFactoryImpl implements ExpressionFactory {
 		return expressionFactory;
 	}
 
+	private final Map<String, Object> globals;
+
+	public ExpressionFactoryImpl() {
+		this(DEFAULT_GLOBAL_MAP);
+	}
+	public ExpressionFactoryImpl(Map<String, Object> globals){
+		this.globals = globals;
+	}
 	public Expression create(Object el) {
 		if(el instanceof String){
 			return new ExpressionImpl((String)el);
@@ -33,7 +42,7 @@ public class ExpressionFactoryImpl implements ExpressionFactory {
 			if(el instanceof List){
 				el = toTokens((List<?>)el);
 			}
-			return new ExpressionImpl(null,(ExpressionToken[])el,DEFAULT_CALCULATER);
+			return new ExpressionImpl(null,(ExpressionToken[])el,DEFAULT_CALCULATER,globals);
 		}
 	}
 	private ExpressionToken toToken(Object value){

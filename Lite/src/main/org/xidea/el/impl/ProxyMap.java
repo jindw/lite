@@ -1,7 +1,8 @@
-package org.xidea.el.operation;
+package org.xidea.el.impl;
 
 import java.util.HashMap;
 import java.util.Set;
+
 
 public class ProxyMap extends HashMap<String, Object> {
 	/**

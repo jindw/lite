@@ -1,8 +1,9 @@
-package org.xidea.el.operation;
+package org.xidea.el.impl;
 
 import java.lang.reflect.Method;
 import java.util.Map;
 
+import org.xidea.el.Invocable;
 import org.xidea.el.Reference;
 
 class PropertyValue implements Reference {

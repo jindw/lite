@@ -1,4 +1,4 @@
-package org.xidea.el.operation;
+package org.xidea.el;
 
 
 import org.xidea.el.parser.ExpressionToken;
@@ -20,7 +20,5 @@ public interface Calculater {
 	 * @param arg2 参数2
 	 * @return 运算结果
 	 */
-	public Object compute(ExpressionToken op,Object arg1,Object arg2) ;
-	public Object realValue(Object result);
-	public Object createRefrence(Object base,Object name);
+	public Object compute(ExpressionToken op,ResultStack stack) ;
 }

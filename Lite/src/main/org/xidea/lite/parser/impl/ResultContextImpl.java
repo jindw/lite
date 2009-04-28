@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.xidea.el.ExpressionFactory;
-import org.xidea.el.ExpressionFactoryImpl;
+import org.xidea.el.impl.ExpressionFactoryImpl;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.BuildInAdvice;
 import org.xidea.lite.Template;

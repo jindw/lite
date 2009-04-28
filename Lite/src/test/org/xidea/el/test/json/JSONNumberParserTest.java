@@ -4,7 +4,7 @@ package org.xidea.el.test.json;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.xidea.el.ExpressionImpl;
+import org.xidea.el.impl.ExpressionImpl;
 
 public class JSONNumberParserTest {
 
