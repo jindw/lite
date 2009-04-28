@@ -13,4 +13,6 @@ public interface Reference{
 	public Object getValue();
 	public Reference next(Object key);
 	public Class<? extends Object> getType();
+	public Object getBase();
+	public Object getName();
 }

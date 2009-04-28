@@ -26,14 +26,6 @@ public class ExpressionFactoryImpl implements ExpressionFactory {
 		return expressionFactory;
 	}
 
-	private final Map<String, Object> globals;
-
-	public ExpressionFactoryImpl() {
-		this(DEFAULT_GLOBAL_MAP);
-	}
-	public ExpressionFactoryImpl(Map<String, Object> globals){
-		this.globals = globals;
-	}
 	public Expression create(Object el) {
 		if(el instanceof String){
 			return new ExpressionImpl((String)el);
@@ -41,7 +33,7 @@ public class ExpressionFactoryImpl implements ExpressionFactory {
 			if(el instanceof List){
 				el = toTokens((List<?>)el);
 			}
-			return new ExpressionImpl(null,(ExpressionToken[])el,DEFAULT_CALCULATER,globals);
+			return new ExpressionImpl(null,(ExpressionToken[])el,DEFAULT_CALCULATER);
 		}
 	}
 	private ExpressionToken toToken(Object value){

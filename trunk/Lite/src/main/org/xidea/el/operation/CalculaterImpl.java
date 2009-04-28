@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.xidea.el.Reference;
 import org.xidea.el.parser.ExpressionToken;
 
 public class CalculaterImpl implements Calculater {
@@ -75,8 +76,8 @@ public class CalculaterImpl implements Calculater {
 	}
 
 	public Object realValue(Object result) {
-		if (result instanceof PropertyValue) {
-			return ((PropertyValue) result).getValue();
+		if (result instanceof Reference) {
+			return ((Reference) result).getValue();
 		}
 		return result;
 	}
@@ -91,8 +92,8 @@ public class CalculaterImpl implements Calculater {
 		case ExpressionToken.OP_STATIC_GET_PROP:
 		    arg2 = op.getParam();
 		case ExpressionToken.OP_GET_PROP:
-			if (arg1 instanceof PropertyValue) {
-				return ((PropertyValue) arg1).next(realValue(arg2));
+			if (arg1 instanceof Reference) {
+				return ((Reference) arg1).next(realValue(arg2));
 			} else {
 				return createRefrence(arg1, realValue(arg2));
 			}
@@ -102,9 +103,9 @@ public class CalculaterImpl implements Calculater {
 				Object[] arguments = (arg2 instanceof List) ? ((List<?>) arg2)
 						.toArray() : EMPTY_ARGS;
 				Invocable invocable = null;
-				if (arg1 instanceof PropertyValue) {
-					PropertyValue pv = (PropertyValue) arg1;
-					invocable = pv.getInvocable(methodMap, arguments);
+				if (arg1 instanceof Reference) {
+					Reference pv = (Reference) arg1;
+					invocable = PropertyValue.getInvocable(pv,methodMap, arguments);
 					thiz = pv.getBase();
 				} else {
 					if (arg1 instanceof Invocable) {

@@ -57,12 +57,12 @@ class PropertyValue implements Reference {
 		return null;
 	}
 
-	public Invocable getInvocable(
+	static Invocable getInvocable(Reference ref,
 			Map<String, Map<String, Invocable>> methodMap, Object[] args) {
-		Invocable invocable = createInvocable(methodMap, base, name.toString(),
+		Invocable invocable = createInvocable(methodMap, ref.getBase(), ref.getName().toString(),
 				args);
 		if (invocable == null) {
-			Object object = getValue();
+			Object object = ref.getValue();
 			if (object instanceof Invocable) {
 				invocable = (Invocable) object;
 			} else if (object instanceof Method) {
@@ -144,6 +144,10 @@ class PropertyValue implements Reference {
 				return null;
 			}
 		};
+	}
+
+	public Object getName() {
+		return name;
 	}
 
 }
