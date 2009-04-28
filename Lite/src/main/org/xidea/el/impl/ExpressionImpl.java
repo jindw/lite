@@ -18,7 +18,7 @@ public class ExpressionImpl implements Expression ,ReferenceExpression {
 	protected final Calculater calculater;
 	protected final ExpressionToken[] expression;
 	protected final String source;
-	private final Map<String, Object> globalMap;
+	protected final Map<String, Object> globalMap;
 
 
 	public ExpressionImpl(String el) {
@@ -93,17 +93,17 @@ public class ExpressionImpl implements Expression ,ReferenceExpression {
 
 	protected Object getValue(ValueStack context, ExpressionToken item) {
 		switch (item.getType()) {
+		case ExpressionToken.VALUE_VAR:
+			String value = (String) item.getParam();
+			return context.get(value);
+		case ExpressionToken.VALUE_CONSTANTS:
+			return item.getParam();
 		case ExpressionToken.VALUE_NEW_LIST:
 			return new ArrayList<Object>();
 		case ExpressionToken.VALUE_NEW_MAP:
 			return new LinkedHashMap<Object, Object>();
-		case ExpressionToken.VALUE_VAR:
-			String value = (String) item.getParam();
-			return context.get(value);
 		case ExpressionToken.VALUE_LAZY:
 			return (item);
-		case ExpressionToken.VALUE_CONSTANTS:
-			return item.getParam();
 		}
 		throw new IllegalArgumentException("unknow token:"+Integer.toBinaryString(item.getType()));
 	}

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 import org.xidea.el.Calculater;
 import org.xidea.el.Expression;
 import org.xidea.el.ExpressionFactory;
@@ -15,64 +16,80 @@ import org.xidea.el.parser.TokenImpl;
 import org.xidea.el.parser.Tokens;
 
 public class ExpressionFactoryImpl implements ExpressionFactory {
-	private static ExpressionFactoryImpl expressionFactory = new ExpressionFactoryImpl();
 	public static final Calculater DEFAULT_CALCULATER = new CalculaterImpl();
 	public static final Map<String, Object> DEFAULT_GLOBAL_MAP;
+	private static ExpressionFactoryImpl expressionFactory = new ExpressionFactoryImpl();
+	protected final Map<String, Object> globals;
 	static {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		ECMA262Impl.appendTo(map);
 		DEFAULT_GLOBAL_MAP = Collections.unmodifiableMap(map);
 	}
+
 	public static ExpressionFactory getInstance() {
 		return expressionFactory;
 	}
 
-	private final Map<String, Object> globals;
-
 	public ExpressionFactoryImpl() {
 		this(DEFAULT_GLOBAL_MAP);
 	}
-	public ExpressionFactoryImpl(Map<String, Object> globals){
+
+	public ExpressionFactoryImpl(Map<String, Object> globals) {
 		this.globals = globals;
 	}
-	public Expression create(Object el) {
-		if(el instanceof String){
-			return new ExpressionImpl((String)el);
-		}else{
-			if(el instanceof List){
-				el = toTokens((List<?>)el);
+
+	public Expression create(Object elo) {
+		if (elo instanceof String) {
+			return new ExpressionImpl((String) elo);
+		} else {
+			ExpressionToken[] el;
+			if (elo instanceof List) {
+				el = toTokens((List<?>) elo);
+			} else {
+				el = (ExpressionToken[]) elo;
 			}
-			return new ExpressionImpl(null,(ExpressionToken[])el,DEFAULT_CALCULATER,globals);
+
+			return getOptimizedExpression(el);
+
 		}
-	}
-	private ExpressionToken toToken(Object value){
-		if(value instanceof List<?>){
-			List<?> list = (List<?>)value;
-			int type = ((Number)list.get(0)).intValue();
-			value = list.size()>1?list.get(1):null;
-			if(type == ExpressionToken.VALUE_LAZY){
-				value = toTokens((List<?>)value);
-			}
-			return new TokenImpl(type,value);
-		}
-		return new TokenImpl(ExpressionToken.VALUE_CONSTANTS,value);
 	}
 
-	private ExpressionToken[] toTokens(List<?> children){
+	private Expression getOptimizedExpression(ExpressionToken[] el) {
+		Expression ressult = OptimizeExpressionImpl.create(el,
+				DEFAULT_CALCULATER, globals);
+		return ressult != null ? ressult : new ExpressionImpl(null, el,
+				DEFAULT_CALCULATER, globals);
+	}
+
+	private ExpressionToken toToken(Object value) {
+		if (value instanceof List<?>) {
+			List<?> list = (List<?>) value;
+			int type = ((Number) list.get(0)).intValue();
+			value = list.size() > 1 ? list.get(1) : null;
+			if (type == ExpressionToken.VALUE_LAZY) {
+				value = toTokens((List<?>) value);
+			}
+			return new TokenImpl(type, value);
+		}
+		return new TokenImpl(ExpressionToken.VALUE_CONSTANTS, value);
+	}
+
+	protected ExpressionToken[] toTokens(List<?> children) {
 		Object[] source = children.toArray();
 		int i = source.length;
 		ExpressionToken[] result = new ExpressionToken[i];
-		int end = i-1;
-		while(i-->0){
+		int end = i - 1;
+		while (i-- > 0) {
 			result[end - i] = toToken(source[i]);
 		}
 		return result;
 	}
+
 	private String simpleCheckEL(String expression) {
-		//check it
+		// check it
 		expression = expression.trim();
 		StringBuilder buf = new StringBuilder();
-		buf.append((char)0);
+		buf.append((char) 0);
 		for (int i = 0; i < expression.length(); i++) {
 			char c = expression.charAt(i);
 			switch (c) {
@@ -114,7 +131,7 @@ public class ExpressionFactoryImpl implements ExpressionFactory {
 			case ']':// 93 //1011101
 			case '}':// 125//1111101
 				int offset = c - buf.charAt(buf.length() - 1);
-				if (offset > 0 && offset < 3) {//[1,2]
+				if (offset > 0 && offset < 3) {// [1,2]
 					buf.deleteCharAt(buf.length() - 1);
 				} else {
 					throw new ExpressionSyntaxException("expression error at"
@@ -122,11 +139,12 @@ public class ExpressionFactoryImpl implements ExpressionFactory {
 				}
 			}
 		}
-		 if(buf.length()!=1) {
+		if (buf.length() != 1) {
 			throw new ExpressionSyntaxException("expression error : " + buf);
 		}
 		return expression;
 	}
+
 	public Object parse(String el) {
 		simpleCheckEL(el);
 		Tokens tokens = new ExpressionTokenizer(el).getTokens();
@@ -138,19 +156,19 @@ public class ExpressionFactoryImpl implements ExpressionFactory {
 	private void check(ExpressionToken[] list) {
 		int index = list.length;
 		int pos = 0;
-		while(index-- >0){
+		while (index-- > 0) {
 			ExpressionToken item = list[index];
 			int type = item.getType();
-			if(type> 0){
-				pos-=(type & 1);
-			}else{
-				if(type == ExpressionToken.VALUE_LAZY){
+			if (type > 0) {
+				pos -= (type & 1);
+			} else {
+				if (type == ExpressionToken.VALUE_LAZY) {
 					check((ExpressionToken[]) item.getParam());
 				}
 				pos++;
 			}
 		}
-		if(pos != 1){
+		if (pos != 1) {
 			throw new ExpressionSyntaxException("表达式最终计算结果数不为1");
 		}
 	}
