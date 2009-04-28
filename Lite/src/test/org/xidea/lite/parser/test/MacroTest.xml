@@ -26,10 +26,52 @@
 		</void>
 	</object>
 	<object class="java.util.LinkedHashMap">
-		<!-- var -->
+		<!-- macro -->
 		<void method="put">
 			<string><![CDATA[${test(1,2)}<c:macro name="test(a,b)">${a}+${b}</c:macro>]]></string>
 			<string><![CDATA[1+2]]></string>
+		</void>
+		<!-- macro -->
+		<!-- 可用父域数据 -->
+		<void method="put">
+			<string><![CDATA[
+			<c:var name="a" value="xxx"/>
+			<c:var name="b" value="yyy"/>
+			${test(1,2)}<c:def name="test()">${a}+${b}</c:def>]]></string>
+			<string><![CDATA[xxx+yyy]]></string>
+		</void>
+		<!-- 可传递参数 -->
+		<void method="put">
+			<string><![CDATA[${test(1,2)}<c:def name="test(a,b)">${a}+${b}</c:def>]]></string>
+			<string><![CDATA[1+2]]></string>
+		</void>
+		<!-- 不受父域印象 -->
+		<void method="put">
+			<string><![CDATA[
+			<c:var name="a" value="xxx"/>
+			<c:var name="b" value="yyy"/>
+			${test(1,2)}<c:def name="test(a,b)">${a}+${b}</c:def>]]></string>
+			<string><![CDATA[1+2]]></string>
+		</void>
+		<!-- 变量不冲突 -->
+		<void method="put">
+			<string><![CDATA[
+			<c:var name="a" value="xxx"/>
+			<c:var name="b" value="yyy"/>
+			${test(1,2)}${a}+${b}<c:def name="test(a,b)">${a}+${b}</c:def>]]></string>
+			<string><![CDATA[1+2xxx+yyy]]></string>
+		</void>
+		<!-- 内部申明不影响外部数据 -->
+		<void method="put">
+			<string><![CDATA[
+			<c:var name="a" value="xxx"/>
+			<c:var name="b" value="yyy"/>
+			${test(1,2)}${a}+${b}<c:def name="test(a,b)">
+			<c:var name="a" value="-xxx"/>
+			${a}+${b}
+			<c:var name="b" value="????"/>
+			</c:def>]]></string>
+			<string><![CDATA[-xxx+2xxx+yyy]]></string>
 		</void>
 	</object>
 </java>
