@@ -6,7 +6,7 @@ import java.util.List;
 import org.xidea.el.Invocable;
 import org.xidea.lite.Template.Context;
 
-public class MicroAdvice implements CompileAdvice {
+public class MacroAdvice implements CompileAdvice {
 	public final static String INSTANCE_MAP = "instanceMap";
 	public final static String OBJECT_MAP = "objectMap";
 	private String name;
@@ -20,8 +20,7 @@ public class MicroAdvice implements CompileAdvice {
 		this.arguments = arguments.toArray(new String[arguments.size()]);
 	}
 
-	public void compile(final Template template, List<Object> result) {
-		final Object[] children = template.compile(result);
+	public List<Object> compile(final Template template, final Object[] children) {
 		template.gloabls.put(this.name, new Invocable() {
 			public Object invoke(Object thizz, Object... args) throws Exception {
 				StringWriter out = new StringWriter();
@@ -39,6 +38,7 @@ public class MicroAdvice implements CompileAdvice {
 				}
 			}
 		});
+		return null;
 	}
 
 }
