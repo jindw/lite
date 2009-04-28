@@ -43,7 +43,7 @@ public class ExpressionImpl implements Expression ,ReferenceExpression {
 		}else{
 			valueStack = new ValueStackImpl(globalMap,context);
 		}
-		ResultStack stack = new ResultStackImpl();
+		ResultStack stack = new ResultStackImpl(valueStack);
 		evaluate(stack, expression, valueStack);
 		return realValue(stack.pop());
 	}
@@ -58,7 +58,7 @@ public class ExpressionImpl implements Expression ,ReferenceExpression {
 		}else{
 			valueStack = new RefrenceStackImpl(globalMap,context);
 		}
-		ResultStack stack = new ResultStackImpl();
+		ResultStack stack = new ResultStackImpl(valueStack);
 		evaluate(stack, expression, valueStack);
 		Object result = stack.pop();
 		if(result instanceof Reference){

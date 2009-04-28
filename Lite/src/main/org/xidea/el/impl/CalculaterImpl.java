@@ -95,7 +95,7 @@ public class CalculaterImpl implements Calculater {
 			}
 		case ExpressionToken.OP_INVOKE_METHOD:
 			try {
-				Object thiz = null;
+				Object thiz;
 				Object[] arguments = (arg2 instanceof List) ? ((List<?>) arg2)
 						.toArray() : EMPTY_ARGS;
 				Invocable invocable = null;
@@ -104,6 +104,7 @@ public class CalculaterImpl implements Calculater {
 					invocable = ReferenceImpl.getInvocable(pv,methodMap, arguments);
 					thiz = pv.getBase();
 				} else {
+					thiz = stack.getValueStack();
 					if (arg1 instanceof Invocable) {
 						invocable = (Invocable) arg1;
 					} else if ((arg1 instanceof java.lang.reflect.Method)) {

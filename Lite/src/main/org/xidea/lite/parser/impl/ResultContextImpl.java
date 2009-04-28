@@ -176,11 +176,12 @@ public class ResultContextImpl implements ResultContext {
 
 	@SuppressWarnings("unchecked")
 	public List<Object> toList() {
-		List<Object> result2 = optimizeResult(this.result);
 		Object globalsAddon = buildGlobalsAddOnEL();
 		if(globalsAddon != null){
-			appendAdvice(BuildInAdvice.class,globalsAddon);
+			this.appendAdvice(BuildInAdvice.class,globalsAddon);
+			this.appendEnd();
 		}
+		List<Object> result2 = optimizeResult(this.result);
 		ArrayList<ArrayList<Object>> stack = new ArrayList<ArrayList<Object>>();
 		ArrayList<Object> current = new ArrayList<Object>();
 		stack.add(current);

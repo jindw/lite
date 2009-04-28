@@ -48,6 +48,10 @@ public class XMLTest {
 	}
 
 	@Test
+	public void runMacroTest() throws Exception {
+		runTest("MacroTest");
+	}
+	@Test
 	public void runELTest() throws Exception {
 		runTest("ELTest");
 	}

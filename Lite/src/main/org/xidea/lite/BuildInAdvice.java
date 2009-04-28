@@ -22,7 +22,7 @@ public class BuildInAdvice implements CompileAdvice {
 		this.objectMap = objectMap;
 	}
 
-	public void compile(Template template, List<Object> result) {
+	public List<Object> compile(final Template template, final Object[] children) {
 		for (String key : instanceMap.keySet()) {
 			String type = (String) instanceMap.get(key);
 			try {
@@ -33,6 +33,7 @@ public class BuildInAdvice implements CompileAdvice {
 			}
 		}
 		template.gloabls.putAll(objectMap);
+		return null;
 	}
 
 }

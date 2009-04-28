@@ -1,11 +1,20 @@
 package org.xidea.el.impl;
 
 import org.xidea.el.ResultStack;
+import org.xidea.el.ValueStack;
 
 class ResultStackImpl implements ResultStack {
 	private int pos = -1;
 	private Object[] data = new Object[2];
+	private ValueStack self;
 
+	public ResultStackImpl(ValueStack self){
+		this.self = self;
+	}
+
+	public ValueStack getValueStack() {
+		return self;
+	}
 
 	/* (non-Javadoc)
 	 * @see org.xidea.el.impl.ResultStack#pop()

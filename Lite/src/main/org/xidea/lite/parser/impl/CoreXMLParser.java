@@ -12,7 +12,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xidea.el.json.JSONEncoder;
-import org.xidea.lite.MicroAdvice;
+import org.xidea.lite.MacroAdvice;
 import org.xidea.lite.Template;
 import org.xidea.lite.parser.ParseChain;
 import org.xidea.lite.parser.ParseContext;
@@ -43,8 +43,8 @@ public class CoreXMLParser implements Parser<Element> {
 				} else if ("group".equals(name) || "context".equals(name)) {
 					parseContextTag(el, context);
 				} else if ("json".equals(name)) {
-				} else if ("micro".equals(name) || "def".equals(name)) {
-					parseMicroTag(el, context);
+				} else if ("macro".equals(name) || "def".equals(name)) {
+					parseMacroTag(el, context);
 				} else if ("choose".equals(name)) {
 					parseChooseTag(el, context);
 				} else if ("elseif".equals(name) || "else-if".equals(name)
@@ -77,7 +77,7 @@ public class CoreXMLParser implements Parser<Element> {
 	 * @param el
 	 * @param context
 	 */
-	protected void parseMicroTag(Element el, ParseContext context) {
+	protected void parseMacroTag(Element el, ParseContext context) {
 		String name = el.getAttribute("name");
 		String[] args = name.trim().split("[^\\w]+");
 		name = args[0];
@@ -93,7 +93,12 @@ public class CoreXMLParser implements Parser<Element> {
 			buf.append('"');
 		}
 		buf.append("]}");
-		context.appendAdvice(MicroAdvice.class, context.parseEL(buf.toString()));
+		context.appendAdvice(MacroAdvice.class, context.parseEL(buf.toString()));
+		if(el.hasChildNodes()){
+			parseChild(el.getFirstChild(), context);
+		}
+		context.appendEnd();
+		
 	}
 
 	public void parseIncludeTag(final Element el, ParseContext context) {

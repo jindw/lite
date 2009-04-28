@@ -110,7 +110,8 @@ public class Template {
 	@SuppressWarnings("unchecked")
 	protected void compileAddOns(final Object[] cmd, List<Object> result) {
 		try {
-			cmd[1] = compile((List<Object>) cmd[1]);
+			Object[] children = compile((List<Object>) cmd[1]);
+			cmd[1] = children;
 			Expression el = createExpression(cmd[2]);
 			cmd[2] = el;
 			Class<? extends Object> addOnType = Class.forName(String
@@ -121,7 +122,10 @@ public class Template {
 				CompileAdvice addOnInstance = (CompileAdvice) addOnType
 						.newInstance();
 				ReflectUtil.setValues(addOnInstance, attributeMap);
-				addOnInstance.compile(this, result);
+				List<Object> result2 = addOnInstance.compile(this, children);
+				if(result2!=null){
+					result.addAll(result2);
+				}
 			}
 			if (RuntimeAdvice.class.isAssignableFrom(addOnType)) {
 				result.add(cmd);
