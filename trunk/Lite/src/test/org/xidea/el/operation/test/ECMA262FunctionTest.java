@@ -8,9 +8,9 @@ import java.util.Map;
 import org.junit.Test;
 import org.xidea.el.Expression;
 import org.xidea.el.ExpressionFactory;
-import org.xidea.el.ExpressionFactoryImpl;
-import org.xidea.el.operation.ECMA262Impl;
-import org.xidea.el.operation.Invocable;
+import org.xidea.el.Invocable;
+import org.xidea.el.impl.ECMA262Impl;
+import org.xidea.el.impl.ExpressionFactoryImpl;
 
 
 public class ECMA262FunctionTest {

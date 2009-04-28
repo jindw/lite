@@ -5,7 +5,7 @@ import java.util.HashMap;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.xidea.el.ExpressionImpl;
+import org.xidea.el.impl.ExpressionImpl;
 
 public class ResultExpressionTest {
 	private HashMap<Object,Object> root;

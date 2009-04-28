@@ -14,8 +14,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.el.Expression;
 import org.xidea.el.ExpressionFactory;
-import org.xidea.el.ExpressionFactoryImpl;
-import org.xidea.el.operation.ReflectUtil;
+import org.xidea.el.impl.ExpressionFactoryImpl;
+import org.xidea.el.impl.ReflectUtil;
+import org.xidea.el.impl.ValueStackImpl;
 
 public class Template {
 	private static Log log = LogFactory.getLog(Template.class);
@@ -31,7 +32,6 @@ public class Template {
 	public static final int CAPTRUE_TYPE = 9;       // [9,[...],'var']
 	
 	public static final String FOR_KEY = "for";
-	public static final String IF_KEY = "if";
 	private Map<String, Object> gloabls = new HashMap<String, Object>(
 			ExpressionFactoryImpl.DEFAULT_GLOBAL_MAP);
 
@@ -47,15 +47,12 @@ public class Template {
 		this.items = this.compile(list);
 	}
 
-	@SuppressWarnings("unchecked")
 	public void render(Object context, Writer out) throws IOException {
-		Map<? extends Object, ? extends Object> contextMap;
-		if (context instanceof Map) {
-			contextMap = (Map<? extends Object, ? extends Object>) context;
-		} else if (context == null) {
-			contextMap = new HashMap<Object, Object>();
+		Context contextMap;
+		if (context == null) {
+			contextMap =  new Context(gloabls);
 		} else {
-			contextMap = ReflectUtil.map(context);
+			contextMap = new Context(gloabls,context);
 		}
 		renderList(contextMap, items, out);
 	}
@@ -69,7 +66,7 @@ public class Template {
 	protected Object[] compile(List<Object> datas) {
 		// Object[] result = datas.toArray();// ;
 		// reverse(result);
-		List result = new ArrayList();
+		ArrayList<Object> result = new ArrayList<Object>();
 		for (int i = datas.size() - 1; i >= 0; i--) {
 			final Object item = datas.get(i);
 			if (item instanceof List) {
@@ -135,7 +132,7 @@ public class Template {
 	}
 
 	protected void renderList(
-			final Map<? extends Object, ? extends Object> context,
+			final Context context,
 			final Object[] children, final Writer out) {
 		int index = children.length;
 		// for (final Object item : children) {
@@ -191,7 +188,7 @@ public class Template {
 	}
 
 	@SuppressWarnings("unchecked")
-	private void prossesAddons(Map<? extends Object, ? extends Object> context,
+	private void prossesAddons(Context context,
 			Object[] data, Writer out) throws Exception {
 		Map<String, Object> attributeMap = (Map) ((Expression) data[1])
 				.evaluate(context);
@@ -200,8 +197,7 @@ public class Template {
 		tag.execute(context, out);
 	}
 
-	@SuppressWarnings("unchecked")
-	protected void processExpression(Map context, Object[] data, Writer out,
+	protected void processExpression(Context context, Object[] data, Writer out,
 			boolean encodeXML) throws IOException {
 		Object value = ((Expression) data[1]).evaluate(context);
 		if (encodeXML && value != null) {
@@ -211,8 +207,7 @@ public class Template {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	protected void processIf(Map context, Object[] data, Writer out) {
+	protected void processIf(Context context, Object[] data, Writer out) {
 		Boolean test = Boolean.TRUE;
 		try {
 			if (toBoolean(((Expression) data[2]).evaluate(context))) {
@@ -221,14 +216,13 @@ public class Template {
 				test = Boolean.FALSE;
 			}
 		} finally {
-			context.put(IF_KEY, test);
+			context.ifStatus=test;
 		}
 
 	}
 
-	@SuppressWarnings("unchecked")
-	protected void processElse(Map context, Object[] data, Writer out) {
-		if (!toBoolean(context.get(IF_KEY))) {
+	protected void processElse(Context context, Object[] data, Writer out) {
+		if (!context.ifStatus) {
 			Boolean test = Boolean.TRUE;
 			try {
 				if (data[2] == null
@@ -238,13 +232,13 @@ public class Template {
 					test = Boolean.FALSE;
 				}
 			} finally {
-				context.put(IF_KEY, test);
+				context.ifStatus = test;
 			}
 		}
 	}
 
 	@SuppressWarnings("unchecked")
-	protected void processFor(Map context, Object[] data, Writer out) {
+	protected void processFor(Context context, Object[] data, Writer out) {
 		final Object[] children = (Object[]) data[1];
 		Object list = ((Expression) data[2]).evaluate(context);
 		final String varName = (String) data[3];
@@ -293,24 +287,21 @@ public class Template {
 		} finally {
 			// context.put("for", preiousStatus);
 			context.put(FOR_KEY, preiousStatus);// for key
-			context.put(IF_KEY, len > 0);// if key
+			context.ifStatus = len > 0;// if key
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	protected void processVar(Map context, Object[] data) {
+	protected void processVar(Context context, Object[] data) {
 		context.put(data[2], ((Expression) data[1]).evaluate(context));
 	}
 
-	@SuppressWarnings("unchecked")
-	protected void processCaptrue(Map context, Object[] data) {
+	protected void processCaptrue(Context context, Object[] data) {
 		StringWriter buf = new StringWriter();
 		renderList(context, (Object[]) data[1], buf);
 		context.put(data[2], buf.toString());
 	}
 
-	@SuppressWarnings("unchecked")
-	protected void processAttribute(Map context, Object[] data, Writer out)
+	protected void processAttribute(Context context, Object[] data, Writer out)
 			throws IOException {
 		Object result = ((Expression) data[1]).evaluate(context);
 		if (data[2] == null) {
@@ -402,7 +393,12 @@ public class Template {
 		protected boolean isValid() {
 			return --depth > 0;
 		}
-
+	}
+	protected static class Context extends ValueStackImpl{
+		public Context(Object... stack) {
+			super(stack);
+		}
+		boolean ifStatus = false;
 	}
 
 	public static class ForStatus {

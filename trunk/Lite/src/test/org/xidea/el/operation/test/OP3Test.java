@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.HashMap;
 
 import org.junit.Test;
-import org.xidea.el.ExpressionImpl;
+import org.xidea.el.impl.ExpressionImpl;
 
 public class OP3Test {
 	@Test

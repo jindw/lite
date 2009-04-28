@@ -8,7 +8,7 @@ import java.io.StringWriter;
 import java.util.Collections;
 
 import org.junit.Test;
-import org.xidea.el.ExpressionImpl;
+import org.xidea.el.impl.ExpressionImpl;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.el.json.JSONTokenizer;
 import org.xidea.el.test.json.JSONWriter;

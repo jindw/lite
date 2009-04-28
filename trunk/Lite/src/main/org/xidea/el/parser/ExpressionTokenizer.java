@@ -28,8 +28,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.xidea.el.ExpressionSyntaxException;
+import org.xidea.el.impl.NumberArithmetic;
 import org.xidea.el.json.JSONTokenizer;
-import org.xidea.el.operation.NumberArithmetic;
 
 public class ExpressionTokenizer extends JSONTokenizer {
 	private static enum Status {

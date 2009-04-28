@@ -9,7 +9,7 @@ import java.io.ObjectOutputStream;
 import java.util.Arrays;
 import java.util.List;
 
-import org.xidea.el.ExpressionImpl;
+import org.xidea.el.impl.ExpressionImpl;
 import org.xidea.el.json.JSONEncoder;
 
 public class TemplateData implements Externalizable {

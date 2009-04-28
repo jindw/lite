@@ -10,7 +10,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.xidea.el.Expression;
 import org.xidea.el.ExpressionFactory;
-import org.xidea.el.ExpressionFactoryImpl;
+import org.xidea.el.impl.ExpressionFactoryImpl;
 
 public class MathTest {
 	ExpressionFactory factory = new ExpressionFactoryImpl();
@@ -18,9 +18,9 @@ public class MathTest {
 
 	@Test
 	public void testMaxMin() throws Exception {
+		test("Math.max(1.2,2,4,1/0,199)");
 		test("Math.min(1.2,2,4,1,2)");
 		test("Math.max(1.2,2.1,-4,1,2)");
-		test("Math.max(1.2,2,4,1/0,199)");
 		test("Math.min(1.2,2,4,-1/0,199)");
 	}
 

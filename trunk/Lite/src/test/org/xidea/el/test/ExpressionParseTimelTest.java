@@ -6,7 +6,7 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Collection;
 
-import org.xidea.el.ExpressionFactoryImpl;
+import org.xidea.el.impl.ExpressionFactoryImpl;
 import org.xidea.el.json.JSONDecoder;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.el.parser.ExpressionToken;

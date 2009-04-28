@@ -10,7 +10,7 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.xidea.el.ExpressionImpl;
+import org.xidea.el.impl.ExpressionImpl;
 
 public class ExpressionImplTest {
 	private Map<String, Object> numberContext = new HashMap<String, Object>();

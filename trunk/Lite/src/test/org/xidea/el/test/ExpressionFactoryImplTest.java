@@ -3,7 +3,7 @@ package org.xidea.el.test;
 import static org.junit.Assert.fail;
 
 import org.junit.Test;
-import org.xidea.el.ExpressionFactoryImpl;
+import org.xidea.el.impl.ExpressionFactoryImpl;
 
 public class ExpressionFactoryImplTest {
 	ExpressionFactoryImpl expressionFactory = new ExpressionFactoryImpl();
