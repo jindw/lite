@@ -1,5 +1,7 @@
 package org.xidea.el.parser;
 
+import org.xidea.el.ExpressionToken;
+
 public class TokenImpl implements ExpressionToken {
 
 	private final static ExpressionToken TOKEN_TRUE = new TokenImpl(

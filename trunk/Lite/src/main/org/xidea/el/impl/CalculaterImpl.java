@@ -7,10 +7,10 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.el.Calculater;
+import org.xidea.el.ExpressionToken;
 import org.xidea.el.Invocable;
 import org.xidea.el.Reference;
 import org.xidea.el.ResultStack;
-import org.xidea.el.parser.ExpressionToken;
 
 public class CalculaterImpl implements Calculater {
 	private static final Log log = LogFactory.getLog(CalculaterImpl.class);
@@ -91,7 +91,7 @@ public class CalculaterImpl implements Calculater {
 			if (arg1 instanceof Reference) {
 				return ((Reference) arg1).next(ExpressionImpl.realValue(arg2));
 			} else {
-				return ExpressionImpl.createRefrence(arg1, ExpressionImpl.realValue(arg2));
+				return new ReferenceImpl(arg1, ExpressionImpl.realValue(arg2));
 			}
 		case ExpressionToken.OP_INVOKE_METHOD:
 			try {
@@ -101,13 +101,13 @@ public class CalculaterImpl implements Calculater {
 				Invocable invocable = null;
 				if (arg1 instanceof Reference) {
 					Reference pv = (Reference) arg1;
-					invocable = PropertyValue.getInvocable(pv,methodMap, arguments);
+					invocable = ReferenceImpl.getInvocable(pv,methodMap, arguments);
 					thiz = pv.getBase();
 				} else {
 					if (arg1 instanceof Invocable) {
 						invocable = (Invocable) arg1;
 					} else if ((arg1 instanceof java.lang.reflect.Method)) {
-						invocable = PropertyValue
+						invocable = ReferenceImpl
 								.createProxy((java.lang.reflect.Method) arg1);
 					}
 				}

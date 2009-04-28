@@ -2,6 +2,8 @@ package org.xidea.el.parser;
 
 import java.util.AbstractList;
 
+import org.xidea.el.ExpressionToken;
+
 /**
  * @author jindw
  */

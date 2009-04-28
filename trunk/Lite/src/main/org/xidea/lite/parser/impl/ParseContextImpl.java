@@ -217,7 +217,9 @@ public class ParseContextImpl implements ParseContext {
 	public void appendXmlText(Object el) {
 		resultContext.appendXmlText(el);
 	}
-
+	public void appendAdvice(Class<? extends Object> clazz, Object el) {
+		resultContext.appendAdvice(clazz, el);
+	}
 	public int mark() {
 		return resultContext.mark();
 	}

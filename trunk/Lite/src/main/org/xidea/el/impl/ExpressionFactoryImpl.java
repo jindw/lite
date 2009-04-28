@@ -9,7 +9,7 @@ import org.xidea.el.Calculater;
 import org.xidea.el.Expression;
 import org.xidea.el.ExpressionFactory;
 import org.xidea.el.ExpressionSyntaxException;
-import org.xidea.el.parser.ExpressionToken;
+import org.xidea.el.ExpressionToken;
 import org.xidea.el.parser.ExpressionTokenizer;
 import org.xidea.el.parser.TokenImpl;
 import org.xidea.el.parser.Tokens;

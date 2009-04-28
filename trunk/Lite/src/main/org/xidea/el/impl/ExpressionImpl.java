@@ -6,12 +6,12 @@ import java.util.Map;
 
 import org.xidea.el.Calculater;
 import org.xidea.el.Expression;
+import org.xidea.el.ExpressionToken;
 import org.xidea.el.Reference;
 import org.xidea.el.ReferenceExpression;
 import org.xidea.el.ResultStack;
 import org.xidea.el.ValueStack;
 import org.xidea.el.json.JSONEncoder;
-import org.xidea.el.parser.ExpressionToken;
 import org.xidea.el.parser.ExpressionTokenizer;
 
 public class ExpressionImpl implements Expression ,ReferenceExpression {
@@ -86,12 +86,12 @@ public class ExpressionImpl implements Expression ,ReferenceExpression {
 				}
 				stack.set(result);
 			} else {
-				stack.push(getTokenValue(context, item));
+				stack.push(getValue(context, item));
 			}
 		}
 	}
 
-	protected Object getTokenValue(ValueStack context, ExpressionToken item) {
+	protected Object getValue(ValueStack context, ExpressionToken item) {
 		switch (item.getType()) {
 		case ExpressionToken.VALUE_NEW_LIST:
 			return new ArrayList<Object>();
@@ -113,11 +113,6 @@ public class ExpressionImpl implements Expression ,ReferenceExpression {
 		}
 		return result;
 	}
-
-	static Object createRefrence(Object base, Object name) {
-		return new PropertyValue(base, name);
-	}
-
 
 	@Override
 	public String toString() {
