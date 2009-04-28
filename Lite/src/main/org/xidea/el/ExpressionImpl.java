@@ -13,7 +13,6 @@ import org.xidea.el.parser.ExpressionTokenizer;
 
 public class ExpressionImpl implements Expression ,ReferenceExpression {
 	protected final Calculater calculater;
-	protected final Map<String, Object> globalMap;
 	
 	
 	protected final ExpressionToken[] expression;
@@ -23,34 +22,37 @@ public class ExpressionImpl implements Expression ,ReferenceExpression {
 
 	public Reference prepare(Object context) {
 		if(rel == null){
-			rel = new ReferenceExpressionImpl(source, expression, calculater, globalMap);
+			rel = new ReferenceExpressionImpl(source, expression, calculater);
 		}
 		return rel.prepare(context);
 	}
 	public ExpressionImpl(String el) {
 		this(el, new ExpressionTokenizer(el).getTokens().getData(),
-				ExpressionFactoryImpl.DEFAULT_CALCULATER,
-				ExpressionFactoryImpl.DEFAULT_GLOBAL_MAP);
+				ExpressionFactoryImpl.DEFAULT_CALCULATER);
 	}
 
 	public ExpressionImpl(String source, ExpressionToken[] expression,
-			Calculater calculater, Map<String, Object> globalMap) {
+			Calculater calculater) {
 		this.source = source;
 		this.calculater = calculater;
 		this.expression = expression;
-		this.globalMap = globalMap;
 	}
 
 	public Object evaluate(Object context) {
+		ValueStack valueStack;
 		if (context == null) {
-			context = Collections.emptyMap();
+			valueStack = new ValueStackImpl(Collections.emptyMap());
+		}else if(context instanceof ValueStack){
+			valueStack = (ValueStack)context;
+		}else{
+			valueStack = new ValueStackImpl(context);
 		}
-		ValueStack stack = new ValueStack();
+		ResultStack stack = new ResultStack();
 		evaluate(stack, expression, context);
 		return calculater.realValue(stack.pop());
 	}
 
-	protected void evaluate(ValueStack stack, ExpressionToken[] tokens,
+	protected void evaluate(ResultStack stack, ExpressionToken[] tokens,
 			Object context) {
 		ExpressionToken item = null;
 		int i = tokens.length;

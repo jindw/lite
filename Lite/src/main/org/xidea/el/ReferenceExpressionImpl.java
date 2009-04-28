@@ -11,14 +11,14 @@ import org.xidea.el.parser.ExpressionToken;
 class ReferenceExpressionImpl extends ExpressionImpl {
 
 	public ReferenceExpressionImpl(String source, ExpressionToken[] expression,
-			Calculater calculater, Map<String, Object> globalMap) {
-		super(source, expression, calculater, globalMap);
+			Calculater calculater) {
+		super(source, expression, calculater);
 	}
 	public Reference prepare(Object context) {
 		if (context == null) {
 			context = Collections.emptyMap();
 		}
-		ValueStack stack = new ValueStack();
+		ResultStack stack = new ResultStack();
 		evaluate(stack, expression, context);
 		Object result = stack.pop();
 		if (result instanceof Reference) {
@@ -68,6 +68,14 @@ class ReferenceExpressionImpl extends ExpressionImpl {
 			}
 			public Reference next(Object key) {
 				throw new UnsupportedOperationException();
+			}
+
+			public Object getBase() {
+				return null;
+			}
+
+			public Object getName() {
+				return null;
 			}
 		};
 	}
