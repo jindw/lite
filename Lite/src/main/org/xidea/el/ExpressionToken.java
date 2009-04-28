@@ -1,4 +1,4 @@
-package org.xidea.el.parser;
+package org.xidea.el;
 
 /**
  * @author jindw

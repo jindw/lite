@@ -87,6 +87,8 @@ public interface ResultContext {
 
 	public void appendCaptrue(String varName);
 
+	public void appendAdvice(Class<? extends Object> class1, Object parseEL);
+
 	public String addGlobalObject(Class<? extends Object> impl, String key);
 
 	public String addGlobalObject(Object object, String key);

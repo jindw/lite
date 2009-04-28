@@ -1,25 +1,25 @@
 package org.xidea.el.parser;
 
-import static org.xidea.el.parser.ExpressionToken.BRACKET_BEGIN;
-import static org.xidea.el.parser.ExpressionToken.BRACKET_END;
-import static org.xidea.el.parser.ExpressionToken.OP_ADD;
-import static org.xidea.el.parser.ExpressionToken.OP_AND;
-import static org.xidea.el.parser.ExpressionToken.OP_GET_PROP;
-import static org.xidea.el.parser.ExpressionToken.OP_INVOKE_METHOD;
-import static org.xidea.el.parser.ExpressionToken.OP_MAP_PUSH;
-import static org.xidea.el.parser.ExpressionToken.OP_NEG;
-import static org.xidea.el.parser.ExpressionToken.OP_OR;
-import static org.xidea.el.parser.ExpressionToken.OP_PARAM_JOIN;
-import static org.xidea.el.parser.ExpressionToken.OP_POS;
-import static org.xidea.el.parser.ExpressionToken.OP_QUESTION;
-import static org.xidea.el.parser.ExpressionToken.OP_QUESTION_SELECT;
-import static org.xidea.el.parser.ExpressionToken.OP_STATIC_GET_PROP;
-import static org.xidea.el.parser.ExpressionToken.OP_SUB;
-import static org.xidea.el.parser.ExpressionToken.VALUE_CONSTANTS;
-import static org.xidea.el.parser.ExpressionToken.VALUE_LAZY;
-import static org.xidea.el.parser.ExpressionToken.VALUE_NEW_LIST;
-import static org.xidea.el.parser.ExpressionToken.VALUE_NEW_MAP;
-import static org.xidea.el.parser.ExpressionToken.VALUE_VAR;
+import static org.xidea.el.ExpressionToken.BRACKET_BEGIN;
+import static org.xidea.el.ExpressionToken.BRACKET_END;
+import static org.xidea.el.ExpressionToken.OP_ADD;
+import static org.xidea.el.ExpressionToken.OP_AND;
+import static org.xidea.el.ExpressionToken.OP_GET_PROP;
+import static org.xidea.el.ExpressionToken.OP_INVOKE_METHOD;
+import static org.xidea.el.ExpressionToken.OP_MAP_PUSH;
+import static org.xidea.el.ExpressionToken.OP_NEG;
+import static org.xidea.el.ExpressionToken.OP_OR;
+import static org.xidea.el.ExpressionToken.OP_PARAM_JOIN;
+import static org.xidea.el.ExpressionToken.OP_POS;
+import static org.xidea.el.ExpressionToken.OP_QUESTION;
+import static org.xidea.el.ExpressionToken.OP_QUESTION_SELECT;
+import static org.xidea.el.ExpressionToken.OP_STATIC_GET_PROP;
+import static org.xidea.el.ExpressionToken.OP_SUB;
+import static org.xidea.el.ExpressionToken.VALUE_CONSTANTS;
+import static org.xidea.el.ExpressionToken.VALUE_LAZY;
+import static org.xidea.el.ExpressionToken.VALUE_NEW_LIST;
+import static org.xidea.el.ExpressionToken.VALUE_NEW_MAP;
+import static org.xidea.el.ExpressionToken.VALUE_VAR;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,6 +28,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.xidea.el.ExpressionSyntaxException;
+import org.xidea.el.ExpressionToken;
 import org.xidea.el.impl.NumberArithmetic;
 import org.xidea.el.json.JSONTokenizer;
 

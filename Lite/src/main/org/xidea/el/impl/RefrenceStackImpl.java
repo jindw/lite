@@ -14,9 +14,9 @@ class RefrenceStackImpl extends ValueStackImpl {
 		while (i-- > 0) {
 			Object context = stack[0];
 			if (context instanceof Map) {
-				return new PropertyValue(context, key);
+				return new ReferenceImpl(context, key);
 			} else if (ReflectUtil.getType(context.getClass(), key) != null) {
-				return new PropertyValue(context, key);
+				return new ReferenceImpl(context, key);
 			}
 		}
 		return null;

@@ -6,12 +6,12 @@ import java.util.Map;
 import org.xidea.el.Invocable;
 import org.xidea.el.Reference;
 
-class PropertyValue implements Reference {
+class ReferenceImpl implements Reference {
 	private Object base;
 	private Object name;
 	private Class<? extends Object> type;
 
-	public PropertyValue(Object base, Object name) {
+	public ReferenceImpl(Object base, Object name) {
 		this.base = base;
 		this.name = name;
 	}

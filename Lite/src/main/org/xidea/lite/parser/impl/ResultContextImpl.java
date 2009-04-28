@@ -2,7 +2,6 @@ package org.xidea.lite.parser.impl;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -156,7 +155,10 @@ public class ResultContextImpl implements ResultContext {
 	public void appendXmlText(Object el) {
 		this.append(new Object[] { Template.XML_TEXT_TYPE, el });
 	}
-
+	public void appendAdvice(Class<? extends Object> clazz, Object el){
+		this.append(new Object[] { Template.ADD_ON_TYPE,el,
+				clazz.getName() });
+	}
 	public int mark() {
 		return result.size();
 	}
@@ -175,6 +177,10 @@ public class ResultContextImpl implements ResultContext {
 	@SuppressWarnings("unchecked")
 	public List<Object> toList() {
 		List<Object> result2 = optimizeResult(this.result);
+		Object globalsAddon = buildGlobalsAddOnEL();
+		if(globalsAddon != null){
+			appendAdvice(BuildInAdvice.class,globalsAddon);
+		}
 		ArrayList<ArrayList<Object>> stack = new ArrayList<ArrayList<Object>>();
 		ArrayList<Object> current = new ArrayList<Object>();
 		stack.add(current);
@@ -203,6 +209,7 @@ public class ResultContextImpl implements ResultContext {
 					case Template.IF_TYPE:
 					case Template.ELSE_TYPE:
 					case Template.FOR_TYPE:
+					case Template.ADD_ON_TYPE:
 						// case IF_STRING_IN_TYPE:
 						cmd2.add(null);
 						stackTop++;
@@ -215,24 +222,26 @@ public class ResultContextImpl implements ResultContext {
 				}
 			}
 		}
+		return current;
+	}
 
-		assert (stackTop == 0);
-
+	@SuppressWarnings("unchecked")
+	private Object buildGlobalsAddOnEL() {
 		HashMap<String, Object> attributeMap = new HashMap<String, Object>();
 		if (!this.typeIdMap.isEmpty()) {
 			Map instanceMap = toIdObject(typeIdMap);
 			attributeMap.put(BuildInAdvice.INSTANCE_MAP, instanceMap);
+			this.typeIdMap = null;
 		}
 		if (!this.objectIdMap.isEmpty()) {
 			Map instanceMap = toIdObject(objectIdMap);
 			attributeMap.put(BuildInAdvice.OBJECT_MAP, instanceMap);
+			this.objectIdMap = null;
 		}
 		if (!attributeMap.isEmpty()) {
-			current.add(Arrays.asList(new Object[] { Template.ADD_ON_TYPE,
-					new ArrayList<Object>(), JSONEncoder.encode(attributeMap),
-					BuildInAdvice.class.getName() }));
+			return this.parseEL(JSONEncoder.encode(attributeMap));
 		}
-		return current;
+		return null;
 	}
 
 	@SuppressWarnings("unchecked")

@@ -32,10 +32,10 @@ public class Template {
 	public static final int CAPTRUE_TYPE = 9;       // [9,[...],'var']
 	
 	public static final String FOR_KEY = "for";
-	private Map<String, Object> gloabls = new HashMap<String, Object>(
+	protected Map<String, Object> gloabls = new HashMap<String, Object>(
 			ExpressionFactoryImpl.DEFAULT_GLOBAL_MAP);
 
-	private ExpressionFactory expressionFactory = new ExpressionFactoryImpl(
+	protected ExpressionFactory expressionFactory = new ExpressionFactoryImpl(
 			gloabls);
 
 	protected Object[] items;// transient＄1�7
@@ -121,7 +121,7 @@ public class Template {
 				CompileAdvice addOnInstance = (CompileAdvice) addOnType
 						.newInstance();
 				ReflectUtil.setValues(addOnInstance, attributeMap);
-				addOnInstance.compile(gloabls, result);
+				addOnInstance.compile(this, result);
 			}
 			if (RuntimeAdvice.class.isAssignableFrom(addOnType)) {
 				result.add(cmd);
@@ -399,6 +399,17 @@ public class Template {
 			super(stack);
 		}
 		boolean ifStatus = false;
+		public void enter() {
+			Object[] newStack = new Object[stack.length+1];
+			System.arraycopy(stack, 0, newStack, 0, stack.length);
+			newStack[stack.length] = new HashMap<Object, Object>();
+			stack = newStack;
+		}
+		public void exit() {
+			Object[] newStack = new Object[stack.length-1];
+			System.arraycopy(stack, 0, newStack, 0, stack.length-1);
+			stack = newStack;
+		}
 	}
 
 	public static class ForStatus {
