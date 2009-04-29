@@ -111,9 +111,9 @@ Parser.prototype = {
         if(this.nativeJS){
             var code = buildNativeJS(buildTreeResult(this.result));
             try{
-                var result =  new Function("_$0","_$1","_$2",code);
+                var result =  new Function(code);
                 result.toString=function(){//_$1 encodeXML
-                    return "function(_$0,_$1,_$2){\n"+code+"\n}"
+                    return "function(){\n"+code+"\n}"
                 }
                 return result;
             }catch(e){

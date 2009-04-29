@@ -50,7 +50,7 @@ function parseNativeEL(expression){
 function checkForExpression(expression){
     if(/\bfor\b/.test(expression)){
         try{
-            new Function(expression);
+            checkEL(expression);
         }catch(e){
             return true;
         }
@@ -70,14 +70,14 @@ function compileEL(el){
     var forBuf= el.match(forPattern);
     if(forBuf){
         try{
-            new Function(codeBuf.join("f"));
+            checkEL(codeBuf.join("f"));
             while(codeBuf.length>1 ){
                 var codeTail = codeBuf.pop();
                 var codePre = codeBuf.pop();
                 var forTail = forBuf.pop();
                 codeBuf.push(codePre+forTail+codeTail);
                 try{
-                    new Function(codeBuf.join("f"));
+                    checkEL(codeBuf.join("f"));
                 }catch(e){
                     codeBuf.pop();
                     codeBuf.push(codePre+SAFE_FOR_KEY+codeTail);
@@ -107,25 +107,44 @@ function(context)
 	replace = function(c){return "&#"+c.charCodeAt()+";";}
  */
 function buildNativeJS(code){
-    var buf = [
+    var buf = [];
+    
+    var idpool = new IDPool(0);
+    var vs = findStatus(code);
+    idpool.hasFor = !!vs.refs['for'];
+    
+    //add function
+    for(var i=0;i<vs.defs.length;i++){
+        def = vs.defs[i];
+        buf.push("\n\tfunction ",def.name,"(");
+        for(var j=0;j<def.arguments.length;j++){
+            buf.push(def.arguments[j]);
+            buf.push(",")
+        }
+        buf.push("_$out){\n\t\tvar _$out=[];");
+        appendCode(def.code,buf,idpool,2);
+        buf.push("\n\t\treturn _$out.join('');\n\t}");
+    }
+    buf.push(
     	'\n\tfunction _$replacer(k){return k in _$context?_$context[k]:this[k];}',
     	"\n\tvar _$context = arguments[0];",
-    	"\n\tvar _$out = [];"
-    ];
-    var vs = findStatus(code);
+    	"\n\tvar _$out = [];")
+    
+    
+    delete vs.refs['for'];
     for(var n in vs.refs){
     	buf.push('\n\tvar ',n,'=_$replacer("',n,'");')
     }
+    
     for(var i=0;i<vs.defs.length;i++){
     	n = vs.defs[i].name;
      	buf.push('\n\tvar ',n,'="',n,'" in _$context?_$context["',n,'"]:',n,';')
     }
     if(vs.useReplacer){
-    	buf.push('\n\_$replacer = function(c){return "&#"+c.charCodeAt()+";";}')
+    	buf.push('\n\t_$replacer = function(c){return "&#"+c.charCodeAt()+";";}')
     }
-    var idpool = new IDPool(0);
     try{
-        appendCode(code,buf,idpool,2);
+        appendCode(code,buf,idpool,1);
     }catch(e){
         //alert(["编译失败：",buf.join(""),code])
         throw e;

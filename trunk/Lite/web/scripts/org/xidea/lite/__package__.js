@@ -8,7 +8,7 @@ this.addScript('expression.js',["Expression","evaluate"]
 this.addScript('parser.js',"*"
                ,0
                ,["buildNativeJS"]);
-this.addScript('text-parser.js',["TextParser"]
+this.addScript('text-parser.js',["TextParser","checkEL"]
                ,["Parser","parser.js"]
                ,["ExpressionTokenizer"]);
 this.addScript('xml-parser.js',"XMLParser"
@@ -21,7 +21,7 @@ this.addScript("expression-tokenizer.js","ExpressionTokenizer"
 
 this.addScript("native-compiler.js",["buildNativeJS"]
                ,0
-               ,["parser.js","findStatus"]);
+               ,["parser.js","findStatus","checkEL"]);
 this.addScript("variable-finder.js",["findStatus"]
                ,0
                ,["parser.js","expression-token.js","ExpressionTokenizer"]);

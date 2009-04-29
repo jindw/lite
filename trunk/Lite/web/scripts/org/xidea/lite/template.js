@@ -40,19 +40,46 @@ function Template(data,parser){
     //alert(this.data)
 }
 
+function processDef(context, item){
+    var fn = evaluate(item[2],context);
+    var args = fn.arguments;
+    var fn = fn.name;
+    context[fn] = function(){
+        var context = {};
+        var buf = [];
+        for(var n in this){
+            context[n] = this[n];
+        }
+        n = args.length;
+        while(n--){
+            context[args[n]] = arguments[n]
+        }
+        renderList(context,item[1],buf);
+        return buf.join('');
+    }
+}
 /**
  * 渲染模板
  * @public
  */
 Template.prototype.render = function(context){
-    var context2 = {};
     var data = this.data;
-    for(var n in context){
-        context2[n] = context[n];
-    }
     if(data instanceof Function){
-        return data(context2);
+        return data(context);
     }else{
+        var i=data.length;
+        var context2 = {};
+        while(i--){//本来是编译期处理的,偷懒,性能优化在toNative中处理吧:(
+            var item = data[i];
+            if(item instanceof Array && item[0] == ADD_ON_TYPE){
+                if(item[3] == '#def'){
+                    processDef(context2, item);
+                }
+            }
+        }
+        for(var i in context){
+            context2[i] = context[i];
+        }
         var buf = [];
         renderList(context2,data,buf);
         return buf.join("");
@@ -94,6 +121,7 @@ function renderList(context,data,out){
 	                break;
 	            case XML_ATTRIBUTE_TYPE:
 	                processAttribute(context, item, out);
+	                break;
 	            }
         	}catch(e){
         		$log.debug("render error",item,e)
@@ -101,7 +129,6 @@ function renderList(context,data,out){
         }
     }
 }
-
 /**
  * 构建表达式
  * el             [EL_TYPE,expression]

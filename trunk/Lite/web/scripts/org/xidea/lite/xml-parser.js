@@ -171,6 +171,7 @@ function parseDefTag(node){
     var result = this.result;
     var mark = result.length;
     ns = ns.replace(/^\s+|\s+$/g,'').split(/[^\w]+/);
+    ns.pop();
     var el = ['{"name":"',ns[0],'","arguments":['];
     for(var i=1;i<ns.length;i++){
     	if(i>1){
@@ -179,7 +180,8 @@ function parseDefTag(node){
     	el.push('"',ns[i],'"');
     }
     el.push("]}")
-    this.append([ADD_ON_TYPE,el.join(''),"#def"]);
+    //prompt('',el.join(''))
+    this.append([ADD_ON_TYPE,this.parseEL(el.join('')),"#def"]);
     if(next){
         do{
             this.parseNode(next)

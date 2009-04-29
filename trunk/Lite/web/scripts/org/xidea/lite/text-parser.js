@@ -114,7 +114,7 @@ function parseFN(fn,expression){
  * 异常一定要抛出去，让parseText做回退处理
  */
 TextParser.prototype.parseEL = function(expression){
-    new Function(expression.replace(/\bfor\b/g,"f"));
+    checkEL(expression.replace(/\bfor\b/g,"f"));
     try{
         if(this.nativeJS){
             return expression;
@@ -130,14 +130,16 @@ TextParser.prototype.parseEL = function(expression){
 function parseFor(el){
     //与CT相差太远
     try{
-        new Function(el);
+        checkEL(el);
         el = '{'+el+'}'
     }catch(e){
-        new Function(el = '['+el+']');
+        checkEL(el = '['+el+']');
     }
 }
 
-
+function checkEL(el){
+    new Function("return "+el)
+}
 
 function xmlReplacer(c){
     switch(c){

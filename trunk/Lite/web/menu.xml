@@ -196,6 +196,30 @@
   [${myName}]
 </div>]]></source>
 	</entry>
+	<entry key="函数申明">
+		<description><![CDATA[<h3>函数申明</h3：
+		<h4>属性表：</h4>
+		<ul>
+			<li>name : 变量名称和参数列表。</li>
+		</ul>
+		<h4>功能：</h4>
+		<ul>
+			<li>定义字符串拼接函数。  </li>
+		</ul>]]></description>
+		<context><![CDATA[
+{
+  "user":{
+    "firstName":"jin",
+    "lastName":"dawei"
+  }
+}]]></context>
+		<source><![CDATA[<div xmlns:c="http://www.xidea.org/ns/template/core">
+  <c:def name="test(user2)" >
+    ${user2.firstName} ${user2.lastName}
+  </c:def>
+  [${test(user)}]
+</div>]]></source>
+	</entry>
 
 
 	<entry key="简单包含">
@@ -221,13 +245,13 @@
 
 	<entry key="PageMesh">
 		<description><![CDATA[<h3>页面装饰：</h3>
-		<p>改功能不便在此演示，希望了解更多，请参看：<a href="http://code.google.com/p/lite/wiki/XML_Lite_PageMesh">XML_Lite_PageMesh</a>
+		<p>改功能不便在此演示，希望了解更多，请参看：<a href="http://code.google.com/p/lite/wiki/XMLLitePageMesh">XMLLitePageMesh</a>
 		</p>]]></description>
 		<context><![CDATA[
-{"url":"http://code.google.com/p/lite/wiki/XML_Lite_PageMesh"}
+{"url":"http://code.google.com/p/lite/wiki/XMLLitePageMesh"}
 		]]></context>
 		<source><![CDATA[<!-- 
-改功能不便在此演示，希望了解更多，请参看：<a href="http://code.google.com/p/lite/wiki/XML_Lite_PageMesh">XML_Lite_PageMesh</a>
+改功能不便在此演示，希望了解更多，请参看：<a href="http://code.google.com/p/lite/wiki/XMLLitePageMesh">XMLLitePageMesh</a>
 -->
 <a href="${url}">${url}</a>]]></source>
 	</entry>
