@@ -32,7 +32,7 @@
 			<param-value>text/html;charset=UTF-8</param-value>
 		</init-param>
 		<init-param>
-			<param-name>xpathFactory</param-name>
+			<param-name>javax.xml.xpath.XPathFactory</param-name>
 			<param-value>
 				org.apache.xpath.jaxp.XPathFactoryImpl
 			</param-value>
