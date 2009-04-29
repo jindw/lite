@@ -144,6 +144,10 @@ XMLParser.prototype.addParser(function(node){//for
             case 'when':
             case 'otherwise':
                 break;
+            case 'def':
+            case 'macro':
+            	parseDefTag.call(this,node);
+                break;
             
             
             //for other
@@ -161,6 +165,19 @@ XMLParser.prototype.addParser(function(node){//for
 /**
  * 
  */
+function parseDefTag(node){
+    var next = node.firstChild;
+    var ns = getAttribute(this,node,'name',false,true);
+    ns = ns.replace(/^\s+|\s+$/g,'').split(/[^\w]+/);
+    var el = ['{"name":',ns[0]];
+    this.append([ADD_ON_TYPE,el,"#def"]);
+    if(next){
+        do{
+            this.parseNode(next)
+        }while(next = next.nextSibling)
+    }
+    this.append([]);
+}
 function processIncludeTag(node){
     var var_ = getAttribute(this,node,'var');
     var path = getAttribute(this,node,'path');

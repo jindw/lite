@@ -204,6 +204,15 @@ var fns = {
 								+ "@" + this.start);
 					}
 					break;
+				}else if(this.status != STATUS_EXPRESSION){
+					var end = findRegExp(this.value,this.start);
+					if(end>0){
+						this.addToken([VALUE_CONSTANTS,
+							window.eval(
+								this.value.substring(this.start-1,end))]);
+						this.start = end;
+						break;
+					}
 				}
 			default:
 				this.addToken([findTokenType(op)]);
@@ -219,7 +228,6 @@ var fns = {
 		} else {
 			this.addToken([findTokenType(op)]);
 		}
-
 	},
 
 	addToken :function(token) {
@@ -268,6 +276,30 @@ var fns = {
 var pt = new JSONTokenizer('');
 for(var n in fns){
     pt[n] = fns[n]
+}
+function findRegExp(text,start){
+	var depth=0,c;
+	while(c = text.charAt(start++)){
+	    if(c=='['){
+	    	depth = 1;
+	    }else if(c==']'){
+	    	depth = 0;
+	    }else if (c == '\\') {
+	        start++;
+	    }else if(depth == 0 && c == '/'){
+	    	while(c = text.charAt(start++)){
+	    		switch(c){
+	    			case 'g':
+	    			case 'i':
+	    			case 'm':
+	    			break;
+	    			default:
+	    			return start-1;
+	    		}
+	    	}
+	    	
+	    }
+	}
 }
 function ExpressionTokenizer(value){
     this.value = value.replace(/^\s+|\s+$/g,'');

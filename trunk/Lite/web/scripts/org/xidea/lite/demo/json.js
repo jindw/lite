@@ -82,6 +82,8 @@ function serialize(value) {
                     buf[i] = serialize(value[i]) || 'null';
                 }
                 return '[' + buf.join(',') + ']';
+            }else if(value instanceof RegExp){
+            	return value+'';
             }
             for (var k in value) {
                 var v = serialize(value[k]);
