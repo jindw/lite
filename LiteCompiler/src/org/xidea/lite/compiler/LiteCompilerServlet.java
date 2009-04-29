@@ -153,11 +153,11 @@ public class LiteCompilerServlet extends HttpServlet {
 		return featrue;
 	}
 
-	private HttpServletRequest wrapRequest(HttpServletRequest req)
+	private HttpServletRequest wrapRequest(final HttpServletRequest req)
 			throws IOException {
 		if (isMultiPart(req)) {
 			final HashMap<String, List<String>> params = getMutiParams(req);
-			req = new HttpServletRequestWrapper(req) {
+			return new HttpServletRequestWrapper(req) {
 				@Override
 				public String getParameter(String name) {
 					String[] v = getParameterValues(name);
@@ -168,37 +168,36 @@ public class LiteCompilerServlet extends HttpServlet {
 				public String[] getParameterValues(String name) {
 					List<String> v = params.get(name);
 					if (v == null) {
-						return findPhpParams(this, name);
+						return findPhpParams(req, name);
 					} else {
 						return v.toArray(new String[v.size()]);
 					}
 				}
 			};
 		} else {
-			req = new HttpServletRequestWrapper(req) {
+			return new HttpServletRequestWrapper(req) {
 
 				@Override
 				public String[] getParameterValues(String name) {
 					String[] v = super.getParameterValues(name);
 					if (v == null) {
-						return findPhpParams(this, name);
+						return findPhpParams(req, name);
 					} else {
 						return v;
 					}
 				}
 			};
 		}
-		return req;
 	}
 
-	private String[] findPhpParams(HttpServletRequest req, String name) {
-		String[] source = req.getParameterValues(name);
+	private String[] findPhpParams(ServletRequest servletRequest, String name) {
+		String[] source = servletRequest.getParameterValues(name);
 		if (source == null) {
 			ArrayList<String> values = new ArrayList<String>();
 			int i = 0;
 			name = name + '[';
 			while (true) {
-				String value = req.getParameter(name + (i++) + ']');
+				String value = servletRequest.getParameter(name + (i++) + ']');
 				if (value == null) {
 					break;
 				} else {
