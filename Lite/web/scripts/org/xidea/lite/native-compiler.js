@@ -107,16 +107,26 @@ function(context)
 	replace = function(c){return "&#"+c.charCodeAt()+";";}
  */
 function buildNativeJS(code){
-    var buf = [];
+    var buf = [
+    	'\n\tfunction _$replacer(k){return k in _$context?_$context[k]:this[k];}',
+    	"\n\tvar _$context = arguments[0];",
+    	"\n\tvar _$out = [];"];
     
     var idpool = new IDPool(0);
     var vs = findStatus(code);
     idpool.hasFor = !!vs.refs['for'];
     
+    
+    
+    delete vs.refs['for'];
+    for(var n in vs.refs){
+    	buf.push('\n\tvar ',n,'=_$replacer("',n,'");')
+    }
     //add function
     for(var i=0;i<vs.defs.length;i++){
         def = vs.defs[i];
-        buf.push("\n\tfunction ",def.name,"(");
+        var n = def.name;
+        buf.push("\n\tfunction ",n,"(");
         for(var j=0;j<def.arguments.length;j++){
             buf.push(def.arguments[j]);
             buf.push(",")
@@ -124,21 +134,8 @@ function buildNativeJS(code){
         buf.push("_$out){\n\t\tvar _$out=[];");
         appendCode(def.code,buf,idpool,2);
         buf.push("\n\t\treturn _$out.join('');\n\t}");
-    }
-    buf.push(
-    	'\n\tfunction _$replacer(k){return k in _$context?_$context[k]:this[k];}',
-    	"\n\tvar _$context = arguments[0];",
-    	"\n\tvar _$out = [];")
-    
-    
-    delete vs.refs['for'];
-    for(var n in vs.refs){
-    	buf.push('\n\tvar ',n,'=_$replacer("',n,'");')
-    }
-    
-    for(var i=0;i<vs.defs.length;i++){
-    	n = vs.defs[i].name;
-     	buf.push('\n\tvar ',n,'="',n,'" in _$context?_$context["',n,'"]:',n,';')
+     	buf.push('\n\tif("',n,'" in _$context){',n,'=_$context["',n,'"];}')
+        
     }
     if(vs.useReplacer){
     	buf.push('\n\t_$replacer = function(c){return "&#"+c.charCodeAt()+";";}')
