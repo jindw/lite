@@ -168,15 +168,26 @@ XMLParser.prototype.addParser(function(node){//for
 function parseDefTag(node){
     var next = node.firstChild;
     var ns = getAttribute(this,node,'name',false,true);
+    var result = this.result;
+    var mark = result.length;
     ns = ns.replace(/^\s+|\s+$/g,'').split(/[^\w]+/);
-    var el = ['{"name":',ns[0]];
-    this.append([ADD_ON_TYPE,el,"#def"]);
+    var el = ['{"name":"',ns[0],'","arguments":['];
+    for(var i=1;i<ns.length;i++){
+    	if(i>1){
+    		el.push(",")
+    	}
+    	el.push('"',ns[i],'"');
+    }
+    el.push("]}")
+    this.append([ADD_ON_TYPE,el.join(''),"#def"]);
     if(next){
         do{
             this.parseNode(next)
         }while(next = next.nextSibling)
     }
     this.append([]);
+    var old = result.splice(0,mark);
+    result.push.apply(result,old);
 }
 function processIncludeTag(node){
     var var_ = getAttribute(this,node,'var');

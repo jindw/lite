@@ -21,6 +21,11 @@ this.addScript("expression-tokenizer.js","ExpressionTokenizer"
 
 this.addScript("native-compiler.js",["buildNativeJS"]
                ,0
-               ,"parser.js");
+               ,["parser.js","findStatus"]);
+this.addScript("variable-finder.js",["findStatus"]
+               ,0
+               ,["parser.js","expression-token.js","ExpressionTokenizer"]);
+
+
 
 //this.addDependence('template.js',"xml-parser.js");
