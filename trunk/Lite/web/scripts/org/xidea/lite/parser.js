@@ -155,6 +155,7 @@ function buildTreeResult(result){
 				case CAPTRUE_TYPE:
 				case IF_TYPE:
 				case ELSE_TYPE:
+				case ADD_ON_TYPE:
 				case FOR_TYPE:
 					cmd2.push(null);
 					stack.push(current = []);

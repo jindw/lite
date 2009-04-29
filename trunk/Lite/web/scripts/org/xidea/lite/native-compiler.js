@@ -1,6 +1,6 @@
 var ID_PREFIX = "_$";
 
-var SAFE_FOR_KEY = "_$0['for']";
+var SAFE_FOR_KEY = "_$context";
 
 /**
  * IE 好像容易出问题，可能是线程不安全导致。
@@ -98,35 +98,52 @@ function getEL(el){
         throw new Error("json->el 尚未实现：（\n"+el);
     }
 }
+/**
+
+function(context)
+	function replacer(k){return k in context?context[k]:this[k];}
+	var var1 = replacer("var1")
+	var var2 = replacer("var2")
+	replace = function(c){return "&#"+c.charCodeAt()+";";}
+ */
 function buildNativeJS(code){
     var buf = [
-        '\t_$1={};\n',
-        '\tfor(_$2 in _$0){_$1[_$2]=_$0[_$2]};\n',
-        '\t_$0=_$1,_$1=[];\n',
-        '\t_$2=function(c){return "&#"+c.charCodeAt()+";";}\n',
-        "\twith(_$0){"
+    	'\n\tfunction _$replacer(k){return k in _$context?_$context[k]:this[k];}',
+    	"\n\tvar _$context = arguments[0];",
+    	"\n\tvar _$out = [];"
     ];
-    var idpool = new IDPool(3);
+    var vs = findStatus(code);
+    for(var n in vs.refs){
+    	buf.push('\n\tvar ',n,'=_$replacer("',n,'");')
+    }
+    for(var i=0;i<vs.defs.length;i++){
+    	n = vs.defs[i].name;
+     	buf.push('\n\tvar ',n,'="',n,'" in _$context?_$context["',n,'"]:',n,';')
+    }
+    if(vs.useReplacer){
+    	buf.push('\n\_$replacer = function(c){return "&#"+c.charCodeAt()+";";}')
+    }
+    var idpool = new IDPool(0);
     try{
         appendCode(code,buf,idpool,2);
     }catch(e){
         //alert(["编译失败：",buf.join(""),code])
         throw e;
     }
-    buf.push("\n\t}\n\treturn _$1.join('');");
+    buf.push("\n\treturn _$out.join('');");
     return buf.join('');
 }
 /**
- * _$0 context
- * _$1 buf
- * _$2 xmlReplacer
+ * _$context context
+ * _$out buf
+ * _$replacer xmlReplacer
  */
 function appendCode(code,buf,idpool,depth){
 	for(var i=0;i<code.length;i++){
 		var item = code[i];
 		printIndex(buf,depth);
 		if(typeof item == 'string'){
-			buf.push("_$1.push(",encodeString(item),");")
+			buf.push("_$out.push(",encodeString(item),");")
 		}else{
 			switch(item[0]){
             case EL_TYPE:
@@ -162,10 +179,10 @@ function appendCode(code,buf,idpool,depth){
 	}
 }
 function processEL(item,buf){
-	buf.push("_$1.push(",getEL(item[1]),");")
+	buf.push("_$out.push(",getEL(item[1]),");")
 }
 function processXMLText(item,buf){
-    buf.push("_$1.push(String(",getEL(item[1]),").replace(/[<>&]/g,_$2));")
+    buf.push("_$out.push(String(",getEL(item[1]),").replace(/[<>&]/g,_$replacer));")
 }
 function processXMLAttribute(item,buf,idpool,depth){
     //[7,[[0,"value"]],"attribute"]
@@ -175,11 +192,11 @@ function processXMLAttribute(item,buf,idpool,depth){
         var testId = idpool.get();
         printIndex(buf,depth,"var ",testId,"=",value);
         printIndex(buf,depth,"if(",testId,"!=null){");
-        printIndex(buf,depth+1,"_$1.push(' ",attributeName,"=\"',String(",testId,").replace(/<>&\"/g,_$2),'\"')");
+        printIndex(buf,depth+1,"_$out.push(' ",attributeName,"=\"',String(",testId,").replace(/<>&\"/g,_$replacer),'\"')");
         printIndex(buf,depth,"}");
         idpool.free(testId);
     }else{
-    	buf.push("_$1.push(String(",value,").replace(/[<>&\"]/g,_$2));")
+    	buf.push("_$out.push(String(",value,").replace(/[<>&\"]/g,_$replacer));")
     }
 }
 function processVar(item,buf){
@@ -189,9 +206,9 @@ function processCaptrue(item,buf,idpool,depth){
     var childCode = item[1];
     var varName = item[2];
     var bufbak = idpool.get();
-    buf.push("var ",bufbak,"=_$1;_$1=[];");
+    buf.push("var ",bufbak,"=_$out;_$out=[];");
     appendCode(childCode,buf,idpool,depth);
-    buf.push("var ",varName,"=_$1.join('');_$1=",bufbak,";");
+    buf.push("var ",varName,"=_$out.join('');_$out=",bufbak,";");
     idpool.free(bufbak);
 }
 function processIf(code,i,buf,idpool,depth){
@@ -250,21 +267,21 @@ function processFor(code,i,buf,idpool,depth){
     //初始化 for状态
     var needForStatus = childInfo.hasForRef;
     if(needForStatus){
-        printIndex(buf,depth,"var ",previousForValueId ,"=_$0['for'];");
+        printIndex(buf,depth,"var ",previousForValueId ,"=_$context;");
         var forVar= [];
-        forVar.push("_$0['for'] = {lastIndex:",itemsId,".length-1};");
+        forVar.push("_$context = {lastIndex:",itemsId,".length-1};");
         printIndex(buf,depth, forVar.join(""));
     }
     printIndex(buf,depth,"for(;",indexId,"<",itemsId,".length;",indexId,"++){");
     if(needForStatus){
-        printIndex(buf,depth+1,"_$0['for'].index=",indexId,";");
+        printIndex(buf,depth+1,"_$context.index=",indexId,";");
     }
     printIndex(buf,depth+1,"var ",varNameId,"=",itemsId,"[",indexId,"];");
     appendCode(childCode,buf,idpool,depth+1)
     printIndex(buf,depth,"}");
     
     if(needForStatus){
-       printIndex(buf,depth ,"_$0['for']=",previousForValueId);
+       printIndex(buf,depth ,"_$context=",previousForValueId);
     }
     idpool.free(itemsId);;
     idpool.free(previousForValueId);
