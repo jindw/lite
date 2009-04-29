@@ -113,7 +113,7 @@ Parser.prototype = {
             try{
                 var result =  new Function(code);
                 result.toString=function(){//_$1 encodeXML
-                    return "function(){\n"+code+"\n}"
+                    return "function(){"+code+"\n}"
                 }
                 return result;
             }catch(e){

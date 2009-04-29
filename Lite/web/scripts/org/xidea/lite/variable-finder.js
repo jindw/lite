@@ -42,15 +42,21 @@ function doFindDef(item,pvs){
 	var el = window.eval('('+item[2]+')');
 	pvs.addVar(el.name);
 	var vs = new VarStatus();
-	vs.vars = el.arguments;
-	vs.arguments = vs.vars.slice(0)
+	var args = el.arguments.slice(0);
+	vs.arguments = args;
+	for(var i=0;i<args.length;i++){
+	    vs.vars[args[i]] = true;
+	}
 	vs.name = el.name;
 	vs.code = item[1];
 	pvs.defs.push(vs);
 	doFind(item[1],vs);
 	for(var n in vs.refs){
-		if(!pvs.vars[n]){
-			pvs.refs[n] = true;
+		if(!vs.vars[n]){
+			vs.refs[n] = true;
+			if(!pvs.vars[n]){
+			    pvs.refs[n] = true;
+			}
 		}
 	}
 	pvs.useReplacer = pvs.useReplacer || vs.useReplacer;
