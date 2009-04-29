@@ -28,7 +28,7 @@ function _evaluate(stack, tokens,context){
                 break;
             case VALUE_VAR:
                 arg1 = item[1]
-                stack.push("this" == arg1?context:(arg1 in context?context:this)[arg1]);
+                stack.push((arg1 in context?context:this)[arg1]);
                 break;
             case VALUE_LAZY:
                 stack.push(new LazyToken(item[1]));
@@ -42,7 +42,7 @@ function _evaluate(stack, tokens,context){
                     arg2=arg1;
                     arg1 = stack.pop();
                 }
-                arg1 = compute(item, arg1, arg2)
+                arg1 = compute(item, arg1, arg2,context)
                 if(arg1 instanceof LazyToken){
                     _evaluate(stack, arg1.data, context)
                 } else{
@@ -57,11 +57,11 @@ function realValue(arg1){
     }
     return arg1;
 }
-function compute(op,arg1,arg2){
+function compute(op,arg1,arg2,thiz){
     var type = op[0];
     if(type == OP_INVOKE_METHOD){
     	if(arg1 instanceof Function){
-            return arg1.apply(null,arg2);
+            return arg1.apply(thiz,arg2);
     	}else if(arg1 instanceof PropertyValue){
             return arg1[0][arg1[1]].apply(arg1[0],arg2);
     	}else{

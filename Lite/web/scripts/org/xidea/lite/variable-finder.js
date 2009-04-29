@@ -1,7 +1,6 @@
 function findStatus(code){
 	var vs = new VarStatus();
 	doFind(code,vs);
-	delete vs.refs['for']
 	return vs;
 }
 function parseEL(el){
@@ -46,11 +45,12 @@ function doFindDef(item,pvs){
 	vs.vars = el.arguments;
 	vs.arguments = vs.vars.slice(0)
 	vs.name = el.name;
+	vs.code = item[1];
 	pvs.defs.push(vs);
 	doFind(item[1],vs);
 	for(var n in vs.refs){
-		if(!this.vars[n]){
-			this.refs[n] = true;
+		if(!pvs.vars[n]){
+			pvs.refs[n] = true;
 		}
 	}
 	pvs.useReplacer = pvs.useReplacer || vs.useReplacer;
