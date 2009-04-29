@@ -19,7 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.lite.parser.ParseContext;
-import org.xidea.lite.parser.ParseContextImpl;
+import org.xidea.lite.parser.impl.ParseContextImpl;
 
 /**
  * 因为GAE不支持文件读写，所只能覆盖这些实现了
@@ -78,7 +78,7 @@ public class TemplateServlet extends org.xidea.lite.servlet.TemplateServlet {
 		@Override
 		protected ParseContext createParseContext() {
 			try {
-				ParseContext context = new ParseContextImpl(getResource("/")) {
+				ParseContext context = new ParseContextImpl(getResource("/"),featrues,null,null) {
 
 					@Override
 					public InputStream getInputStream(URL url) {
@@ -94,9 +94,7 @@ public class TemplateServlet extends org.xidea.lite.servlet.TemplateServlet {
 					}
 
 				};
-				context.setCompress(compress);
-				context.setFormat(format);
-				context.setFeatrueMap(featrues);
+				//context.setFeatrueMap();
 				return context;
 			} catch (MalformedURLException e) {
 				throw new RuntimeException(e);
