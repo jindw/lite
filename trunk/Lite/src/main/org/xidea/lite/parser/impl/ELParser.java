@@ -1,11 +1,14 @@
 package org.xidea.lite.parser.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.xidea.el.ExpressionSyntaxException;
 import org.xidea.lite.Template;
 import org.xidea.lite.parser.InstructionParser;
 import org.xidea.lite.parser.ParseContext;
 
 public class ELParser implements InstructionParser {
+	private static final Log log = LogFactory.getLog(ELParser.class);
 	public static InstructionParser EL = new ELParser("", true);
 	public static InstructionParser IF = new ELParser("if", true) {
 		protected void addEl(ParseContext context, String text) {
@@ -144,16 +147,16 @@ public class ELParser implements InstructionParser {
 	/**
 	 * 
 	 * @param text
-	 * @param elBegin
+	 * @param elQuteBegin
 	 *            {的位置
 	 * @return }的位置
 	 */
-	protected int findELEnd(String text, int elBegin) {
+	protected int findELEnd(String text, final int elQuteBegin) {
 		int length = text.length();
-		if (elBegin >= length) {
+		int next = elQuteBegin + 1;
+		if (next >= length) {
 			return -1;
 		}
-		int next = elBegin + 1;
 		char stringChar = 0;
 		int depth = 0;
 		do {
@@ -182,8 +185,78 @@ public class ELParser implements InstructionParser {
 						return next;
 					}
 				}
+				break;
+			case '/':// 如果是正则，需要跳过正则
+				boolean isRegExp = isRegExp(text, elQuteBegin, next);
+				if (isRegExp) {
+					int end = findRegExpEnd(text, next);
+					if(end >0){
+						next = end;
+					}else{
+						log.error("无效状态");
+					}
+				}
 			}
 		} while (++next < length);
+		return -1;
+	}
+
+	private static boolean isRegExp(String text, final int elQuteBegin,
+			int regExpStart) {
+		for (int i = regExpStart-1; i > elQuteBegin; i--) {
+			char pc = text.charAt(i);
+			if (!Character.isWhitespace(pc)) {
+				if (Character.isJavaIdentifierPart(pc)) {
+					return false;// 有效id后，不可能是正则
+				} else {
+					switch (pc) {
+					case ']':// 伪有效id后，不可能是正则
+					case ')':
+					case '}':
+						return false;
+						// case '{'
+						// case '[':
+						// case '(':
+						// 伪开头，不可能是除号，是正则
+						// isRegExp = true;
+						// break;
+						// +-*/ 非后缀运算符后，一定是正则，非运算符
+					default:
+						return true;
+					}
+				}
+			}
+		}
+		// 开头出现时，是正则
+		return true;
+	}
+
+	private static int findRegExpEnd(String text, int regExpStart) {
+		int length = text.length();
+		int depth = 0;
+		for (regExpStart++; regExpStart < length; regExpStart++) {
+			char rc = text.charAt(regExpStart);
+			if (rc == '[') {
+				depth = 1;
+			} else if (rc == ']') {
+				depth = 0;
+			} else if (rc == '\\') {
+				regExpStart++;
+			} else if (depth == 0 && rc == '/') {
+				while (regExpStart < length) {
+					rc = text.charAt(regExpStart++);
+					switch (rc) {
+					case 'g':
+					case 'i':
+					case 'm':
+						break;
+					default:
+						return regExpStart - 1;
+					}
+				}
+
+			}
+		}
 		return -1;
 	}
 
