@@ -18,6 +18,7 @@ import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.impl.ELParser;
 import org.xidea.lite.parser.impl.Java6JSBuilder;
 import org.xidea.lite.parser.impl.ParseContextImpl;
+import org.xidea.lite.parser.impl.RhinoJSBuilder;
 import org.xml.sax.SAXException;
 
 public class ClientJSBuilderTest {
@@ -47,6 +48,8 @@ public class ClientJSBuilderTest {
 		context2.parse(context2.loadXML(url));
 		List<Object> liteCode = context2.toList();
 		String result = new Java6JSBuilder().buildJS(liteCode, "test");
+		String result2 = new RhinoJSBuilder().buildJS(liteCode, "test");
+		Assert.assertEquals(result, result2);
 		System.out.println("==JS Code==");
 		System.out.println(result);
 		boolean isError = Pattern.compile("[\r\n]alert", Pattern.MULTILINE)
