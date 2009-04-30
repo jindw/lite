@@ -30,22 +30,22 @@ public class Java6JSBuilder implements JSBuilder {
 
 		parentScope = jsengine.createBindings();
 		ClassLoader loader = Java6JSBuilder.class.getClassLoader();
-
 		try {
-			InputStream uncompressedParser = loader
-					.getResourceAsStream("org/xidea/lite/parser.js");
-			InputStream uncompressedCompiler = loader
-					.getResourceAsStream("org/xidea/lite/native-compiler.js");
-			InputStream compressed = loader
-					.getResourceAsStream("org/xidea/lite/template.js");
-			if (uncompressedParser != null && uncompressedCompiler != null) {
-				jsengine.eval(
-						new InputStreamReader(uncompressedParser, "utf-8"),
-						parentScope);
-				jsengine.eval(new InputStreamReader(uncompressedCompiler,
-						"utf-8"), parentScope);
-			} else {
-				jsengine.eval(new InputStreamReader(compressed, "utf-8"),
+			InputStream boot = loader
+					.getResourceAsStream("boot.js");
+			if (boot != null) {
+				try {
+					jsengine.eval(
+							new InputStreamReader(boot, "utf-8"),
+							parentScope);
+					jsengine.eval("$import('org.xidea.lite:buildNativeJS')", parentScope);
+				} catch (Exception e) {
+					log.debug("尝试JSI启动编译脚本失败", e);
+				}
+			}
+			if (boot == null) {
+				jsengine.eval(new InputStreamReader(loader
+						.getResourceAsStream("org/xidea/lite/template.js"), "utf-8"),
 						parentScope);
 			}
 		} catch (Exception e) {
@@ -89,7 +89,7 @@ public class Java6JSBuilder implements JSBuilder {
 					+ ")";
 			log.warn("生成js代码失败：", e);
 		}
-		return "function " + name + "(_$0,_$1,_$2){\n" + code + "\n}";
+		return "function " + name + "(){\n" + code + "\n}";
 	}
 
 	public String compress(String source) {

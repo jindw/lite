@@ -26,19 +26,21 @@ public class RhinoJSBuilder implements JSBuilder {
 	private static Scriptable scope = ScriptRuntime.getGlobal(context);
 
 	static {
-		ClassLoader loader = RhinoJSBuilder.class.getClassLoader();
+		ClassLoader loader = Java6JSBuilder.class.getClassLoader();
 		try {
-			InputStream uncompressedParser = loader
-					.getResourceAsStream("org/xidea/lite/parser.js");
-			InputStream uncompressedCompiler = loader
-					.getResourceAsStream("org/xidea/lite/native-compiler.js");
-			InputStream compressed = loader
-					.getResourceAsStream("org/xidea/lite/template.js");
-			if (uncompressedParser != null && uncompressedCompiler != null) {
-				eval(new InputStreamReader(uncompressedParser, "utf-8"));
+			InputStream boot = loader.getResourceAsStream("boot.js");
 
-				eval(new InputStreamReader(uncompressedCompiler, "utf-8"));
-			} else {
+			if (boot != null) {
+				try {
+					eval(new InputStreamReader(boot, "utf-8"));
+					eval("$import('org.xidea.lite:buildNativeJS')");
+				} catch (Exception e) {
+					log.debug("尝试JSI启动编译脚本失败", e);
+				}
+			}
+			if (boot == null) {
+				InputStream compressed = loader
+						.getResourceAsStream("org/xidea/lite/template.js");
 				eval(new InputStreamReader(compressed, "utf-8"));
 			}
 		} catch (Exception e) {
@@ -50,12 +52,13 @@ public class RhinoJSBuilder implements JSBuilder {
 		StringWriter out = new StringWriter();
 		int count;
 		char[] cbuf = new char[1024];
-		while((count = in.read(cbuf))>-1){
-			out.write(cbuf,0,count);
+		while ((count = in.read(cbuf)) > -1) {
+			out.write(cbuf, 0, count);
 		}
 		return eval(out.toString());
-		
+
 	}
+
 	private static Object eval(String source) {
 		return context.evaluateString(scope, source, "<file>", 1, null);
 	}
@@ -82,19 +85,18 @@ public class RhinoJSBuilder implements JSBuilder {
 		penv.setReservedKeywordAsIdentifier(true);
 	}
 
-	public String buildJS(List<Object> liteCode,String name) {
+	public String buildJS(List<Object> liteCode, String name) {
 		String source = JSONEncoder.encode(liteCode);
 		String code;
 		try {
-			code = (String) eval("buildNativeJS(eval(" + source
-					+ "))+''");
+			code = (String) eval("buildNativeJS(eval(" + source + "))+''");
 			eval("+function(){" + code + "}");
 		} catch (Exception e) {
 			code = "alert('生成js代码失败：'+" + JSONEncoder.encode(e.getMessage())
 					+ ")";
 			log.warn("生成js代码失败：", e);
 		}
-		return "function " + name + "(_$0,_$1,_$2){\n" + code + "\n}";
+		return "function " + name + "(){\n" + code + "\n}";
 	}
 
 	public String compress(String source) {
