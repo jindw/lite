@@ -20,17 +20,19 @@ import org.xidea.el.impl.ValueStackImpl;
 
 public class Template {
 	private static Log log = LogFactory.getLog(Template.class);
-	public static final int EL_TYPE = 0;            // [0,<el>]
-	public static final int IF_TYPE = 1;            // [1,[...],<test el>]
-	public static final int BREAK_TYPE = 2;         // [2,depth]
+	public static final int EL_TYPE = 0; // [0,<el>]
+	public static final int IF_TYPE = 1; // [1,[...],<test el>]
+	public static final int BREAK_TYPE = 2; // [2,depth]
 	public static final int XML_ATTRIBUTE_TYPE = 3; // [3,<value el>,'name']
-	public static final int XML_TEXT_TYPE = 4;      // [4,<el>]
-	public static final int FOR_TYPE = 5;           // [5,[...],<items el>,'varName']/
-	public static final int ELSE_TYPE = 6;          // [6,[...],<test el>] //<test el> 可为null
-	public static final int ADD_ON_TYPE =7;        // [7,[...],<add on el>,'<addon-class>']
-	public static final int VAR_TYPE = 8;           // [8,<value el>,'name']
-	public static final int CAPTRUE_TYPE = 9;       // [9,[...],'var']
-	
+	public static final int XML_TEXT_TYPE = 4; // [4,<el>]
+	public static final int FOR_TYPE = 5; // [5,[...],<items el>,'varName']/
+	public static final int ELSE_TYPE = 6; // [6,[...],<test el>] //<test el>
+											// 可为null
+	public static final int ADD_ON_TYPE = 7; // [7,[...],<add on
+												// el>,'<addon-class>']
+	public static final int VAR_TYPE = 8; // [8,<value el>,'name']
+	public static final int CAPTRUE_TYPE = 9; // [9,[...],'var']
+
 	public static final String FOR_KEY = "for";
 	protected Map<String, Object> gloabls = new HashMap<String, Object>(
 			ExpressionFactoryImpl.DEFAULT_GLOBAL_MAP);
@@ -50,9 +52,9 @@ public class Template {
 	public void render(Object context, Writer out) throws IOException {
 		Context contextMap;
 		if (context == null) {
-			contextMap =  new Context(gloabls);
+			contextMap = new Context(gloabls);
 		} else {
-			contextMap = new Context(gloabls,context);
+			contextMap = new Context(gloabls, context);
 		}
 		renderList(contextMap, items, out);
 	}
@@ -74,7 +76,7 @@ public class Template {
 				final Object[] cmd = data.toArray();
 				final int type = ((Number) cmd[0]).intValue();
 				cmd[0] = type;
-				
+
 				switch (type) {
 				case ADD_ON_TYPE:
 					compileAddOns(cmd, result);
@@ -123,7 +125,7 @@ public class Template {
 						.newInstance();
 				ReflectUtil.setValues(addOnInstance, attributeMap);
 				List<Object> result2 = addOnInstance.compile(this, children);
-				if(result2!=null){
+				if (result2 != null) {
 					result.addAll(result2);
 				}
 			}
@@ -135,9 +137,8 @@ public class Template {
 		}
 	}
 
-	protected void renderList(
-			final Context context,
-			final Object[] children, final Writer out) {
+	protected void renderList(final Context context, final Object[] children,
+			final Writer out) {
 		int index = children.length;
 		// for (final Object item : children) {
 		while (index-- > 0) {
@@ -192,8 +193,8 @@ public class Template {
 	}
 
 	@SuppressWarnings("unchecked")
-	private void prossesAddons(Context context,
-			Object[] data, Writer out) throws Exception {
+	private void prossesAddons(Context context, Object[] data, Writer out)
+			throws Exception {
 		Map<String, Object> attributeMap = (Map) ((Expression) data[1])
 				.evaluate(context);
 		RuntimeAdvice tag = (RuntimeAdvice) ((Class) data[2]).newInstance();
@@ -201,8 +202,8 @@ public class Template {
 		tag.execute(context, out);
 	}
 
-	protected void processExpression(Context context, Object[] data, Writer out,
-			boolean encodeXML) throws IOException {
+	protected void processExpression(Context context, Object[] data,
+			Writer out, boolean encodeXML) throws IOException {
 		Object value = ((Expression) data[1]).evaluate(context);
 		if (encodeXML && value != null) {
 			printXMLText(String.valueOf(value), out);
@@ -220,7 +221,7 @@ public class Template {
 				test = Boolean.FALSE;
 			}
 		} finally {
-			context.ifStatus=test;
+			context.ifStatus = test;
 		}
 
 	}
@@ -250,7 +251,7 @@ public class Template {
 		int len = 0;
 		ForStatus forStatus = new ForStatus(preiousStatus == null ? 0
 				: preiousStatus.getDepth() + 1);
-		try {//hack return 代替ifelse，减少一些判断
+		try {// hack return 代替ifelse，减少一些判断
 			context.put(FOR_KEY, forStatus);
 			if (list instanceof Map) {
 				list = ((Map) list).entrySet();
@@ -279,7 +280,7 @@ public class Template {
 				return;
 			}
 
-			if (list instanceof Number) {//算是比较少见吧
+			if (list instanceof Number) {// 算是比较少见吧
 				len = ((Number) list).intValue();
 				forStatus.setSize(len);
 				while (++forStatus.index < len) {
@@ -398,21 +399,43 @@ public class Template {
 			return --depth > 0;
 		}
 	}
-	protected static class Context extends ValueStackImpl{
+
+	/**
+	 * @author jindw
+	 */
+	protected static class Context extends ValueStackImpl {
+		boolean ifStatus = false;
+		private int readLength;
+
 		public Context(Object... stack) {
 			super(stack);
+			readLength = stack.length;
 		}
-		boolean ifStatus = false;
-		public void enter() {
-			Object[] newStack = new Object[stack.length+1];
-			System.arraycopy(stack, 0, newStack, 0, stack.length);
-			newStack[stack.length] = new HashMap<Object, Object>();
-			stack = newStack;
+
+		public void put(Object key, Object value) {
+			requireWrite();
+			ReflectUtil.setValue(stack[stack.length - 1], key, value);
 		}
-		public void exit() {
-			Object[] newStack = new Object[stack.length-1];
-			System.arraycopy(stack, 0, newStack, 0, stack.length-1);
-			stack = newStack;
+		/**
+		 * 创建新域,需要处理局部域短路问题,倒霉,真想用栈:(
+		 */
+		public Context newScope() {
+			requireWrite();
+			Context context = new Context(stack); 
+			context.requireWrite();
+			return context;
+		}
+
+		/**
+		 * 安需创建新HashMap
+		 */
+		private void requireWrite() {
+			if (stack.length == readLength) {
+				Object[] newStack = new Object[stack.length + 1];
+				System.arraycopy(stack, 0, newStack, 0, stack.length);
+				newStack[stack.length] = new HashMap<Object, Object>();
+				stack = newStack;
+			}
 		}
 	}
 
