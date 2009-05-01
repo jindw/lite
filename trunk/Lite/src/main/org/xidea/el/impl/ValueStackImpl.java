@@ -19,7 +19,7 @@ public class ValueStackImpl implements ValueStack {
 				if (result !=null || contextMap.containsKey(key)){
 					return result;
 				}
-			}else  {
+			}else if(context!=null) {
 				Object result = ReflectUtil.getValue(context, key);
 				if(result != null || ReflectUtil.getType(context.getClass(), key) != null){
 					return result;

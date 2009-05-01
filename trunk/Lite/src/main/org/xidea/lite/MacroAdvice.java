@@ -26,16 +26,13 @@ public class MacroAdvice implements CompileAdvice {
 				StringWriter out = new StringWriter();
 				int i = Math.min(args.length, arguments.length);
 				Context context = (Context) thizz;
-				try {
-					context.enter();
-					while (i-- > 0) {
-						context.put(arguments[i], args[i]);
-					}
-					template.renderList(context, children, out);
-					return out.toString();
-				} finally {
-					context.exit();
+				context = context.newScope();
+				while (i-- > 0) {
+					context.put(arguments[i], args[i]);
 				}
+				template.renderList(context, children, out);
+				return out.toString();
+
 			}
 		});
 		return null;
