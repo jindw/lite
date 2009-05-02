@@ -1,0 +1,208 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:d="http://www.xidea.org/taglib/decorator" xml:lang="zh_CN"
+	lang="zh_CN">
+	<head>
+		<meta http-equiv="Content-Type"
+			content="text/html; charset=utf-8" />
+		<meta name="keywords"
+			content="JSA,JSIntegration,JavaScript Integration,脚本,压缩,混淆" />
+		<title>JSA 简单压缩接口</title>
+		<script>
+		/*<![CDATA[*/
+/*
+ * Compressed by JSA(www.xidea.org)
+ */
+var Q="d:default-value",S="d:data-type",O="d:required",C="d:min-value",M="d:max-value",D="d:min-length",H="d:max-length",P="d:error",I=32767,E=2147483647,J=0x7fffffffffffffff;function G(){}function $($){return document.getElementById($)}G.prototype={decorate:function(){var E=$(this.id),C=E.elements,_=C.length;for(var D=0;D<_;D++){var A=C[D];if(A.name)N(A)}E.submit=B}};function B(){var F=$(this.id),E=F.cloneNode(false),_=F.elements,D=_.length;F.parentNode.insertBefore(E,F);for(var A=0;A<D;A++){var C=_[A];switch(C.tagName.toLowerCase()){case"input":case"select":if(C.name&&!C.disabled)switch(String(C.type).toLowerCase()){case"checkbox":case"radio":if(!C.checked){if(C.hasAttribute(Q)){var B=C.getAttribute(Q);C=C.cloneNode(true);C.value=B;C.checked=true;E.appendChild(C)}break}default:E.appendChild(C.cloneNode(true))}}}E.submit();E.parentNode.removeChild(E);return false}function N($){K($)}function K(B){var _=B.getAttribute(S),F=B.getAttribute(C),I=B.getAttribute(M),$=B.getAttribute(O),G=B.getAttribute(D),A=B.getAttribute(H),E=B.getAttribute(P)||"";if(_||F||I){B.onblur=R(_,F,I,$,G,A,E);B.onblur()}}function R(F,E,G,D,C,B,$){return function(){var H=this.value,K=H.length;if(!H&&!D)return;if(C!=null&&C>K)L(this,H,[$,"长度不能小于:"+C],true);else if(B!=null&&B<K)L(this,H,[$,"长度不能大于:"+B],true);else switch(F){case"float":case"double":var J=parseFloat(H);if(J!=H)L(this,H,[$,"非有效小数"],true);if(!_(J,E,G))L(this,J,[$,"数值范围越界:"+J+"->["+E+","+G+"]"],true);break;case"long":case"int":case"integer":case"short":J=parseInt(H);if(J!=H)L(this,H,[$,"非有效整数"],true);var I=A(F,G,E);if(!_(J,I[0],I[1]))L(this,J,[$,"数值范围越界:["+I+"]"],true);break}}}var F=new Date();function L(C,B,A,$){var _=new Date();confirm("验证出错,("+C.name+"="+B+"):\n"+A.join("\n"));if($&&_-F>10){C.focus();C.select()}F=new Date();return false}function A($,_,A){switch($){case"long":$=J;break;case"int":case"integer":$=E;break;case"short":$=I;break;default:$=null}if(_==null&&$)_=-1-$;if(A==null&&$)A=$;return[_,A]}function _($,_,A){return(_==null||$>=_)&&(A==null||$<=A)}
+function a(A,B,_,$){this.xhr=new XMLHttpRequest();this.onComplete=_;this.onStep=$;this.options=B=new X(A,B);this.headers={Accept:"'text/javascript, text/html, application/xml, text/xml, */*'","Content-Type":B.contentType};var C=this;this.onreadystatechange=function(){var $=C.xhr.readyState;C.onStep&&C.onStep($);if($==4){var _=C.isSuccess();C.onComplete&&C.onComplete(_);if(_)C.onSuccess&&C.onSuccess();else C.onFailure&&C.onFailure();C.free=true;C.xhr.onreadystatechange=Function.prototype}};this.free=true}a.prototype={send:function(A,_){this.free=false;var B=this.headers,$=this.options;_=_||$.sync;if(/post/i.test($.method))if(this.xhr.overrideMimeType)B.Connection="close";this.xhr.open($.method,$.url,!_);this.xhr.onreadystatechange=this.onreadystatechange;for(var C in B)this.xhr.setRequestHeader(C,B[C]);this.xhr.send(A);return this},isSuccess:function(){var $=this.getStatus();return $?$>=200&&$<300:null},getStatus:function(){var $=this.xhr;return $.readyState==4&&(($.responseText||$.responseXML)&&$.status)},putHeader:function(_,$){this.headers[_]=$;return this},getHeader:function($){if(this.xhr.readyState>=3)return this.xhr.getResponseHeader($)},evalResult:function(){if(this.xhr.readyState==4)return window.eval("("+this.xhr.responseText+")")},getResult:function(){if(/\/xml/.test(this.getHeader("Content-Type"))){if(this.xhr.readyState==4)return this.xhr.responseXML}else if(this.xhr.readyState>=3)return this.xhr.responseText},getXML:function(){if(this.xhr.readyState==4)return this.xhr.responseXML},getText:function(){if(this.xhr.readyState>=3)return this.xhr.responseText}};function X(_,A){this.url=_;if(A.constructor==String)this.method=A;else for(var $ in A)this[$]=A[$]}X.prototype={method:"post",contentType:"application/x-www-form-urlencoded",encoding:"UTF-8"};var V=new RegExp(["/\\*(?:[^\\*]|\\*[^/])*\\*/","//.*$",'"(?:\\\\(?:.|\\r|\\n|\\r\\n)|[^"\\n\\r])*"',"'(?:\\\\(?:.|\\r|\\n|\\r\\n)|[^'\\n\\r])*'","/.*/"].join("|"),"m");function d($){var D="",A=$,E;$:while(E=V.exec(A)){var C=E.index+E[0].length,E=E.index;if(A.charAt(E)=="/"){switch(A.charAt(E+1)){case"/":case"*":D+=A.substr(0,E);A=A.substr(C);continue $}try{new Function(D+A.replace(V,"/\\$&"));C=E;while((C=A.indexOf("/",C)+1)>E){try{var _=A.substring(E,C);if(/.*/.test(_))new Function(_);D+=A.substr(0,E)+"/./";A=A.substr(C);continue $}catch(B){}}throw new Error("怎么可能？？^_^")}catch(B){D+=A.substr(0,E+1);A=A.substr(E+1);continue $}}else{D+=A.substr(0,E)+'""';A=A.substr(C);continue $}}return D+A}function e(_){_=d(_.replace(/^\s*#.*/,""));var $={},C=/\b(function\b[^\(]*)[^{]+\{|\{|\}|\[|\]/mg,B=/\b(var|function|,)\b\s*([\w\$]+)\s*/mg,G=[],H=0,I=0,A=0,K;while(K=C.exec(_))switch(K[0]){case"[":if(!H){if(!I)G.push(_.substring(A,K.index),"[]");I++}break;case"]":if(!H){I--;if(!I)A=K.index+1}break;case"{":if(!I&&H)H++;break;case"}":if(!I&&H){H--;if(H==0)A=K.index+1}break;default:if(!I){if(!H)G.push(_.substring(A,K.index),K[1],"}");H++}break}G.push(_.substr(A));_=G.join("");_=_.replace(/([\w\$\]])\s*\([\w\$\d,]*\)/m,"$1()");A=0;while(K=B.exec(_))switch(K[1]){case"var":A=K.index;case"function":$[K[2]]=1;default:var F=_.charAt(K.index+K[0].length);if(F!=":"){var J=_.indexOf(";",A);if(J>0&&J<K.index)continue;try{J=_.substring(A,K.index);J=J.replace(/[\r\n]/g," ");new Function(J+",a;")}catch(D){continue}$[K[2]]=1}}var E=[];for(K in $)E.push(K);return E}function f($){var A=e($),B=new java.util.ArrayList();for(var _=0;_<A.length;_++)B.add(A[_]);return B}function b($){switch($){case"<":return"&lt;";case">":return"&gt;";case"&":return"&amp;";case"'":return"&#39;";case'"':return"&#34;"}}function c(A){var _=new XMLHttpRequest();_.open("GET",A,false);try{_.send(null);if(_.status>=200&&_.status<300||_.status==304||!_.status)return _.responseText}catch($){}finally{_.abort()}}var W={decode:function($){return window.eval("("+$+")")},encode:Y},T=/["\\\x00-\x1f\x7f-\x9f]/g,Z={"\b":"\\b","\t":"\\t","\n":"\\n","\f":"\\f","\r":"\\r",'"':'\\"',"\\":"\\\\"};function U(_){var $=Z[_];if($)return $;$=_.charCodeAt().toString(16);return"\\u00"+($.length>1?$:"0"+$)}function Y(A){switch(typeof A){case"string":T.lastIndex=0;return'"'+(T.test(A)?A.replace(T,U):A)+'"';case"function":return A.toString();case"object":if(!A)return"null";var C=[];if(A instanceof Array){var B=A.length;while(B--)C[B]=Y(A[B])||"null";return"["+C.join(",")+"]"}for(var _ in A){var $=Y(A[_]);if($)C.push(Y(_)+":"+$)}return"{"+C.join(",")+"}";case"number":if(!isFinite(A))A="null";default:return String(A)}}
+var Compressor={connect:i},o=",$log.trace,$log.debug,alert,console.log,prompt,confirm,";function i(D){var E="config.syntaxCompression",_="config.textCompression",B=r(D,E,["config.trimBracket","internalPrefix"]),C=r(D,_,["config.compatible","config.sizeCondition","config.ratioCondition"]),$="",H=window.setInterval(function(){if(D.source.value!=$){$=D.source.value;var A;try{new Function($);A=""}catch(_){A=_.message}k($);g("error").innerHTML=A;var C=g("compress"),B=g("analyse");B.disabled=C.disabled=!!A||!$;C.onclick=l;B.onclick=n}},1000);function A(){B.apply(D[E]);C.apply(D[_])}g("reset").onclick=function(){setTimeout(A,1000)};setTimeout(A,500);var F=new G();F.id=D.id;F.decorate()}function n(){j(this.form,"0")}function l(){j(this.form,"3")}function g($){return document.getElementById($)}function j(B,$){var C=B.content,D=['<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">',"<properties>"],_=q(p("internalList"),false);m(D,"default/__package__.js","this.addScript('default.js',['"+_.join("','")+"'])");m(D,"default/default.js",B.source.value);D.push("</properties>");C.value=D.join("");var A=open("about:blank","result","top=220px,left=220px,width=680px,height=240px,scrollbars=yes");A.focus();B.level.value=$;B.source.disabled=true;B.submit();setTimeout(function(){B.source.disabled=false},1000)}function m($,A,_){$.push("<entry key='",A,"'>");$.push(/[<>&]/.test(_)&&_.indexOf("]]\>")<0?"<![CDATA["+_+"]]\>":_.replace(/[<>&]/g,b));$.push("</entry>\n")}var h={"for":true,"while":true,"if":true,"function":true};function k(D){var $=/(\bfunction\s+[\w\$\s]+)|([\w\$\s\.]+)\(/g,C={},B;while(B=$.exec(D))if(!B[1]){B=B[2].replace(/\s*\.\s*/g,".").replace(/^[\s\S]*\s+([\$\w])/,"$1");if(/^[\w\$]+(?:[\w\$\.]+)+$/.test(B)&&h[B]!=true)C[B]=C[B]?C[B]+1:1}var A=/\bif\s*\(\s*!*\s*['"]([\w\$\.\:]+)['"]\s*\)/g,_={};while(B=A.exec(D))_[B[1]]=_[B[1]]?_[B[1]]+1:1;s("debugCallList","config.debugCalls",C);s("featureList","config.features",_);s("internalList",null,e(D))}function s(_,$,F){var D=g(_),E=p(_),B=F instanceof Array?F:q(F);if(_=="debugCallList")B.sort(function(A,_){var $=o.indexOf(_)-o.indexOf(A);if($)return $;return A>_?1:A==_?0:-1});var G=[];for(var H=0;H<B.length;H++){var A=B[H],C=D.id+"_"+A;G.push("<label><input type='checkbox'");if($)G.push(" name='",$,"'");G.push(" value='",A,"'");E[A]&&G.push("checked");G.push("/>");G.push(A);if(F[A])G.push("("+F[A]+")");G.push("</label><br/>")}D.innerHTML=G.join("\n")}function p(C){var _=g(C),B={},A=_.getElementsByTagName("input"),D=C.length+1,$=A.length;while($--)B[A[$].value]=A[$].checked;return B}function q($,B){var A=[];for(var _ in $)if(B==undefined||B==$[_])A.push(_);return A}function r(_,$,A){return _[$].onclick=function(){var C=this.form,B=this.type=="hidden"?this.nextSibling:this,D=!B.checked,$=A.length;while($--){try{B=C[A[$]];B.disabled=D;if(B.type=="hidden"){B=B.nextSibling;B.disabled=D}}catch(_){alert([A,$,_])}}}}
+
+		/*]]>*/
+		</script>
+		<style>
+		html{
+			text-align:center;
+			font-size:12px;
+			background:#333;
+			padding:8px;
+		}
+		body{
+			width:786px;
+			text-align:left;
+			margin:auto;
+			background:#fefefe;
+			border:3px double #DDD;
+		}
+		.group{
+			height:200px;
+			overflow:auto;
+		}
+		fieldset input{
+		    font-size:12px;
+		    height:16px;
+		}
+		</style>
+	</head>
+	<body>
+		<p>
+			<strong>JSA</strong>
+			是一个脚本压缩、混淆、分析工具， 也是
+			<a href="http://www.xidea.org/project/jsi">JSI</a>
+			的编译工具， 有着非常可观的压缩质量和压缩比率。 JSA 的运用，可以减轻网络负担，保护源代码。
+		</p>
+		<br />
+		<form id="export-form" action="/scripts/export.action" method="post"
+			target="result">
+			<table width="98%">
+				<tr>
+					<th valign="bottom">在线压缩</th>
+					<th align="right" colspan='2' id="error"
+						valign="bottom" style="color:red">
+					</th>
+					<td align="right" valign="bottom">
+						<label for="source">源代码&#8595;</label>
+					</td>
+				</tr>
+				<tr>
+					<td colspan='4'>
+						<textarea id="source" xml:space="preserve"
+							style="width:100%;height:200px">//js code...</textarea>
+					</td>
+				</tr>
+				<tr valign="top">
+					<td align="left" width="20%">
+						<fieldset>
+							<legend>
+								<label>
+									<input type="checkbox"
+										checked="true" d:default-value="false" value="true"
+										name="config.syntaxCompression" />
+									执行语法压缩
+								</label>
+							</legend>
+							<div id="syntaxGroup">
+								<div>
+									<label title="容易发生错误">
+										<input type="checkbox"
+											d:default-value="false" value="true"
+											name="config.trimBracket" />
+										删除多余括弧
+									</label>
+								</div>
+								<div>
+									<label title="内部全局变量前缀,混淆全局变量设置">
+										保护前缀
+										<input type="text" size="4"
+											value="_$" name="internalPrefix" />
+									</label>
+								</div>
+							</div>
+						</fieldset>
+						<fieldset>
+							<legend>
+								<label>
+									<input type="checkbox"
+										checked="true" d:default-value="false" value="true"
+										name="config.textCompression" />
+									执行文本压缩
+								</label>
+							</legend>
+							<div id="textGroup">
+								<div>
+									<label>
+										<input type="checkbox"
+											d:default-value="false" value="true"
+											name="config.compatible" />
+										兼容IE5
+									</label>
+								</div>
+								<div>
+									<label>
+										大小要求
+										<input d:data-type="int"
+											d:required="true" type="text" size="4" value="1000"
+											name="config.sizeCondition" title="执行文本压缩的最小大小条件" />
+									</label>
+								</div>
+								<div>
+									<label>
+										比率要求
+										<input d:data-type="float"
+											d:required="true" type="text" size="4" value="0.99"
+											name="config.ratioCondition" title="选择文本压缩结果时的最小压缩比率条件" />
+									</label>
+								</div>
+							</div>
+						</fieldset>
+						<fieldset>
+							<legend>后期处理</legend>
+							<div>
+								<input type="checkbox"
+									d:default-value="false" value="true" checked="true"
+									name="config.escapeScriptTag" />
+								<label title="html内嵌脚本需要勾选此项">
+									转义&lt;/script&gt;标签
+								</label>
+							</div>
+							<div>
+								<label>
+									<input type="checkbox"
+										d:default-value="false" value="true" checked="true"
+										name="config.ascii" />
+									转义为ASCII兼容
+								</label>
+							</div>
+							<div>
+								<label title="\r\n表示分别表示回车和换行">
+									文件间隔
+									<input type="text" size="8"
+										value="\r\n\r\n" name="lineSeparator" />
+								</label>
+							</div>
+						</fieldset>
+					</td>
+					<td width="20%">
+						<fieldset>
+							<legend>混淆全局变量：</legend>
+							<div class="group" id="internalList"></div>
+						</fieldset>
+					</td>
+					<td width="30%">
+						<fieldset>
+							<legend>保留特征：</legend>
+							<div class="group" id="featureList"></div>
+						</fieldset>
+					</td>
+					<td>
+						<fieldset>
+							<legend>清理调试函数：</legend>
+							<div class="group" id="debugCallList"></div>
+						</fieldset>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="4" align="right">
+						<div>
+							<input id="effective" type="button"
+								value="最高效的设置" onclick="alert('自己思考一下，自动脚本还没写完呢，^_^')" />
+							<input id="reset" type="reset" value="默认设置" />
+							<input id="analyse" type="button"
+								value="分析代码" />
+							<input id="compress" type="button"
+								value="执行压缩" />
+							<input type="hidden" name="level" value="3" />
+							<input type="hidden" name="exports"
+								value="default.*" />
+						</div>
+					</td>
+				</tr>
+			</table>
+			<input type="hidden" name="content" id="xmlContent" />
+		</form>
+		<script>
+		Compressor.connect(document.forms[0])
+		</script>
+
+	</body>
+</html>
+
