@@ -29,7 +29,7 @@ public abstract class AbstractHTMLParser implements Parser<Element> {
 
 	public void parse(ParseContext context,ParseChain chain,Element node) {
 		String namespace = node.getNamespaceURI();
-		if (namespace == null || XHTMLNS.equals(namespace)) {
+		if (namespace == null && node.getPrefix()==null || XHTMLNS.equals(namespace)) {
 			parse(node, context);
 		}else{
 			chain.process(node);
