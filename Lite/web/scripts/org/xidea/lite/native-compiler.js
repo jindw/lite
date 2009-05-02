@@ -98,13 +98,30 @@ function getEL(el){
         throw new Error("json->el 尚未实现：（\n"+el);
     }
 }
-/**
 
-function(context)
+
+
+/**
+ * <code>
+function(context){
+    function _$items(source,objectType){
+        if(objectType){
+            var result = [];
+            for(objectType in source){
+                result.push({key:objectType,value:source[objectType]})
+            }
+            return result;
+        }
+        objectType = typeof source;
+        return objectType == "number"? new Array(source):
+            objectType == "string"?source.split(""):
+            source instanceof Array?source:_$items(source,1);
+    }
+
 	function replacer(k){return k in context?context[k]:this[k];}
 	var var1 = replacer("var1")
 	var var2 = replacer("var2")
-	replace = function(c){return "&#"+c.charCodeAt()+";";}
+	replace = function(c){return "&#"+c.charCodeAt()+";";}</code>
  */
 function buildNativeJS(code){
     var buf = [
@@ -112,19 +129,16 @@ function buildNativeJS(code){
     	"\n\tvar _$context = arguments[0];",
     	"\n\tvar _$out = [];"];
     
-    var idpool = new IDPool(0);
-    var vs = findStatus(code);
-    idpool.hasFor = !!vs.refs['for'];
-    
-    
-    
-    delete vs.refs['for'];
-    for(var n in vs.refs){
-    	buf.push('\n\tvar ',n,'=_$replacer("',n,'");')
+    var context = new Context(code,0);
+    for(var n in context.refs){
+       if(n!= 'for'){
+    	  buf.push('\n\tvar ',n,'=_$replacer("',n,'");')
+       }
     }
+    
     //add function
-    for(var i=0;i<vs.defs.length;i++){
-        def = vs.defs[i];
+    for(var i=0;i<context.defs.length;i++){
+        def = context.defs[i];
         var n = def.name;
         buf.push("\n\tfunction ",n,"(");
         for(var j=0;j<def.arguments.length;j++){
@@ -132,16 +146,30 @@ function buildNativeJS(code){
             buf.push(",")
         }
         buf.push("_$out){\n\t\tvar _$out=[];");
-        appendCode(def.code,buf,idpool,2);
+        appendCode(def.code,buf,context,2);
         buf.push("\n\t\treturn _$out.join('');\n\t}");
      	buf.push('\n\tif("',n,'" in _$context){',n,'=_$context["',n,'"];}')
-        
     }
-    if(vs.useReplacer){
+    if(context.hasFor){
+        buf.push('\n\tfunction _$items(source,objectType){');
+        buf.push('\n\t    if(objectType){');
+        buf.push('\n\t        var result = [];');
+        buf.push('\n\t        for(objectType in source){');
+        buf.push('\n\t            result.push({key:objectType,value:source[objectType]})');
+        buf.push('\n\t        }');
+        buf.push('\n\t        return result;');
+        buf.push('\n\t    }');
+        buf.push('\n\t    objectType = typeof source;');
+        buf.push('\n\t    return objectType == "number"? new Array(source):');
+        buf.push('\n\t        objectType == "string"?source.split(""):');
+        buf.push('\n\t        source instanceof Array?source:_$items(source,1);');
+        buf.push('\n\t}');
+    }
+    if(context.needReplacer){
     	buf.push('\n\t_$replacer = function(c){return "&#"+c.charCodeAt()+";";}')
     }
     try{
-        appendCode(code,buf,idpool,1);
+        appendCode(code,buf,context,1);
     }catch(e){
         //alert(["编译失败：",buf.join(""),code])
         throw e;
@@ -154,7 +182,7 @@ function buildNativeJS(code){
  * _$out buf
  * _$replacer xmlReplacer
  */
-function appendCode(code,buf,idpool,depth){
+function appendCode(code,buf,context,depth){
 	for(var i=0;i<code.length;i++){
 		var item = code[i];
 		printIndex(buf,depth);
@@ -169,19 +197,19 @@ function appendCode(code,buf,idpool,depth){
                 processXMLText(item,buf);
 			    break;
             case XML_ATTRIBUTE_TYPE:
-                processXMLAttribute(item,buf,idpool,depth);
+                processXMLAttribute(item,buf,context,depth);
                 break;
             case VAR_TYPE:
                 processVar(item,buf);
                 break;
             case CAPTRUE_TYPE:
-                processCaptrue(item,buf,idpool,depth);
+                processCaptrue(item,buf,context,depth);
                 break;
             case IF_TYPE:
-                i = processIf(code,i,buf,idpool,depth);
+                i = processIf(code,i,buf,context,depth);
                 break;
             case FOR_TYPE:
-                i = processFor(code,i,buf,idpool,depth);
+                i = processFor(code,i,buf,context,depth);
                 break;
                 
 			case ADD_ON_TYPE://not support
@@ -200,17 +228,17 @@ function processEL(item,buf){
 function processXMLText(item,buf){
     buf.push("_$out.push(String(",getEL(item[1]),").replace(/[<>&]/g,_$replacer));")
 }
-function processXMLAttribute(item,buf,idpool,depth){
+function processXMLAttribute(item,buf,context,depth){
     //[7,[[0,"value"]],"attribute"]
     var value = getEL(item[1]);
     var attributeName = item[2];
     if(attributeName){
-        var testId = idpool.get();
+        var testId = context.getVarId();
         printIndex(buf,depth,"var ",testId,"=",value);
         printIndex(buf,depth,"if(",testId,"!=null){");
         printIndex(buf,depth+1,"_$out.push(' ",attributeName,"=\"',String(",testId,").replace(/<>&\"/g,_$replacer),'\"')");
         printIndex(buf,depth,"}");
-        idpool.free(testId);
+        context.freeVarId(testId);
     }else{
     	buf.push("_$out.push(String(",value,").replace(/[<>&\"]/g,_$replacer));")
     }
@@ -218,21 +246,21 @@ function processXMLAttribute(item,buf,idpool,depth){
 function processVar(item,buf){
     buf.push("var ",item[2],"=",getEL(item[1]),";");
 }
-function processCaptrue(item,buf,idpool,depth){
+function processCaptrue(item,buf,context,depth){
     var childCode = item[1];
     var varName = item[2];
-    var bufbak = idpool.get();
+    var bufbak = context.getVarId();
     buf.push("var ",bufbak,"=_$out;_$out=[];");
-    appendCode(childCode,buf,idpool,depth);
+    appendCode(childCode,buf,context,depth);
     buf.push("var ",varName,"=_$out.join('');_$out=",bufbak,";");
-    idpool.free(bufbak);
+    context.freeVarId(bufbak);
 }
-function processIf(code,i,buf,idpool,depth){
+function processIf(code,i,buf,context,depth){
     var item = code[i];
     var childCode = item[1];
     var test = getEL(item[2]);
     buf.push("if(",test,"){");
-    appendCode(childCode,buf,idpool,depth+1)
+    appendCode(childCode,buf,context,depth+1)
     printIndex(buf,depth,"}");
     var nextElse = code[i+1];
     var notEnd = true;
@@ -246,42 +274,29 @@ function processIf(code,i,buf,idpool,depth){
             notEnd = false;
             printIndex(buf,depth,"else{");
         }
-        appendCode(childCode,buf,idpool,depth+1)
+        appendCode(childCode,buf,context,depth+1)
         printIndex(buf,depth,"}");
         nextElse = code[i+1];
     }
     return i;
 }
-function processFor(code,i,buf,idpool,depth){
+function processFor(code,i,buf,context,depth){
     var item = code[i];
-    var indexId = idpool.get();
-    var itemsId = idpool.get();
-    var previousForValueId = idpool.get();
+    var indexId = context.getVarId();
+    var itemsId = context.getVarId();
+    var previousForValueId = context.getVarId();
     var itemsEL = getEL(item[2]);
     var varNameId = item[3]; 
     //var statusNameId = item[4]; 
     var childCode = item[1];
-    var childInfo = {}
-    buildForChildInfo(item[1],childInfo);
+    var forInfo = context.getForStatus(code)
     //初始化 items 开始
     printIndex(buf,depth,"var ",itemsId,"=",itemsEL,";");
     printIndex(buf,depth,"var ",indexId,"=0;")
-    printIndex(buf,depth,"if(typeof ",itemsId," == 'number'){");
-    printIndex(buf,depth+1,itemsId,"= new Array(",itemsId,");");
-    printIndex(buf,depth,"}else if(!(",itemsId," instanceof Array)){");
-    depth++
-    //hack 重用变量名：previousForValueId as temp itemsId，varNameId as temp key ID
-    printIndex(buf,depth,"var ",previousForValueId,"= [];");
-    printIndex(buf,depth,"for(",varNameId," in ",itemsId,"){");
-    printIndex(buf,depth+1,previousForValueId,".push({key:",varNameId,",value:",itemsId,"[",varNameId,"]});");
-    printIndex(buf,depth,"}");
-    printIndex(buf,depth,itemsId,"=",previousForValueId,";");
-    depth--
-    printIndex(buf,depth,"}");
-    //初始化 items 结束
+    printIndex(buf,depth,itemsId,"=_$items(",itemsId,")");
     
     //初始化 for状态
-    var needForStatus = childInfo.hasForRef;
+    var needForStatus = forInfo.ref || forInfo.index || forInfo.lastIndex;
     if(needForStatus){
         printIndex(buf,depth,"var ",previousForValueId ,"=_$context;");
         var forVar= [];
@@ -293,14 +308,14 @@ function processFor(code,i,buf,idpool,depth){
         printIndex(buf,depth+1,"_$context.index=",indexId,";");
     }
     printIndex(buf,depth+1,"var ",varNameId,"=",itemsId,"[",indexId,"];");
-    appendCode(childCode,buf,idpool,depth+1)
+    appendCode(childCode,buf,context,depth+1)
     printIndex(buf,depth,"}");
     
     if(needForStatus){
        printIndex(buf,depth ,"_$context=",previousForValueId);
     }
-    idpool.free(itemsId);;
-    idpool.free(previousForValueId);
+    context.freeVarId(itemsId);;
+    context.freeVarId(previousForValueId);
     var nextElse = code[i+1];
     var notEnd = true;
     while(notEnd && nextElse && nextElse[0] == ELSE_TYPE){
@@ -313,59 +328,12 @@ function processFor(code,i,buf,idpool,depth){
             notEnd = false;
             printIndex(buf,depth,"if(!",indexId,"){");
         }
-        appendCode(childCode,buf,idpool,depth+1)
+        appendCode(childCode,buf,context,depth+1)
         printIndex(buf,depth,"}");
         nextElse = code[i+1];
     }
-    idpool.free(indexId);
+    context.freeVarId(indexId);
     return i;
-}
-/*
- * hasForRef
- * hasForChild
- */
-function buildForChildInfo(code,childInfo){
-    for(var i=0;i<code.length;i++){
-        var item = code[i];
-        if(item instanceof Array){
-			switch (item[0]) {
-			case ADD_ON_TYPE:
-				continue;// continue for（not support）
-			case XML_ATTRIBUTE_TYPE:
-			case VAR_TYPE:
-			case XML_TEXT_TYPE:
-			case EL_TYPE:
-			    if(!childInfo.hasForRef){
-		           childInfo.hasForRef = checkForExpression(item[1]);
-			    }
-				break;
-			case FOR_TYPE:
-			    childInfo.hasForChild = true;
-			    if(!childInfo.hasForRef){
-		           childInfo.hasForRef = checkForExpression(item[2]);
-			    }
-			    if(childInfo.hasForRef){
-			        return;
-			    }
-				buildForChildInfo(item[1],childInfo);
-				break;
-			case IF_TYPE:
-			case ELSE_TYPE:
-				if (item[2] != null) {
-				    if(!childInfo.hasForRef){
-			           childInfo.hasForRef = checkForExpression(item[2]);
-				    }
-				}
-			case CAPTRUE_TYPE:
-				// children
-				buildForChildInfo(item[1],childInfo);
-				break;
-			}
-        }
-		if(childInfo.hasForRef && childInfo.hasForChild){
-			return;
-		}
-    }
 }
 function printIndex(buf,depth){
     buf.push("\n");
@@ -379,23 +347,31 @@ function printIndex(buf,depth){
         }
     }
 }
-function IDPool(index){
-    this.map = {};
+function Context(code,index){
+    var vs = this.vs = findStatus(code);
+    this.hasFor = vs.forInfos.length;
+    this.needReplacer = vs.needReplacer;
+    this.defs = vs.defs;
+    this.refs = vs.refs;
+    this.idMap = {};
     this.index = index?index:3
 }
-IDPool.prototype = {
-    get:function(){
+Context.prototype = {
+    getForStatus:function(forCode){
+        return this.vs.getForStatus(forCode);
+    },
+    getVarId:function(){
         var i = this.index;
         while(true){
-            if(!this.map[i]){
-                this.map[i] = true;
+            if(!this.idMap[i]){
+                this.idMap[i] = true;
                 return ID_PREFIX+i.toString(36);
             }
             i++;
         }
     },
-    free:function(id){
+    freeVarId:function(id){
         var i = id.substring(ID_PREFIX.length);
-        delete this.map[i];
+        delete this.idMap[i];
     }
 }

@@ -27,9 +27,9 @@ public class Template {
 	public static final int XML_TEXT_TYPE = 4; // [4,<el>]
 	public static final int FOR_TYPE = 5; // [5,[...],<items el>,'varName']/
 	public static final int ELSE_TYPE = 6; // [6,[...],<test el>] //<test el>
-											// 可为null
+	// 可为null
 	public static final int ADD_ON_TYPE = 7; // [7,[...],<add on
-												// el>,'<addon-class>']
+	// el>,'<addon-class>']
 	public static final int VAR_TYPE = 8; // [8,<value el>,'name']
 	public static final int CAPTRUE_TYPE = 9; // [9,[...],'var']
 
@@ -245,49 +245,45 @@ public class Template {
 	@SuppressWarnings("unchecked")
 	protected void processFor(Context context, Object[] data, Writer out) {
 		final Object[] children = (Object[]) data[1];
-		Object list = ((Expression) data[2]).evaluate(context);
 		final String varName = (String) data[3];
 		final ForStatus preiousStatus = (ForStatus) context.get(FOR_KEY);
 		int len = 0;
-		ForStatus forStatus = new ForStatus(preiousStatus == null ? 0
-				: preiousStatus.getDepth() + 1);
+		Object list = ((Expression) data[2]).evaluate(context);
 		try {// hack return 代替ifelse，减少一些判断
-			context.put(FOR_KEY, forStatus);
+
 			if (list instanceof Map) {
 				list = ((Map) list).entrySet();
 			}
 			if (list instanceof Collection) {
 				Collection<Object> items = (Collection<Object>) list;
 				len = items.size();
-				forStatus.setSize(len);
+				ForStatus forStatus = new ForStatus(len);
+				context.put(FOR_KEY, forStatus);
 				for (Object item : items) {
 					forStatus.index++;
 					context.put(varName, item);
 					renderList(context, children, out);
 				}
-				return;
-			}
-			if (list instanceof CharSequence) {
-				list = ((CharSequence) list).toString().toCharArray();
-			}
-			if (list.getClass().isArray()) {// list!=null && 让他抛吧，外面有检查
-				len = Array.getLength(list);
-				forStatus.setSize(len);
+			} else {
+				if (list instanceof Number) {// 算是比较少见吧
+					len = ((Number) list).intValue();
+					list = null;
+				} else {
+					if (list instanceof CharSequence) {
+						list = ((CharSequence) list).toString().toCharArray();
+					}
+					if (list.getClass().isArray()) {// list!=null && 让他抛吧，外面有检查
+						len = Array.getLength(list);
+					}
+				}
+				ForStatus forStatus = new ForStatus(len);
+				context.put(FOR_KEY, forStatus);
 				while (++forStatus.index < len) {
-					context.put(varName, Array.get(list, forStatus.index));
+					if (list != null) {
+						context.put(varName, Array.get(list, forStatus.index));
+					}
 					renderList(context, children, out);
 				}
-				return;
-			}
-
-			if (list instanceof Number) {// 算是比较少见吧
-				len = ((Number) list).intValue();
-				forStatus.setSize(len);
-				while (++forStatus.index < len) {
-					context.put(varName, forStatus.index + 1);
-					renderList(context, children, out);
-				}
-				return;
 			}
 		} finally {
 			// context.put("for", preiousStatus);
@@ -406,24 +402,31 @@ public class Template {
 	protected static class Context extends ValueStackImpl {
 		boolean ifStatus = false;
 		private int readLength;
+		private Context root;
 
 		public Context(Object... stack) {
 			super(stack);
-			readLength = stack.length;
+			this.readLength = stack.length;
+			this.root = this;
+		}
+
+		Context(Context root) {
+			this(root.stack);
+			this.root = root;
+			this.requireWrite();
 		}
 
 		public void put(Object key, Object value) {
 			requireWrite();
 			ReflectUtil.setValue(stack[stack.length - 1], key, value);
 		}
+
 		/**
-		 * 创建新域,需要处理局部域短路问题,倒霉,真想用栈:(
+		 * 创建新域,需要处理局部域短路问题,倒霉,真想用栈:( 貌似有问题..添加测试吧
 		 */
 		public Context newScope() {
-			requireWrite();
-			Context context = new Context(stack); 
-			context.requireWrite();
-			return context;
+			root.requireWrite();
+			return new Context(root);
 		}
 
 		/**
@@ -442,22 +445,13 @@ public class Template {
 	public static class ForStatus {
 		private int index = -1;
 		private int lastIndex;
-		private final int depth;
 
-		ForStatus(int depth) {
-			this.depth = depth;
-		}
-
-		private void setSize(int end) {
+		private ForStatus(int end) {
 			this.lastIndex = end - 1;
 		}
 
 		public int getIndex() {
 			return index;
-		}
-
-		public int getDepth() {
-			return depth;
 		}
 
 		public int getLastIndex() {

@@ -3,45 +3,118 @@ function findStatus(code){
 	doFind(code,vs);
 	return vs;
 }
-function parseEL(el){
-	return new ExpressionTokenizer(el).toTokens();
+
+function ForStatus(code){
+    this.code = code;
+    this.index;
+    this.lastIndex;
+    this.ref;
 }
-function VarStatus(){
-	this.useReplacer = false;
+function VarStatus(pvs){
+    this.parentStatus = pvs;
+	this.needReplacer = false;
 	this.vars={};
 	this.refs={};
 	this.defs = [];
-}
-VarStatus.prototype.addVar = function(n){
-	this.vars[n] = true;
-}
-VarStatus.prototype.vistEL = function(el){
-	var tokens = parseEL(el)
-	var result ={};
-	doFindVar(tokens,result);
-	for(var n in result){
-		if(!this.vars[n]){
-			this.refs[n] = true;
-		}
+	if(pvs){
+    	this.forInfos = pvs.forInfos;
+    	this.forStack = pvs.forStack;
+	}else{
+    	this.forInfos = [];
+    	this.forStack = [];
 	}
 }
-function doFindVar(tokens,result){
-	for(var i=0;i<tokens.length;i++){
-		var item = tokens[i];
-		if(item instanceof Array){
-			if(item[0] == VALUE_VAR){
-				result[item[1]] = true;
-			}else if(item[0] == VALUE_LAZY){
-				doFindVar(item[1],result);
-			}
-		}
-	}
+VarStatus.prototype = {
+    setNeedReplacer : function(){
+        var s = this;
+        while(s){
+            s.needReplacer = true;
+            s = s.parentStatus;
+        }
+    },
+    getForStatus : function(code){
+        var fis = this.forInfos;
+        var i = fis.length;
+        while(i--){
+            var fi = fis[i];
+            if(fi.code == code){
+                return fi;
+            }
+        }
+    },
+    addVar : function(n){
+    	this.vars[n] = true;
+    },
+    vistEL : function(el){
+    	var tokens = parseEL(el)
+    	var result ={};
+    	this.fillVar(tokens,result);
+    	for(var n in result){
+    		if(!this.vars[n]){
+    			this.refs[n] = true;
+    		}
+    	}
+    },
+    fillVar : function(tokens,result){
+    	for(var i=0;i<tokens.length;i++){
+    		var item = tokens[i];
+    		if(item instanceof Array){
+    			if(item[0] == VALUE_VAR){
+    			    var varName = item[1];
+    				result[varName] = true;
+    				if(varName == 'for'){
+    				    var next = tokens[i+1]
+    				    var fs = this.forStack[this.forStack.length-1];
+    				    if(next[0] == OP_STATIC_GET_PROP){
+    				        if(next[1] == 'index'){
+    				            fs.index = true
+    				        }else if(next[1] == 'lastIndex'){
+    				            fs.lastIndex = true
+    				        }else{
+    				            fs.ref = true;
+    				        }
+    				    }else{
+    				        fs.ref = true;
+    				    }
+    				}
+    			}else if(item[0] == VALUE_LAZY){
+    				this.fillVar(item[1],result);
+    			}
+    		}
+    	}
+    },
+    enterFor:function(forCode){
+        var fs = new ForStatus(forCode);
+        this.forInfos.push(fs)
+        this.forStack.push(fs)
+    },
+    exitFor:function(){
+        this.forStack.pop()
+    }
+}
+function parseEL(el){
+	return new ExpressionTokenizer(el).toTokens();
 }
 
+
+
+/**
+ * 函数定义只能在根上,即不能在 if,for之内的子节点中
+ */
 function doFindDef(item,pvs){
+    if(pvs.parentNode != null){
+        var error = "函数定义不能嵌套!!"
+        $log.error(error)
+        throw new Error(error)
+    }
+    if(pvs.forStack.length){
+        var error = "函数定义不能在for 循环内!!"
+        $log.error(error)
+        throw new Error(error)
+    }
 	var el = window.eval('('+item[2]+')');
 	pvs.addVar(el.name);
-	var vs = new VarStatus();
+	var vs = new VarStatus(pvs);
 	var args = el.arguments.slice(0);
 	vs.arguments = args;
 	for(var i=0;i<args.length;i++){
@@ -59,7 +132,6 @@ function doFindDef(item,pvs){
 			}
 		}
 	}
-	pvs.useReplacer = pvs.useReplacer || vs.useReplacer;
 }
 function doFind(code,vs){
     for(var i=0;i<code.length;i++){
@@ -71,14 +143,19 @@ function doFind(code,vs){
 					doFindDef(item,vs)
 				}
 				break;
+			case FOR_TYPE:
+			    vs.vistEL(item[2]);
+			    vs.enterFor(code);
+				doFind(item[1],vs);
+				vs.exitFor();
+				break;
 			case XML_ATTRIBUTE_TYPE:
 			case VAR_TYPE:
 			case XML_TEXT_TYPE:
-				vs.useReplacer = true;
+				vs.setNeedReplacer();
 			case EL_TYPE:
 			    vs.vistEL(item[1]);
 				break;
-			case FOR_TYPE:
 			case IF_TYPE:
 			    vs.vistEL(item[2]);
 				doFind(item[1],vs);
