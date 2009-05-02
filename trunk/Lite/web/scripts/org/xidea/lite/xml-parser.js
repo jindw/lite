@@ -88,24 +88,29 @@ XMLParser.prototype.addParser(function(node){
 
 var htmlLeaf = /^(?:meta|link|img|br|hr)$/i;
 var scriptTag = /^script$/i
-
 XMLParser.prototype.addParser(function(node){
     if(node.nodeType ==1){
-        var next = node.attributes;
+        var attributes = node.attributes;
         this.append('<'+node.tagName);
-        for (var i=0; i<next.length; i++) {
-            this.parseNode(next.item(i))
+        for (var i=0; i<attributes.length; i++) {
+            try{
+                //htmlunit bug...
+                var attr = attributes.item(i);
+            }catch(e){
+                var attr =attributes[i];
+            }
+            this.parseNode(attr)
         }
         if(htmlLeaf.test(node.tagName)){
             this.append('/>')
             return true;
         }
         this.append('>')
-        next = node.firstChild
-        if(next){
+        var child = node.firstChild
+        if(child){
             do{
-                this.parseNode(next)
-            }while(next = next.nextSibling)
+                this.parseNode(child)
+            }while(child = child.nextSibling)
         }
         this.append('</'+node.tagName+'>')
         return null;
@@ -170,7 +175,7 @@ function parseDefTag(node){
     var ns = getAttribute(this,node,'name',false,true);
     var result = this.result;
     var mark = result.length;
-    ns = ns.replace(/^\s+|\s+$/g,'').split(/[^\w]+/);
+    ns = (ns.replace(/^\s+/,'')+'end').split(/[^\w]+/);
     ns.pop();
     var el = ['{"name":"',ns[0],'","params":['];
     for(var i=1;i<ns.length;i++){
@@ -427,7 +432,9 @@ function parseAttribute(node){
 }
 function parseTextNode(node){
     var data = String(node.data);
-    this.append.apply(this,this.parseText(data.replace(/^\s*([\r\n])\s*|\s*([\r\n])\s*$|^(\s)+|(\s)+$/g,"$1$2$3$4"),true))
+    //this.append.apply(this,this.parseText(data.replace(/^\s*([\r\n])\s*|\s*([\r\n])\s*$|^(\s)+|(\s)+$/g,"$1$2$3$4"),true))
+    //不用回车js序列化后更短
+    this.append.apply(this,this.parseText(data.replace(/^\s+|\s+$/g," "),true))
     return null;
 }
 

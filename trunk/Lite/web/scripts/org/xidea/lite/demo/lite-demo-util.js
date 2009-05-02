@@ -51,7 +51,6 @@ var TestCase = {
 	            var jsResult = jsTemplate.render(context);
 	        }
 	        jsTime = new Date()-t1;
-	        templateResult.value = jsResult;
 	    }catch(e){
 	        $log.error("Lite JS优化版本模板渲染错误",e)
 	    }
@@ -59,11 +58,13 @@ var TestCase = {
 	        var t1 = new Date();
 	        var count = testCount;
 	        while(count--){
-	            var JSONResult = jsonTemplate.render(context);
+	            var jsonResult = jsonTemplate.render(context);
 	        }
 	        $log.info("模版消耗时间（？毫秒/"+testCount+"次）：",
 	        "jsTime:"+jsTime,
 	        "json:"+(new Date()-t1))
+	        
+	        templateResult.value = jsonResult;
 	    }catch(e){
 	        $log.error("Lite JSON模板渲染错误",e)
 	    }
@@ -79,8 +80,8 @@ var TestCase = {
     	        a[i].target="_blank";
     	    }
     	}catch(e){}
-	    if(jsResult!=JSONResult){
-	        $log.error("优化后的jslite与优化前渲染结果有差别！！！","JS:"+jsResult,"JSON:"+JSONResult)
+	    if(jsResult!=jsonResult){
+	        $log.error("优化后的jslite与优化前渲染结果有差别！！！","JS:"+jsResult,"JSON:"+jsonResult)
 	    }
 	    try{
 	        templateResult.scrollIntoView();

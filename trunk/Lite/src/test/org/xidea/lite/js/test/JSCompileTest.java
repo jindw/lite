@@ -106,13 +106,18 @@ public class JSCompileTest {
 			new Template(pc.toList()).render(JSONDecoder.decode(contextJSON),
 					out);
 			String java = out.toString();
-			java = java.replace("&gt;", "&#62;");
-			java = java.replace("&lt;", "&#60;");
-			java = java.replace("&amp;", "&#38;");
-			Assert.assertEquals("JS结果与Java不一致", result1, java);
+			Assert.assertEquals("JS结果与Java不一致", sumText((String)result1), sumText(java));
 
 			child = (Element) child.getNextSibling();
 		}
+	}
+
+	private String sumText(String java) {
+		java = java.replace("&gt;", "&#62;");
+		java = java.replace("&lt;", "&#60;");
+		java = java.replace("&amp;", "&#38;");
+		java = java.replaceAll("[\r\\\n]", " ");
+		return java;
 	}
 
 	public static class DOMParser {
