@@ -44,8 +44,9 @@ public class XMLParserTest {
 		}; 
 		try{
 			org.w3c.dom.Document doc = new XMLParser().loadXML(url, context);
+			Assert.fail("非法xml必须抛出");
 		}catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 	}
 	@Test

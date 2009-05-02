@@ -36,6 +36,7 @@ XMLHttpRequest.prototype={
 	status : 200
 }
 
+alert = print;
 confirm = print;
 function DOMParser(){
     return new Packages.org.xidea.lite.js.test.JSCompileTest.DOMParser()
