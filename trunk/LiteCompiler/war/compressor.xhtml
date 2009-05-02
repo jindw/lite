@@ -45,14 +45,22 @@ var Compressor={connect:i},o=",$log.trace,$log.debug,alert,console.log,prompt,co
 	</head>
 	<body>
 		<p>
+			<a href="http://www.xidea.org/project/jsa/example.html" style="float: right;width:80px;">查看实例</a>
 			<strong>JSA</strong>
 			是一个脚本压缩、混淆、分析工具， 也是
 			<a href="http://www.xidea.org/project/jsi">JSI</a>
-			的编译工具， 有着非常可观的压缩质量和压缩比率。 JSA 的运用，可以减轻网络负担，保护源代码。
+			的编译工具 具体功能有：
+			<ul>
+				<li>非常可观的压缩质量和压缩比率，减轻网络负担，保护源代码。</li>
+				<li>自动检查代码潜在问题（语法错误，未申明变量隐患）</li>
+				<li>JSI脚本导出、模板编译织入</li>
+				<li>自动分析生成包定义文件</li>
+			</ul>
 		</p>
 		<br />
-		<form id="export-form" action="/scripts/export.action" method="post"
-			target="result">
+		<form id="export-form"
+			action="http://litecompiler.appspot.com/scripts/export.action"
+			method="post" target="result">
 			<table width="98%">
 				<tr>
 					<th valign="bottom">在线压缩</th>
@@ -66,7 +74,12 @@ var Compressor={connect:i},o=",$log.trace,$log.debug,alert,console.log,prompt,co
 				<tr>
 					<td colspan='4'>
 						<textarea id="source" xml:space="preserve"
-							style="width:100%;height:200px">//js code...</textarea>
+							style="width:100%;height:200px">/**
+ * 就一个简单测试
+ */
+function test(aaa,bbb){
+    return aaa+bbb+aaa;
+}</textarea>
 					</td>
 				</tr>
 				<tr valign="top">
@@ -128,7 +141,7 @@ var Compressor={connect:i},o=",$log.trace,$log.debug,alert,console.log,prompt,co
 									<label>
 										比率要求
 										<input d:data-type="float"
-											d:required="true" type="text" size="4" value="0.99"
+											d:required="true" type="text" size="4" value="0.75"
 											name="config.ratioCondition" title="选择文本压缩结果时的最小压缩比率条件" />
 									</label>
 								</div>
