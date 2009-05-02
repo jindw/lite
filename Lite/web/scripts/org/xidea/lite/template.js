@@ -42,7 +42,7 @@ function Template(data,parser){
 
 function processDef(context, item){
     var fn = evaluate(item[2],context);
-    var args = fn.arguments;
+    var args = fn.params;
     var fn = fn.name;
     context[fn] = function(){
         var context = {};

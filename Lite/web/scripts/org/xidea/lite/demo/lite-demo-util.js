@@ -3,7 +3,7 @@ var TestCase = {
 	    var context = document.getElementById("context").value;
 	    var templateSource = E("templateSource").value;
 	    try{
-	        context = window.eval("("+context+")");//JSON.decode(context);
+	        context = JSON.decode(context);//JSON.decode(context);
 	    }catch(e){
 	        $log.error("数据源解析失败",e);
 	        return false;

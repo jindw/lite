@@ -85,6 +85,7 @@ VarStatus.prototype = {
     },
     enterFor:function(forCode){
         var fs = new ForStatus(forCode);
+        fs.depth = this.forStack.length;
         this.forInfos.push(fs)
         this.forStack.push(fs)
     },
@@ -112,11 +113,11 @@ function doFindDef(item,pvs){
         $log.error(error)
         throw new Error(error)
     }
-	var el = window.eval('('+item[2]+')');
+	var el = this.eval('('+item[2]+')');
 	pvs.addVar(el.name);
 	var vs = new VarStatus(pvs);
-	var args = el.arguments.slice(0);
-	vs.arguments = args;
+	var args = el.params.slice(0);
+	vs.params = args;
 	for(var i=0;i<args.length;i++){
 	    vs.vars[args[i]] = true;
 	}

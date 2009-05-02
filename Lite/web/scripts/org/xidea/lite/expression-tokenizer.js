@@ -208,7 +208,7 @@ var fns = {
 					var end = findRegExp(this.value,this.start);
 					if(end>0){
 						this.addToken([VALUE_CONSTANTS,
-							window.eval(
+							toValue(
 								this.value.substring(this.start-1,end))]);
 						this.start = end;
 						break;
@@ -276,6 +276,9 @@ var fns = {
 var pt = new JSONTokenizer('');
 for(var n in fns){
     pt[n] = fns[n]
+}
+function toValue(v){
+    return this.eval(v);
 }
 function findRegExp(text,start){
 	var depth=0,c;

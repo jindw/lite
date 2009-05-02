@@ -14,6 +14,7 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -299,7 +300,7 @@ public class ParseContextImpl implements ParseContext {
 		return xmlContext.loadXML(url);
 	}
 
-	public Node selectNodes(String xpath, Node doc)
+	public DocumentFragment selectNodes(String xpath, Node doc)
 			throws XPathExpressionException {
 		return xmlContext.selectNodes(xpath, doc);
 	}

@@ -44,7 +44,7 @@ XMLParser.prototype.load = function(url,xpath){
 	    this.url = url;
 		return doc;
 	}catch(e){
-		$log.error("文档解析失败",e)
+		$log.error("文档解析失败",url,e)
 		throw e;
 	}
 }
@@ -94,7 +94,7 @@ XMLParser.prototype.addParser(function(node){
         var next = node.attributes;
         this.append('<'+node.tagName);
         for (var i=0; i<next.length; i++) {
-            this.parseNode(next[i])
+            this.parseNode(next.item(i))
         }
         if(htmlLeaf.test(node.tagName)){
             this.append('/>')
@@ -172,7 +172,7 @@ function parseDefTag(node){
     var mark = result.length;
     ns = ns.replace(/^\s+|\s+$/g,'').split(/[^\w]+/);
     ns.pop();
-    var el = ['{"name":"',ns[0],'","arguments":['];
+    var el = ['{"name":"',ns[0],'","params":['];
     for(var i=1;i<ns.length;i++){
     	if(i>1){
     		el.push(",")
@@ -426,8 +426,8 @@ function parseAttribute(node){
     return null;
 }
 function parseTextNode(node){
-    var data = node.data;
-    this.append.apply(this,this.parseText(data.replace(/^\s+|\s+$/g,' '),true))
+    var data = String(node.data);
+    this.append.apply(this,this.parseText(data.replace(/^\s*([\r\n])\s*|\s*([\r\n])\s*$|^(\s)+|(\s)+$/g,"$1$2$3$4"),true))
     return null;
 }
 
@@ -538,7 +538,7 @@ function getAttribute(context,node,key,isEL,required){
 		if(isEL){
 	         return findFirstEL(context,value);
 		}else{
-			return value.replace(/^\s+|\s+$/g,'');
+			return String(value).replace(/^\s+|\s+$/g,'');
 		}
 	}else if(required){
 		$log.error("属性"+key+"为必须值");
@@ -566,7 +566,7 @@ function findFirstEL(context,value){
  */
 function toDoc(text){
 	try{
-		if(window.DOMParser){
+		if(this.DOMParser){
 	        var doc = new DOMParser().parseFromString(text,"text/xml");
 	        var root = doc.documentElement;
 	        if(root.tagName == "parsererror"){
@@ -631,8 +631,7 @@ function selectNodes(currentNode,xpath){
         }
     }
     while (node = buf.shift()){
-        node.parentNode.removeChild(node);
-        docFragment.appendChild(node);
+        docFragment.appendChild(node.cloneNode(true));
     }
     return docFragment;
 }

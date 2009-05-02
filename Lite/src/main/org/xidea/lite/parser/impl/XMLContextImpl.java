@@ -40,7 +40,7 @@ import org.xidea.lite.parser.XMLContext;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
-public class XMLContextImpl implements XMLContext{
+public class XMLContextImpl implements XMLContext {
 	private static Log log = LogFactory.getLog(XMLContextImpl.class);
 
 	private ArrayList<Boolean> indentStatus = new ArrayList<Boolean>();
@@ -49,16 +49,14 @@ public class XMLContextImpl implements XMLContext{
 	private boolean format = false;
 	private boolean compress = true;
 	private final ParseContext context;
-	
 
 	protected XPathFactory xpathFactory;
 	protected TransformerFactory transformerFactory;
 
 	protected DocumentBuilder documentBuilder;
-	
-	
-	public XMLContextImpl(ParseContext result){
-		this.context = result;
+
+	public XMLContextImpl(ParseContext context) {
+		this.context = context;
 		try {
 			DocumentBuilderFactory factory = DocumentBuilderFactory
 					.newInstance();
@@ -74,11 +72,10 @@ public class XMLContextImpl implements XMLContext{
 		}
 	}
 
-
-	public Document loadXML(URL url) throws SAXException,
-			IOException {
+	public Document loadXML(URL url) throws SAXException, IOException {
 		context.setCurrentURL(url);
 		InputStream in = context.getInputStream(url);
+
 		in = new BufferedInputStream(in, 1);
 		int c;
 		do {// bugfix \ufeff
@@ -93,9 +90,9 @@ public class XMLContextImpl implements XMLContext{
 			Document doc = documentBuilder.parse(in, url.toString());
 			return doc;
 		} catch (SAXParseException e) {
-			throw new SAXException("XML Parser Error:"+url+"(" + e.getLineNumber() + ","
-					+ e.getColumnNumber() + ")\r\n" + e.getMessage()
-					);
+			throw new SAXException("XML Parser Error:" + url + "("
+					+ e.getLineNumber() + "," + e.getColumnNumber() + ")\r\n"
+					+ e.getMessage());
 		}
 	}
 
@@ -159,8 +156,8 @@ public class XMLContextImpl implements XMLContext{
 		return frm;
 	}
 
-	public Node transform(URL parentURL, Node doc,
-			String xslt) throws TransformerConfigurationException,
+	public Node transform(URL parentURL, Node doc, String xslt)
+			throws TransformerConfigurationException,
 			TransformerFactoryConfigurationError, TransformerException,
 			IOException {
 		Source xsltSource;
@@ -204,7 +201,8 @@ public class XMLContextImpl implements XMLContext{
 
 	protected XPath createXPath() {
 		if (xpathFactory == null) {
-			String  xpathFactoryClass = context.getFeatrue(XPathFactory.DEFAULT_PROPERTY_NAME);
+			String xpathFactoryClass = context
+					.getFeatrue(XPathFactory.DEFAULT_PROPERTY_NAME);
 			if (xpathFactoryClass != null) {
 				try {
 					xpathFactory = XPathFactory
@@ -229,7 +227,8 @@ public class XMLContextImpl implements XMLContext{
 			throws TransformerConfigurationException,
 			TransformerFactoryConfigurationError {
 		if (transformerFactory == null) {
-			String transformerFactoryClass = context.getFeatrue(TransformerFactory.class.getName());
+			String transformerFactoryClass = context
+					.getFeatrue(TransformerFactory.class.getName());
 			if (transformerFactoryClass != null) {
 				try {
 					transformerFactory = TransformerFactory.newInstance(
@@ -262,8 +261,7 @@ public class XMLContextImpl implements XMLContext{
 		}
 		return frm;
 	}
-	
-	
+
 	public boolean isFormat() {
 		return format;
 	}
@@ -335,7 +333,5 @@ public class XMLContextImpl implements XMLContext{
 
 		}
 	}
-
-
 
 }

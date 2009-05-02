@@ -87,6 +87,7 @@ if("org.xidea.jsi.boot:$log"){
      * @param bindLevel 绑定函数的输出级别，只有该级别大于等于输出级别时，才可输出日志
      */
     function buildLevelLog(bindLevel,bindName){
+        var global = this;
         return function(){
             if(bindLevel>=consoleLevel){
                 var msg = [bindLevel,bindName];
@@ -94,7 +95,7 @@ if("org.xidea.jsi.boot:$log"){
                 $log.apply($log,msg);
             }
             if(":debug"){
-                if((typeof window.console == 'object') && (typeof console.log == 'function')){
+                if((typeof global.console == 'object') && (typeof console.log == 'function')){
                     var msg = [bindLevel,bindName];
                     msg.push.apply(msg,arguments);
                     console.log(msg.join(';'))

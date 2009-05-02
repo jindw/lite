@@ -16,7 +16,7 @@ var JSON = {
      * @owner JSON
      */
     decode : function(data){
-        return window.eval("("+data+")")
+        return parse(data);
     },
     /**
      * 以JSON格式，系列化javascript对象
@@ -45,6 +45,9 @@ var charMap = {
     '"' : '\\"',
     '\\': '\\\\'
 };
+function parse(data){
+    return this.eval("("+data+")")
+}
 /**
  * 转义替换函数
  * @internal

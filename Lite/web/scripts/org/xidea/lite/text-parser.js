@@ -45,8 +45,10 @@ TextParser.prototype.parseText = function(text,xmlText,xmlAttr){
     if(!text){
         return [];
     }
+    text = String(text);//for rhino
+    //print("\n====\n"+text)
     var buf = [];
-    var pattern = new RegExp(/(\\*)\$([a-zA-Z!]{0,5}\{)/g)  //允许$for{} $if{} $end ...  see CT????
+    var pattern = /(\\*)\$([a-zA-Z!]{0,5}\{)/  //允许$for{} $if{} $end ...  see CT????
     //var pattern = /(\\*)\$\{/g
     var match ;
     //seach:
@@ -75,7 +77,8 @@ TextParser.prototype.parseText = function(text,xmlText,xmlAttr){
                     }
                     
                     text = text.substr(expressionEnd+1);
-                    pattern = text && new RegExp(pattern);
+                    //以前为了一些正则bug,不知道是否还需要:(
+                    //pattern = text && /(\\*)\$([a-zA-Z!]{0,5}\{)/;
                     //continue seach;
                     break;
                 }catch(e){$log.debug("尝试表达式解析失败",expression,e)}
