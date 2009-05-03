@@ -325,7 +325,7 @@ Context.prototype = {
         var varNameId = item[3]; 
         //var statusNameId = item[4]; 
         var childCode = item[1];
-        var forInfo = this.getForStatus(code)
+        var forInfo = this.getForStatus(item)
         if(forInfo.depth){
             var previousForValueId = this.getVarId();
         }
