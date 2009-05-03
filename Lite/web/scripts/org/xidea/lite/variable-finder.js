@@ -146,7 +146,7 @@ function doFind(code,vs){
 				break;
 			case FOR_TYPE:
 			    vs.vistEL(item[2]);
-			    vs.enterFor(code);
+			    vs.enterFor(item);
 				doFind(item[1],vs);
 				vs.exitFor();
 				break;
