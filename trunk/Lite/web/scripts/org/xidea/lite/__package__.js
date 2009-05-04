@@ -10,9 +10,10 @@ this.addScript('parser.js',"*"
                ,["buildNativeJS"]);
 this.addScript('text-parser.js',["TextParser","checkEL"]
                ,["Parser","parser.js"]
-               ,["ExpressionTokenizer"]);
+               ,["ExpressionTokenizer","org.xidea.jsidoc.util:XMLHttpRequest"]); 
 this.addScript('xml-parser.js',"XMLParser"
-               ,["TextParser","parser.js"]); 
+               ,["TextParser","parser.js"]
+               ,"org.xidea.jsidoc.util:XMLHttpRequest"); 
 this.addScript("expression-token.js","*");
 this.addScript("json-tokenizer.js","JSONTokenizer");
 this.addScript("expression-tokenizer.js","ExpressionTokenizer"
@@ -28,4 +29,4 @@ this.addScript("variable-finder.js",["findStatus"]
 
 
 
-//this.addDependence('template.js',"xml-parser.js");
+this.addDependence('*',"org.xidea.jsidoc.util:$log");

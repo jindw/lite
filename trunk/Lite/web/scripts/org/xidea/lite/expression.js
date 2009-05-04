@@ -2,11 +2,7 @@ function Expression(tokens){
 	this.tokens = tokens;
 }
 Expression.prototype.evaluate = function(context){
-     try{
-         return evaluate(this.tokens,context);
-     }catch(e){
-         $log.trace(e);
-     }
+     return evaluate(this.tokens,context);
 }
 function evaluate(el,context){
      var stack = [];
