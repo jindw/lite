@@ -8,6 +8,7 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/js.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-fileupload-1.2.1.jar" sourcepath="E:/opensource/commons-fileupload-1.2.1-sources.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/Template.jar" sourcepath="/Lite/src/main"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/JSI.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
