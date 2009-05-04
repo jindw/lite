@@ -478,12 +478,18 @@ function parseDocumentType(node){
             this.append( '" "');
             this.append(node.systemId);
             this.append('">');
-        }else{
-            this.append("<!DOCTYPE ");
+        }else if(node.systemId){
+            this.append('<!DOCTYPE ');
             this.append(node.nodeName);
-            this.append("[");
+            this.append(' SYSTEM "');
+            this.append(node.systemId);
+            this.append('">');
+        }else{
+            this.append('<!DOCTYPE ');
+            this.append(node.nodeName);
+            this.append(' [');
             this.append(node.internalSubset);
-            this.append("]>");
+            this.append(']>');
         }
     }
     return null;

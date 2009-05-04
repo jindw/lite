@@ -23,7 +23,7 @@ public class DefaultXMLParser implements Parser<Node> {
 	final static Pattern PRIM_PATTERN = Pattern
 			.compile("^\\s*([\\r\\n])\\s*|\\s*([\\r\\n])\\s*$|^(\\s)+|(\\s)+$");
 
-	public void parse(ParseContext context,ParseChain chain,Node node) {
+	public void parse(ParseContext context, ParseChain chain, Node node) {
 		switch (node.getNodeType()) {
 		case 1: // NODE_ELEMENT
 			parseElement(node, context);
@@ -50,14 +50,16 @@ public class DefaultXMLParser implements Parser<Node> {
 			parseComment(node, context);
 			break;
 		case 9: // NODE_DOCUMENT
+			parseDocument(node, context);
+			break;
 		case 11:// NODE_DOCUMENT_FRAGMENT
 			parseDocument(node, context);
 			break;
 		case 10:// NODE_DOCUMENT_TYPE
 			parseDocumentType(node, context);
 			break;
-			// case 11://NODE_DOCUMENT_FRAGMENT
-			// return parseDocumentFragment(node,context);
+		// case 11://NODE_DOCUMENT_FRAGMENT
+		// return parseDocumentFragment(node,context);
 		case 12:// NODE_NOTATION
 			parseNotation(node, context);
 			break;
@@ -76,7 +78,9 @@ public class DefaultXMLParser implements Parser<Node> {
 		}
 		try {
 			context.append("<![CDATA[");
-			context.parseText(((CDATASection) node).getData(),Template.EL_TYPE);
+			context
+					.parseText(((CDATASection) node).getData(),
+							Template.EL_TYPE);
 			context.append("]]>");
 		} finally {
 			if (needFormat) {
@@ -96,7 +100,15 @@ public class DefaultXMLParser implements Parser<Node> {
 			context.append(node.getNodeName());
 			context.append(" PUBLIC \"");
 			context.append(node.getPublicId());
-			context.append("\" \"");
+			if (node.getSystemId() == null) {
+				context.append("\" \"");
+				context.append(node.getSystemId());
+			}
+			context.append("\">");
+		} else if (node.getSystemId() != null) {
+			context.append("<!DOCTYPE ");
+			context.append(node.getNodeName());
+			context.append(" SYSTEM \"");
 			context.append(node.getSystemId());
 			context.append("\">");
 		} else {
@@ -114,7 +126,6 @@ public class DefaultXMLParser implements Parser<Node> {
 			context.parse(n);
 		}
 	}
-
 	private void parseComment(Node node, ParseContext context) {
 		return;
 	}
@@ -152,7 +163,7 @@ public class DefaultXMLParser implements Parser<Node> {
 				context.beginIndent();// false);
 			}
 			try {
-				context.parseText(text,Template.XML_TEXT_TYPE);
+				context.parseText(text, Template.XML_TEXT_TYPE);
 			} finally {
 				if (needFormat) {
 					context.endIndent();
@@ -220,7 +231,7 @@ public class DefaultXMLParser implements Parser<Node> {
 
 	private List<Object> parseAttributeValue(ParseContext context, String value) {
 		int mark = context.mark();
-		context.parseText(value,Template.XML_ATTRIBUTE_TYPE);
+		context.parseText(value, Template.XML_ATTRIBUTE_TYPE);
 		return context.reset(mark);
 	}
 
