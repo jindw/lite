@@ -15,7 +15,7 @@
  * @public
  */
 function Template(data,parser){
-    if("org.xidea.lite:compile"){
+    if("org.xidea.lite:Compile"){
         if(!(data instanceof Array || data instanceof Function)){
             var inlineClass = {
                 'xml':XMLParser,

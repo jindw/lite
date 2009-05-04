@@ -87,7 +87,7 @@
 			<arg value="-config.ascii" />
 			<arg value="false" />
 			<arg value="-config.features" />
-			<arg value="org.xidea.lite:compile" />
+			<arg value="org.xidea.lite:Compile" />
 
 			<arg value="-exports" />
 			<arg value="org.xidea.lite:Template" />
@@ -105,17 +105,14 @@
 			<arg value="-config.ascii" />
 			<arg value="false" />
 			<arg value="-config.features" />
-			<arg value="org.xidea.jsi.boot:$log" />
+			<arg value="org.xidea.lite:Compile" />
 			<arg value="-config.features" />
-			<arg value="org.xidea.lite:compile" />
-			<arg value="-config.features" />
-			<arg value=":debug" />
+			<arg value=":Debug" />
 
 			<arg value="-exports" />
 			<arg value="org.xidea.lite:Parser" />
 			<arg value="org.xidea.lite:TextParser" />
 			<arg value="org.xidea.lite:XMLParser" />
-			<arg value="org.xidea.lite.demo:$log" />
 			<arg value="org.xidea.lite.demo:TestCase" />
 
 			<arg value="-outputExported" />
