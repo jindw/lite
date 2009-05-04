@@ -83,7 +83,7 @@ public class CoreXMLParser implements Parser<Element> {
 		name = args[0];
 		StringBuilder buf = new StringBuilder("{\"name\":\"");
 		buf.append(name);
-		buf.append("\",arguments:[");
+		buf.append("\",params:[");
 		for (int i = 1; i < args.length; i++) {
 			if(i>1){
 				buf.append(',');
