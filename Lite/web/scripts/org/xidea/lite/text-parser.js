@@ -55,7 +55,7 @@ TextParser.prototype.parseText = function(text,xmlText,xmlAttr){
     while(match = pattern && pattern.exec(text)){
         var begin = match.index;
         var expressionBegin = begin + match[0].length;
-        var expressionEnd = expressionBegin;
+        var expressionEnd = findELEnd(text,expressionBegin);
         var fn = match[2];
         
         begin && buf.push(text.substr(0,begin));
@@ -66,23 +66,21 @@ TextParser.prototype.parseText = function(text,xmlText,xmlAttr){
         }else{
             fn = fn.substr(0,fn.length-1);
             //expression:
-            while((expressionEnd = text.indexOf("}",expressionEnd+1))>0){
-                try{
-                    var expression = text.substring(expressionBegin ,expressionEnd );
-                    expression = this.parseEL(expression);
-                    if(xmlAttr){
-                    	buf.push([XML_ATTRIBUTE_TYPE,expression]);
-                    }else{
-                    	buf.push([xmlText ? XML_TEXT_TYPE : EL_TYPE,expression]);
-                    }
-                    
-                    text = text.substr(expressionEnd+1);
-                    //以前为了一些正则bug,不知道是否还需要:(
-                    //pattern = text && /(\\*)\$([a-zA-Z!]{0,5}\{)/;
-                    //continue seach;
-                    break;
-                }catch(e){$log.debug("尝试表达式解析失败",expression,e)}
-            }
+            try{
+                var expression = text.substring(expressionBegin ,expressionEnd );
+                expression = this.parseEL(expression);
+                if(xmlAttr){
+                	buf.push([XML_ATTRIBUTE_TYPE,expression]);
+                }else{
+                	buf.push([xmlText ? XML_TEXT_TYPE : EL_TYPE,expression]);
+                }
+                
+                text = text.substr(expressionEnd+1);
+                //以前为了一些正则bug,不知道是否还需要:(
+                //pattern = text && /(\\*)\$([a-zA-Z!]{0,5}\{)/;
+                //continue seach;
+                break;
+            }catch(e){$log.debug("尝试表达式解析失败",expression,e)}
         }
     }
     text && buf.push(text);
