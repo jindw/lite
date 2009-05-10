@@ -125,58 +125,13 @@ function(context){
  */
 function buildNativeJS(code){
     var context = new Context(code,0);
-    for(var n in context.refs){
-       if(n!= 'for'){
-    	  context.append('var ',n,'=_$replacer("',n,'");')
-       }
-    }
-    //add function
-    for(var i=0;i<context.defs.length;i++){
-        var def = context.defs[i];
-        var n = def.name;
-        context.append("function ",n,"(",def.params.join(','),'){')
-        context.depth++;
-        context.append('var _$out=[];');
-        context.appendCode(def.code);
-        context.append("return _$out.join('');");
-        context.depth--;
-        context.append("}");
-     	context.append('if("',n,'" in _$context){',n,'=_$context["',n,'"];}')
-    }
-    if(context.hasFor){
-        context.append('function _$items(source,objectType){');
-        context.append('    if(objectType){');
-        context.append('        var result = [];');
-        context.append('        for(objectType in source){');
-        context.append('            result.push({key:objectType,value:source[objectType]})');
-        context.append('        }');
-        context.append('        return result;');
-        context.append('    }');
-        context.append('    objectType = typeof source;');
-        context.append('    return objectType == "number"? new Array(source):');
-        context.append('        objectType == "string"?source.split(""):');
-        context.append('        source instanceof Array?source:_$items(source,1);');
-        context.append('}');
-    }
-    if(context.needReplacer){
-    	context.append('_$replacer = function(c){return "&#"+c.charCodeAt()+";";}')
-    }
-    try{
-        context.appendCode(code);
-    }catch(e){
-        //alert(["编译失败：",buf.join(""),code])
-        throw e;
-    }
-    context.append("return _$out.join('');");
+    context.parse();
     return context.toString();
 }
 
 function Context(code,index){
-    this.out = [
-    	'\n\tfunction _$replacer(k){return k in _$context?_$context[k]:this[k];}',
-    	"\n\tvar _$context = arguments[0];",
-    	"\n\tvar _$out = [];"];
     var vs = this.vs = findStatus(code);
+    this.code = code;
     this.hasFor = vs.forInfos.length;
     this.needReplacer = vs.needReplacer;
     this.defs = vs.defs;
@@ -186,6 +141,57 @@ function Context(code,index){
     this.index = index?index:3
 }
 Context.prototype = {
+	parse:function(){
+		var code = this.code;
+	    this.out = [
+	    	'\n\tfunction _$replacer(k){return k in _$context?_$context[k]:this[k];}',
+	    	"\n\tvar _$context = arguments[0];",
+	    	"\n\tvar _$out = [];"];
+		for(var n in this.refs){
+	       if(n!= 'for'){
+	    	  this.append('var ',n,'=_$replacer("',n,'");')
+	       }
+	    }
+	    //add function
+	    for(var i=0;i<this.defs.length;i++){
+	        var def = this.defs[i];
+	        var n = def.name;
+	        this.append("function ",n,"(",def.params.join(','),'){')
+	        this.depth++;
+	        this.append('var _$out=[];');
+	        this.appendCode(def.code);
+	        this.append("return _$out.join('');");
+	        this.depth--;
+	        this.append("}");
+	     	this.append('if("',n,'" in _$this){',n,'=_$context["',n,'"];}')
+	    }
+	    if(this.hasFor){
+	        this.append('function _$items(source,objectType){');
+	        this.append('    if(objectType){');
+	        this.append('        var result = [];');
+	        this.append('        for(objectType in source){');
+	        this.append('            result.push({key:objectType,value:source[objectType]})');
+	        this.append('        }');
+	        this.append('        return result;');
+	        this.append('    }');
+	        this.append('    objectType = typeof source;');
+	        this.append('    return objectType == "number"? new Array(source):');
+	        this.append('        objectType == "string"?source.split(""):');
+	        this.append('        source instanceof Array?source:_$items(source,1);');
+	        this.append('}');
+	    }
+	    if(this.needReplacer){
+	    	this.append('_$replacer = function(c){return "&#"+c.charCodeAt()+";";}')
+	    	this.append('_$replace = function(text,pattern){return String(text).replace(/[<>&"]/g,_$replacer)}')
+	    }
+	    try{
+	        this.appendCode(code);
+	    }catch(e){
+	        //alert(["编译失败：",buf.join(""),code])
+	        throw e;
+	    }
+	    this.append("return _$out.join('');");
+	},
     getForStatus:function(forCode){
         return this.vs.getForStatus(forCode);
     },
@@ -257,7 +263,7 @@ Context.prototype = {
     	this.append("_$out.push(",getEL(item[1]),");")
     },
     processXMLText:function(item){
-        this.append("_$out.push(String(",getEL(item[1]),").replace(/[<>&]/g,_$replacer));")
+        this.append("_$out.push(_$replace(",getEL(item[1]),"));")
     },
     processXMLAttribute:function(item){
         //[7,[[0,"value"]],"attribute"]
@@ -268,12 +274,12 @@ Context.prototype = {
             this.append("var ",testId,"=",value);
             this.append("if(",testId,"!=null){");
             this.depth++;
-            this.append("_$out.push(' ",attributeName,"=\"',String(",testId,").replace(/<>&\"/g,_$replacer),'\"')");
+            this.append("_$out.push(' ",attributeName,"=\"',_$replace(",testId,"),'\"')");
             this.depth--;
             this.append("}");
             this.freeVarId(testId);
         }else{
-        	this.append("_$out.push(String(",value,").replace(/[<>&\"]/g,_$replacer));")
+        	this.append("_$out.push(_$replace(",value,");")
         }
     },
     processVar:function(item){
