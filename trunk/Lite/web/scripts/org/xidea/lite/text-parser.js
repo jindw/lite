@@ -55,7 +55,7 @@ TextParser.prototype.parseText = function(text,xmlText,xmlAttr){
     while(match = pattern && pattern.exec(text)){
         var begin = match.index;
         var expressionBegin = begin + match[0].length;
-        var expressionEnd = findELEnd(text,expressionBegin);
+        var expressionEnd = findELEnd(text,expressionBegin-1);
         var fn = match[2];
         
         begin && buf.push(text.substr(0,begin));
@@ -79,8 +79,11 @@ TextParser.prototype.parseText = function(text,xmlText,xmlAttr){
                 //以前为了一些正则bug,不知道是否还需要:(
                 //pattern = text && /(\\*)\$([a-zA-Z!]{0,5}\{)/;
                 //continue seach;
-                break;
-            }catch(e){$log.debug("尝试表达式解析失败",expression,e)}
+            }catch(e){
+            	$log.debug("尝试表达式解析失败",expression,text,expressionBegin ,expressionEnd,e);
+            	buf.push(match[0]);
+            	text = text.substr(expressionBegin);
+            }
         }
     }
     text && buf.push(text);

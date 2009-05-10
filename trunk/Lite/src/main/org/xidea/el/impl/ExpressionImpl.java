@@ -79,6 +79,7 @@ public class ExpressionImpl implements Expression ,ReferenceExpression {
 				if (result instanceof ExpressionToken) {
 					ExpressionToken lazyToken = (ExpressionToken) result;
 					if (lazyToken.getType() == ExpressionToken.VALUE_LAZY) {
+						stack.pop();
 						evaluate(stack, (ExpressionToken[]) lazyToken
 								.getParam(), context);
 						continue;
