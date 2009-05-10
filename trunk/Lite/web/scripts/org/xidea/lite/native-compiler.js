@@ -182,7 +182,7 @@ Context.prototype = {
 	    }
 	    if(this.needReplacer){
 	    	this.append('_$replacer = function(c){return "&#"+c.charCodeAt()+";";}')
-	    	this.append('_$replace = function(text,pattern){return String(text).replace(/[<>&"]/g,_$replacer)}')
+	    	this.append('_$replace = function(text){return String(text).replace(/[<>&"]/g,_$replacer)}')
 	    }
 	    try{
 	        this.appendCode(code);
@@ -279,7 +279,7 @@ Context.prototype = {
             this.append("}");
             this.freeVarId(testId);
         }else{
-        	this.append("_$out.push(_$replace(",value,");")
+        	this.append("_$out.push(_$replace(",value,"));")
         }
     },
     processVar:function(item){
