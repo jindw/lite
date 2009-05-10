@@ -182,7 +182,7 @@ Context.prototype = {
 	    }
 	    if(this.needReplacer){
 	    	this.append('_$replacer = function(c){return "&#"+c.charCodeAt()+";";}')
-	    	this.append('_$replace = function(text){return String(text).replace(/[<>&"]/g,_$replacer)}')
+	    	this.append('function _$replace(text){return String(text).replace(/[<>&"]/g,_$replacer)}')
 	    }
 	    try{
 	        this.appendCode(code);
