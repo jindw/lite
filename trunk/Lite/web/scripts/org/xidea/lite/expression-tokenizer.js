@@ -80,7 +80,7 @@ var fns = {
 		case '|':// ||
     		if(":debug"){
     			if (this.value.charAt(this.start) != this.value.charAt(this.start + 1)){
-    			    $log.error("Error OP:" + this.value.substring(this.start,this.start+2))
+    			    $log.error("未知符号:" , this.value.substring(this.start),this.value)
     			}
     		}
 			return this.value.substring(this.start, this.start += 2);
