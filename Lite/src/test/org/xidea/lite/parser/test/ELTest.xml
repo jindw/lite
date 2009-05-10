@@ -8,6 +8,10 @@
 	</object>
 	<object class="java.util.LinkedHashMap">
 		<void method="put">
+			<string><![CDATA[<div>${Math.max(2>=0?3+2:2,1)}</div>]]></string>
+			<string><![CDATA[<div>5</div>]]></string>
+		</void>
+		<void method="put">
 			<string><![CDATA[<div>\${1+1}</div>]]></string>
 			<string><![CDATA[<div>${1+1}</div>]]></string>
 		</void>

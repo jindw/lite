@@ -64,6 +64,10 @@ public class ExpressionImplTest {
 		test(null,"1+2 == '3'",true, true);
 	}
 	@Test
+	public void test3opAndFN() {	
+		test(null,"Math.max(2>=0?3+2:2,1)",5, true);
+	}
+	@Test
 	public void test3op() {	
 		test(null,"(0?1+4:+2)+1",3, true);
 

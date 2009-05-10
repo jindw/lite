@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -34,7 +33,6 @@ import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.Template;
 import org.xidea.lite.dtd.DefaultEntityResolver;
 import org.xidea.lite.parser.impl.ParseContextImpl;
-import org.xidea.lite.parser.impl.XMLContextImpl;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -62,10 +60,24 @@ public class JSCompileTest {
 		engine.eval("$import('org.xidea.lite:Template');");
 		engine.eval("$import('org.xidea.lite:buildNativeJS');");
 		engine.eval("$import('org.xidea.lite:XMLParser');");
+		engine.eval("$import('org.xidea.lite:findELEnd')");
 		engine.eval(new InputStreamReader(JSCompileTest.class
 				.getResourceAsStream("JSCompileTest.js"), "utf-8"));
 	}
-
+	@Test
+	public void testTextParser() throws Exception {
+		String test = "您好：${user}，您的的ip地址是：${ippart0}  .${ip.part1}.${ip.part2}.${ip.part3}。";
+		
+		Assert.assertEquals(11,engine.eval("new XMLParser(true).parseText('"+test+"').length"));
+		System.out.println("###"+engine.eval("new XMLParser(true).parseText('2${..}2').join('/')"));
+		Assert.assertEquals("2${..}2",engine.eval("new XMLParser(true).parseText('2${..}2').join('')"));
+	}
+	@Test
+	public void testFindELEnd() throws Exception {
+		Assert.assertEquals(16,engine.eval("findELEnd(\"${'jin '+'dawei'}\",1)"));
+		Assert.assertEquals(5,engine.eval("findELEnd('${123}xxx',1)"));
+		Assert.assertEquals(6,engine.eval("findELEnd('x${123}xxx',2)"));
+	}
 	@Test
 	public void testExample() throws Exception {
 		URL menuURL = new File(webRoot, "menu.xml").toURI().toURL();
@@ -95,18 +107,18 @@ public class JSCompileTest {
 			System.out.println("\n======" + key + "======\n");
 			System.out.println(engine.eval("jsTemplate.data+''"));
 			// System.out.println(engine.eval("liteTemplate.data+''"));
-			Object result1 = engine.eval("liteTemplate.render(" + contextJSON
+			Object jsJSON = engine.eval("liteTemplate.render(" + contextJSON
 					+ ")");
-			Object result2 = engine.eval("jsTemplate.render(" + contextJSON
+			Object jsJS = engine.eval("jsTemplate.render(" + contextJSON
 					+ ")");
-			Assert.assertEquals("JS编译后结果不一致", result1, result2);
+			Assert.assertEquals("JS编译后结果不一致", jsJSON, jsJS);
 			ParseContextImpl pc = new ParseContextImpl(menuURL);
 			pc.parse(DOMParser.parseFromString(source, ""));
 			StringWriter out = new StringWriter();
 			new Template(pc.toList()).render(JSONDecoder.decode(contextJSON),
 					out);
 			String java = out.toString();
-			Assert.assertEquals("JS结果与Java不一致", sumText((String)result1), sumText(java));
+			Assert.assertEquals("JS结果与Java不一致", sumText((String)jsJSON), sumText(java));
 
 			child = (Element) child.getNextSibling();
 		}

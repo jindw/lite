@@ -163,7 +163,7 @@ Context.prototype = {
 	        this.append("return _$out.join('');");
 	        this.depth--;
 	        this.append("}");
-	     	this.append('if("',n,'" in _$this){',n,'=_$context["',n,'"];}')
+	     	this.append('if("',n,'" in _$context){',n,'=_$context["',n,'"];}')
 	    }
 	    if(this.hasFor){
 	        this.append('function _$items(source,objectType){');
