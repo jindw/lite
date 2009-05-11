@@ -123,6 +123,12 @@ public class CoreXMLParser implements Parser<Element> {
 			if (path != null) {
 				if (path.startsWith("#")) {
 					doc = (Node) context.getAttribute(path);
+					if(doc==null){
+						log.error("没找到相关命名节点："+context.getCurrentURL()+ path);
+						return;
+					}
+					
+					
 					String uri;
 					if (doc instanceof Document) {
 						uri = ((Document) doc).getDocumentURI();
