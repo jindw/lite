@@ -65,7 +65,7 @@ public class TemplateEngine{
 	 * @param path
 	 * @return
 	 */
-	protected Template getTemplate(String path) {
+	public Template getTemplate(String path) {
 		TemplateEntry templateEntry = templateMap.get(path);
 		if (templateEntry == null) {
 			Object lock2 = null;
