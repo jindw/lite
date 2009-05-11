@@ -23,6 +23,7 @@ import javax.xml.xpath.XPathFactory;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mozilla.javascript.Script;
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;
@@ -35,6 +36,14 @@ import org.xidea.lite.dtd.DefaultEntityResolver;
 import org.xidea.lite.parser.impl.ParseContextImpl;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+
+import sun.org.mozilla.javascript.internal.BaseFunction;
+import sun.org.mozilla.javascript.internal.Callable;
+import sun.org.mozilla.javascript.internal.Context;
+import sun.org.mozilla.javascript.internal.IdFunctionObject;
+import sun.org.mozilla.javascript.internal.NativeFunction;
+import sun.org.mozilla.javascript.internal.ScriptRuntime;
+import sun.org.mozilla.javascript.internal.Scriptable;
 
 public class JSCompileTest {
 	ScriptEngine engine = new ScriptEngineManager().getEngineByExtension("js");
@@ -55,31 +64,64 @@ public class JSCompileTest {
 
 	@Before
 	public void setup() throws Exception, ScriptException {
+		engine.eval("this['javax.script.filename']='<boot.js>'");
 		engine.eval(new InputStreamReader(this.getClass().getResourceAsStream(
 				"/boot.js"), "utf-8"));
+		engine.put("evalFile", new BaseFunction() {
+
+			@Override
+			public Object call(Context ct, Scriptable scope,
+					Scriptable thisArg, Object[] args) {
+				String sourceName = String.valueOf(args[1]);
+				String source = (String) args[0];
+				//thisArg = (Scriptable) args[2];
+				source = "function(){"+source+"\n}";
+				Callable call = (Callable) ct.compileFunction(scope,source, sourceName, 1, null);
+				try{
+					//ct.enter();
+					System.out.println(scope.getClass());
+					System.out.println(scope);
+					return call.call(ct, scope, thisArg, args);
+				}finally{
+					//ct.exit();
+				}
+			}
+
+		});
+		engine.eval(new InputStreamReader(JSCompileTest.class
+				.getResourceAsStream("JSCompileTest.js"), "utf-8"));
+		//engine.eval("evalFile.call(null,'print(this)',111)");
 		engine.eval("$import('org.xidea.lite:Template');");
 		engine.eval("$import('org.xidea.lite:buildNativeJS');");
 		engine.eval("$import('org.xidea.lite:XMLParser');");
 		engine.eval("$import('org.xidea.lite:findELEnd')");
-		engine.eval(new InputStreamReader(JSCompileTest.class
-				.getResourceAsStream("JSCompileTest.js"), "utf-8"));
 	}
+
 	@Test
 	public void testTextParser() throws Exception {
 		String test = "您好：${user}，您的的ip地址是：${ippart0}  .${ip.part1}.${ip.part2}.${ip.part3}。";
-		
-		Assert.assertEquals(11,engine.eval("new XMLParser(true).parseText('"+test+"').length"));
-		System.out.println("###"+engine.eval("new XMLParser(true).parseText('2${..}2').join('/')"));
-		Assert.assertEquals("2${..}2",engine.eval("new XMLParser(true).parseText('2${..}2').join('')"));
+
+		Assert.assertEquals(11, engine.eval("new XMLParser(true).parseText('"
+				+ test + "').length"));
+		System.out
+				.println("###"
+						+ engine
+								.eval("new XMLParser(true).parseText('2${..}2').join('/')"));
+		Assert.assertEquals("2${..}2", engine
+				.eval("new XMLParser(true).parseText('2${..}2').join('')"));
 	}
+
 	@Test
 	public void testFindELEnd() throws Exception {
-		Assert.assertEquals(16,engine.eval("findELEnd(\"${'jin '+'dawei'}\",1)"));
-		Assert.assertEquals(5,engine.eval("findELEnd('${123}xxx',1)"));
-		Assert.assertEquals(6,engine.eval("findELEnd('x${123}xxx',2)"));
+		Assert.assertEquals(16, engine
+				.eval("findELEnd(\"${'jin '+'dawei'}\",1)"));
+		Assert.assertEquals(5, engine.eval("findELEnd('${123}xxx',1)"));
+		Assert.assertEquals(6, engine.eval("findELEnd('x${123}xxx',2)"));
 	}
+
 	@Test
 	public void testExample() throws Exception {
+		
 		URL menuURL = new File(webRoot, "menu.xml").toURI().toURL();
 		Document doc = context.loadXML(menuURL);
 		String defaultContext = getText(doc, "/root/context");
@@ -97,7 +139,9 @@ public class JSCompileTest {
 
 			String sourceJSON = JSONEncoder.encode(source);
 			String contextJSON = context;
+			// engine.put(ScriptEngine.FILENAME, "<file>");
 
+			System.out.println();
 			engine.eval("var jsTemplate = new Template(" + sourceJSON
 					+ ",new XMLParser(true))");
 			engine.eval("var liteTemplate = new Template(" + sourceJSON
@@ -109,16 +153,16 @@ public class JSCompileTest {
 			// System.out.println(engine.eval("liteTemplate.data+''"));
 			Object jsJSON = engine.eval("liteTemplate.render(" + contextJSON
 					+ ")");
-			Object jsJS = engine.eval("jsTemplate.render(" + contextJSON
-					+ ")");
-			Assert.assertEquals("JS编译后结果不一致", jsJSON, jsJS);
+			Object jsJS = engine.eval("jsTemplate.render(" + contextJSON + ")");
+			Assert.assertEquals("JS编译后结果不一致"+source, jsJSON, jsJS);
 			ParseContextImpl pc = new ParseContextImpl(menuURL);
 			pc.parse(DOMParser.parseFromString(source, ""));
 			StringWriter out = new StringWriter();
 			new Template(pc.toList()).render(JSONDecoder.decode(contextJSON),
 					out);
 			String java = out.toString();
-			Assert.assertEquals("JS结果与Java不一致", sumText((String)jsJSON), sumText(java));
+			Assert.assertEquals("JS结果与Java不一致", sumText((String) jsJSON),
+					sumText(java));
 
 			child = (Element) child.getNextSibling();
 		}

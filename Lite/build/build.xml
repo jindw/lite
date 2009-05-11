@@ -123,4 +123,14 @@
 
 	</target>
 
+	<target name="static">
+		<java classname="org.xidea.lite.tools.Build" classpath="web/WEB-INF/classes;web/WEB-INF/lib/commons-logging-1.0.4.jar;web/WEB-INF/lib/js.jar;web/WEB-INF/lib/JSI.jar">
+			<arg value="-webRoot" />
+			<arg value="${basedir}/web/" />
+
+			<arg value="-htmlcached" />
+			<arg value="${basedir}/web/WEB-INF/htmlcached" />
+
+		</java>
+	</target>
 </project>

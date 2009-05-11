@@ -1,6 +1,6 @@
 this.addScript('template.js',"Template"
-               ,"evaluate"
-               ,["parser.js","text-parser.js","xml-parser.js"]);
+               ,0
+               ,["parser.js","evaluate","xml-parser.js"]);
 
 this.addScript('expression.js',["Expression","evaluate"]
               ,0

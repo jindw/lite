@@ -27,7 +27,6 @@ public class Java6JSBuilder implements JSBuilder {
 
 	static {
 		jsengine = new ScriptEngineManager().getEngineByExtension("js");
-
 		parentScope = jsengine.createBindings();
 		ClassLoader loader = Java6JSBuilder.class.getClassLoader();
 		try {

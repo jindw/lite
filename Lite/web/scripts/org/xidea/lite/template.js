@@ -17,13 +17,10 @@
 function Template(data,parser){
     if("org.xidea.lite:Compile"){
         if(!(data instanceof Array || data instanceof Function)){
-            var inlineClass = {
-                'xml':XMLParser,
-                'text':TextParser
-            }
-            parser = parser || "xml";
-            if(typeof parser == "string"){
-                parser = new (inlineClass[parser] || $import(parser))(true);
+            if(parser == null|| parser == "xml"){
+            	parser = new XMLParser();
+            }else if(typeof parser == "string"){
+                parser = new $import(parser)(true);
             }
             parser.parse(data);
             data = parser.buildResult();
