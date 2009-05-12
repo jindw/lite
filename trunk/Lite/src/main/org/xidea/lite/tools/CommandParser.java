@@ -25,71 +25,77 @@ public class CommandParser {
 	public static final Map<Class<?>, Convertor<? extends Object>> CONVERTOR_MAP;
 	public Map<Class<?>, Convertor<? extends Object>> convertorMap = CONVERTOR_MAP;
 
-	private Map<String, List<String>> params;
+	private Map<String, String[]> params = Collections.emptyMap();
 
+	public CommandParser(){
+	}
 	public CommandParser(String[] args){
 		this.params = parseArgs(args);
 		;
 	}
+	public void addConvertor(Convertor<? extends Object> convertor){
+		if(!(convertorMap instanceof HashMap)){
+			convertorMap = new HashMap<Class<?>, Convertor<? extends Object>>(convertorMap);
+		}
+		convertorMap.put(convertor.getClass(), convertor);
+		
+	}
 
-	public void setup(Object config) {
-		setup(config, params);
+	public void setup(Object result) {
+		setup(result, params);
+	}
+
+	public void setup(Object result,String[] args) {
+		setup(result, parseArgs(args));
 	}
 
 
-	protected void setup(final Object context, Map<String, ? extends Object> params) {
+	protected void setup(final Object context, Map<String,String[]> params) {
 		for (String name : params.keySet()) {
 			if (name!=null && name.length() > 0) {
 				ReferenceExpression el = new ExpressionImpl(name);
 				Reference result = el.prepare(context);
 				if (result != null && result.getType()!=null) {
 					Class<? extends Object> type = result.getType();
-					Object object = params.get(name);
-					String[] values = null;
+					String[] values = params.get(name);
 
-					// values.toArray(new String[values.size()])
-					if (object instanceof Collection) {
-						@SuppressWarnings("unchecked")
-						Collection<String> col = (Collection) object;
-						values = (String[]) col.toArray(new String[col.size()]);
-					} else {
-						values = (String[]) object;
-					}
 					result.setValue(getValue(values, type, context, name));
-				} else {
+				} else if(context != null){
 					log.warn("找不到相关属性：" + name);
 					if (log.isInfoEnabled()) {
-						if (context == null) {
-							return;
-						}
-						ArrayList<String> properties = new ArrayList<String>();
-						try {
-							PropertyDescriptor[] ps = Introspector.getBeanInfo(
-									context.getClass())
-									.getPropertyDescriptors();
-
-							for (PropertyDescriptor p : ps) {
-								properties.add(p.getName());
-							}
-						} catch (IntrospectionException e) {
-							log.error(e);
-						}
-						log.info("当前对象可能属性有：" + properties);
+						traceBeanInfo(context);
 					}
 				}
 			}
 		}
 	}
 
-	protected static Map<String, List<String>> parseArgs(String[] args) {
-		Map<String, List<String>> result = new HashMap<String, List<String>>();
+	protected void traceBeanInfo(final Object context) {
+		ArrayList<String> properties = new ArrayList<String>();
+		try {
+			PropertyDescriptor[] ps = Introspector.getBeanInfo(
+					context.getClass())
+					.getPropertyDescriptors();
+
+			for (PropertyDescriptor p : ps) {
+				properties.add(p.getName());
+			}
+		} catch (IntrospectionException e) {
+			log.error(e);
+		}
+		log.info("当前对象可能属性有：" + properties);
+	}
+
+	@SuppressWarnings("unchecked")
+	protected static Map<String, String[]> parseArgs(String[] args) {
+		Map result = new HashMap();
 		String name = null;
 		for (int i = 0; i < args.length; i++) {
 			String arg = args[i];
 			if (arg.startsWith("-")) {
 				name = arg.substring(1);
 			} else {
-				List<String> values = result.get(name);
+				List<String> values = (List<String>) result.get(name);
 				if (values == null) {
 					values = new ArrayList<String>();
 					result.put(name, values);
@@ -97,7 +103,12 @@ public class CommandParser {
 				values.add(arg);
 			}
 		}
-		return result;
+		for(Object item : result.entrySet()){
+			Map.Entry entry = (Map.Entry)item;
+			List<String> value = (List<String>)entry.getValue();
+			entry.setValue(value.toArray(new String[value.size()]));
+		}
+		return (Map<String, String[]>)result;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -228,9 +239,16 @@ public class CommandParser {
 				}
 			}
 		};
-
 		convertorMap.put(Boolean.TYPE, c);
 		convertorMap.put(Boolean.class, c);
+		c = new Convertor<Object>() {
+			public Object getValue(String value,
+					Class<? extends Object> expectedType, Object context,
+					String key) {
+				return value;
+			}
+		};
+		convertorMap.put(Object.class, c);
 		CONVERTOR_MAP = Collections.unmodifiableMap(convertorMap);
 	}
 
