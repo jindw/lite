@@ -97,7 +97,7 @@ public class ResultContextImpl implements ResultContext {
 		}
 	}
 
-	public void clearPreviousText() {
+	protected void clearPreviousText() {
 		int i = result.size();
 		while (i-- > 0) {
 			Object item = result.get(i);

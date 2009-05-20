@@ -22,7 +22,7 @@ XMLParser.prototype.parse = function(url){
         var data =toDoc(url)
         //alert([data,doc.documentElement.tagName])
     }else{
-    	print(url)
+    	//print(url)
         var pos = url.indexOf('#')+1;
         var data = this.load( pos?url.substr(0,pos-1):url,pos && url.substr(pos));
     }

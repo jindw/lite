@@ -168,7 +168,6 @@ public class CoreXMLParser implements Parser<Element> {
 	}
 
 	protected Node parseElseIfTag(Element el, ParseContext context, boolean reqiiredTest) {
-		context.clearPreviousText();
 		if (((Element) el).hasAttribute("test")) {
 			Object test = getAttributeEL(context, el, "test");
 			context.appendElse(test);
@@ -183,7 +182,6 @@ public class CoreXMLParser implements Parser<Element> {
 	}
 
 	protected Node parseElseTag(Element el, ParseContext context) {
-		context.clearPreviousText();
 		context.appendElse(null);
 		parseChild(el.getFirstChild(), context);
 		context.appendEnd();

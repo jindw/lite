@@ -18,7 +18,7 @@ function Template(data,parser){
     if("org.xidea.lite:Compile"){
         if(!(data instanceof Array || data instanceof Function)){
             if(parser == null|| parser == "xml"){
-            	parser = new XMLParser();
+            	parser = new XMLParser(true);
             }else if(typeof parser == "string"){
                 parser = new $import(parser)(true);
             }
