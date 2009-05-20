@@ -87,6 +87,9 @@ public class RhinoContext {
 		if (parser instanceof Scriptable) {
 			Function parse = (Function) RhinoContext.getProperty(
 					(Scriptable) parser, "parse");
+			if(parse == null){
+				parse = (Function) parser;
+			}
 			nodeParser = new RhinoParserProxy(context, (Scriptable) parser,
 					parse, type);
 		} else {
