@@ -67,7 +67,7 @@ public interface ResultContext {
 	 */
 	public void appendAll(List<Object> instruction);
 
-	public void clearPreviousText();
+//	public void clearPreviousText();
 
 	public void appendEL(Object el);
 
@@ -77,6 +77,10 @@ public interface ResultContext {
 
 	public void appendIf(Object testEL);
 
+	/**
+	 * @see org.xidea.lite.parser.impl.ResultContextImpl#appendElse(Object)
+	 * @param testEL
+	 */
 	public void appendElse(Object testEL);
 
 	public void appendFor(String var, Object itemsEL, String status);
