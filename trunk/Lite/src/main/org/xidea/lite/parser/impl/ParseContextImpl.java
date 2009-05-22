@@ -78,13 +78,6 @@ public class ParseContextImpl implements ParseContext {
 
 	}
 
-	public ParseContext createClientContext(String name){
-		return new ClientContextImpl(this,name);
-	}
-
-	public InstructionParser[] getInstructionParsers() {
-		return parserHolder.getInstructionParsers();
-	}
 
 	public void parseText(String source, int defaultType) {
 		int type = resourceContext.getSourceType();
@@ -120,6 +113,13 @@ public class ParseContextImpl implements ParseContext {
 	}
 
 
+	public ParseContext createClientContext(String name){
+		return new ClientContextImpl(this,name);
+	}
+
+	public InstructionParser[] getInstructionParsers() {
+		return parserHolder.getInstructionParsers();
+	}
 	public String getFeatrue(String key) {
 		return featrues.get(key);
 	}

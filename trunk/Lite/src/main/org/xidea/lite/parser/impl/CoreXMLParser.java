@@ -31,7 +31,7 @@ public class CoreXMLParser implements Parser<Element> {
 
 	}
 
-	public void parse( ParseContext context,ParseChain chain,final Element el) {
+	public void parse( final Element el,ParseContext context,ParseChain chain) {
 			String prefix = el.getPrefix();
 			String namespaceURI = el.getNamespaceURI();
 			if (namespaceURI != null && isCoreNS(prefix, namespaceURI)) {

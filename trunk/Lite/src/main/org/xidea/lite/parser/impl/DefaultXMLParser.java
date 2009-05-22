@@ -23,7 +23,7 @@ public class DefaultXMLParser implements Parser<Node> {
 	final static Pattern PRIM_PATTERN = Pattern
 			.compile("^\\s*([\\r\\n])\\s*|\\s*([\\r\\n])\\s*$|^(\\s)+|(\\s)+$");
 
-	public void parse(ParseContext context, ParseChain chain, Node node) {
+	public void parse(Node node, ParseContext context, ParseChain chain) {
 		switch (node.getNodeType()) {
 		case 1: // NODE_ELEMENT
 			parseElement(node, context);

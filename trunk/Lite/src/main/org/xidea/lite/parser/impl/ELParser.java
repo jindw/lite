@@ -23,7 +23,7 @@ public class ELParser implements InstructionParser {
 		}
 	};
 	public static InstructionParser ELSE = new ELParser("else", false) {
-		public int parse(ParseContext context, String text, int p$) {
+		public int parse(String text, int p$, ParseContext context) {
 			int begin = text.indexOf('{', p$);
 			if (begin > 0) {
 				int end = findELEnd(text, begin);
@@ -38,7 +38,7 @@ public class ELParser implements InstructionParser {
 		}
 	};
 	public static InstructionParser CLIENT = new ELParser("client", true) {
-		public int parse(ParseContext context, String text, int p$) {
+		public int parse(String text, int p$, ParseContext context) {
 			int p1 = text.indexOf('{', p$);
 			int p2 = text.indexOf('}', p1);
 			String id = text.substring(p1 + 1, p2);
@@ -51,7 +51,7 @@ public class ELParser implements InstructionParser {
 		}
 	};
 	public static InstructionParser END = new ELParser("end", false) {
-		public int parse(ParseContext context, String text, int p$) {
+		public int parse(String text, int p$, ParseContext context) {
 			ParseContext parentContext = (ParseContext) context
 					.getAttribute(CLIENT);
 			if (parentContext != null) {
@@ -94,7 +94,7 @@ public class ELParser implements InstructionParser {
 
 	}
 
-	public int findStart(ParseContext context, String text, int start) {
+	public int findStart(String text, int start, ParseContext context) {
 		int i;
 		while ((i = text.indexOf(this.prefix, start)) >= start) {
 			if (i < text.length()) {
@@ -113,7 +113,7 @@ public class ELParser implements InstructionParser {
 		return -1;
 	}
 
-	public int parse(ParseContext context, String text, int p$) {
+	public int parse(String text, int p$, ParseContext context) {
 		int begin = text.indexOf('{', p$);
 		if (begin > 0) {
 			String fn2 = text.substring(p$ + 1, begin);

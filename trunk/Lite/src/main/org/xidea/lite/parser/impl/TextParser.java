@@ -17,7 +17,7 @@ public class TextParser implements Parser<String> {
 //				DefaultELParser.END, DefaultELParser.VAR };
 	}
 
-	public void parse(ParseContext context, ParseChain chain, String text) {
+	public void parse(String text, ParseContext context, ParseChain chain) {
 		final boolean encode;
 		final char qute;
 		switch (context.getSourceType()) {
@@ -52,7 +52,7 @@ public class TextParser implements Parser<String> {
 			InstructionParser nip = null;
 			int p$ = length + 1;
 			for (InstructionParser ip : instructionParser) {
-				int p$2 = ip.findStart(context, text, start);
+				int p$2 = ip.findStart(text, start, context);
 				if (p$2 >= start && p$2 < p$) {
 					p$ = p$2;
 					nip = ip;
@@ -69,7 +69,7 @@ public class TextParser implements Parser<String> {
 					start = p$;
 					int mark = context.mark();
 					try {
-						start = nip.parse(context, text, start);
+						start = nip.parse(text, start, context);
 					} catch (Exception e) {
 					}
 					if (start <= p$) {
