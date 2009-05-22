@@ -26,8 +26,33 @@ var TEMPLATE_NS_REG = /^http:\/\/www.xidea.org\/ns\/(?:template|lite)(?:\/core)?
 function ParseContext(){
     this.parserList = this.parserList.concat([]);
     this.result = [];
+    this.topChain = new Chain(this);
 }
-
+function Chain(context,index){
+	this.context = context;
+	this.index = index || 0;
+}
+Chain.prototype = {
+	process:function(node){
+		var parser = this.context.parseList[this.index];
+		var nextChain = new Chain(this.context,this.index+1);
+		if(parser.accept(node)){
+			parser.apply(context,[node,this.context,nextChain])
+		}else{
+			if(nextChain != null){
+				nextChain.process();
+			}
+		}
+		if(/^[\s\ufeff]*</.test(url)){
+	        var data =toDoc(url)
+	        //alert([data,doc.documentElement.tagName])
+	    }else{
+	    	//print(url)
+	        var pos = url.indexOf('#')+1;
+	        var data = this.load( pos?url.substr(0,pos-1):url,pos && url.substr(pos));
+	    }
+	}
+}
 
 /**
  * @private
@@ -44,10 +69,7 @@ ParseContext.prototype = {
 	},
 
 	parse:function(source) {
-		if(typeof text == 'object'){
-			
-		}
-		this.topChain.process();
+		this.topChain.process(source);
 	},
     /**
 	 * 添加静态文本（不编码）
