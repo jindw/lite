@@ -19,7 +19,7 @@ Lite Compiler的解析链结构简单表示如下：
     |-----[DefaultXMLParser]--/              |
     |                                        |
     |                                        |
-    |--------------------------------[TextParserImpl]-------[InstructionParser]
+    |--------------------------------[TextParserImpl]-------[InstructionParser（名字是不是改成ELParser）]
                                                                    |
                                                         【添加自定义指令解析器】..
                     
@@ -29,9 +29,8 @@ Lite Compiler的解析链结构简单表示如下：
     用于控制节点解析，新的解析器将添加在解析链的顶端。
     接口代码：
     {{{
-var pagerParser = {
-	parse:function(context,chain,pagerNode){
-	}
+function pagerParser (pagerNode，context,chain){
+
 }
     }}}
     # 独立处理模式
@@ -44,10 +43,10 @@ var pagerParser = {
     接口代码：
     {{{
 var pagerParser = {
-	findStart:function(context,text,start){
+	findStart:function(text,start,context){
 		rerurn <el begin>
 	},
-	parse:function(context,text,start){
+	parse:function(text,start,context){
 		rerurn <el end>
 	}
 }
@@ -71,28 +70,26 @@ var pagerParser = {
  * 解析函数:
  *
  */
-var pagerParser = {
-	parse:function(context,chain,pagerNode){
-	    if(pagerNode.nodeName == 'ui:pager'){
-	        var selectedEl = (pagerNode.getAttribute("selectedIndex")+'').replace(/^\$\{|\}$/g,'');
-	        var listEl = pagerNode.getAttribute("list")+'';
-	        context.appendFor(listEl,context.parseEL("link"),null);
+function pagerParser(pagerNode,context,chain){
+    if(pagerNode.nodeName == 'ui:pager'){
+        var selectedEl = (pagerNode.getAttribute("selectedIndex")+'').replace(/^\$\{|\}$/g,'');
+        var listEl = pagerNode.getAttribute("list")+'';
+        context.appendFor(listEl,context.parseEL("link"),null);
+        
+        context.appendIf(context.parseEL("for.index>0"));
+        context.append(",");
+        context.appendEnd();//end else
 	        
-	        context.appendIf(context.parseEL("for.index>0"));
-	        context.append(",");
-	        context.appendEnd();//end else
+        context.appendIf(context.parseEL(selectedEl+ " == for.index"));
+        context.parse("<a href='${link}'>[${for.index+1}]</a>");
+        context.appendElse(null);
+        context.parse("[${for.index+1}]");
+        context.appendEnd();//end else
 	        
-	        context.appendIf(context.parseEL(selectedEl+ " == for.index"));
-	        context.parse("<a href='${link}'>[${for.index+1}]</a>");
-	        context.appendElse(null);
-	        context.parse("[${for.index+1}]");
-	        context.appendEnd();//end else
-	        
-	        context.appendEnd();//end for
-	    }else{
-	    	chain.process(pagerNode);
-	    }
-	}
+        context.appendEnd();//end for
+    }else{
+    	chain.process(pagerNode);
+    }
 }
 
 //将节点解析器添加到解析上下文
@@ -103,23 +100,23 @@ context.addNodeParser(pagerParser );
 {{{
 //{{if test}}....{{/endif}}
 var $if = {
-	parse : function(context,text,start){
+	parse : function(text,start,context){
 		var end = text.indexOf("}}",start);
 		var el = text.substring(start+5,end);
 		el = context.parseEL(el);
 		context.appendIf(el);
 		return end+2;
 	},
-	findStart : function(context,text,start){
+	findStart : function(text,start,context){
 		return text.indexOf("{{if",start);
 	}
 }
 var $endif = {
-	parse : function(context,text,start){
+	parse : function(text,start,context){
 		context.appendEnd();
 		return start+10;
 	},
-	findStart : function(context,text,start){
+	findStart : function(text,start,context){
 		return text.indexOf("{{/endif}}",start);
 	}
 }
