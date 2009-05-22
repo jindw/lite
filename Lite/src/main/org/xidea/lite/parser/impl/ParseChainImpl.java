@@ -18,14 +18,15 @@ public class ParseChainImpl implements ParseChain {
 		this.context = context;
 		this.parser = parser;
 		try {
+			//System.out.println(java.util.Arrays.asList(parser.getClass().getTypeParameters()));
 			Method[] methods = parser.getClass().getMethods();
 			for (Method method : methods) {
 				if ("parse".equals(method.getName())) {
 					Class<?>[] types = method.getParameterTypes();
-					if (types.length == 3 && types[0] == ParseContext.class
-							&& types[1] == ParseChain.class) {
-						if(nodeType.isAssignableFrom(types[2])){
-							nodeType = types[2];
+					if (types.length == 3 && types[1] == ParseContext.class
+							&& types[2] == ParseChain.class) {
+						if(nodeType.isAssignableFrom(types[1])){
+							nodeType = types[0];
 						}
 
 					}
@@ -41,12 +42,12 @@ public class ParseChainImpl implements ParseChain {
 	public void process(Object node) {
 		if (next != null) {
 			if (nodeType.isInstance(node)) {
-				parser.parse(context, next, node);
+				parser.parse(node, context, next);
 			} else {
 				next.process(node);
 			}
 		} else {
-			parser.parse(context, next, node);
+			parser.parse(node, context, next);
 		}
 	}
 

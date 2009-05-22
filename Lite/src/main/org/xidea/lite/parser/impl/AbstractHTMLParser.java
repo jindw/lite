@@ -27,7 +27,7 @@ public abstract class AbstractHTMLParser implements Parser<Element> {
 		BOOLEAN_ATTBUTE_MAP.put("disabled", "disabled");
 	}
 
-	public void parse(ParseContext context,ParseChain chain,Element node) {
+	public void parse(Element node,ParseContext context,ParseChain chain) {
 		String namespace = node.getNamespaceURI();
 		if (namespace == null && node.getPrefix()==null || XHTMLNS.equals(namespace)) {
 			parse(node, context);

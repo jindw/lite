@@ -36,6 +36,19 @@ ParseContext.prototype = {
     //nativeJS:false,
     parserList : [],
 
+	parseText:function(source, defaultType) {
+		var type = this.textType;
+		this.textType = defaultType;
+		this.parse(source);
+		this.textType = type;
+	},
+
+	parse:function(source) {
+		if(typeof text == 'object'){
+			
+		}
+		this.topChain.process();
+	},
     /**
 	 * 添加静态文本（不编码）
 	 * @param <String>text
@@ -43,7 +56,17 @@ ParseContext.prototype = {
 	 * @param <char>escapeQute
 	 */
 	append:function( text,  encode,  escapeQute){
-		
+		if(encode){
+			if(escapeQute == '"'){
+				var replaceExp = /[<>&"]/g;
+			}else if(escapeQute == '\''){
+				var replaceExp = /[<>&']/g;
+			}else{
+				var replaceExp = /[<>&]/g;
+			}
+			text = text.replace(replaceExp,xmlReplacer);
+		}
+		this.result.push(text);
 	},
 
 	/**
@@ -228,4 +251,19 @@ function buildTreeResult(result){
 		}
 	}
 	return current;
+}
+
+function xmlReplacer(c){
+    switch(c){
+        case '<':
+          return '&lt;';
+        case '>':
+          return '&gt;';
+        case '&':
+          return '&amp;';
+        case "'":
+          return '&#39;';
+        case '"':
+          return '&#34;';
+    }
 }

@@ -43,7 +43,7 @@ public class TextParserTest {
 	public void test(String text, String result) throws Exception {
 		TextParser p = new TextParser();
 		ParseContextImpl context = new ParseContextImpl(new URL("http://localhost:8080/"));
-		p.parse(context, null, text);
+		p.parse(text, context, null);
 		List<Object> insts = context.toList();
 		Template t = new Template(insts);
 		Writer out = new StringWriter();

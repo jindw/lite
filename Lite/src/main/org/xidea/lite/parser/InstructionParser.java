@@ -7,18 +7,18 @@ package org.xidea.lite.parser;
  */
 public interface InstructionParser {
 	/**
-	 * @param context
 	 * @param text
 	 * @param start 对jsel来说 就是 $出现的位置
+	 * @param context
 	 * @return 返回改指令结束位置的下一个位置，返回值一定要 大于 start 否则安失败算
 	 */
-	public int parse(ParseContext context,String text,int start);
+	public int parse(String text,int start,ParseContext context);
 	/**
 	 * 查找EL或者模板指令的开始位置
-	 * @param context
 	 * @param text
 	 * @param start
+	 * @param context
 	 * @return 返回EL起始位置
 	 */
-	public int findStart(ParseContext context,String text,int start);
+	public int findStart(String text,int start,ParseContext context);
 }
