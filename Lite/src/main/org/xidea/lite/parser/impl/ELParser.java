@@ -45,7 +45,7 @@ public class ELParser implements InstructionParser {
 			ParseContext clientContext = context.createClientContext(id);
 			String subtext = text.substring(p2 + 1);
 			clientContext.setAttribute(CLIENT, context);
-			clientContext.parseText(subtext, context.getSourceType());
+			clientContext.parseText(subtext, context.getTextType());
 			return text.length();
 
 		}
@@ -62,7 +62,7 @@ public class ELParser implements InstructionParser {
 							+ "/*]]>*/</script>");
 					String subtext = text.substring(p$ + 4);
 					parentContext.parseText(subtext, parentContext
-							.getSourceType());
+							.getTextType());
 					return text.length();
 				}
 			}
@@ -131,7 +131,7 @@ public class ELParser implements InstructionParser {
 
 	protected void addEl(ParseContext context, String text) {
 		Object el = context.parseEL(text);
-		switch (context.getSourceType()) {
+		switch (context.getTextType()) {
 		case Template.EL_TYPE:
 			context.appendEL(el);
 			break;

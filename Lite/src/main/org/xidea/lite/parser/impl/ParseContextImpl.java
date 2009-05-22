@@ -15,9 +15,7 @@ import javax.xml.xpath.XPathExpressionException;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
-import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.xidea.el.ExpressionFactory;
 import org.xidea.lite.parser.InstructionParser;
 import org.xidea.lite.parser.ParseChain;
@@ -80,36 +78,14 @@ public class ParseContextImpl implements ParseContext {
 
 
 	public void parseText(String source, int defaultType) {
-		int type = resourceContext.getSourceType();
-		resourceContext.setSourceType(defaultType);
+		int type = resourceContext.getTextType();
+		resourceContext.setTextType(defaultType);
 		parse(source);
-		resourceContext.setSourceType(type);
+		resourceContext.setTextType(type);
 	}
 
 	public void parse(Object source) {
-		if (source instanceof Node || source instanceof String) {
-			getTopChain().process(source);
-		}else if (source instanceof NodeList) {
-			NodeList list = (NodeList) source;
-			int len = list.getLength();
-			for (int i = 0; i < len; i++) {
-				parse(list.item(i));
-			}
-		} else if (source instanceof NamedNodeMap) {
-			NamedNodeMap list = (NamedNodeMap) source;
-			int len = list.getLength();
-			for (int i = 0; i < len; i++) {
-				parse(list.item(i));
-			}
-		} else if (source instanceof URL) {
-			try {
-				parse(loadXML((URL) source));
-			} catch (Exception e) {
-				throw new RuntimeException(e);
-			}
-		}else{
-			getTopChain().process(source);
-		}
+		getTopChain().process(source);
 	}
 
 
@@ -292,8 +268,8 @@ public class ParseContextImpl implements ParseContext {
 		xmlContext.setReserveSpace(keepSpace);
 	}
 
-	public int getSourceType() {
-		return resourceContext.getSourceType();
+	public int getTextType() {
+		return resourceContext.getTextType();
 	}
 
 	public Document loadXML(URL url) throws SAXException, IOException {

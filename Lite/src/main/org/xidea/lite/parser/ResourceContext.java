@@ -56,6 +56,6 @@ public interface ResourceContext{
 	 * Template.EL_TYPE
 	 * @return
 	 */
-	public int getSourceType();
+	public int getTextType();
 
 }
