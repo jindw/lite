@@ -232,9 +232,7 @@ public class CoreXMLParser implements Parser<Element> {
 			parseChild(el.getFirstChild(), context);
 			context.appendEnd();
 		} else {
-			int mark = context.mark();
-			context.parseText(value, Template.EL_TYPE);
-			List<Object> temp = context.reset(mark);
+			List<Object> temp = context.parseText(value, Template.EL_TYPE);
 			if (temp.size() == 1) {
 				Object item = temp.get(0);
 				if(item instanceof Object[]){//EL_TYPE
@@ -320,7 +318,7 @@ public class CoreXMLParser implements Parser<Element> {
 
 	protected void parseOutTag(Element el, ParseContext context) {
 		String value = getAttributeOrNull(el, "value");
-		context.parseText(value,Template.EL_TYPE);
+		context.appendAll(context.parseText(value,Template.EL_TYPE));
 	}
 
 	private void parseChild(Node child, ParseContext context) {

@@ -32,8 +32,8 @@ import org.w3c.dom.NodeList;
 import org.xidea.el.json.JSONDecoder;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.Template;
-import org.xidea.lite.dtd.DefaultEntityResolver;
 import org.xidea.lite.parser.impl.ParseContextImpl;
+import org.xidea.lite.parser.impl.dtd.DefaultEntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -53,7 +53,7 @@ public class JSCompileTest {
 	ParseContextImpl context;
 
 	public JSCompileTest() throws MalformedURLException {
-		context = new ParseContextImpl(webRoot.toURI().toURL());
+		context = new ParseContextImpl(webRoot.toURI().toURL(),null,null,null);
 	}
 
 	public String getText(Node doc, String xpath)
@@ -155,7 +155,7 @@ public class JSCompileTest {
 					+ ")");
 			Object jsJS = engine.eval("jsTemplate.render(" + contextJSON + ")");
 			Assert.assertEquals("JS编译后结果不一致"+source, jsJSON, jsJS);
-			ParseContextImpl pc = new ParseContextImpl(menuURL);
+			ParseContextImpl pc = new ParseContextImpl(menuURL,null,null,null);
 			pc.parse(DOMParser.parseFromString(source, ""));
 			StringWriter out = new StringWriter();
 			new Template(pc.toList()).render(JSONDecoder.decode(contextJSON),

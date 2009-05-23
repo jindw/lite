@@ -1,4 +1,4 @@
-package org.xidea.lite.dtd;
+package org.xidea.lite.parser.impl.dtd;
 
 import java.io.IOException;
 import java.util.HashMap;

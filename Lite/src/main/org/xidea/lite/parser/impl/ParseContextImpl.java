@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -21,28 +20,29 @@ import org.xidea.lite.parser.InstructionParser;
 import org.xidea.lite.parser.ParseChain;
 import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.Parser;
+import org.xidea.lite.parser.ParserHolder;
+import org.xidea.lite.parser.ResourceContext;
+import org.xidea.lite.parser.ResultContext;
 import org.xidea.lite.parser.XMLContext;
 import org.xml.sax.SAXException;
 
 public class ParseContextImpl implements ParseContext {
 	private static final long serialVersionUID = 1L;
-	protected ResourceContextImpl resourceContext;
+	protected ResourceContext resourceContext;
 	protected XMLContext xmlContext;
-	protected ResultContextImpl resultContext;
-	protected ParseHolderImpl parserHolder;
-	protected Map<String, String> featrues;
+	protected ResultContext resultContext;
+	protected ParserHolder parserHolder;
+
 	protected ParseContextImpl() {
 	}
-	protected ParseContextImpl(ParseContextImpl parent){
-		this.resourceContext = parent.resourceContext;
-		this.xmlContext = parent.xmlContext;
-		this.parserHolder = new ParseHolderImpl(this,parent.parserHolder);
-		this.featrues = parent.featrues;
-		this.resultContext = new ResultContextImpl();
+	ParseContextImpl(ParseContext parent) {
+		this.resourceContext = parent;
+		this.xmlContext = parent;
+		//需要重设 ParseChain 的context
+		this.parserHolder = new ParseHolderImpl(this,parent);
+		this.resultContext = new ResultContextImpl(parent);
 	}
-	public ParseContextImpl(URL base) {
-		initialize(base, null, null, null);
-	}
+
 
 	public ParseContextImpl(URL base, Map<String, String> featrues,
 			Parser<? extends Object>[] parsers, InstructionParser[] ips) {
@@ -55,7 +55,7 @@ public class ParseContextImpl implements ParseContext {
 		resourceContext = new ResourceContextImpl(base);
 		resultContext = new ResultContextImpl();
 		xmlContext = new XMLContextImpl(this);
-		parserHolder = new ParseHolderImpl(this,parsers, ips);
+		parserHolder = new ParseHolderImpl(this, parsers, ips);
 		if (featrues != null) {
 			String v = featrues.get("compress");
 			if (v != null) {
@@ -69,44 +69,46 @@ public class ParseContextImpl implements ParseContext {
 			if (v != null) {
 				xmlContext.setFormat("true".equalsIgnoreCase(v));
 			}
-			this.featrues = featrues;
-		} else {
-			this.featrues = new HashMap<String, String>();
+			getFeatrueMap().putAll(featrues);
 		}
 
 	}
 
-
-	public void parseText(String source, int defaultType) {
+	public List<Object> parseText(String text, int defaultType) {
 		int type = resourceContext.getTextType();
-		resourceContext.setTextType(defaultType);
-		parse(source);
-		resourceContext.setTextType(type);
+		int mark = this.mark();
+		List<Object> result;
+		try {
+			resourceContext.setTextType(defaultType);
+			parse(text);
+		} finally {
+			resourceContext.setTextType(type);
+			result = this.reset(mark);
+		}
+		return result;
 	}
 
 	public void parse(Object source) {
 		getTopChain().process(source);
 	}
 
-
-	public ParseContext createClientContext(String name){
-		return new ClientContextImpl(this,name);
+	public ParseContext createClientContext(String name) {
+		return new ClientContextImpl(this, name);
 	}
 
 	public InstructionParser[] getInstructionParsers() {
 		return parserHolder.getInstructionParsers();
 	}
+
 	public String getFeatrue(String key) {
-		return featrues.get(key);
+		return resultContext.getFeatrue(key);
 	}
 
-	public void setFeatrue(String key, String value) {
-		this.featrues.put(key, value);
+	public Map<String, String> getFeatrueMap() {
+		return resultContext.getFeatrueMap();
 	}
-	
-	
 	// delegate methods...
-	
+
 	public void addResource(URL resource) {
 		resourceContext.addResource(resource);
 	}
@@ -194,9 +196,11 @@ public class ParseContextImpl implements ParseContext {
 	public void appendXmlText(Object el) {
 		resultContext.appendXmlText(el);
 	}
+
 	public void appendAdvice(Class<? extends Object> clazz, Object el) {
 		resultContext.appendAdvice(clazz, el);
 	}
+
 	public int mark() {
 		return resultContext.mark();
 	}
@@ -205,9 +209,6 @@ public class ParseContextImpl implements ParseContext {
 		return resultContext.parseEL(eltext);
 	}
 
-	public void clearPreviousText() {
-		resultContext.clearPreviousText();
-	}
 
 	public List<Object> reset(int mark) {
 		return resultContext.reset(mark);
@@ -220,20 +221,25 @@ public class ParseContextImpl implements ParseContext {
 	public int findBeginType() {
 		return resultContext.findBeginType();
 	}
+
 	public int findBegin() {
 		return resultContext.findBegin();
 	}
+
 	public int getDepth() {
 		return resultContext.getDepth();
 	}
+
 	public int getType(int offset) {
 		return resultContext.getType(offset);
 	}
+
 	public List<Object> toList() {
 		return resultContext.toList();
 	}
-	public String toJSON() {
-		return resultContext.toJSON();
+
+	public String toCode() {
+		return resultContext.toCode();
 	}
 
 	public void beginIndent() {
@@ -295,12 +301,14 @@ public class ParseContextImpl implements ParseContext {
 	public void addNodeParser(Parser<? extends Node> iparser) {
 		parserHolder.addNodeParser(iparser);
 	}
+
 	public ParseChain getTopChain() {
 		return parserHolder.getTopChain();
 	}
 
-
-
+	public void setTextType(int textType) {
+		resourceContext.setTextType(textType);
+	}
 
 
 }

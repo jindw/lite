@@ -78,9 +78,9 @@ public class DefaultXMLParser implements Parser<Node> {
 		}
 		try {
 			context.append("<![CDATA[");
-			context
+			context.appendAll(context
 					.parseText(((CDATASection) node).getData(),
-							Template.EL_TYPE);
+							Template.EL_TYPE));
 			context.append("]]>");
 		} finally {
 			if (needFormat) {
@@ -163,7 +163,7 @@ public class DefaultXMLParser implements Parser<Node> {
 				context.beginIndent();// false);
 			}
 			try {
-				context.parseText(text, Template.XML_TEXT_TYPE);
+				context.appendAll(context.parseText(text, Template.XML_TEXT_TYPE));
 			} finally {
 				if (needFormat) {
 					context.endIndent();
@@ -230,9 +230,7 @@ public class DefaultXMLParser implements Parser<Node> {
 	}
 
 	private List<Object> parseAttributeValue(ParseContext context, String value) {
-		int mark = context.mark();
-		context.parseText(value, Template.XML_ATTRIBUTE_TYPE);
-		return context.reset(mark);
+		return context.parseText(value, Template.XML_ATTRIBUTE_TYPE);
 	}
 
 	private void parseElement(Node node, ParseContext context) {

@@ -34,9 +34,9 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xidea.lite.dtd.DefaultEntityResolver;
 import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.XMLContext;
+import org.xidea.lite.parser.impl.dtd.DefaultEntityResolver;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 

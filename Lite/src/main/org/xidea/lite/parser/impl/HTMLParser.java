@@ -57,9 +57,9 @@ public class HTMLParser extends AbstractHTMLParser implements Parser<Element>{
 		if (AUTO_ANYWAY.equals(status)) {
 			processAutoForm(context, el, localName);
 		} else if (AUTO_IN_FORM.equals(status) && FORM_TAG.equals(localName)) {
-			context.setFeatrue(AUTO_FORM_FEATRUE_URL, AUTO_ANYWAY);
+			context.getFeatrueMap().put(AUTO_FORM_FEATRUE_URL, AUTO_ANYWAY);
 			parseHTMLElement(el, context, null);
-			context.setFeatrue(AUTO_FORM_FEATRUE_URL, AUTO_ANYWAY);
+			context.getFeatrueMap().put(AUTO_FORM_FEATRUE_URL, AUTO_ANYWAY);
 		} else {
 			parseHTMLElement(el, context, null);
 		}

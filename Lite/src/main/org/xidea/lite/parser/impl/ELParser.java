@@ -45,7 +45,7 @@ public class ELParser implements InstructionParser {
 			ParseContext clientContext = context.createClientContext(id);
 			String subtext = text.substring(p2 + 1);
 			clientContext.setAttribute(CLIENT, context);
-			clientContext.parseText(subtext, context.getTextType());
+			clientContext.appendAll(clientContext.parseText(subtext, context.getTextType()));
 			return text.length();
 
 		}
@@ -61,8 +61,9 @@ public class ELParser implements InstructionParser {
 					parentContext.append("<script>/*<![CDATA[*/" + js
 							+ "/*]]>*/</script>");
 					String subtext = text.substring(p$ + 4);
-					parentContext.parseText(subtext, parentContext
-							.getTextType());
+					parentContext.appendAll(parentContext.parseText(subtext, parentContext
+							.getTextType()));
+					
 					return text.length();
 				}
 			}

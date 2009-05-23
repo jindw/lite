@@ -28,14 +28,14 @@ public class ParseHolderImpl implements ParserHolder {
 	}
 
 	@SuppressWarnings("unchecked")
-	public ParseHolderImpl(ParseContext context, ParseHolderImpl parentHolder) {
-		ParseChainImpl chain = parentHolder.topChain;
+	public ParseHolderImpl(ParseContext context,ParserHolder parentHolder) {
+		ParseChainImpl chain = (ParseChainImpl) parentHolder.getTopChain();
 		ArrayList<Parser> cs = new ArrayList<Parser>();
 		do{
 			cs.add(chain.parser);
 			chain = chain.next;
 		}while(chain!=null);
-		initialize(context, cs.toArray(new Parser[cs.size()]), parentHolder.ips);
+		initialize(context, cs.toArray(new Parser[cs.size()]), parentHolder.getInstructionParsers());
 	}
 
 	@SuppressWarnings("unchecked")

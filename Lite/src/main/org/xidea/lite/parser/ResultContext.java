@@ -1,11 +1,23 @@
 package org.xidea.lite.parser;
 
 import java.util.List;
+import java.util.Map;
 
 import org.xidea.el.ExpressionFactory;
 
 public interface ResultContext {
 	public static final Object END_INSTRUCTION = new Object[0];
+
+	/**
+	 * 记录一下编译上下文特征变量，该对象不可被修改
+	 * @param featrues {url,value}
+	 */
+	public String getFeatrue(String key);
+	/**
+	 * 获得特征表的直接引用，外部的修改也将直接影响解析上下文的特征表
+	 * @return
+	 */
+	public Map<String, String> getFeatrueMap();
 
 	/**
 	 * 记录一下当前位置，reset的参考位置
@@ -49,7 +61,7 @@ public interface ResultContext {
 	/**
 	 * @return 经过优化后的树形结果集
 	 */
-	public String toJSON();
+	public String toCode();
 
 	/**
 	 * 添加静态文本（不编码）

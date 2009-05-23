@@ -61,15 +61,23 @@ ParseContext.prototype = {
     //nativeJS:false,
     parserList : [],
 
-	parseText:function(source, defaultType) {
+	parseText:function(source, textType) {
 		var type = this.textType;
-		this.textType = defaultType;
+		var mark = this.mark();
+		this.textType = textType;
 		this.parse(source);
 		this.textType = type;
+		return this.reset(mark);
 	},
 
 	parse:function(source) {
 		this.topChain.process(source);
+	},
+	mark:function(){
+		return this.result.length;
+	},
+	reset:function(mark){
+		return this.result.splice(mark);
 	},
     /**
 	 * 添加静态文本（不编码）
@@ -180,22 +188,20 @@ ParseContext.prototype = {
     },
     buildResult:function(){
     	var result = joinText(this.result);
+    	result = buildTreeResult(result);
         if(this.nativeJS){
-            var code = buildNativeJS(buildTreeResult(result));
+            var code = buildNativeJS(result);
             try{
-                var result =  new Function(code);
+                result =  new Function(code);
                 result.toString=function(){//_$1 encodeXML
                     return "function(){"+code+"\n}"
                 }
-                return result;
             }catch(e){
             	alert("翻译结果错误："+code)
                 throw e;
             }
-        }else{
-            var data = buildTreeResult(result);
-            return data;
         }
+        return result;
     }
 }
 /**
