@@ -2,10 +2,10 @@
 == 使用方法 ==
    在[http://code.google.com/p/lite/downloads/list 下载页] 下载PHP 实例程序，解压到自己虚拟目录根下。
    * 仿照example/test.xhtml 编写模板
-     见：[http://code.google.com/p/lite/wiki/XML_Lite_Syntax]
+     见：[http://code.google.com/p/lite/wiki/XMLLiteSyntax]
    * 仿照WEB-INF/decorators.xml 设置模板布局（可选）
    * 仿照example/layout.xhtml 编写模板布局页（可选）
-     见：[http://code.google.com/p/lite/wiki/XML_Lite_SiteMesh]
+     见：[http://code.google.com/p/lite/wiki/XMLLiteSiteMesh]
    * 仿照example/test.php 使用模板
    * 查看模板运行效果：
      [http://www.xidea.org/project/lite/php/example/test.php]
