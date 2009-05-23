@@ -35,7 +35,7 @@ public class XMLParserTest {
 	@Test
 	public void testError() throws Exception {
 		URL url = new URL("http://test/");
-		ParseContextImpl context = new ParseContextImpl(url){
+		ParseContextImpl context = new ParseContextImpl(url,null,null,null){
 			@Override
 			public InputStream getInputStream(URL url) {
 				return new ByteArrayInputStream("<xml".getBytes());
@@ -52,10 +52,10 @@ public class XMLParserTest {
 	@Test
 	public void testSelect() throws Exception {
 		URL url = this.getClass().getResource("include-test.xml");
-		ParseContextImpl context = new ParseContextImpl(url); 
+		ParseContextImpl context = new ParseContextImpl(url,null,null,null); 
 		org.w3c.dom.Document doc = new XMLParser().loadXML(url, context);
 		
-		Node node = new XMLContextImpl(new ParseContextImpl(null)){
+		Node node = new XMLContextImpl(new ParseContextImpl(null,null,null,null)){
 			@Override
 			public DocumentFragment selectNodes(String xpath,
 					Node currentNode) throws XPathExpressionException {
@@ -69,7 +69,7 @@ public class XMLParserTest {
 	@Test
 	public void testFormat() throws Exception {
 		URL url = this.getClass().getResource("format-test.xhtml");
-		ParseContextImpl parseContext = new ParseContextImpl(url); 
+		ParseContextImpl parseContext = new ParseContextImpl(url,null,null,null); 
 		parseContext.setFormat(true);
 		HashMap context = new HashMap();
 		context.put("data", Arrays.asList("0", "1", "2", "3", "4", "5", "6",

@@ -57,5 +57,6 @@ public interface ResourceContext{
 	 * @return
 	 */
 	public int getTextType();
+	public void setTextType(int textType);
 
 }

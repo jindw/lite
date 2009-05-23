@@ -8,6 +8,7 @@ import org.apache.commons.logging.LogFactory;
 import org.xidea.el.Expression;
 import org.xidea.el.ExpressionFactory;
 import org.xidea.el.json.JSONEncoder;
+import org.xidea.lite.parser.ParseContext;
 
 
 public class ClientContextImpl extends ParseContextImpl {
@@ -40,7 +41,7 @@ public class ClientContextImpl extends ParseContextImpl {
 	private String name;
 
 	
-	ClientContextImpl(ParseContextImpl parent,String fn){
+	ClientContextImpl(ParseContext parent,String fn){
 		super(parent);
 		this.name = fn;
 		this.resultContext.setExpressionFactory(clientFactory);

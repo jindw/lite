@@ -40,7 +40,7 @@ public class ClientJSBuilderTest {
 	@Test
 	public void testBuildJS() throws SAXException, IOException {
 		URL url = this.getClass().getResource("format-test.xhtml");
-		ParseContext context2 = new ParseContextImpl(url);
+		ParseContext context2 = new ParseContextImpl(url,null,null,null);
 		// 前端直接压缩吧？反正保留那些空白也没有调试价值
 		// context2.setCompress(context.isCompress());
 		context2.setCompress(true);
@@ -60,7 +60,7 @@ public class ClientJSBuilderTest {
 	@Test
 	public void testClient() throws SAXException, IOException {
 		URL url = this.getClass().getResource("asciitable-client.xhtml");
-		ParseContext context2 = new ParseContextImpl(url);
+		ParseContext context2 = new ParseContextImpl(url,null,null,null);
 		// 前端直接压缩吧？反正保留那些空白也没有调试价值
 		// context2.setCompress(context.isCompress());
 		context2.setCompress(true);

@@ -16,10 +16,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
-import org.xidea.lite.dtd.DefaultEntityResolver;
 import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.impl.ParseContextImpl;
 import org.xidea.lite.parser.impl.TextParser;
+import org.xidea.lite.parser.impl.dtd.DefaultEntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 public
@@ -46,7 +46,7 @@ class XMLParser extends TextParser{
 		}
 	}
 	public List<Object> parse(Object data) throws MalformedURLException {
-		return parse(data,new ParseContextImpl(new URL("http://xx/")));
+		return parse(data,new ParseContextImpl(new URL("http://xx/"),null,null,null));
 	}
 	public List<Object> parse(Object data, ParseContext context) {
 		try {
