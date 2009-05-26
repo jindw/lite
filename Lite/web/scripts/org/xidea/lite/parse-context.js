@@ -6,28 +6,11 @@
  * @version $Id: template.js,v 1.4 2008/02/28 14:39:06 jindw Exp $
  */
 
-
-var EL_TYPE = 0;// [0,'el']
-var IF_TYPE = 1;// [1,[...],'test']
-var BREAK_TYPE = 2;// [2,depth]
-var XML_ATTRIBUTE_TYPE = 3;// [3,'value','name']
-var XML_TEXT_TYPE = 4;// [4,'el']
-var FOR_TYPE = 5;// [5,[...],'items','var']
-var ELSE_TYPE = 6;// [6,[...],'test']//test opt?
-var ADD_ON_TYPE =7;// [7,[...],'var']
-var VAR_TYPE = 8;// [8,'value','name']
-var CAPTRUE_TYPE = 9;// [9,[...],'var']
-var IF_KEY = "if";
-var FOR_KEY = "for";
-
-var TEMPLATE_NS_REG = /^http:\/\/www.xidea.org\/ns\/(?:template|lite)(?:\/core)?\/?$/;
-
-
 //add as default
 function ParseContext(){
     this.parserList = this.parserList.concat([]);
     this.result = [];
-    this.topChain = new Chain(this);
+    this.topChain = new ParseChain(this);
 }
 /**
  * @private
@@ -35,7 +18,8 @@ function ParseContext(){
 ParseContext.prototype = {
     //nativeJS:false,
     parserList : [],
-
+    loadXML:loadXML,
+    selectNodes:selectNodes,
 	parseText:function(source, textType) {
 		var type = this.textType;
 		var mark = this.mark();
@@ -48,6 +32,14 @@ ParseContext.prototype = {
 	parse:function(source) {
 		this.topChain.process(source);
 	},
+	
+    /**
+     * 异常一定要抛出去，让parseText做回退处理
+     */
+    parseEL : function(el){
+        return parseEL(el,this.nativeJS)
+    }
+	
 	mark:function(){
 		return this.result.length;
 	},
@@ -194,6 +186,80 @@ function clearPreviousText(result){
         }
         
     }
+}
+
+/**
+ */
+function toDoc(text){
+	try{
+		if(this.DOMParser){
+	        var doc = new DOMParser().parseFromString(text,"text/xml");
+	        var root = doc.documentElement;
+	        if(root.tagName == "parsererror"){
+	        	var s = new XMLSerializer();
+	        	$log.error("解析xml失败",s.serializeToString(root))
+	        }
+	    }else{
+	        //["Msxml2.DOMDocument.6.0", "Msxml2.DOMDocument.3.0", "MSXML2.DOMDocument", "MSXML.DOMDocument", "Microsoft.XMLDOM"];
+	        var doc = new ActiveXObject("Microsoft.XMLDOM");
+	        doc.loadXML(text);
+	        doc.documentElement.tagName;
+	    }
+	    
+	    return doc;
+    }catch(e){
+    	$log.error("解析xml失败",e,text);
+    	throw e;
+    }
+}
+function getNamespaceMap(node){
+	var attributes = node.attributes;
+	var map = {};
+	for(var i = 0;i<attributes.length;i++){
+		var attribute = attributes[i];
+		var name = attribute.name;
+		if(/^xmlns(:.*)?$/.test(name)){
+			var value = attribute.value;
+			var prefix = name.substr(6) || value.replace(/^.*\/([^\/]+)\/?$/,'$1');
+			map[prefix] = value;
+		}
+	}
+	return map;
+}
+
+/**
+ * TODO:貌似需要importNode
+ */
+function selectNodes(currentNode,xpath){
+	var doc = currentNode.ownerDocument || currentNode;
+    var docFragment = doc.createDocumentFragment();
+    var nsMap = getNamespaceMap(doc.documentElement);
+    try{
+    	var buf = [];
+    	for(var n in nsMap){
+    		buf.push("xmlns:"+n+'="'+nsMap[n]+'"')
+    	}
+    	doc.setProperty("SelectionNamespaces",buf.join(' '));
+    	doc.setProperty("SelectionLanguage","XPath");
+        var nodes = currentNode.selectNodes(xpath);
+        var buf = [];
+        for (var i=0; i<nodes.length; i++) {
+            buf.push(nodes.item(i))
+        }
+    }catch(e){
+        var xpe = doc.evaluate? doc: new XPathEvaluator();
+        //var nsResolver = xpe.createNSResolver(doc.documentElement);
+        var result = xpe.evaluate(xpath, currentNode, function(prefix){return nsMap[prefix]}, 5, null);
+        var node;
+        var buf = [];
+        while (node = result.iterateNext()){
+            buf.push(node);
+        }
+    }
+    while (node = buf.shift()){
+        docFragment.appendChild(node.cloneNode(true));
+    }
+    return docFragment;
 }
 /**
  * 想当前栈顶添加数据

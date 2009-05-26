@@ -57,12 +57,12 @@ public class XMLParserTest {
 		
 		Node node = new XMLContextImpl(new ParseContextImpl(null,null,null,null)){
 			@Override
-			public DocumentFragment selectNodes(String xpath,
-					Node currentNode) throws XPathExpressionException {
-				return super.selectNodes(xpath, currentNode);
+			public DocumentFragment selectNodes(Node currentNode,
+					String xpath) throws XPathExpressionException {
+				return super.selectNodes(currentNode, xpath);
 			}
 			
-		}.selectNodes("//xhtml:body",doc);
+		}.selectNodes(doc,"//xhtml:body");
 		Assert.assertTrue(node.getChildNodes().getLength()==1);
 	}
 

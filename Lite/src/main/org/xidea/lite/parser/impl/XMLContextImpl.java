@@ -139,7 +139,7 @@ public class XMLContextImpl implements XMLContext {
 		};
 	}
 
-	public DocumentFragment selectNodes(String xpath, Node currentNode)
+	public DocumentFragment selectNodes(Node currentNode, String xpath)
 			throws XPathExpressionException {
 		Document doc;
 		if (currentNode instanceof Document) {

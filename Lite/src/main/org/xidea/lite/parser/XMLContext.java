@@ -69,12 +69,12 @@ public interface XMLContext {
 	public Document loadXML(URL createURL) throws SAXException, IOException;
 
 	/**
-	 * @param xpath
 	 * @param doc
+	 * @param xpath
 	 * @return
 	 * @throws XPathExpressionException
 	 */
-	public DocumentFragment selectNodes(String xpath, Node doc)
+	public DocumentFragment selectNodes(Node doc, String xpath)
 			throws XPathExpressionException;
 
 	/**

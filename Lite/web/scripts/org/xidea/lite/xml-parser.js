@@ -15,7 +15,7 @@ function XMLParser(nativeJS){
 function isTemplateNS(value,shortAvaliable){
     return shortAvaliable && (value=="#" || value=="#core" || value ==null) || TEMPLATE_NS_REG.test(value);
 }
-XMLParser.prototype = new TextParser()
+XMLParser.prototype = new TextParserOld()
 XMLParser.prototype.parse = function(url){
     if(/^[\s\ufeff]*</.test(url)){
         var data =toDoc(url)
