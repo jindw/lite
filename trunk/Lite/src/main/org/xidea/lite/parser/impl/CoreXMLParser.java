@@ -145,7 +145,7 @@ public class CoreXMLParser implements Parser<Element> {
 			}
 
 			if (xpath != null) {
-				doc = context.selectNodes(xpath, doc);
+				doc = context.selectNodes(doc, xpath);
 			}
 			if (xslt != null) {
 				doc = context.transform(parentURL, doc, xslt);

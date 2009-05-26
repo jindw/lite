@@ -8,11 +8,11 @@ this.addScript('expression.js',["Expression","evaluate"]
 this.addScript('parser.js',"*"
                ,0
                ,["buildNativeJS"]);
-this.addScript('text-parser.js',["TextParser","checkEL"]
+this.addScript('text-parser.js',["TextParserOld","checkEL"]
                ,["Parser","parser.js"]
                ,["ExpressionTokenizer","findELEnd","org.xidea.jsidoc.util:XMLHttpRequest"]); 
 this.addScript('xml-parser.js',"XMLParser"
-               ,["TextParser","parser.js"]
+               ,["TextParserOld","parser.js"]
                ,"org.xidea.jsidoc.util:XMLHttpRequest"); 
 this.addScript("expression-token.js","*");
 this.addScript("json-tokenizer.js","JSONTokenizer");

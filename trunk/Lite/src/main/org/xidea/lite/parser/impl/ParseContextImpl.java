@@ -282,9 +282,9 @@ public class ParseContextImpl implements ParseContext {
 		return xmlContext.loadXML(url);
 	}
 
-	public DocumentFragment selectNodes(String xpath, Node doc)
+	public DocumentFragment selectNodes(Node doc, String xpath)
 			throws XPathExpressionException {
-		return xmlContext.selectNodes(xpath, doc);
+		return xmlContext.selectNodes(doc, xpath);
 	}
 
 	public Node transform(URL parentURL, Node doc, String xslt)

@@ -24,85 +24,63 @@ function TextParser(nativeJS){
  * @private
  */
 TextParser.prototype = new Parser();
-TextParser.prototype.parse = function(url){
-    var xhr = new XMLHttpRequest();
-    xhr.open("get",url,true)
-    xhr.send('');
-    this.parseNode(xhr.responseText);
-    return this.reuslt;
-}
 //parse text
-TextParser.prototype.addParser(function(node){
-    if(node.constructor == String){
-        this.append.apply(this,this.parseText(node,false));
-        return null;
-    }
-})
 
 
 
 
-TextParser.prototype.parseText = function(text,xmlText,xmlAttr){
-    if(!text){
-        return [];
-    }
-    text = String(text);//for rhino
-    //print("\n====\n"+text)
-    var buf = [];
-    var pattern = /(\\*)\$([a-zA-Z!]{0,5}\{)/  //允许$for{} $if{} $end ...  see CT????
-    //var pattern = /(\\*)\$\{/g
-    var match ;
-    //seach:
-    while(match = pattern && pattern.exec(text)){
-        var begin = match.index;
-        var expressionBegin = begin + match[0].length;
-        var expressionEnd = findELEnd(text,expressionBegin-1);
-        var fn = match[2];
+TextParser.prototype.parse = function(text,context,parseChain){
+    if(text && text.constructor == String){
+        switch(context.textType){
+        case XML_TEXT_TYPE :
+            var escapeQute = '"';
+        case XML_ATTRIBUTE_TYPE :
+            var encode = true;  
+            var textType = context.textType;
+            break;
+        default:
+            var textType = EL_TYPE;
+        }
         
-        begin && buf.push(text.substr(0,begin));
-        
-        if(match[1].length & 1){//转义后，打印转义结果，跳过
-            buf.push(match[1].substr(0,parseInt(match[1].length / 2)) + '$')
-            text = text.substr(expressionBegin+1);
-        }else{
-            fn = fn.substr(0,fn.length-1);
-            //expression:
-            try{
-                var expression = text.substring(expressionBegin ,expressionEnd );
-                expression = this.parseEL(expression);
-                if(xmlAttr){
-                	buf.push([XML_ATTRIBUTE_TYPE,expression]);
-                }else{
-                	buf.push([xmlText ? XML_TEXT_TYPE : EL_TYPE,expression]);
+        var pattern = /(\\*)\$([a-zA-Z!]{0,5}\{)/  //允许$for{} $if{} $end ...  see CT????
+        //var pattern = /(\\*)\$\{/g
+        var match ;
+        //seach:
+        while(match = pattern && pattern.exec(text)){
+            var begin = match.index;
+            var expressionBegin = begin + match[0].length;
+            var expressionEnd = findELEnd(text,expressionBegin-1);
+            var fn = match[2];
+            
+            begin && context.append(text.substr(0,begin),encode,escapeQute);
+            
+            if(match[1].length & 1){//转义后，打印转义结果，跳过
+                context.append(match[1].substr(0,parseInt(match[1].length / 2)) + '$',encode,escapeQute)
+                text = text.substr(expressionBegin+1);
+            }else{
+                fn = fn.substr(0,fn.length-1);
+                //expression:
+                try{
+                    var expression = text.substring(expressionBegin ,expressionEnd );
+                    expression = context.parseEL(expression);
+                    
+                    context.appendEL(expression);
+                    
+                    text = text.substr(expressionEnd+1);
+                    //以前为了一些正则bug,不知道是否还需要:(
+                    //pattern = text && /(\\*)\$([a-zA-Z!]{0,5}\{)/;
+                    //continue seach;
+                }catch(e){
+                	$log.debug("尝试表达式解析失败",expression,text,expressionBegin ,expressionEnd,e);
+                	context.append(match[0],encode,escapeQute);
+                	text = text.substr(expressionBegin);
                 }
-                
-                text = text.substr(expressionEnd+1);
-                //以前为了一些正则bug,不知道是否还需要:(
-                //pattern = text && /(\\*)\$([a-zA-Z!]{0,5}\{)/;
-                //continue seach;
-            }catch(e){
-            	$log.debug("尝试表达式解析失败",expression,text,expressionBegin ,expressionEnd,e);
-            	buf.push(match[0]);
-            	text = text.substr(expressionBegin);
             }
         }
+        text && context.append(text,encode,escapeQute);
+    }else{
+        parseChain.process(text);
     }
-    text && buf.push(text);
-    //hack reuse begin as index
-    if(xmlText||xmlAttr){
-        var begin = buf.length;
-        while(begin--){
-            //hack match reuse match as item
-            var match = buf[begin];
-            if(match == ''){
-            	buf.splice(begin,1);
-            }
-            if(match.constructor == String){
-                buf[begin] = match.replace(xmlAttr?/[<>&'"]/g:/[<>&]/g,xmlReplacer);
-            }
-        }
-    }
-    return buf;
 }
 
 function parseFN(fn,expression){
@@ -114,14 +92,10 @@ function parseFN(fn,expression){
         throw new Error("不支持指令："+fn);
     }
 }
-
-/**
- * 异常一定要抛出去，让parseText做回退处理
- */
-TextParser.prototype.parseEL = function(expression){
-    checkEL(expression.replace(/\bfor\b/g,"f"));
+function parseEL(expression,nativeJS){
     try{
-        if(this.nativeJS){
+        checkEL(expression.replace(/\bfor\b/g,"f"));
+        if(nativeJS){
             return expression;
         }else{
             return new ExpressionTokenizer(expression).toTokens();
@@ -130,7 +104,6 @@ TextParser.prototype.parseEL = function(expression){
         $log.debug("表达式解析失败",expression,e)
     }
 }
-
 
 function parseFor(el){
     //与CT相差太远

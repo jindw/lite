@@ -58,7 +58,7 @@ public class JSCompileTest {
 
 	public String getText(Node doc, String xpath)
 			throws XPathExpressionException {
-		Node node = context.selectNodes(xpath, doc).getFirstChild();
+		Node node = context.selectNodes(doc, xpath).getFirstChild();
 		return node == null ? null : node.getTextContent();
 	}
 
@@ -129,7 +129,7 @@ public class JSCompileTest {
 				ScriptContext.ENGINE_SCOPE);
 		engine
 				.eval("XMLHttpRequest['menu.xml'] = {responseXML:testMenuDoc,'#getResponseHeader':{'Content-Type':'text/xml'}}");
-		DocumentFragment node = context.selectNodes("/root/entry", doc);
+		DocumentFragment node = context.selectNodes(doc, "/root/entry");
 		Element child = (Element) node.getFirstChild();
 		while (child != null) {
 			String key = child.getAttribute("key");
