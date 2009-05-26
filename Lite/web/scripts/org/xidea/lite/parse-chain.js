@@ -6,29 +6,32 @@
  * @version $Id: template.js,v 1.4 2008/02/28 14:39:06 jindw Exp $
  */
 
-
-var EL_TYPE = 0;// [0,'el']
-var IF_TYPE = 1;// [1,[...],'test']
-var BREAK_TYPE = 2;// [2,depth]
-var XML_ATTRIBUTE_TYPE = 3;// [3,'value','name']
-var XML_TEXT_TYPE = 4;// [4,'el']
-var FOR_TYPE = 5;// [5,[...],'items','var']
-var ELSE_TYPE = 6;// [6,[...],'test']//test opt?
-var ADD_ON_TYPE =7;// [7,[...],'var']
-var VAR_TYPE = 8;// [8,'value','name']
-var CAPTRUE_TYPE = 9;// [9,[...],'var']
-var IF_KEY = "if";
-var FOR_KEY = "for";
-
-var TEMPLATE_NS_REG = /^http:\/\/www.xidea.org\/ns\/(?:template|lite)(?:\/core)?\/?$/;
-
-
-//add as default
-function ParseContext(){
-    this.parserList = this.parserList.concat([]);
-    this.result = [];
-    this.topChain = new Chain(this);
+function Chain(context,index){
+	this.context = context;
+	this.index = index || 0;
 }
+Chain.prototype = {
+	process:function(node){
+		var parser = this.context.parseList[this.index];
+		var nextChain = new Chain(this.context,this.index+1);
+		if(parser.accept(node)){
+			parser.apply(context,[node,this.context,nextChain])
+		}else{
+			if(nextChain != null){
+				nextChain.process();
+			}
+		}
+		if(/^[\s\ufeff]*</.test(url)){
+	        var data =toDoc(url)
+	        //alert([data,doc.documentElement.tagName])
+	    }else{
+	    	//print(url)
+	        var pos = url.indexOf('#')+1;
+	        var data = this.load( pos?url.substr(0,pos-1):url,pos && url.substr(pos));
+	    }
+	}
+}
+
 /**
  * @private
  */
