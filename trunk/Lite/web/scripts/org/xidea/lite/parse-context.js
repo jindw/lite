@@ -8,14 +8,30 @@
 
 //add as default
 function ParseContext(){
-    this.parserList = this.parserList.concat([]);
-    this.result = [];
-    this.topChain = new ParseChain(this);
+	this.initialize();
+}
+function URL(path){
+	this.path = path;
 }
 /**
  * @private
  */
 ParseContext.prototype = {
+	/**
+	 * 初始化上下文
+	 * @arguments 链顶插入的解析器列表（第一个元素为初始化后的链顶解析器，以后类推）
+	 */
+	initialize:function(){
+	    var parserList = [];
+	    parserList.push.apply(parserList,arguments)
+	    this.parserList = parserList.concat(this.parserList);
+	    this.result = [];
+	    this.topChain = new ParseChain(this);
+	},
+    createURL:function(path,parentURL) {
+    	path = (parentURL||'')+(path||'')
+		return new URL(path);
+    },
     //nativeJS:false,
     parserList : [],
     loadXML:loadXML,
@@ -28,8 +44,16 @@ ParseContext.prototype = {
 		this.textType = type;
 		return this.reset(mark);
 	},
-
+    /**
+     * 调用解析链顶解析器解析源码对象
+     * @param 文本源代码内容或xml源代码文档对象。
+     * @public
+     * @abstract
+     */
 	parse:function(source) {
+		if(source instanceof URL){
+			source = this.loadXML(source);
+		}
 		this.topChain.process(source);
 	},
 	
@@ -105,6 +129,7 @@ ParseContext.prototype = {
 	 * @param testEL
 	 */
 	appendElse:function(testEL){
+		clearPreviousText(this.result);
 		this.result.push([ELSE_TYPE, testEL ]);
 	},
 
@@ -120,39 +145,15 @@ ParseContext.prototype = {
 	},
 
 	appendVar:function(varName, valueEL){
-		this.result.push([VAR_TYPE,varName , valueEL]);
+		this.result.push([VAR_TYPE,valueEL,varName]);
 	},
 
 	appendCaptrue:function(varName){
 		this.result.push([CAPTRUE_TYPE,varName]);
 	},
-
-	appendAdvice:function(class1, parseEL){
-		throw new Error("not support");
+	appendAdvice:function(clazz, el){
+		this.result.push([ADD_ON_TYPE,el,clazz]);
 	},
-    
-
-    /**
-     * 给出文件内容或url，解析模版源文件。
-     * 如果指定了base，当作url解析，无base，当作纯文本解析
-     * @public
-     * @abstract
-     * @return <Array> result
-     */
-    parse : function(node){
-        throw new Error("未实现")
-    },
-    /**
-     * 解析源文件文档节点。
-     * @public 
-     */
-    parseNode : function(node){
-        var parserList = this.parserList;
-        var i = parserList.length;
-        while(i-- && node!=null){
-            node = parserList[i].call(this,node)
-        }
-    },
     buildResult:function(){
     	var result = joinText(this.result);
     	result = buildTreeResult(result);
@@ -188,79 +189,7 @@ function clearPreviousText(result){
     }
 }
 
-/**
- */
-function toDoc(text){
-	try{
-		if(this.DOMParser){
-	        var doc = new DOMParser().parseFromString(text,"text/xml");
-	        var root = doc.documentElement;
-	        if(root.tagName == "parsererror"){
-	        	var s = new XMLSerializer();
-	        	$log.error("解析xml失败",s.serializeToString(root))
-	        }
-	    }else{
-	        //["Msxml2.DOMDocument.6.0", "Msxml2.DOMDocument.3.0", "MSXML2.DOMDocument", "MSXML.DOMDocument", "Microsoft.XMLDOM"];
-	        var doc = new ActiveXObject("Microsoft.XMLDOM");
-	        doc.loadXML(text);
-	        doc.documentElement.tagName;
-	    }
-	    
-	    return doc;
-    }catch(e){
-    	$log.error("解析xml失败",e,text);
-    	throw e;
-    }
-}
-function getNamespaceMap(node){
-	var attributes = node.attributes;
-	var map = {};
-	for(var i = 0;i<attributes.length;i++){
-		var attribute = attributes[i];
-		var name = attribute.name;
-		if(/^xmlns(:.*)?$/.test(name)){
-			var value = attribute.value;
-			var prefix = name.substr(6) || value.replace(/^.*\/([^\/]+)\/?$/,'$1');
-			map[prefix] = value;
-		}
-	}
-	return map;
-}
 
-/**
- * TODO:貌似需要importNode
- */
-function selectNodes(currentNode,xpath){
-	var doc = currentNode.ownerDocument || currentNode;
-    var docFragment = doc.createDocumentFragment();
-    var nsMap = getNamespaceMap(doc.documentElement);
-    try{
-    	var buf = [];
-    	for(var n in nsMap){
-    		buf.push("xmlns:"+n+'="'+nsMap[n]+'"')
-    	}
-    	doc.setProperty("SelectionNamespaces",buf.join(' '));
-    	doc.setProperty("SelectionLanguage","XPath");
-        var nodes = currentNode.selectNodes(xpath);
-        var buf = [];
-        for (var i=0; i<nodes.length; i++) {
-            buf.push(nodes.item(i))
-        }
-    }catch(e){
-        var xpe = doc.evaluate? doc: new XPathEvaluator();
-        //var nsResolver = xpe.createNSResolver(doc.documentElement);
-        var result = xpe.evaluate(xpath, currentNode, function(prefix){return nsMap[prefix]}, 5, null);
-        var node;
-        var buf = [];
-        while (node = result.iterateNext()){
-            buf.push(node);
-        }
-    }
-    while (node = buf.shift()){
-        docFragment.appendChild(node.cloneNode(true));
-    }
-    return docFragment;
-}
 /**
  * 想当前栈顶添加数据
  * 解析和编译过程中使用

@@ -26,12 +26,12 @@ public interface ResourceContext{
 	/**
 	 * 如果file相于根目录（/path/...），以base作为根目录处理
 	 * 否则以parentURL，或者base作为parent直接new URL处理。
-	 * @see org.xidea.lite.parser.impl.ParseContextImpl#createURL
-	 * @param parentURL
 	 * @param file
+	 * @param parentURL
+	 * @see org.xidea.lite.parser.impl.ParseContextImpl#createURL
 	 * @return
 	 */
-	public URL createURL(URL parentURL, String file);
+	public URL createURL(String file, URL parentURL);
 	public InputStream getInputStream(URL url);
 	/**
 	 * 添加（记录）解析相关的资源

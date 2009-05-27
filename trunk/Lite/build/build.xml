@@ -11,7 +11,21 @@
 		<mkdir dir="build/dest/jslite" />
 		<mkdir dir="build/dest" />
 	</target>
-	
+
+	<target name="packageOptimize">
+		<java classname="org.jside.jsi.tools.web.PackageAction" classpath="${JSAPath}">
+			<arg value="-scriptBase" />
+			<arg value="${basedir}/web/scripts" />
+			<arg value="-output" />
+			<arg value="${basedir}/build/dest/package-gen.js" />
+
+			<arg value="-packageName" />
+			<arg value="org.xidea.lite" />
+
+			<arg value="-dependences" />
+			<arg value="org.xidea.jsidoc.util" />
+		</java>
+	</target>
 	<target name="join-php">
 		<concat destfile="build/dest/TemplateEngine.php" encoding="utf-8">
 			<path path="src/php/lite/TemplateEngine.php" />

@@ -5,8 +5,18 @@
  * @author jindw
  * @version $Id: template.js,v 1.4 2008/02/28 14:39:06 jindw Exp $
  */
-
-
+var EL_TYPE = 0;// [0,'el']
+var IF_TYPE = 1;// [1,[...],'test']
+var BREAK_TYPE = 2;// [2,depth]
+var XML_ATTRIBUTE_TYPE = 3;// [3,'value','name']
+var XML_TEXT_TYPE = 4;// [4,'el']
+var FOR_TYPE = 5;// [5,[...],'items','var']
+var ELSE_TYPE = 6;// [6,[...],'test']//test opt?
+var ADD_ON_TYPE =7;// [7,[...],'el','clazz']
+var VAR_TYPE = 8;// [8,'value','name']
+var CAPTRUE_TYPE = 9;// [9,[...],'var']
+var IF_KEY = "if";
+var FOR_KEY = "for";
 /**
  * 模板类
  * 起初base 的设计是表示，他是一个url还是一段文本。
@@ -19,9 +29,12 @@ function Template(data,parser){
     if("org.xidea.lite:Compile"){
         if(!(data instanceof Array || data instanceof Function)){
             if(parser == null|| parser == "xml"){
-            	parser = new XMLParserOld(true);
+            	parser = new XMLParser(true);
             }else if(typeof parser == "string"){
                 parser = new $import(parser)(true);
+            }
+            if(typeof data == 'string' && /^[\s\ufeff]*</.test(data)){
+            	data = parser.createURL(data);
             }
             parser.parse(data);
             data = parser.buildResult();

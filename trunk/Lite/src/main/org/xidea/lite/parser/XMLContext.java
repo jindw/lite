@@ -74,7 +74,7 @@ public interface XMLContext {
 	 * @return
 	 * @throws XPathExpressionException
 	 */
-	public DocumentFragment selectNodes(Node doc, String xpath)
+	public DocumentFragment selectNodes(Node doc,String xpath)
 			throws XPathExpressionException;
 
 	/**

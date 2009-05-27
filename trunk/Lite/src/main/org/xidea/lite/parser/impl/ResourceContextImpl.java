@@ -57,7 +57,7 @@ public class ResourceContextImpl implements ResourceContext {
 		this.currentURL = currentURL;
 	}
 
-	public URL createURL(URL parentURL, String path) {
+	public URL createURL(String path, URL parentURL) {
 		try {
 			if (path.startsWith("/")) {
 				return new URL(this.base, path.substring(1));
