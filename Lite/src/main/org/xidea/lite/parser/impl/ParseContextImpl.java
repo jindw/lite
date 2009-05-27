@@ -113,8 +113,8 @@ public class ParseContextImpl implements ParseContext {
 		resourceContext.addResource(resource);
 	}
 
-	public URL createURL(URL parentURL, String file) {
-		return resourceContext.createURL(parentURL, file);
+	public URL createURL(String file, URL parentURL) {
+		return resourceContext.createURL(file, parentURL);
 	}
 
 	public Object getAttribute(Object key) {

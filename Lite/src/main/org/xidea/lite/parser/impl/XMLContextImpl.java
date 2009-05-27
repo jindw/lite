@@ -175,7 +175,7 @@ public class XMLContextImpl implements XMLContext {
 			xsltSource = new javax.xml.transform.dom.DOMSource(result.getNode());
 		} else {
 			xsltSource = new javax.xml.transform.stream.StreamSource(context
-					.createURL(parentURL, xslt).openStream());
+					.createURL(xslt, parentURL).openStream());
 		}
 
 		// create an instance of TransformerFactory

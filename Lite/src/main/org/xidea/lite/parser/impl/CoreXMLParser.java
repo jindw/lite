@@ -49,9 +49,9 @@ public class CoreXMLParser implements Parser<Element> {
 					parseChooseTag(el, context);
 				} else if ("elseif".equals(name) || "else-if".equals(name)
 						|| "elif".equals(name)) {
-					parseElseIfTag(el, context, true);
+					parseElseTag(el, context, true);
 				} else if ("else".equals(name)) {
-					parseElseIfTag(el, context, false);
+					parseElseTag(el, context, false);
 				} else if ("if".equals(name)) {
 					parseIfTag(el, context);
 				} else if ("out".equals(name)) {
@@ -136,11 +136,11 @@ public class CoreXMLParser implements Parser<Element> {
 						uri = doc.getOwnerDocument().getDocumentURI();
 					}
 					if (uri != null) {
-						context.setCurrentURL(context.createURL(null, uri));
+						context.setCurrentURL(context.createURL(uri, null));
 					}
 				} else {
 					doc = context.loadXML(context
-							.createURL(parentURL, path));
+							.createURL(path, parentURL));
 				}
 			}
 
@@ -167,12 +167,10 @@ public class CoreXMLParser implements Parser<Element> {
 		return null;
 	}
 
-	protected Node parseElseIfTag(Element el, ParseContext context, boolean reqiiredTest) {
-		if (((Element) el).hasAttribute("test")) {
+	protected Node parseElseTag(Element el, ParseContext context, boolean requiredTest) {
+		if (requiredTest) {
 			Object test = getAttributeEL(context, el, "test");
 			context.appendElse(test);
-		} else if (reqiiredTest) {
-			throw new IllegalArgumentException("@test is required");
 		} else {
 			context.appendElse(null);
 		}
@@ -182,7 +180,12 @@ public class CoreXMLParser implements Parser<Element> {
 	}
 
 	protected Node parseElseTag(Element el, ParseContext context) {
-		context.appendElse(null);
+		if (((Element) el).hasAttribute("test")) {
+			Object test = getAttributeEL(context, el, "test");
+			context.appendElse(test);
+		} else {
+			context.appendElse(null);
+		}
 		parseChild(el.getFirstChild(), context);
 		context.appendEnd();
 		return null;
@@ -201,10 +204,10 @@ public class CoreXMLParser implements Parser<Element> {
 						first = false;
 						parseIfTag((Element) next, context);
 					} else {
-						parseElseIfTag((Element) next, context, true);
+						parseElseTag((Element) next, context, true);
 					}
 				} else if (next.getLocalName().equals(elseTag)) {
-					parseElseTag((Element) next, context);
+					parseElseTag((Element) next, context,false);
 				} else {
 					throw new RuntimeException("choose 只接受when，otherwise 节点");
 				}
@@ -285,7 +288,7 @@ public class CoreXMLParser implements Parser<Element> {
 		String content = getAttributeOrNull(el, "content");
 		if (file != null) {
 			try {
-				URL url = context.createURL(null, file);
+				URL url = context.createURL(file, null);
 				InputStream in = url.openStream();
 				InputStreamReader reader = new InputStreamReader(in,
 						encoding == null ? "utf-8" : encoding);
