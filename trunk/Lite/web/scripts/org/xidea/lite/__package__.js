@@ -11,7 +11,7 @@ this.addScript('parser.js',"*"
 this.addScript('text-parser.js',["TextParserOld","checkEL"]
                ,["Parser","parser.js"]
                ,["ExpressionTokenizer","findELEnd","org.xidea.jsidoc.util:XMLHttpRequest"]); 
-this.addScript('xml-parser.js',"XMLParser"
+this.addScript('xml-parser.js',"XMLParserOld"
                ,["TextParserOld","parser.js"]
                ,"org.xidea.jsidoc.util:XMLHttpRequest"); 
 this.addScript("expression-token.js","*");

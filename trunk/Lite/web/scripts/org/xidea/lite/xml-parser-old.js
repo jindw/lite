@@ -7,15 +7,55 @@
  */
 
 function XMLParser(nativeJS){
+    this.nativeJS = nativeJS;
+    this.parserList = this.parserList.concat([]);
+    this.result = [];
 }
 
 function isTemplateNS(value,shortAvaliable){
     return shortAvaliable && (value=="#" || value=="#core" || value ==null) || TEMPLATE_NS_REG.test(value);
 }
-function parseXMLNode(node,context,chain){
+XMLParser.prototype = new TextParserOld()
+XMLParser.prototype.parse = function(url){
+    if(/^[\s\ufeff]*</.test(url)){
+        var data =toDoc(url)
+        //alert([data,doc.documentElement.tagName])
+    }else{
+    	//print(url)
+        var pos = url.indexOf('#')+1;
+        var data = this.load( pos?url.substr(0,pos-1):url,pos && url.substr(pos));
+    }
+    this.parseNode(data);
+    return this.reuslt;
+}
+XMLParser.prototype.load = function(url,xpath){
+	try{
+	    var xhr = new XMLHttpRequest();
+	    xhr.open("GET",url,false)
+	    xhr.send('');
+	    if(/\/xml/.test(xhr.getResponseHeader("Content-Type"))){//text/xml,application/xml...
+	        var doc = xhr.responseXML;
+	    }else{
+	        var doc = toDoc(xhr.responseText)
+	    }
+	    if(xpath){
+	        doc = selectNodes(doc,xpath);
+	    }
+	    this.url = url;
+		return doc;
+	}catch(e){
+		$log.error("文档解析失败",url,e)
+		throw e;
+	}
+}
+/**
+ * 解析函数集
+ * @private
+ */
+XMLParser.prototype.addParser(function(node){
     switch(node.nodeType){
-        case 1: //NODE_ELEMENT 
-            parseElement.call(this,node)
+        //case 1: //NODE_ELEMENT 
+        //    return parseElement.call(this,node)
         case 2: //NODE_ATTRIBUTE                             
             return parseAttribute.call(this,node)
         case 3: //NODE_TEXT                                        
@@ -43,15 +83,15 @@ function parseXMLNode(node,context,chain){
             //this.println("<!-- ERROR： UNKNOW nodeType:"+node.nodeType+"-->")
     }
     return node;
-}
+});
 
 
 var htmlLeaf = /^(?:meta|link|img|br|hr)$/i;
 var scriptTag = /^script$/i
-function parseElement(node,context){
+XMLParser.prototype.addParser(function(node){
     if(node.nodeType ==1){
         var attributes = node.attributes;
-        context.append('<'+node.tagName);
+        this.append('<'+node.tagName);
         for (var i=0; i<attributes.length; i++) {
             try{
                 //htmlunit bug...
@@ -59,27 +99,27 @@ function parseElement(node,context){
             }catch(e){
                 var attr =attributes[i];
             }
-            context.parse(attr)
+            this.parseNode(attr)
         }
         if(htmlLeaf.test(node.tagName)){
-            context.append('/>')
+            this.append('/>')
             return true;
         }
-        context.append('>')
+        this.append('>')
         var child = node.firstChild
         if(child){
             do{
-                context.parse(child)
+                this.parseNode(child)
             }while(child = child.nextSibling)
         }
-        context.append('</'+node.tagName+'>')
+        this.append('</'+node.tagName+'>')
         return null;
     }
     return node;
-}
+});
 
 //:core
-function parseCoreXML(node,context){//for
+XMLParser.prototype.addParser(function(node){//for
     if(node.nodeType ==1){
         var tagName = node.tagName.toLowerCase();
         if(isTemplateNS(node.namespaceURI,/^c\:/i.test(tagName))){
@@ -113,6 +153,8 @@ function parseCoreXML(node,context){//for
             case 'macro':
             	parseDefTag.call(this,node);
                 break;
+            
+            
             //for other
             case 'include':
                 processIncludeTag.call(this,node);
@@ -124,7 +166,7 @@ function parseCoreXML(node,context){//for
         }
     }
     return node;
-}
+});
 /**
  * 
  */
