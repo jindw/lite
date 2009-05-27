@@ -38,7 +38,7 @@ ParseContext.prototype = {
      */
     parseEL : function(el){
         return parseEL(el,this.nativeJS)
-    }
+    },
 	
 	mark:function(){
 		return this.result.length;

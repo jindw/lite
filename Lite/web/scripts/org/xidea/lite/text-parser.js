@@ -8,28 +8,9 @@
 
 //parse
 
-//add as default
-function TextParser(nativeJS){
-    this.nativeJS = nativeJS;
-    this.parserList = this.parserList.concat([]);
-    this.result = [];
-}
 
 
-
-
-
-/**
- * 解析函数集
- * @private
- */
-TextParser.prototype = new Parser();
-//parse text
-
-
-
-
-TextParser.prototype.parse = function(text,context,parseChain){
+function parseText(text,context,parseChain){
     if(text && text.constructor == String){
         switch(context.textType){
         case XML_TEXT_TYPE :
