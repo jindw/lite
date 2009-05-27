@@ -10,18 +10,8 @@ var TestCase = {
 	    }
 	    
 	    try{
-	    	var parser = new XMLParser(true);
-	    	parser.parse(templateSource);
-	    	var jsCode = parser.buildResult();
-	        var jsTemplate = new Template(templateSource);
-	        jsCode = jsCode.toString()
-	    }catch(e){
-	        $log.error("模板解析失败（JS）",e);
-	        return false;
-	    }
-	    try{
 	    	var parser = new XMLParser(false);
-	    	parser.parse(templateSource);
+	    	parser.parse(parseXMLText(templateSource));
 	    	var jsonCode = parser.buildResult();
 	        var jsonTemplate = new Template(jsonCode);
 	    }catch(e){
@@ -29,6 +19,16 @@ var TestCase = {
 	        return false;
 	    }
 	    E("templateCode").value = liteFormat(jsonCode,false);
+	    try{
+	    	var parser = new XMLParser(true);
+	    	parser.parse(parseXMLText(templateSource));
+	    	var jsCode = parser.buildResult();
+	        var jsTemplate = new Template(jsCode);
+	        jsCode = jsCode.toString()
+	    }catch(e){
+	        $log.error("模板解析失败（JS）",e);
+	        return false;
+	    }
 	    E("optimizedResult").value = jsCode;
 	    
 	    var templateResult = E("templateResult");

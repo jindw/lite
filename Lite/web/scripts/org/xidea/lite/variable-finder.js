@@ -71,9 +71,9 @@ VarStatus.prototype = {
     			    var varName = item[1];
     				result[varName] = true;
     				if(varName == 'for'){
-    				    var next = tokens[i+1]
     				    var fs = this.forStack[this.forStack.length-1];
-    				    if(next[0] == OP_STATIC_GET_PROP){
+    				    var next = tokens[i+1]
+    				    if(next!=null && next[0] == OP_STATIC_GET_PROP){
     				        if(next[1] == 'index'){
     				            fs.index = true
     				        }else if(next[1] == 'lastIndex'){

@@ -261,7 +261,7 @@ Context.prototype = {
     				break;
                 //case ELSE_TYPE:
                 default:
-                    throw Error('valid status')
+                    throw Error('valid status'+item)
                     break;
                 }
     		}
