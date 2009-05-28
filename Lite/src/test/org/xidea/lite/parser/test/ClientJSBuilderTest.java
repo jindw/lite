@@ -16,9 +16,9 @@ import org.xidea.el.ExpressionFactory;
 import org.xidea.lite.parser.InstructionParser;
 import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.impl.ELParser;
-import org.xidea.lite.parser.impl.Java6JSBuilder;
+import org.xidea.lite.parser.impl.Java6JSTranslator;
 import org.xidea.lite.parser.impl.ParseContextImpl;
-import org.xidea.lite.parser.impl.RhinoJSBuilder;
+import org.xidea.lite.parser.impl.RhinoJSTranslator;
 import org.xml.sax.SAXException;
 
 public class ClientJSBuilderTest {
@@ -46,9 +46,8 @@ public class ClientJSBuilderTest {
 		context2.setCompress(true);
 		context2.setExpressionFactory(clientExpressionFactory);
 		context2.parse(context2.loadXML(url));
-		List<Object> liteCode = context2.toList();
-		String result = new Java6JSBuilder().buildJS(liteCode, "test");
-		String result2 = new RhinoJSBuilder().buildJS(liteCode, "test");
+		String result = new Java6JSTranslator().translate(context2, "test");
+		String result2 = new RhinoJSTranslator().translate(context2, "test");
 		Assert.assertEquals(result, result2);
 		System.out.println("==JS Code==");
 		System.out.println(result);

@@ -47,6 +47,9 @@ function encodeString(value){
                     value)
                + '"';
 }
+function checkEL(el){
+    new Function("return "+el)
+}
 
 function parseNativeEL(expression){
     if(checkForExpression(expression)){
@@ -107,8 +110,22 @@ function getEL(el){
     }
 }
 
-
-
+function ResultTranslator(){
+}
+ResultTranslator.prototype = {
+	transform:function(list,id,featrues){
+		var code = buildNativeJS(list)
+		return "function"+(id?" "+id:'')+"(){"+code+"\n}"
+	},
+	getSupportFeatrues:function(){
+		return ["compress"];
+	}
+}
+function buildNativeJS(code){
+    var context = new Context(code,0);
+    context.parse();
+    return context.toString();
+}
 /**
  * <code>
 function(context){
@@ -131,12 +148,6 @@ function(context){
 	var var2 = replacer("var2")
 	replace = function(c){return "&#"+c.charCodeAt()+";";}</code>
  */
-function buildNativeJS(code){
-    var context = new Context(code,0);
-    context.parse();
-    return context.toString();
-}
-
 function Context(code,index){
     var vs = this.vs = findStatus(code);
     this.code = code;

@@ -25,6 +25,6 @@ public interface ParseContext extends ParserHolder,ResourceContext,ResultContext
 	 * @param fn 函数名称
 	 * @return
 	 */
-	public ParseContext createClientContext(String fn);
+//	public ParseContext createClientContext(String fn);
 
 }

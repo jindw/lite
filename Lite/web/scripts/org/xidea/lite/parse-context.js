@@ -5,7 +5,6 @@
  * @author jindw
  * @version $Id: template.js,v 1.4 2008/02/28 14:39:06 jindw Exp $
  */
-
 //add as default
 function ParseContext(){
 	this.initialize();
@@ -42,7 +41,8 @@ ParseContext.prototype = {
 		this.textType = textType;
 		this.parse(source);
 		this.textType = type;
-		return this.reset(mark);
+		var result = this.reset(mark);
+		return result;
 	},
     /**
      * 调用解析链顶解析器解析源码对象
@@ -52,7 +52,7 @@ ParseContext.prototype = {
      */
 	parse:function(source) {
 		if(source instanceof URL){
-			source = this.loadXML(source);
+			source = this.loadXML(source.path);
 		}
 		this.topChain.process(source);
 	},
@@ -68,7 +68,7 @@ ParseContext.prototype = {
 		return this.result.length;
 	},
 	reset:function(mark){
-		return this.result.splice(mark);
+		return optimizeResult(this.result.splice(mark));
 	},
     /**
 	 * 添加静态文本（不编码）
@@ -155,7 +155,7 @@ ParseContext.prototype = {
 		this.result.push([ADD_ON_TYPE,el,clazz]);
 	},
     buildResult:function(){
-    	var result = joinText(this.result);
+    	var result = optimizeResult(this.result);
     	result = buildTreeResult(result);
         if(this.nativeJS){
             var code = buildNativeJS(result);
@@ -195,7 +195,7 @@ function clearPreviousText(result){
  * 解析和编译过程中使用
  * @public
  */
-function joinText(source){
+function optimizeResult(source){
     var result = [];
     var previousText;
     for(var i=0,j=0;i<source.length;i++){

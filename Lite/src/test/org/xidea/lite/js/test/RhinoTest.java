@@ -18,7 +18,7 @@ import org.mozilla.javascript.NativeObject;
 import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.Scriptable;
 import org.xidea.lite.parser.impl.CoreXMLParser;
-import org.xidea.lite.parser.impl.Java6JSBuilder;
+import org.xidea.lite.parser.impl.Java6JSTranslator;
 
 import com.sun.xml.internal.bind.v2.ContextFactory;
 
@@ -30,7 +30,7 @@ public class RhinoTest {
 	private static Scriptable scope = ScriptRuntime.getGlobal(context);
 
 	static {
-		ClassLoader loader = Java6JSBuilder.class.getClassLoader();
+		ClassLoader loader = Java6JSTranslator.class.getClassLoader();
 		try {
 			InputStream boot = loader.getResourceAsStream("boot.js");
 

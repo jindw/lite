@@ -82,8 +82,8 @@ function parseElement(node,context,chain){
 
 //parser attribute
 function parseAttribute(node,context,chain){
-    var name = node.name;
-    var value = node.value;
+    var name = String(node.name);
+    var value = String(node.value);
     var buf = context.parseText(value,XML_ATTRIBUTE_TYPE);
     var isStatic;
     var isDynamic;

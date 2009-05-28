@@ -10,13 +10,15 @@
  */
 function ParseChain(context,index){
 	this.context = context;
-	this.index = index || 0;
+	this.index = index>0?index:0;
 }
 ParseChain.prototype = {
     initialize:function(){
-	    this.parser = this.context.parserList[this.index];
-		this.nextChain = new ParseChain(this.context,this.index+1);
-		this.initialize = Function.prototype;
+    	var parserList = this.context.parserList;
+    	var index = this.index;
+	    this.parser = parserList[index];
+		this.nextChain = new ParseChain(this.context,index+1);
+	    this.initialize = Function.prototype;
     },
 	process:function(node){
 	    this.initialize();

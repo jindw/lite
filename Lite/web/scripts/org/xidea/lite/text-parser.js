@@ -11,18 +11,16 @@
 
 
 function parseText(text,context,parseChain){
-    if(text && text.constructor == String){
-        switch(context.textType){
-        case XML_TEXT_TYPE :
+    if(text!=null && text.constructor == String){
+        switch(context.textType){        case XML_ATTRIBUTE_TYPE :
             var escapeQute = '"';
-        case XML_ATTRIBUTE_TYPE :
+        case XML_TEXT_TYPE :
             var encode = true;  
             var textType = context.textType;
             break;
         default:
             var textType = EL_TYPE;
         }
-        
         var pattern = /(\\*)\$([a-zA-Z!]{0,5}\{)/  //允许$for{} $if{} $end ...  see CT????
         //var pattern = /(\\*)\$\{/g
         var match ;
@@ -44,8 +42,13 @@ function parseText(text,context,parseChain){
                 try{
                     var expression = text.substring(expressionBegin ,expressionEnd );
                     expression = context.parseEL(expression);
-                    
-                    context.appendEL(expression);
+                    if(textType == XML_TEXT_TYPE){
+                    	context.appendXmlText(expression);
+                    }else if(textType == XML_ATTRIBUTE_TYPE){
+                    	context.appendAttribute(null,expression);
+                    }else{
+                    	context.appendEL(expression);
+                    }
                     
                     text = text.substr(expressionEnd+1);
                     //以前为了一些正则bug,不知道是否还需要:(
@@ -83,6 +86,7 @@ function parseEL(expression,nativeJS){
         }
     }catch(e){
         $log.debug("表达式解析失败",expression,e)
+        throw e;
     }
 }
 
@@ -94,8 +98,4 @@ function parseFor(el){
     }catch(e){
         checkEL(el = '['+el+']');
     }
-}
-
-function checkEL(el){
-    new Function("return "+el)
 }

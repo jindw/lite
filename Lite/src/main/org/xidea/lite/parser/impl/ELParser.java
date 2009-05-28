@@ -42,7 +42,7 @@ public class ELParser implements InstructionParser {
 			int p1 = text.indexOf('{', p$);
 			int p2 = text.indexOf('}', p1);
 			String id = text.substring(p1 + 1, p2);
-			ParseContext clientContext = context.createClientContext(id);
+			ParseContext clientContext = new ParseContextImpl(context,id,JSTranslator.getInstance());
 			String subtext = text.substring(p2 + 1);
 			clientContext.setAttribute(CLIENT, context);
 			clientContext.appendAll(clientContext.parseText(subtext, context.getTextType()));
