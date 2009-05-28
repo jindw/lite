@@ -109,7 +109,9 @@ function getEL(el){
         throw new Error("json->el 尚未实现：（\n"+el);
     }
 }
-
+/**
+ * JS原生代码翻译器实现
+ */
 function ResultTranslator(){
 }
 ResultTranslator.prototype = {

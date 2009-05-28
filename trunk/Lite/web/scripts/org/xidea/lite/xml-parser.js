@@ -5,7 +5,10 @@
  * @author jindw
  * @version $Id: template.js,v 1.4 2008/02/28 14:39:06 jindw Exp $
  */
-
+/**
+ * XML 模板解释引擎，集成自 ParseContext。
+ * 该引擎带有parseCoreNode,parseXMLNode,parseText三个节点解析器实现
+ */
 function XMLParser(nativeJS){
 	this.nativeJS = nativeJS;
 	this.initialize(parseCoreNode,parseXMLNode,parseText);

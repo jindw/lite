@@ -16,12 +16,13 @@ public abstract class JSTranslator implements ResultTranslator, ExpressionFactor
 		if (instance == null) {
 			try {
 				instance = new RhinoJSTranslator();
+				return instance;
 			} catch (NoClassDefFoundError e) {
-				try {
-					instance = new Java6JSTranslator();
-				} catch (NoClassDefFoundError e2) {
-					log.error("找不到您的JS运行环境，不能为您编译前端js", e);
-				}
+			}
+			try {
+				instance = new Java6JSTranslator();
+			} catch (NoClassDefFoundError e2) {
+				log.error("找不到您的JS运行环境，不能为您编译前端js", e2);
 			}
 		}
 		return instance;

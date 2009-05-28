@@ -5,7 +5,9 @@
  * @author jindw
  * @version $Id: template.js,v 1.4 2008/02/28 14:39:06 jindw Exp $
  */
-
+/**
+ * JSON解码器器的纯JS实现
+ */
 function JSONTokenizer(value){
     this.value = value.replace(/^\s+|\s+$/g,'');
 	this.start = 0;
