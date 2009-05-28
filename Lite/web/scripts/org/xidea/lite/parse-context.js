@@ -28,12 +28,19 @@ ParseContext.prototype = {
 	    this.topChain = new ParseChain(this);
 	},
     createURL:function(path,parentURL) {
-    	path = (parentURL||'')+(path||'')
+    	path = (parentURL||this.currentURL || '')+(path||'')
 		return new URL(path);
     },
     //nativeJS:false,
     parserList : [],
-    loadXML:loadXML,
+    loadXML:function(path){
+    	if(/^[\s\ufeff]*</.test(path)){
+    		//this.currentURL = "data:text/xml,"+encodeURIComponent(path)
+    	}else{
+    		this.currentURL = path.replace(/#.*/,'');
+    	}
+    	return loadXML(path)
+    },
     selectNodes:selectNodes,
 	parseText:function(source, textType) {
 		var type = this.textType;
@@ -68,7 +75,7 @@ ParseContext.prototype = {
 		return this.result.length;
 	},
 	reset:function(mark){
-		return optimizeResult(this.result.splice(mark));
+		return optimizeResult(this.result.splice(mark,this.result.length));
 	},
     /**
 	 * 添加静态文本（不编码）

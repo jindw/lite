@@ -59,7 +59,10 @@ public class JSCompileTest {
 	public String getText(Node doc, String xpath)
 			throws XPathExpressionException {
 		Node node = context.selectNodes(doc, xpath).getFirstChild();
-		return node == null ? null : node.getTextContent();
+		if(node == null){
+			return null;
+		}
+		return node.getTextContent();
 	}
 
 	@Before
@@ -141,9 +144,9 @@ public class JSCompileTest {
 			String contextJSON = context;
 			// engine.put(ScriptEngine.FILENAME, "<file>");
 
-			System.out.println();
 			engine.eval("var jsTemplate = new Template(" + sourceJSON
 					+ ",new XMLParser(true))");
+
 			engine.eval("var liteTemplate = new Template(" + sourceJSON
 					+ ",new XMLParser(false))");
 			// .buildResult()");

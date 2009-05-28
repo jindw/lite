@@ -50,7 +50,7 @@
 			</fileset>
 		</delete>
 
-		<echo file="build/dest/jslite/__package__.js">this.addScript("template.js",["XMLParser","Template"])</echo>
+		<echo file="build/dest/jslite/__package__.js">this.addScript("template.js",["Template","ParseContext","XMLParser","ResultTranslator"])</echo>
 		<jar destfile="build/dest/Template.jar" compress="true">
 			<fileset dir="web/WEB-INF/classes">
 				<include name="org/xidea/el/**/*.class" />
@@ -105,9 +105,10 @@
 
 			<arg value="-exports" />
 			<arg value="org.xidea.lite:Template" />
-			<arg value="org.xidea.lite:TextParser" />
+			<arg value="org.xidea.lite:ParseContext" />
 			<arg value="org.xidea.lite:XMLParser" />
-			<arg value="org.xidea.lite:buildNativeJS" />
+			<arg value="org.xidea.lite:ParseContext" />
+			<arg value="org.xidea.lite:ResultTranslator" />
 
 			<arg value="-outputExported" />
 			<arg value="${basedir}/build/dest/jslite/template.js" />
@@ -124,8 +125,7 @@
 			<arg value=":Debug" />
 
 			<arg value="-exports" />
-			<arg value="org.xidea.lite:Parser" />
-			<arg value="org.xidea.lite:TextParser" />
+			<arg value="org.xidea.lite:Template" />
 			<arg value="org.xidea.lite:XMLParser" />
 			<arg value="org.xidea.lite.demo:TestCase" />
 
