@@ -312,6 +312,9 @@ function findRegExp(text,start){
 	    }
 	}
 }
+/**
+ * 表达式解析器，将JS表达式文本解析成JSON中间代码
+ */
 function ExpressionTokenizer(value){
     this.value = value.replace(/^\s+|\s+$/g,'');
 	this.start = 0;

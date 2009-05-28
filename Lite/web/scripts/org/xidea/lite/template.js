@@ -18,28 +18,25 @@ var CAPTRUE_TYPE = 9;// [9,[...],'var']
 var IF_KEY = "if";
 var FOR_KEY = "for";
 /**
- * 模板类
- * 起初base 的设计是表示，他是一个url还是一段文本。
- * 感觉没有必要，感觉需要简化。
- * 设计为接受两个参数？
- * <a href="http://code.google.com/p/jsiside/wiki/Template"> 模版基础指令说明</a>
+ * 如果传入的是json 数组 或者是函数对象，直接作为编译结果初始化，否则，作为源代码编译。
+ * @param data 模板源代码或者编译结果
+ * @param parser 解析器对象，或者类名（通过jsi导入），可选
+ * <a href="http://code.google.com/p/lite/wiki/Template"> 模版基础指令说明</a>
  * @public
  */
 function Template(data,parser){
-    if("org.xidea.lite:Compile"){
-        if(!(data instanceof Array || data instanceof Function)){
-            if(parser == null|| parser == "xml"){
-            	parser = new XMLParser(true);
-            }else if(typeof parser == "string"){
-                parser = new $import(parser)(true);
-            }
-            if(typeof data == 'string' && /^[\s\ufeff]*</.test(data)){
-            	data = parser.createURL(data);
-            }
-            parser.parse(data);
-            data = parser.buildResult();
-            this.compileData = data;
+    if(!(data instanceof Array || data instanceof Function)){
+        if(parser == null|| parser == "xml"){
+        	parser = new XMLParser(true);
+        }else if(typeof parser == "string"){
+            parser = new $import(parser)(true);
         }
+        if(typeof data == 'string' && /^[\s\ufeff]*</.test(data)){
+        	data = parser.createURL(data);
+        }
+        parser.parse(data);
+        data = parser.buildResult();
+        this.compileData = data;
     }
     //alert(data.join("\n"));;
     /**

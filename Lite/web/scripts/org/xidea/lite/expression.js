@@ -5,13 +5,18 @@
  * @author jindw
  * @version $Id: template.js,v 1.4 2008/02/28 14:39:06 jindw Exp $
  */
-
+/**
+ * 表达式对象，可以单步解释表达式中间代码
+ */
 function Expression(tokens){
 	this.tokens = tokens;
 }
 Expression.prototype.evaluate = function(context){
      return evaluate(this.tokens,context);
 }
+/**
+ * 表达式单步解析函数实现
+ */
 function evaluate(el,context){
      var stack = [];
      _evaluate(stack,el,context)

@@ -6,15 +6,15 @@
  * @version $Id: template.js,v 1.4 2008/02/28 14:39:06 jindw Exp $
  */
 //add as default
+/**
+ * 模板解析上下文对象实现
+ */
 function ParseContext(){
 	this.initialize();
 }
 function URL(path){
 	this.path = path;
 }
-/**
- * @private
- */
 ParseContext.prototype = {
 	/**
 	 * 初始化上下文
