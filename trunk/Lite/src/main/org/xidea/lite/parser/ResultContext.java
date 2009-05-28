@@ -59,7 +59,7 @@ public interface ResultContext {
 	 */
 	public List<Object> toList();
 	/**
-	 * @return 经过优化后的树形结果集
+	 * @return 经过结果转换后的代码
 	 */
 	public String toCode();
 

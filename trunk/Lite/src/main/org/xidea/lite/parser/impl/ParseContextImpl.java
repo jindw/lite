@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -23,6 +25,7 @@ import org.xidea.lite.parser.Parser;
 import org.xidea.lite.parser.ParserHolder;
 import org.xidea.lite.parser.ResourceContext;
 import org.xidea.lite.parser.ResultContext;
+import org.xidea.lite.parser.ResultTranslator;
 import org.xidea.lite.parser.XMLContext;
 import org.xml.sax.SAXException;
 
@@ -32,12 +35,50 @@ public class ParseContextImpl implements ParseContext {
 	protected XMLContext xmlContext;
 	protected ResultContext resultContext;
 	protected ParserHolder parserHolder;
-
+	private String id;
+	private ResultTranslator translator;
+	
 	protected ParseContextImpl() {
 	}
-	ParseContextImpl(ParseContext parent) {
-		this.resourceContext = parent;
-		this.xmlContext = parent;
+
+	public ParseContextImpl(ParseContext parent, String fn,
+			ResultTranslator translator) {
+		initializeFromParent(parent);
+		intializeTranslator(parent, fn, translator);
+	}
+
+	private void intializeTranslator(ParseContext parent, String fn,
+			ResultTranslator translator) {
+		this.id = fn;
+		this.translator = translator;
+		if (translator instanceof ExpressionFactory) {
+			this.resultContext
+					.setExpressionFactory((ExpressionFactory) translator);
+		}
+		HashMap<String, String> oldFeatrues = new HashMap<String, String>(
+				parent.getFeatrueMap());
+		Set<String> support = translator.getSupportFeatrues();
+		if (support != null) {
+			Map<String, String> newFeatrues = this.getFeatrueMap();
+			for (String key : oldFeatrues.keySet()) {
+				if (support.contains(key)) {
+					newFeatrues.put(key, oldFeatrues.get(key));
+				}
+			}
+		}
+	}
+
+
+
+	private void initializeFromParent(ParseContext parent) {
+		if(parent instanceof ParseContextImpl){
+			ParseContextImpl parent2 = (ParseContextImpl)parent;
+			this.resourceContext = parent2.resourceContext;
+			this.xmlContext = parent2.xmlContext;
+		}else{
+			this.resourceContext = parent;
+			this.xmlContext = parent;
+		}
 		//需要重设 ParseChain 的context
 		this.parserHolder = new ParseHolderImpl(this,parent);
 		this.resultContext = new ResultContextImpl(parent);
@@ -56,6 +97,11 @@ public class ParseContextImpl implements ParseContext {
 		resultContext = new ResultContextImpl();
 		xmlContext = new XMLContextImpl(this);
 		parserHolder = new ParseHolderImpl(this, parsers, ips);
+		initializeFeatrues(featrues);
+
+	}
+
+	protected void initializeFeatrues(Map<String, String> featrues) {
 		if (featrues != null) {
 			String v = featrues.get("compress");
 			if (v != null) {
@@ -71,7 +117,6 @@ public class ParseContextImpl implements ParseContext {
 			}
 			getFeatrueMap().putAll(featrues);
 		}
-
 	}
 
 	public List<Object> parseText(String text, int defaultType) {
@@ -90,10 +135,6 @@ public class ParseContextImpl implements ParseContext {
 
 	public void parse(Object source) {
 		getTopChain().process(source);
-	}
-
-	public ParseContext createClientContext(String name) {
-		return new ClientContextImpl(this, name);
 	}
 
 	public InstructionParser[] getInstructionParsers() {
@@ -237,9 +278,12 @@ public class ParseContextImpl implements ParseContext {
 	public List<Object> toList() {
 		return resultContext.toList();
 	}
-
 	public String toCode() {
-		return resultContext.toCode();
+		if(translator==null){
+			return resultContext.toCode();
+		}else{
+			return translator.translate(this,id);
+		}
 	}
 
 	public void beginIndent() {

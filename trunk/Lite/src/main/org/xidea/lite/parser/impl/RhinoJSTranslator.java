@@ -5,7 +5,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
-import java.util.List;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -18,22 +20,23 @@ import org.mozilla.javascript.Parser;
 import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.UintMap;
-import org.xidea.el.json.JSONEncoder;
+import org.xidea.el.json.JSONDecoder;
 
-public class RhinoJSBuilder implements JSBuilder {
+@SuppressWarnings("unchecked")
+public class RhinoJSTranslator extends JSTranslator {
 	private static Log log = LogFactory.getLog(CoreXMLParser.class);
 	private static Context context = Context.enter();
 	private static Scriptable scope = ScriptRuntime.getGlobal(context);
-
+	protected static String DEFAULT_FEATRUES;
 	static {
-		ClassLoader loader = Java6JSBuilder.class.getClassLoader();
+		ClassLoader loader = Java6JSTranslator.class.getClassLoader();
 		try {
 			InputStream boot = loader.getResourceAsStream("boot.js");
 
 			if (boot != null) {
 				try {
 					eval(new InputStreamReader(boot, "utf-8"));
-					eval("$import('org.xidea.lite:buildNativeJS')");
+					eval("$import('org.xidea.lite:ResultTranslator')");
 				} catch (Exception e) {
 					log.debug("尝试JSI启动编译脚本失败", e);
 				}
@@ -43,9 +46,19 @@ public class RhinoJSBuilder implements JSBuilder {
 						.getResourceAsStream("org/xidea/lite/template.js");
 				eval(new InputStreamReader(compressed, "utf-8"));
 			}
+			eval("var transformer = new ResultTranslator();");
+			supportFeatrues = new HashSet<String>(
+					(Collection) JSONDecoder
+							.decode((String) eval("uneval(transformer.getSupportFeatrues())")));
 		} catch (Exception e) {
 			log.error("初始化Rhino JS引擎失败", e);
 		}
+	}
+
+	protected static Set<String> supportFeatrues = new HashSet<String>();
+
+	public Set<String> getSupportFeatrues() {
+		return supportFeatrues;
 	}
 
 	private static Object eval(Reader in) throws IOException {
@@ -85,18 +98,10 @@ public class RhinoJSBuilder implements JSBuilder {
 		penv.setReservedKeywordAsIdentifier(true);
 	}
 
-	public String buildJS(List<Object> liteCode, String name) {
-		String source = JSONEncoder.encode(liteCode);
-		String code;
-		try {
-			code = (String) eval("buildNativeJS(eval(" + source + "))+''");
-			eval("+function(){" + code + "}");
-		} catch (Exception e) {
-			code = "alert('生成js代码失败：'+" + JSONEncoder.encode(e.getMessage())
-					+ ")";
-			log.warn("生成js代码失败：", e);
-		}
-		return "function " + name + "(){\n" + code + "\n}";
+	public String buildJS(String script) {
+		String code = (String) eval(script);
+		eval("function x(){" + code + "}");
+		return code;
 	}
 
 	public String compress(String source) {
@@ -112,4 +117,5 @@ public class RhinoJSBuilder implements JSBuilder {
 		// return result.replaceAll("(\\}[\r\n])|[\r\n]", "$1");
 		return result.replaceAll("[\r\n]", "");
 	}
+
 }

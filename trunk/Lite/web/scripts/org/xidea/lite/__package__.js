@@ -2,9 +2,9 @@ this.addScript('parse-context.js','ParseContext'
                 ,['xml-context.js','ParseChain']
                 ,['buildNativeJS','parseEL','VAR_TYPE','XML_ATTRIBUTE_TYPE','ELSE_TYPE','ADD_ON_TYPE','CAPTRUE_TYPE','IF_TYPE','EL_TYPE','XML_TEXT_TYPE','FOR_TYPE']);
 
-this.addScript('native-compiler.js','buildNativeJS'
+this.addScript('native-compiler.js',["ResultTranslator",'buildNativeJS','checkEL']
                 ,0
-                ,['checkEL','org.xidea.jsidoc.util:$log','findStatus','VAR_TYPE','XML_ATTRIBUTE_TYPE','ELSE_TYPE','ADD_ON_TYPE','CAPTRUE_TYPE','IF_TYPE','EL_TYPE','XML_TEXT_TYPE','FOR_TYPE']);
+                ,['org.xidea.jsidoc.util:$log','findStatus','VAR_TYPE','XML_ATTRIBUTE_TYPE','ELSE_TYPE','ADD_ON_TYPE','CAPTRUE_TYPE','IF_TYPE','EL_TYPE','XML_TEXT_TYPE','FOR_TYPE']);
 
 this.addScript('variable-finder.js','findStatus'
                 ,0
@@ -40,9 +40,9 @@ this.addScript('template.js',['VAR_TYPE','XML_ATTRIBUTE_TYPE','Template','ELSE_T
                 ,0
                 ,['XMLParser','org.xidea.jsidoc.util:$log','evaluate','VAR_TYPE','XML_ATTRIBUTE_TYPE','ELSE_TYPE','ADD_ON_TYPE','CAPTRUE_TYPE','IF_TYPE','EL_TYPE','XML_TEXT_TYPE','FOR_TYPE']);
 
-this.addScript('text-parser.js',['parseText','parseEL','checkEL']
+this.addScript('text-parser.js',['parseText','parseEL']
                 ,0
-                ,['ExpressionTokenizer','org.xidea.jsidoc.util:$log','findELEnd','XML_ATTRIBUTE_TYPE','EL_TYPE','XML_TEXT_TYPE']);
+                ,['checkEL','ExpressionTokenizer','org.xidea.jsidoc.util:$log','findELEnd','XML_ATTRIBUTE_TYPE','EL_TYPE','XML_TEXT_TYPE']);
 
 this.addScript('expression-tokenizer.js','ExpressionTokenizer'
                 ,'JSONTokenizer'

@@ -1,9 +1,6 @@
 package org.xidea.lite.parser;
 
-import java.util.List;
-import java.util.Map;
-
-public interface ResultTransformer {
+public interface ResultTranslator {
 
 	/**
 	 * 创建一个解析客户端模板的解析上下文对象
@@ -11,7 +8,7 @@ public interface ResultTransformer {
 	 * @param fn 函数名称
 	 * @return
 	 */
-	public String transform(List<Object> list,String id,Map<String, String> featrues);
+	public String translate(ParseContext context,String id);
 
 	public java.util.Set<String> getSupportFeatrues();
 }

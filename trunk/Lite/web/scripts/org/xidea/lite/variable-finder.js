@@ -73,6 +73,7 @@ VarStatus.prototype = {
     				if(varName == 'for'){
     				    var fs = this.forStack[this.forStack.length-1];
     				    var next = tokens[i+1]
+    				    //next!=null &&  需要吗？貌似不会有这种情况呢！！
     				    if(next!=null && next[0] == OP_STATIC_GET_PROP){
     				        if(next[1] == 'index'){
     				            fs.index = true

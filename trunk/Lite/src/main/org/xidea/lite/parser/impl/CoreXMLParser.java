@@ -256,13 +256,12 @@ public class CoreXMLParser implements Parser<Element> {
 		Node next = el.getFirstChild();
 		if (next != null) {
 			// new Java6JSBuilder();
-			ParseContext context2 = context.createClientContext(el.getAttribute("id"));
+			ParseContext clientContext = new ParseContextImpl(context,el.getAttribute("id"),JSTranslator.getInstance());
 			// 前端直接压缩吧？反正保留那些空白也没有调试价值
 			do {
-				context2.parse(next);
+				clientContext.parse(next);
 			} while ((next = next.getNextSibling()) != null);
-			List<Object> result = context2.toList();
-			String js = (String)result.get(0);
+			String js = clientContext.toCode();
 			boolean needScript = needScript(el);
 			if (needScript) {
 				context.append("<script>/*<![CDATA[*/" + js
