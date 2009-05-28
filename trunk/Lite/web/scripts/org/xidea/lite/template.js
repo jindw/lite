@@ -31,7 +31,7 @@ function Template(data,parser){
         }else if(typeof parser == "string"){
             parser = new $import(parser)(true);
         }
-        if(typeof data == 'string' && /^[\s\ufeff]*</.test(data)){
+        if(typeof data == 'string'){
         	data = parser.createURL(data);
         }
         parser.parse(data);

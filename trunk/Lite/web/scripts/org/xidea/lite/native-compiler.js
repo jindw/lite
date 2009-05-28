@@ -124,7 +124,7 @@ ResultTranslator.prototype = {
 	}
 }
 function buildNativeJS(code){
-    var context = new Context(code,0);
+    var context = new Context(code);
     context.parse();
     return context.toString();
 }
@@ -150,7 +150,7 @@ function(context){
 	var var2 = replacer("var2")
 	replace = function(c){return "&#"+c.charCodeAt()+";";}</code>
  */
-function Context(code,index){
+function Context(code){
     var vs = this.vs = findStatus(code);
     this.code = code;
     this.hasFor = vs.forInfos.length;
@@ -159,7 +159,7 @@ function Context(code,index){
     this.refs = vs.refs;
     this.idMap = {};
     this.depth = 1;
-    this.index = index?index:3
+    this.index = 0
 }
 Context.prototype = {
 	parse:function(){
