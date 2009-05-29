@@ -96,8 +96,7 @@ public class LiteCompilerServlet extends HttpServlet {
 					if (layout != null) {
 						if (resourceMap.containsKey(layout)) {
 							context.setAttribute("#page", context
-									.loadXML(context.createURL(null,
-											templateURL)));
+									.loadXML(context.createURL(templateURL,null											)));
 							templateURL = layout;
 						} else {
 							context.addMissedResource(layout);
@@ -109,7 +108,7 @@ public class LiteCompilerServlet extends HttpServlet {
 			}
 
 			PrintWriter out = resp.getWriter();
-			URL source = context.createURL(null, templateURL);
+			URL source = context.createURL(templateURL,null);
 			printResult(context, source, out);
 		}
 	}

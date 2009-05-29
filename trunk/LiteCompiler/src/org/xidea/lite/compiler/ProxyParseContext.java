@@ -36,6 +36,7 @@ public class ProxyParseContext extends
 			for(Parser parser : loader.getNodeParserList()){
 				this.addNodeParser(parser);
 			}
+			
 		}
 		this.resourceMap = resourceMap;
 	}

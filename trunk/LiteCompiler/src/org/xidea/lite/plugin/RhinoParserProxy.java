@@ -22,9 +22,9 @@ public class RhinoParserProxy implements Parser<Node> {
 	}
 
 	@Override
-	public void parse(ParseContext context, ParseChain chain, Node node) {
+	public void parse(Node node,ParseContext context, ParseChain chain) {
 		if (type == 0 || node.getNodeType() == type) {
-			Object[] args = new Object[] { context, chain, node };
+			Object[] args = new Object[] {node, context, chain };
 			RhinoContext.call(base, parse, args);
 		}else{
 			chain.process(node);

@@ -52,7 +52,7 @@ public class SimplePluginTest {
 	public void test(int index,String text, String result) throws Exception {
 
 		ParseContextImpl parseContext = new ParseContextImpl(this.getClass()
-				.getResource("/"));
+				.getResource("/"),null,null,null);
 		for(InstructionParser iparser:pf.getInstructionParserList()){
 			parseContext.addInstructionParser(iparser);
 		}
