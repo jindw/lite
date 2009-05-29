@@ -39,7 +39,6 @@ public class RhinoContext {
 		context = Context.enter();
 		scope = ScriptRuntime.getGlobal(context);
 		context.evaluateString(scope, INITIALIZE_SCRIPT, "data:", 1, null);
-
 	}
 
 	public void setUp(String source) {

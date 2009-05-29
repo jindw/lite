@@ -24,9 +24,9 @@ public class RhinoInstructionParserProxy implements InstructionParser {
 	}
 
 	@Override
-	public int findStart(ParseContext context, String text, int start) {
+	public int findStart(String text, int start,int otherStart) {
 		try {
-			Object[] args = new Object[] { context, text, start };
+			Object[] args = new Object[] {  text, start ,otherStart};
 			Number value = (Number) RhinoContext.call(base, findStart, args);
 			return value.intValue();
 		} catch (RuntimeException e) {
@@ -41,9 +41,9 @@ public class RhinoInstructionParserProxy implements InstructionParser {
 	}
 
 	@Override
-	public int parse(ParseContext context, String text, int start) {
+	public int parse( String text, int start,ParseContext context) {
 		try {
-			Object[] args = new Object[] { context, text, start };
+			Object[] args = new Object[] { text, start ,context};
 			Number value = (Number) RhinoContext.call(base, parse, args);
 			return value.intValue();
 		} catch (RuntimeException e) {
