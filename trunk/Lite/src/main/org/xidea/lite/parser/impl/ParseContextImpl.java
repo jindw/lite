@@ -35,19 +35,24 @@ public class ParseContextImpl implements ParseContext {
 	protected XMLContext xmlContext;
 	protected ResultContext resultContext;
 	protected ParserHolder parserHolder;
-	private String id;
-	private ResultTranslator translator;
+	protected String id;
+	protected ResultTranslator translator;
 	
 	protected ParseContextImpl() {
+	}
+
+	public ParseContextImpl(URL base, Map<String, String> featrues,
+			Parser<? extends Object>[] parsers, InstructionParser[] ips) {
+		initialize(base, featrues, parsers, ips);
 	}
 
 	public ParseContextImpl(ParseContext parent, String fn,
 			ResultTranslator translator) {
 		initializeFromParent(parent);
-		intializeTranslator(parent, fn, translator);
+		initializeTranslator(parent, fn, translator);
 	}
 
-	private void intializeTranslator(ParseContext parent, String fn,
+	protected void initializeTranslator(ParseContext parent, String fn,
 			ResultTranslator translator) {
 		this.id = fn;
 		this.translator = translator;
@@ -70,7 +75,7 @@ public class ParseContextImpl implements ParseContext {
 
 
 
-	private void initializeFromParent(ParseContext parent) {
+	protected void initializeFromParent(ParseContext parent) {
 		if(parent instanceof ParseContextImpl){
 			ParseContextImpl parent2 = (ParseContextImpl)parent;
 			this.resourceContext = parent2.resourceContext;
@@ -84,11 +89,6 @@ public class ParseContextImpl implements ParseContext {
 		this.resultContext = new ResultContextImpl(parent);
 	}
 
-
-	public ParseContextImpl(URL base, Map<String, String> featrues,
-			Parser<? extends Object>[] parsers, InstructionParser[] ips) {
-		initialize(base, featrues, parsers, ips);
-	}
 
 	@SuppressWarnings("unchecked")
 	protected void initialize(URL base, Map<String, String> featrues,

@@ -46,13 +46,13 @@ public class TextParser implements Parser<String> {
 	protected void parse(ParseContext context, final String text,
 			final boolean encode, final char qute) {
 		InstructionParser[] instructionParser = context.getInstructionParsers();
-		int length = text.length();
+		final int length = text.length();
 		int start = 0;
 		do {
 			InstructionParser nip = null;
 			int p$ = length + 1;
 			for (InstructionParser ip : instructionParser) {
-				int p$2 = ip.findStart(text, start, context);
+				int p$2 = ip.findStart(text, start, p$);
 				if (p$2 >= start && p$2 < p$) {
 					p$ = p$2;
 					nip = ip;

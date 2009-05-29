@@ -95,9 +95,9 @@ public class ELParser implements InstructionParser {
 
 	}
 
-	public int findStart(String text, int start, ParseContext context) {
+	public int findStart(String text, int start,int other$start) {
 		int i;
-		while ((i = text.indexOf(this.prefix, start)) >= start) {
+		while ((i = text.indexOf(this.prefix, start)) >= start && i<=other$start) {
 			if (i < text.length()) {
 				int j = i + length;
 				if (j < text.length()
