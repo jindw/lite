@@ -3,20 +3,20 @@
 	<string><![CDATA[
 //{{if test}}....{{/endif}}
 var $if = {
-	parse : function(context,text,start){
+	parse : function(text,start,context){
 		var end = text.indexOf("}}",start);
 		var el = text.substring(start+5,end);
 		el = context.parseEL(el);
 		context.appendIf(el);
 		return end+2;
 	},
-	findStart : function(context,text,start){
+	findStart : function(text,start,otherStart){
 		return text.indexOf("{{if",start);
 	}
 };
 //{{for item:items}}....{{/endfor}}
 var $for = {
-	parse : function(context,text,start){
+	parse : function(text,start,context){
 		var end = text.indexOf("}}",start);
 		var el = text.substring(start+6,end);
 		el = el.replace(/^\s+/,'');
@@ -27,13 +27,13 @@ var $for = {
 		context.appendFor(varName,el,null);
 		return end+2;
 	},
-	findStart : function(context,text,start){
+	findStart : function(text,start,otherStart){
 		return text.indexOf("{{for",start);
 	}
 };
 //{{if test}}....{{else test2}}{{/endelse}}
 var $else = {
-	parse : function(context,text,start){
+	parse : function(text,start,context){
 		var end = text.indexOf("}}",start);
 		var el = text.substring(start+6,end);
 		if(/^\s*$/.test(el)){
@@ -46,12 +46,14 @@ var $else = {
 		}
 		return end+2;
 	},
-	findStart : function(context,text,start){
+	findStart : function(text,start,otherStart){
 		return text.indexOf("{{else",start);
 	}
 };
+//{{var name= value}}
+//{{var name}}...{{/var}}
 var $var = {
-	parse : function(context,text,start){
+	parse : function(text,start,context){
 		var end = text.indexOf("}}",start);
 		var el = text.substring(start+5,end);
 		el = el.replace(/^\s+|\s+$/,'');
@@ -67,16 +69,16 @@ var $var = {
 		}
 		return end+2;
 	},
-	findStart : function(context,text,start){
+	findStart : function(text,start,otherStart){
 		return text.indexOf("{{var",start);
 	}
 };
 var $end = {
-	parse : function(context,text,start){
+	parse : function(text,start,context){
 		context.appendEnd();
 		return text.indexOf("}}",start)+2;
 	},
-	findStart : function(context,text,start){
+	findStart : function(text,start,otherStart){
 		var begin = text.indexOf("{{/",start);
 		if(begin>0){
 		    var end = text.indexOf("}}",begin);
@@ -92,17 +94,18 @@ var $end = {
 		return -1;
 	}
 }
+//{{client fn}}
+//{{/client}}
 $client = {
-
 }
 var $el = {
-	parse : function(context,text,start){
+	parse : function(text,start,context){
 		var end = text.indexOf("}}",start);
 		var el = context.parseEL(text.substring(start+2,end));
 		context.appendEL(el);
 		return end+2;
 	},
-	findStart : function(context,text,start){
+	findStart : function(text,start,otherStart){
 		return text.indexOf("{{",start);
 	}
 }
