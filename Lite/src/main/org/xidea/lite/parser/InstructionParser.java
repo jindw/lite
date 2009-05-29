@@ -7,6 +7,7 @@ package org.xidea.lite.parser;
  */
 public interface InstructionParser {
 	/**
+	 * 执行解析操作
 	 * @param text
 	 * @param start 对jsel来说 就是 $出现的位置
 	 * @param context
@@ -16,9 +17,10 @@ public interface InstructionParser {
 	/**
 	 * 查找EL或者模板指令的开始位置
 	 * @param text
-	 * @param start
+	 * @param start 开始查询的位置
+	 * @param otherStart 其他的指令解析器找到的指令开始位置（以后必须出现在更前面，否则无效）
 	 * @param context
 	 * @return 返回EL起始位置
 	 */
-	public int findStart(String text,int start,ParseContext context);
+	public int findStart(String text,int start,int otherStart);
 }
