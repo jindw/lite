@@ -140,6 +140,8 @@ class ReferenceImpl implements Reference {
 							}
 						}
 					}
+					//TODO:....
+					method.setAccessible(true);
 					return method.invoke(thiz, args);
 				}
 				return null;

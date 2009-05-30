@@ -55,8 +55,8 @@
 			<fileset dir="web/WEB-INF/classes">
 				<include name="org/xidea/el/**/*.class" />
 				<include name="org/xidea/lite/**/*.class" />
-				<include name="org/xidea/lite/dtd/**/*.ent" />
-				<include name="org/xidea/lite/dtd/**/xhtml1.dtd" />
+				<include name="org/xidea/lite/parser/impl/dtd/**/*.ent" />
+				<include name="org/xidea/lite/parser/impl/dtd/**/xhtml1.dtd" />
 				<exclude name="**/test/**/*.*" />
 			</fileset>
 			<fileset dir="src/main" defaultexcludes="true">
