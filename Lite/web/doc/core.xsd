@@ -37,7 +37,7 @@
 			</xs:documentation>
 		</xs:annotation>
 		<xs:complexType mixed="false">
-			<xs:attribute name="value" type="EL" use="required" />
+			<xs:attribute name="value" type="xs:string" use="required" />
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="if">
