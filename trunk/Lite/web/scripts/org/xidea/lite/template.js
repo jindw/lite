@@ -35,7 +35,16 @@ function Template(data,parser){
         	data = parser.createURL(data);
         }
         parser.parse(data);
-        data = parser.buildResult();
+        var code = parser.toCode();
+        try{
+            data =  window.eval(code);
+            data.toString=function(){//_$1 encodeXML
+                return code;
+            }
+        }catch(e){
+        	alert("翻译结果错误："+code)
+            throw e;
+        }
         this.compileData = data;
     }
     //alert(data.join("\n"));;

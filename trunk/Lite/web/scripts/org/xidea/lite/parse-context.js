@@ -161,22 +161,18 @@ ParseContext.prototype = {
 	appendAdvice:function(clazz, el){
 		this.result.push([ADD_ON_TYPE,el,clazz]);
 	},
-    buildResult:function(){
-    	var result = optimizeResult(this.result);
-    	result = buildTreeResult(result);
+	toList:function(){
+		var result = optimizeResult(this.result);
+    	return buildTreeResult(result);
+	},
+    toCode:function(){
+    	var result = this.toList();
         if(this.nativeJS){
             var code = buildNativeJS(result);
-            try{
-                result =  new Function(code);
-                result.toString=function(){//_$1 encodeXML
-                    return "function(){"+code+"\n}"
-                }
-            }catch(e){
-            	alert("翻译结果错误："+code)
-                throw e;
-            }
+            return "function(){"+code+"\n}";
+        }else{
+        	return stringifyJSON(result)
         }
-        return result;
     }
 }
 /**

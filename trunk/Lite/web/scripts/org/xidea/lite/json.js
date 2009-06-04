@@ -5,29 +5,6 @@
  */
 
 /**
- * @public
- * @param data
- * @return JSON
- */
-var JSON = {
-    /**
-     * 解析JSON文本
-     * @public 解析
-     * @owner JSON
-     */
-    decode : function(data){
-        return parse(data);
-    },
-    /**
-     * 以JSON格式，系列化javascript对象
-     * @public
-     * @owner JSON
-     * @param <Object> value
-     * @return <String> json 表达式
-     */
-    encode : serialize
-}
-/**
  * IE 好像容易出问题，可能是线程不安全导致。
  * @internal
  */
@@ -45,7 +22,7 @@ var charMap = {
     '"' : '\\"',
     '\\': '\\\\'
 };
-function parse(data){
+function parseJSON(data){
     return this.eval("("+data+")")
 }
 /**
@@ -64,7 +41,7 @@ function charReplacer(item) {
  * JSON 串行化实现
  * @internal
  */
-function serialize(value) {
+function stringifyJSON(value) {
     switch (typeof value) {
         case 'string':
             stringRegexp.lastIndex = 0;
@@ -82,16 +59,16 @@ function serialize(value) {
             if (value instanceof Array) {
                 var i = value.length;
                 while (i--) {
-                    buf[i] = serialize(value[i]) || 'null';
+                    buf[i] = stringifyJSON(value[i]) || 'null';
                 }
                 return '[' + buf.join(',') + ']';
             }else if(value instanceof RegExp){
             	return value+'';
             }
             for (var k in value) {
-                var v = serialize(value[k]);
+                var v = stringifyJSON(value[k]);
                 if (v) {
-                    buf.push(serialize(k) + ':' + v);
+                    buf.push(stringifyJSON(k) + ':' + v);
                 }
             }
             return '{' + buf.join(',') + '}';

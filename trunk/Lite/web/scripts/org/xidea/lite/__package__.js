@@ -1,6 +1,6 @@
 this.addScript('parse-context.js','ParseContext'
                 ,['xml-context.js','ParseChain']
-                ,['buildNativeJS','parseEL','VAR_TYPE','XML_ATTRIBUTE_TYPE','ELSE_TYPE','ADD_ON_TYPE','CAPTRUE_TYPE','IF_TYPE','EL_TYPE','XML_TEXT_TYPE','FOR_TYPE']);
+                ,['buildNativeJS','parseEL','stringifyJSON','VAR_TYPE','XML_ATTRIBUTE_TYPE','ELSE_TYPE','ADD_ON_TYPE','CAPTRUE_TYPE','IF_TYPE','EL_TYPE','XML_TEXT_TYPE','FOR_TYPE']);
 
 this.addScript('native-compiler.js',["ResultTranslator",'buildNativeJS','checkEL']
                 ,0
@@ -52,3 +52,4 @@ this.addScript('find-el-end.js','findELEnd'
                 ,0
                 ,'org.xidea.jsidoc.util:$log');
 
+this.addScript('json.js',["stringifyJSON","parseJSON"]);
