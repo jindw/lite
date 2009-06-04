@@ -37,7 +37,7 @@ function Template(data,parser){
         parser.parse(data);
         var code = parser.toCode();
         try{
-            data =  window.eval(code);
+            data =  window.eval("("+code+")");
             data.toString=function(){//_$1 encodeXML
                 return code;
             }
