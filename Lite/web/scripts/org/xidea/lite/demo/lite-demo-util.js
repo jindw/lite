@@ -3,7 +3,7 @@ var TestCase = {
 	    var context = document.getElementById("context").value;
 	    var templateSource = E("templateSource").value;
 	    try{
-	        context = JSON.decode(context);//JSON.decode(context);
+	        context = parseJSON(context);//JSON.decode(context);
 	    }catch(e){
 	        $log.error("数据源解析失败",e);
 	        return false;
@@ -122,7 +122,7 @@ var TestCase = {
 		}
 	},
 	liteFormat:function(text){
-	    confirm(liteFormat(JSON.decode(text),true));
+	    confirm(liteFormat(parseJSON(text),true));
 	}
 }
 var data;
@@ -161,7 +161,7 @@ function updateData(doc){
 			"source":source.replace(/^\s+|\s+$/g,''),
 			"description":description.replace(/^\s+|\s+$/g,'')
 		}
-		buf.push("<li onclick='TestCase.prepare(this,"+JSON.encode(key)+")'>"+key+"</li>")
+		buf.push("<li onclick='TestCase.prepare(this,"+stringifyJSON(key)+")'>"+key+"</li>")
 	}
 	//alert(buf.join(""))
 	E("menuContent").innerHTML = buf.join("");

@@ -71,7 +71,7 @@ function doLiteFormat(json,prefix,showName){
         buf.push(prefix+"\t");
         var item = json[i];
         if(typeof item == 'string'){
-            buf.push(JSON.encode(item));
+            buf.push(stringifyJSON(item));
         }else{
             var j = 0;
             var type = item[j++];
@@ -90,7 +90,7 @@ function doLiteFormat(json,prefix,showName){
     		    if(item2 instanceof Array){
     		        buf.push(doFormatEL(item2,showName));
     		    }else{
-    		        buf.push(JSON.encode(item2));
+    		        buf.push(stringifyJSON(item2));
     		    }
     		    if(j<item.length){
     		        buf.push(",");
@@ -124,7 +124,7 @@ function doFormatEL(json,showName){
                 buf.push(doFormatEL(item[1],showName));
             }else{
                 for(var j = 1;j<item.length;j++){
-                    buf.push(",",JSON.encode(item[j]));
+                    buf.push(",",stringifyJSON(item[j]));
                 }
             }
             buf.push("]");
@@ -132,7 +132,7 @@ function doFormatEL(json,showName){
         buf.push("]");
         return  buf.join("");
     }else{
-        return JSON.encode(json);
+        return stringifyJSON(json);
     }
 
 }

@@ -274,8 +274,7 @@ Context.prototype = {
     				break;
                 //case ELSE_TYPE:
                 default:
-                    throw Error('valid status'+item)
-                    break;
+                    throw Error('无效指令：'+item)
                 }
     		}
     	}
