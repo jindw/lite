@@ -8,5 +8,5 @@ this.addScript('lite-demo-util.js',["TestCase"]
 
 this.addScript('lite-formatter.js',["liteFormat"]
                 ,[
-                    "org.xidea.lite.*",
+                    "org.xidea.lite.*"
                 ]);
