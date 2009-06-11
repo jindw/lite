@@ -5,13 +5,15 @@
  * require_once("../WEB-INF/classes/TemplateEngine.php");
  * $engine = new TemplateEngine();
  *
- * ## 通过上下文数据方式传递模板参数：
- * #$engine->render("/example/test.xhtml",array("int1"=>1,"text1"=>'1'));
+ * # 通过上下文数据方式传递模板参数：
+ * $engine->render("/example/test.xhtml",array("int1"=>1,"text1"=>'1'));
  * 
- * # 直接通过全局变量传递模板参数：
- * $int1 = 1;
- * $text1 = '1';
- * $engine->render("/example/test.xhtml");
+ * ## 直接通过全局变量传递模板参数：
+ * #$int1 = 1;
+ * #$text1 = '1';
+ * #$engine->render("/example/test.xhtml");
+ *
+ * @see http://lite.googlecode.com 
  * ?>
  */
 require_once('Template.php');
@@ -22,6 +24,7 @@ class TemplateEngine{
 	 * 上线后建议关闭
 	 */
 	var $autocompile = true;
+	//var $liteService='http://localhost:8080';
 	var $liteService='http://litecompiler.appspot.com';
 	var $liteCached;
 	function TemplateEngine($liteBase=null,$liteService=null){
@@ -88,6 +91,8 @@ class TemplateEngine{
 	}
 	function compile($liteFile,$path){
 		if(substr_compare('/',$path,0,1)){
+			echo "模板地址需要 '/' 开头;\n";
+		}else{
 			$paths = array($path);
 			$sources = array(file_get_contents(realpath($this->liteBase.$path)));
 			$decoratorPath = '/WEB-INF/decorators.xml';
@@ -130,8 +135,6 @@ class TemplateEngine{
 					return array($paths,$result,$code);
 				}
 			}
-		}else{
-			echo "模板地址需要 '/' 开头;\n";
 		}
 		echo "编译失败...";
 		exit();

@@ -168,12 +168,13 @@ public class CoreXMLParser implements Parser<Element> {
 	}
 
 	protected Node parseElseTag(Element el, ParseContext context, boolean requiredTest) {
+		Object test = getAttributeEL(context, el, "test");
 		if (requiredTest) {
-			Object test = getAttributeEL(context, el, "test");
-			context.appendElse(test);
-		} else {
-			context.appendElse(null);
+			if(test == null){
+				throw new IllegalStateException("不能有多个连续无条件Else");
+			}
 		}
+		context.appendElse(test);
 		parseChild(el.getFirstChild(), context);
 		context.appendEnd();
 		return null;
@@ -339,7 +340,16 @@ public class CoreXMLParser implements Parser<Element> {
 		return null;
 	}
 
+	/**
+	 * 如果value == null,返回null
+	 * @param context
+	 * @param value
+	 * @return
+	 */
 	private Object toEL(ParseContext context, String value) {
+		if(value == null){
+			return null;
+		}
 		value = value.trim();
 		if (value.startsWith("${") && value.endsWith("}")) {
 			value = value.substring(2, value.length() - 1);
@@ -350,6 +360,13 @@ public class CoreXMLParser implements Parser<Element> {
 		return context.parseEL(value);
 	}
 
+	/**
+	 * 如果属性不存在，返回null
+	 * @param context
+	 * @param el
+	 * @param key
+	 * @return
+	 */
 	private Object getAttributeEL(ParseContext context, Element el, String key) {
 		String value = getAttributeOrNull(el, key);
 		return toEL(context, value);
