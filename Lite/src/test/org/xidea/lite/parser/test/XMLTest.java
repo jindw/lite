@@ -95,6 +95,7 @@ public class XMLTest {
 
 	public void test(int index,String text, String result) throws Exception {
 
+		String info = "第"+index+"个测试错误：";
 		ParseContextImpl parseContext = new ParseContextImpl(this.getClass()
 				.getResource("/"),null,null,null);
 		parseContext.getFeatrueMap().put(HTMLParser.AUTO_FORM_FEATRUE_URL, HTMLParser.AUTO_IN_FORM);
@@ -103,13 +104,50 @@ public class XMLTest {
 		List<Object> insts = parser.parse(
 				"<div xmlns:c=\"http://www.xidea.org/ns/template/core\">"
 						+ text + "</div>", parseContext);
+		checkElse(insts,info);
 		System.out.println(JSONEncoder.encode(insts));
 		Template t = new Template(insts);
 		Writer out = new StringWriter();
 		t.render(new HashMap(context), out);
-		assertXMLEquals("第"+index+"个测试错误："+text+":\n"+result,"<div>" + result + "</div>", out.toString());
+		assertXMLEquals(info+text+":\n"+result,"<div>" + result + "</div>", out.toString());
 	}
 	
+	public static void checkElse(List<Object> insts,String info) {
+		int i = 0;
+		int type = -1;
+		for(Object item:insts){
+			if(item instanceof String){
+				type = -1;
+			}else {
+				List<Object> data = (List)item;
+				int type2 = ((Number)data.get(0)).intValue();
+
+				switch(type2){
+				case Template.ELSE_TYPE:
+				case Template.FOR_TYPE:
+				case Template.CAPTRUE_TYPE:
+				case Template.IF_TYPE:
+				case Template.ADD_ON_TYPE:
+					checkElse((List<Object>)data.get(1),info);
+					
+				}
+				
+				
+				if(type2 == Template.ELSE_TYPE){
+					if(data.get(2) == null){
+						type2 = -type2;
+						if(type == type2){
+							Assert.fail(info+"不能有两个连续的无条件Else");
+						}
+					}
+					
+				}
+				type=type2;
+			}
+			i++;
+		}
+	}
+
 	public static void assertXMLEquals(String msg,String expected, String acture) {
 		Assert.assertEquals(msg+"(有效字符摘要检查)",sumText(expected), sumText(acture));
 		if(empty.matcher(expected).find() || empty.matcher(expected).find()){

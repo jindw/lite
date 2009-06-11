@@ -8,11 +8,10 @@ var TestCase = {
 	        $log.error("数据源解析失败",e);
 	        return false;
 	    }
-	    
 	    try{
 	    	var parser = new XMLParser(false);
 	    	parser.parse(parseXMLText(templateSource));
-	    	var jsonCode = parser.buildResult();
+	    	var jsonCode = parser.toList();
 	        var jsonTemplate = new Template(jsonCode);
 	    }catch(e){
 	        $log.error("模板解析失败（JSON）",e);
@@ -22,9 +21,9 @@ var TestCase = {
 	    try{
 	    	var parser = new XMLParser(true);
 	    	parser.parse(parseXMLText(templateSource));
-	    	var jsCode = parser.buildResult();
-	        var jsTemplate = new Template(jsCode);
-	        jsCode = jsCode.toString()
+	    	var jsCode = parser.toCode();
+	        var jsTemplate = new Template(window.eval(jsCode));
+	        jsCode = jsCode
 	    }catch(e){
 	        $log.error("模板解析失败（JS）",e);
 	        return false;

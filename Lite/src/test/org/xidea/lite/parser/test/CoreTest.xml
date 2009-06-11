@@ -31,6 +31,10 @@
 			<string><![CDATA[false]]></string>
 		</void>
 		<void method='put'>
+			<string><![CDATA[<c:if test='${true}'>true</c:if><c:else test="${1}">1</c:else><c:else>2</c:else>]]></string>
+			<string><![CDATA[true]]></string>
+		</void>
+		<void method='put'>
 			<string><![CDATA[<c:choose><c:when test='${false}'>1</c:when><c:when test='${false}'>2</c:when><c:otherwise>3</c:otherwise></c:choose>]]></string>
 			<string><![CDATA[3]]></string>
 		</void>
