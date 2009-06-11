@@ -18,6 +18,10 @@ require_once('Template.php');
 
 class TemplateEngine{
 	var $liteBase;
+	/**
+	 * 上线后建议关闭
+	 */
+	var $autocompile = true;
 	var $liteService='http://litecompiler.appspot.com';
 	var $liteCached;
 	function TemplateEngine($liteBase=null,$liteService=null){
@@ -64,14 +68,18 @@ class TemplateEngine{
 	    $liteFile = $this->liteCached.urlencode($path);
 	    if(file_exists($liteFile)){
 	    	$lite = json_decode(file_get_contents($liteFile));
-	    	$paths = $lite[0];
-	    	$liteTime = filemtime($liteFile);
-	    	$fileTime = $liteTime;
-	    	$i=count($paths);
-			while($i--){
-				$fileTime = max($fileTime,filemtime($this->liteBase.$paths[$i]));
-			}
-			if($fileTime<=$liteTime){
+	    	if($this->autocompile){
+		    	$paths = $lite[0];
+		    	$liteTime = filemtime($liteFile);
+		    	$fileTime = $liteTime;
+		    	$i=count($paths);
+				while($i--){
+					$fileTime = max($fileTime,filemtime($this->liteBase.$paths[$i]));
+				}
+				if($fileTime<=$liteTime){
+					return $lite[1];
+				}
+			}else{
 				return $lite[1];
 			}
 	    }
@@ -79,47 +87,51 @@ class TemplateEngine{
 	    return $lite[1];
 	}
 	function compile($liteFile,$path){
-		$paths = array($path);
-		$sources = array(file_get_contents(realpath($this->liteBase.$path)));
-		$decoratorPath = '/WEB-INF/decorators.xml';
-		$decoratorXml = file_get_contents(realpath($this->liteBase.$decoratorPath));
-		if($decoratorXml){
-			array_push($sources,$decoratorXml);
-			array_push($paths,$decoratorPath);
-		}
-		//最多尝试6次
-		$test = 6;
-		while($test--){
-			$code = $this->httpLoad($paths,$sources);
-			if(!$code){
-				sleep(10);
-				continue;
+		if(substr_compare('/',$path,0,1)){
+			$paths = array($path);
+			$sources = array(file_get_contents(realpath($this->liteBase.$path)));
+			$decoratorPath = '/WEB-INF/decorators.xml';
+			$decoratorXml = file_get_contents(realpath($this->liteBase.$decoratorPath));
+			if($decoratorXml){
+				array_push($sources,$decoratorXml);
+				array_push($paths,$decoratorPath);
 			}
-			$result = json_decode($code);
-			if(!$result){
-				sleep(10);
-				continue;
-			}
-			if(!is_array($result)){
-				$missed = $result->missed;
-				$retry = false;
-				foreach($missed as $path){
-					if(!in_array($path,$paths)){
-						$content = file_get_contents(realpath($this->liteBase.$path));
-						
-						array_push($sources,$content);
-						array_push($paths,$path);
-						$retry = true;
+			//最多尝试6次
+			$test = 6;
+			while($test--){
+				$code = $this->httpLoad($paths,$sources);
+				if(!$code){
+					sleep(10);
+					continue;
+				}
+				$result = json_decode($code);
+				if(!$result){
+					sleep(10);
+					continue;
+				}
+				if(!is_array($result)){
+					$missed = $result->missed;
+					$retry = false;
+					foreach($missed as $path){
+						if(!in_array($path,$paths)){
+							$content = file_get_contents(realpath($this->liteBase.$path));
+							
+							array_push($sources,$content);
+							array_push($paths,$path);
+							$retry = true;
+						}
 					}
+					if(!$retry){
+						return array($paths,array($code));
+					}
+					sleep(5);
+				}else{
+		            $this->writeCache($liteFile,$paths,$code);
+					return array($paths,$result,$code);
 				}
-				if(!$retry){
-					return array($paths,array($code));
-				}
-				sleep(5);
-			}else{
-	            $this->writeCache($liteFile,$paths,$code);
-				return array($paths,$result,$code);
 			}
+		}else{
+			echo "模板地址需要 '/' 开头;\n";
 		}
 		echo "编译失败...";
 		exit();
