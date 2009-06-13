@@ -14,6 +14,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xidea.lite.parser.DecoratorContext;
+import org.xml.sax.InputSource;
 
 public class DecoratorContextImpl implements DecoratorContext {
 	protected URLMatcher excludeMatcher;
@@ -26,7 +27,7 @@ public class DecoratorContextImpl implements DecoratorContext {
 	}
 
 	protected long lastModified() {
-		return config.lastModified();
+		return config == null?0:config.lastModified();
 	}
 
 	/* (non-Javadoc)
@@ -52,9 +53,13 @@ public class DecoratorContextImpl implements DecoratorContext {
 		return null;
 	}
 	protected void reset() {
+		reset(new InputSource(config.toURI().toASCIIString()));
+	}
+
+	protected void reset(InputSource source) {
 		try {
 			Document doc = DocumentBuilderFactory.newInstance()
-					.newDocumentBuilder().parse(this.config);
+					.newDocumentBuilder().parse(source);
 			reset(doc);
 		} catch (Exception e) {
 			throw new RuntimeException("装饰配置解析失败", e);

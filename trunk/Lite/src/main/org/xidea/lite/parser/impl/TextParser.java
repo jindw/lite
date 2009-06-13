@@ -10,11 +10,6 @@ public class TextParser implements Parser<String> {
 
 
 	public TextParser() {
-//		protected InstructionParser[] instructionParser = { new DefaultELParser("",
-//				true) };
-//		instructionParser = new InstructionParser[] { DefaultELParser.EL,
-//				DefaultELParser.IF, DefaultELParser.FOR, DefaultELParser.ELSE,
-//				DefaultELParser.END, DefaultELParser.VAR };
 	}
 
 	public void parse(String text, ParseContext context, ParseChain chain) {
