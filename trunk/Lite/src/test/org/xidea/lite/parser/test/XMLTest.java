@@ -21,7 +21,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.Template;
-import org.xidea.lite.parser.impl.HTMLParser;
+import org.xidea.lite.parser.impl.HTMLNodeParser;
 import org.xidea.lite.parser.impl.ParseContextImpl;
 
 public class XMLTest {
@@ -98,7 +98,7 @@ public class XMLTest {
 		String info = "第"+index+"个测试错误：";
 		ParseContextImpl parseContext = new ParseContextImpl(this.getClass()
 				.getResource("/"),null,null,null);
-		parseContext.getFeatrueMap().put(HTMLParser.AUTO_FORM_FEATRUE_URL, HTMLParser.AUTO_IN_FORM);
+		parseContext.getFeatrueMap().put(HTMLNodeParser.AUTO_FORM_FEATRUE_URL, HTMLNodeParser.AUTO_IN_FORM);
 		
 		parseContext.setCompress(true);
 		List<Object> insts = parser.parse(

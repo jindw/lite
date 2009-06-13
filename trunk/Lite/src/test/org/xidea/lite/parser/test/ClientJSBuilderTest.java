@@ -13,7 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.xidea.el.Expression;
 import org.xidea.el.ExpressionFactory;
-import org.xidea.lite.parser.InstructionParser;
+import org.xidea.lite.parser.TextParser;
 import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.impl.ELParser;
 import org.xidea.lite.parser.impl.Java6JSTranslator;
@@ -80,7 +80,7 @@ public class ClientJSBuilderTest {
 		InputStreamReader source = new InputStreamReader(this.getClass()
 				.getResourceAsStream("ct-client.txt"), "utf-8");
 		ParseContext context2 = new ParseContextImpl(new URL("http://w/"),
-				null, null, new InstructionParser[] { ELParser.EL, ELParser.IF,
+				null, null, new TextParser[] { ELParser.EL, ELParser.IF,
 						ELParser.FOR, ELParser.ELSE, ELParser.CLIENT,
 						ELParser.END, ELParser.VAR });
 		// 前端直接压缩吧？反正保留那些空白也没有调试价值

@@ -18,10 +18,10 @@ import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Node;
 import org.xidea.el.ExpressionFactory;
-import org.xidea.lite.parser.InstructionParser;
+import org.xidea.lite.parser.TextParser;
 import org.xidea.lite.parser.ParseChain;
 import org.xidea.lite.parser.ParseContext;
-import org.xidea.lite.parser.Parser;
+import org.xidea.lite.parser.NodeParser;
 import org.xidea.lite.parser.ParserHolder;
 import org.xidea.lite.parser.ResourceContext;
 import org.xidea.lite.parser.ResultContext;
@@ -42,7 +42,7 @@ public class ParseContextImpl implements ParseContext {
 	}
 
 	public ParseContextImpl(URL base, Map<String, String> featrues,
-			Parser<? extends Object>[] parsers, InstructionParser[] ips) {
+			NodeParser<? extends Object>[] parsers, TextParser[] ips) {
 		initialize(base, featrues, parsers, ips);
 	}
 
@@ -92,7 +92,7 @@ public class ParseContextImpl implements ParseContext {
 
 	@SuppressWarnings("unchecked")
 	protected void initialize(URL base, Map<String, String> featrues,
-			Parser<? extends Object>[] parsers, InstructionParser[] ips) {
+			NodeParser<? extends Object>[] parsers, TextParser[] ips) {
 		resourceContext = new ResourceContextImpl(base);
 		resultContext = new ResultContextImpl();
 		xmlContext = new XMLContextImpl(this);
@@ -137,8 +137,8 @@ public class ParseContextImpl implements ParseContext {
 		getTopChain().process(source);
 	}
 
-	public InstructionParser[] getInstructionParsers() {
-		return parserHolder.getInstructionParsers();
+	public TextParser[] getTextParsers() {
+		return parserHolder.getTextParsers();
 	}
 
 	public String getFeatrue(String key) {
@@ -338,11 +338,11 @@ public class ParseContextImpl implements ParseContext {
 		return xmlContext.transform(parentURL, doc, xslt);
 	}
 
-	public void addInstructionParser(InstructionParser iparser) {
-		parserHolder.addInstructionParser(iparser);
+	public void addTextParser(TextParser iparser) {
+		parserHolder.addTextParser(iparser);
 	}
 
-	public void addNodeParser(Parser<? extends Node> iparser) {
+	public void addNodeParser(NodeParser<? extends Node> iparser) {
 		parserHolder.addNodeParser(iparser);
 	}
 

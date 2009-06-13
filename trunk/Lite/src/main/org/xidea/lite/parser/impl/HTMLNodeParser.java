@@ -16,14 +16,14 @@ import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.Template;
 import org.xidea.lite.parser.ParseChain;
 import org.xidea.lite.parser.ParseContext;
-import org.xidea.lite.parser.Parser;
+import org.xidea.lite.parser.NodeParser;
 
 /**
  * 类似这种特别的编译模块(有扩展,可能导致其他运行环境无法解释)，最好带上双重开关。
  * 
  * @author jindw
  */
-public class HTMLParser extends AbstractHTMLParser implements Parser<Element>{
+public class HTMLNodeParser extends AbstractHTMLNodeParser implements NodeParser<Element>{
 	public static final String AUTO_FORM_FEATRUE_URL = "http://www.xidea.org/ns/lite/autoform";
 	public static final String NO_AUTO = "none";
 	public static final String AUTO_ANYWAY = "anyway";
@@ -47,7 +47,7 @@ public class HTMLParser extends AbstractHTMLParser implements Parser<Element>{
 			.compile("^(?:reset|button|submit)$");
 	private static final Object KEY_SELECT = new Object();
 
-	public HTMLParser() {
+	public HTMLNodeParser() {
 		super();
 	}
 

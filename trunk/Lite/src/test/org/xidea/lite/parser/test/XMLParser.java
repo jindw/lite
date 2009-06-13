@@ -18,12 +18,12 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.impl.ParseContextImpl;
-import org.xidea.lite.parser.impl.TextParser;
+import org.xidea.lite.parser.impl.TextNodeParser;
 import org.xidea.lite.parser.impl.dtd.DefaultEntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 public
-class XMLParser extends TextParser{
+class XMLParser extends TextNodeParser{
 	private static Log log = LogFactory.getLog(XMLParser.class);
 	private static final Pattern XML_HEADER_SPACE_PATTERN = Pattern
 	.compile("^[\\s\\ufeff]*<");

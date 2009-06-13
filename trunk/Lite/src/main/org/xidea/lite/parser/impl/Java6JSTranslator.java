@@ -22,7 +22,7 @@ import sun.org.mozilla.javascript.internal.UintMap;
 
 @SuppressWarnings("unchecked")
 public class Java6JSTranslator extends JSTranslator {
-	private static Log log = LogFactory.getLog(CoreXMLParser.class);
+	private static Log log = LogFactory.getLog(CoreXMLNodeParser.class);
 	private static ScriptEngine jsengine;
 
 	static {

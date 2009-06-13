@@ -17,7 +17,7 @@ import org.mozilla.javascript.EvaluatorException;
 import org.mozilla.javascript.NativeObject;
 import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.Scriptable;
-import org.xidea.lite.parser.impl.CoreXMLParser;
+import org.xidea.lite.parser.impl.CoreXMLNodeParser;
 import org.xidea.lite.parser.impl.Java6JSTranslator;
 
 import com.sun.xml.internal.bind.v2.ContextFactory;
@@ -25,7 +25,7 @@ import com.sun.xml.internal.bind.v2.ContextFactory;
 
 
 public class RhinoTest {
-	private static Log log = LogFactory.getLog(CoreXMLParser.class);
+	private static Log log = LogFactory.getLog(CoreXMLNodeParser.class);
 	private static Context context = Context.enter();
 	private static Scriptable scope = ScriptRuntime.getGlobal(context);
 

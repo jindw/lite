@@ -14,9 +14,9 @@ import org.w3c.dom.Text;
 import org.xidea.lite.Template;
 import org.xidea.lite.parser.ParseChain;
 import org.xidea.lite.parser.ParseContext;
-import org.xidea.lite.parser.Parser;
+import org.xidea.lite.parser.NodeParser;
 
-public class DefaultXMLParser implements Parser<Node> {
+public class DefaultXMLNodeParser implements NodeParser<Node> {
 
 	public static final Pattern SCRIPT_TAG = Pattern.compile("^script$",
 			Pattern.CASE_INSENSITIVE);
@@ -182,7 +182,7 @@ public class DefaultXMLParser implements Parser<Node> {
 		Attr attr = (Attr) node;
 		String name = attr.getName();
 		String value = attr.getValue();
-		if (CoreXMLParser.isCoreNS("xmlns:c".equals(name) ? "c" : attr
+		if (CoreXMLNodeParser.isCoreNS("xmlns:c".equals(name) ? "c" : attr
 				.getPrefix(), value)) {
 			return;
 		}
