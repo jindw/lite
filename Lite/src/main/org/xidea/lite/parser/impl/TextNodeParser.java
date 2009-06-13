@@ -1,15 +1,15 @@
 package org.xidea.lite.parser.impl;
 
 import org.xidea.lite.Template;
-import org.xidea.lite.parser.InstructionParser;
+import org.xidea.lite.parser.TextParser;
 import org.xidea.lite.parser.ParseChain;
 import org.xidea.lite.parser.ParseContext;
-import org.xidea.lite.parser.Parser;
+import org.xidea.lite.parser.NodeParser;
 
-public class TextParser implements Parser<String> {
+public class TextNodeParser implements NodeParser<String> {
 
 
-	public TextParser() {
+	public TextNodeParser() {
 	}
 
 	public void parse(String text, ParseContext context, ParseChain chain) {
@@ -40,13 +40,13 @@ public class TextParser implements Parser<String> {
 	 */
 	protected void parse(ParseContext context, final String text,
 			final boolean encode, final char qute) {
-		InstructionParser[] instructionParser = context.getInstructionParsers();
+		TextParser[] instructionParser = context.getTextParsers();
 		final int length = text.length();
 		int start = 0;
 		do {
-			InstructionParser nip = null;
+			TextParser nip = null;
 			int p$ = length + 1;
-			for (InstructionParser ip : instructionParser) {
+			for (TextParser ip : instructionParser) {
 				int p$2 = ip.findStart(text, start, p$);
 				if (p$2 >= start && p$2 < p$) {
 					p$ = p$2;

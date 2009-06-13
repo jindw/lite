@@ -4,25 +4,25 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.el.ExpressionSyntaxException;
 import org.xidea.lite.Template;
-import org.xidea.lite.parser.InstructionParser;
+import org.xidea.lite.parser.TextParser;
 import org.xidea.lite.parser.ParseContext;
 
-public class ELParser implements InstructionParser {
+public class ELParser implements TextParser {
 	private static final Log log = LogFactory.getLog(ELParser.class);
-	public static InstructionParser EL = new ELParser("", true);
-	public static InstructionParser IF = new ELParser("if", true) {
+	public static TextParser EL = new ELParser("", true);
+	public static TextParser IF = new ELParser("if", true) {
 		protected void addEl(ParseContext context, String text) {
 			context.appendIf(context.parseEL(text));
 		}
 	};
-	public static InstructionParser FOR = new ELParser("for", true) {
+	public static TextParser FOR = new ELParser("for", true) {
 		protected void addEl(ParseContext context, String text) {
 			int p = text.indexOf(':');
 			context.appendFor(text.substring(0, p).trim(), context.parseEL(text
 					.substring(p + 1)), null);
 		}
 	};
-	public static InstructionParser ELSE = new ELParser("else", false) {
+	public static TextParser ELSE = new ELParser("else", false) {
 		public int parse(String text, int p$, ParseContext context) {
 			int begin = text.indexOf('{', p$);
 			if (begin > 0) {
@@ -37,7 +37,7 @@ public class ELParser implements InstructionParser {
 			return p$ + 5;
 		}
 	};
-	public static InstructionParser CLIENT = new ELParser("client", true) {
+	public static TextParser CLIENT = new ELParser("client", true) {
 		public int parse(String text, int p$, ParseContext context) {
 			int p1 = text.indexOf('{', p$);
 			int p2 = text.indexOf('}', p1);
@@ -50,7 +50,7 @@ public class ELParser implements InstructionParser {
 
 		}
 	};
-	public static InstructionParser END = new ELParser("end", false) {
+	public static TextParser END = new ELParser("end", false) {
 		public int parse(String text, int p$, ParseContext context) {
 			ParseContext parentContext = (ParseContext) context
 					.getAttribute(CLIENT);
@@ -71,7 +71,7 @@ public class ELParser implements InstructionParser {
 			return p$ + 4;
 		}
 	};
-	public static InstructionParser VAR = new ELParser("var", true) {
+	public static TextParser VAR = new ELParser("var", true) {
 		protected void addEl(ParseContext context, String text) {
 			int p = text.indexOf('=');
 			if (p > 0) {

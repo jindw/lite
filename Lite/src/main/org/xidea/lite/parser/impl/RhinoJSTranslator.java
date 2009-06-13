@@ -24,7 +24,7 @@ import org.xidea.el.json.JSONDecoder;
 
 @SuppressWarnings("unchecked")
 public class RhinoJSTranslator extends JSTranslator {
-	private static Log log = LogFactory.getLog(CoreXMLParser.class);
+	private static Log log = LogFactory.getLog(CoreXMLNodeParser.class);
 	private static Context context = Context.enter();
 	private static Scriptable scope = ScriptRuntime.getGlobal(context);
 	protected static String DEFAULT_FEATRUES;

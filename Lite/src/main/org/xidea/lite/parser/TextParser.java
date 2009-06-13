@@ -5,7 +5,7 @@ package org.xidea.lite.parser;
  * 需要设计为线程安全
  * @author jindw
  */
-public interface InstructionParser {
+public interface TextParser {
 	/**
 	 * 执行解析操作
 	 * @param text

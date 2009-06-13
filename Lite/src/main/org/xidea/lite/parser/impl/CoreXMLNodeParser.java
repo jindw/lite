@@ -16,10 +16,10 @@ import org.xidea.lite.MacroAdvice;
 import org.xidea.lite.Template;
 import org.xidea.lite.parser.ParseChain;
 import org.xidea.lite.parser.ParseContext;
-import org.xidea.lite.parser.Parser;
+import org.xidea.lite.parser.NodeParser;
 
-public class CoreXMLParser implements Parser<Element> {
-	private static Log log = LogFactory.getLog(CoreXMLParser.class);
+public class CoreXMLNodeParser implements NodeParser<Element> {
+	private static Log log = LogFactory.getLog(CoreXMLNodeParser.class);
 	private static final Pattern TEMPLATE_NAMESPACE_CORE = Pattern
 			.compile("^http:\\/\\/www.xidea.org\\/ns\\/(?:template|lite)(?:\\/core)?\\/?$");
 	public static boolean isCoreNS(String prefix, String url) {
@@ -27,7 +27,7 @@ public class CoreXMLParser implements Parser<Element> {
 				|| TEMPLATE_NAMESPACE_CORE.matcher(url).find();
 	}
 
-	public CoreXMLParser() {
+	public CoreXMLNodeParser() {
 
 	}
 

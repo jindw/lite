@@ -9,7 +9,7 @@ import java.util.Map;
 import org.xidea.el.ExpressionFactory;
 import org.xidea.el.impl.ExpressionFactoryImpl;
 import org.xidea.el.json.JSONEncoder;
-import org.xidea.lite.BuildInAdvice;
+import org.xidea.lite.VarAdvice;
 import org.xidea.lite.Template;
 import org.xidea.lite.parser.ResultContext;
 
@@ -26,9 +26,11 @@ public class ResultContextImpl implements ResultContext {
 	ResultContextImpl() {
 		this.featrues = new HashMap<String, String>();
 	}
+
 	public ResultContextImpl(ResultContext parent) {
 		this.featrues = new HashMap<String, String>(parent.getFeatrueMap());
 	}
+
 	public String getFeatrue(String key) {
 		return featrues.get(key);
 	}
@@ -36,6 +38,7 @@ public class ResultContextImpl implements ResultContext {
 	public Map<String, String> getFeatrueMap() {
 		return featrues;
 	}
+
 	public void setExpressionFactory(ExpressionFactory expressionFactory) {
 		this.expressionFactory = expressionFactory;
 	}
@@ -132,7 +135,7 @@ public class ResultContextImpl implements ResultContext {
 
 	public void appendElse(Object testEL) {
 		this.clearPreviousText();
-		if(this.getType(this.result.size()-1) != -1){
+		if (this.getType(this.result.size() - 1) != -1) {
 			this.appendEnd();
 		}
 		this.append(new Object[] { Template.ELSE_TYPE, testEL });
@@ -166,10 +169,11 @@ public class ResultContextImpl implements ResultContext {
 	public void appendXmlText(Object el) {
 		this.append(new Object[] { Template.XML_TEXT_TYPE, el });
 	}
-	public void appendAdvice(Class<? extends Object> clazz, Object el){
-		this.append(new Object[] { Template.ADD_ON_TYPE,el,
-				clazz.getName() });
+
+	public void appendAdvice(Class<? extends Object> clazz, Object el) {
+		this.append(new Object[] { Template.ADD_ON_TYPE, el, clazz.getName() });
 	}
+
 	public int mark() {
 		return result.size();
 	}
@@ -187,11 +191,8 @@ public class ResultContextImpl implements ResultContext {
 
 	@SuppressWarnings("unchecked")
 	public List<Object> toList() {
-		Object globalsAddon = buildGlobalsAddOnEL();
-		if(globalsAddon != null){
-			this.appendAdvice(BuildInAdvice.class,globalsAddon);
-			this.appendEnd();
-		}
+		appendGlobalsAddOn();
+
 		List<Object> result2 = optimizeResult(this.result);
 		ArrayList<ArrayList<Object>> stack = new ArrayList<ArrayList<Object>>();
 		ArrayList<Object> current = new ArrayList<Object>();
@@ -238,31 +239,25 @@ public class ResultContextImpl implements ResultContext {
 	}
 
 	@SuppressWarnings("unchecked")
-	private Object buildGlobalsAddOnEL() {
-		HashMap<String, Object> attributeMap = new HashMap<String, Object>();
-		if (!this.typeIdMap.isEmpty()) {
-			Map instanceMap = toIdObject(typeIdMap);
-			attributeMap.put(BuildInAdvice.INSTANCE_MAP, instanceMap);
-			this.typeIdMap = null;
-		}
-		if (!this.objectIdMap.isEmpty()) {
-			Map instanceMap = toIdObject(objectIdMap);
-			attributeMap.put(BuildInAdvice.OBJECT_MAP, instanceMap);
-			this.objectIdMap = null;
-		}
-		if (!attributeMap.isEmpty()) {
-			return this.parseEL(JSONEncoder.encode(attributeMap));
-		}
-		return null;
+	private void appendGlobalsAddOn() {
+		appendVarAdvice(typeIdMap, "type");
+		this.typeIdMap = null;
+		appendVarAdvice(objectIdMap, "value");
+		this.objectIdMap = null;
 	}
 
 	@SuppressWarnings("unchecked")
-	private Map toIdObject(Map objectIdMap) {
-		HashMap instanceMap = new HashMap<String, String>();
-		for (Object key : objectIdMap.keySet()) {
-			instanceMap.put(objectIdMap.get(key), key);
+	private void appendVarAdvice(Map valueIdMap, String valueKey) {
+		if (valueIdMap != null && !valueIdMap.isEmpty()) {
+			HashMap<String, Object> attributeMap = new HashMap<String, Object>();
+			for (Object value : valueIdMap.keySet()) {
+				attributeMap.put("name", valueIdMap.get(value));
+				attributeMap.put(valueKey, value);
+				Object valueEL = this.parseEL(JSONEncoder.encode(attributeMap));
+				this.appendAdvice(VarAdvice.class, valueEL);
+				this.appendEnd();
+			}
 		}
-		return instanceMap;
 	}
 
 	public String addGlobalObject(Class<? extends Object> class1, String key) {
@@ -310,15 +305,16 @@ public class ResultContextImpl implements ResultContext {
 
 	public int findBeginType() {
 		int begin = findBegin();
-		if(begin>=0){
+		if (begin >= 0) {
 			return this.getType(begin);
 		}
-		return -3;//no begin
+		return -3;// no begin
 	}
+
 	public int findBegin() {
 		int depth = 0;
 		int i = this.result.size();
-		while (i-->0) {
+		while (i-- > 0) {
 			switch (getType(i)) {
 			case Template.CAPTRUE_TYPE:
 			case Template.IF_TYPE:
@@ -329,7 +325,7 @@ public class ResultContextImpl implements ResultContext {
 			case -1:
 				depth++;
 			}
-			if(depth == -1){
+			if (depth == -1) {
 				return i;
 			}
 		}
@@ -359,12 +355,12 @@ public class ResultContextImpl implements ResultContext {
 		if (item instanceof Object[]) {
 			Object[] ins = (Object[]) item;
 			if (ins.length == 0) {
-				return -1;//end token
+				return -1;// end token
 			} else {
 				return ((Number) ins[0]).intValue();
 			}
 		}
-		return -2;//string type
+		return -2;// string type
 	}
 
 }

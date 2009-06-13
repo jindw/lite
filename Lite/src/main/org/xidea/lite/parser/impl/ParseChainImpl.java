@@ -7,7 +7,7 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.NodeList;
 import org.xidea.lite.parser.ParseChain;
 import org.xidea.lite.parser.ParseContext;
-import org.xidea.lite.parser.Parser;
+import org.xidea.lite.parser.NodeParser;
 
 @SuppressWarnings("unchecked")
 public class ParseChainImpl implements ParseChain {
@@ -15,10 +15,10 @@ public class ParseChainImpl implements ParseChain {
 	ParseChainImpl pre;
 	ParseChainImpl next;
 	ParseContext context;
-	Parser parser;
+	NodeParser parser;
 	private Class<?> nodeType = Object.class;
 
-	ParseChainImpl(ParseContext context, Parser<? extends Object> parser) {
+	ParseChainImpl(ParseContext context, NodeParser<? extends Object> parser) {
 		this.context = context;
 		this.parser = parser;
 		try {

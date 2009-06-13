@@ -9,7 +9,7 @@ import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.ResultTranslator;
 
 public abstract class JSTranslator implements ResultTranslator, ExpressionFactory {
-	private static Log log = LogFactory.getLog(CoreXMLParser.class);
+	private static Log log = LogFactory.getLog(CoreXMLNodeParser.class);
 	private static JSTranslator instance;
 
 	public static JSTranslator getInstance() {
