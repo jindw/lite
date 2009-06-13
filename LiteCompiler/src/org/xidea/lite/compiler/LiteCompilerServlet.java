@@ -29,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.parser.DecoratorContext;
 import org.xidea.lite.parser.impl.DecoratorContextImpl;
+import org.xml.sax.InputSource;
 
 /**
  * @author jindw
@@ -87,11 +88,14 @@ public class LiteCompilerServlet extends HttpServlet {
 			printResult(context, resourceMap.get(templateURL), out);
 		} else {
 			try {
-				String decoratorxml = resourceMap
+				final String decoratorxml = resourceMap
 						.get("/WEB-INF/decorators.xml");
 				if (decoratorxml != null) {
-					DecoratorContext mapper = new DecoratorContextImpl(
-							new StringReader(decoratorxml));
+					DecoratorContext mapper = new DecoratorContextImpl(null){
+						protected void reset(){
+							this.reset(new InputSource(new StringReader(decoratorxml)));
+						}
+					};
 					String layout = mapper.getDecotatorPage(templateURL);
 					if (layout != null) {
 						if (resourceMap.containsKey(layout)) {
