@@ -54,6 +54,10 @@ public class ResultContextImpl implements ResultContext {
 		}
 	}
 
+	public void append(ResultItem item) {
+		this.result.add(item);
+	}
+
 	public void append(String text, boolean encode, char quteChar) {
 		if (encode) {
 			text = encodeText(text, quteChar);
@@ -104,8 +108,9 @@ public class ResultContextImpl implements ResultContext {
 		for (Object text : items) {
 			if (text instanceof String) {
 				this.append((String) text);
-			} else {
-
+			} else if(text instanceof ResultItem){
+				this.append((ResultItem)text);
+			} else{
 				this.append((Object[]) text);
 			}
 

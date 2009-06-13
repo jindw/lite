@@ -15,14 +15,14 @@ public interface ParserHolder{
 	public TextParser[] getTextParsers();
 	/**
 	 * 添加指令解析器
-	 * @param iparser
+	 * @param textParser
 	 */
-	public void addTextParser(TextParser iparser);
+	public void addTextParser(TextParser textParser);
 	/**
 	 * 添加节点解析器
-	 * @param iparser
+	 * @param nodeParser
 	 */
-	public void addNodeParser(NodeParser<? extends Node> iparser);
+	public void addNodeParser(NodeParser<? extends Node> nodeParser);
 	
 	/**
 	 * 获取当前context的顶级 parseChain对象
