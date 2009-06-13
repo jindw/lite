@@ -1,8 +1,6 @@
 package org.xidea.lite;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.MalformedURLException;
@@ -21,7 +19,7 @@ import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.impl.DecoratorContextImpl;
 import org.xidea.lite.parser.impl.ParseContextImpl;
 
-public class TemplateEngine{
+public class TemplateEngine {
 	public static final String DEFAULT_DECORATOR_MAPPING = "/WEB-INF/decorators.xml";
 	private static final Log log = LogFactory.getLog(TemplateEngine.class);
 
@@ -30,7 +28,7 @@ public class TemplateEngine{
 
 	protected Map<String, String> featrues = new HashMap<String, String>();
 	protected File webRoot;
-	protected DecoratorContext decoratorMapper;
+	protected DecoratorContext decoratorContext;
 
 	protected TemplateEngine() {
 	}
@@ -40,20 +38,16 @@ public class TemplateEngine{
 	}
 
 	public TemplateEngine(File webRoot, File config) {
-		try {
-			if(config != null && config.exists()){
-				this.decoratorMapper = new DecoratorContextImpl(new FileInputStream(config));
-			}else{
-				log.warn("找不到装饰器配置信息:"+config.getAbsolutePath());
-			}
-			this.webRoot = webRoot;
-		} catch (FileNotFoundException e) {
-			log.error(e);
-			throw new RuntimeException(e);
+		if (config != null && config.exists()) {
+			this.decoratorContext = new DecoratorContextImpl(config);
+		} else {
+			log.warn("找不到装饰器配置信息:" + config.getAbsolutePath());
 		}
+		this.webRoot = webRoot;
 	}
 
-	public void render(String path, Object context, Writer out) throws IOException {
+	public void render(String path, Object context, Writer out)
+			throws IOException {
 		getTemplate(path).render(context, out);
 	}
 
@@ -108,7 +102,7 @@ public class TemplateEngine{
 
 	protected ParseContext createParseContext() {
 		try {
-			return new ParseContextImpl(getResource("/"),featrues,null,null);
+			return new ParseContextImpl(getResource("/"), featrues, null, null);
 		} catch (MalformedURLException e) {
 			throw new RuntimeException(e);
 		}
@@ -116,8 +110,8 @@ public class TemplateEngine{
 
 	protected Template createTemplate(String path, ParseContext parseContext) {
 		String decoratorPath = null;
-		if(decoratorMapper!=null){
-			decoratorPath = decoratorMapper.getDecotatorPage(path);
+		if (decoratorContext != null) {
+			decoratorPath = decoratorContext.getDecotatorPage(path);
 		}
 		if (decoratorPath != null && !decoratorPath.equals(path)) {
 			try {
@@ -152,14 +146,15 @@ public class TemplateEngine{
 		long j = 0;
 		for (File file : files) {
 			long k = file.lastModified();
-			if(k == 0){
+			if (k == 0) {
 				j++;
 			}
-			j*=2;
+			j *= 2;
 			i = Math.max(k, i);
 		}
-		return i+j;
+		return i + j;
 	}
+
 	protected class TemplateEntry {
 		private Template template;
 		private File[] files;

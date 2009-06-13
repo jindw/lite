@@ -3,6 +3,8 @@ package org.xidea.lite.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
+import java.io.File;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.xidea.lite.parser.DecoratorContext;
@@ -13,8 +15,8 @@ public class DecoratorMapperTest {
 
 	@Before
 	public void setUp() throws Exception {
-		mapper = new DecoratorContextImpl(this.getClass().getResourceAsStream(
-				"decorators.xml"));
+		mapper = new DecoratorContextImpl(new File(this.getClass().getResource(
+				"decorators.xml").getFile()));
 	}
 
 	@Test

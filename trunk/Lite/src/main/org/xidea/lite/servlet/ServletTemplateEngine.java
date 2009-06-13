@@ -28,7 +28,7 @@ public class ServletTemplateEngine extends TemplateEngine {
 		
 		try {
 			String decoratorPath = getParam("decoratorMapping",DEFAULT_DECORATOR_MAPPING);
-			this.decoratorMapper = new DecoratorContextImpl(context.getResourceAsStream(decoratorPath));
+			this.decoratorContext = new DecoratorContextImpl(new File(context.getRealPath(decoratorPath)));
 		} catch (Exception e) {
 			log.error("装载页面装饰配置信息失败", e);
 		}

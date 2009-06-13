@@ -1,7 +1,6 @@
 package org.xidea.lite.parser.impl;
 
-import java.io.InputStream;
-import java.io.Reader;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -15,40 +14,57 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xidea.lite.parser.DecoratorContext;
-import org.xml.sax.InputSource;
 
 public class DecoratorContextImpl implements DecoratorContext {
-	private URLMatcher excludeMatcher;
-	private Map<URLMatcher, String> decoratorMap;
+	protected URLMatcher excludeMatcher;
+	protected Map<URLMatcher, String> decoratorMap;
+	protected long lastModified = -1;//not found or error :0
+	protected File config;
 
-	protected DecoratorContextImpl() {
-
+	public DecoratorContextImpl(File config) {
+		this.config = config;
 	}
 
-	public DecoratorContextImpl(InputStream config) {
-		if(config!=null){
-			initialize(new InputSource(config));
+	protected long lastModified() {
+		return config.lastModified();
+	}
+
+	/* (non-Javadoc)
+	 * @see org.xidea.lite.parser.DecoratorMapperI#getDecotatorPage(java.lang.String)
+	 */
+	public String getDecotatorPage(String path) {
+		if(lastModified!= this.lastModified()){
+			this.reset();
+			this.lastModified = this.lastModified();
 		}
-	}
-	public DecoratorContextImpl(Reader config) {
-		if(config!=null){
-			initialize(new InputSource(config));
+		if (this.excludeMatcher != null) {
+			if (this.excludeMatcher.match(path)) {
+				return null;
+			}
 		}
+		if (this.decoratorMap != null) {
+			for (Map.Entry<URLMatcher, String> entry : decoratorMap.entrySet()) {
+				if (entry.getKey().match(path)) {
+					return entry.getValue();
+				}
+			}
+		}
+		return null;
 	}
-	protected void initialize(InputSource config) {
+	protected void reset() {
 		try {
-			Document configDoc = DocumentBuilderFactory.newInstance()
-					.newDocumentBuilder().parse(config);
-			initialize(configDoc);
+			Document doc = DocumentBuilderFactory.newInstance()
+					.newDocumentBuilder().parse(this.config);
+			reset(doc);
 		} catch (Exception e) {
 			throw new RuntimeException("装饰配置解析失败", e);
 		}
 	}
 
-	private void initialize(Document configDoc) {
+	protected void reset(Document config) {
 		Map<URLMatcher, String> map = new HashMap<URLMatcher, String>();
 		List<URLMatcher> excludes = new ArrayList<URLMatcher>();
-		NodeList patterns = configDoc.getElementsByTagName("pattern");
+		NodeList patterns = config.getElementsByTagName("pattern");
 		for (int i = 0; i < patterns.getLength(); i++) {
 			Element patternEl = (Element) patterns.item(i);
 			Element parentEl = (Element) patternEl.getParentNode();
@@ -75,23 +91,5 @@ public class DecoratorContextImpl implements DecoratorContext {
 				.toArray(new URLMatcher[excludes.size()]));
 	}
 
-	/* (non-Javadoc)
-	 * @see org.xidea.lite.parser.DecoratorMapperI#getDecotatorPage(java.lang.String)
-	 */
-	public String getDecotatorPage(String path) {
-		if (this.excludeMatcher != null) {
-			if (this.excludeMatcher.match(path)) {
-				return null;
-			}
-		}
-		if (this.decoratorMap != null) {
-			for (Map.Entry<URLMatcher, String> entry : decoratorMap.entrySet()) {
-				if (entry.getKey().match(path)) {
-					return entry.getValue();
-				}
-			}
-		}
-		return null;
-	}
 
 }

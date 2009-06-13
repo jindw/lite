@@ -74,7 +74,7 @@ function parseCoreNode(node,context,chain){//for
  */
 function parseDefTag(node,context,chain){
     var next = node.firstChild;
-    var ns = getAttribute(context,node,'name',false,true);
+    var ns = getAttributeText(context,node,'name',true);
     ns = (ns.replace(/^\s+/,'')+'{end').split(/[^\w]+/);
     ns.pop();
     var el = ['{"name":"',ns[0],'","params":['];
@@ -95,10 +95,10 @@ function parseDefTag(node,context,chain){
     context.appendEnd();
 }
 function processIncludeTag(node,context,chain){
-    var var_ = getAttribute(context,node,'var');
-    var path = getAttribute(context,node,'path');
-    var xpath = getAttribute(context,node,'xpath');
-    var name = getAttribute(context,node,'name');
+    var var_ = getAttributeText(context,node,'var');
+    var path = getAttributeText(context,node,'path');
+    var xpath = getAttributeText(context,node,'xpath');
+    var name = getAttributeText(context,node,'name');
     var doc = node.ownerDocument || node;
     var parentURL = context.currentURL;
 	try{
@@ -141,7 +141,7 @@ function processIncludeTag(node,context,chain){
 }
 function parseIfTag(node,context,chain){
     var next = node.firstChild;
-    var test = getAttribute(context,node,'test',true,true);
+    var test = getAttributeEL(context,node,'test',true);
     context.appendIf(test);
     if(next){
         do{
@@ -154,7 +154,7 @@ function parseIfTag(node,context,chain){
 function parseElseIfTag(node,context,chain,requireTest){
     var next = node.firstChild;
     if(requireTest != false){
-        var test = getAttribute(context,node,'test',true,requireTest == true);
+        var test = getAttributeEL(context,node,'test',requireTest == true);
     }
     if(test){
     	context.appendElse(test);
@@ -193,9 +193,9 @@ function parseChooseTag(node,context,chain){
 
 function parseForTag(node,context,chain){
     var next = node.firstChild;
-    var items = getAttribute(context,node,'items',true);
-    var var_ = getAttribute(context,node,'var');
-    var status_ = getAttribute(context,node,'status');
+    var items = getAttributeEL(context,node,['items','values','value'],true);
+    var var_ = getAttributeText(context,node,['var','id','name','item'],true);
+    var status_ = getAttributeText(context,node,'status');
     context.appendFor(var_,items,status_);
     if(next){
         do{
@@ -205,8 +205,8 @@ function parseForTag(node,context,chain){
     context.appendEnd();
 }
 function parseVarTag(node,context,chain){
-    var name = getAttribute(context,node,'name');
-    var value = getAttribute(context,node,'value');
+    var name = getAttributeText(context,node,['name','id'],true);
+    var value = getAttributeText(context,node,'value');
     if(value){
     	var value = context.parseText(value,false);
     	if(value.length == 1){
@@ -233,7 +233,7 @@ function parseVarTag(node,context,chain){
 }
 
 function parseOutTag(node,context,chain){
-    var value = getAttribute(context,node,"value");
+    var value = getAttributeText(context,node,"value");
     value = context.parseText(value,EL_TYPE);
     context.appendAll(value);
 }
@@ -270,9 +270,28 @@ function charReplacer(item) {
     c = item.charCodeAt().toString(16);
     return '\\u00' + (c.length>1?c:'0'+c);
 }
+function getAttributeEL(context,node,key,required){
+    return getAttributeObject(context,node,key,true,required)
+}
+function getAttributeText(context,node,key,required){
+    return getAttributeObject(context,node,key,false,required)
+}
 
-function getAttribute(context,node,key,isEL,required){
-	var value = node.getAttribute(key);
+function getAttributeObject(context,node,key,isEL,required){
+    if(key instanceof Array){
+        for(var i=0;i<key.length;i++){
+            var value = node.getAttribute(key[i]);
+            if(value){
+                if(i>0){
+                    $log.warn("元素："+node.tagName +"的属性：'" + key[i] +"' 不被推荐；请使用是:'"+key[0]+"'代替");
+                }
+                key = key[i];
+                break;
+            }
+        }
+    }else{
+        var value = node.getAttribute(key);
+    }
 	if(value){
 		value = String(value);
 		if(isEL){
@@ -281,8 +300,9 @@ function getAttribute(context,node,key,isEL,required){
 			return value.replace(/^\s+|\s+$/g,'');
 		}
 	}else if(required){
-		$log.error("属性"+key+"为必须值");
-		throw new Error();
+	    var error = "属性"+key+"为必选属性";
+		$log.error(error);
+		throw new Error(error);
 	}
 }
 function findFirstEL(context,value){
