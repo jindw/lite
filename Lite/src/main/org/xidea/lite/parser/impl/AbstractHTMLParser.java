@@ -30,17 +30,17 @@ public abstract class AbstractHTMLParser implements Parser<Element> {
 	public void parse(Element node,ParseContext context,ParseChain chain) {
 		String namespace = node.getNamespaceURI();
 		if (namespace == null && node.getPrefix()==null || XHTMLNS.equals(namespace)) {
-			parse(node, context);
+			parseHTMLElement(node, context,chain);
 		}else{
 			chain.process(node);
 		}
 	}
 
-	protected void parse(Node node, ParseContext context) {
-		parseHTMLElement(node, context, null);
+	protected void parseHTMLElement(Element node, ParseContext context,ParseChain chain) {
+		appendHTMLElement(node, context, null);
 	}
 
-	protected void parseHTMLElement(Node node, ParseContext context,
+	protected void appendHTMLElement(Element node, ParseContext context,
 			List<Object> exts) {
 		context.beginIndent();//false);
 		String closeTag = null;

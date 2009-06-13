@@ -52,9 +52,9 @@ public class Template {
 	public void render(Object context, Writer out) throws IOException {
 		Context contextMap;
 		if (context == null) {
-			contextMap = new Context(gloabls);
+			contextMap = new Context(this, gloabls);
 		} else {
-			contextMap = new Context(gloabls, context);
+			contextMap = new Context(this, gloabls, context);
 		}
 		renderList(contextMap, items, out);
 	}
@@ -116,15 +116,23 @@ public class Template {
 			cmd[1] = children;
 			Expression el = createExpression(cmd[2]);
 			cmd[2] = el;
-			Class<? extends Object> addOnType = Class.forName(String
-					.valueOf(cmd[3]));
+			String cn = String.valueOf(cmd[3]);
+			Class<? extends Object> addOnType;
+			if("#def".equals(cn)){
+				addOnType = MacroAdvice.class;
+			}else if("#var".equals(cn)){
+				addOnType = BuildInAdvice.class;
+			}else{
+				addOnType = Class.forName(cn);
+			}
 			cmd[3] = addOnType;
 			if (CompileAdvice.class.isAssignableFrom(addOnType)) {
 				Map attributeMap = (Map) el.evaluate(null);
 				CompileAdvice addOnInstance = (CompileAdvice) addOnType
 						.newInstance();
 				ReflectUtil.setValues(addOnInstance, attributeMap);
-				List<Object> result2 = addOnInstance.compile(this, children);
+				List<Object> result2 = addOnInstance.compile(this.gloabls,
+						children);
 				if (result2 != null) {
 					result.addAll(result2);
 				}
@@ -403,15 +411,17 @@ public class Template {
 		boolean ifStatus = false;
 		private int readLength;
 		private Context root;
+		private Template template;
 
-		public Context(Object... stack) {
+		public Context(Template template, Object... stack) {
 			super(stack);
 			this.readLength = stack.length;
 			this.root = this;
+			this.template = template;
 		}
 
 		Context(Context root) {
-			this(root.stack);
+			this(root.template, root.stack);
 			this.root = root;
 			this.requireWrite();
 		}
@@ -439,6 +449,10 @@ public class Template {
 				newStack[stack.length] = new HashMap<Object, Object>();
 				stack = newStack;
 			}
+		}
+
+		public void renderList(Object[] children, StringWriter out) {
+			this.template.renderList(this, children, out);
 		}
 	}
 
