@@ -12,6 +12,7 @@ import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.VarAdvice;
 import org.xidea.lite.Template;
 import org.xidea.lite.parser.ResultContext;
+import org.xidea.lite.parser.ResultItem;
 
 public class ResultContextImpl implements ResultContext {
 	protected Map<String, String> featrues;
@@ -202,6 +203,8 @@ public class ResultContextImpl implements ResultContext {
 			if (item instanceof String) {
 				// System.out.println(item);
 				current.add(item);
+			} else if(item instanceof ResultItem){
+				current.addAll(((ResultItem)item).compile());
 			} else {
 				Object[] cmd = (Object[]) item;
 
