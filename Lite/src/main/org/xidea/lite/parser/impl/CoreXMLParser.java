@@ -219,8 +219,8 @@ public class CoreXMLParser implements Parser<Element> {
 	}
 
 	protected Node parseForTag(Element el, ParseContext context) {
-		Object items = getAttributeEL(context, el, "items");
-		String var = getAttributeOrNull(el, "var");
+		Object items = getAttributeEL(context, el, "items","values","value");
+		String var = getAttributeOrNull(el, "var","name","id");
 		String status = getAttributeOrNull(el, "status");
 		context.appendFor(var, items, status);
 		parseChild(el.getFirstChild(), context);
@@ -229,7 +229,7 @@ public class CoreXMLParser implements Parser<Element> {
 	}
 
 	protected Node parseVarTag(Element el, ParseContext context) {
-		String name = getAttributeOrNull(el, "name");
+		String name = getAttributeOrNull(el, "name","id");
 		String value = getAttributeOrNull(el, "value");
 		if (value == null) {
 			context.appendCaptrue(name);
@@ -257,7 +257,8 @@ public class CoreXMLParser implements Parser<Element> {
 		Node next = el.getFirstChild();
 		if (next != null) {
 			// new Java6JSBuilder();
-			ParseContext clientContext = new ParseContextImpl(context,el.getAttribute("id"),JSTranslator.getInstance());
+			String id = getAttributeOrNull(el, "id","name");
+			ParseContext clientContext = new ParseContextImpl(context,id,JSTranslator.getInstance());
 			// 前端直接压缩吧？反正保留那些空白也没有调试价值
 			do {
 				clientContext.parse(next);
@@ -332,8 +333,12 @@ public class CoreXMLParser implements Parser<Element> {
 	}
 
 	private String getAttributeOrNull(Element el, String... keys) {
-		for (String key : keys) {
+		for (int i = 0; i < keys.length; i++) {
+			String key = keys[i];
 			if (el.hasAttribute(key)) {
+				if(i>0){
+					log.warn("元素："+el.getTagName() +"属性：'" + key +"' 不被推荐；请使用是:'"+keys[0]+"'代替");
+				}
 				return el.getAttribute(key);
 			}
 		}
@@ -367,7 +372,7 @@ public class CoreXMLParser implements Parser<Element> {
 	 * @param key
 	 * @return
 	 */
-	private Object getAttributeEL(ParseContext context, Element el, String key) {
+	private Object getAttributeEL(ParseContext context, Element el, String... key) {
 		String value = getAttributeOrNull(el, key);
 		return toEL(context, value);
 
