@@ -19,7 +19,7 @@ import org.xml.sax.InputSource;
 public class DecoratorContextImpl implements DecoratorContext {
 	protected URLMatcher excludeMatcher;
 	protected Map<URLMatcher, String> decoratorMap;
-	protected long lastModified = -1;//not found or error :0
+	protected long lastModified = -1;// not found or error :0
 	protected File config;
 
 	public DecoratorContextImpl(File config) {
@@ -27,14 +27,16 @@ public class DecoratorContextImpl implements DecoratorContext {
 	}
 
 	protected long lastModified() {
-		return config == null?0:config.lastModified();
+		return config == null ? 0 : config.lastModified();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.xidea.lite.parser.DecoratorMapperI#getDecotatorPage(java.lang.String)
 	 */
 	public String getDecotatorPage(String path) {
-		if(lastModified!= this.lastModified()){
+		if (lastModified != this.lastModified()) {
 			this.reset();
 			this.lastModified = this.lastModified();
 		}
@@ -52,8 +54,11 @@ public class DecoratorContextImpl implements DecoratorContext {
 		}
 		return null;
 	}
+
 	protected void reset() {
-		reset(new InputSource(config.toURI().toASCIIString()));
+		if (config == null && config.exists()) {
+			reset(new InputSource(config.toURI().toASCIIString()));
+		}
 	}
 
 	protected void reset(InputSource source) {
@@ -95,6 +100,5 @@ public class DecoratorContextImpl implements DecoratorContext {
 		this.excludeMatcher = URLMatcher.createOrMatcher(excludes
 				.toArray(new URLMatcher[excludes.size()]));
 	}
-
 
 }

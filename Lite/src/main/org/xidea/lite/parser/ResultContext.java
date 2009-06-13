@@ -71,6 +71,13 @@ public interface ResultContext {
 	public void append(String text);
 
 	public void append(String text, boolean encode, char escapeQute);
+	
+
+	/**
+	 * 添加一段呆编译的中间代码
+	 * @param item
+	 */
+	public void append(ResultItem item);
 
 	/**
 	 * 添加模板指令

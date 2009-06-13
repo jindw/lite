@@ -18,6 +18,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Node;
 import org.xidea.el.ExpressionFactory;
+import org.xidea.lite.parser.ResultItem;
 import org.xidea.lite.parser.TextParser;
 import org.xidea.lite.parser.ParseChain;
 import org.xidea.lite.parser.ParseContext;
@@ -191,6 +192,9 @@ public class ParseContextImpl implements ParseContext {
 	}
 
 	public void append(String text) {
+		resultContext.append(text);
+	}
+	public void append(ResultItem text) {
 		resultContext.append(text);
 	}
 
