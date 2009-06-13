@@ -14,6 +14,7 @@ import org.xidea.el.impl.TextContains;
 import org.xidea.el.impl.TextNullEmpty;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.Template;
+import org.xidea.lite.parser.ParseChain;
 import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.Parser;
 
@@ -50,18 +51,18 @@ public class HTMLParser extends AbstractHTMLParser implements Parser<Element>{
 		super();
 	}
 
-	protected void parse(Node node, ParseContext context) {
-		Element el = (Element) node;
+	@Override
+	protected void parseHTMLElement(Element el, ParseContext context,ParseChain chain) {
 		String localName = el.getLocalName();
 		Object status = context.getFeatrue(AUTO_FORM_FEATRUE_URL);
 		if (AUTO_ANYWAY.equals(status)) {
 			processAutoForm(context, el, localName);
 		} else if (AUTO_IN_FORM.equals(status) && FORM_TAG.equals(localName)) {
 			context.getFeatrueMap().put(AUTO_FORM_FEATRUE_URL, AUTO_ANYWAY);
-			parseHTMLElement(el, context, null);
+			appendHTMLElement(el, context, null);
 			context.getFeatrueMap().put(AUTO_FORM_FEATRUE_URL, AUTO_ANYWAY);
 		} else {
-			parseHTMLElement(el, context, null);
+			appendHTMLElement(el, context, null);
 		}
 	}
 
@@ -76,13 +77,13 @@ public class HTMLParser extends AbstractHTMLParser implements Parser<Element>{
 		} else if (OPTION_TAG.equals(localName)) {
 			parseSelectOption(el, context);
 		} else {
-			parseHTMLElement(el, context, null);
+			appendHTMLElement(el, context, null);
 		}
 	}
 
 	protected void parseSelect(Element el, ParseContext context) {
 		context.setAttribute(KEY_SELECT, el);
-		parseHTMLElement(el, context, null);
+		appendHTMLElement(el, context, null);
 	}
 
 	protected void parseInput(Element element, ParseContext context) {
@@ -105,7 +106,7 @@ public class HTMLParser extends AbstractHTMLParser implements Parser<Element>{
 						+ element.getAttribute(ATTRIBUTE_NAME) + "}");
 			}
 		}
-		parseHTMLElement(element, context, attributes);
+		appendHTMLElement(element, context, attributes);
 	}
 
 	protected void parseTextArea(Element el, ParseContext context) {
@@ -136,7 +137,7 @@ public class HTMLParser extends AbstractHTMLParser implements Parser<Element>{
 				}
 			}
 		}
-		parseHTMLElement(el, context, null);
+		appendHTMLElement(el, context, null);
 	}
 
 	protected void parseSelectOption(Element element, ParseContext context) {
@@ -152,7 +153,7 @@ public class HTMLParser extends AbstractHTMLParser implements Parser<Element>{
 						ATTRIBUTE_SELECTED);
 			}
 		}
-		parseHTMLElement(element, context, attributes);
+		appendHTMLElement(element, context, attributes);
 	}
 
 	protected List<Object> buildCheckedAttribute(ParseContext context,

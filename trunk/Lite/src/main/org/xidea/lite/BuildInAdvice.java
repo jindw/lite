@@ -22,17 +22,17 @@ public class BuildInAdvice implements CompileAdvice {
 		this.objectMap = objectMap;
 	}
 
-	public List<Object> compile(final Template template, final Object[] children) {
+	public List<Object> compile(final Map<String, Object> gloabls, final Object[] children) {
 		for (String key : instanceMap.keySet()) {
 			String type = (String) instanceMap.get(key);
 			try {
 				Object value = Class.forName(type).newInstance();
-				template.gloabls.put(key, value);
+				gloabls.put(key, value);
 			} catch (Exception e) {
 				log.error("无法装载扩展：" + type, e);
 			}
 		}
-		template.gloabls.putAll(objectMap);
+		gloabls.putAll(objectMap);
 		return null;
 	}
 
