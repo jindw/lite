@@ -90,9 +90,9 @@ public class TemplateEngine {
 		}
 	}
 
-	protected File[] getAssociatedFiles(Collection<URL> resources) {
+	protected File[] getAssociatedFiles(ParseContext context) {
 		ArrayList<File> files = new ArrayList<File>();
-		for (URL url : resources) {
+		for (URL url : context.getResources()) {
 			if ("file".equals(url.getProtocol())) {
 				files.add(new File(url.getFile()));
 			}
@@ -108,7 +108,8 @@ public class TemplateEngine {
 		}
 	}
 
-	protected Template createTemplate(String path, ParseContext parseContext) {
+	protected Template createTemplate(String path, ParseContext parseContext)
+			throws IOException {
 		String decoratorPath = null;
 		if (decoratorContext != null) {
 			decoratorPath = decoratorContext.getDecotatorPage(path);
@@ -122,22 +123,23 @@ public class TemplateEngine {
 				log.error(e);
 			}
 		}
+		parseContext.parse(getResource(path));
+		List<Object> items = parseContext.toList();
+		return new Template(items);
+	}
+
+	protected TemplateEntry createTemplateEntry(String path) {
+		Template template;
+		ParseContext parseContext = createParseContext();
 		try {
-			parseContext.parse(getResource(path));
-			List<Object> items = parseContext.toList();
-			return new Template(items);
+			template = createTemplate(path, parseContext);
 		} catch (Exception e) {
 			log.error(e);
 			ArrayList<Object> errors = new ArrayList<Object>();
 			errors.add(e.getMessage());
-			return new Template(errors);
+			template = new Template(errors);
 		}
-	}
-
-	private TemplateEntry createTemplateEntry(String path) {
-		ParseContext parseContext = createParseContext();
-		Template template = createTemplate(path, parseContext);
-		File[] files = getAssociatedFiles(parseContext.getResources());
+		File[] files = getAssociatedFiles(parseContext);
 		return new TemplateEntry(template, files);
 	}
 
@@ -156,9 +158,9 @@ public class TemplateEngine {
 	}
 
 	protected class TemplateEntry {
-		private Template template;
-		private File[] files;
-		private long lastModified;
+		Template template;
+		File[] files;
+		long lastModified;
 
 		public TemplateEntry(Template template, File[] files) {
 			this.template = template;

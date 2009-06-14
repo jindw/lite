@@ -27,6 +27,14 @@ public class Java6JSTranslator extends JSTranslator {
 
 	static {
 		jsengine = new ScriptEngineManager().getEngineByExtension("js");
+		if(jsengine == null){
+			StringBuilder error = new StringBuilder("Java 6 找不到可用的 jsengine");
+			try{
+				error.append(System.getProperties());
+			}catch(Throwable e){
+			}
+			throw new RuntimeException(error.toString());
+		}
 		ClassLoader loader = Java6JSTranslator.class.getClassLoader();
 		try {
 			InputStream boot = loader.getResourceAsStream("boot.js");

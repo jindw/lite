@@ -11,6 +11,23 @@
 		<mkdir dir="build/dest/jslite" />
 		<mkdir dir="build/dest" />
 	</target>
+	<target name="compilelite">
+		<delete dir="build/dest/temp"/>
+		<mkdir dir="build/dest/temp"/>
+		<copy todir="build/dest/temp">
+			<fileset dir="web">
+				<include name="**/*.xhtml" />
+				<include name="WEB-INF/decorators.xml" />
+				<exclude name="WEB-INF/litecached/*.*" />
+				<exclude name="WEB-INF/htmlcached/**/*.*" />
+			</fileset>
+		</copy>
+		<java classname="org.xidea.lite.tools.LiteCompiler"
+			classpath="web/WEB-INF/lib/js.jar;web/WEB-INF/lib/JSI.jar;web/WEB-INF/lib/commons-logging-1.0.4.jar;web/WEB-INF/classes">
+			<arg value="-root" />
+			<arg value="${basedir}/build/dest/temp" />
+		</java>
+	</target>
 
 	<target name="packageOptimize">
 		<java classname="org.jside.jsi.tools.web.PackageAction" classpath="${JSAPath}">
