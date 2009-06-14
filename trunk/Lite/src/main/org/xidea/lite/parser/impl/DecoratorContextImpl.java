@@ -56,7 +56,7 @@ public class DecoratorContextImpl implements DecoratorContext {
 	}
 
 	protected void reset() {
-		if (config == null && config.exists()) {
+		if (config != null && config.exists()) {
 			reset(new InputSource(config.toURI().toASCIIString()));
 		}
 	}

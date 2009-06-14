@@ -49,7 +49,7 @@ public abstract class JSTranslator implements ResultTranslator, ExpressionFactor
 			}
 			return result;
 		} catch (Exception e) {
-			log.warn("生成js代码失败：", e);
+			log.warn("生成js代码失败："+id+"@"+context.getCurrentURL(), e);
 			return "function " + id + "(){alert('生成js代码失败：'+"
 					+ JSONEncoder.encode(e.getMessage()) + ")}";
 

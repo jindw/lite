@@ -1,7 +1,8 @@
 package org.xidea.el.json;
 
 public class JSONDecoder {
-	public static Object decode(String value) {
-		return new JSONTokenizer(value).parse();
+	@SuppressWarnings("unchecked")
+	public static <T> T decode(String value) {
+		return (T)new JSONTokenizer(value).parse();
 	}
 }
