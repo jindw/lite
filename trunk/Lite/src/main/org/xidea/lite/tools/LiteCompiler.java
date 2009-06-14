@@ -15,11 +15,12 @@ import org.xidea.lite.Template;
 
 public class LiteCompiler {
 	private static final Log log = LogFactory.getLog(LiteCompiler.class);
-	private File root;
+	private File webRoot;
+	private String[] parsers;
+	private String[] featrues;
 	private File htmlcached;
 	private File litecached;
 	private String encoding = "utf-8";
-	private String[] parsers;
 	private TemplateCompilerEngine engine;
 
 	public LiteCompiler(String[] args) {
@@ -32,18 +33,27 @@ public class LiteCompiler {
 
 	public void execute() {
 		initialize();
-		this.processDir(root, "/");
+		this.processDir(webRoot, "/");
 	}
 
 	protected void initialize() {
-		engine = new TemplateCompilerEngine(root,parsers);
+		HashMap<String, String> featrueMap = new HashMap<String, String>();
+		if (featrues != null) {
+			for (String f : featrues) {
+				int p = f.indexOf("=");
+				featrueMap.put(f.substring(0, p).trim(), f.substring(p + 1)
+						.trim());
+			}
+		}
+		engine = new TemplateCompilerEngine(webRoot, parsers, featrueMap);
+
 		litecached = createIfNotExist(litecached, "WEB-INF/litecached/");
 		htmlcached = createIfNotExist(htmlcached, null);
 	}
 
 	protected File createIfNotExist(File cached, String defaultPath) {
 		if (cached == null && defaultPath != null) {
-			cached = new File(root, defaultPath);
+			cached = new File(webRoot, defaultPath);
 		}
 		if (cached != null) {
 			if (!cached.exists()) {
@@ -66,7 +76,7 @@ public class LiteCompiler {
 				try {
 					out.write(engine.getCacheCode(path));
 				} catch (Exception e) {
-					log.error("编译Lite中间代码出错："+path, e);
+					log.error("编译Lite中间代码出错：" + path, e);
 				} finally {
 					out.close();
 				}
@@ -79,17 +89,15 @@ public class LiteCompiler {
 				try {
 					template.render(new HashMap<String, String>(), out);
 				} catch (Exception e) {
-					log.error("生成HTML 静态数据出错："+path, e);
+					log.error("生成HTML 静态数据出错：" + path, e);
 				} finally {
 					out.close();
 				}
 			}
 		} catch (IOException e) {
-			log.error("处理模板异常（可能是模板文件生成异常）："+path, e);
+			log.error("处理模板异常（可能是模板文件生成异常）：" + path, e);
 		}
 	}
-
-
 
 	public void processDir(final File dir, final String path) {
 		dir.listFiles(new FileFilter() {
@@ -110,18 +118,22 @@ public class LiteCompiler {
 		return file.getName().endsWith(".xhtml");
 	}
 
-
-	public void setRoot(File webRoot) {
-		this.root = webRoot;
+	public void setWebRoot(File webRoot) {
+		this.webRoot = webRoot;
 	}
 
 	public void setHtmlcached(File htmlcached) {
 		this.htmlcached = htmlcached;
 	}
 
+	public void setFeatrues(String[] featrues) {
+		this.featrues = featrues;
+	}
+
 	public void setParsers(String[] additional) {
 		this.parsers = additional;
 	}
+
 	public void setEncoding(String encoding) {
 		this.encoding = encoding;
 	}

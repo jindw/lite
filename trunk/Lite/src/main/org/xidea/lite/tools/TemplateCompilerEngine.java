@@ -20,10 +20,12 @@ public class TemplateCompilerEngine extends TemplateEngine {
 	private Map<String, List<Object>> itemsMap = new HashMap<String, List<Object>>();
 	private Map<String, File[]> filesMap = new HashMap<String, File[]>();
 	private NodeParser[] parsers;
+	private Map<String, String> featrueMap;
 
 	@SuppressWarnings("unchecked")
-	public TemplateCompilerEngine(File root, String[] parserClasses) {
+	public TemplateCompilerEngine(File root, String[] parserClasses, Map<String, String> featrueMap) {
 		super(root);
+		this.featrueMap = featrueMap;
 		if (parserClasses != null) {
 			try {
 				NodeParser[] parsers = new NodeParser[parserClasses.length];
@@ -45,6 +47,9 @@ public class TemplateCompilerEngine extends TemplateEngine {
 			for (NodeParser parser : this.parsers) {
 				context.addNodeParser(parser);
 			}
+		}
+		if(this.featrueMap !=null){
+			context.getFeatrueMap().putAll(featrueMap);
 		}
 		return context;
 	}
