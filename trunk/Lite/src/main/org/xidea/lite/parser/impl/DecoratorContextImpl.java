@@ -10,6 +10,8 @@ import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -17,6 +19,7 @@ import org.xidea.lite.parser.DecoratorContext;
 import org.xml.sax.InputSource;
 
 public class DecoratorContextImpl implements DecoratorContext {
+	private static final Log log = LogFactory.getLog(DecoratorContextImpl.class);
 	protected URLMatcher excludeMatcher;
 	protected Map<URLMatcher, String> decoratorMap;
 	protected long lastModified = -1;// not found or error :0
@@ -48,7 +51,9 @@ public class DecoratorContextImpl implements DecoratorContext {
 		if (this.decoratorMap != null) {
 			for (Map.Entry<URLMatcher, String> entry : decoratorMap.entrySet()) {
 				if (entry.getKey().match(path)) {
-					return entry.getValue();
+					String decorator = entry.getValue();
+					log.info("装饰器配置："+path+"->"+decorator);
+					return path.equals(decorator)?null:decorator;
 				}
 			}
 		}

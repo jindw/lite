@@ -7,17 +7,11 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.Template;
-import org.xidea.lite.TemplateEngine;
-import org.xidea.lite.parser.ParseContext;
 
 public class LiteCompiler {
 	private static final Log log = LogFactory.getLog(LiteCompiler.class);
@@ -25,6 +19,7 @@ public class LiteCompiler {
 	private File htmlcached;
 	private File litecached;
 	private String encoding = "utf-8";
+	private String[] parsers;
 	private TemplateCompilerEngine engine;
 
 	public LiteCompiler(String[] args) {
@@ -36,10 +31,14 @@ public class LiteCompiler {
 	}
 
 	public void execute() {
-		engine = new TemplateCompilerEngine(root);
+		initialize();
+		this.processDir(root, "/");
+	}
+
+	protected void initialize() {
+		engine = new TemplateCompilerEngine(root,parsers);
 		litecached = createIfNotExist(litecached, "WEB-INF/litecached/");
 		htmlcached = createIfNotExist(htmlcached, null);
-		this.processDir(root, "/");
 	}
 
 	protected File createIfNotExist(File cached, String defaultPath) {
@@ -120,40 +119,10 @@ public class LiteCompiler {
 		this.htmlcached = htmlcached;
 	}
 
+	public void setParsers(String[] additional) {
+		this.parsers = additional;
+	}
 	public void setEncoding(String encoding) {
 		this.encoding = encoding;
 	}
-}
-class TemplateCompilerEngine extends TemplateEngine{
-
-	private Map<String, List<Object>> itemsMap = new HashMap<String, List<Object>>();
-	private Map<String, File[]> filesMap = new HashMap<String,File[]>();
-
-	public TemplateCompilerEngine(File root) {
-		super(root);
-	}
-
-	public String getCacheCode(String path){
-		String root = super.webRoot.getAbsolutePath();
-		if(root.endsWith("/") || root.endsWith("\\")){
-			root = root.substring(0,root.length()-1);
-		}
-		ArrayList<String> filesList = new ArrayList<String>();
-		for(File file : filesMap.get(path)){
-			String item = file.getAbsolutePath();
-			if(item.startsWith(root)){
-				filesList.add(item);
-			}
-		}
-		return JSONEncoder.encode(new Object[]{filesList,itemsMap.get(path)});
-	}
-
-	
-	protected Template createTemplate(String path,ParseContext context) throws IOException {
-		Template template = super.createTemplate(path, context);
-		this.itemsMap.put(path,context.toList());
-		this.filesMap.put(path,this.getAssociatedFiles(context));
-		return template;
-	}
-	
 }
