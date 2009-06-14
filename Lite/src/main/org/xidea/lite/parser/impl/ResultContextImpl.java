@@ -281,9 +281,15 @@ public class ResultContextImpl implements ResultContext {
 	private String addGlobalObject(Map objectIdMap, Object object, String key) {
 		String id = (String) (key == null ? objectIdMap.get(object) : key);
 		if (id == null) {
-			id = "__" + inc++ + "__";
+			id = newId();
 			objectIdMap.put(object, id);
 		}
+		return id;
+	}
+
+	public String newId() {
+		String id;
+		id = "__" + inc++ + "__";
 		return id;
 	}
 
