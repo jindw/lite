@@ -49,7 +49,7 @@ public class ServletTemplateEngine extends TemplateEngine {
 		if(autocompile){
 			return super.createTemplate(path, parseContext);
 		}else{
-			File file = new File(context.getRealPath("/WEB-INF/litecached"+URLEncoder.encode(path,"UTF-8")));
+			File file = new File(context.getRealPath("/WEB-INF/litecached/"+URLEncoder.encode(path,"UTF-8")));
 			List<Object> list = JSONDecoder.decode(loadText(file));
 			parseContext.addResource(file.toURI().toURL());
 			return new Template((List<Object>)list.get(1));

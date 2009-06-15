@@ -24,12 +24,4 @@ public class JSONEncoderTest {
 		assertEquals("{\"class\":\"java.lang.Object\"}", out.toString());
 	}
 
-	@Test
-	public void testJSEL() throws IOException {
-		Object o = new ExpressionImpl("{key:'value'}").evaluate(null);
-		System.out.println(o);
-		//assertEquals("{\"class\":\"java.lang.Object\"}", out.toString());
-	}
-
-
 }
