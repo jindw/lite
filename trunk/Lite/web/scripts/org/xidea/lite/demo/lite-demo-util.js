@@ -22,7 +22,7 @@ var TestCase = {
 	    	var parser = new XMLParser(true);
 	    	parser.parse(parseXMLText(templateSource));
 	    	var jsCode = parser.toCode();
-	        var jsTemplate = new Template(window.eval(jsCode));
+	        var jsTemplate = new Template(window.eval(jsCode || null));
 	        jsCode = jsCode
 	    }catch(e){
 	        $log.error("模板解析失败（JS）",e);
