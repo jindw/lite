@@ -127,18 +127,22 @@ public class JSONTokenizer {
 		int i = start;// skip -;
 		boolean isFloatingPoint = false;
 		char c = value.charAt(i++);
-		int flag;
+		boolean neg;
 		if (c == '-') {
 			c = value.charAt(i++);
-			flag = -1;
+			neg = true;
 		}else{
-			flag = 1;
+			neg =false;
 		}
 		if (c == '0') {
 			if (i < end) {
 				c = value.charAt(i++);
 				if (c == 'x' || c == 'X') {
-					return flag * parseHex(i);
+					long value = parseHex(i);
+					if(neg){
+						value = -value;
+					}
+					return value;
 				} else {
 					c = '0';
 					i--;
@@ -171,7 +175,10 @@ public class JSONTokenizer {
 				// c = '.';
 				// i--;
 				start = i - 2;
-				return flag * ivalue;
+				if(neg){
+					ivalue = -ivalue;
+				}
+				return  ivalue;
 			}
 		}
 		if (c == 'E' || c == 'e') {
@@ -198,7 +205,10 @@ public class JSONTokenizer {
 			return /*flag **/ Float.parseFloat(value.substring(start, start = i));
 		} else {
 			start = i;
-			return flag * ivalue;
+			if(neg){
+				ivalue = -ivalue;
+			}
+			return ivalue;
 		}
 	}
 
