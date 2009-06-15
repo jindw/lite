@@ -119,26 +119,26 @@ public class JSONTokenizer {
 				break;
 			}
 		}
-		if (value.charAt(start) == '-') {
-			lvalue = -lvalue;
-		}
 		start = i;
 		return lvalue;
 	}
-
+	//还是改成JDK自己的parser？
 	protected Number findNumber() {
 		int i = start;// skip -;
 		boolean isFloatingPoint = false;
-
 		char c = value.charAt(i++);
+		int flag;
 		if (c == '-') {
 			c = value.charAt(i++);
+			flag = -1;
+		}else{
+			flag = 1;
 		}
 		if (c == '0') {
 			if (i < end) {
 				c = value.charAt(i++);
 				if (c == 'x' || c == 'X') {
-					return parseHex(i);
+					return flag * parseHex(i);
 				} else {
 					c = '0';
 					i--;
@@ -171,7 +171,7 @@ public class JSONTokenizer {
 				// c = '.';
 				// i--;
 				start = i - 2;
-				return ivalue;
+				return flag * ivalue;
 			}
 		}
 		if (c == 'E' || c == 'e') {
@@ -195,10 +195,10 @@ public class JSONTokenizer {
 		}
 
 		if (isFloatingPoint) {
-			return Float.parseFloat(value.substring(start, start = i));
+			return /*flag **/ Float.parseFloat(value.substring(start, start = i));
 		} else {
 			start = i;
-			return ivalue;
+			return flag * ivalue;
 		}
 	}
 
