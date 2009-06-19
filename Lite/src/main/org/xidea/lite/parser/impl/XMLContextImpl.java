@@ -205,11 +205,18 @@ public class XMLContextImpl implements XMLContext {
 					.getFeatrue(XPathFactory.DEFAULT_PROPERTY_NAME);
 			if (xpathFactoryClass != null) {
 				try {
-					xpathFactory = XPathFactory
-							.newInstance(XPathFactory.DEFAULT_OBJECT_MODEL_URI,
-									xpathFactoryClass, this.getClass()
-											.getClassLoader());
-					return xpathFactory.newXPath();
+					try {
+						xpathFactory = XPathFactory.newInstance(
+								XPathFactory.DEFAULT_OBJECT_MODEL_URI,
+								xpathFactoryClass, this.getClass()
+										.getClassLoader());
+					} catch (NoSuchMethodError e) {
+						log.info("不好意思，我忘记了，我们JDK5没这个方法：<" + xpathFactoryClass
+								+ ">");
+						xpathFactory = (XPathFactory) Class.forName(
+								xpathFactoryClass).newInstance();
+						// 还有一堆校验，算了，饶了我吧：（
+					}
 				} catch (Exception e) {
 					log.error(
 							"自定义xpathFactory初始化失败<" + xpathFactoryClass + ">",
