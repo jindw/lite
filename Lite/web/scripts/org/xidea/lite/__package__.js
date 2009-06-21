@@ -12,7 +12,7 @@ this.addScript('variable-finder.js','findStatus'
 
 this.addScript('xml-context.js',['loadXML','selectNodes','parseXMLText']
                 ,0
-                ,'org.xidea.jsidoc.util:$log');
+                ,['org.xidea.jsidoc.util:$log','org.xidea.jsidoc.util:XMLHttpRequest']);
 
 this.addScript('xml-parser.js','XMLParser'
                 ,'ParseContext'
