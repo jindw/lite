@@ -102,6 +102,17 @@
 			<c:else>else</c:else>
 		</p>
 		<p>
+			for index:
+			<c:for items="${[1,2,3,4,5,6,7,8,9]}" var="item">
+				<div>
+					<c:if test="${for.index % 2 == 1}">双行</c:if>
+					<c:else>单行</c:else>
+					(${item})
+				</div>
+			</c:for>
+			<c:else>else</c:else>
+		</p>
+		<p>
 			var:xx=\${1+1}
 			<c:var name="xx" value="${1+1}" />
 			${xx}
