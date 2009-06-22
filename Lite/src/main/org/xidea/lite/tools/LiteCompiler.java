@@ -125,6 +125,9 @@ public class LiteCompiler {
 	public void setHtmlcached(File htmlcached) {
 		this.htmlcached = htmlcached;
 	}
+	public void setLitecached(File litecached) {
+		this.litecached = litecached;
+	}
 
 	public void setFeatrues(String[] featrues) {
 		this.featrues = featrues;
