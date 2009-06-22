@@ -12,8 +12,8 @@
 		<mkdir dir="build/dest" />
 	</target>
 	<target name="compilelite">
-		<delete dir="build/dest/temp"/>
-		<mkdir dir="build/dest/temp"/>
+		<delete dir="build/dest/temp" />
+		<mkdir dir="build/dest/temp" />
 		<copy todir="build/dest/temp">
 			<fileset dir="web">
 				<include name="**/*.xhtml" />
@@ -22,11 +22,13 @@
 				<exclude name="WEB-INF/htmlcached/**/*.*" />
 			</fileset>
 		</copy>
-		<java classname="org.xidea.lite.tools.LiteCompiler"
-			classpath="web/WEB-INF/lib/js.jar;web/WEB-INF/lib/JSI.jar;web/WEB-INF/lib/commons-logging-1.0.4.jar;web/WEB-INF/classes">
-			<arg value="-root" />
+		<java classname="org.xidea.lite.tools.LiteCompiler" classpath="web/WEB-INF/lib/js.jar;web/WEB-INF/lib/JSI.jar;web/WEB-INF/lib/commons-logging-1.0.4.jar;web/WEB-INF/classes">
+			<arg value="-webRoot" />
 			<arg value="${basedir}/build/dest/temp" />
+			<arg value="-litecached" />
+			<arg value="${basedir}/web/WEB-INF/litecached" />
 		</java>
+		<delete dir="build/dest/temp" />
 	</target>
 
 	<target name="packageOptimize">

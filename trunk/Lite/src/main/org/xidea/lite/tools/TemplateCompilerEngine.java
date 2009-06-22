@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -13,12 +12,12 @@ import org.xidea.lite.Template;
 import org.xidea.lite.TemplateEngine;
 import org.xidea.lite.parser.NodeParser;
 import org.xidea.lite.parser.ParseContext;
-import org.xidea.lite.parser.impl.ParseContextImpl;
 
 public class TemplateCompilerEngine extends TemplateEngine {
 
 	private Map<String, List<Object>> itemsMap = new HashMap<String, List<Object>>();
 	private Map<String, File[]> filesMap = new HashMap<String, File[]>();
+	@SuppressWarnings("unchecked")
 	private NodeParser[] parsers;
 	private Map<String, String> featrueMap;
 
@@ -40,6 +39,7 @@ public class TemplateCompilerEngine extends TemplateEngine {
 
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	protected ParseContext createParseContext() {
 		ParseContext context = super.createParseContext();
@@ -63,7 +63,7 @@ public class TemplateCompilerEngine extends TemplateEngine {
 		for (File file : filesMap.get(path)) {
 			String item = file.getAbsolutePath();
 			if (item.startsWith(root)) {
-				filesList.add(item);
+				filesList.add(item.substring(root.length()));
 			}
 		}
 		return JSONEncoder
