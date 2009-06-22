@@ -223,7 +223,7 @@ class _LitePropertyValue {
 		$this->base = &$base;
 		$this->name = &$name;
 	}
-	function &get(){
+	function get(){
 		$base = &$this->base;
 		$name = &$this->name;
 		if(is_array($base)) {
