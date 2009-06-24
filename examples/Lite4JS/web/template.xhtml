@@ -1,0 +1,76 @@
+<html xmlns:c="http://www.xidea.org/ns/lite">
+	<head>
+		<title>小饭团程序</title>
+	</head>
+	<c:client id="tempalte">
+		<table width="600px" border="1">
+			<tr>
+				<td>成员</td>
+				<td>总存款</td>
+				<td>余额</td>
+			</tr>
+			<c:for items="${userList}" var="item">
+				<tr>
+					<td>${item.name}</td>
+					<td>${item.deposited}</td>
+					<td style="${item.deposited > item.cost?'':'color:red'}">
+					${item.deposited-item.cost}
+					</td>
+				</tr>
+			</c:for>
+			<tr>
+				<td colspan="3">
+					<form>
+						<c:for items="${userList}" var="item">
+							<label>
+								${item.name}：
+								<input type="checkbox" name="user"
+									value="${item.name}" />
+
+							</label>
+						</c:for>
+						<label>
+							金额：
+							<input type="input" size="10" name="amount" />
+						</label>
+						<label>
+							<input type="button" value="存款" onclick="controller.deposit(this.user,this.amount)" />
+							<input type="button" value="消費" onclick="controller.cost(this.user,this.amount)" />
+						</label>
+					</form>
+				</td>
+			</tr>
+		</table>
+	</c:client>
+	<body>
+		<div id="content"></div>
+		<script
+			src="http://jsicdn.appspot.com/cdn/=
+					org.xidea.lite.Template
+					+org.jside.E
+					+org.jside.Cookie
+					+org.jside.JSON">
+		</script>
+		<script>
+			//模型层 var model = { "userList":[
+			{"name":"金大为","deposited":100,"cost":10},
+			{"name":"路人甲","deposited":20},
+			{"name":"路人乙","deposited":45}, ] }; var dao = new
+			Cookie("date","/",new Date(2200)); function save(data){
+			dao.set(encode(JSON.encode(data))); } function load(){ var
+			data = dao.get(); return data?JSON.decode(data):model; }
+			model = load();
+		</script>
+		<script>
+			//控制层
+
+			var controller = { cost:function(users,amout){ repaint(); },
+			pay:function(user,amout){ } }
+		</script>
+		<script>
+			//视图层 function repaint(){ E("content").innerHTML =
+			template.render(model); } //警告：前端模板可不能這么用！！！ var template =
+			new Template("template.xhtml#//c:template/*"); repaint();
+		</script>
+	</body>
+</html>
