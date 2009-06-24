@@ -8,65 +8,95 @@
 					+org.jside.E
 					+org.jside.Cookie
 					+org.jside.JSON"></script>
-		<title>小饭团程序</title>
+		<style>
+		label{
+			padding:10px;
+		}
+		td{
+			font-size:13px;
+		}
+		</style>
+		<title>小饭团实例</title>
 	</head>
 	<body>
-		<h3>迷你小饭团程序</h3>
+		<h3>迷你小饭团实例</h3>
 		<div id="content"></div>
 		<script>
-		//模型层
-		var model = {
-			"userList":[
-				{"name":"金大为","deposited":100,"cost":10},
-				{"name":"路人甲","deposited":20,"cost":45},
-				{"name":"路人乙","deposited":45,"cost":10},
-			]
-		};
-		var dao = new Cookie("date","/",new Date(2200));
-		function save(data){
-			dao.set(encode(JSON.encode(data)));
-		}
-		function load(){
-			var data = dao.get();
-			return data?JSON.decode(data):model;
-		}
-		model = load();
+			//<![CDATA[
+			//模型层
+			var model = {
+				"userList":[
+					{"name":"金大为","deposited":100,"cost":10},
+					{"name":"路人甲","deposited":20,"cost":45},
+					{"name":"路人乙","deposited":45,"cost":10},
+				]
+			};
+			var dao = new Cookie("date","/",new Date(2200));
+			function save(){
+				dao.set(JSON.encode(model));
+			}
+			function load(){
+				var data = dao.get();
+				return data?JSON.decode():model;
+			}
+			model = load();
+			//]]>
 		</script>
 		<script>
-		//控制层
-		
-		var controller = {
-			cost:function(users,amount){
-				users = getUsers(users);
-				var userAmount = amount/users.length;
-				for(var i = 0;i<users.length;i++){
-					model.userList[item.value].cost +=userAmount;
+			//<![CDATA[
+			//控制层
+			var controller = {
+				cost:function(users,amount){
+					users = getSelectedUserList(users);
+					var userAmount = amount/users.length;
+					for(var i = 0;i<users.length;i++){
+						users[i].cost +=userAmount;
+					}
+					save();
+					repaint();
+				},
+				deposit:function(users,amount){
+					users = getSelectedUserList(users);
+					var userAmount = amount/users.length;
+					for(var i = 0;i<users.length;i++){
+						users[i].deposited +=userAmount;
+					}
+					save();
+					repaint();
 				}
-				repaint();
-			},
-			pay:function(users,amout){
 			}
-		}
-		
-		function getUsers(users){
-			var result = [];
-			for(var i=0;i<users.length;i++){
-				var item = users[i];
-				if(item.checked){
-					result.push(item.value);
+			
+			function getSelectedUserList(users){
+				var result = [];
+				for(var i=0;i<users.length;i++){
+					var user = users[i];
+					if(user.checked){
+						result.push(getUserByName(user.value))
+						
+					}
+				}
+				return result;
+			}
+			function getUserByName(userName){
+				var j = model.userList.length
+				while(j--){
+					if(model.userList[j].name == userName){
+						return model.userList[j];
+					}
 				}
 			}
-			return result;
-		}
+			//]]>
 		</script>
 		<script>
-		//视图层
-		function repaint(){
-			E("content").innerHTML = template.render(model);
-		}
-		//警告：前端模板可不能這么用！！！
-		var template = new Template("template.xhtml#//c:client/*");
-		repaint();
+			//<![CDATA[
+			//视图层
+			function repaint(){
+				E("content").innerHTML = template.render(model);
+			}
+			//警告：前端模板可不能這么用！！！
+			var template = new Template("template.xhtml#//c:client/*");
+			repaint();
+			//]]>
 		</script>
 	</body>
 </html>
