@@ -1,13 +1,8 @@
 <html xmlns:c="http://www.xidea.org/ns/lite">
 	<head>
 		<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+		<title>小饭团实例</title>
 		<link href="http://jsicdn.appspot.com/styles/default.css" rel="Stylesheet" type="text/css"/>
-		
-		<script src="http://jsicdn.appspot.com/cdn/=
-					org.xidea.lite.Template
-					+org.jside.E
-					+org.jside.Cookie
-					+org.jside.JSON"></script>
 		<style>
 		label{
 			padding:10px;
@@ -16,11 +11,11 @@
 			font-size:13px;
 		}
 		</style>
-		<title>小饭团实例</title>
-	</head>
-	<body>
-		<h3>迷你小饭团实例</h3>
-		<div id="content"></div>
+		<script src="http://jsicdn.appspot.com/cdn/=
+					org.xidea.lite.Template
+					+org.jside.E
+					+org.jside.Cookie
+					+org.jside.JSON"></script>
 		<script>
 			//<![CDATA[
 			//模型层
@@ -29,17 +24,36 @@
 					{"name":"金大为","deposited":100,"cost":10},
 					{"name":"路人甲","deposited":20,"cost":45},
 					{"name":"路人乙","deposited":45,"cost":10},
-				]
+				],
+				dao: new Cookie("date","/",new Date(2200)),
+				save:function(){
+					this.dao.set(JSON.encode(this.userList));
+				},
+				load : function(){
+					var data = this.dao.get();
+					if(data){
+						this.userList = JSON.decode(data);
+					}
+				},
+				cost:function(users,averageCost){
+					var i = users.length;
+					while(i--){
+						this.getUserByName(users[i]).cost +=averageCost;
+					}
+				},
+				deposit:function(user,amount){
+					this.getUserByName(user).deposited +=amount;
+				},
+				getUserByName:function(userName){
+					var j = this.userList.length
+					while(j--){
+						if(this.userList[j].name == userName){
+							return this.userList[j];
+						}
+					}
+				}
 			};
-			var dao = new Cookie("date","/",new Date(2200));
-			function save(){
-				dao.set(JSON.encode(model));
-			}
-			function load(){
-				var data = dao.get();
-				return data?JSON.decode():model;
-			}
-			model = load();
+			model.load();
 			//]]>
 		</script>
 		<script>
@@ -47,22 +61,28 @@
 			//控制层
 			var controller = {
 				cost:function(users,amount){
-					users = getSelectedUserList(users);
-					var userAmount = amount/users.length;
-					for(var i = 0;i<users.length;i++){
-						users[i].cost +=userAmount;
+					var userList = getSelectedUserList(users);
+					if(userList.length == 0){
+						alert("请选择消费人员清单");
+					}else{
+						var averageCost = amount/userList.length;
+						model.cost(userList,averageCost);
+						model.save();
+						repaint();
 					}
-					save();
-					repaint();
 				},
 				deposit:function(users,amount){
-					users = getSelectedUserList(users);
-					var userAmount = amount/users.length;
-					for(var i = 0;i<users.length;i++){
-						users[i].deposited +=userAmount;
+					var userList = getSelectedUserList(users);
+					if(userList.length == 0){
+						alert("请选择充值用户");
+					}else{
+						if(userList.length>1){
+							alert("只能单人充值，输入金额将充值给第一个用户："+userList[0]);
+						}
+						model.deposit(userList[0],amount);
+						model.save();
+						repaint();
 					}
-					save();
-					repaint();
 				}
 			}
 			
@@ -71,22 +91,18 @@
 				for(var i=0;i<users.length;i++){
 					var user = users[i];
 					if(user.checked){
-						result.push(getUserByName(user.value))
-						
+						result.push(user.value)
 					}
 				}
 				return result;
 			}
-			function getUserByName(userName){
-				var j = model.userList.length
-				while(j--){
-					if(model.userList[j].name == userName){
-						return model.userList[j];
-					}
-				}
-			}
 			//]]>
 		</script>
+	</head>
+	<body>
+		<h3>迷你小饭团实例</h3>
+		<div id="content"></div>
+		
 		<script>
 			//<![CDATA[
 			//视图层
