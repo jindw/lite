@@ -138,151 +138,151 @@ public class ParseContextImpl implements ParseContext {
 		getTopChain().process(source);
 	}
 
-	public TextParser[] getTextParsers() {
+	public final TextParser[] getTextParsers() {
 		return parserHolder.getTextParsers();
 	}
 
-	public String getFeatrue(String key) {
+	public final String getFeatrue(String key) {
 		return resultContext.getFeatrue(key);
 	}
 
-	public Map<String, String> getFeatrueMap() {
+	public final Map<String, String> getFeatrueMap() {
 		return resultContext.getFeatrueMap();
 	}
 	// delegate methods...
 
-	public void addResource(URL resource) {
+	public final void addResource(URL resource) {
 		resourceContext.addResource(resource);
 	}
 
-	public URL createURL(String file, URL parentURL) {
+	public final URL createURL(String file, URL parentURL) {
 		return resourceContext.createURL(file, parentURL);
 	}
 
-	public Object getAttribute(Object key) {
+	public final Object getAttribute(Object key) {
 		return resourceContext.getAttribute(key);
 	}
 
-	public URL getCurrentURL() {
+	public final URL getCurrentURL() {
 		return resourceContext.getCurrentURL();
 	}
 
-	public InputStream getInputStream(URL url) {
+	public final InputStream getInputStream(URL url) {
 		return resourceContext.getInputStream(url);
 	}
 
-	public Collection<URL> getResources() {
+	public final Collection<URL> getResources() {
 		return resourceContext.getResources();
 	}
 
-	public void setAttribute(Object key, Object value) {
+	public final void setAttribute(Object key, Object value) {
 		resourceContext.setAttribute(key, value);
 	}
 
-	public void setCurrentURL(URL currentURL) {
+	public final void setCurrentURL(URL currentURL) {
 		resourceContext.setCurrentURL(currentURL);
 	}
 
-	public String addGlobalObject(Class<? extends Object> impl, String key) {
+	public final String addGlobalObject(Class<? extends Object> impl, String key) {
 		return resultContext.addGlobalObject(impl, key);
 	}
 
-	public String addGlobalObject(Object object, String key) {
+	public final String addGlobalObject(Object object, String key) {
 		return resultContext.addGlobalObject(object, key);
 	}
 
-	public void append(String text) {
+	public final void append(String text) {
 		resultContext.append(text);
 	}
-	public void append(ResultItem text) {
+	public final void append(ResultItem text) {
 		resultContext.append(text);
 	}
 
-	public void append(String text, boolean encode, char escapeQute) {
+	public final void append(String text, boolean encode, char escapeQute) {
 		resultContext.append(text, encode, escapeQute);
 	}
 
-	public void appendAll(List<Object> instruction) {
+	public final void appendAll(List<Object> instruction) {
 		resultContext.appendAll(instruction);
 	}
 
-	public void appendAttribute(String name, Object el) {
+	public final void appendAttribute(String name, Object el) {
 		resultContext.appendAttribute(name, el);
 	}
 
-	public void appendCaptrue(String varName) {
+	public final void appendCaptrue(String varName) {
 		resultContext.appendCaptrue(varName);
 	}
 
-	public void appendEL(Object el) {
+	public final void appendEL(Object el) {
 		resultContext.appendEL(el);
 	}
 
-	public void appendElse(Object testEL) {
+	public final void appendElse(Object testEL) {
 		resultContext.appendElse(testEL);
 	}
 
-	public void appendEnd() {
+	public final void appendEnd() {
 		resultContext.appendEnd();
 	}
 
-	public void appendFor(String var, Object itemsEL, String status) {
+	public final void appendFor(String var, Object itemsEL, String status) {
 		resultContext.appendFor(var, itemsEL, status);
 	}
 
-	public void appendIf(Object testEL) {
+	public final void appendIf(Object testEL) {
 		resultContext.appendIf(testEL);
 	}
 
-	public void appendVar(String name, Object valueEL) {
+	public final void appendVar(String name, Object valueEL) {
 		resultContext.appendVar(name, valueEL);
 	}
 
-	public void appendXmlText(Object el) {
+	public final void appendXmlText(Object el) {
 		resultContext.appendXmlText(el);
 	}
 
-	public void appendAdvice(Class<? extends Object> clazz, Object el) {
+	public final void appendAdvice(Class<? extends Object> clazz, Object el) {
 		resultContext.appendAdvice(clazz, el);
 	}
 
-	public int mark() {
+	public final int mark() {
 		return resultContext.mark();
 	}
 
-	public Object parseEL(String eltext) {
+	public final Object parseEL(String eltext) {
 		return resultContext.parseEL(eltext);
 	}
 
 
-	public List<Object> reset(int mark) {
+	public final List<Object> reset(int mark) {
 		return resultContext.reset(mark);
 	}
 
-	public void setExpressionFactory(ExpressionFactory expressionFactory) {
+	public final void setExpressionFactory(ExpressionFactory expressionFactory) {
 		resultContext.setExpressionFactory(expressionFactory);
 	}
 
-	public int findBeginType() {
+	public final int findBeginType() {
 		return resultContext.findBeginType();
 	}
 
-	public int findBegin() {
+	public final int findBegin() {
 		return resultContext.findBegin();
 	}
 
-	public int getDepth() {
+	public final int getDepth() {
 		return resultContext.getDepth();
 	}
 
-	public int getType(int offset) {
+	public final int getType(int offset) {
 		return resultContext.getType(offset);
 	}
 
-	public List<Object> toList() {
+	public final List<Object> toList() {
 		return resultContext.toList();
 	}
-	public String toCode() {
+	public final String toCode() {
 		if(translator==null){
 			return resultContext.toCode();
 		}else{
@@ -290,71 +290,71 @@ public class ParseContextImpl implements ParseContext {
 		}
 	}
 
-	public void beginIndent() {
+	public final void beginIndent() {
 		xmlContext.beginIndent();
 	}
 
-	public void endIndent() {
+	public final void endIndent() {
 		xmlContext.endIndent();
 	}
 
-	public boolean isCompress() {
+	public final boolean isCompress() {
 		return xmlContext.isCompress();
 	}
 
-	public boolean isFormat() {
+	public final boolean isFormat() {
 		return xmlContext.isFormat();
 	}
 
-	public boolean isReserveSpace() {
+	public final boolean isReserveSpace() {
 		return xmlContext.isReserveSpace();
 	}
 
-	public void setCompress(boolean compress) {
+	public final void setCompress(boolean compress) {
 		xmlContext.setCompress(compress);
 	}
 
-	public void setFormat(boolean format) {
+	public final void setFormat(boolean format) {
 		xmlContext.setFormat(format);
 	}
 
-	public void setReserveSpace(boolean keepSpace) {
+	public final void setReserveSpace(boolean keepSpace) {
 		xmlContext.setReserveSpace(keepSpace);
 	}
 
-	public int getTextType() {
+	public final int getTextType() {
 		return resourceContext.getTextType();
 	}
 
-	public Document loadXML(URL url) throws SAXException, IOException {
+	public final Document loadXML(URL url) throws SAXException, IOException {
 		return xmlContext.loadXML(url);
 	}
 
-	public DocumentFragment selectNodes(Node doc, String xpath)
+	public final DocumentFragment selectNodes(Node doc, String xpath)
 			throws XPathExpressionException {
 		return xmlContext.selectNodes(doc, xpath);
 	}
 
-	public Node transform(URL parentURL, Node doc, String xslt)
+	public final Node transform(URL parentURL, Node doc, String xslt)
 			throws TransformerConfigurationException,
 			TransformerFactoryConfigurationError, TransformerException,
 			IOException {
 		return xmlContext.transform(parentURL, doc, xslt);
 	}
 
-	public void addTextParser(TextParser iparser) {
+	public final void addTextParser(TextParser iparser) {
 		parserHolder.addTextParser(iparser);
 	}
 
-	public void addNodeParser(NodeParser<? extends Node> iparser) {
+	public final void addNodeParser(NodeParser<? extends Node> iparser) {
 		parserHolder.addNodeParser(iparser);
 	}
 
-	public ParseChain getTopChain() {
+	public final ParseChain getTopChain() {
 		return parserHolder.getTopChain();
 	}
 
-	public void setTextType(int textType) {
+	public final void setTextType(int textType) {
 		resourceContext.setTextType(textType);
 	}
 
