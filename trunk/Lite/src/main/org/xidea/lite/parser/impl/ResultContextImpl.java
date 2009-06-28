@@ -47,6 +47,12 @@ public class ResultContextImpl implements ResultContext {
 	public Object parseEL(String expression) {
 		return expressionFactory.parse(expression);
 	}
+	private Object requrieEL(Object expression){
+		if(expression instanceof String){
+			expression = parseEL((String)expression);
+		}
+		return expression;
+	}
 
 	public void append(String text) {
 		if (text != null && text.length() > 0) {
@@ -113,7 +119,6 @@ public class ResultContextImpl implements ResultContext {
 			} else{
 				this.append((Object[]) text);
 			}
-
 		}
 	}
 
@@ -131,12 +136,12 @@ public class ResultContextImpl implements ResultContext {
 	}
 
 	public void appendAttribute(String name, Object el) {
-		this.append(new Object[] { Template.XML_ATTRIBUTE_TYPE, el, name });
+		this.append(new Object[] { Template.XML_ATTRIBUTE_TYPE, requrieEL(el), name });
 
 	}
 
 	public void appendIf(Object testEL) {
-		this.append(new Object[] { Template.IF_TYPE, testEL });
+		this.append(new Object[] { Template.IF_TYPE, requrieEL(testEL) });
 	}
 
 	public void appendElse(Object testEL) {
@@ -144,7 +149,7 @@ public class ResultContextImpl implements ResultContext {
 		if (this.getType(this.result.size() - 1) != -1) {
 			this.appendEnd();
 		}
-		this.append(new Object[] { Template.ELSE_TYPE, testEL });
+		this.append(new Object[] { Template.ELSE_TYPE, requrieEL(testEL) });
 	}
 
 	public void appendEnd() {
@@ -152,7 +157,7 @@ public class ResultContextImpl implements ResultContext {
 	}
 
 	public void appendVar(String name, Object valueEL) {
-		this.append(new Object[] { Template.VAR_TYPE, valueEL, name });
+		this.append(new Object[] { Template.VAR_TYPE, requrieEL(valueEL), name });
 	}
 
 	public void appendCaptrue(String varName) {
@@ -161,6 +166,7 @@ public class ResultContextImpl implements ResultContext {
 	}
 
 	public void appendFor(String var, Object itemsEL, String status) {
+		itemsEL = requrieEL(itemsEL);
 		this.append(new Object[] { Template.FOR_TYPE, itemsEL, var });
 		if (status != null && status.length() > 0) {
 			this.appendVar(status, this.parseEL("for"));
@@ -168,6 +174,7 @@ public class ResultContextImpl implements ResultContext {
 	}
 
 	public void appendEL(Object el) {
+		el = requrieEL(el);
 		this.append(new Object[] { Template.EL_TYPE, el });
 
 	}
@@ -177,7 +184,7 @@ public class ResultContextImpl implements ResultContext {
 	}
 
 	public void appendAdvice(Class<? extends Object> clazz, Object el) {
-		this.append(new Object[] { Template.ADD_ON_TYPE, el, clazz.getName() });
+		this.append(new Object[] { Template.ADD_ON_TYPE, requrieEL(el), clazz.getName() });
 	}
 
 	public int mark() {

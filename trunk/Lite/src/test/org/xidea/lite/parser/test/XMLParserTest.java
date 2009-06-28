@@ -33,23 +33,6 @@ public class XMLParserTest {
 	}
 
 	@Test
-	public void testError() throws Exception {
-		URL url = new URL("http://test/");
-		ParseContextImpl context = new ParseContextImpl(url,null,null,null){
-			@Override
-			public InputStream getInputStream(URL url) {
-				return new ByteArrayInputStream("<xml".getBytes());
-			}
-			
-		}; 
-		try{
-			org.w3c.dom.Document doc = new XMLParser().loadXML(url, context);
-			Assert.fail("非法xml必须抛出");
-		}catch (Exception e) {
-			//e.printStackTrace();
-		}
-	}
-	@Test
 	public void testSelect() throws Exception {
 		URL url = this.getClass().getResource("include-test.xml");
 		ParseContextImpl context = new ParseContextImpl(url,null,null,null); 
