@@ -3,25 +3,27 @@
 Lite Compiler的解析链结构简单表示如下：
 
 {{{
- 
-[ParseChain]                     [Parser]    
-    |                               |
-    |                               |
-    |                        /------^-------\
-    |                        |              |  
-    |                   [NodeParser]    [TextParser]
-    |----【解析链顶】         ^              ^
-    |                         |              |
-    |-----[HTMLParser] -------/              |
-    |                         |              |
-    |-----[CoreXMLParser]-----/              |
-    |                         |              |
-    |-----[DefaultXMLParser]--/              |
-    |                                        |
-    |                                        |
-    |--------------------------------[TextParserImpl]-------[InstructionParser（名字是不是改成ELParser）]
-                                                                   |
-                                                        【添加自定义指令解析器】..
+   
+[ParseChain]                [NodeParser]    
+    |                             |
+    |                             |
+    |                             |           
+    |----【解析链顶】             ^          
+    |                             |          
+    |-----[HTMLNodeParser] -------/    
+    |                             |              
+    |-----[CoreXMLNodeParser]-----/              
+    |                             |              
+    |-----[DefaultXMLNodeParser]--/              
+    |                             |              
+    |                             |              
+    |-----[TextNodeParser]--------/
+                      ^
+                      |
+                      |
+                      \ ----[TextParser]
+                                  |
+                         【添加自定义文本模板语法】..
                     
 }}}
 === 基本用法 ===
@@ -38,12 +40,12 @@ function pagerParser (pagerNode，context,chain){
     # 合作模式
       可以将当前节点克隆后，做适当修改，能后交由后续解析器处理【chain.process(node)】。
       不能处理的节点，直接让后续节点处理。
-  * 添加指令解析器
-    用于解析文本节点中的动态内容，如表达式，也可以是文本格式的控制指令。
+  * 添加文本语法解析器
+    用于解析文本节点中的动态内容，如表达式，也可以是文本格式的控制指令（配合TextNodeParser实现）。
     接口代码：
     {{{
 var pagerParser = {
-	findStart:function(text,start,context){
+	findStart:function(text,start,otherStart){
 		rerurn <el begin>
 	},
 	parse:function(text,start,context){
@@ -107,7 +109,7 @@ var $if = {
 		context.appendIf(el);
 		return end+2;
 	},
-	findStart : function(text,start,context){
+	findStart : function(text,start,otherStart){
 		return text.indexOf("{{if",start);
 	}
 }
@@ -116,11 +118,11 @@ var $endif = {
 		context.appendEnd();
 		return start+10;
 	},
-	findStart : function(text,start,context){
+	findStart : function(text,start,otherStart){
 		return text.indexOf("{{/endif}}",start);
 	}
 }
 //将文本指令解析器添加到解析上下文
-context.addInstructionParser($if);
-context.addInstructionParser($endif);
+context.addTextParser($if);
+context.addTextParser($endif);
 }}}
