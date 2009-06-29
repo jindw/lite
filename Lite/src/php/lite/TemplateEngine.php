@@ -25,7 +25,8 @@ class TemplateEngine{
 	 */
 	var $autocompile = true;
 	//var $liteService='http://localhost:8080';
-	var $liteService='http://litecompiler.appspot.com';
+	//var $liteService='http://litecompiler.appspot.com';
+	var $liteService='java -jar $this->liteBase';
 	var $liteCached;
 	function TemplateEngine($liteBase=null,$liteService=null){
 		if($liteBase == null){
