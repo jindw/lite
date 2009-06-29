@@ -62,7 +62,7 @@ function lite_print_xml_text(&$text){
     }
 }
 
-function lite_to_bool(&$test){
+function lite_to_bool($test){
     return !!$test;
 }
 
