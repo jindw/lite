@@ -114,8 +114,11 @@ class TemplateEngine{
 					sleep(10);
 					continue;
 				}
-				if(!is_array($result)){
-					$missed = $result->missed;
+				if(is_array($result)){
+				    $this->writeCache($liteFile,$paths,$code);
+					return array($paths,$result,$code);
+				}else{
+		        	$missed = $result->missed;
 					$retry = false;
 					foreach($missed as $path){
 						if(!in_array($path,$paths)){
@@ -130,9 +133,6 @@ class TemplateEngine{
 						return array($paths,array($code));
 					}
 					sleep(5);
-				}else{
-		            $this->writeCache($liteFile,$paths,$code);
-					return array($paths,$result,$code);
 				}
 			}
 		}
