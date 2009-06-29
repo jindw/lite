@@ -16,6 +16,7 @@ import org.xidea.lite.Template;
 public class LiteCompiler {
 	private static final Log log = LogFactory.getLog(LiteCompiler.class);
 	private File webRoot;
+	private String path;
 	private String[] parsers;
 	private String[] featrues;
 	private File htmlcached;
@@ -33,7 +34,11 @@ public class LiteCompiler {
 
 	public void execute() {
 		initialize();
-		this.processDir(webRoot, "/");
+		if(path == null){
+			this.processDir(webRoot, "/");
+		}else{
+			this.processFile(path);
+		}
 	}
 
 	protected void initialize() {
@@ -139,5 +144,8 @@ public class LiteCompiler {
 
 	public void setEncoding(String encoding) {
 		this.encoding = encoding;
+	}
+	public void setPath(String path) {
+		this.path = path;
 	}
 }
