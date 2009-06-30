@@ -9,7 +9,7 @@ import java.util.Map;
 import org.xidea.el.ExpressionFactory;
 import org.xidea.el.impl.ExpressionFactoryImpl;
 import org.xidea.el.json.JSONEncoder;
-import org.xidea.lite.VarAdvice;
+import org.xidea.lite.BuildInAdvice;
 import org.xidea.lite.Template;
 import org.xidea.lite.parser.ResultContext;
 import org.xidea.lite.parser.ResultItem;
@@ -269,7 +269,7 @@ public class ResultContextImpl implements ResultContext {
 				attributeMap.put("name", valueIdMap.get(value));
 				attributeMap.put(valueKey, value);
 				Object valueEL = this.parseEL(JSONEncoder.encode(attributeMap));
-				this.appendAdvice(VarAdvice.class, valueEL);
+				this.appendAdvice(BuildInAdvice.class, valueEL);
 				this.appendEnd();
 			}
 		}
