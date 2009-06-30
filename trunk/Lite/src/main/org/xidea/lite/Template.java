@@ -121,7 +121,7 @@ public class Template {
 			if("#def".equals(cn)){
 				addOnType = MacroAdvice.class;
 			}else if("#var".equals(cn)){
-				addOnType = VarAdvice.class;
+				addOnType = StaticAdvice.class;
 			}else{
 				addOnType = Class.forName(cn);
 			}

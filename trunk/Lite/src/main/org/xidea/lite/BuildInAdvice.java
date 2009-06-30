@@ -6,8 +6,8 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class VarAdvice implements CompileAdvice {
-	private static Log log = LogFactory.getLog(VarAdvice.class);
+public class BuildInAdvice implements CompileAdvice {
+	private static Log log = LogFactory.getLog(BuildInAdvice.class);
 	private String name;
 	private Object value;
 	private String type;
@@ -37,5 +37,6 @@ public class VarAdvice implements CompileAdvice {
 		}
 		return null;
 	}
+
 
 }
