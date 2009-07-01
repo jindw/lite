@@ -52,12 +52,12 @@ class Expression{
 	function Expression(&$tokens){
 		$this->tokens = &$tokens;
 	}
-	function &evaluate(&$context) {
+	function evaluate(&$context) {
 		return lite_evaluate($context,$this->tokens);
 	}
 }
 
-function lite_evaluate(&$context,$tokens) {
+function lite_evaluate(&$context,&$tokens) {
 	if(count($tokens)==1){
 	    $stack = lite_value($context,$tokens[0]);
 	}else{
