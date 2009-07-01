@@ -50,11 +50,11 @@ function lite_render_list(&$context, &$children){
         }
     }
 }
-function lite_print_xml_attribute(&$text){
+function lite_print_xml_attribute($text){
     lite_print_xml_text($text);
 }
 
-function lite_print_xml_text(&$text){
+function lite_print_xml_text($text){
     if(is_bool($text)){
         echo $text?'true':'false';
     }else{
@@ -66,10 +66,10 @@ function lite_to_bool($test){
     return !!$test;
 }
 
-function lite_process_el(&$context, &$data, $encodeXML){
+function lite_process_el(&$context, &$data, $encode_xml){
 	$stack = &$data[1];
     $value = lite_evaluate($context,$stack);
-    if($encodeXML && isset($value)){
+    if($encode_xml && isset($value)){
         lite_print_xml_text($value);
     }else{
         echo $value;
@@ -137,7 +137,7 @@ function lite_process_for(&$context, &$data){
         $context[LITE_FOR_KEY]=&$preiousStatus;
         $context[LITE_IF_KEY]= $length > 0;
     }catch(Exception $e){
-        $context[LITE_FOR_KEY]=$preiousStatus;
+        $context[LITE_FOR_KEY]=&$preiousStatus;
         $context[LITE_IF_KEY]= $length > 0;
         throw $e;
     }
