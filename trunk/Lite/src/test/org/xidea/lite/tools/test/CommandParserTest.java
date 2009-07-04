@@ -39,7 +39,6 @@ public class CommandParserTest {
 		System.out.println(Arrays.asList(field.getAnnotations()));
 		System.out.println(field.getType());
 		ParameterizedType pt = (ParameterizedType) field.getGenericType();
-		System.out.println(pt.getOwnerType());
 		System.out.println(Arrays.asList(pt.getActualTypeArguments()));
 
 	}
