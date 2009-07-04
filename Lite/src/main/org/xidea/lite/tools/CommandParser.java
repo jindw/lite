@@ -25,13 +25,7 @@ public class CommandParser {
 	public static final Map<Class<?>, Convertor<? extends Object>> CONVERTOR_MAP;
 	public Map<Class<?>, Convertor<? extends Object>> convertorMap = CONVERTOR_MAP;
 
-	private Map<String, String[]> params = Collections.emptyMap();
-
 	public CommandParser(){
-	}
-	public CommandParser(String[] args){
-		this.params = parseArgs(args);
-		;
 	}
 	public void addConvertor(Convertor<? extends Object> convertor){
 		if(!(convertorMap instanceof HashMap)){
@@ -41,16 +35,12 @@ public class CommandParser {
 		
 	}
 
-	public void setup(Object result) {
-		setup(result, params);
-	}
-
 	public void setup(Object result,String[] args) {
 		setup(result, parseArgs(args));
 	}
 
 
-	protected void setup(final Object context, Map<String,String[]> params) {
+	public void setup(final Object context, Map<String,String[]> params) {
 		for (String name : params.keySet()) {
 			if (name!=null && name.length() > 0) {
 				ReferenceExpression el = new ExpressionImpl(name);
