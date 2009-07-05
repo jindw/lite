@@ -2,6 +2,10 @@ package org.xidea.el.impl;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -74,25 +78,111 @@ public abstract class ReflectUtil {
 		return key instanceof Number ? ((Number) key).intValue() : Integer
 				.parseInt(String.valueOf(key));
 	}
+	@SuppressWarnings("unchecked")
+	public static Class getValueType(Type type){
+		Type result = null;
+		Class clazz = null;
+		if (type instanceof ParameterizedType) {
+			clazz = (Class) ((ParameterizedType)type).getRawType();
+		} else {
+			clazz = (Class) type;
+		}
+		if(Collection.class.isAssignableFrom(clazz)){
+			result = getParameterizedType(type,Collection.class,0);
+		}
+		if(Map.class.isAssignableFrom(clazz)){
+			result = getParameterizedType(type,Map.class,1);
+		}
+		if(result!=null){
+			return findClass(result);
+		}
+		return Object.class;
+	}
 
-	public static Class<? extends Object> getType(Class<? extends Object> type,
+	@SuppressWarnings("unchecked")
+	public static Type getParameterizedType(Type type,Class destClass,int paramIndex) {
+		Class clazz = null;
+		ParameterizedType pt = null;
+		Type[] ats = null;
+		TypeVariable[] tps = null;
+		if (type instanceof ParameterizedType) {
+			pt = (ParameterizedType) type;
+			clazz = (Class) pt.getRawType();
+			ats = pt.getActualTypeArguments();
+			tps  = clazz.getTypeParameters();
+		} else {
+			clazz = (Class) type;
+		}
+		if (destClass.equals(clazz)) {
+			if (pt != null) {
+				return pt.getActualTypeArguments()[0];
+			}
+			return Object.class;
+		}
+		Class<?>[] ifs = clazz.getInterfaces();
+		Type[] pis = clazz.getGenericInterfaces();
+		for (int i = 0; i < ifs.length; i++) {
+			Class<?> ifc = ifs[i];
+			if (destClass.isAssignableFrom(ifc)) {
+				return getTureType(getParameterizedType(pis[i],destClass,paramIndex),tps,ats);
+			}
+		}
+		Class<?> type2 = clazz.getSuperclass();
+		if (type2 != null) {
+			if (destClass.isAssignableFrom(type2)) {
+				return getTureType(getParameterizedType(clazz.getGenericSuperclass(),destClass,paramIndex),tps,ats);
+			}
+		}
+		throw new IllegalArgumentException("必须是Collection 子类");
+	}
+
+	@SuppressWarnings("unchecked")
+	private static Type getTureType(Type type, TypeVariable[] typeVariables, Type[] actualTypes) {
+		if (type instanceof Class) {
+			return type;
+		} else if (type instanceof TypeVariable) {
+			TypeVariable tv = (TypeVariable) type;
+			String name = tv.getName();
+			if (actualTypes != null) {
+				for (int i = 0; i < typeVariables.length; i++) {
+					if(name.equals(typeVariables[i].getName())){
+						return actualTypes[i];
+					}
+				}
+			}
+			return tv;
+		}
+		return type;
+	}
+	public static Class<?> findClass(Type result) {
+		if(result instanceof Class){
+			return (Class<?>)result;
+		}else if(result instanceof ParameterizedType){
+			return findClass(((ParameterizedType)result).getRawType());
+		}else if(result instanceof WildcardType){
+			return findClass(((WildcardType)result).getUpperBounds()[0]);
+		}
+		return null;
+	}
+	public static Class<? extends Object> getType(Type type,
 			Object key) {
-		if (type != null) {
-			if (type.isArray()) {
+		Class<?> clazz=findClass(type);
+		if (clazz != null) {
+			if (clazz.isArray()) {
 				if (LENGTH.equals(key)) {
 					return Integer.TYPE;
 				} else {
-					return type.getComponentType();
+					return clazz.getComponentType();
 				}
-			} else if (Collection.class.isAssignableFrom(type)) {
+			} else if (Collection.class.isAssignableFrom(clazz)) {
 				// TypeVariable<?>[] ca = type.getTypeParameters();
 				// for (TypeVariable tv : ca) {
 				// }
 				return Object.class;
-			} else if (Map.class.isAssignableFrom(type)) {
+			} else if (Map.class.isAssignableFrom(clazz)) {
 				return Object.class;
 			} else {
-				AccessDescriptor pd = getPropertyDescriptor(type, String
+				AccessDescriptor pd = getPropertyDescriptor(clazz, String
 						.valueOf(key));
 				if (pd != null) {
 					return pd.getPropertyType();
