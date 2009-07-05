@@ -24,9 +24,9 @@ public class ProxyMap extends HashMap<String, Object> {
 			return v;
 		}
 	}
-	public Object getPropertyValue(Object key){
-		return super.get(key);
-	}
+//	public Object getPropertyValue(Object key){
+//		return super.get(key);
+//	}
 
 	@Override
 	public Object put(String key, Object value) {
@@ -38,48 +38,4 @@ public class ProxyMap extends HashMap<String, Object> {
 			return v;
 		}
 	}
-//
-//	@Override
-//	public Set<Entry<Object, Object>> entrySet() {
-//		@SuppressWarnings("unchecked")
-//		Set<Entry<Object, Object>> result = new HashSet<Entry<Object,Object>>(super.entrySet());
-//		for(Entry<Object, Object> entry : result){
-//			Object value = entry.getValue();
-//			if(value instanceof PropertyValue){
-//				entry.setValue(((PropertyValue)value).getValue());
-//			}
-//		}
-//		return result;
-//	}
-
-
-//
-//	@Override
-//	public void putAll(Map<? extends Object, ? extends Object> m) {
-//		for (Map.Entry<? extends Object, ? extends Object> entry : m.entrySet()) {
-//			put(entry.getKey(), entry.getValue());
-//		}
-//	}
-
-//
-//	protected class PropertyEntry implements Map.Entry<Object, Object> {
-//		private Object key;
-//		public PropertyEntry(String key) {
-//			this.key = key;
-//		}
-//
-//		public Object getKey() {
-//			return key;
-//		}
-//
-//		public Object getValue() {
-//			return ReflectUtil.getValue(base, key);
-//		}
-//
-//		public Object setValue(Object value) {
-//			Object old =  getValue();
-//			ReflectUtil.setValue(base, key,value);
-//			return old;
-//		}
-//	}
 }

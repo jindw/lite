@@ -54,7 +54,13 @@ public class Template {
 		if (context == null) {
 			contextMap = new Context(this, gloabls);
 		} else {
-			contextMap = new Context(this, gloabls, context);
+			if(context  instanceof Object[]){
+				Object[] values = new Object[((Object[])context).length+1];
+				System.arraycopy(context, 0, values, 1, values.length-1);
+				contextMap = new Context(this, gloabls, values);
+			}else{
+				contextMap = new Context(this, gloabls, context);
+			}
 		}
 		renderList(contextMap, items, out);
 	}
