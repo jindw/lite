@@ -60,9 +60,6 @@ class TemplateEngine{
 		}
 	}
 	function render($path,$context=null){
-			$out = array("AA");
-			exec("java",$out);
-			echo json_encode($out);
 		$liteCode = $this->load($path);
 		$template = new Template($liteCode);
 		if($context == null){
