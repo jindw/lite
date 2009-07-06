@@ -60,6 +60,9 @@ class TemplateEngine{
 		}
 	}
 	function render($path,$context=null){
+			$out = array("AA");
+			exec("java",$out);
+			echo json_encode($out);
 		$liteCode = $this->load($path);
 		$template = new Template($liteCode);
 		if($context == null){
@@ -95,6 +98,7 @@ class TemplateEngine{
 				return $lite[1];
 			}
 		}
+		
 	    //$lite = $this->httpCompile($path,$litefile);
 	    return $lite[1];
 	}
@@ -115,19 +119,14 @@ class TemplateEngine{
 			}
 			exec($cmd);
 			//exec("java",$args);
-			$i=100;
-			while($i--){
-				if(file_exists($litefile)){
-					$lite = json_decode(file_get_contents($litefile));
-					return $lite;
-				}
-				sleep(1);
+			if(file_exists($litefile)){
+				$lite = json_decode(file_get_contents($litefile));
+				return $lite;
 			}
-			return null;
 		}catch(Exception $e){
 			echo $e;
-			return null;
 		}
+		return null;
 	}
 	function httpCompile($path,$litefile){
 		$paths = array($path);
