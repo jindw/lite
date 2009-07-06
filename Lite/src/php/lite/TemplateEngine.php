@@ -60,7 +60,6 @@ class TemplateEngine{
 		}
 	}
 	function render($path,$context=null){
-	echo $this->litecached;
 		$liteCode = $this->load($path);
 		$template = new Template($liteCode);
 		if($context == null){
@@ -109,19 +108,22 @@ class TemplateEngine{
 			//.PATH_SEPARATOR;
 			$main = "org.xidea.lite.tools.LiteCompiler";
 			$args = array("-cp",$cp,$main,"-path",$path,"-webRoot",$litebase);
-			echo json_encode($args);
+			//echo json_encode($args);
 			$cmd = "java";
 			foreach($args as $arg){
-				$cmd.="$cmd $arg";
+				$cmd="$cmd $arg";
 			}
-			//exec($cmd);
-			exec("java",$args);
-			if(file_exists($litefile)){
-				$lite = json_decode(file_get_contents($litefile));
-				return $lite[1];
-			}else{
-				return null;
+			exec($cmd);
+			//exec("java",$args);
+			$i=100;
+			while($i--){
+				if(file_exists($litefile)){
+					$lite = json_decode(file_get_contents($litefile));
+					return $lite;
+				}
+				sleep(1);
 			}
+			return null;
 		}catch(Exception $e){
 			echo $e;
 			return null;
@@ -151,14 +153,13 @@ class TemplateEngine{
 			}
 			if(is_array($result)){
 			    $this->writeCache($litefile,$paths,$code);
-				return array($paths,$result,$code);
+				return array($paths,$result);
 			}else{
 	        	$missed = $result->missed;
 				$retry = false;
 				foreach($missed as $path){
 					if(!in_array($path,$paths)){
 						$content = file_get_contents(realpath($this->litebase.$path));
-						
 						array_push($sources,$content);
 						array_push($paths,$path);
 						$retry = true;
