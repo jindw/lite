@@ -96,7 +96,7 @@ class TemplateEngine{
 			}
 		}
 		
-	    //$lite = $this->httpCompile($path,$litefile);
+	    $lite = $this->httpCompile($path,$litefile);
 	    return $lite[1];
 	}
 	function javaCompile($path,$litefile){
@@ -114,9 +114,10 @@ class TemplateEngine{
 			foreach($args as $arg){
 				$cmd="$cmd $arg";
 			}
+			$time = time();
 			exec($cmd);
 			//exec("java",$args);
-			if(file_exists($litefile)){
+			if(file_exists($litefile) && $time <= filemtime($litefile)){
 				$lite = json_decode(file_get_contents($litefile));
 				return $lite;
 			}
