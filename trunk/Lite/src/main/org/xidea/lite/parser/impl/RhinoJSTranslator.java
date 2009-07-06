@@ -32,7 +32,6 @@ public class RhinoJSTranslator extends JSTranslator {
 		ClassLoader loader = Java6JSTranslator.class.getClassLoader();
 		try {
 			InputStream boot = loader.getResourceAsStream("boot.js");
-
 			if (boot != null) {
 				try {
 					eval(new InputStreamReader(boot, "utf-8"));
@@ -42,6 +41,7 @@ public class RhinoJSTranslator extends JSTranslator {
 				}
 			}
 			if (boot == null) {
+				eval("var window = this;");
 				InputStream compressed = loader
 						.getResourceAsStream("org/xidea/lite/template.js");
 				eval(new InputStreamReader(compressed, "utf-8"));

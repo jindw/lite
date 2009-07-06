@@ -87,6 +87,9 @@
 				<include name="template.js" />
 				<include name="__package__.js" />
 			</zipfileset>
+			<zipfileset src="web/WEB-INF/lib/commons-logging-1.0.4.jar">
+				<include name="**/*.*" />
+			</zipfileset>
 		</jar>
 		<delete file="build/dest/jslite/__package__.js" />
 		<copy tofile="build/dest/Template-${version}.jar" file="build/dest/Template.jar" />
@@ -154,6 +157,26 @@
 	</target>
 	<target name="build" depends="compress,jar-template">
 
+	</target>
+
+	<target name="php-example">
+		<zip file="build/dest/php-example.zip">
+			<fileset dir="web">
+				<include name="example/test.php"/>
+				<include name="example/test.xhtml"/>
+				<include name="example/layout.xhtml"/>
+				<include name="WEB-INF/decorators.xml"/>
+			</fileset>
+			<zipfileset dir="build/dest/" prefix="WEB-INF/classes/lite/">
+				<include name="TemplateEngine.php" />
+			</zipfileset>
+			<zipfileset dir="build/" prefix="WEB-INF/">
+				<include name="build.xml" />
+			</zipfileset>
+			<zipfileset dir="build/dest/" prefix="WEB-INF/lib">
+				<include name="Template.jar" />
+			</zipfileset>
+		</zip>
 	</target>
 
 	<target name="static">
