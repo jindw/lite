@@ -38,7 +38,7 @@ this.addScript('xml-default-parser.js','parseXMLNode'
 
 this.addScript('template.js',['VAR_TYPE','XML_ATTRIBUTE_TYPE','Template','ELSE_TYPE','ADD_ON_TYPE','CAPTRUE_TYPE','IF_TYPE','EL_TYPE','BREAK_TYPE','XML_TEXT_TYPE','FOR_TYPE']
                 ,0
-                ,['XMLParser','org.xidea.jsidoc.util:$log','evaluate','VAR_TYPE','XML_ATTRIBUTE_TYPE','ELSE_TYPE','ADD_ON_TYPE','CAPTRUE_TYPE','IF_TYPE','EL_TYPE','XML_TEXT_TYPE','FOR_TYPE']);
+                ,['XMLParser','org.xidea.jsidoc.util:$log','evaluate']);
 
 this.addScript('text-parser.js',['parseText','parseEL']
                 ,0

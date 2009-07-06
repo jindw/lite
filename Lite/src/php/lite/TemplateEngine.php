@@ -19,66 +19,66 @@
 require_once('Template.php');
 
 class TemplateEngine{
-	var $liteBase;
+	var $litebase;
 	/**
 	 * 上线后建议关闭
 	 */
 	var $autocompile = true;
-	//var $liteService='http://localhost:8080';
-	//var $liteService='http://litecompiler.appspot.com';
-	var $liteService='java -jar $this->liteBase';
-	var $liteCached;
-	function TemplateEngine($liteBase=null,$liteService=null){
-		if($liteBase == null){
+	//var $liteservice='http://localhost:8080';
+	var $liteservice='http://litecompiler.appspot.com';
+	var $litecached;
+	function TemplateEngine($litebase=null,$liteservice=null){
+		if($litebase == null){
 			//自动探测虚拟目录
-			$liteBase = $_SERVER['DOCUMENT_ROOT'];
+			$litebase = $_SERVER['DOCUMENT_ROOT'];
 			$dir = realpath($_SERVER['SCRIPT_FILENAME']);
 			while($dir!=($dir2 = dirname($dir))){
 				$dir=$dir2;
 				if(file_exists($dir.'/WEB-INF')){
-					$liteBase = $dir;
+					$litebase = $dir;
 					break;
 				}
 			}
 		}
-		$liteBase = realpath($liteBase);
-		if(!file_exists($liteBase)){
-			echo 'liteBase not found:'.$liteBase;
+		$litebase = realpath($litebase);
+		if(!file_exists($litebase)){
+			echo 'litebase not found:'.$litebase;
 			exit();
 		}
-		if($liteService == null){
-			$liteService = $this->liteService;
+		if($liteservice == null){
+			$liteservice = $this->liteservice;
 		}else{
-			$this->liteService = $liteService;
+			$this->liteservice = $liteservice;
 		}
-		$this->liteBase = $liteBase;
-		$this->liteCached = $liteBase.'/WEB-INF/litecached/';
-		if(!file_exists($this->liteCached)){
-			if(!file_exists($liteBase.'/WEB-INF')){
-				mkdir($liteBase.'/WEB-INF');
+		$this->litebase = $litebase;
+		$this->litecached = $litebase.'/WEB-INF/litecached/';
+		if(!file_exists($this->litecached)){
+			if(!file_exists($litebase.'/WEB-INF')){
+				mkdir($litebase.'/WEB-INF');
 			}
-			mkdir($this->liteCached);
+			mkdir($this->litecached);
 		}
 	}
 	function render($path,$context=null){
-		$liteCode = &$this->load($path);
+	echo $this->litecached;
+		$liteCode = $this->load($path);
 		$template = new Template($liteCode);
 		if($context == null){
 			$context = $GLOBALS;
 		}
 		$template->render($context);
 	}
-	function &load($path){
-	    $liteFile = $this->liteCached.urlencode($path);
-	    if(file_exists($liteFile)){
-	    	$lite = json_decode(file_get_contents($liteFile));
+	function load($path){
+	    $litefile = $this->litecached.urlencode($path);
+	    if(file_exists($litefile)){
+	    	$lite = json_decode(file_get_contents($litefile));
 	    	if($this->autocompile){
 		    	$paths = $lite[0];
-		    	$liteTime = filemtime($liteFile);
+		    	$liteTime = filemtime($litefile);
 		    	$fileTime = $liteTime;
 		    	$i=count($paths);
 				while($i--){
-					$fileTime = max($fileTime,filemtime($this->liteBase.$paths[$i]));
+					$fileTime = max($fileTime,filemtime($this->litebase.$paths[$i]));
 				}
 				if($fileTime<=$liteTime){
 					return $lite[1];
@@ -87,60 +87,93 @@ class TemplateEngine{
 				return $lite[1];
 			}
 	    }
-	    $lite = $this->compile($liteFile,$path);
+	    if(substr_compare('/',$path,0,1)){
+			echo "模板地址需要 '/' 开头;\n";
+			exit();
+		}else{
+			$lite = $this->javaCompile($path,$litefile);
+			if($lite !=null){
+				return $lite[1];
+			}
+		}
+	    //$lite = $this->httpCompile($path,$litefile);
 	    return $lite[1];
 	}
-	function compile($liteFile,$path){
-		if(substr_compare('/',$path,0,1)){
-			echo "模板地址需要 '/' 开头;\n";
-		}else{
-			$paths = array($path);
-			$sources = array(file_get_contents(realpath($this->liteBase.$path)));
-			$decoratorPath = '/WEB-INF/decorators.xml';
-			$decoratorXml = file_get_contents(realpath($this->liteBase.$decoratorPath));
-			if($decoratorXml){
-				array_push($sources,$decoratorXml);
-				array_push($paths,$decoratorPath);
+	function javaCompile($path,$litefile){
+		try{
+			$litebase = $this->litebase;
+			$cp = realpath("$litebase/WEB-INF/lib/Template.jar");
+			if(!$cp){
+				$cp = realpath("$litebase/../build/dest/Template.jar");
 			}
-			//最多尝试6次
-			$test = 6;
-			while($test--){
-				$code = $this->httpLoad($paths,$sources);
-				if(!$code){
-					sleep(10);
-					continue;
-				}
-				$result = json_decode($code);
-				if(!$result){
-					sleep(10);
-					continue;
-				}
-				if(is_array($result)){
-				    $this->writeCache($liteFile,$paths,$code);
-					return array($paths,$result,$code);
-				}else{
-		        	$missed = $result->missed;
-					$retry = false;
-					foreach($missed as $path){
-						if(!in_array($path,$paths)){
-							$content = file_get_contents(realpath($this->liteBase.$path));
-							
-							array_push($sources,$content);
-							array_push($paths,$path);
-							$retry = true;
-						}
+			//.PATH_SEPARATOR;
+			$main = "org.xidea.lite.tools.LiteCompiler";
+			$args = array("-cp",$cp,$main,"-path",$path,"-webRoot",$litebase);
+			echo json_encode($args);
+			$cmd = "java";
+			foreach($args as $arg){
+				$cmd.="$cmd $arg";
+			}
+			//exec($cmd);
+			exec("java",$args);
+			if(file_exists($litefile)){
+				$lite = json_decode(file_get_contents($litefile));
+				return $lite[1];
+			}else{
+				return null;
+			}
+		}catch(Exception $e){
+			echo $e;
+			return null;
+		}
+	}
+	function httpCompile($path,$litefile){
+		$paths = array($path);
+		$sources = array(file_get_contents(realpath($this->litebase.$path)));
+		$decoratorPath = '/WEB-INF/decorators.xml';
+		$decoratorXml = file_get_contents(realpath($this->litebase.$decoratorPath));
+		if($decoratorXml){
+			array_push($sources,$decoratorXml);
+			array_push($paths,$decoratorPath);
+		}
+		//最多尝试6次
+		$test = 6;
+		while($test--){
+			$code = $this->httpLoad($paths,$sources);
+			if(!$code){
+				sleep(10);
+				continue;
+			}
+			$result = json_decode($code);
+			if(!$result){
+				sleep(10);
+				continue;
+			}
+			if(is_array($result)){
+			    $this->writeCache($litefile,$paths,$code);
+				return array($paths,$result,$code);
+			}else{
+	        	$missed = $result->missed;
+				$retry = false;
+				foreach($missed as $path){
+					if(!in_array($path,$paths)){
+						$content = file_get_contents(realpath($this->litebase.$path));
+						
+						array_push($sources,$content);
+						array_push($paths,$path);
+						$retry = true;
 					}
-					if(!$retry){
-						return array($paths,array($code));
-					}
-					sleep(5);
 				}
+				if(!$retry){
+					return array($paths,array($code));
+				}
+				sleep(5);
 			}
 		}
 		echo "编译失败...";
 		exit();
 	}
-	function httpLoad($paths,&$sources){
+	function httpLoad($paths,$sources){
 		$postdata = http_build_query(
 			array(
 			    'source'=>$sources,
@@ -160,7 +193,7 @@ class TemplateEngine{
 		    )
 		);
 		$context  = stream_context_create($opts);
-		return file_get_contents($this->liteService, false, $context);
+		return file_get_contents($this->liteservice, false, $context);
 	}
 	/**
 	 * 写入文件缓存

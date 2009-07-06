@@ -48,6 +48,7 @@ public class Java6JSTranslator extends JSTranslator {
 				}
 			}
 			if (boot == null) {
+				jsengine.eval("var window = this;");
 				jsengine.eval(new InputStreamReader(loader
 						.getResourceAsStream("org/xidea/lite/template.js"),
 						"utf-8"));

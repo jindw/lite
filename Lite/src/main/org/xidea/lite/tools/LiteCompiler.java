@@ -5,6 +5,7 @@ import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.io.Writer;
 import java.net.URLEncoder;
 import java.util.HashMap;
@@ -25,7 +26,7 @@ public class LiteCompiler {
 	private TemplateCompilerEngine engine;
 
 	public LiteCompiler(String[] args) {
-		new CommandParser().setup(this,args);
+		new CommandParser().setup(this, args);
 	}
 
 	public static void main(String[] args) {
@@ -33,11 +34,27 @@ public class LiteCompiler {
 	}
 
 	public void execute() {
-		initialize();
-		if(path == null){
-			this.processDir(webRoot, "/");
-		}else{
-			this.processFile(path);
+		try {
+			initialize();
+			if (path == null) {
+				this.processDir(webRoot, "/");
+			} else {
+				this.processFile(path);
+			}
+		} catch (Exception e) {
+			File file = new File(webRoot, "log.txt");
+			try {
+				if (!file.exists()) {
+					file.createNewFile();
+				}
+				PrintWriter out = new PrintWriter(new FileOutputStream(file));
+				e.printStackTrace(out);
+				out.flush();
+				out.close();
+			} catch (IOException ex) {
+				log.error(ex);
+			}
+
 		}
 	}
 
@@ -130,6 +147,7 @@ public class LiteCompiler {
 	public void setHtmlcached(File htmlcached) {
 		this.htmlcached = htmlcached;
 	}
+
 	public void setLitecached(File litecached) {
 		this.litecached = litecached;
 	}
@@ -145,6 +163,7 @@ public class LiteCompiler {
 	public void setEncoding(String encoding) {
 		this.encoding = encoding;
 	}
+
 	public void setPath(String path) {
 		this.path = path;
 	}
