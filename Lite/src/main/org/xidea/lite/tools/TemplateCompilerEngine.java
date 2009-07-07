@@ -63,7 +63,7 @@ public class TemplateCompilerEngine extends TemplateEngine {
 		for (File file : filesMap.get(path)) {
 			String item = file.getAbsolutePath();
 			if (item.startsWith(root)) {
-				filesList.add(item.substring(root.length()));
+				filesList.add(item.substring(root.length()).replace('\\', '/'));
 			}
 		}
 		return JSONEncoder
