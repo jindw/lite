@@ -71,6 +71,9 @@
 
 		<echo file="build/dest/jslite/__package__.js">this.addScript("template.js",["Template","ParseContext","XMLParser","ResultTranslator"])</echo>
 		<jar destfile="build/dest/Template.jar" compress="true">
+			<manifest>
+				<attribute name="Main-Class" value="org.xidea.lite.tools.LiteCompiler" />
+			</manifest>
 			<fileset dir="web/WEB-INF/classes">
 				<include name="org/xidea/el/**/*.class" />
 				<include name="org/xidea/lite/**/*.class" />
@@ -160,7 +163,7 @@
 	</target>
 
 	<target name="php-example">
-		<zip file="build/dest/php-example.zip">
+		<zip comment="ÅúÁ¿±àÒë:java -jar ./WEB-INF/lib/Template.jar -webRoot ." file="build/dest/php-example.zip" encoding="GBK">
 			<fileset dir="web">
 				<include name="example/test.php"/>
 				<include name="example/test.xhtml"/>
@@ -169,9 +172,6 @@
 			</fileset>
 			<zipfileset dir="build/dest/" prefix="WEB-INF/classes/lite/">
 				<include name="TemplateEngine.php" />
-			</zipfileset>
-			<zipfileset dir="build/" prefix="WEB-INF/">
-				<include name="build.xml" />
 			</zipfileset>
 			<zipfileset dir="build/dest/" prefix="WEB-INF/lib">
 				<include name="Template.jar" />
