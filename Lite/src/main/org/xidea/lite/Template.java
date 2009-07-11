@@ -57,7 +57,8 @@ public class Template {
 			if(context  instanceof Object[]){
 				Object[] values = new Object[((Object[])context).length+1];
 				System.arraycopy(context, 0, values, 1, values.length-1);
-				contextMap = new Context(this, gloabls, values);
+				values[0] = gloabls;
+				contextMap = new Context(this, values);
 			}else{
 				contextMap = new Context(this, gloabls, context);
 			}
