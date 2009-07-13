@@ -5,14 +5,15 @@
 		<title>简单表达式和简单模板控制指令测试</title>
 	</head>
 	<body>
-	<c:var name="test">
-	ó''牛肩猪肉乗t乗'乗"乗\乗&lt;乗&gt;;""/**/end#---
-	</c:var>
+		<c:var name="test">
+			ó''牛肩猪肉乗t乗'乗"乗\乗&lt;乗&gt;;""/**/end#---
+		</c:var>
 		<script>//<![CDATA[
 		document.write(${JSON.stringify(test)})
 		//]]>
-		</script><hr/>
-		${test}
+		</script>
+		<hr />
+		<c:out value="${test}" />
 		<h3>测试</h3>
 		<c:var name="msg">value="'12\n3'"</c:var>
 		<p title="測試属性，onclick 弹出消息：${msg}"
