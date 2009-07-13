@@ -1,7 +1,7 @@
 <?php
 require_once("../WEB-INF/classes/lite/TemplateEngine.php");
 $engine = new TemplateEngine();
-# 閫氳繃涓婁笅鏂囨暟鎹柟寮忎紶閫掓ā鏉垮弬鏁帮細
+# 通过上下文数据方式传递模板参数：
 $context = array(
 	"int1"=>1,
 	"text1"=>'1'

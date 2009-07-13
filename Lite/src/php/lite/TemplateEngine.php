@@ -70,17 +70,19 @@ class TemplateEngine{
 	function load($path){
 	    $litefile = $this->litecached.urlencode($path);
 	    if(file_exists($litefile)){
-	    	$lite = json_decode(file_get_contents($litefile));
+	    	$lite = json_decode(file_get_contents($litefile),true);
 	    	if($this->autocompile){
-		    	$paths = $lite[0];
-		    	$liteTime = filemtime($litefile);
-		    	$fileTime = $liteTime;
-		    	$i=count($paths);
-				while($i--){
-					$fileTime = max($fileTime,filemtime($this->litebase.$paths[$i]));
-				}
-				if($fileTime<=$liteTime){
-					return $lite[1];
+		    	if($lite!=null){
+			    	$paths = $lite[0];
+			    	$liteTime = filemtime($litefile);
+			    	$fileTime = $liteTime;
+			    	$i=count($paths);
+					while($i--){
+						$fileTime = max($fileTime,filemtime($this->litebase.$paths[$i]));
+					}
+					if($fileTime<=$liteTime){
+						return $lite[1];
+					}
 				}
 			}else{
 				return $lite[1];
@@ -116,8 +118,8 @@ class TemplateEngine{
 			}
 			$time = time();
 			exec($cmd);
-			//exec("java",$args);
-			if(file_exists($litefile) && $time <= filemtime($litefile)){
+			sleep(1);
+			if(file_exists($litefile) && $time < filemtime($litefile)){
 				$lite = json_decode(file_get_contents($litefile));
 				return $lite;
 			}
