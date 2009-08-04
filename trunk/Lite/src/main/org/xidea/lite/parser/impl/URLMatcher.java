@@ -19,7 +19,7 @@ public abstract class URLMatcher implements Comparable<URLMatcher> {
 		int j = pattern.lastIndexOf('*');
 		if (j == i + 1) {
 			if (i == 0) {
-				return new EndMatcher(pattern.substring(1));
+				return new EndMatcher(pattern.substring(2));
 			}
 			if (j == pattern.length() - 1) {
 				return new BeginMatcher(pattern.substring(0, i));
