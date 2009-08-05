@@ -43,17 +43,18 @@ public class CommandParser {
 	public void setup(final Object context, Map<String,String[]> params) {
 		for (String name : params.keySet()) {
 			if (name!=null && name.length() > 0) {
-				ReferenceExpression el = new ExpressionImpl(name);
-				Reference result = el.prepare(context);
-				if (result != null && result.getType()!=null) {
-					Class<? extends Object> type = result.getType();
-					String[] values = params.get(name);
-
-					result.setValue(getValue(values, type, context, name));
-				} else if(context != null){
-					log.warn("找不到相关属性：" + name);
-					if (log.isInfoEnabled()) {
-						traceBeanInfo(context);
+				if (Character.isJavaIdentifierStart(name.charAt(0))) {
+					ReferenceExpression el = new ExpressionImpl(name);
+					Reference result = el.prepare(context);
+					if (result != null && result.getType() != null) {
+						Class<? extends Object> type = result.getType();
+						String[] values = params.get(name);
+						result.setValue(getValue(values, type, context, name));
+					} else if (context != null) {
+						log.warn("找不到相关属性：" + name);
+						if (log.isInfoEnabled()) {
+							traceBeanInfo(context);
+						}
 					}
 				}
 			}
