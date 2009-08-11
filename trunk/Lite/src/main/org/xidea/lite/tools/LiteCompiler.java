@@ -23,6 +23,7 @@ public class LiteCompiler {
 	private File htmlcached;
 	private File litecached;
 	private String encoding = "utf-8";
+	private boolean writeError = true;
 	private TemplateCompilerEngine engine;
 
 	public LiteCompiler(String[] args) {
@@ -98,6 +99,9 @@ public class LiteCompiler {
 				try {
 					out.write(engine.getCacheCode(path));
 				} catch (Exception e) {
+					if(writeError){
+					out.write(engine.toErrorCode(path,e));
+					}
 					log.error("编译Lite中间代码出错：" + path, e);
 				} finally {
 					out.close();
@@ -162,6 +166,10 @@ public class LiteCompiler {
 
 	public void setEncoding(String encoding) {
 		this.encoding = encoding;
+	}
+
+	public void setWriteError(boolean writeError) {
+		this.writeError = writeError;
 	}
 
 	public void setPath(String path) {

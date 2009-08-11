@@ -2,7 +2,11 @@ package org.xidea.lite.tools;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,6 +59,19 @@ public class TemplateCompilerEngine extends TemplateEngine {
 	}
 
 	public String getCacheCode(String path) {
+		return JSONEncoder
+				.encode(new Object[] { getResources(path), itemsMap.get(path) });
+	}
+
+	public String toErrorCode(String path,Exception e) {
+		StringWriter out = new StringWriter();
+		PrintWriter pout = new PrintWriter(out,true);
+		e.printStackTrace(pout );
+		return JSONEncoder
+		.encode(new Object[] { getResources(path), Arrays.asList(out.toString()) });
+	}
+
+	protected List<String> getResources(String path) {
 		String root = super.webRoot.getAbsolutePath();
 		if (root.endsWith("/") || root.endsWith("\\")) {
 			root = root.substring(0, root.length() - 1);
@@ -66,8 +83,7 @@ public class TemplateCompilerEngine extends TemplateEngine {
 				filesList.add(item.substring(root.length()).replace('\\', '/'));
 			}
 		}
-		return JSONEncoder
-				.encode(new Object[] { filesList, itemsMap.get(path) });
+		return filesList;
 	}
 
 	protected Template createTemplate(String path, ParseContext context)
