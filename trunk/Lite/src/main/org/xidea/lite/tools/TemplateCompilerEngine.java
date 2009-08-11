@@ -1,11 +1,7 @@
 package org.xidea.lite.tools;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +21,8 @@ public class TemplateCompilerEngine extends TemplateEngine {
 	private Map<String, String> featrueMap;
 
 	@SuppressWarnings("unchecked")
-	public TemplateCompilerEngine(File root, String[] parserClasses, Map<String, String> featrueMap) {
+	public TemplateCompilerEngine(File root, String[] parserClasses,
+			Map<String, String> featrueMap) {
 		super(root);
 		this.featrueMap = featrueMap;
 		if (parserClasses != null) {
@@ -46,30 +43,30 @@ public class TemplateCompilerEngine extends TemplateEngine {
 	@Override
 	protected ParseContext createParseContext() {
 		ParseContext context = super.createParseContext();
-		if(this.parsers != null){
+		if (this.parsers != null) {
 			for (NodeParser parser : this.parsers) {
 				context.addNodeParser(parser);
 			}
 		}
-		if(this.featrueMap !=null){
+		if (this.featrueMap != null) {
 			context.getFeatrueMap().putAll(featrueMap);
 		}
 		return context;
 	}
 
-	public String getCacheCode(String path) {
-		this.getTemplate(path);
-		return JSONEncoder
-				.encode(new Object[] { getResources(path), itemsMap.get(path) });
+	public String getLiteCode(String path) {
+		this.getTemplate(path);//确保模板初始化
+		return buildLiteCode(path,itemsMap.get(path).toArray());
 	}
 
-	public String toErrorCode(String path,Exception e) {
-		StringWriter out = new StringWriter();
-		out.append("模板编译失败：\r\n<hr>");
-		PrintWriter pout = new PrintWriter(out,true);
-		e.printStackTrace(pout);
-		return JSONEncoder
-			.encode(new Object[] { getResources(path), Arrays.asList(out.toString()) });
+	/**
+	 * 只能是合法节点（Object[]）和字符串（String）
+	 * @param path
+	 * @param items
+	 * @return
+	 */
+	String buildLiteCode(String path, Object... items) {
+		return JSONEncoder.encode(new Object[] { getResources(path),items});
 	}
 
 	protected List<String> getResources(String path) {
@@ -77,22 +74,30 @@ public class TemplateCompilerEngine extends TemplateEngine {
 		if (root.endsWith("/") || root.endsWith("\\")) {
 			root = root.substring(0, root.length() - 1);
 		}
-		ArrayList<String> filesList = new ArrayList<String>();
-		for (File file : filesMap.get(path)) {
-			String item = file.getAbsolutePath();
-			if (item.startsWith(root)) {
-				filesList.add(item.substring(root.length()).replace('\\', '/'));
+		ArrayList<String> fileList = new ArrayList<String>();
+		File[] list = filesMap.get(path);
+		if (list == null) {
+			fileList.add(path);
+		} else {
+			for (File file : list) {
+				String item = file.getAbsolutePath();
+				if (item.startsWith(root)) {
+					fileList.add(item.substring(root.length()).replace('\\',
+							'/'));
+				}
 			}
 		}
-		return filesList;
+		return fileList;
 	}
 
-	protected Template createTemplate(String path, ParseContext context)
-			throws IOException {
-		Template template = super.createTemplate(path, context);
-		this.itemsMap.put(path, context.toList());
-		this.filesMap.put(path, this.getAssociatedFiles(context));
-		return template;
+	protected Template createTemplate(String path, ParseContext context) {
+		try{
+			return super.createTemplate(path, context);
+		}finally{
+			this.itemsMap.put(path, context.toList());
+			this.filesMap.put(path, this.getAssociatedFiles(context));
+		}
 	}
+
 
 }

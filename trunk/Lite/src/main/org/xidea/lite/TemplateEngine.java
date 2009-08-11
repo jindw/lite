@@ -2,6 +2,8 @@ package org.xidea.lite;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -50,8 +52,12 @@ public class TemplateEngine {
 		getTemplate(path).render(context, out);
 	}
 
-	protected URL getResource(String pagePath) throws MalformedURLException {
-		return new File(webRoot, pagePath).toURI().toURL();
+	protected URL getResource(String pagePath) {
+		try {
+			return new File(webRoot, pagePath).toURI().toURL();
+		} catch (MalformedURLException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	/**
@@ -100,15 +106,10 @@ public class TemplateEngine {
 	}
 
 	protected ParseContext createParseContext() {
-		try {
-			return new ParseContextImpl(getResource("/"), featrues, null, null);
-		} catch (MalformedURLException e) {
-			throw new RuntimeException(e);
-		}
+		return new ParseContextImpl(getResource("/"), featrues, null, null);
 	}
 
-	protected Template createTemplate(String path, ParseContext parseContext)
-			throws IOException {
+	protected Template createTemplate(String path, ParseContext parseContext){
 		String decoratorPath = null;
 		if (decoratorContext != null) {
 			decoratorPath = decoratorContext.getDecotatorPage(path);
@@ -119,7 +120,12 @@ public class TemplateEngine {
 				parseContext.setAttribute("#page", node);
 				path = decoratorPath;
 			} catch (Exception e) {
-				log.error(e);
+				log.error("模板解析失败",e);
+				StringWriter out = new StringWriter();
+				out.append("模板编译失败：\r\n<hr>");
+				PrintWriter pout = new PrintWriter(out, true);
+				e.printStackTrace(pout);
+				parseContext.append(out.toString());
 			}
 		}
 		parseContext.parse(getResource(path));
@@ -128,16 +134,8 @@ public class TemplateEngine {
 	}
 
 	protected TemplateEntry createTemplateEntry(String path) {
-		Template template;
 		ParseContext parseContext = createParseContext();
-		try {
-			template = createTemplate(path, parseContext);
-		} catch (Exception e) {
-			log.error(e);
-			ArrayList<Object> errors = new ArrayList<Object>();
-			errors.add(e.getMessage());
-			template = new Template(errors);
-		}
+		Template template = createTemplate(path, parseContext);
 		File[] files = getAssociatedFiles(parseContext);
 		return new TemplateEntry(template, files);
 	}

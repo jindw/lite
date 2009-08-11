@@ -97,10 +97,10 @@ public class LiteCompiler {
 				Writer out = new OutputStreamWriter(new FileOutputStream(
 						cachedFile), encoding);
 				try {
-					out.write(engine.getCacheCode(path));
-				} catch (Exception e) {
+					out.write(engine.getLiteCode(path));
+				} catch (Throwable e) {
 					if(writeError){
-						out.write(engine.toErrorCode(path,e));
+						out.write(engine.buildLiteCode(path,e.getMessage()));
 					}
 					log.error("编译Lite中间代码出错：" + path, e);
 				} finally {
@@ -118,7 +118,7 @@ public class LiteCompiler {
 				} catch (Exception e) {
 					if(writeError){
 						if(writeError){
-							out.write(engine.toErrorCode(path,e));
+							out.write(engine.buildLiteCode(path,e));
 						}
 					}
 					log.error("生成HTML 静态数据出错：" + path, e);
