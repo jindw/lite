@@ -129,6 +129,7 @@ class TemplateEngine{
 		return null;
 	}
 	function httpCompile($path,$litefile){
+		return null;
 		$paths = array($path);
 		$sources = array(file_get_contents(realpath($this->litebase.$path)));
 		$decoratorPath = '/WEB-INF/decorators.xml';

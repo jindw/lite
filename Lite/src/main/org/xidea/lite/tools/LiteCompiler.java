@@ -10,6 +10,8 @@ import java.io.Writer;
 import java.net.URLEncoder;
 import java.util.HashMap;
 
+import javax.swing.JOptionPane;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.lite.Template;
@@ -88,19 +90,17 @@ public class LiteCompiler {
 	}
 
 	public void processFile(final String path) {
-		Template template = engine.getTemplate(path);
 		try {
 			{
 				File cachedFile = new File(litecached, URLEncoder.encode(path,
 						"utf-8"));
 				Writer out = new OutputStreamWriter(new FileOutputStream(
 						cachedFile), encoding);
-
 				try {
 					out.write(engine.getCacheCode(path));
 				} catch (Exception e) {
 					if(writeError){
-					out.write(engine.toErrorCode(path,e));
+						out.write(engine.toErrorCode(path,e));
 					}
 					log.error("编译Lite中间代码出错：" + path, e);
 				} finally {
@@ -113,14 +113,21 @@ public class LiteCompiler {
 				Writer out = new OutputStreamWriter(new FileOutputStream(
 						cachedFile), encoding);
 				try {
+					Template template = engine.getTemplate(path);
 					template.render(new HashMap<String, String>(), out);
 				} catch (Exception e) {
+					if(writeError){
+						if(writeError){
+							out.write(engine.toErrorCode(path,e));
+						}
+					}
 					log.error("生成HTML 静态数据出错：" + path, e);
 				} finally {
 					out.close();
 				}
 			}
 		} catch (IOException e) {
+			JOptionPane.showConfirmDialog(null, e);
 			log.error("处理模板异常（可能是模板文件生成异常）：" + path, e);
 		}
 	}
