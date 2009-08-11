@@ -45,14 +45,19 @@ public class ServletTemplateEngine extends TemplateEngine {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	protected Template createTemplate(String path, ParseContext parseContext) throws IOException {
+	protected Template createTemplate(String path, ParseContext parseContext){
 		if(autocompile){
 			return super.createTemplate(path, parseContext);
 		}else{
-			File file = new File(context.getRealPath("/WEB-INF/litecached/"+URLEncoder.encode(path,"UTF-8")));
-			List<Object> list = JSONDecoder.decode(loadText(file));
-			parseContext.addResource(file.toURI().toURL());
-			return new Template((List<Object>)list.get(1));
+			try {
+				File file = new File(context.getRealPath("/WEB-INF/litecached/"+URLEncoder.encode(path,"UTF-8")));
+				List<Object> list = JSONDecoder.decode(loadText(file));
+				parseContext.addResource(file.toURI().toURL());
+				return new Template((List<Object>)list.get(1));
+			} catch (IOException e) {
+				log.error(e);
+				throw new RuntimeException(e);
+			}
 		}
 	}
 
@@ -87,7 +92,12 @@ public class ServletTemplateEngine extends TemplateEngine {
 	}
 
 	@Override
-	protected URL getResource(String path) throws MalformedURLException {
-		return new File(context.getRealPath(path)).toURI().toURL();
+	protected URL getResource(String path){
+		try {
+			return new File(context.getRealPath(path)).toURI().toURL();
+		} catch (MalformedURLException e) {
+			log.error("路径格式有问题", e);
+			throw new RuntimeException(e);
+		}
 	}
 }

@@ -24,8 +24,7 @@ class TemplateEngine{
 	 * 上线后建议关闭
 	 */
 	var $autocompile = true;
-	//var $liteservice='http://localhost:8080';
-	var $liteservice='http://litecompiler.appspot.com';
+	var $liteservice = null; //'http://litecompiler.appspot.com';
 	var $litecached;
 	function TemplateEngine($litebase=null,$liteservice=null){
 		if($litebase == null){
@@ -72,7 +71,7 @@ class TemplateEngine{
 	    if(file_exists($litefile)){
 	    	$lite = json_decode(file_get_contents($litefile),true);
 	    	if($this->autocompile){
-		    	if($lite!=null){
+		    	if(is_array($lite[1])){
 			    	$paths = $lite[0];
 			    	$liteTime = filemtime($litefile);
 			    	$fileTime = $liteTime;
@@ -83,6 +82,8 @@ class TemplateEngine{
 					if($fileTime<=$liteTime){
 						return $lite[1];
 					}
+				}else{
+					unlink($litefile);
 				}
 			}else{
 				return $lite[1];
@@ -97,9 +98,15 @@ class TemplateEngine{
 				return $lite[1];
 			}
 		}
-		
-	    $lite = $this->httpCompile($path,$litefile);
-	    return $lite[1];
+		if($this->liteservice){
+	    	$lite = $this->httpCompile($path,$litefile);
+	    }
+	    if(is_array($lite[1])){
+	    	return $lite[1];
+	    }else{
+	    	echo "无法完成编译";
+	    	exit();
+	    }
 	}
 	function javaCompile($path,$litefile){
 		try{
@@ -120,7 +127,8 @@ class TemplateEngine{
 			exec($cmd);
 			sleep(1);
 			if(file_exists($litefile) && $time < filemtime($litefile)){
-				$lite = json_decode(file_get_contents($litefile));
+				$lite = file_get_contents($litefile);
+				$lite = json_decode($lite);
 				return $lite;
 			}
 		}catch(Exception $e){
@@ -129,7 +137,6 @@ class TemplateEngine{
 		return null;
 	}
 	function httpCompile($path,$litefile){
-		return null;
 		$paths = array($path);
 		$sources = array(file_get_contents(realpath($this->litebase.$path)));
 		$decoratorPath = '/WEB-INF/decorators.xml';
