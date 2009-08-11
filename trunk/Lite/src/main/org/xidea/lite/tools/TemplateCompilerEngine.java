@@ -2,7 +2,6 @@ package org.xidea.lite.tools;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -59,16 +58,18 @@ public class TemplateCompilerEngine extends TemplateEngine {
 	}
 
 	public String getCacheCode(String path) {
+		this.getTemplate(path);
 		return JSONEncoder
 				.encode(new Object[] { getResources(path), itemsMap.get(path) });
 	}
 
 	public String toErrorCode(String path,Exception e) {
 		StringWriter out = new StringWriter();
+		out.append("模板编译失败：\r\n<hr>");
 		PrintWriter pout = new PrintWriter(out,true);
-		e.printStackTrace(pout );
+		e.printStackTrace(pout);
 		return JSONEncoder
-		.encode(new Object[] { getResources(path), Arrays.asList(out.toString()) });
+			.encode(new Object[] { getResources(path), Arrays.asList(out.toString()) });
 	}
 
 	protected List<String> getResources(String path) {
