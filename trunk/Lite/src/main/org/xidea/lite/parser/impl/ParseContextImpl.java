@@ -36,8 +36,6 @@ public class ParseContextImpl implements ParseContext {
 	protected XMLContext xmlContext;
 	protected ResultContext resultContext;
 	protected ParserHolder parserHolder;
-	protected String id;
-	protected ResultTranslator translator;
 	
 	protected ParseContextImpl() {
 	}
@@ -47,16 +45,14 @@ public class ParseContextImpl implements ParseContext {
 		initialize(base, featrues, parsers, ips);
 	}
 
-	public ParseContextImpl(ParseContext parent, String fn,
+	public ParseContextImpl(ParseContext parent, 
 			ResultTranslator translator) {
 		initializeFromParent(parent);
-		initializeTranslator(parent, fn, translator);
+		initializeTranslator(parent, translator);
 	}
 
-	protected void initializeTranslator(ParseContext parent, String fn,
+	protected void initializeTranslator(ParseContext parent, 
 			ResultTranslator translator) {
-		this.id = fn;
-		this.translator = translator;
 		if (translator instanceof ExpressionFactory) {
 			this.resultContext
 					.setExpressionFactory((ExpressionFactory) translator);
@@ -283,11 +279,7 @@ public class ParseContextImpl implements ParseContext {
 		return resultContext.toList();
 	}
 	public final String toCode() {
-		if(translator==null){
-			return resultContext.toCode();
-		}else{
-			return translator.translate(this,id);
-		}
+		return resultContext.toCode();
 	}
 
 	public final void beginIndent() {
@@ -356,6 +348,10 @@ public class ParseContextImpl implements ParseContext {
 
 	public final void setTextType(int textType) {
 		resourceContext.setTextType(textType);
+	}
+
+	public void setResultTranslator(ResultTranslator translator) {
+		resultContext.setResultTranslator(translator);
 	}
 
 

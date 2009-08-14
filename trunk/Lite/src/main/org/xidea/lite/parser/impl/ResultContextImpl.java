@@ -13,6 +13,7 @@ import org.xidea.lite.BuildInAdvice;
 import org.xidea.lite.Template;
 import org.xidea.lite.parser.ResultContext;
 import org.xidea.lite.parser.ResultItem;
+import org.xidea.lite.parser.ResultTranslator;
 
 public class ResultContextImpl implements ResultContext {
 	protected Map<String, String> featrues;
@@ -23,6 +24,7 @@ public class ResultContextImpl implements ResultContext {
 	private final ArrayList<Object> result = new ArrayList<Object>();
 	private ExpressionFactory expressionFactory = ExpressionFactoryImpl
 			.getInstance();
+	private ResultTranslator translator;
 
 	ResultContextImpl() {
 		this.featrues = new HashMap<String, String>();
@@ -44,6 +46,9 @@ public class ResultContextImpl implements ResultContext {
 		this.expressionFactory = expressionFactory;
 	}
 
+	public void setResultTranslator(ResultTranslator translator) {
+		this.translator = translator;
+	}
 	public Object parseEL(String expression) {
 		return expressionFactory.parse(expression);
 	}
@@ -321,7 +326,11 @@ public class ResultContextImpl implements ResultContext {
 	}
 
 	public String toCode() {
-		return JSONEncoder.encode(toList());
+		if(translator==null){
+			return JSONEncoder.encode(toList());
+		}else{
+			return translator.translate(this);
+		}
 	}
 
 	public int findBeginType() {
@@ -383,5 +392,6 @@ public class ResultContextImpl implements ResultContext {
 		}
 		return -2;// string type
 	}
+
 
 }
