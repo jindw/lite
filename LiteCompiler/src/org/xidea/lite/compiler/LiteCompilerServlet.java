@@ -92,9 +92,18 @@ public class LiteCompilerServlet extends HttpServlet {
 						.get("/WEB-INF/decorators.xml");
 				if (decoratorxml != null) {
 					DecoratorContext mapper = new DecoratorContextImpl(null){
-						protected void reset(){
-							this.reset(new InputSource(new StringReader(decoratorxml)));
+
+						@Override
+						protected long lastModified() {
+							return 100;
 						}
+
+						@Override
+						protected void reset() {
+							super.reset(
+									new InputSource(new StringReader(decoratorxml)));
+						}
+						
 					};
 					String layout = mapper.getDecotatorPage(templateURL);
 					if (layout != null) {

@@ -1,43 +1,73 @@
 package org.xidea.lite.plugin;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Node;
-import org.xidea.lite.parser.InstructionParser;
-import org.xidea.lite.parser.Parser;
+import org.xidea.lite.parser.ParseContext;
+import org.xidea.lite.parser.TextParser;
+import org.xidea.lite.parser.NodeParser;
+
 
 
 public class PluginLoader{
-	List<InstructionParser> iparserList = new ArrayList<InstructionParser>();
-	List<Parser<? extends Node>> parserList = new ArrayList<Parser<? extends Node>>();
+	protected List<TextParser> textParserList = new ArrayList<TextParser>();
+	protected List<NodeParser<? extends Node>> nodeParserList = new ArrayList<NodeParser<? extends Node>>();
+	private static Log log = LogFactory.getLog(PluginLoader.class);
 
-	public void load(String source){
+	@SuppressWarnings("unchecked")
+	public void setup(ParseContext context, URL pluginSource) {
+		if(pluginSource != null){
+			try {
+				this.load(pluginSource);
+			} catch (IOException e) {
+				log.error(e);
+			}
+		}
+		setup(context);
+	}
+	@SuppressWarnings("unchecked")
+	public void setup(ParseContext context) {
+		for(TextParser parser : textParserList){
+			context.addTextParser(parser);
+		}
+		for(NodeParser parser : nodeParserList){
+			context.addNodeParser(parser);
+		}
+	}
+	public void load(Reader source){//不用string 是为了避免 string source url混淆
 		RhinoContext rhinoContext = new RhinoContext(this);
-		rhinoContext.setUp(source);
+		rhinoContext.initialize(loadText(source));
 	}
 
-	public void load(Reader source) throws IOException{
-		this.load(loadText(source));
+	public void load(URL source) throws IOException{
+		InputStream in = source.openStream();
+		try{
+			this.load(new InputStreamReader(in,"UTF-8"));
+		}finally{
+			in.close();
+		}
 	}
-	public void addInstructionParser(InstructionParser iparser) {
-		iparserList.add(iparser);
-	}
-
-	public List<InstructionParser> getInstructionParserList() {
-		return iparserList;
-	}
-
-	public List<Parser<? extends Node>> getNodeParserList() {
-		return parserList;
+	public void addInstructionParser(TextParser iparser) {
+		textParserList.add(iparser);
 	}
 
-	public void addNodeParser(Parser<? extends Node> parser) {
-		parserList.add(parser);
+
+	public List<NodeParser<? extends Node>> getNodeParserList() {
+		return nodeParserList;
+	}
+
+	public void addNodeParser(NodeParser<? extends Node> parser) {
+		nodeParserList.add(parser);
 	}
 
 	public static String loadText(Reader in) {
@@ -54,4 +84,5 @@ public class PluginLoader{
 		}
 		return out.toString();
 	}
+
 }

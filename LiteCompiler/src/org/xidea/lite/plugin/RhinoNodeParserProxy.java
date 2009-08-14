@@ -6,15 +6,15 @@ import org.mozilla.javascript.Scriptable;
 import org.w3c.dom.Node;
 import org.xidea.lite.parser.ParseChain;
 import org.xidea.lite.parser.ParseContext;
-import org.xidea.lite.parser.Parser;
+import org.xidea.lite.parser.NodeParser;
 
-public class RhinoParserProxy implements Parser<Node> {
+public class RhinoNodeParserProxy implements NodeParser<Node> {
 
 	private Scriptable base;
 	private Function parse;
 	private int type;
 
-	public RhinoParserProxy(Context context, Scriptable base, Function parse,
+	public RhinoNodeParserProxy(Context context, Scriptable base, Function parse,
 			int type) {
 		this.base = base;
 		this.parse = parse;
