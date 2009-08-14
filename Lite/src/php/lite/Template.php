@@ -114,10 +114,10 @@ function lite_process_for(&$context, &$data){
     }
     try{
         $length = 0;
-        $forStatus = array('index'=>-1);
+        $forStatus = array();
         $context[LITE_FOR_KEY]=&$forStatus;
+        $i=0;
         if(is_numeric($items)){
-        	$i=0;
         	$length = $items;
         	$forStatus['lastIndex']=$length-1;
 	        while($i<$length){
@@ -129,7 +129,7 @@ function lite_process_for(&$context, &$data){
             $length = count($items);
         	$forStatus['lastIndex'] = $length-1;
 	        foreach($items as &$item){
-	            $forStatus['index'] += 1;
+	            $forStatus['index'] = $i++;
 	            $context[$varName] = $item;
 	            lite_render_list($context, $children);
 	        }

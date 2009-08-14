@@ -158,7 +158,7 @@
 			<arg value="${basedir}/build/dest/jslite/demo.js" />
 		</java>
 	</target>
-	<target name="build" depends="compress,jar-template">
+	<target name="build" depends="compress,jar-template,php-example">
 
 	</target>
 
