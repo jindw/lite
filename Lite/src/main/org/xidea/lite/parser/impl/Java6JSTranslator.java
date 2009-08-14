@@ -20,22 +20,21 @@ import sun.org.mozilla.javascript.internal.UintMap;
 public class Java6JSTranslator extends JSTranslator implements ErrorReporter {
 	private static Log log = LogFactory.getLog(CoreXMLNodeParser.class);
 	private static ScriptEngine jsengine;
-
 	static {
 		jsengine = new ScriptEngineManager().getEngineByExtension("js");
 		if (jsengine == null) {
 			throw new RuntimeException("Java 6 找不到可用的 jsengine");
 		}
-		try {
-			invocable = (Invocable) 
-			jsengine.eval("function(thiz,fn){" +
-					"var args = Array.prototype.slice.call(arguments,2);" +
-					"if(!(fn instanceof Function)){" +
-					"fn = thiz[fn]"+
-					"}" +
-					"return fn.apply(thiz,args)}");
-		} catch (ScriptException e) {
-		}
+	}
+
+	public Object invokeFunction(String name, Object... args)
+			throws ScriptException, NoSuchMethodException {
+		return ((Invocable)jsengine).invokeFunction(name, args);
+	}
+
+	public Object invokeMethod(Object thiz, String name, Object... args)
+			throws ScriptException, NoSuchMethodException {
+		return ((Invocable)jsengine).invokeMethod(thiz, name, args);
 	}
 
 	@Override
@@ -53,11 +52,6 @@ public class Java6JSTranslator extends JSTranslator implements ErrorReporter {
 		return new EvaluatorException(message);
 	}
 
-
-	public Object call(Object thiz,Object... args){
-		return invocable.invokeFunction(name, args);
-	}
-	
 	public String compress(String source) {
 		// , int linebreakpos
 		CompilerEnvirons penv = new CompilerEnvirons();
