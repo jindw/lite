@@ -1,17 +1,13 @@
 package org.xidea.lite.parser.impl;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 
+import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.xidea.el.json.JSONDecoder;
 
 import sun.org.mozilla.javascript.internal.CompilerEnvirons;
 import sun.org.mozilla.javascript.internal.Decompiler;
@@ -21,85 +17,52 @@ import sun.org.mozilla.javascript.internal.Parser;
 import sun.org.mozilla.javascript.internal.UintMap;
 
 @SuppressWarnings("unchecked")
-public class Java6JSTranslator extends JSTranslator {
+public class Java6JSTranslator extends JSTranslator implements ErrorReporter {
 	private static Log log = LogFactory.getLog(CoreXMLNodeParser.class);
 	private static ScriptEngine jsengine;
 
 	static {
 		jsengine = new ScriptEngineManager().getEngineByExtension("js");
-		if(jsengine == null){
-			StringBuilder error = new StringBuilder("Java 6 找不到可用的 jsengine");
-			try{
-				error.append(System.getProperties());
-			}catch(Throwable e){
-			}
-			throw new RuntimeException(error.toString());
+		if (jsengine == null) {
+			throw new RuntimeException("Java 6 找不到可用的 jsengine");
 		}
-		ClassLoader loader = Java6JSTranslator.class.getClassLoader();
 		try {
-			InputStream boot = loader.getResourceAsStream("boot.js");
-			if (boot != null) {
-				try {
-					jsengine.eval(new InputStreamReader(boot, "utf-8"));
-					jsengine
-							.eval("$import('org.xidea.lite:ResultTranslator')");
-				} catch (Exception e) {
-					log.debug("尝试JSI启动编译脚本失败", e);
-				}
-			}
-			if (boot == null) {
-				jsengine.eval("var window = this;");
-				jsengine.eval(new InputStreamReader(loader
-						.getResourceAsStream("org/xidea/lite/template.js"),
-						"utf-8"));
-			}
-			jsengine.eval("var transformer = new ResultTranslator();");
-			supportFeatrues = new HashSet<String>((Collection) JSONDecoder
-					.decode((String) jsengine
-							.eval("uneval(transformer.getSupportFeatrues())")));
-		} catch (Exception e) {
-			log.error("初始化Java6 JS引擎失败", e);
+			invocable = (Invocable) 
+			jsengine.eval("function(thiz,fn){" +
+					"var args = Array.prototype.slice.call(arguments,2);" +
+					"if(!(fn instanceof Function)){" +
+					"fn = thiz[fn]"+
+					"}" +
+					"return fn.apply(thiz,args)}");
+		} catch (ScriptException e) {
+		}
+	}
+
+	@Override
+	protected Object eval(String source) {
+		try {
+			return jsengine.eval(source);
+		} catch (ScriptException e) {
+			log.error(e);
 			throw new RuntimeException(e);
 		}
-
-	}
-	protected static Set<String> supportFeatrues = new HashSet<String>();
-
-	public Set<String> getSupportFeatrues() {
-		return supportFeatrues;
 	}
 
-	private ErrorReporter reportor = new ErrorReporter() {
-		public void error(String arg0, String arg1, int arg2, String arg3,
-				int arg4) {
-			log.warn(arg0 + ":" + arg1 + ":" + arg3 + "@" + arg2);
-		}
-
-		public EvaluatorException runtimeError(String arg0, String arg1,
-				int arg2, String arg3, int arg4) {
-			return null;
-		}
-
-		public void warning(String arg0, String arg1, int arg2, String arg3,
-				int arg4) {
-			log.warn(arg0 + ":" + arg1 + ":" + arg3 + "@" + arg2);
-		}
-	};
-
-	private CompilerEnvirons penv = new CompilerEnvirons();
-	{
-		penv.setReservedKeywordAsIdentifier(true);
+	public EvaluatorException runtimeError(String message, String sourceName,
+			int line, String lineSource, int lineOffset) {
+		return new EvaluatorException(message);
 	}
 
-	public String buildJS(String script) throws Exception {
-		String code = (String) jsengine.eval(script);
-		jsengine.eval("+function(){" + code + "}");
-		return code;
-	}
 
+	public Object call(Object thiz,Object... args){
+		return invocable.invokeFunction(name, args);
+	}
+	
 	public String compress(String source) {
 		// , int linebreakpos
-		Parser parser = new Parser(penv, reportor);
+		CompilerEnvirons penv = new CompilerEnvirons();
+		penv.setReservedKeywordAsIdentifier(true);
+		Parser parser = new Parser(penv, this);
 		parser.parse(source, "<script>", 1);
 		String encoded = parser.getEncodedSource();
 		UintMap setting = new UintMap();
@@ -110,4 +73,5 @@ public class Java6JSTranslator extends JSTranslator {
 		// return result.replaceAll("(\\}[\r\n])|[\r\n]", "$1");
 		return result.replaceAll("[\r\n]", "");
 	}
+
 }
