@@ -1,6 +1,5 @@
 package org.xidea.lite.parser.impl;
 
-
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -17,7 +16,7 @@ import sun.org.mozilla.javascript.internal.Parser;
 import sun.org.mozilla.javascript.internal.UintMap;
 
 @SuppressWarnings("unchecked")
-public class Java6JSTranslator extends JSTranslator implements ErrorReporter {
+public class Java6Proxy extends JSProxy implements ErrorReporter {
 	private static Log log = LogFactory.getLog(CoreXMLNodeParser.class);
 	private static ScriptEngine jsengine;
 	static {
@@ -27,14 +26,20 @@ public class Java6JSTranslator extends JSTranslator implements ErrorReporter {
 		}
 	}
 
-	public Object invokeFunction(String name, Object... args)
-			throws ScriptException, NoSuchMethodException {
-		return ((Invocable)jsengine).invokeFunction(name, args);
+    public <T> T getInterface(Object thiz, Class<T> clasz){
+		try {
+			return ((Invocable) jsengine).getInterface(thiz, clasz);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
-	public Object invokeMethod(Object thiz, String name, Object... args)
-			throws ScriptException, NoSuchMethodException {
-		return ((Invocable)jsengine).invokeMethod(thiz, name, args);
+	public Object invokeMethod(Object thiz, String name, Object... args) {
+		try {
+			return ((Invocable) jsengine).invokeMethod(thiz, name, args);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override

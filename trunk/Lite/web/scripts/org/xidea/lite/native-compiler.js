@@ -112,15 +112,16 @@ function getEL(el){
 /**
  * JS原生代码翻译器实现
  */
-function ResultTranslator(){
+function ResultTranslator(id){
+    this.id = id;
 }
 ResultTranslator.prototype = {
-	transform:function(list,id,featrues){
+	transform:function(list){
 		var code = buildNativeJS(list)
 		return "function"+(id?" "+id:'')+"(){"+code+"\n}"
 	},
 	getSupportFeatrues:function(){
-		return ["compress"];
+		return java.util.Arrays.asList(["compress"]);
 	}
 }
 function buildNativeJS(code){

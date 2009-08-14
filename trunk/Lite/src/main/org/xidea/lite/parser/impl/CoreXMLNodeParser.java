@@ -258,7 +258,7 @@ public class CoreXMLNodeParser implements NodeParser<Element> {
 		if (next != null) {
 			// new Java6JSBuilder();
 			String id = getAttributeOrNull(el, "id","name");
-			ParseContext clientContext = new ParseContextImpl(context,JSTranslator.newTranslator(id,context.isCompress(),context.getCurrentURL().toString()));
+			ParseContext clientContext = new ParseContextImpl(context,JSProxy.newTranslator(id,context.isCompress(),context.getCurrentURL().toString()));
 			// 前端直接压缩吧？反正保留那些空白也没有调试价值
 			do {
 				clientContext.parse(next);
