@@ -1,6 +1,7 @@
 package org.xidea.lite.plugin.test;
 
 import java.beans.XMLDecoder;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.HashMap;
@@ -12,7 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.Template;
-import org.xidea.lite.parser.InstructionParser;
+import org.xidea.lite.parser.TextParser;
 import org.xidea.lite.parser.impl.ParseContextImpl;
 import org.xidea.lite.plugin.PluginLoader;
 
@@ -37,7 +38,7 @@ public class SimplePluginTest {
 				file + ".xml"));
 		String plugin = (String)de.readObject();
 		pf = new PluginLoader();
-		pf.load(plugin);
+		pf.load(new StringReader(plugin));
 		this.context = (Map<String, Object>) de.readObject();
 		System.out.println(JSONEncoder.encode(this.context));
 		Map<String, String> templateResultMap = (Map<String, String>) de.readObject();
@@ -53,9 +54,7 @@ public class SimplePluginTest {
 
 		ParseContextImpl parseContext = new ParseContextImpl(this.getClass()
 				.getResource("/"),null,null,null);
-		for(InstructionParser iparser:pf.getInstructionParserList()){
-			parseContext.addInstructionParser(iparser);
-		}
+		pf.setup(parseContext);
 		parseContext.parse(text);
 		List<Object> insts = parseContext.toList();
 		System.out.println(JSONEncoder.encode(insts));
