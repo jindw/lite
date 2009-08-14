@@ -46,8 +46,8 @@ public class ClientJSBuilderTest {
 		context2.setCompress(true);
 		context2.setExpressionFactory(clientExpressionFactory);
 		context2.parse(context2.loadXML(url));
-		String result = new Java6JSTranslator().translate(context2, "test");
-		String result2 = new RhinoJSTranslator().translate(context2, "test");
+		String result = new Java6JSTranslator().translate(context2);
+		String result2 = new RhinoJSTranslator().translate(context2);
 		Assert.assertEquals(result, result2);
 		System.out.println("==JS Code==");
 		System.out.println(result);

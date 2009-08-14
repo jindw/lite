@@ -7,7 +7,7 @@ import org.xidea.el.ExpressionFactory;
 
 public interface ResultContext {
 	public static final Object END_INSTRUCTION = new Object[0];
-
+	
 	/**
 	 * 记录一下编译上下文特征变量，该对象不可被修改
 	 * @param featrues {url,value}
@@ -18,6 +18,12 @@ public interface ResultContext {
 	 * @return
 	 */
 	public Map<String, String> getFeatrueMap();
+	
+	/**
+	 * 设置translator，同时更新featrueMap（结果翻译起对某些特征可能不支持）
+	 * @param translator
+	 */
+	public void setResultTranslator(ResultTranslator translator);
 
 	/**
 	 * 记录一下当前位置，reset的参考位置
