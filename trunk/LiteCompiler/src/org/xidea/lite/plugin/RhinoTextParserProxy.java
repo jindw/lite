@@ -5,18 +5,18 @@ import org.apache.commons.logging.LogFactory;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Scriptable;
-import org.xidea.lite.parser.InstructionParser;
+import org.xidea.lite.parser.TextParser;
 import org.xidea.lite.parser.ParseContext;
 
-public class RhinoInstructionParserProxy implements InstructionParser {
+public class RhinoTextParserProxy implements TextParser {
 
 	private static final Log log = LogFactory
-			.getLog(RhinoInstructionParserProxy.class);
+			.getLog(RhinoTextParserProxy.class);
 	private Scriptable base;
 	private Function findStart;
 	private Function parse;
 
-	public RhinoInstructionParserProxy(Context context, Scriptable base,
+	public RhinoTextParserProxy(Context context, Scriptable base,
 			Function findStart, Function parse) {
 		this.base = base;
 		this.parse = parse;

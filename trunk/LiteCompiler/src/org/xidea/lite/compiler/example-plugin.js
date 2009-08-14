@@ -1,11 +1,11 @@
 //添加Common Template 语法支持
 $import("org.xidea.lite.parser.impl.ELParser");
-context.addInstructionParser(ELParser.IF);
-context.addInstructionParser(ELParser.FOR);
-context.addInstructionParser(ELParser.ELSE);
-context.addInstructionParser(ELParser.END);
-context.addInstructionParser(ELParser.VAR);
-context.addInstructionParser(ELParser.CLIENT);
+context.addTextParser(ELParser.IF);
+context.addTextParser(ELParser.FOR);
+context.addTextParser(ELParser.ELSE);
+context.addTextParser(ELParser.END);
+context.addTextParser(ELParser.VAR);
+context.addTextParser(ELParser.CLIENT);
 
 /*
 //一个简单测试，将当前文档的标记名称全部打印出来

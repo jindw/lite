@@ -14,8 +14,8 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 import org.mozilla.javascript.Undefined;
 import org.w3c.dom.Node;
-import org.xidea.lite.parser.InstructionParser;
-import org.xidea.lite.parser.Parser;
+import org.xidea.lite.parser.NodeParser;
+import org.xidea.lite.parser.TextParser;
 
 public class RhinoContext {
 	public static final Log log = LogFactory.getLog(RhinoContext.class);
@@ -41,7 +41,7 @@ public class RhinoContext {
 		context.evaluateString(scope, INITIALIZE_SCRIPT, "data:", 1, null);
 	}
 
-	public void setUp(String source) {
+	public void initialize(String source) {
 		scope.put("context", scope, this);
 		scope.put("Node", scope,new NativeJavaClass(scope,Node.class));
 		context.evaluateString(scope, source, "data:" + source, 1, null);
@@ -61,17 +61,17 @@ public class RhinoContext {
 
 	}
 
-	public void addInstructionParser(Object iparser) {
-		InstructionParser parser;
+	public void addTextParser(Object iparser) {
+		TextParser parser;
 		if (iparser instanceof Scriptable) {
 			Function findStart = (Function) RhinoContext.getProperty(
 					(Scriptable) iparser, "findStart");
 			Function parse = (Function) RhinoContext.getProperty(
 					(Scriptable) iparser, "parse");
-			parser = new RhinoInstructionParserProxy(context,
+			parser = new RhinoTextParserProxy(context,
 					(Scriptable) iparser, findStart, parse);
 		} else {
-			parser = (InstructionParser) iparser;
+			parser = (TextParser) iparser;
 		}
 		initializer.addInstructionParser(parser);
 	}
@@ -82,17 +82,17 @@ public class RhinoContext {
 
 	@SuppressWarnings("unchecked")
 	public void addNodeParser(Object parser, int type) {
-		Parser<Node> nodeParser;
+		NodeParser<Node> nodeParser;
 		if (parser instanceof Scriptable) {
 			Function parse = (Function) RhinoContext.getProperty(
 					(Scriptable) parser, "parse");
 			if(parse == null){
 				parse = (Function) parser;
 			}
-			nodeParser = new RhinoParserProxy(context, (Scriptable) parser,
+			nodeParser = new RhinoNodeParserProxy(context, (Scriptable) parser,
 					parse, type);
 		} else {
-			nodeParser = (Parser<Node>) parser;
+			nodeParser = (NodeParser<Node>) parser;
 		}
 		initializer.addNodeParser(nodeParser);
 	}
