@@ -18,9 +18,9 @@ import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.parser.ResultContext;
 import org.xidea.lite.parser.ResultTranslator;
 
-public abstract class JSTranslator implements ResultTranslator,
+public abstract class JSProxy implements ResultTranslator,
 		ExpressionFactory {
-	private static Log log = LogFactory.getLog(JSTranslator.class);
+	private static Log log = LogFactory.getLog(JSProxy.class);
 
 	protected Set<String> supportFeatrues = new HashSet<String>();
 	
@@ -28,14 +28,14 @@ public abstract class JSTranslator implements ResultTranslator,
 	protected String path = "<file>";
 	protected String id = "";
 
-	public static JSTranslator newTranslator(String id, boolean compress,
+	public static JSProxy newTranslator(String id, boolean compress,
 			String pathInfo) {
-		JSTranslator instance = null;
+		JSProxy instance = null;
 		try {
-			instance = new RhinoJSTranslator();
+			instance = new RhinoProxy();
 		} catch (NoClassDefFoundError e) {
 			try {
-				instance = new Java6JSTranslator();
+				instance = new Java6Proxy();
 			} catch (NoClassDefFoundError e2) {
 				log.error("找不到您的JS运行环境，不能为您编译前端js", e2);
 				throw e2;
@@ -52,10 +52,13 @@ public abstract class JSTranslator implements ResultTranslator,
 		return supportFeatrues;
 	}
 
+    public abstract <T> T getInterface(Object thiz, Class<T> clasz);
+	public abstract Object invokeMethod(Object thiz, String name, Object... args);
+	
 	@SuppressWarnings("unchecked")
 	private void initializeTranslator() {
 		try {
-			ClassLoader loader = JSTranslator.class.getClassLoader();
+			ClassLoader loader = JSProxy.class.getClassLoader();
 			InputStream boot = loader.getResourceAsStream("boot.js");
 			if (boot != null) {
 				try {

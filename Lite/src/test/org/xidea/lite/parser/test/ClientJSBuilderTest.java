@@ -5,6 +5,8 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -22,9 +24,9 @@ import org.xidea.lite.parser.ResultTranslator;
 import org.xidea.lite.parser.TextParser;
 import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.impl.ELParser;
-import org.xidea.lite.parser.impl.Java6JSTranslator;
+import org.xidea.lite.parser.impl.Java6Proxy;
 import org.xidea.lite.parser.impl.ParseContextImpl;
-import org.xidea.lite.parser.impl.RhinoJSTranslator;
+import org.xidea.lite.parser.impl.RhinoProxy;
 import org.xml.sax.SAXException;
 
 public class ClientJSBuilderTest {
@@ -44,9 +46,19 @@ public class ClientJSBuilderTest {
 	}
 
 	@Test
+	public void testRhinoProxy() throws SAXException, IOException, ScriptException, NoSuchMethodException {
+		RhinoProxy rp = new RhinoProxy();
+		
+		Object o = rp.eval("({getSupportFeatrues:function(){return new java.util.HashSet(new java.util.Arrays.asList([1,2,3]))},run:function(){print(111)}})");
+		//rp.invokeMethod(o, "run");
+		ResultTranslator r = rp.getInterface(o,ResultTranslator.class);
+		System.out.println(r.getSupportFeatrues());
+		
+	}
+	@Test
 	public void testScriptBind() throws SAXException, IOException, ScriptException, NoSuchMethodException {
 		ScriptEngine engine = new ScriptEngineManager().getEngineByExtension("js");
-		Object o = engine.eval("({getSupportFeatrues:function(){return [1,2,3]},run:function(){print(111)}})");
+		Object o = engine.eval("({getSupportFeatrues:function(){return new java.util.HashSet(java.util.Arrays.asList([1,2,3]))},run:function(){print(111)}})");
 		((Invocable)engine).invokeMethod(o, "run");
 		ResultTranslator r = ((Invocable)engine).getInterface(o,ResultTranslator.class);
 		System.out.println(r.getSupportFeatrues());
@@ -61,8 +73,8 @@ public class ClientJSBuilderTest {
 		context2.setCompress(true);
 		context2.setExpressionFactory(clientExpressionFactory);
 		context2.parse(context2.loadXML(url));
-		String result = new Java6JSTranslator().translate(context2);
-		String result2 = new RhinoJSTranslator().translate(context2);
+		String result = new Java6Proxy().translate(context2);
+		String result2 = new RhinoProxy().translate(context2);
 		Assert.assertEquals(result, result2);
 		System.out.println("==JS Code==");
 		System.out.println(result);
