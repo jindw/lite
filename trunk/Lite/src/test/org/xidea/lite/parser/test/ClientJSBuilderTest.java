@@ -8,11 +8,17 @@ import java.net.URL;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import javax.script.Invocable;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.xidea.el.Expression;
 import org.xidea.el.ExpressionFactory;
+import org.xidea.lite.parser.ResultTranslator;
 import org.xidea.lite.parser.TextParser;
 import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.impl.ELParser;
@@ -37,6 +43,15 @@ public class ClientJSBuilderTest {
 	public void setUp() throws Exception {
 	}
 
+	@Test
+	public void testScriptBind() throws SAXException, IOException, ScriptException, NoSuchMethodException {
+		ScriptEngine engine = new ScriptEngineManager().getEngineByExtension("js");
+		Object o = engine.eval("({getSupportFeatrues:function(){return [1,2,3]},run:function(){print(111)}})");
+		((Invocable)engine).invokeMethod(o, "run");
+		ResultTranslator r = ((Invocable)engine).getInterface(o,ResultTranslator.class);
+		System.out.println(r.getSupportFeatrues());
+		
+	}
 	@Test
 	public void testBuildJS() throws SAXException, IOException {
 		URL url = this.getClass().getResource("format-test.xhtml");
