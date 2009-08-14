@@ -50,7 +50,7 @@ class Expression{
 		return json_decode($t);
 	}
 	function Expression(&$tokens){
-		$this->tokens = &$tokens;
+		$this->tokens = $tokens;
 	}
 	function evaluate(&$context) {
 		return lite_evaluate($context,$this->tokens);
@@ -65,7 +65,7 @@ function lite_evaluate(&$context,&$tokens) {
 		_lite_evaluate($stack, $context, $tokens);
 		$stack=$stack[0];
 		if ($stack instanceof _LitePropertyValue){
-			$stack = &$stack->get();
+			$stack = $stack->get();
 		}
 	}
 	return $stack;
@@ -139,10 +139,10 @@ function lite_compute(&$op, &$arg2, &$arg1) {
 	}
 	//echo get_class ( $arg1);
 	if ($arg1 instanceof _LitePropertyValue) {
-		$arg1 = &$arg1->get();
+		$arg1 = $arg1->get();
 	}
 	if ($arg2 instanceof _LitePropertyValue) {
-		$arg2 = &$arg2->get();
+		$arg2 = $arg2->get();
 	}
 	switch($type) {
 		case LITE_OP_STATIC_GET_PROP:
@@ -220,8 +220,8 @@ class _LitePropertyValue {
 	var $base;
 	var $name;
 	function _LitePropertyValue(&$base, &$name) {
-		$this->base = &$base;
-		$this->name = &$name;
+		$this->base = $base;
+		$this->name = $name;
 	}
 	function get(){
 		$base = &$this->base;
