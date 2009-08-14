@@ -17,7 +17,19 @@
 			</fileset>
 		</war>
 	</target>
-	<target name="build" depends="init,war">
+
+	<target name="jar" depends="init">
+		<jar destfile="build/dest/Template-plugin.jar" compress="true">
+			<fileset dir="src" defaultexcludes="true">
+				<include name="org/xidea/lite/plugin/*.java" />
+			</fileset>
+			<fileset dir="war/WEB-INF/classes" defaultexcludes="true">
+				<include name="org/xidea/lite/plugin/*.*" />
+			</fileset>
+		</jar>
+	</target>
+
+	<target name="build" depends="init,jar,war">
 		<input addproperty="ftppassword" />
 		<ftp password="${ftppassword}" server="fe.baidu.com" userid="jindawei" action="put" remotedir="${remoteDir}">
 			<fileset file="build/dest/LC.war">
