@@ -14,6 +14,15 @@ public interface TextParser {
 	 * @return 返回改指令结束位置的下一个位置，返回值一定要 大于 start 否则安失败算
 	 */
 	public int parse(String text,int start,ParseContext context);
+	
+	/**
+	 * 补充优先级位数,一般为匹配字长 
+	 * 比如 :${aa}  priority 1
+	 *     :$end  priority 3
+	 *     :$if{ test }  priority 2
+	 * @return 附加优先级
+	 */
+	public int getPriority();
 	/**
 	 * 查找EL或者模板指令的开始位置
 	 * @param text

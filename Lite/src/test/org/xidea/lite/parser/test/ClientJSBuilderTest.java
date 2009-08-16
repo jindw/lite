@@ -51,7 +51,7 @@ public class ClientJSBuilderTest {
 		
 		Object o = rp.eval("({getSupportFeatrues:function(){return new java.util.HashSet(new java.util.Arrays.asList([1,2,3]))},run:function(){print(111)}})");
 		//rp.invokeMethod(o, "run");
-		ResultTranslator r = rp.getInterface(o,ResultTranslator.class);
+		ResultTranslator r = rp.wrapToJava(o,ResultTranslator.class);
 		System.out.println(r.getSupportFeatrues());
 		
 	}
@@ -73,8 +73,8 @@ public class ClientJSBuilderTest {
 		context2.setCompress(true);
 		context2.setExpressionFactory(clientExpressionFactory);
 		context2.parse(context2.loadXML(url));
-		String result = new Java6Proxy().translate(context2);
-		String result2 = new RhinoProxy().translate(context2);
+		String result = new Java6Proxy().createJSTranslator("t1").translate(context2);
+		String result2 = new RhinoProxy().createJSTranslator("t1").translate(context2);
 		Assert.assertEquals(result, result2);
 		System.out.println("==JS Code==");
 		System.out.println(result);

@@ -10,5 +10,5 @@ public interface ResultTranslator {
 	 */
 	public String translate(ResultContext context);
 
-	public java.util.Set<String> getSupportFeatrues();
+	public java.util.Collection<String> getSupportFeatrues();
 }

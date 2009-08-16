@@ -1,140 +1,127 @@
 package org.xidea.lite.parser.impl;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.net.URL;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.xidea.el.Expression;
-import org.xidea.el.ExpressionFactory;
-import org.xidea.el.json.JSONDecoder;
-import org.xidea.el.json.JSONEncoder;
-import org.xidea.lite.parser.ResultContext;
+import org.xidea.lite.parser.NodeParser;
 import org.xidea.lite.parser.ResultTranslator;
+import org.xidea.lite.parser.TextParser;
 
-public abstract class JSProxy implements ResultTranslator,
-		ExpressionFactory {
+public abstract class JSProxy {
 	private static Log log = LogFactory.getLog(JSProxy.class);
+	private static ClassLoader loader = JSProxy.class.getClassLoader();
+	private boolean jsiAvailable = false;
 
-	protected Set<String> supportFeatrues = new HashSet<String>();
-	
-	protected boolean compress;
-	protected String path = "<file>";
-	protected String id = "";
+	protected abstract Object eval(String source, String pathInfo);
 
-	public static JSProxy newTranslator(String id, boolean compress,
-			String pathInfo) {
-		JSProxy instance = null;
-		try {
-			instance = new RhinoProxy();
-		} catch (NoClassDefFoundError e) {
-			try {
-				instance = new Java6Proxy();
-			} catch (NoClassDefFoundError e2) {
-				log.error("找不到您的JS运行环境，不能为您编译前端js", e2);
-				throw e2;
-			}
+	public abstract <T> T wrapToJava(Object thiz, Class<T> clasz);
+
+	public abstract Object invoke(Object thiz, String methodName,
+			Object... args);
+
+
+	public abstract String compress(String source);
+
+	public <T> T createObject(Class<T> clasz,String... scripts){
+		Object o = null;
+		for (String s:scripts) {
+			o = eval(s);
 		}
-		instance.id = id;
-		instance.compress = compress;
-		instance.path = pathInfo;
-		instance.initializeTranslator();
-		return instance;
+		return wrapToJava(o, clasz);
 	}
-
-	public Set<String> getSupportFeatrues() {
-		return supportFeatrues;
+	public TextParser createTextParser(String... scripts){
+		Object o = null;
+		for (String s:scripts) {
+			o = eval(s);
+		}
+		Object fn = eval("{wrap:function(o){o.getPriority||this.getPriority;return o},getPriority:function(){return o.priority || 1;}}");
+		return wrapToJava(invoke(fn, "wrap", o), TextParser.class);
 	}
-
-    public abstract <T> T getInterface(Object thiz, Class<T> clasz);
-	public abstract Object invokeMethod(Object thiz, String name, Object... args);
-	
 	@SuppressWarnings("unchecked")
-	private void initializeTranslator() {
+	public NodeParser<Object> createNodeParser(String... scripts){
+		Object o = null;
+		for (String s:scripts) {
+			o = eval(s);
+		}
+		Object fn = eval("{wrap:function(o){return o instanceof Function?{parse:o}:o}}");
+		return wrapToJava(invoke(fn, "wrap", o), NodeParser.class);
+	}
+	
+	public ResultTranslator createJSTranslator(String id) {
+		Object translator = null;
 		try {
-			ClassLoader loader = JSProxy.class.getClassLoader();
-			InputStream boot = loader.getResourceAsStream("boot.js");
-			if (boot != null) {
-				try {
-					eval(new InputStreamReader(boot, "utf-8"));
-					eval("$import('org.xidea.lite:ResultTranslator')");
-				} catch (Exception e) {
-					log.debug("尝试JSI启动编译脚本失败", e);
-				}
+			if (this.isJSIAvailable()) {
+				translator = this
+						.eval("new ($import('org.xidea.lite:ResultTranslator',null))('"
+								+ id + "')");
+			} else {
+				URL compressed = loader
+						.getResource("org/xidea/lite/template.js");
+
+				this.eval(compressed);
+				translator = this.eval("new ResultTranslator('" + id + "')");
+
 			}
-			if (boot == null) {
-				eval("var window = this;");
-				InputStream compressed = loader
-						.getResourceAsStream("org/xidea/lite/template.js");
-				eval(new InputStreamReader(compressed, "utf-8"));
-			}
-			eval("var transformer = new ResultTranslator();");
-			supportFeatrues = new HashSet<String>(
-					(Collection) JSONDecoder
-							.decode((String) eval("uneval(transformer.getSupportFeatrues())")));
+			return this.wrapToJava(translator, ResultTranslator.class);
 		} catch (Exception e) {
 			log.error("初始化Rhino JS引擎失败", e);
+			throw new RuntimeException(e);
 		}
 	}
-	
-	
 
-	public Object eval(Reader in) throws IOException {
+	public static JSProxy newProxy() {
+		try {
+			return new RhinoProxy();
+		} catch (NoClassDefFoundError e) {
+			return new Java6Proxy();
+		}
+	}
+
+	public boolean isJSIAvailable() {
+		return jsiAvailable;
+	}
+
+	@SuppressWarnings("unchecked")
+	protected void initialize() {
+		eval("window = this;");
+		URL boot = loader.getResource("boot.js");
+		if (boot != null) {
+			try {
+				eval(boot);
+				jsiAvailable = (Boolean) eval("!!(this.$import && this.$JSI)");
+			} catch (Exception e) {
+				log.debug("尝试JSI启动编译脚本失败", e);
+			}
+		}
+	}
+
+	public Object eval(URL resource) throws IOException {
+		InputStreamReader in = new InputStreamReader(resource.openStream(),
+				"utf-8");
+		try {
+			return eval(in, resource.toString());
+		} finally {
+			in.close();
+		}
+	}
+
+	public Object eval(Reader in, String pathInfo) throws IOException {
 		StringWriter out = new StringWriter();
 		int count;
 		char[] cbuf = new char[1024];
 		while ((count = in.read(cbuf)) > -1) {
 			out.write(cbuf, 0, count);
 		}
-		return eval(out.toString());
+		return eval(out.toString(), pathInfo);
 	}
 
-	private String buildJS(String script) {
-		String code = (String) eval(script);
-		eval("function x(){" + code + "}");
-		return code;
-	}
-
-	protected abstract Object eval(String source);
-
-	public abstract String compress(String source);
-
-	public String translate(ResultContext context) {
-		try {
-			String script = getTranslateScript(context);
-			String result = this.buildJS(script);
-			if (compress) {
-				result = compress(result);
-			}
-			return result;
-		} catch (Exception e) {
-			log.warn("生成js代码失败：" + id + "@" + path, e);
-			return "function " + id + "(){alert('生成js代码失败：'+"
-					+ JSONEncoder.encode(e.getMessage()) + ")}";
-		}
-	}
-
-	private String getTranslateScript(ResultContext context) {
-		String liteJSON = JSONEncoder.encode(context.toList());
-		String featrueJSON = JSONEncoder.encode(context.getFeatrueMap());
-		String script = "transformer.transform(" + liteJSON + ",'" + id + "',"
-				+ featrueJSON + ")+''";
-		return script;
-	}
-
-	// mock other
-	public Expression create(Object el) {
-		throw new UnsupportedOperationException();
-	}
-
-	public Object parse(String expression) {
-		return expression;
+	public Object eval(String source) {
+		return this.eval(source, "source:" + source);
 	}
 
 	public void error(String message, String sourceName, int line,

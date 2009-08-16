@@ -93,6 +93,8 @@ public class XMLContextImpl implements XMLContext {
 			throw new SAXException("XML Parser Error:" + url + "("
 					+ e.getLineNumber() + "," + e.getColumnNumber() + ")\r\n"
 					+ e.getMessage());
+		}finally{
+			in.close();
 		}
 	}
 

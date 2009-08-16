@@ -1,23 +1,12 @@
 package org.xidea.lite.parser;
 
 import java.util.List;
-import java.util.Map;
 
 import org.xidea.el.ExpressionFactory;
 
 public interface ResultContext {
 	public static final Object END_INSTRUCTION = new Object[0];
 	
-	/**
-	 * 记录一下编译上下文特征变量，该对象不可被修改
-	 * @param featrues {url,value}
-	 */
-	public String getFeatrue(String key);
-	/**
-	 * 获得特征表的直接引用，外部的修改也将直接影响解析上下文的特征表
-	 * @return
-	 */
-	public Map<String, String> getFeatrueMap();
 	
 	/**
 	 * 设置translator，同时更新featrueMap（结果翻译起对某些特征可能不支持）
@@ -39,7 +28,8 @@ public interface ResultContext {
 	public List<Object> reset(int mark);
 
 	/**
-	 * 获取结束节点
+	 * 获取结束节点,开始为0
+	 * @see org.xidea.lite.parser.impl.ResultContextImpl#getDepth()
 	 * @return
 	 */
 	public int getDepth();

@@ -9,6 +9,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import sun.org.mozilla.javascript.internal.CompilerEnvirons;
+import sun.org.mozilla.javascript.internal.Context;
 import sun.org.mozilla.javascript.internal.Decompiler;
 import sun.org.mozilla.javascript.internal.ErrorReporter;
 import sun.org.mozilla.javascript.internal.EvaluatorException;
@@ -18,15 +19,19 @@ import sun.org.mozilla.javascript.internal.UintMap;
 @SuppressWarnings("unchecked")
 public class Java6Proxy extends JSProxy implements ErrorReporter {
 	private static Log log = LogFactory.getLog(CoreXMLNodeParser.class);
-	private static ScriptEngine jsengine;
+	private ScriptEngine jsengine;
 	static {
-		jsengine = new ScriptEngineManager().getEngineByExtension("js");
-		if (jsengine == null) {
+		if (new ScriptEngineManager().getEngineByExtension("js") == null) {
 			throw new RuntimeException("Java 6 找不到可用的 jsengine");
 		}
 	}
 
-    public <T> T getInterface(Object thiz, Class<T> clasz){
+	public Java6Proxy() {
+		jsengine = new ScriptEngineManager().getEngineByExtension("js");
+		initialize();
+	}
+
+	public <T> T wrapToJava(Object thiz, Class<T> clasz) {
 		try {
 			return ((Invocable) jsengine).getInterface(thiz, clasz);
 		} catch (Exception e) {
@@ -34,21 +39,33 @@ public class Java6Proxy extends JSProxy implements ErrorReporter {
 		}
 	}
 
-	public Object invokeMethod(Object thiz, String name, Object... args) {
+	public Object invoke(Object thiz, String name, Object... args) {
 		try {
+			Context context = Context.enter();
+			context.getWrapFactory().setJavaPrimitiveWrap(false);
 			return ((Invocable) jsengine).invokeMethod(thiz, name, args);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
+		} finally {
+			Context.exit();
 		}
 	}
 
 	@Override
-	protected Object eval(String source) {
+	public Object eval(String source, String pathInfo) {
+		System.out.println(jsengine.getClass());
+		Object file = jsengine.get(ScriptEngine.FILENAME);
 		try {
+			Context context = Context.enter();
+			context.getWrapFactory().setJavaPrimitiveWrap(false);
+			jsengine.put(ScriptEngine.FILENAME, pathInfo);
 			return jsengine.eval(source);
 		} catch (ScriptException e) {
 			log.error(e);
 			throw new RuntimeException(e);
+		} finally {
+			Context.exit();
+			jsengine.put(ScriptEngine.FILENAME, file);
 		}
 	}
 

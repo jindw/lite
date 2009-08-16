@@ -182,7 +182,7 @@ public class DefaultXMLNodeParser implements NodeParser<Node> {
 		Attr attr = (Attr) node;
 		String name = attr.getName();
 		String value = attr.getValue();
-		if (CoreXMLNodeParser.isCoreNS("xmlns:c".equals(name) ? "c" : attr
+		if (ParseUtil.isCoreNS("xmlns:c".equals(name) ? "c" : attr
 				.getPrefix(), value)) {
 			return;
 		}
