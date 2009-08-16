@@ -14,6 +14,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Node;
 import org.xidea.lite.parser.ParseContext;
+import org.xidea.lite.parser.ResultTranslator;
 import org.xidea.lite.parser.TextParser;
 import org.xidea.lite.parser.NodeParser;
 
@@ -22,7 +23,10 @@ import org.xidea.lite.parser.NodeParser;
 public class PluginLoader{
 	protected List<TextParser> textParserList = new ArrayList<TextParser>();
 	protected List<NodeParser<? extends Node>> nodeParserList = new ArrayList<NodeParser<? extends Node>>();
+	protected ResultTranslator translater;
 	private static Log log = LogFactory.getLog(PluginLoader.class);
+	
+	
 
 	@SuppressWarnings("unchecked")
 	public void setup(ParseContext context, URL pluginSource) {
@@ -42,6 +46,9 @@ public class PluginLoader{
 		}
 		for(NodeParser parser : nodeParserList){
 			context.addNodeParser(parser);
+		}
+		if(translater != null){
+			
 		}
 	}
 	public void load(Reader source){//不用string 是为了避免 string source url混淆
