@@ -50,8 +50,7 @@ public class RhinoContext {
 	@SuppressWarnings("unchecked")
 	public void doImport(String path) {
 		try {
-
-				Class clazz = Class.forName(path);
+			Class clazz = Class.forName(path);
 			scope.put(path.substring(path.lastIndexOf('.') + 1), scope,
 					new NativeJavaClass(scope,clazz));
 			
@@ -68,8 +67,14 @@ public class RhinoContext {
 					(Scriptable) iparser, "findStart");
 			Function parse = (Function) RhinoContext.getProperty(
 					(Scriptable) iparser, "parse");
+			Object getPriority = (Function) RhinoContext.getProperty(
+					(Scriptable) iparser, "getPriority");
+			if(getPriority == null){
+				getPriority = RhinoContext.getProperty(
+						(Scriptable) iparser, "priority");
+			}
 			parser = new RhinoTextParserProxy(context,
-					(Scriptable) iparser, findStart, parse);
+					(Scriptable) iparser, findStart, parse,getPriority);
 		} else {
 			parser = (TextParser) iparser;
 		}
@@ -110,7 +115,7 @@ public class RhinoContext {
 	public static Object getProperty(Scriptable base, String functionName) {
 		Object x = ScriptableObject.getProperty(base, functionName);
 		if (x == Scriptable.NOT_FOUND) {
-			log.error("method not found");
+			log.warn("property:"+functionName+" not found");
 			return null;
 		}
 		return x;
