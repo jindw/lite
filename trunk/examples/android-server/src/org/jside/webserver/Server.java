@@ -17,7 +17,6 @@ public class Server extends Activity{
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		new Thread(new Executor(this)).start();
 		setContentView(R.layout.main);
 		Button exit = (Button) super.findViewById(R.id.exit);
 		exit.setOnClickListener(new OnClickListener() {
@@ -26,39 +25,43 @@ public class Server extends Activity{
 				System.exit(0);
 			}
 		});
+		Button hide = (Button) super.findViewById(R.id.hide);
+		hide.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Server.this.setVisible(false);
+			}
+		});
+		Button open = (Button) super.findViewById(R.id.open);
+		open.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				//todo;
+			}
+		});
 
-		EditText link = (EditText) super.findViewById(R.id.link);
-		link.setText("111");
-	}
-}
-class Executor implements Runnable{
-	private Server server;
-
-	public Executor(Server server) {
-		this.server = server;
+		this.run();
 	}
 
 	public void run() {
-		
-		EditText link = (EditText) server.findViewById(R.id.link);
-		link.setText("222");
+		EditText link = (EditText) this.findViewById(R.id.link);
 		try {
-//			ws = new MutiThreadWebServer(new File("/").toURI().toURL());
-//			ws.start();
-//			while (true) {
-//				if (ws.getPort() > 0) {
-//					break;
-//				}
-//				Thread.sleep(300);
-//			}
-//			WifiManager wm = (WifiManager) server.getSystemService(Activity.WIFI_SERVICE);
-//			String ip = "127.0.0.1";
-//			if (wm != null) {
-//				int i = wm.getConnectionInfo().getIpAddress();
-//				ip = (i >> 24) + "." + (0xFF & (i >> 16)) + '.'
-//						+ (0xFF & (i >> 8)) + '.' + (0xFF & i);
-//			}
-//			link.setText("http://" + ip + ":" + ws.getPort());
+			MutiThreadWebServer ws = new MutiThreadWebServer(new File("/").toURI().toURL());
+			ws.start();
+			while (true) {
+				if (ws.getPort() > 0) {
+					break;
+				}
+				Thread.sleep(300);
+			}
+			WifiManager wm = (WifiManager) this.getSystemService(Activity.WIFI_SERVICE);
+			String ip = "127.0.0.1";
+			if (wm != null && wm.getConnectionInfo() !=null) {
+				int i = wm.getConnectionInfo().getIpAddress();
+				ip = (i >> 24) + "." + (0xFF & (i >> 16)) + '.'
+						+ (0xFF & (i >> 8)) + '.' + (0xFF & i);
+			}
+			link.setText("http://" + ip + ":" + ws.getPort());
 		} catch (Throwable e) {
 			String msg = e.getMessage();
 			link.setText(msg.replaceAll("[\r\n]", ""));
