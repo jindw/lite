@@ -8,7 +8,6 @@ import org.xidea.lite.parser.NodeParser;
 
 public class TextNodeParser implements NodeParser<String> {
 
-
 	public TextNodeParser() {
 	}
 
@@ -46,11 +45,16 @@ public class TextNodeParser implements NodeParser<String> {
 		do {
 			TextParser nip = null;
 			int p$ = length + 1;
-			for (TextParser ip : instructionParser) {
-				int p$2 = ip.findStart(text, start, p$);
-				if (p$2 >= start && p$2 < p$) {
-					p$ = p$2;
-					nip = ip;
+			{
+				int pri = 0;
+				for (TextParser ip : instructionParser) {
+					int p$2 = ip.findStart(text, start, p$);
+					int pri2 = ip.getPriority();
+					if (p$2 >= start && p$2 - pri2 < p$ - pri) {
+						p$ = p$2;
+						nip = ip;
+					}
+					pri = pri2;
 				}
 			}
 			if (nip != null) {

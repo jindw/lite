@@ -4,7 +4,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -20,26 +19,18 @@ import org.xidea.lite.parser.NodeParser;
 
 public class CoreXMLNodeParser implements NodeParser<Element> {
 	private static Log log = LogFactory.getLog(CoreXMLNodeParser.class);
-	private static final Pattern TEMPLATE_NAMESPACE_CORE = Pattern
-			.compile("^http:\\/\\/www.xidea.org\\/ns\\/(?:template|lite)(?:\\/core)?\\/?$");
-	public static boolean isCoreNS(String prefix, String url) {
-		return ("c".equals(prefix) && ("#".equals(url) || "#core".equals(url)))
-				|| TEMPLATE_NAMESPACE_CORE.matcher(url).find();
-	}
-
-	public CoreXMLNodeParser() {
-
-	}
+	private static ClientParser clientParser = new ClientParser();
+	
 
 	public void parse( final Element el,ParseContext context,ParseChain chain) {
 			String prefix = el.getPrefix();
 			String namespaceURI = el.getNamespaceURI();
-			if (namespaceURI != null && isCoreNS(prefix, namespaceURI)) {
+			if (namespaceURI != null && ParseUtil.isCoreNS(prefix, namespaceURI)) {
 				String name = el.getLocalName();
 				if ("include".equals(name)) {
 					 parseIncludeTag(el, context);
 				} else if ("client".equals(name)) {
-					parseClientTag(el, context);
+					clientParser.parseClientTag(el, context);
 				} else if ("group".equals(name) || "context".equals(name)) {
 					parseContextTag(el, context);
 				} else if ("json".equals(name)) {
@@ -95,18 +86,18 @@ public class CoreXMLNodeParser implements NodeParser<Element> {
 		buf.append("]}");
 		context.appendAdvice(MacroAdvice.class, context.parseEL(buf.toString()));
 		if(el.hasChildNodes()){
-			parseChild(el.getFirstChild(), context);
+			ParseUtil.parseChild(el.getFirstChild(), context);
 		}
 		context.appendEnd();
 		
 	}
 
-	public void parseIncludeTag(final Element el, ParseContext context) {
-		String var = getAttributeOrNull(el, "var");
-		String path = getAttributeOrNull(el, "path");
-		String xpath = getAttributeOrNull(el, "xpath");
-		String xslt = getAttributeOrNull(el, "xslt");
-		String name = getAttributeOrNull(el, "name");
+	protected void parseIncludeTag(final Element el, ParseContext context) {
+		String var = ParseUtil.getAttributeOrNull(el, "var");
+		String path = ParseUtil.getAttributeOrNull(el, "path");
+		String xpath = ParseUtil.getAttributeOrNull(el, "xpath");
+		String xslt = ParseUtil.getAttributeOrNull(el, "xslt");
+		String name = ParseUtil.getAttributeOrNull(el, "name");
 		Node doc = el.getOwnerDocument();
 		final URL parentURL = context.getCurrentURL();
 		try {
@@ -160,34 +151,34 @@ public class CoreXMLNodeParser implements NodeParser<Element> {
 
 
 	protected Node parseIfTag(Element el, ParseContext context) {
-		Object test = getAttributeEL(context, el, "test");
+		Object test = ParseUtil.getAttributeEL(context, el, "test");
 		context.appendIf(test);
-		parseChild(el.getFirstChild(), context);
+		ParseUtil.parseChild(el.getFirstChild(), context);
 		context.appendEnd();
 		return null;
 	}
 
 	protected Node parseElseTag(Element el, ParseContext context, boolean requiredTest) {
-		Object test = getAttributeEL(context, el, "test");
+		Object test = ParseUtil.getAttributeEL(context, el, "test");
 		if (requiredTest) {
 			if(test == null){
 				throw new IllegalStateException("不能有多个连续无条件Else");
 			}
 		}
 		context.appendElse(test);
-		parseChild(el.getFirstChild(), context);
+		ParseUtil.parseChild(el.getFirstChild(), context);
 		context.appendEnd();
 		return null;
 	}
 
 	protected Node parseElseTag(Element el, ParseContext context) {
 		if (((Element) el).hasAttribute("test")) {
-			Object test = getAttributeEL(context, el, "test");
+			Object test = ParseUtil.getAttributeEL(context, el, "test");
 			context.appendElse(test);
 		} else {
 			context.appendElse(null);
 		}
-		parseChild(el.getFirstChild(), context);
+		ParseUtil.parseChild(el.getFirstChild(), context);
 		context.appendEnd();
 		return null;
 	}
@@ -219,21 +210,21 @@ public class CoreXMLNodeParser implements NodeParser<Element> {
 	}
 
 	protected Node parseForTag(Element el, ParseContext context) {
-		Object items = getAttributeEL(context, el, "items","values","value");
-		String var = getAttributeOrNull(el, "var","name","id");
-		String status = getAttributeOrNull(el, "status");
+		Object items = ParseUtil.getAttributeEL(context, el, "items","values","value");
+		String var = ParseUtil.getAttributeOrNull(el, "var","name","id");
+		String status = ParseUtil.getAttributeOrNull(el, "status");
 		context.appendFor(var, items, status);
-		parseChild(el.getFirstChild(), context);
+		ParseUtil.parseChild(el.getFirstChild(), context);
 		context.appendEnd();
 		return null;
 	}
 
 	protected Node parseVarTag(Element el, ParseContext context) {
-		String name = getAttributeOrNull(el, "name","id");
-		String value = getAttributeOrNull(el, "value");
+		String name = ParseUtil.getAttributeOrNull(el, "name","id");
+		String value = ParseUtil.getAttributeOrNull(el, "value");
 		if (value == null) {
 			context.appendCaptrue(name);
-			parseChild(el.getFirstChild(), context);
+			ParseUtil.parseChild(el.getFirstChild(), context);
 			context.appendEnd();
 		} else {
 			List<Object> temp = context.parseText(value, Template.EL_TYPE);
@@ -253,40 +244,15 @@ public class CoreXMLNodeParser implements NodeParser<Element> {
 		return null;
 	}
 
-	protected void parseClientTag(Element el, ParseContext context) {
-		Node next = el.getFirstChild();
-		if (next != null) {
-			// new Java6JSBuilder();
-			String id = getAttributeOrNull(el, "id","name");
-			ParseContext clientContext = new ParseContextImpl(context,JSProxy.newTranslator(id,context.isCompress(),context.getCurrentURL().toString()));
-			// 前端直接压缩吧？反正保留那些空白也没有调试价值
-			do {
-				clientContext.parse(next);
-			} while ((next = next.getNextSibling()) != null);
-			String js = clientContext.toCode();
-			boolean needScript = needScript(el);
-			if (needScript) {
-				context.append("<script>/*<![CDATA[*/" + js
-						+ "/*]]>*/</script>");
-			} else {
-				context.append("/*<![CDATA[*/" + js + "/*]]>*/");
-			}
-		}
-	}
-
-	private boolean needScript(Element el) {
-		return true;
-	}
-
 	protected void parseContextTag(Element el, ParseContext context) {
-		parseChild(el.getFirstChild(), context);
+		ParseUtil.parseChild(el.getFirstChild(), context);
 	}
 
 	protected void parseJSONTag(final Element el, ParseContext context) {
-		String var = getAttributeOrNull(el, "var");
-		String file = getAttributeOrNull(el, "file");
-		String encoding = getAttributeOrNull(el, "encoding", "charset");
-		String content = getAttributeOrNull(el, "content");
+		String var = ParseUtil.getAttributeOrNull(el, "var");
+		String file = ParseUtil.getAttributeOrNull(el, "file");
+		String encoding = ParseUtil.getAttributeOrNull(el, "encoding", "charset");
+		String content = ParseUtil.getAttributeOrNull(el, "content");
 		if (file != null) {
 			try {
 				URL url = context.createURL(file, null);
@@ -321,60 +287,7 @@ public class CoreXMLNodeParser implements NodeParser<Element> {
 	}
 
 	protected void parseOutTag(Element el, ParseContext context) {
-		String value = getAttributeOrNull(el, "value");
+		String value = ParseUtil.getAttributeOrNull(el, "value");
 		context.appendAll(context.parseText(value,Template.EL_TYPE));
-	}
-
-	private void parseChild(Node child, ParseContext context) {
-		while (child != null) {
-			context.parse(child);
-			child = child.getNextSibling();
-		}
-	}
-
-	private String getAttributeOrNull(Element el, String... keys) {
-		for (int i = 0; i < keys.length; i++) {
-			String key = keys[i];
-			if (el.hasAttribute(key)) {
-				if(i>0){
-					log.warn("元素："+el.getTagName() +"属性：'" + key +"' 不被推荐；请使用是:'"+keys[0]+"'代替");
-				}
-				return el.getAttribute(key);
-			}
-		}
-		return null;
-	}
-
-	/**
-	 * 如果value == null,返回null
-	 * @param context
-	 * @param value
-	 * @return
-	 */
-	private Object toEL(ParseContext context, String value) {
-		if(value == null){
-			return null;
-		}
-		value = value.trim();
-		if (value.startsWith("${") && value.endsWith("}")) {
-			value = value.substring(2, value.length() - 1);
-		} else {
-			log.warn("输入的不是有效el，系统将字符串转换成el");
-			value = JSONEncoder.encode(value);
-		}
-		return context.parseEL(value);
-	}
-
-	/**
-	 * 如果属性不存在，返回null
-	 * @param context
-	 * @param el
-	 * @param key
-	 * @return
-	 */
-	private Object getAttributeEL(ParseContext context, Element el, String... key) {
-		String value = getAttributeOrNull(el, key);
-		return toEL(context, value);
-
 	}
 }

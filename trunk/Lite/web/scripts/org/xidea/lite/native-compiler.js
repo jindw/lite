@@ -115,10 +115,23 @@ function getEL(el){
 function ResultTranslator(id){
     this.id = id;
 }
+function java2jsList(list){
+    if(!(list instanceof Array)){
+        list = Packages.org.xidea.el.json.JSONEncoder.encode(list);
+	    list = this.eval(list);
+	}
+	return list;
+}
 ResultTranslator.prototype = {
-	transform:function(list){
-		var code = buildNativeJS(list)
-		return "function"+(id?" "+id:'')+"(){"+code+"\n}"
+	translate:function(result){
+	    try{
+	        var list = java2jsList(result.toList());
+		    var code = buildNativeJS(list);
+		    new Function("function x(){"+code+"\n}");
+	    }catch(e){
+	        code = "alert('生成js代码失败：'+"+encodeString(e.message+'')+');';
+	    }
+		return "function"+(this.id?" "+this.id:'')+"(){"+code+"\n}"
 	},
 	getSupportFeatrues:function(){
 		return java.util.Arrays.asList(["compress"]);
@@ -161,6 +174,7 @@ function Context(code){
     this.idMap = {};
     this.depth = 1;
     this.index = 0
+    //print([vs.defs,vs.refs])
 }
 Context.prototype = {
 	parse:function(){

@@ -7,7 +7,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -36,43 +35,20 @@ public class ParseContextImpl implements ParseContext {
 	protected XMLContext xmlContext;
 	protected ResultContext resultContext;
 	protected ParserHolder parserHolder;
+	protected final Map<String, String> featrueMap;
 	
 	protected ParseContextImpl() {
+		featrueMap = new HashMap<String, String>();
 	}
 
 	public ParseContextImpl(URL base, Map<String, String> featrues,
 			NodeParser<? extends Object>[] parsers, TextParser[] ips) {
+		this();
 		initialize(base, featrues, parsers, ips);
 	}
 
 	public ParseContextImpl(ParseContext parent, 
-			ResultTranslator translator) {
-		initializeFromParent(parent);
-		initializeTranslator(parent, translator);
-	}
-
-	protected void initializeTranslator(ParseContext parent, 
-			ResultTranslator translator) {
-		if (translator instanceof ExpressionFactory) {
-			this.resultContext
-					.setExpressionFactory((ExpressionFactory) translator);
-		}
-		HashMap<String, String> oldFeatrues = new HashMap<String, String>(
-				parent.getFeatrueMap());
-		Set<String> support = translator.getSupportFeatrues();
-		if (support != null) {
-			Map<String, String> newFeatrues = this.getFeatrueMap();
-			for (String key : oldFeatrues.keySet()) {
-				if (support.contains(key)) {
-					newFeatrues.put(key, oldFeatrues.get(key));
-				}
-			}
-		}
-	}
-
-
-
-	protected void initializeFromParent(ParseContext parent) {
+			ResultTranslator translator,ExpressionFactory ef) {
 		if(parent instanceof ParseContextImpl){
 			ParseContextImpl parent2 = (ParseContextImpl)parent;
 			this.resourceContext = parent2.resourceContext;
@@ -83,7 +59,13 @@ public class ParseContextImpl implements ParseContext {
 		}
 		//需要重设 ParseChain 的context
 		this.parserHolder = new ParseHolderImpl(this,parent);
-		this.resultContext = new ResultContextImpl(parent);
+		this.resultContext = new ResultContextImpl();
+		this.featrueMap = new HashMap<String, String>(parent.getFeatrueMap());
+		if (ef != null) {
+			this.resultContext
+					.setExpressionFactory(ef);
+		}
+		this.setResultTranslator(translator);
 	}
 
 
@@ -95,24 +77,24 @@ public class ParseContextImpl implements ParseContext {
 		xmlContext = new XMLContextImpl(this);
 		parserHolder = new ParseHolderImpl(this, parsers, ips);
 		initializeFeatrues(featrues);
-
 	}
 
-	protected void initializeFeatrues(Map<String, String> featrues) {
-		if (featrues != null) {
-			String v = featrues.get("compress");
+	protected void initializeFeatrues(Map<String, String> newFeatrues) {
+		if (newFeatrues != null) {
+			String v = newFeatrues.get("compress");
 			if (v != null) {
 				xmlContext.setCompress("true".equalsIgnoreCase(v));
 			}
-			v = featrues.get("reserveSpace");
+			v = newFeatrues.get("reserveSpace");
 			if (v != null) {
 				xmlContext.setReserveSpace("true".equalsIgnoreCase(v));
 			}
-			v = featrues.get("format");
+			v = newFeatrues.get("format");
 			if (v != null) {
 				xmlContext.setFormat("true".equalsIgnoreCase(v));
 			}
-			getFeatrueMap().putAll(featrues);
+			featrueMap.clear();
+			featrueMap.putAll(newFeatrues);
 		}
 	}
 
@@ -138,13 +120,15 @@ public class ParseContextImpl implements ParseContext {
 		return parserHolder.getTextParsers();
 	}
 
-	public final String getFeatrue(String key) {
-		return resultContext.getFeatrue(key);
+
+	public String getFeatrue(String key) {
+		return featrueMap.get(key);
 	}
 
-	public final Map<String, String> getFeatrueMap() {
-		return resultContext.getFeatrueMap();
+	public Map<String, String> getFeatrueMap() {
+		return featrueMap;
 	}
+
 	// delegate methods...
 
 	public final void addResource(URL resource) {
@@ -350,7 +334,18 @@ public class ParseContextImpl implements ParseContext {
 		resourceContext.setTextType(textType);
 	}
 
-	public void setResultTranslator(ResultTranslator translator) {
+	public final void setResultTranslator(ResultTranslator translator) {
+		Collection<String> featrueKeys = featrueMap.keySet();
+		Collection<String> support = translator.getSupportFeatrues();
+		if (support == null) {
+			featrueMap.clear();
+		}else{
+			for (String key : featrueKeys) {
+				if (!support.contains(key)) {
+					featrueMap.remove(key);
+				}
+			}
+		}
 		resultContext.setResultTranslator(translator);
 	}
 

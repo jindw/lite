@@ -37,36 +37,9 @@ public class ELParser implements TextParser {
 			return p$ + 5;
 		}
 	};
-	public static TextParser CLIENT = new ELParser("client", true) {
-		public int parse(String text, int p$, ParseContext context) {
-			int p1 = text.indexOf('{', p$);
-			int p2 = text.indexOf('}', p1);
-			String id = text.substring(p1 + 1, p2);
-			ParseContext clientContext = new ParseContextImpl(context,JSProxy.newTranslator(id,context.isCompress(),context.getCurrentURL().toString()));
-			String subtext = text.substring(p2 + 1);
-			clientContext.setAttribute(CLIENT, context);
-			clientContext.appendAll(clientContext.parseText(subtext, context.getTextType()));
-			return text.length();
-
-		}
-	};
+	public static TextParser CLIENT = new ClientParser();
 	public static TextParser END = new ELParser("end", false) {
 		public int parse(String text, int p$, ParseContext context) {
-			ParseContext parentContext = (ParseContext) context
-					.getAttribute(CLIENT);
-			if (parentContext != null) {
-				int depth = context.getDepth();
-				if (depth == 0) {
-					String js = (String) context.toList().get(0);
-					parentContext.append("<script>/*<![CDATA[*/" + js
-							+ "/*]]>*/</script>");
-					String subtext = text.substring(p$ + 4);
-					parentContext.appendAll(parentContext.parseText(subtext, parentContext
-							.getTextType()));
-					
-					return text.length();
-				}
-			}
 			context.appendEnd();
 			return p$ + 4;
 		}
@@ -95,6 +68,9 @@ public class ELParser implements TextParser {
 
 	}
 
+	public int getPriority() {
+		return prefix.length();
+	}
 	public int findStart(String text, int start,int other$start) {
 		int i;
 		while ((i = text.indexOf(this.prefix, start)) >= start && i<=other$start) {
@@ -260,5 +236,9 @@ public class ELParser implements TextParser {
 		}
 		return -1;
 	}
+	public String toString(){
+		return "EL:"+fn;
+	}
+
 
 }

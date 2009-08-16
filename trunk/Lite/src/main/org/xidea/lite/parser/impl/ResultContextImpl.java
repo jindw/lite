@@ -16,7 +16,6 @@ import org.xidea.lite.parser.ResultItem;
 import org.xidea.lite.parser.ResultTranslator;
 
 public class ResultContextImpl implements ResultContext {
-	protected Map<String, String> featrues;
 	private HashMap<String, String> typeIdMap = new HashMap<String, String>();
 	private HashMap<Object, String> objectIdMap = new HashMap<Object, String>();
 	private int inc = 0;
@@ -27,19 +26,6 @@ public class ResultContextImpl implements ResultContext {
 	private ResultTranslator translator;
 
 	ResultContextImpl() {
-		this.featrues = new HashMap<String, String>();
-	}
-
-	public ResultContextImpl(ResultContext parent) {
-		this.featrues = new HashMap<String, String>(parent.getFeatrueMap());
-	}
-
-	public String getFeatrue(String key) {
-		return featrues.get(key);
-	}
-
-	public Map<String, String> getFeatrueMap() {
-		return featrues;
 	}
 
 	public void setExpressionFactory(ExpressionFactory expressionFactory) {
