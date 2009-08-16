@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hide">Hide</string>
+    <string name="welcome">Welcome to use WebServer!</string>
+    <string name="exit">Exit!</string>
+    <string name="app_name">Server</string>
+</resources>
