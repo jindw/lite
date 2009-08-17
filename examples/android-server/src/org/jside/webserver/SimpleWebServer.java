@@ -1,8 +1,10 @@
 package org.jside.webserver;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
@@ -11,52 +13,102 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 
-public abstract class SimpleWebServer implements Runnable, WebServer {
+public abstract class SimpleWebServer implements WebServer {
 	private static final Log log = LogFactory.getLog(SimpleWebServer.class);
 	protected int defaultPort = 1981;
 	private int port;
+	private int state = CREATED;
+	private Object stateLock = new Object();
+
 	private ServerSocket serverSocket;
-	private boolean runningFlag;
+
 	protected URL webBase;
 	protected Map<String, Object> application = new HashMap<String, Object>();
 
-	public SimpleWebServer(URL webBase) {
-		this.webBase = webBase;
+	public SimpleWebServer(URL webRoot) {
+		this.webBase = webRoot;
+	}
+	public SimpleWebServer(String webRoot) {
+		try{
+			this.webBase = new URL(webRoot);
+		}catch (MalformedURLException e) {
+			try {
+				this.webBase = new File(webRoot).toURI().toURL();
+			} catch (MalformedURLException e2) {
+				log.error(e2);
+				throw new RuntimeException(e2);
+			}
+		}
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.jside.webserver.WebServer#getApplication()
 	 */
 	public Map<String, Object> getApplication() {
 		return application;
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.jside.webserver.WebServer#getWebBase()
 	 */
 	public URL getWebBase() {
 		return webBase;
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.jside.webserver.WebServer#getPort()
 	 */
 	public int getPort() {
 		return port;
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see org.jside.webserver.WebServer#start()
 	 */
 	public void start() {
-		Thread thread = new Thread(this);
-		thread.start();
+		if (state != CREATED && state != CLOSED) {
+			stop();
+		}
+		synchronized (stateLock) {
+			state = STARTING;
+			Thread thread = new RunThread();
+			thread.setName("WebServer");
+			resetSocket();
+			thread.start();
+		}
+
 	}
 
-	/* (non-Javadoc)
-	 * @see org.jside.webserver.WebServer#restart()
+	/**
+	 * @see org.jside.webserver.WebServer#stop()
 	 */
-	public void restart() {
+	public void stop() {
+		synchronized (stateLock) {
+			if (state == STARTING) {
+				waitTo(RUNNING);
+			}
+			if (state == RUNNING) {
+				state = STOPING;
+			}
+			waitTo(CLOSED);
+		}
+
+	}
+
+	private void waitTo(int state) {
+		while (true) {
+			if (state >= this.state) {
+				return;
+			}
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				log.warn(e);
+			}
+		}
+	}
+
+	private void resetSocket() {
 		try {
 			if (this.serverSocket != null) {
 				log.info("Webserver stoping up");
@@ -83,39 +135,35 @@ public abstract class SimpleWebServer implements Runnable, WebServer {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.jside.webserver.WebServer#stop()
-	 */
-	public void stop() {
-		this.runningFlag = false;
-	}
+	private class RunThread extends Thread {
 
-	public void run() {
-		this.runningFlag = true;
-		restart();
-		while (runningFlag) {
-			try {
-				if (serverSocket.isBound() && !serverSocket.isClosed()) {
-					Socket remote = serverSocket.accept();
-					// remote is now the connected socket
-					log.debug("Connectioned, begin schedule.");
-					scheduleRequest(remote);
-				} else {
-					log.info("restarting...");
-					Thread.sleep(1000);
+		public void run() {
+			state = RUNNING;
+			while (state == RUNNING) {// STOPING
+				try {
+					if (serverSocket.isBound() && !serverSocket.isClosed()) {
+						Socket remote = serverSocket.accept();
+						// remote is now the connected socket
+						log.debug("Connectioned, begin schedule.");
+						scheduleRequest(remote);
+					} else {
+						log.debug("waiting...");
+						Thread.sleep(1000);
+					}
+				} catch (Exception e) {
+					log.error(e);
 				}
-			} catch (Exception e) {
-				log.error(e);
 			}
-		}
+			state = CLOSED;
 
+		}
 	}
 
 	protected void scheduleRequest(Socket remote) throws Exception {
 		InputStream in = remote.getInputStream();
 		OutputStream out = remote.getOutputStream();
-		//remote.setSoTimeout(1000 * 60);
-		RequestContext.enter(this,in, out);
+		// remote.setSoTimeout(1000 * 60);
+		RequestContext.enter(this, in, out);
 		processRequest();
 		RequestContext.get().getOutputStream().flush();
 		in.close();
