@@ -20,6 +20,6 @@ public interface WebServer {
 
 	public void stop();
 
-	public void processRequest() throws Exception ;
+	public void processRequest(RequestContext context) throws Exception ;
 
 }
