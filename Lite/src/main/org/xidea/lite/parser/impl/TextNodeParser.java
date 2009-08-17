@@ -50,11 +50,14 @@ public class TextNodeParser implements NodeParser<String> {
 				for (TextParser ip : instructionParser) {
 					int p$2 = ip.findStart(text, start, p$);
 					int pri2 = ip.getPriority();
-					if (p$2 >= start && p$2 - pri2 < p$ - pri) {
-						p$ = p$2;
-						nip = ip;
+					if (p$2 >= start ){
+						if(p$2 < p$ || p$2 == p$ && pri2>pri){
+							p$ = p$2;
+							nip = ip;
+							pri = pri2;
+						}
 					}
-					pri = pri2;
+					
 				}
 			}
 			if (nip != null) {
