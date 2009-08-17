@@ -10,7 +10,7 @@ import android.widget.EditText;
 
 public class Server extends Activity{
 	/** Called when the activity is first created. */
-	FileServer ws;
+	private FileServer ws = new FileServer();
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -23,7 +23,6 @@ public class Server extends Activity{
 				System.exit(0);
 			}
 		});
-		ws = new FileServer();
 		this.start();
 	}
 
