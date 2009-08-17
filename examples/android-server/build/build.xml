@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="GBK"?>
+<project name="andriod" default="build" basedir="../">
+	<tstamp>
+		<format property="version" pattern="yyyyMMdd" />
+	</tstamp>
+
+	<target name="build">
+		<java classname="org.xidea.lite.tools.LiteCompiler" classpath="lib/Template.jar">
+			<arg value="-webRoot" />
+			<arg value="${basedir}/web/" />
+			<arg value="-litecached" />
+			<arg value="${basedir}/src/org/jside/server/web" />
+
+		</java>
+	</target>
+</project>
