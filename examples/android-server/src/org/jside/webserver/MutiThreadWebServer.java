@@ -26,6 +26,7 @@ public class MutiThreadWebServer extends SimpleWebServer {
 		super(webRoot);
 	}
 
+	@Override
 	public void start() {
 		start(5);
 	}
@@ -39,6 +40,7 @@ public class MutiThreadWebServer extends SimpleWebServer {
 		super.start();
 	}
 
+	@Override
 	protected void scheduleRequest(final Socket remote) {
 		taskList.add(remote);
 		synchronized (taskNotifier) {
@@ -46,19 +48,18 @@ public class MutiThreadWebServer extends SimpleWebServer {
 		}
 	}
 
-	protected void processRequest(final Socket remote){
+	private void processRequest(final Socket remote){
 		try {
 			InputStream in = remote.getInputStream();
 			OutputStream out = remote.getOutputStream();
+			RequestContext context = RequestContext.enter(this, in, out);
 			try {
-				RequestContext.enter(this, in, out);
-				processRequest();
+				processRequest(context);
 			} catch (Exception e) {
 				e.printStackTrace();
 				log.warn(e);
 				HttpUtil.printResource(e, "text");
 			}
-			RequestContext context = RequestContext.get();
 			context.getOutputStream().flush();
 			in.close();
 			out.close();
@@ -106,4 +107,5 @@ public class MutiThreadWebServer extends SimpleWebServer {
 		}
 
 	}
+
 }

@@ -25,9 +25,10 @@ import org.apache.commons.logging.Log;
 public abstract class RequestContext {
 	private static ThreadLocal<RequestContext> tl = new ThreadLocal<RequestContext>();
 
-	public static void enter(WebServer server, InputStream in, OutputStream out) {
+	public static RequestContext enter(WebServer server, InputStream in, OutputStream out) {
 		RequestContext context = new RequestContextImpl(server, in, out);
 		tl.set(context);
+		return context;
 	}
 
 	public static RequestContext get() {
@@ -215,9 +216,9 @@ class RequestContextImpl extends RequestContext {
 		String preuri = this.requestURI;
 		this.requestURI = path;
 		try {
-			server.processRequest();
+			server.processRequest(RequestContext.get());
 		} catch (Exception e) {
-			log.warn("重定向处理失贄1�7", e);
+			log.warn("重定向处理失败...", e);
 		} finally {
 			this.requestURI = preuri;
 		}
@@ -279,7 +280,7 @@ class RequestContextImpl extends RequestContext {
 					addStrings(paramsMap, URLDecoder.decode(name, encoding),
 							value == null?"":URLDecoder.decode(value, encoding));
 				} catch (Exception e) {
-					log.info("解析失败＄1�7"+query+"\n"+name+"="+value,e);
+					log.info("解析失败＄1�7"+query+"\n"+name+"="+value,e);
 				}
 
 			}
