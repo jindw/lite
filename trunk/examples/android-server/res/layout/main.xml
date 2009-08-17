@@ -5,9 +5,8 @@
 	<TextView android:layout_width="fill_parent"
 		android:layout_height="wrap_content" android:text="@string/welcome"
 		android:textSize="32px" android:padding="20px" />
-	<TableLayout android:id="@+id/contentTab"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content">
+	<TableLayout android:layout_width="wrap_content"
+		android:layout_height="wrap_content" android:id="@+id/content">
 
 		<TableRow android:id="@+id/linkRow"
 			android:layout_width="wrap_content"
@@ -17,29 +16,10 @@
 			</TextView>
 			<EditText android:layout_height="wrap_content" android:id="@+id/link" android:layout_width="fill_parent">
 			</EditText>
-		</TableRow>
-		<TableRow android:id="@+id/actionRow"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content">
-			<Button android:text="open" android:id="@+id/open"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content">
-			</Button>
-			<Button android:layout_width="wrap_content"
-				android:layout_height="wrap_content" android:id="@+id/hide"
-				android:text="@string/hide">
-			</Button>
 			<Button android:text="@string/exit" android:id="@+id/exit"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content">
 			</Button>
-
-
 		</TableRow>
 	</TableLayout>
-
-
-
-
-
 </LinearLayout>

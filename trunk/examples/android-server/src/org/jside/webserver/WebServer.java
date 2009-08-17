@@ -4,6 +4,11 @@ import java.net.URL;
 import java.util.Map;
 
 public interface WebServer {
+	public int CREATED = 0;
+	public int STARTING = 1;
+	public int RUNNING = 2;
+	public int STOPING = 3;
+	public int CLOSED = 4;
 
 	public Map<String, Object> getApplication();
 
@@ -12,8 +17,6 @@ public interface WebServer {
 	public int getPort();
 
 	public void start();
-
-	public void restart();
 
 	public void stop();
 

@@ -18,13 +18,16 @@ public class MutiThreadWebServer extends SimpleWebServer {
 	private List<Socket> taskList = Collections
 			.synchronizedList(new ArrayList<Socket>());
 
-	int inc;
 	public MutiThreadWebServer(URL webRoot) {
 		super(webRoot);
 	}
 
+	public MutiThreadWebServer(String webRoot) {
+		super(webRoot);
+	}
+
 	public void start() {
-		start(10);
+		start(5);
 	}
 
 	public void start(int threadCount) {
@@ -37,10 +40,7 @@ public class MutiThreadWebServer extends SimpleWebServer {
 	}
 
 	protected void scheduleRequest(final Socket remote) {
-		inc++;
-		log.info("process:"+remote);
 		taskList.add(remote);
-		log.debug("new request:"+remote);
 		synchronized (taskNotifier) {
 			taskNotifier.notify();
 		}
@@ -48,7 +48,6 @@ public class MutiThreadWebServer extends SimpleWebServer {
 
 	protected void processRequest(final Socket remote){
 		try {
-			log.debug("accept request:"+remote);
 			InputStream in = remote.getInputStream();
 			OutputStream out = remote.getOutputStream();
 			try {
@@ -67,8 +66,6 @@ public class MutiThreadWebServer extends SimpleWebServer {
 			log.error(e);
 		} finally {
 			try {
-				log.info("inc:"+inc);
-				log.info("complete:"+RequestContext.get().getRequestURI()+"\n"+remote);
 				remote.close();
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -93,7 +90,6 @@ public class MutiThreadWebServer extends SimpleWebServer {
 			while (this.running) {
 				Socket remote = offerTask();
 				if (remote != null) {
-					inc--;
 					processRequest(remote);
 				}
 				if (taskList.isEmpty()) {
