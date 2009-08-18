@@ -71,9 +71,11 @@ public class ELParser implements TextParser {
 	public int getPriority() {
 		return prefix.length();
 	}
-	public int findStart(String text, int start,int other$start) {
+
+	public int findStart(String text, int start, int other$start) {
 		int i;
-		while ((i = text.indexOf(this.prefix, start)) >= start && i<=other$start) {
+		while ((i = text.indexOf(this.prefix, start)) >= start
+				&& i <= other$start) {
 			if (i < text.length()) {
 				int j = i + length;
 				if (j < text.length()
@@ -164,13 +166,15 @@ public class ELParser implements TextParser {
 				}
 				break;
 			case '/':// 如果是正则，需要跳过正则
-				boolean isRegExp = isRegExp(text, elQuteBegin, next);
-				if (isRegExp) {
-					int end = findRegExpEnd(text, next);
-					if(end >0){
-						next = end;
-					}else{
-						log.error("无效状态");
+				if (stringChar == 0) {
+					boolean isRegExp = isRegExp(text, elQuteBegin, next);
+					if (isRegExp) {
+						int end = findRegExpEnd(text, next);
+						if (end > 0) {
+							next = end;
+						} else {
+							log.error("无效状态");
+						}
 					}
 				}
 			}
@@ -180,7 +184,7 @@ public class ELParser implements TextParser {
 
 	private static boolean isRegExp(String text, final int elQuteBegin,
 			int regExpStart) {
-		for (int i = regExpStart-1; i > elQuteBegin; i--) {
+		for (int i = regExpStart - 1; i > elQuteBegin; i--) {
 			char pc = text.charAt(i);
 			if (!Character.isWhitespace(pc)) {
 				if (Character.isJavaIdentifierPart(pc)) {
@@ -236,9 +240,9 @@ public class ELParser implements TextParser {
 		}
 		return -1;
 	}
-	public String toString(){
-		return "EL:"+fn;
-	}
 
+	public String toString() {
+		return "EL:" + fn;
+	}
 
 }
