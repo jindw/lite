@@ -25,15 +25,16 @@ public class FileServer extends MutiThreadWebServer {
 		if (res.getProtocol().equals("file")) {
 			File file = getFile(res);
 			if (file.isDirectory()) {
-				OutputStreamWriter out = new OutputStreamWriter(context
-						.getOutputStream(), "UTF-8");
 				File[] list = file.listFiles();
 				HashMap<String, Object> data = new HashMap<String, Object>();
 				data.put("path", file.getAbsoluteFile());
 				data.put("fileList", list);
 				context.setContentType("text/html;charset=utf-8");
 				try {
-					engine.render("dir.xhtml", data, out);
+					OutputStreamWriter out = new OutputStreamWriter(context
+							.getOutputStream(), "UTF-8");
+					engine.render("/dir.xhtml", data, out);
+					out.close();
 				} catch (Throwable e) {
 					throw new RuntimeException(e);
 				}
@@ -51,6 +52,9 @@ public class FileServer extends MutiThreadWebServer {
 		} catch (UnsupportedEncodingException e) {
 			return null;
 		}
+	}
+	public static void main(String[] args){
+		new FileServer().start();
 	}
 
 }

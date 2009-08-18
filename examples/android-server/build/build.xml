@@ -5,7 +5,7 @@
 	</tstamp>
 
 	<target name="build">
-		<java classname="org.xidea.lite.tools.LiteCompiler" classpath="lib/Template.jar">
+		<java classname="org.xidea.lite.tools.LiteCompiler" classpath="../Lite/build/dest/Template.jar">
 			<arg value="-webRoot" />
 			<arg value="${basedir}/web/" />
 			<arg value="-litecached" />
