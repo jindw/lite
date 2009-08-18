@@ -2,17 +2,17 @@
 	<head>
 		<meta http-equiv="content-type"
 			content="text/html; charset=UTF-8" />
-		<title>系统管理页</title>
+		<title>Andriod 文件管理</title>
 		<link type="text/css" rel="Stylesheet"
 			href="/styles/default.css" />
-		<script src="/cdn/=org.jside:*"></script>
 	</head>
 	<body>
 		<h2>${path}</h2>
-		<c:for var="file" items="${files}">
+		<c:for var="file" items="${fileList}">
 			<p>
-				<a href='${file.name}'>.cvsignore</a>
-				<a href="/action/delete?path=${path}/${file.name}">刪除</a>
+				<c:var name="name" value="${file.file?file.name:file.name+'/'}"/>
+				<a href='${name}'>${name}</a>
+				<a href="/action/delete?path=${path}/${name}">刪除</a>
 			</p>
 		</c:for>
 	</body>

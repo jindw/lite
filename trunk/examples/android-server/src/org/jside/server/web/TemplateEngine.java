@@ -6,18 +6,15 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.net.URLEncoder;
 import java.util.List;
 
-import org.jside.server.FileServer;
 import org.xidea.el.json.JSONDecoder;
 import org.xidea.lite.Template;
 
 public class TemplateEngine {
 	public void render(String path, Object context, Writer out) {
 		try {
-			if(path.startsWith("/")){
-				path = path.substring(1);
-			}
 			loadTemplate(path).render(context, out);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -26,7 +23,7 @@ public class TemplateEngine {
 	}
 
 	public static Template loadTemplate(String path) throws IOException {
-		InputStream in = TemplateEngine.class.getResourceAsStream(path);
+		InputStream in = TemplateEngine.class.getResourceAsStream(URLEncoder.encode(path));
 		try {
 			List data = (List) JSONDecoder
 			.decode(loadText(in, "utf-8"));
