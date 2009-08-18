@@ -98,6 +98,7 @@
 			<zipfileset src="build/dest/template.jar">
 				<include name="org/xidea/**/*.*" />
 				<exclude name="**/*.java" />
+				<exclude name="**/*.js" />
 				<exclude name="org/xidea/lite/tools/*.*" />
 				<exclude name="org/xidea/lite/parser/**/*.*" />
 			</zipfileset>
