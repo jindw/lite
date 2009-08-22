@@ -35,7 +35,7 @@ public class TextContains implements Invocable {
 			}
 		}else {
 			if(String.valueOf(value).equals(key)){
-				return true;
+				return Boolean.TRUE;
 			}
 		}
 		return Boolean.FALSE;

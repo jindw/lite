@@ -14,14 +14,14 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.xidea.lite.TemplateEngine;
+import org.xidea.lite.parser.impl.HotTemplateEngine;
 
 public class TemplateServlet extends GenericServlet {
 	private static final long serialVersionUID = 1L;
 	@SuppressWarnings("unused")
 	private static final Log log = LogFactory.getLog(TemplateServlet.class);
 
-	protected TemplateEngine templateEngine;
+	protected HotTemplateEngine templateEngine;
 	protected String contentType;
 	
 

@@ -60,7 +60,7 @@ public class LiteCompiler {
 		}
 	}
 
-	protected void initialize() {
+	protected void initialize() throws IOException {
 		HashMap<String, String> featrueMap = new HashMap<String, String>();
 		if (featrues != null) {
 			for (String f : featrues) {
