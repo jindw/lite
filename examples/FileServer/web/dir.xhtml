@@ -1,0 +1,105 @@
+<html xmlns:c="http://www.xidea.org/ns/lite/core">
+	<head>
+		<meta http-equiv="content-type"
+			content="text/html; charset=UTF-8" />
+		<title>Andriod 文件管理</title>
+		<link type="text/css" rel="Stylesheet"
+			href="http://www.xidea.org/project/jsi/styles/default.css" />
+	</head>
+	<body>
+		<c:client id="renderDelete">
+			<form method="POST" action="/${path}/${name};delete">
+				<lable for="fileName">文件名:</lable>
+				<input type="text" size="${name.length}" readyonly="true" id="fileName" value="${name}" />
+				<input type="submit" value="确认删除" />
+				<input type="reset" value="取消" onclick="closeDialog()" />
+			</form>
+		</c:client>
+		<c:client id="renderRename">
+			<form method="POST" action="/${path}/${name};rename">
+				<lable for="newName">新名字:</lable>
+				<input id="newName" size="${name.length+5}" type="text" name="name"
+					value="${name}" />
+				<input type="submit" value="确认重命名" />
+				<input type="reset" value="取消" onclick="closeDialog()" />
+			</form>
+		</c:client>
+		<c:client id="renderMove">
+			<form method="POST" action="/${path}/${name};move">
+				<lable for="fileName">移动文件:</lable>
+				<input type="text" size="${name.length}" readyonly="true" id="fileName" value="${name}" />
+				<hr/>
+				<lable for="newPath">新目标地址:</lable>
+				<input id="newPath" size="${path.length+5}" type="text" name="path"
+					value="${path}" />
+				<input type="submit" value="确认移动" />
+				<input type="reset" value="取消" onclick="closeDialog()" />
+			</form>
+		</c:client>
+		<script>
+			//<![CDATA[
+	var path = "${path}".replace(':','%3A');
+	function E(id){
+		return document.getElementById(id)
+	}
+	function showDialog(content){
+		E("dialogContent").innerHTML = content;
+		E("dialog").style.display='block';
+	}
+	function closeDialog(){
+		E("dialog").style.display='none';
+	}
+	function doRename(name){
+		showDialog(renderRename({name:name}));
+	}
+	function doDelete(name){
+		showDialog(renderDelete({name:name}));
+	}
+	function doMove(name){
+		showDialog(renderMove({name:name}));
+	}
+	//]]>
+		</script>
+		<h2>
+			<c:for var="item" items="${path.split('/')}">
+				<c:if test="${for.index==0}">
+					<a href="/">${item}</a>
+					<c:var name="href" value="" />
+				</c:if>
+				<c:else>
+					<c:var name="href" value="${href}/${item}" />
+					/
+					<a href="${href}/">${item}</a>
+				</c:else>
+			</c:for>
+		</h2>
+		<div id="dialog" style="padding:12px;border:3px yellow solid">
+			<div id="dialogContent"></div>
+		</div>
+		<table width="98%">
+			<c:for var="file" items="${fileList}">
+				<tr>
+					<td>
+						<c:var name="name"
+							value="${file.file?file.name:file.name+'/'}" />
+						<a href='${name}'>${name}</a>
+					</td>
+					<td>
+						<a href="#"
+							onclick="doDelete('${name}')">
+							刪除
+						</a>
+						<a href="#"
+							onclick="doMove('${name}')">
+							移动
+						</a>
+						<a href="#"
+							onclick="doRename('${name}')">
+							重命名
+						</a>
+					</td>
+				</tr>
+			</c:for>
+		</table>
+	</body>
+</html>
