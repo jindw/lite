@@ -67,7 +67,7 @@ class TemplateEngine{
 		$template->render($context);
 	}
 	function load($path){
-	    $litefile = $this->litecached.urlencode($path);
+	    $litefile = $this->litecached.str_replace('/','.',$path);
 	    if(file_exists($litefile)){
 	    	$lite = json_decode(file_get_contents($litefile),true);
 	    	if($this->autocompile){

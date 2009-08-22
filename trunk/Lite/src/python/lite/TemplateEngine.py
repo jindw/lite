@@ -21,7 +21,7 @@ class TemplateEngine:
         template = Template(liteCode);
         template.render(context,out);
     def load(self,path,out):
-        liteFile = self.liteCached+quote_plus(path)
+        liteFile = self.liteCached+path.replace('/','.')
         if exists(liteFile):
             lite = json_decode(self.readFile(liteFile))
             paths = lite[0]

@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Writer;
-import java.net.URLEncoder;
 import java.util.HashMap;
 
 import javax.swing.JOptionPane;
@@ -92,8 +91,7 @@ public class LiteCompiler {
 	public void processFile(final String path) {
 		try {
 			{
-				File cachedFile = new File(litecached, URLEncoder.encode(path,
-						"utf-8"));
+				File cachedFile = new File(litecached, path.replace('/', '.'));
 				Writer out = new OutputStreamWriter(new FileOutputStream(
 						cachedFile), encoding);
 				try {
