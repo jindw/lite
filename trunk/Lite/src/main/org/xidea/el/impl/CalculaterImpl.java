@@ -20,7 +20,9 @@ public class CalculaterImpl implements Calculater {
 	private NumberArithmetic arithmetic = new NumberArithmetic();
 
 	public CalculaterImpl(){
-		this(new HashMap<String, Map<String, Invocable>>());
+		Map<String, Map<String, Invocable>> methodMap = new HashMap<String, Map<String, Invocable>>();
+		this.methodMap = methodMap;
+		JSArray.appendTo(this);
 	}
 	public CalculaterImpl(Map<String, Map<String, Invocable>> methodMap){
 		this.methodMap = methodMap;
