@@ -30,12 +30,22 @@ public class URLMatcherTest {
 	}
 
 	@Test
+	public void test0FileMatch(){
+		Assert.assertTrue(URLMatcher.createMatcher("**").match("/bb/aa"));
+		Assert.assertTrue(URLMatcher.createMatcher("/*/bb").match("/a/bb"));
+		Assert.assertTrue(!URLMatcher.createMatcher("/*/bb").match("/a/a/bb"));
+		Assert.assertTrue(URLMatcher.createMatcher("/**/bb").match("/a/a/bb"));
+		Assert.assertTrue(URLMatcher.createMatcher("/**/bb").match("/bb"));
+		
+	}
+
+	@Test
 	public void testBothMatch(){
 		Assert.assertTrue(URLMatcher.createMatcher("**").match("/bb/aa"));
 		Assert.assertTrue(URLMatcher.createMatcher("**/bb**").match("/bb"));
 		Assert.assertTrue(URLMatcher.createMatcher("**/bb/a**").match("/bb/aa"));
 		Assert.assertTrue(URLMatcher.createMatcher("**/bb/aa**").match("/bb/aa"));
-		Assert.assertTrue(!URLMatcher.createMatcher("**/bb/aa/**").match("/bb/aa"));
+		Assert.assertTrue(URLMatcher.createMatcher("**/bb/aa/**/c").match("/bb/aa/c"));
 	}
 
 }

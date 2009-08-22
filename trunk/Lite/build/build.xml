@@ -65,12 +65,12 @@
 		<delete>
 			<fileset dir="build/dest/">
 				<include name="Example-*.zip" />
-				<include name="template-*.jar" />
+				<include name="Template-*.jar" />
 			</fileset>
 		</delete>
 
 		<echo file="build/dest/jslite/__package__.js">this.addScript("template.js",["Template","ParseContext","XMLParser","ResultTranslator"])</echo>
-		<jar destfile="build/dest/template.jar" compress="true">
+		<jar destfile="build/dest/Template.jar" compress="true">
 			<manifest>
 				<attribute name="Main-Class" value="org.xidea.lite.tools.LiteCompiler" />
 			</manifest>
@@ -94,7 +94,7 @@
 				<include name="**/*.*" />
 			</zipfileset>
 		</jar>
-		<jar destfile="build/dest/template-runtime.jar" compress="true">
+		<jar destfile="build/dest/TemplateRuntime.jar" compress="true">
 			<zipfileset src="build/dest/template.jar">
 				<include name="org/xidea/**/*.*" />
 				<exclude name="**/*.java" />
@@ -104,14 +104,14 @@
 			</zipfileset>
 		</jar>
 		<delete file="build/dest/jslite/__package__.js" />
-		<copy tofile="build/dest/template-${version}.jar" file="build/dest/template.jar" />
+		<copy tofile="build/dest/Template-${version}.jar" file="build/dest/Template.jar" />
 
 		<zip destfile="build/dest/Example.zip">
 			<zipfileset dir="build/dest/" prefix="WEB-INF/lib/">
-				<include name="template.jar" />
+				<include name="Template.jar" />
 			</zipfileset>
 			<zipfileset dir="build/dest/" prefix="WEB-INF/classes/lite/">
-				<include name="templateEngine.php" />
+				<include name="TemplateEngine.php" />
 			</zipfileset>
 			<zipfileset dir="web/">
 				<include name="WEB-INF/classes/lite/*.py" />
@@ -172,7 +172,7 @@
 	</target>
 
 	<target name="php-example">
-		<zip comment="批量编译:java -jar ./WEB-INF/lib/template.jar -webRoot ." file="build/dest/php-example.zip" encoding="GBK">
+		<zip comment="批量编译:java -jar ./WEB-INF/lib/Template.jar -webRoot ." file="build/dest/php-example.zip" encoding="GBK">
 			<fileset dir="web">
 				<include name="example/test.php" />
 				<include name="example/test.xhtml" />
@@ -183,7 +183,7 @@
 				<include name="TemplateEngine.php" />
 			</zipfileset>
 			<zipfileset dir="build/dest/" prefix="WEB-INF/lib">
-				<include name="template.jar" />
+				<include name="Template.jar" />
 			</zipfileset>
 		</zip>
 	</target>
