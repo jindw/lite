@@ -53,7 +53,7 @@ public class Java6Proxy extends JSProxy implements ErrorReporter {
 
 	@Override
 	public Object eval(String source, String pathInfo) {
-		System.out.println(jsengine.getClass());
+		//log.info(jsengine.getClass());
 		Object file = jsengine.get(ScriptEngine.FILENAME);
 		try {
 			Context context = Context.enter();

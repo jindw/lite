@@ -383,7 +383,18 @@ public abstract class ECMA262Impl {
 			return defaultValue;
 		}
 	}
-
+	public static String getStringArg(Object[] args, int index, String defaultValue) {
+		Object value = getArg(args, index, defaultValue);
+		return String.valueOf(ToPrimitive(value, String.class));
+	}
+	public static Number getNumberArg(Object[] args, int index, Number defaultValue) {
+		Object value = getArg(args, index, defaultValue);
+		return ToNumber(value);
+	}
+	public static Integer getIntArg(Object[] args, int index, Integer defaultValue) {
+		Number value = getNumberArg(args, index, defaultValue);
+		return value.intValue();
+	}
 	private static Number parseNumber(String text, int radix) {
 		try {
 			return Integer.parseInt(text, radix);

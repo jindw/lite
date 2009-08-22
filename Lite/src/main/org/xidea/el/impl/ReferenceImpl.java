@@ -110,7 +110,7 @@ class ReferenceImpl implements Reference {
 			}
 		}
 		Class<?> clazz2 = clazz.getSuperclass();
-		if (clazz2 != clazz) {
+		if (clazz2 != clazz && clazz2 != null) {
 			return findInvocable(methodMap, clazz2);
 		}
 		return null;
