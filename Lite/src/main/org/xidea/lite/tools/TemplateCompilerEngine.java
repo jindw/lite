@@ -1,6 +1,7 @@
 package org.xidea.lite.tools;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,22 +9,24 @@ import java.util.Map;
 
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.Template;
-import org.xidea.lite.TemplateEngine;
 import org.xidea.lite.parser.NodeParser;
 import org.xidea.lite.parser.ParseContext;
+import org.xidea.lite.parser.impl.HotTemplateEngine;
 
-public class TemplateCompilerEngine extends TemplateEngine {
+public class TemplateCompilerEngine extends HotTemplateEngine {
 
 	private Map<String, List<Object>> itemsMap = new HashMap<String, List<Object>>();
 	private Map<String, File[]> filesMap = new HashMap<String, File[]>();
 	@SuppressWarnings("unchecked")
 	private NodeParser[] parsers;
 	private Map<String, String> featrueMap;
+	private File webBase;
 
 	@SuppressWarnings("unchecked")
 	public TemplateCompilerEngine(File root, String[] parserClasses,
-			Map<String, String> featrueMap) {
+			Map<String, String> featrueMap) throws IOException {
 		super(root);
+		this.webBase = root.getCanonicalFile();
 		this.featrueMap = featrueMap;
 		if (parserClasses != null) {
 			try {
@@ -70,7 +73,7 @@ public class TemplateCompilerEngine extends TemplateEngine {
 	}
 
 	protected List<String> getResources(String path) {
-		String root = super.webRoot.getAbsolutePath();
+		String root = webBase.getAbsolutePath();
 		if (root.endsWith("/") || root.endsWith("\\")) {
 			root = root.substring(0, root.length() - 1);
 		}

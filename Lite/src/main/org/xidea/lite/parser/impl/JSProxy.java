@@ -15,6 +15,19 @@ import org.xidea.lite.parser.TextParser;
 public abstract class JSProxy {
 	private static Log log = LogFactory.getLog(JSProxy.class);
 	private static ClassLoader loader = JSProxy.class.getClassLoader();
+
+	public static JSProxy newProxy() {
+		try {
+			return RhinoProxy.class.newInstance();
+		} catch (Throwable e) {
+			try {
+				return Java6Proxy.class.newInstance();
+			} catch (Exception e1) {
+				throw new RuntimeException(e1);
+			}
+		}
+	}
+
 	private boolean jsiAvailable = false;
 
 	protected abstract Object eval(String source, String pathInfo);
@@ -73,15 +86,6 @@ public abstract class JSProxy {
 			throw new RuntimeException(e);
 		}
 	}
-
-	public static JSProxy newProxy() {
-		try {
-			return new RhinoProxy();
-		} catch (NoClassDefFoundError e) {
-			return new Java6Proxy();
-		}
-	}
-
 	public boolean isJSIAvailable() {
 		return jsiAvailable;
 	}

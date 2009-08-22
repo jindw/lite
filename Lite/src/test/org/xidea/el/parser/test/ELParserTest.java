@@ -1,8 +1,8 @@
 package org.xidea.el.parser.test;
 
-
 import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;
+import java.io.File;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -19,6 +19,7 @@ public class ELParserTest {
 
 	protected Map<String, Object> context;
 	protected Map<String, String> elResultMap;
+
 	@Before
 	public void setUp() throws Exception {
 		XMLDecoder de = new XMLDecoder(this.getClass().getResourceAsStream(
@@ -41,8 +42,13 @@ public class ELParserTest {
 	}
 
 	@Test
+	public void runFile() throws Exception {
+		System.out.println(new File("d:/workspace/", "d:/1.txt"));
+	}
+
+	@Test
 	public void runTest() throws Exception {
-		for (String key : elResultMap.keySet()){
+		for (String key : elResultMap.keySet()) {
 			String value = elResultMap.get(key);
 			test(key, value);
 		}
@@ -54,6 +60,5 @@ public class ELParserTest {
 		String eljson = JSONEncoder.encode(el);
 		Assert.assertEquals(result, eljson);
 	}
-
 
 }

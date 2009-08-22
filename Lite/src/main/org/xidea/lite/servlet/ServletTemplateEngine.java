@@ -19,11 +19,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.el.json.JSONDecoder;
 import org.xidea.lite.Template;
-import org.xidea.lite.TemplateEngine;
 import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.impl.DecoratorContextImpl;
+import org.xidea.lite.parser.impl.HotTemplateEngine;
 
-public class ServletTemplateEngine extends TemplateEngine {
+public class ServletTemplateEngine extends HotTemplateEngine {
 	private static final Log log = LogFactory.getLog(ServletTemplateEngine.class);
 	private ServletConfig config;
 	private ServletContext context;
