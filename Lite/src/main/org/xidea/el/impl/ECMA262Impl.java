@@ -1,11 +1,14 @@
 package org.xidea.el.impl;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -21,7 +24,34 @@ import org.xidea.el.json.JSONTokenizer;
  * @see org.mozilla.javascript.NativeGlobal
  */
 public abstract class ECMA262Impl {
-	public static void appendTo(Map<String, Object> globalInvocableMap) {
+	@SuppressWarnings("unchecked")
+	private final static Class[] arrayClasses = new Class[] { List.class, Object[].class,
+			int[].class, float[].class, double[].class, long[].class,
+			short[].class, byte[].class, char[].class };
+	public static void setup(CalculaterImpl calculater) {
+		setup(calculater,JSArray.class,arrayClasses);
+		setup(calculater,JSNumber.class,Number.class);
+	}
+	@SuppressWarnings("unchecked")
+	private static void setup(CalculaterImpl calculater,Class impl,Class... forClass) {
+		Field[] fields = impl.getFields();
+		for (Field field : fields) {
+			if (field.getType().isAssignableFrom(Invocable.class)
+					&& (field.getModifiers() & Modifier.STATIC) > 0) {
+				try {
+					Invocable inv = (Invocable) field.get(null);
+					for (Class type : forClass) {
+						calculater.addMethod(type, field.getName(), inv);
+					}
+				} catch (Exception e) {
+				}
+
+			}
+		}
+
+	}
+
+	public static void setup(Map<String, Object> globalInvocableMap) {
 		globalInvocableMap.put("encodeURI", new EncodeURI());
 		globalInvocableMap.put("decodeURI", new DecodeURI());
 
@@ -376,7 +406,7 @@ public abstract class ECMA262Impl {
 		}
 	}
 
-	private static Object getArg(Object[] args, int index, Object defaultValue) {
+	protected static Object getArg(Object[] args, int index, Object defaultValue) {
 		if (index >= 0 && index < args.length) {
 			return args[index];
 		} else {

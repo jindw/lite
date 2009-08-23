@@ -22,8 +22,8 @@ public abstract class JSProxy {
 		} catch (Throwable e) {
 			try {
 				return Java6Proxy.class.newInstance();
-			} catch (Exception e1) {
-				throw new RuntimeException(e1);
+			} catch (Throwable e1) {
+				throw new RuntimeException("您的JDK不支持js，请补充rhino jar包。",e1);
 			}
 		}
 	}

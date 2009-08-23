@@ -1,41 +1,24 @@
 package org.xidea.el.impl;
 
 import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.xidea.el.Invocable;
 
-public abstract class JSArray extends ECMA262Impl implements Invocable {
+abstract class JSArray extends ECMA262Impl implements Invocable {
 	@SuppressWarnings("unchecked")
-	private static Class[] classes = new Class[] { List.class, Object[].class,
-			int[].class, float[].class, double[].class, long[].class,
-			short[].class, byte[].class, char[].class };
-
-	@SuppressWarnings("unchecked")
-	public static void appendTo(CalculaterImpl calculater) {
-		Field[] fields = JSArray.class.getFields();
-		for (Field field : fields) {
-			if (field.getType().isAssignableFrom(Invocable.class)
-					&& (field.getModifiers() & Modifier.STATIC) > 0) {
-				try {
-					Invocable inv = (Invocable) field.get(null);
-					for (Class type : classes) {
-						calculater.addMethod(type, field.getName(), inv);
-					}
-				} catch (Exception e) {
-				}
-
-			}
-		}
-
+	public Object invoke(Object thiz, Object... args) throws Exception {
+		thiz = toList(thiz);
+		return this.invoke((List<Object>) thiz, args);
 	}
 
 	@SuppressWarnings("unchecked")
-	public Object invoke(Object thiz, Object... args) throws Exception {
+	private static Object toList(Object thiz) {
 		if (thiz instanceof Object[]) {
 			thiz = Arrays.asList(thiz);
 		} else if (thiz.getClass().isArray()) {
@@ -46,7 +29,7 @@ public abstract class JSArray extends ECMA262Impl implements Invocable {
 			}
 			thiz = buf;
 		}
-		return this.invoke((List<Object>) thiz, args);
+		return thiz;
 	}
 
 	public abstract Object invoke(List<Object> thiz, Object... args)
@@ -116,6 +99,42 @@ public abstract class JSArray extends ECMA262Impl implements Invocable {
 				thiz.add(i,args[i]);
 			}
 			return thiz.size();
+		}
+	};
+	public static final Invocable concat = new JSArray() {
+		@SuppressWarnings("unchecked")
+		@Override
+		public Object invoke(List<Object> thiz, Object... args) {
+			List<Object > result = new ArrayList<Object>(thiz);
+			for (Object o:args) {
+				o = toList(o);
+				if(o instanceof Collection){
+					result.addAll((Collection)o);
+				}else{
+					result.add(o);
+				}
+			}
+			return result;
+		}
+	};
+	public static final Invocable reverse = new JSArray() {
+		@Override
+		public Object invoke(List<Object> thiz, Object... args) {
+			Collections.reverse(thiz);
+			return thiz;
+		}
+	};
+	public static final Invocable sort = new JSArray() {
+		@SuppressWarnings("unchecked")
+		@Override
+		public Object invoke(List thiz, Object... args) {
+			Object o = getArg(args, 0, null);
+			Comparator c = null;
+			if(o instanceof Comparator){
+				c = (Comparator)o;
+			}
+			Collections.sort(thiz,c);
+			return thiz;
 		}
 	};
 

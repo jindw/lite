@@ -22,7 +22,7 @@ public class CalculaterImpl implements Calculater {
 	public CalculaterImpl(){
 		Map<String, Map<String, Invocable>> methodMap = new HashMap<String, Map<String, Invocable>>();
 		this.methodMap = methodMap;
-		JSArray.appendTo(this);
+		ECMA262Impl.setup(this);
 	}
 	public CalculaterImpl(Map<String, Map<String, Invocable>> methodMap){
 		this.methodMap = methodMap;

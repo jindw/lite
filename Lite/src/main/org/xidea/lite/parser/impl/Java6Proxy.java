@@ -21,7 +21,7 @@ public class Java6Proxy extends JSProxy implements ErrorReporter {
 	private static Log log = LogFactory.getLog(CoreXMLNodeParser.class);
 	private ScriptEngine jsengine;
 	static {
-		if (new ScriptEngineManager().getEngineByExtension("js") == null) {
+		if (new ScriptEngineManager(com.sun.script.javascript.RhinoScriptEngineFactory.class.getClassLoader()).getEngineByExtension("js") == null) {
 			throw new RuntimeException("Java 6 找不到可用的 jsengine");
 		}
 	}
