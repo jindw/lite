@@ -81,10 +81,10 @@
 				<include name="org/xidea/lite/parser/impl/dtd/**/xhtml1.dtd" />
 				<exclude name="**/test/**/*.*" />
 			</fileset>
-			<fileset dir="src/main" defaultexcludes="true">
-				<include name="org/xidea/el/*.java" />
-				<include name="org/xidea/el/json/*.java" />
-				<include name="org/xidea/lite/*.java" />
+			<fileset dir="src/main/" defaultexcludes="true">
+				<exclude name="org/xidea/**/test/**.java" />
+				<exclude name="org/xidea/**/*Test*.java" />
+				<include name="org/xidea/**/*.java" />
 			</fileset>
 			<zipfileset prefix="org/xidea/lite/" dir="build/dest/jslite/">
 				<include name="template.js" />
@@ -99,6 +99,7 @@
 				<include name="org/xidea/**/*.*" />
 				<exclude name="**/*.java" />
 				<exclude name="**/*.js" />
+				<exclude name="org/xidea/lite/servlet/*.*" />
 				<exclude name="org/xidea/lite/tools/*.*" />
 				<exclude name="org/xidea/lite/parser/**/*.*" />
 			</zipfileset>

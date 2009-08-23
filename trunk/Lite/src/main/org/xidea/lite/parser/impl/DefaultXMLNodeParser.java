@@ -204,16 +204,16 @@ public class DefaultXMLNodeParser implements NodeParser<Node> {
 				isDynamic = true;
 			}
 		}
-		if (isDynamic && !isStatic) {
+		if (isDynamic && !isStatic && buf.size() == 1) {
 			// remove attribute;
 			// context.append(" "+name+'=""');
-			if (buf.size() > 1) {
-				// TODO:....
-				throw new RuntimeException("只能有单个EL表达式");
-			} else {// 只考虑单一EL表达式的情况
+//			if (buf.size() > 1) {
+//				// TODO:....
+//				throw new RuntimeException("只能有单个EL表达式");
+//			} else {// 只考虑单一EL表达式的情况
 				Object[] el = (Object[]) buf.get(0);
 				context.appendAttribute(name, el[1]);
-			}
+//			}
 		} else {
 			context.append(" " + name + "=\"");
 			if (name.startsWith("xmlns")) {

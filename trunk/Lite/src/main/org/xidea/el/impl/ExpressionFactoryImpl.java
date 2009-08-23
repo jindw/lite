@@ -22,7 +22,7 @@ public class ExpressionFactoryImpl implements ExpressionFactory {
 	protected final Map<String, Object> globals;
 	static {
 		HashMap<String, Object> map = new HashMap<String, Object>();
-		ECMA262Impl.appendTo(map);
+		ECMA262Impl.setup(map);
 		DEFAULT_GLOBAL_MAP = Collections.unmodifiableMap(map);
 	}
 

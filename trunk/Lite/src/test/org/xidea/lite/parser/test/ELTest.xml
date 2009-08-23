@@ -8,9 +8,18 @@
 	</object>
 	<object class="java.util.LinkedHashMap">
 		<void method="put">
+			<string><![CDATA[${encodeURIComponent('1:')}${'a'.length()?'1':'2'}]]></string>
+			<string><![CDATA[1%3A1]]></string>
+		</void>
+		<void method="put">
+			<string><![CDATA[${(-1234.254).toFixed(1)}]]></string>
+			<string><![CDATA[-1234.3]]></string>
+		</void>
+		<void method="put">
 			<string><![CDATA[<div>${Math.max(2>=0?3+2:2,1)}</div>]]></string>
 			<string><![CDATA[<div>5</div>]]></string>
 		</void>
+		
 		<void method="put">
 			<string><![CDATA[<div>\${1+1}</div>]]></string>
 			<string><![CDATA[<div>${1+1}</div>]]></string>
