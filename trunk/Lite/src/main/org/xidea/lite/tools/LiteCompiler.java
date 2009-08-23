@@ -89,6 +89,7 @@ public class LiteCompiler {
 	}
 
 	public void processFile(final String path) {
+		log.info("处理文件："+path);
 		try {
 			{
 				File cachedFile = new File(litecached, path.replace('/', '.'));
@@ -96,6 +97,7 @@ public class LiteCompiler {
 						cachedFile), encoding);
 				try {
 					out.write(engine.getLiteCode(path));
+					log.info("Lite文件写入成功:"+cachedFile);
 				} catch (Throwable e) {
 					if(writeError){
 						out.write(engine.buildLiteCode(path,e.getMessage()));
@@ -131,11 +133,16 @@ public class LiteCompiler {
 	}
 
 	public void processDir(final File dir, final String path) {
+		log.info("处理目录："+dir+","+path);
 		dir.listFiles(new FileFilter() {
 			public boolean accept(File file) {
 				if (!file.equals(htmlcached) && !file.equals(litecached)) {
 					if (file.isDirectory()) {
-						processDir(file, path + file.getName() + '/');
+						if(file.getName().startsWith(".")){
+						   log.warn("跳过目录："+file);
+						}else{
+							processDir(file, path + file.getName() + '/');
+						}
 					} else if (isTemplateFile(file)) {
 						processFile(path + file.getName());
 					}
