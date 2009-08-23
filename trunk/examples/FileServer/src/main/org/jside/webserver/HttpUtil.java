@@ -46,7 +46,7 @@ public class HttpUtil {
 	public static String getContentType(String name) {
 		int extIndex = name.lastIndexOf('.');
 		if (extIndex >= 0) {
-			name = name.substring(extIndex + 1);
+			name = name.substring(extIndex + 1).toLowerCase();
 		}
 		String contentType = (String) contentTypeMap.get(name);
 		return contentType == null ? "application/octet-stream" : contentType;

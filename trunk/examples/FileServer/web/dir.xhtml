@@ -3,42 +3,51 @@
 		<meta http-equiv="content-type"
 			content="text/html; charset=UTF-8" />
 		<title>Andriod 文件管理</title>
-		<link type="text/css" rel="Stylesheet"
-			href="http://www.xidea.org/project/jsi/styles/default.css" />
 	</head>
 	<body>
 		<c:client id="renderDelete">
-			<form method="POST" action="/${path}/${name};delete">
+			<form method="POST" action="${path}${name};delete">
 				<lable for="fileName">文件名:</lable>
-				<input type="text" size="${name.length}" readyonly="true" id="fileName" value="${name}" />
+				<input type="text" size="${name.length}"
+					readyonly="true" id="fileName" value="${name}" />
 				<input type="submit" value="确认删除" />
 				<input type="reset" value="取消" onclick="closeDialog()" />
 			</form>
 		</c:client>
 		<c:client id="renderRename">
-			<form method="POST" action="/${path}/${name};rename">
+			<form method="POST" action="${path}${name};rename">
 				<lable for="newName">新名字:</lable>
-				<input id="newName" size="${name.length+5}" type="text" name="name"
-					value="${name}" />
+				<input id="newName" size="${name.length+5}" type="text"
+					name="name" value="${name}" />
 				<input type="submit" value="确认重命名" />
 				<input type="reset" value="取消" onclick="closeDialog()" />
 			</form>
 		</c:client>
 		<c:client id="renderMove">
-			<form method="POST" action="/${path}/${name};move">
+			<form method="POST" action="${path}${name};move">
 				<lable for="fileName">移动文件:</lable>
-				<input type="text" size="${name.length}" readyonly="true" id="fileName" value="${name}" />
-				<hr/>
+				<input type="text" size="${name.length}"
+					readyonly="true" id="fileName" value="${name}" />
+				<hr />
 				<lable for="newPath">新目标地址:</lable>
-				<input id="newPath" size="${path.length+5}" type="text" name="path"
-					value="${path}" />
+				<input id="newPath" size="${path.length+5}" type="text"
+					name="path" value="${decodeURIComponent(path)}" />
 				<input type="submit" value="确认移动" />
+				<input type="reset" value="取消" onclick="closeDialog()" />
+			</form>
+		</c:client>
+		<c:client id="renderMkdir">
+			<form method="POST" action="${path};mkdir">
+				<lable for="fileName">创建目录:</lable>
+				<input type="text" size="40" id="fileName" name="name"
+					value="新建文件夹" />
+				<input type="submit" value="确认创建" />
 				<input type="reset" value="取消" onclick="closeDialog()" />
 			</form>
 		</c:client>
 		<script>
 			//<![CDATA[
-	var path = "${path}".replace(':','%3A');
+	var path = "${path}".replace(':','%3A').replace(/^\/?|\/?$/g,'/');
 	function E(id){
 		return document.getElementById(id)
 	}
@@ -58,16 +67,29 @@
 	function doMove(name){
 		showDialog(renderMove({name:name}));
 	}
+	function doMkdir(){
+		showDialog(renderMkdir({}));
+	}
+	function doUpload(){
+		alert("尚未支持");
+	}
 	//]]>
 		</script>
 		<h2>
 			<c:for var="item" items="${path.split('/')}">
 				<c:if test="${for.index==0}">
-					<a href="/">${item}</a>
-					<c:var name="href" value="" />
+					<c:if test="${item}">
+						<c:var name="href"
+							value="/${encodeURIComponent(item)}" />
+						<a href="${href}/">${item}</a>
+					</c:if>
+					<c:else>
+						<c:var name="href" value="" />
+					</c:else>
 				</c:if>
 				<c:else>
-					<c:var name="href" value="${href}/${item}" />
+					<c:var name="href"
+						value="${href}/${encodeURIComponent(item)}" />
 					/
 					<a href="${href}/">${item}</a>
 				</c:else>
@@ -80,26 +102,47 @@
 			<c:for var="file" items="${fileList}">
 				<tr>
 					<td>
-						<c:var name="name"
-							value="${file.file?file.name:file.name+'/'}" />
-						<a href='${name}'>${name}</a>
+						<c:var name="name" value="${file.name}" />
+						<c:if test="${file.file}">
+							<a href="${encodeURIComponent(name)}">
+								${name}
+							</a>
+
+							<c:var name="length"
+								value="${file.length()/1024}" />
+							(${length>1024?(length/1024).toFixed(2)+'M':(length).toFixed(2)+'K'})
+						</c:if>
+						<c:else>
+							<a href="${encodeURIComponent(name)}/">
+								${name}
+							</a>
+						</c:else>
+
 					</td>
 					<td>
-						<a href="#"
-							onclick="doDelete('${name}')">
-							刪除
-						</a>
-						<a href="#"
-							onclick="doMove('${name}')">
-							移动
-						</a>
-						<a href="#"
-							onclick="doRename('${name}')">
+						<a href="#" onclick="doDelete('${name}')">刪除</a>
+						<a href="#" onclick="doMove('${name}')">移动</a>
+						<a href="#" onclick="doRename('${name}')">
 							重命名
 						</a>
 					</td>
 				</tr>
 			</c:for>
+			<tr>
+				<td colspan="2"
+					style="padding-top:14px;border-bottom:1px solid blue">
+					&#160;
+				</td>
+			</tr>
+			<tr>
+				<td colspan="2">
+					<a href="#" onclick="doMkdir()">创建目录</a>
+					<a href="#" onclick="doUpload()">上传文件</a>
+				</td>
+			</tr>
 		</table>
 	</body>
+	<link type="text/css" rel="Stylesheet"
+		href="http://www.xidea.org/project/jsi/styles/default.css" />
+
 </html>
