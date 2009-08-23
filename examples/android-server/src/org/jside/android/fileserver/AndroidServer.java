@@ -1,4 +1,7 @@
-package org.jside.server;
+package org.jside.android.fileserver;
+
+import java.net.MalformedURLException;
+
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -12,14 +15,19 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 
-public class Server extends Activity{
-	static Server instance;
+public class AndroidServer extends Activity{
+	static AndroidServer instance;
 	/** Called when the activity is first created. */
-	private FileServer ws = new FileServer();
+	private org.jside.fileserver.FileServer ws;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		instance = this;
+		try {
+			ws = new org.jside.fileserver.FileServer();
+		} catch (MalformedURLException e) {
+			throw new RuntimeException(e);
+		}
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 		Button exit = (Button) super.findViewById(R.id.exit);
