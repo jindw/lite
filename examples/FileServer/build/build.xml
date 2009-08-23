@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="GBK"?>
+<project name="fileserver" default="build" basedir="../">
+	<tstamp>
+		<format property="version" pattern="yyyyMMdd" />
+	</tstamp>
+
+	<target name="build">
+		<delete dir="${basedir}/build/dest/" />
+		<mkdir dir="${basedir}/build/dest/" />
+		<antcall target="compileLite" />
+		<jar destfile="${basedir}/build/dest/fs.jar">
+			<manifest>
+				<attribute name="Main-Class" value="org.jside.fileserver.FileServer" />
+			</manifest>
+			<fileset dir="${basedir}/web/WEB-INF/classes">
+				<include name="**/*.class" />
+				<include name="**/mime.types" />
+				<exclude name="**/test/**/*.*" />
+			</fileset>
+			<zipfileset prefix="org/jside/webserver/action/" dir="${basedir}/build/dest/lite">
+				<include name=".*.xhtml" />
+			</zipfileset>
+			<zipfileset src="${basedir}/web/WEB-INF/lib/Template.jar">
+				<include name="**/*.*" />
+				<exclude name="**.java" />
+				<exclude name="org/xidea/lite/parser/**/*.*" />
+				<exclude name="org/xidea/lite/servlet/**/*.*" />
+				<exclude name="org/xidea/lite/tools/**/*.*" />
+			</zipfileset>
+		</jar>
+	</target>
+	<target name="compileLite">
+		<delete dir="${basedir}/build/dest/lite" />
+		<mkdir dir="${basedir}/build/dest/lite" />
+		<java classname="org.xidea.lite.tools.LiteCompiler" classpath="../Lite/build/dest/Template.jar;../Lite/web/WEB-INF/lib/js.jar">
+			<arg value="-webRoot" />
+			<arg value="${basedir}/web/" />
+			<arg value="-litecached" />
+			<arg value="${basedir}/build/dest/lite" />
+		</java>
+	</target>
+</project>

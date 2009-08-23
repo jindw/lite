@@ -404,8 +404,14 @@ class ResponseOutputStream extends FilterOutputStream {
 		super.close();
 	}
 
+	@Override
+	public void write(byte[] b, int off, int len) throws IOException {
+		this.beforeWrite();
+		out.write(b, off, len);
+	}
+
 	public void write(int b) throws IOException {
 		this.beforeWrite();
-		super.write(b);
+		out.write(b);
 	}
 }
