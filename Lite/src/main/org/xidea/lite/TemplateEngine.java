@@ -27,7 +27,7 @@ public class TemplateEngine {
 
 	public Template getTemplate(String path) {
 		Template o = templateMap.get(path);
-		if (o != null) {
+		if (o == null) {
 			o = createTemplate(path);
 			templateMap.put(path, o);
 		}
