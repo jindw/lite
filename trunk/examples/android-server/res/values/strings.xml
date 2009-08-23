@@ -3,5 +3,5 @@
     <string name="hide">Hide</string>
     <string name="welcome">G2 WiFi Web Based FileManager!</string>
     <string name="exit">Exit!</string>
-    <string name="app_name">Server</string>
+    <string name="app_name">AndroidServer</string>
 </resources>
