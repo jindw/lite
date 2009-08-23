@@ -1,9 +1,0 @@
-text/css	css
-image/gif	gif
-image/jpeg	jpg,jpeg
-text/html	htm,html,xhtml
-text/xml	xml,xsl,xslt
-application/zip	zip
-audio/basic	snd,au
-audio/x	wav
-text/plain	text,c,cc,c++,h,pl,txt,java,json
