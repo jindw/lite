@@ -74,7 +74,7 @@ public class XMLContextImpl implements XMLContext {
 
 	public Document loadXML(URI url) throws SAXException, IOException {
 		context.setCurrentURI(url);
-		InputStream in = context.getInputStream(url);
+		InputStream in = context.openInputStream(url);
 
 		in = new BufferedInputStream(in, 1);
 		int c;
@@ -177,7 +177,7 @@ public class XMLContextImpl implements XMLContext {
 			xsltSource = new javax.xml.transform.dom.DOMSource(result.getNode());
 		} else {
 			xsltSource = new javax.xml.transform.stream.StreamSource(context
-					.getInputStream(context.createURI(xslt, parentURI)));
+					.openInputStream(context.createURI(xslt, parentURI)));
 		}
 
 		// create an instance of TransformerFactory

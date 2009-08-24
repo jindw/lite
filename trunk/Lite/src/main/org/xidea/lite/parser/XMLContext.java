@@ -60,7 +60,7 @@ public interface XMLContext {
 
 	/**
 	 * 装载指定文档。数据源需要从ResourceContext中获取资源数据
-	 * @see ResourceContext#getInputStream(parentURI)
+	 * @see ResourceContext#openInputStream(parentURI)
 	 * @param createURI
 	 * @return
 	 * @throws SAXException

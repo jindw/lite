@@ -147,8 +147,8 @@ public class ParseContextImpl implements ParseContext {
 		return resourceContext.getCurrentURI();
 	}
 
-	public final InputStream getInputStream(URI url) {
-		return resourceContext.getInputStream(url);
+	public final InputStream openInputStream(URI url) {
+		return resourceContext.openInputStream(url);
 	}
 
 	public final Collection<URI> getResources() {

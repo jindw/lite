@@ -256,7 +256,7 @@ public class CoreXMLNodeParser implements NodeParser<Element> {
 		if (file != null) {
 			try {
 				URI uri = context.createURI(file, null);
-				InputStream in = context.getInputStream(uri);
+				InputStream in = context.openInputStream(uri);
 				InputStreamReader reader = new InputStreamReader(in,
 						encoding == null ? "utf-8" : encoding);
 				StringBuilder sbuf = new StringBuilder();
