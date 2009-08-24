@@ -13,7 +13,11 @@ import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Node;
 import org.xidea.lite.parser.impl.ParseContextImpl;
 import org.xml.sax.SAXException;
-
+/**
+ * @author jindw
+ * 要设计为继承安全，这个接口不能滥用
+ * 而且，实现不能直接调用this。否则容易形成孤岛
+ */
 public interface XMLContext {
 
 	/**

@@ -29,6 +29,10 @@ import org.xidea.lite.parser.ResultTranslator;
 import org.xidea.lite.parser.XMLContext;
 import org.xml.sax.SAXException;
 
+/**
+ * 不要较差调用，交叉调用，用this代替，确保继承安全
+ * @author jindw
+ */
 public class ParseContextImpl implements ParseContext {
 	private static final long serialVersionUID = 1L;
 	protected ResourceContext resourceContext;
@@ -59,7 +63,7 @@ public class ParseContextImpl implements ParseContext {
 		}
 		//需要重设 ParseChain 的context
 		this.parserHolder = new ParseHolderImpl(this,parent);
-		this.resultContext = new ResultContextImpl();
+		this.resultContext = new ResultContextImpl(this);
 		this.featrueMap = new HashMap<String, String>(parent.getFeatrueMap());
 		if (ef != null) {
 			this.resultContext
@@ -73,7 +77,7 @@ public class ParseContextImpl implements ParseContext {
 	protected void initialize(URI base, Map<String, String> featrues,
 			NodeParser<? extends Object>[] parsers, TextParser[] ips) {
 		resourceContext = new ResourceContextImpl(base);
-		resultContext = new ResultContextImpl();
+		resultContext = new ResultContextImpl(this);
 		xmlContext = new XMLContextImpl(this);
 		parserHolder = new ParseHolderImpl(this, parsers, ips);
 		initializeFeatrues(featrues);
@@ -131,35 +135,36 @@ public class ParseContextImpl implements ParseContext {
 
 	// delegate methods...
 
-	public final void addResource(URI resource) {
+	public void addResource(URI resource) {
 		resourceContext.addResource(resource);
 	}
 
-	public final URI createURI(String file, URI parentURI) {
+	public URI createURI(String file, URI parentURI) {
 		return resourceContext.createURI(file, parentURI);
 	}
 
-	public final Object getAttribute(Object key) {
+	public Object getAttribute(Object key) {
 		return resourceContext.getAttribute(key);
 	}
 
-	public final URI getCurrentURI() {
+	public void setAttribute(Object key, Object value) {
+		resourceContext.setAttribute(key, value);
+	}
+	
+	public URI getCurrentURI() {
 		return resourceContext.getCurrentURI();
 	}
 
-	public final InputStream openInputStream(URI url) {
+	public InputStream openInputStream(URI url) {
 		return resourceContext.openInputStream(url);
 	}
 
-	public final Collection<URI> getResources() {
+	public Collection<URI> getResources() {
 		return resourceContext.getResources();
 	}
 
-	public final void setAttribute(Object key, Object value) {
-		resourceContext.setAttribute(key, value);
-	}
 
-	public final void setCurrentURI(URI currentURI) {
+	public void setCurrentURI(URI currentURI) {
 		resourceContext.setCurrentURI(currentURI);
 	}
 

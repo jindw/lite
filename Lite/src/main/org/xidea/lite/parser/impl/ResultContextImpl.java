@@ -11,10 +11,15 @@ import org.xidea.el.impl.ExpressionFactoryImpl;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.BuildInAdvice;
 import org.xidea.lite.Template;
+import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.ResultContext;
 import org.xidea.lite.parser.ResultItem;
 import org.xidea.lite.parser.ResultTranslator;
 
+/**
+ * 接口函数不能直接相互调用，用context对象！！！
+ * @author jindw
+ */
 public class ResultContextImpl implements ResultContext {
 	private HashMap<String, String> typeIdMap = new HashMap<String, String>();
 	private HashMap<Object, String> objectIdMap = new HashMap<Object, String>();
@@ -24,8 +29,10 @@ public class ResultContextImpl implements ResultContext {
 	private ExpressionFactory expressionFactory = ExpressionFactoryImpl
 			.getInstance();
 	private ResultTranslator translator;
+	private ParseContext context;
 
-	ResultContextImpl() {
+	public ResultContextImpl(ParseContext context) {
+		this.context = context;
 	}
 
 	public void setExpressionFactory(ExpressionFactory expressionFactory) {
@@ -101,7 +108,7 @@ public class ResultContextImpl implements ResultContext {
 		result.add(object);
 	}
 
-	public void appendAll(List<Object> items) {
+	public final void appendAll(List<Object> items) {
 		for (Object text : items) {
 			if (text instanceof String) {
 				this.append((String) text);
@@ -126,16 +133,16 @@ public class ResultContextImpl implements ResultContext {
 		}
 	}
 
-	public void appendAttribute(String name, Object el) {
+	public final void appendAttribute(String name, Object el) {
 		this.append(new Object[] { Template.XML_ATTRIBUTE_TYPE, requrieEL(el), name });
 
 	}
 
-	public void appendIf(Object testEL) {
+	public final void appendIf(Object testEL) {
 		this.append(new Object[] { Template.IF_TYPE, requrieEL(testEL) });
 	}
 
-	public void appendElse(Object testEL) {
+	public final void appendElse(Object testEL) {
 		this.clearPreviousText();
 		if (this.getType(this.result.size() - 1) != -1) {
 			this.appendEnd();
@@ -143,20 +150,20 @@ public class ResultContextImpl implements ResultContext {
 		this.append(new Object[] { Template.ELSE_TYPE, requrieEL(testEL) });
 	}
 
-	public void appendEnd() {
+	public final void appendEnd() {
 		this.result.add(END_INSTRUCTION);
 	}
 
-	public void appendVar(String name, Object valueEL) {
+	public final void appendVar(String name, Object valueEL) {
 		this.append(new Object[] { Template.VAR_TYPE, requrieEL(valueEL), name });
 	}
 
-	public void appendCaptrue(String varName) {
+	public final void appendCaptrue(String varName) {
 		this.append(new Object[] { Template.CAPTRUE_TYPE, varName });
 
 	}
 
-	public void appendFor(String var, Object itemsEL, String status) {
+	public final void appendFor(String var, Object itemsEL, String status) {
 		itemsEL = requrieEL(itemsEL);
 		this.append(new Object[] { Template.FOR_TYPE, itemsEL, var });
 		if (status != null && status.length() > 0) {
@@ -164,25 +171,25 @@ public class ResultContextImpl implements ResultContext {
 		}
 	}
 
-	public void appendEL(Object el) {
+	public final void appendEL(Object el) {
 		el = requrieEL(el);
 		this.append(new Object[] { Template.EL_TYPE, el });
 
 	}
 
-	public void appendXmlText(Object el) {
+	public final void appendXmlText(Object el) {
 		this.append(new Object[] { Template.XML_TEXT_TYPE, el });
 	}
 
-	public void appendAdvice(Class<? extends Object> clazz, Object el) {
+	public final void appendAdvice(Class<? extends Object> clazz, Object el) {
 		this.append(new Object[] { Template.ADD_ON_TYPE, requrieEL(el), clazz.getName() });
 	}
 
-	public int mark() {
+	public final int mark() {
 		return result.size();
 	}
 
-	public List<Object> reset(int mark) {
+	public final List<Object> reset(int mark) {
 		int end = result.size();
 		// 好像是关联的，所以，希望尽早解除关联
 		List<Object> pops = new ArrayList<Object>(result.subList(mark, end));
@@ -313,9 +320,9 @@ public class ResultContextImpl implements ResultContext {
 
 	public String toCode() {
 		if(translator==null){
-			return JSONEncoder.encode(toList());
+			return JSONEncoder.encode(context.toList());
 		}else{
-			return translator.translate(this);
+			return translator.translate(context);
 		}
 	}
 
