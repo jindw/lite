@@ -3,32 +3,33 @@ package org.jside.webserver.action;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
-import java.net.URLEncoder;
 
 import org.jside.webserver.HttpUtil;
 import org.jside.webserver.RequestContext;
 import org.xidea.lite.TemplateEngine;
 
 public class TemplateAction extends TemplateEngine {
-	protected URL root;
+	protected URL root = this.getClass().getResource("./");
 	private String contentType = "text/html;charset=UTF-8";
-	private Class<? extends Object> resourceLoader = TemplateAction.class;
-	private static TemplateAction instance;
+	private boolean fromWeb = true;
 
-	public static TemplateAction getInstance() {
-		if (instance == null) {
-			try {
-				instance = new HotTemplateAction(new File("web"));
-			} catch (Throwable w) {
-				instance = new TemplateAction();
-			}
+	public static TemplateAction create(URL root, boolean fromWeb) {
+		TemplateAction ta;
+		try {
+			ta = new HotTemplateAction(root);
+		} catch (Throwable w) {
+			ta = new TemplateAction(root);
 		}
-		return instance;
+		ta.fromWeb = fromWeb;
+		return ta;
 	}
 
-	protected TemplateAction() {
-		super(null);
+	public TemplateAction(URL root) {
+		super((URI) null);
+		this.reset(root);
 	}
 
 	public void execute() throws IOException {
@@ -42,16 +43,15 @@ public class TemplateAction extends TemplateEngine {
 
 	public void reset(RequestContext requestContext) {
 		URL newRoot = requestContext.getResource("/");
-		if (newRoot == null) {
-			if (root != null) {
-				root = newRoot;
-				reset(newRoot);
-			}
-		} else {
+		if (newRoot != null) {
 			if (!newRoot.equals(root)) {
 				reset(newRoot);
 			}
 		}
+	}
+
+	public URL getRoot() {
+		return root;
 	}
 
 	public void reset(URL newRoot) {
@@ -59,25 +59,42 @@ public class TemplateAction extends TemplateEngine {
 		root = newRoot;
 	}
 
-	protected URL getResource(String pagePath) {
+	protected URI getResource(String pagePath) {
 		try {
-			if (root != null) {
-				if (root.getProtocol().equals("file")) {
-					File file = new File(URLEncoder.encode(root.getFile(),
-							"UTF-8"), pagePath);
-
-					if (file.exists()) {
-						return file.toURI().toURL();
+			if (fromWeb) {
+				RequestContext context = RequestContext.get();
+				URL url = context.getResource(pagePath);
+				if (url != null) {
+					URI uri = url.toURI();
+					uri = toExistResource(uri);
+					if (uri != null) {
+						return uri;
 					}
-
-				} else {
-					return new URL(root, pagePath);
 				}
 			}
-		} catch (IOException e) {
+			if (root != null) {
+				URI uri = new URL(root, pagePath).toURI();
+				uri = toExistResource(uri);
+				if (uri != null) {
+					return uri;
+				}
+			}
+		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-		return resourceLoader.getResource(pagePath);
+		return null;
+	}
+
+	private URI toExistResource(URI uri) throws MalformedURLException {
+		File file = HttpUtil.getFile(uri.toURL());
+		if (file != null) {
+			if (file.exists()) {
+				return uri;
+			}
+		} else {
+			return uri;
+		}
+		return null;
 	}
 
 }
