@@ -8,7 +8,7 @@ public interface ResultTranslator {
 	 * @param id
 	 * @return
 	 */
-	public String translate(ResultContext context);
+	public String translate(ParseContext context);
 
 	public java.util.Collection<String> getSupportFeatrues();
 }

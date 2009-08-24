@@ -4,6 +4,11 @@ import java.util.List;
 
 import org.xidea.el.ExpressionFactory;
 
+/**
+ * 要设计为继承安全，这个接口不能滥用
+ * 而且，实现不能直接调用this。否则容易形成孤岛
+ * @author jindw
+ */
 public interface ResultContext {
 	public static final Object END_INSTRUCTION = new Object[0];
 	
