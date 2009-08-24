@@ -1,6 +1,7 @@
 package org.xidea.lite.parser.impl;
 
 import java.io.File;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -23,14 +24,16 @@ public class DecoratorContextImpl implements DecoratorContext {
 	protected URLMatcher excludeMatcher;
 	protected Map<URLMatcher, String> decoratorMap;
 	protected long lastModified = -1;// not found or error :0
-	protected File config;
+	protected URI config;
+	protected File checkFile;
 
-	public DecoratorContextImpl(File config) {
+	public DecoratorContextImpl(URI config,File checkFile) {
 		this.config = config;
+		this.checkFile = checkFile;
 	}
 
 	protected long lastModified() {
-		return config == null ? 0 : config.lastModified();
+		return checkFile == null ? 0 : checkFile.lastModified();
 	}
 
 	/*
@@ -61,8 +64,8 @@ public class DecoratorContextImpl implements DecoratorContext {
 	}
 
 	protected void reset() {
-		if (config != null && config.exists()) {
-			reset(new InputSource(config.toURI().toASCIIString()));
+		if (config != null) {
+			reset(new InputSource(config.toString()));
 		}
 	}
 

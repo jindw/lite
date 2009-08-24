@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
@@ -65,8 +67,8 @@ public class ClientJSBuilderTest {
 		
 	}
 	@Test
-	public void testBuildJS() throws SAXException, IOException {
-		URL url = this.getClass().getResource("format-test.xhtml");
+	public void testBuildJS() throws SAXException, IOException, URISyntaxException {
+		URI url = this.getClass().getResource("format-test.xhtml").toURI();
 		ParseContext context2 = new ParseContextImpl(url,null,null,null);
 		// 前端直接压缩吧？反正保留那些空白也没有调试价值
 		// context2.setCompress(context.isCompress());
@@ -84,8 +86,8 @@ public class ClientJSBuilderTest {
 	}
 
 	@Test
-	public void testClient() throws SAXException, IOException {
-		URL url = this.getClass().getResource("asciitable-client.xhtml");
+	public void testClient() throws SAXException, IOException, URISyntaxException {
+		URI url = this.getClass().getResource("asciitable-client.xhtml").toURI();
 		ParseContext context2 = new ParseContextImpl(url,null,null,null);
 		// 前端直接压缩吧？反正保留那些空白也没有调试价值
 		// context2.setCompress(context.isCompress());
@@ -103,10 +105,10 @@ public class ClientJSBuilderTest {
 	}
 
 	@Test
-	public void testCTClient() throws SAXException, IOException {
+	public void testCTClient() throws SAXException, IOException, URISyntaxException {
 		InputStreamReader source = new InputStreamReader(this.getClass()
 				.getResourceAsStream("ct-client.txt"), "utf-8");
-		ParseContext context2 = new ParseContextImpl(new URL("http://w/"),
+		ParseContext context2 = new ParseContextImpl(new URI("http://w/"),
 				null, null, new TextParser[] { ELParser.EL, ELParser.IF,
 						ELParser.FOR, ELParser.ELSE, ELParser.CLIENT,
 						ELParser.END, ELParser.VAR });

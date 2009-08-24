@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 
 import javax.script.ScriptContext;
@@ -53,7 +54,7 @@ public class JSCompileTest {
 	ParseContextImpl context;
 
 	public JSCompileTest() throws MalformedURLException {
-		context = new ParseContextImpl(webRoot.toURI().toURL(),null,null,null);
+		context = new ParseContextImpl(webRoot.toURI(),null,null,null);
 	}
 
 	public String getText(Node doc, String xpath)
@@ -125,7 +126,7 @@ public class JSCompileTest {
 	@Test
 	public void testExample() throws Exception {
 		
-		URL menuURL = new File(webRoot, "menu.xml").toURI().toURL();
+		URI menuURL = new File(webRoot, "menu.xml").toURI();
 		Document doc = context.loadXML(menuURL);
 		String defaultContext = getText(doc, "/root/context");
 		engine.getContext().setAttribute("testMenuDoc", doc,

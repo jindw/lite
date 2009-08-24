@@ -3,7 +3,7 @@ package org.xidea.lite.parser.impl;
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.net.URL;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,8 +25,12 @@ public class HotTemplateEngine extends TemplateEngine {
 	protected Map<String, String> featrues = new HashMap<String, String>();
 	protected DecoratorContext decoratorContext;
 
-	protected HotTemplateEngine() {
-		super(null);
+	public HotTemplateEngine(URI webRoot, URI config) {
+		super(webRoot);
+		if (config!=null) {
+			this.decoratorContext = new DecoratorContextImpl(
+					config,null);
+		}
 	}
 
 	public HotTemplateEngine(File webRoot) {
@@ -35,10 +39,13 @@ public class HotTemplateEngine extends TemplateEngine {
 
 	public HotTemplateEngine(File webRoot, File config) {
 		super(webRoot);
-		if (config != null && config.exists()) {
-			this.decoratorContext = new DecoratorContextImpl(config);
-		} else {
-			log.warn("找不到装饰器配置信息:" + config.getAbsolutePath());
+		if (config != null) {
+			if (config.exists()) {
+				this.decoratorContext = new DecoratorContextImpl(
+						config.toURI(), config);
+			} else {
+				log.info("没有找到装饰器配置信息:" + config.getAbsolutePath());
+			}
 		}
 	}
 
@@ -58,9 +65,9 @@ public class HotTemplateEngine extends TemplateEngine {
 
 	protected File[] getAssociatedFiles(ParseContext context) {
 		ArrayList<File> files = new ArrayList<File>();
-		for (URL url : context.getResources()) {
-			if ("file".equals(url.getProtocol())) {
-				files.add(new File(url.getFile()));
+		for (URI url : context.getResources()) {
+			if ("file".equals(url.getScheme())) {
+				files.add(new File(url.getPath()));
 			}
 		}
 		return files.toArray(new File[files.size()]);
@@ -96,7 +103,7 @@ public class HotTemplateEngine extends TemplateEngine {
 					ParseContext parseContext = createParseContext();
 					template = createTemplate(path, parseContext);
 					File[] files = getAssociatedFiles(parseContext);
-					Info entry =  new Info(files);
+					Info entry = new Info(files);
 					infoMap.put(path, entry);
 				}
 			}

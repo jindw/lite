@@ -1,7 +1,7 @@
 package org.xidea.lite.parser;
 
 import java.io.InputStream;
-import java.net.URL;
+import java.net.URI;
 import java.util.Collection;
 
 import org.xidea.lite.parser.impl.ParseContextImpl;
@@ -12,33 +12,33 @@ import org.xidea.lite.parser.impl.ParseContextImpl;
 public interface ResourceContext{
 
 	/**
-	 * 获取当前正在解析的模版URL
+	 * 获取当前正在解析的模版URI
 	 * @return
 	 */
-	public URL getCurrentURL();
+	public URI getCurrentURI();
 
 	/**
-	 * 获取当前正在解析的模版URL
+	 * 获取当前正在解析的模版URI
 	 * 同事将该url记录在资源列表中
 	 * @return
 	 */
-	public void setCurrentURL(URL currentURL);
+	public void setCurrentURI(URI currentURI);
 	/**
 	 * 如果file相于根目录（/path/...），以base作为根目录处理
-	 * 否则以parentURL，或者base作为parent直接new URL处理。
+	 * 否则以parentURI，或者base作为parent直接new URL处理。
 	 * @param file
-	 * @param parentURL
-	 * @see org.xidea.lite.parser.impl.ParseContextImpl#createURL
+	 * @param parentURI
+	 * @see org.xidea.lite.parser.impl.ParseContextImpl#createURI
 	 * @return
 	 */
-	public URL createURL(String file, URL parentURL);
-	public InputStream getInputStream(URL url);
+	public URI createURI(String file, URI parentURI);
+	public InputStream getInputStream(URI url);
 	/**
 	 * 添加（记录）解析相关的资源
 	 * @param resource
 	 */
-	public void addResource(URL resource);
-	public Collection<URL> getResources();
+	public void addResource(URI resource);
+	public Collection<URI> getResources();
 
 	/**
 	 * 记录一下编译上下文状态

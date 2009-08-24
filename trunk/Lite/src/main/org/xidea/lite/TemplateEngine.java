@@ -5,18 +5,28 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Writer;
+import java.net.URI;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.xidea.el.json.JSONDecoder;
 
 public class TemplateEngine {
-	private File base;
+	private static final Log log = LogFactory.getLog(TemplateEngine.class);
+	protected URI baseURI;
+	protected File baseFile;
 	protected Map<String, Template> templateMap = new java.util.WeakHashMap<String, Template>();
 
 	public TemplateEngine(File base) {
-		this.base = base;
+		this.baseFile = base;
+		this.baseURI = base.toURI();
+	}
+
+	public TemplateEngine(URI base) {
+		this.baseURI = base;
 	}
 
 	public void render(String path, Object context, Writer out)
@@ -37,8 +47,8 @@ public class TemplateEngine {
 	@SuppressWarnings("unchecked")
 	protected Template createTemplate(String path) {
 		try {
-			URL url = getResource(path.replace('/', '.'));
-			InputStream in = url.openStream();
+			URI url = getResource(path.replace('/', '.'));
+			InputStream in = url.toURL().openStream();
 			try {
 				List data = (List) JSONDecoder.decode(loadText(in, "utf-8"));
 				return new Template((List) data.get(1));
@@ -50,16 +60,21 @@ public class TemplateEngine {
 		}
 	}
 
-	protected URL getResource(String path) {
+	protected URI getResource(String path) {
 		try {
-			if (base != null) {
-				File file = new File(base, path);
+			if (baseFile != null) {
+				// path 必须是 /开头。
+				File file = new File(baseFile, path);
 				if (file.exists()) {
-					return file.toURI().toURL();
+					return file.toURI();
 				}
 			}
-		} catch (IOException e) {
-			throw new RuntimeException(e);
+			if (baseURI != null) {
+				return new URL(baseURI.toURL(), path).toURI();
+
+			}
+		} catch (Exception e) {
+			log.warn(e);
 		}
 		return null;
 	}

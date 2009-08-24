@@ -2,7 +2,7 @@ package org.xidea.lite.parser.impl;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URL;
+import java.net.URI;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -99,7 +99,7 @@ public class CoreXMLNodeParser implements NodeParser<Element> {
 		String xslt = ParseUtil.getAttributeOrNull(el, "xslt");
 		String name = ParseUtil.getAttributeOrNull(el, "name");
 		Node doc = el.getOwnerDocument();
-		final URL parentURL = context.getCurrentURL();
+		final URI parentURI = context.getCurrentURI();
 		try {
 			if (name != null) {
 				Node cachedNode = XMLContextImpl.toDocumentFragment(el, el
@@ -115,7 +115,7 @@ public class CoreXMLNodeParser implements NodeParser<Element> {
 				if (path.startsWith("#")) {
 					doc = (Node) context.getAttribute(path);
 					if(doc==null){
-						log.error("没找到相关命名节点："+context.getCurrentURL()+ path);
+						log.error("没找到相关命名节点："+context.getCurrentURI()+ path);
 						return;
 					}
 					
@@ -127,11 +127,11 @@ public class CoreXMLNodeParser implements NodeParser<Element> {
 						uri = doc.getOwnerDocument().getDocumentURI();
 					}
 					if (uri != null) {
-						context.setCurrentURL(context.createURL(uri, null));
+						context.setCurrentURI(context.createURI(uri, null));
 					}
 				} else {
 					doc = context.loadXML(context
-							.createURL(path, parentURL));
+							.createURI(path, parentURI));
 				}
 			}
 
@@ -139,13 +139,13 @@ public class CoreXMLNodeParser implements NodeParser<Element> {
 				doc = context.selectNodes(doc, xpath);
 			}
 			if (xslt != null) {
-				doc = context.transform(parentURL, doc, xslt);
+				doc = context.transform(parentURI, doc, xslt);
 			}
 			context.parse(doc);
 		} catch (Exception e) {
 			log.warn(e);
 		} finally {
-			context.setCurrentURL(parentURL);
+			context.setCurrentURI(parentURI);
 		}
 	}
 
@@ -255,8 +255,8 @@ public class CoreXMLNodeParser implements NodeParser<Element> {
 		String content = ParseUtil.getAttributeOrNull(el, "content");
 		if (file != null) {
 			try {
-				URL url = context.createURL(file, null);
-				InputStream in = url.openStream();
+				URI uri = context.createURI(file, null);
+				InputStream in = context.getInputStream(uri);
 				InputStreamReader reader = new InputStreamReader(in,
 						encoding == null ? "utf-8" : encoding);
 				StringBuilder sbuf = new StringBuilder();
