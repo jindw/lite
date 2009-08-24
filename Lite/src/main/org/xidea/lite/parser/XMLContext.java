@@ -1,7 +1,7 @@
 package org.xidea.lite.parser;
 
 import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
 
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -60,13 +60,13 @@ public interface XMLContext {
 
 	/**
 	 * 装载指定文档。数据源需要从ResourceContext中获取资源数据
-	 * @see ResourceContext#getInputStream(URL)
-	 * @param createURL
+	 * @see ResourceContext#getInputStream(parentURI)
+	 * @param createURI
 	 * @return
 	 * @throws SAXException
 	 * @throws IOException
 	 */
-	public Document loadXML(URL createURL) throws SAXException, IOException;
+	public Document loadXML(URI parentURI) throws SAXException, IOException;
 
 	/**
 	 * @param doc
@@ -78,7 +78,7 @@ public interface XMLContext {
 			throws XPathExpressionException;
 
 	/**
-	 * @param parentURL
+	 * @param parentURI
 	 * @param doc
 	 * @param xslt
 	 * @return
@@ -87,7 +87,7 @@ public interface XMLContext {
 	 * @throws TransformerException
 	 * @throws IOException
 	 */
-	public Node transform(URL parentURL, Node doc, String xslt)
+	public Node transform(URI parentURI, Node doc, String xslt)
 			throws TransformerConfigurationException,
 			TransformerFactoryConfigurationError, TransformerException,
 			IOException;

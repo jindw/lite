@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.net.URI;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.regex.Pattern;
@@ -42,7 +43,7 @@ public class XMLParserTest {
 		System.out.println(JSONEncoder.encode("<"
 				+ (trim.matcher("\r\n\r\n\r\n sdsdsd\r\n")
 						.replaceAll("$1$2$3$4")) + ">"));
-		ParseContextImpl context = new ParseContextImpl(new URL("http://localhost/"),null,null,null);
+		ParseContextImpl context = new ParseContextImpl(new URI("http://localhost/"),null,null,null);
 		context.setCompress(true);
 		Object s = new XMLParser().parse(
 				"<xml>\r\n\r\n\r\n\t\t\t\t\r\n\r\n</xml>",context).get(0);

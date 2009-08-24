@@ -1,6 +1,7 @@
 package org.xidea.lite.parser.impl;
 
 import java.lang.reflect.Method;
+import java.net.URI;
 import java.net.URL;
 
 import org.w3c.dom.NamedNodeMap;
@@ -52,7 +53,13 @@ public class ParseChainImpl implements ParseChain {
 			} else {
 				if (node instanceof URL) {
 					try {
-						context.parse(context.loadXML((URL) node));
+						context.parse(context.loadXML(((URL)node).toURI()));
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				}else if (node instanceof URI) {
+					try {
+						context.parse(context.loadXML((URI) node));
 					} catch (Exception e) {
 						throw new RuntimeException(e);
 					}

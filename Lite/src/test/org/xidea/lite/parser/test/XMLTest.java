@@ -97,8 +97,8 @@ public class XMLTest {
 
 		String info = "第"+index+"个测试错误：";
 		ParseContextImpl parseContext = new ParseContextImpl(this.getClass()
-				.getResource("/"),null,null,null);
-		parseContext.getFeatrueMap().put(HTMLNodeParser.AUTO_FORM_FEATRUE_URL, HTMLNodeParser.AUTO_IN_FORM);
+				.getResource("/").toURI(),null,null,null);
+		parseContext.getFeatrueMap().put(HTMLNodeParser.AUTO_FORM_FEATRUE_URI, HTMLNodeParser.AUTO_IN_FORM);
 		
 		parseContext.setCompress(true);
 		List<Object> insts = parser.parse(

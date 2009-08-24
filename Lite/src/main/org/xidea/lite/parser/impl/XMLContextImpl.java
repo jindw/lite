@@ -3,7 +3,7 @@ package org.xidea.lite.parser.impl;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -72,8 +72,8 @@ public class XMLContextImpl implements XMLContext {
 		}
 	}
 
-	public Document loadXML(URL url) throws SAXException, IOException {
-		context.setCurrentURL(url);
+	public Document loadXML(URI url) throws SAXException, IOException {
+		context.setCurrentURI(url);
 		InputStream in = context.getInputStream(url);
 
 		in = new BufferedInputStream(in, 1);
@@ -93,7 +93,7 @@ public class XMLContextImpl implements XMLContext {
 			throw new SAXException("XML Parser Error:" + url + "("
 					+ e.getLineNumber() + "," + e.getColumnNumber() + ")\r\n"
 					+ e.getMessage());
-		}finally{
+		} finally {
 			in.close();
 		}
 	}
@@ -158,7 +158,7 @@ public class XMLContextImpl implements XMLContext {
 		return frm;
 	}
 
-	public Node transform(URL parentURL, Node doc, String xslt)
+	public Node transform(URI parentURI, Node doc, String xslt)
 			throws TransformerConfigurationException,
 			TransformerFactoryConfigurationError, TransformerException,
 			IOException {
@@ -177,7 +177,7 @@ public class XMLContextImpl implements XMLContext {
 			xsltSource = new javax.xml.transform.dom.DOMSource(result.getNode());
 		} else {
 			xsltSource = new javax.xml.transform.stream.StreamSource(context
-					.createURL(xslt, parentURL).openStream());
+					.getInputStream(context.createURI(xslt, parentURI)));
 		}
 
 		// create an instance of TransformerFactory

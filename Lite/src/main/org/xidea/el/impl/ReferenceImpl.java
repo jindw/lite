@@ -15,6 +15,9 @@ class ReferenceImpl implements Reference {
 		this.base = base;
 		this.name = name;
 	}
+	public String toString(){
+		return String.valueOf(this.getValue());
+	}
 
 	public Reference next(Object key) {
 		if (base != null) {

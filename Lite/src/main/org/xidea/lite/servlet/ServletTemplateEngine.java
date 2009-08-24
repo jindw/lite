@@ -4,8 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
 import java.net.URLEncoder;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -30,6 +29,7 @@ public class ServletTemplateEngine extends HotTemplateEngine {
 	private boolean autocompile = true;
 
 	public ServletTemplateEngine(ServletConfig config) {
+		super((URI)null,null);
 		//this.parser = new XMLParser(transformerFactory,xpathFactory);
 		this.config = config;
 		this.context = config.getServletContext();
@@ -37,7 +37,8 @@ public class ServletTemplateEngine extends HotTemplateEngine {
 		this.autocompile = getParam("autocompile", "true").equals("true");
 		try {
 			String decoratorPath = getParam("decoratorMapping",DEFAULT_DECORATOR_MAPPING);
-			this.decoratorContext = new DecoratorContextImpl(new File(context.getRealPath(decoratorPath)));
+			File file = new File(context.getRealPath(decoratorPath));
+			this.decoratorContext = new DecoratorContextImpl(file.toURI(),file);
 		} catch (Exception e) {
 			log.error("装载页面装饰配置信息失败", e);
 		}
@@ -52,7 +53,7 @@ public class ServletTemplateEngine extends HotTemplateEngine {
 			try {
 				File file = new File(context.getRealPath("/WEB-INF/litecached/"+URLEncoder.encode(path,"UTF-8")));
 				List<Object> list = JSONDecoder.decode(loadText(file));
-				parseContext.addResource(file.toURI().toURL());
+				parseContext.addResource(file.toURI());
 				return new Template((List<Object>)list.get(1));
 			} catch (IOException e) {
 				log.error(e);
@@ -92,12 +93,7 @@ public class ServletTemplateEngine extends HotTemplateEngine {
 	}
 
 	@Override
-	protected URL getResource(String path){
-		try {
-			return new File(context.getRealPath(path)).toURI().toURL();
-		} catch (MalformedURLException e) {
-			log.error("路径格式有问题", e);
-			throw new RuntimeException(e);
-		}
+	protected URI getResource(String path){
+		return new File(context.getRealPath(path)).toURI();
 	}
 }

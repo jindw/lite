@@ -2,7 +2,7 @@ package org.xidea.lite.parser.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,14 +11,14 @@ import java.util.Set;
 import org.xidea.lite.parser.ResourceContext;
 
 public class ResourceContextImpl implements ResourceContext {
-	private URL currentURL;
-	protected final URL base;
+	private URI currentURI;
+	protected final URI base;
 	private int textType = 0;
-	
-	private HashMap<Object, Object> attributeMap = new HashMap<Object, Object>();
-	private HashSet<URL> resources = new HashSet<URL>();
 
-	public ResourceContextImpl(URL base) {
+	private HashMap<Object, Object> attributeMap = new HashMap<Object, Object>();
+	private HashSet<URI> resources = new HashSet<URI>();
+
+	public ResourceContextImpl(URI base) {
 		this.base = base;
 	}
 
@@ -38,41 +38,41 @@ public class ResourceContextImpl implements ResourceContext {
 		this.textType = textType;
 	}
 
-	public URL getCurrentURL() {
-		return currentURL;
+	public URI getCurrentURI() {
+		return currentURI;
 	}
 
-	public Set<URL> getResources() {
+	public Set<URI> getResources() {
 		return resources;
 	}
 
-	public void addResource(URL resource) {
+	public void addResource(URI resource) {
 		resources.add(resource);
 	}
 
-	public void setCurrentURL(URL currentURL) {
-		if (currentURL != null) {
-			resources.add(currentURL);
+	public void setCurrentURI(URI currentURI) {
+		if (currentURI != null) {
+			resources.add(currentURI);
 		}
-		this.currentURL = currentURL;
+		this.currentURI = currentURI;
 	}
 
-	public URL createURL(String path, URL parentURL) {
+	public URI createURI(String path, URI parentURI) {
 		try {
 			if (path.startsWith("/")) {
-				return new URL(this.base, path.substring(1));
+				return new URL(this.base.toURL(), path.substring(1)).toURI();
 			} else {
-				return new URL(parentURL != null ? parentURL : this.base, path);
+				return new URL(parentURI != null ? parentURI.toURL() : this.base.toURL(), path).toURI();
 			}
 
-		} catch (MalformedURLException e) {
+		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	public InputStream getInputStream(URL url) {
+	public InputStream getInputStream(URI url) {
 		try {
-			return url.openStream();
+			return url.toURL().openStream();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

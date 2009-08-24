@@ -2,7 +2,7 @@ package org.xidea.lite.parser.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
+import java.net.URI;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -41,7 +41,7 @@ public class ParseContextImpl implements ParseContext {
 		featrueMap = new HashMap<String, String>();
 	}
 
-	public ParseContextImpl(URL base, Map<String, String> featrues,
+	public ParseContextImpl(URI base, Map<String, String> featrues,
 			NodeParser<? extends Object>[] parsers, TextParser[] ips) {
 		this();
 		initialize(base, featrues, parsers, ips);
@@ -70,7 +70,7 @@ public class ParseContextImpl implements ParseContext {
 
 
 	@SuppressWarnings("unchecked")
-	protected void initialize(URL base, Map<String, String> featrues,
+	protected void initialize(URI base, Map<String, String> featrues,
 			NodeParser<? extends Object>[] parsers, TextParser[] ips) {
 		resourceContext = new ResourceContextImpl(base);
 		resultContext = new ResultContextImpl();
@@ -131,27 +131,27 @@ public class ParseContextImpl implements ParseContext {
 
 	// delegate methods...
 
-	public final void addResource(URL resource) {
+	public final void addResource(URI resource) {
 		resourceContext.addResource(resource);
 	}
 
-	public final URL createURL(String file, URL parentURL) {
-		return resourceContext.createURL(file, parentURL);
+	public final URI createURI(String file, URI parentURI) {
+		return resourceContext.createURI(file, parentURI);
 	}
 
 	public final Object getAttribute(Object key) {
 		return resourceContext.getAttribute(key);
 	}
 
-	public final URL getCurrentURL() {
-		return resourceContext.getCurrentURL();
+	public final URI getCurrentURI() {
+		return resourceContext.getCurrentURI();
 	}
 
-	public final InputStream getInputStream(URL url) {
+	public final InputStream getInputStream(URI url) {
 		return resourceContext.getInputStream(url);
 	}
 
-	public final Collection<URL> getResources() {
+	public final Collection<URI> getResources() {
 		return resourceContext.getResources();
 	}
 
@@ -159,8 +159,8 @@ public class ParseContextImpl implements ParseContext {
 		resourceContext.setAttribute(key, value);
 	}
 
-	public final void setCurrentURL(URL currentURL) {
-		resourceContext.setCurrentURL(currentURL);
+	public final void setCurrentURI(URI currentURI) {
+		resourceContext.setCurrentURI(currentURI);
 	}
 
 	public final String addGlobalObject(Class<? extends Object> impl, String key) {
@@ -302,7 +302,7 @@ public class ParseContextImpl implements ParseContext {
 		return resourceContext.getTextType();
 	}
 
-	public final Document loadXML(URL url) throws SAXException, IOException {
+	public final Document loadXML(URI url) throws SAXException, IOException {
 		return xmlContext.loadXML(url);
 	}
 
@@ -311,11 +311,11 @@ public class ParseContextImpl implements ParseContext {
 		return xmlContext.selectNodes(doc, xpath);
 	}
 
-	public final Node transform(URL parentURL, Node doc, String xslt)
+	public final Node transform(URI parentURI, Node doc, String xslt)
 			throws TransformerConfigurationException,
 			TransformerFactoryConfigurationError, TransformerException,
 			IOException {
-		return xmlContext.transform(parentURL, doc, xslt);
+		return xmlContext.transform(parentURI, doc, xslt);
 	}
 
 	public final void addTextParser(TextParser iparser) {

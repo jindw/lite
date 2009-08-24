@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.net.URI;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -34,7 +35,7 @@ public class XMLParserTest {
 
 	@Test
 	public void testSelect() throws Exception {
-		URL url = this.getClass().getResource("include-test.xml");
+		URI url = this.getClass().getResource("include-test.xml").toURI();
 		ParseContextImpl context = new ParseContextImpl(url,null,null,null); 
 		org.w3c.dom.Document doc = new XMLParser().loadXML(url, context);
 		
@@ -51,7 +52,7 @@ public class XMLParserTest {
 
 	@Test
 	public void testFormat() throws Exception {
-		URL url = this.getClass().getResource("format-test.xhtml");
+		URI url = this.getClass().getResource("format-test.xhtml").toURI();
 		ParseContextImpl parseContext = new ParseContextImpl(url,null,null,null); 
 		parseContext.setFormat(true);
 		HashMap context = new HashMap();

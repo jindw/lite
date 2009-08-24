@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -45,8 +47,8 @@ class XMLParser extends TextNodeParser{
 			throw new RuntimeException(e);
 		}
 	}
-	public List<Object> parse(Object data) throws MalformedURLException {
-		return parse(data,new ParseContextImpl(new URL("http://xx/"),null,null,null));
+	public List<Object> parse(Object data) throws MalformedURLException, URISyntaxException {
+		return parse(data,new ParseContextImpl(new URI("http://xx/"),null,null,null));
 	}
 	public List<Object> parse(Object data, ParseContext context) {
 		try {
@@ -63,16 +65,16 @@ class XMLParser extends TextNodeParser{
 						xpath = path.substring(pos + 1);
 						path = path.substring(0, pos);
 					}
-					node = context.loadXML(context.createURL(path, null));
+					node = context.loadXML(context.createURI(path, null));
 					if (xpath != null) {
 						node = context.selectNodes(node, xpath);
 					}
 				}
 
-			} else if (data instanceof URL) {
-				node = context.loadXML((URL) data);
+			} else if (data instanceof URI) {
+				node = context.loadXML((URI) data);
 			} else if (data instanceof File) {
-				node = context.loadXML(((File) data).toURI().toURL());
+				node = context.loadXML(((File) data).toURI());
 			}
 			if (node != null) {
 				parseNode(node, context);
@@ -87,7 +89,7 @@ class XMLParser extends TextNodeParser{
 		context.parse(node);
 	}
 
-	public Document loadXML(URL url, ParseContextImpl context) throws SAXException, IOException {
+	public Document loadXML(URI url, ParseContextImpl context) throws SAXException, IOException {
 		return (Document) context.loadXML(url);
 	}
 
