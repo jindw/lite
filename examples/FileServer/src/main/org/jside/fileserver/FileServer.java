@@ -17,10 +17,19 @@ import org.jside.webserver.action.TemplateAction;
 
 public class FileServer extends ActionWebServer {
 
-	private TemplateAction engine = TemplateAction.getInstance();
+	private TemplateAction engine;
 
 	public FileServer() throws MalformedURLException {
 		super(new URL("file:///"));
+		engine= TemplateAction.create(null,false);
+		if(engine.getClass() == TemplateAction.class){
+			engine.reset(this.getClass().getResource("./"));
+		}else{
+			File base = new File("web");
+			if (base.exists()) {
+				engine.reset(base.toURI().toURL());
+			}
+		}
 		// this.addAction("/filemanager/delete.action", this);
 
 	}

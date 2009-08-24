@@ -238,7 +238,7 @@ public class RequestContextImpl extends RequestContext {
 		}
 		try {
 			URL url = new URL(base , path);
-			if(url.getProtocol().equals("file") && new File(URLDecoder.decode(url.getFile(),"UTF-8")).exists()){
+			if(!url.getProtocol().equals("file") || new File(URLDecoder.decode(url.getFile(),"UTF-8")).exists()){
 				return url;
 			}
 			String host = findHeader("Host");
@@ -253,12 +253,24 @@ public class RequestContextImpl extends RequestContext {
 					return hostFile.toURI().toURL();
 				}
 			}
-			String name = host.replace('.', '/')+"/web/"+path;
+			String name = toResourceRoot(host);
 			return server.getClass().getClassLoader().getResource(name);
 		} catch (IOException e) {
 			log.warn(e);
 			return null;
 		}
+	}
+	private String toResourceRoot(String host) {
+		String[] data = host.split("[\\.]");
+		StringBuilder buf = new StringBuilder();
+		int p = data.length;
+		while (p-- > 0) {
+			buf.append(data[p]);
+			buf.append('/');
+		}
+		buf.append("web/");
+		String name = buf.toString();
+		return name;
 	}
 
 	@Override

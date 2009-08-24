@@ -1,21 +1,23 @@
 package org.jside.webserver.action;
 
-import java.io.File;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
-import java.net.URLDecoder;
 
 import org.xidea.lite.Template;
 import org.xidea.lite.parser.impl.HotTemplateEngine;
 
 public class HotTemplateAction extends TemplateAction {
-	private HotTemplateEngine engine;
-
-	protected HotTemplateAction(File file) throws MalformedURLException {
-		if(file!=null){
-			reset(file.toURI().toURL());
+	private HotTemplateEngine engine = new HotTemplateEngine((URI)null,null){
+		@Override
+		protected URI getResource(String path) {
+			return HotTemplateAction.this.getResource(path);
 		}
+		
+	};
+
+	public HotTemplateAction(URL file) throws MalformedURLException {
+		super(file);
 	}
 
 
@@ -25,16 +27,5 @@ public class HotTemplateAction extends TemplateAction {
 	}
 
 
-	@Override
-	public void reset(URL newRoot) {
-		super.root = newRoot;
-		if(newRoot.getProtocol().equals("file")){
-			try {
-				this.engine = new HotTemplateEngine(new File(URLDecoder.decode(newRoot.getFile(),"UTF-8")));
-			} catch (UnsupportedEncodingException e) {
-				throw new RuntimeException(e);
-			}
-		}
-	}
 
 }

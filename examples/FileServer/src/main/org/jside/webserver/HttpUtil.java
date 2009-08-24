@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.Date;
@@ -171,5 +172,17 @@ public class HttpUtil {
 			}
 			
 		}
+	}
+	public static File getFile(URL root) {
+		if (root != null && root.getProtocol().equals("file")) {
+			try {
+				return new File(URLDecoder.decode(root.getFile(), "UTF-8"));
+			} catch (UnsupportedEncodingException e) {
+				throw new RuntimeException(e);
+			}
+		} else {
+			return null;
+		}
+
 	}
 }
