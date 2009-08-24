@@ -165,6 +165,10 @@ public class RequestContextImpl extends RequestContext {
 			log.warn("重定向处理失败...", e);
 		} finally {
 			this.requestURI = preuri;
+			try {
+				this.getOutputStream().flush();
+			} catch (IOException e) {
+			}
 		}
 
 	}
