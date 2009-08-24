@@ -70,7 +70,7 @@ public class ResourceContextImpl implements ResourceContext {
 		}
 	}
 
-	public InputStream getInputStream(URI url) {
+	public InputStream openInputStream(URI url) {
 		try {
 			return url.toURL().openStream();
 		} catch (IOException e) {

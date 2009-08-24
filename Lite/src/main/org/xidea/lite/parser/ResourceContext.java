@@ -32,7 +32,7 @@ public interface ResourceContext{
 	 * @return
 	 */
 	public URI createURI(String file, URI parentURI);
-	public InputStream getInputStream(URI url);
+	public InputStream openInputStream(URI url);
 	/**
 	 * 添加（记录）解析相关的资源
 	 * @param resource
