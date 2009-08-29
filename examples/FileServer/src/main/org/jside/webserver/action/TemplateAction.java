@@ -32,13 +32,18 @@ public class TemplateAction extends TemplateEngine {
 		this.reset(root);
 	}
 
+	public void setContentType(String contentType) {
+		this.contentType = contentType;
+	}
+
 	public void execute() throws IOException {
 		RequestContext context = RequestContext.get();
 		reset(context);
 		OutputStreamWriter out = new OutputStreamWriter(context
 				.getOutputStream(), "UTF-8");
+		context.setContentType(contentType);
 		render(context.getRequestURI(), context.getValueStack(), out);
-		HttpUtil.printResource(out, contentType);
+//		HttpUtil.printResource(out, contentType);
 	}
 
 	public void reset(RequestContext requestContext) {
