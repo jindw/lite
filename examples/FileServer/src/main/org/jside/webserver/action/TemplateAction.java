@@ -41,7 +41,9 @@ public class TemplateAction extends TemplateEngine {
 		reset(context);
 		OutputStreamWriter out = new OutputStreamWriter(context
 				.getOutputStream(), "UTF-8");
-		context.setContentType(contentType);
+		if(contentType!=null){
+			context.setContentType(contentType);
+		}
 		render(context.getRequestURI(), context.getValueStack(), out);
 //		HttpUtil.printResource(out, contentType);
 	}
