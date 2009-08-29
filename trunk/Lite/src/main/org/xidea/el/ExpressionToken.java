@@ -5,10 +5,6 @@ package org.xidea.el;
  */
 public abstract interface ExpressionToken {
 
-	//编译期间标记，compile time object
-	public static final int BRACKET_BEGIN = 0xFFFE;//([{;
-	public static final int BRACKET_END = 0xFFFF;//)]};
-	
 	//值类型（<=0）
 	//常量标记（String,Number,Boolean,Null）
 	public static final int VALUE_CONSTANTS = -0x0;//c;

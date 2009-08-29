@@ -33,8 +33,8 @@ public class TokenImpl implements ExpressionToken {
 			":",// 3op
 			OP_POS, "+", OP_NEG,
 			"-",// +-
-			BRACKET_BEGIN, "(", BRACKET_END,
-			")", // group
+			//BRACKET_BEGIN, "(", BRACKET_END,
+			//")", // group
 			VALUE_NEW_LIST, "[", VALUE_NEW_MAP, "{", OP_MAP_PUSH, ":",
 			OP_PARAM_JOIN, ",",// map list,
 			OP_GET_PROP, ".",// prop
