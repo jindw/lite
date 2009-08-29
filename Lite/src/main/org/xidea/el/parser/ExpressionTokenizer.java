@@ -1,7 +1,5 @@
 package org.xidea.el.parser;
 
-import static org.xidea.el.ExpressionToken.BRACKET_BEGIN;
-import static org.xidea.el.ExpressionToken.BRACKET_END;
 import static org.xidea.el.ExpressionToken.OP_ADD;
 import static org.xidea.el.ExpressionToken.OP_AND;
 import static org.xidea.el.ExpressionToken.OP_GET_PROP;
@@ -33,6 +31,11 @@ import org.xidea.el.impl.NumberArithmetic;
 import org.xidea.el.json.JSONTokenizer;
 
 public class ExpressionTokenizer extends JSONTokenizer {
+
+	//编译期间标记，compile time object
+	static final int BRACKET_BEGIN = 0xFFFE;//([{;
+	static final int BRACKET_END = 0xFFFF;//)]};
+	
 	private static enum Status {
 		STATUS_BEGIN, STATUS_EXPRESSION, STATUS_OPERATOR
 	}
