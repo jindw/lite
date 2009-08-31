@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,8 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.xpath.XPathExpressionException;
 
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Node;
@@ -35,6 +38,7 @@ import org.xml.sax.SAXException;
  */
 public class ParseContextImpl implements ParseContext {
 	private static final long serialVersionUID = 1L;
+	private static final Log log = LogFactory.getLog(ParseContextImpl.class);
 	protected ResourceContext resourceContext;
 	protected XMLContext xmlContext;
 	protected ResultContext resultContext;
@@ -341,7 +345,12 @@ public class ParseContextImpl implements ParseContext {
 
 	public final void setResultTranslator(ResultTranslator translator) {
 		Collection<String> featrueKeys = featrueMap.keySet();
-		Collection<String> support = translator.getSupportFeatrues();
+		Collection<String> support = Collections.emptyList();
+		try{
+			support = translator.getSupportFeatrues();
+		}catch (Exception e) {
+			log.warn("未指定支持的特征，设空处理",e);
+		}
 		if (support == null) {
 			featrueMap.clear();
 		}else{

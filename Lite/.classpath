@@ -6,7 +6,7 @@
 	<classpathentry kind="src" path="src/python"/>
 	<classpathentry kind="src" path="src/php"/>
 	<classpathentry kind="src" path="src/c"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jre"/>
 	<classpathentry kind="lib" path="web/WEB-INF/lib/commons-logging-1.0.4.jar"/>
 	<classpathentry kind="lib" path="web/WEB-INF/lib/js.jar" sourcepath="/JSA/lib/js.jar"/>
 	<classpathentry kind="lib" path="web/WEB-INF/lib/JSI.jar"/>
