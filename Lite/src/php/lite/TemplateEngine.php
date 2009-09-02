@@ -89,7 +89,7 @@ class TemplateEngine{
 				return $lite[1];
 			}
 	    }
-	    if(substr_compare('/',$path,0,1)){
+	    if(substr_compare($path,'/',0,1)){
 			echo "模板地址需要 '/' 开头;\n";
 			exit();
 		}else{
