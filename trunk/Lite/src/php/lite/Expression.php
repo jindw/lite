@@ -194,9 +194,9 @@ function lite_compute(&$op, &$arg2, &$arg1) {
 
 		/* and or */
 		case LITE_OP_AND:
-			return $arg2 && $arg1;
+			return $arg1 ? $arg2 : $arg1;
 		case LITE_OP_OR:
-			return $arg1 || $arg2;
+			return $arg1 ? $arg1 : $arg2;
 		case LITE_OP_QUESTION:
 			return $arg1 ? $arg2 : $LITE_QUESTION_NEXT;
 		case LITE_OP_QUESTION_SELECT:
