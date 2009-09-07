@@ -62,7 +62,11 @@ public class RhinoProxy extends JSProxy implements ErrorReporter {
 					name);
 			// return null;
 			Object result = fn.call(cx, globals, rhinoThiz, args);
-			return Context.jsToJava(result, type);
+			if(type == Void.TYPE){
+				return null;
+			}else{
+				return Context.jsToJava(result, type);
+			}
 		} finally {
 			Context.exit();
 		}
