@@ -180,13 +180,13 @@ public class HTMLNodeParser extends AbstractHTMLNodeParser implements NodeParser
 
 	private String buildCSEL(ParseContext context, final String collectionEL,
 			final String valueEL) {
-		String id = context.addGlobalObject(TextContains.class, null);
+		String id = null;//context.addGlobalObject(TextContains.class, null);
 		return id + "(" + collectionEL + "," + valueEL + ")";
 	}
 
 	private String buildNullEmptyEL(ParseContext context, final String valueEL) {
-		String id = context.addGlobalObject(TextNullEmpty.class, null);
-		return "${" + id + "(" + valueEL + ")}";
+		//String id = context.addGlobalObject(TextNullEmpty.class, null);
+		return "${(" + valueEL + ") == null ?'':"+valueEL+"}";
 	}
 
 }

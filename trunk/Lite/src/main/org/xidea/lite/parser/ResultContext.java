@@ -113,9 +113,9 @@ public interface ResultContext {
 
 	public void appendAdvice(Class<? extends Object> class1, Object parseEL);
 
-	public String addGlobalObject(Class<? extends Object> impl, String key);
-
-	public String addGlobalObject(Object object, String key);
+//	public String addGlobalObject(Class<? extends Object> impl, String key);
+//
+//	public String addGlobalObject(Object object, String key);
 
 	/**
 	 * 自定义表达式解析器

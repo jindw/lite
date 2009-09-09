@@ -172,13 +172,13 @@ public class ParseContextImpl implements ParseContext {
 		resourceContext.setCurrentURI(currentURI);
 	}
 
-	public final String addGlobalObject(Class<? extends Object> impl, String key) {
-		return resultContext.addGlobalObject(impl, key);
-	}
-
-	public final String addGlobalObject(Object object, String key) {
-		return resultContext.addGlobalObject(object, key);
-	}
+//	public final String addGlobalObject(Class<? extends Object> impl, String key) {
+//		return resultContext.addGlobalObject(impl, key);
+//	}
+//
+//	public final String addGlobalObject(Object object, String key) {
+//		return resultContext.addGlobalObject(object, key);
+//	}
 
 	public final void append(String text) {
 		resultContext.append(text);
