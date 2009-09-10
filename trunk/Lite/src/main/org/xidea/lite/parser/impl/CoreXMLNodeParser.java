@@ -70,6 +70,18 @@ public class CoreXMLNodeParser implements NodeParser<Element> {
 	 */
 	protected void parseMacroTag(Element el, ParseContext context) {
 		String name = el.getAttribute("name");
+		String exp = createMacro(name);
+		context.appendAdvice(MacroAdvice.class, context.parseEL(exp));
+		
+		if(el.hasChildNodes()){
+			ParseUtil.parseChild(el.getFirstChild(), context);
+		}
+		
+		context.appendEnd();
+		
+	}
+
+	static String createMacro(String name) {
 		String[] args = name.trim().split("[^\\w]+");
 		name = args[0];
 		StringBuilder buf = new StringBuilder("{\"name\":\"");
@@ -84,12 +96,7 @@ public class CoreXMLNodeParser implements NodeParser<Element> {
 			buf.append('"');
 		}
 		buf.append("]}");
-		context.appendAdvice(MacroAdvice.class, context.parseEL(buf.toString()));
-		if(el.hasChildNodes()){
-			ParseUtil.parseChild(el.getFirstChild(), context);
-		}
-		context.appendEnd();
-		
+		return buf.toString();
 	}
 
 	protected void parseIncludeTag(final Element el, ParseContext context) {

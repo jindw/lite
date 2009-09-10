@@ -9,7 +9,7 @@ import org.junit.Test;
 import org.xidea.el.Expression;
 import org.xidea.el.ExpressionFactory;
 import org.xidea.el.Invocable;
-import org.xidea.el.impl.ECMA262Impl;
+import org.xidea.el.fn.ECMA262Impl;
 import org.xidea.el.impl.ExpressionFactoryImpl;
 
 

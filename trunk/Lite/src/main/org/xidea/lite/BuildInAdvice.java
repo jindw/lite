@@ -9,16 +9,16 @@ import org.apache.commons.logging.LogFactory;
 public class BuildInAdvice implements CompileAdvice {
 	private static Log log = LogFactory.getLog(BuildInAdvice.class);
 	private String name;
-	private Object value;
+//	private Object value;
 	private String type;
 
 	public void setName(String name) { 
 		this.name = name;
 	}
-
-	public void setValue(Object value) {
-		this.value = value;
-	}
+//
+//	public void setValue(Object value) {
+//		this.value = value;
+//	}
 
 	public void setType(String type) {
 		this.type = type;
@@ -33,7 +33,7 @@ public class BuildInAdvice implements CompileAdvice {
 				log.error("无法装载扩展：" + type, e);
 			}
 		}else{
-			gloabls.put(name,value);
+//			gloabls.put(name,value);
 		}
 		return null;
 	}
