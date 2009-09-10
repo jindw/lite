@@ -425,7 +425,24 @@ function getPriority(type) {
 	    return type & 30;
 	}
 }
-
-function rightEnd(itemType, priviousType) {
-	return getPriority(itemType) <= getPriority( priviousType);
+/**
+ */
+function rightEnd(currentType, priviousType) {
+	var priviousPriority = getPriority(priviousType);
+	var currentPriority = getPriority(currentType);
+	//1?1:3 + 0?5:7 ==>1
+	//1?0?5:7:3 ==>7
+	//1?0?5:0?11:13:3 ==>13
+	if(currentPriority <= priviousPriority){
+		if(currentPriority == priviousPriority){
+			if(currentType == OP_QUESTION_SELECT){
+				return priviousType == OP_QUESTION;
+			}else if(currentType == OP_QUESTION){
+				return priviousType != OP_QUESTION_SELECT;
+			}
+		}
+		return true;
+	}else{
+		return false;
+	}
 }

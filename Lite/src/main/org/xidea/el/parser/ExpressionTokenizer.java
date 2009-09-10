@@ -64,7 +64,25 @@ public class ExpressionTokenizer extends JSONTokenizer {
 	}
 
 	private boolean rightEnd(ExpressionToken item, ExpressionToken privious) {
-		return getPriority(item.getType()) <= getPriority(privious.getType());
+		int t1 = privious.getType();
+		int t2 = item.getType();
+		int p1 = getPriority(t1);
+		int p2 = getPriority(t2);
+		//1?1:3 + 0?5:7 ==>1
+		//1?0?5:7:3 ==>7
+		//1?0?5:0?11:13:3 ==>13
+		if(p2 <= p1){
+			if(p2 == p1){
+				if(t2 == OP_QUESTION_SELECT){
+					return t1 == OP_QUESTION;
+				}else if(t2 == OP_QUESTION){
+					return t1 != OP_QUESTION_SELECT;
+				}
+			}
+			return true;
+		}else{
+			return false;
+		}
 	}
 
 	// 将中序表达式转换为右序表达式
