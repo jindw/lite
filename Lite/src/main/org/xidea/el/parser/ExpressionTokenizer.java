@@ -27,7 +27,7 @@ import java.util.List;
 
 import org.xidea.el.ExpressionSyntaxException;
 import org.xidea.el.ExpressionToken;
-import org.xidea.el.impl.NumberArithmetic;
+import org.xidea.el.fn.NumberArithmetic;
 import org.xidea.el.json.JSONTokenizer;
 
 public class ExpressionTokenizer extends JSONTokenizer {

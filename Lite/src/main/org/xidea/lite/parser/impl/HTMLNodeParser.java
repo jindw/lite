@@ -10,9 +10,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.Text;
-import org.xidea.el.impl.TextContains;
-import org.xidea.el.impl.TextNullEmpty;
+import org.xidea.el.fn.TextContains;
 import org.xidea.el.json.JSONEncoder;
+import org.xidea.lite.MacroAdvice;
 import org.xidea.lite.Template;
 import org.xidea.lite.parser.ParseChain;
 import org.xidea.lite.parser.ParseContext;
@@ -46,6 +46,7 @@ public class HTMLNodeParser extends AbstractHTMLNodeParser implements NodeParser
 	private static final Pattern TYPE_BUTTON = Pattern
 			.compile("^(?:reset|button|submit)$");
 	private static final Object KEY_SELECT = new Object();
+	private static final Object NULL_EMPTY_FN_KEY = new Object();
 
 	public HTMLNodeParser() {
 		super();
@@ -180,13 +181,26 @@ public class HTMLNodeParser extends AbstractHTMLNodeParser implements NodeParser
 
 	private String buildCSEL(ParseContext context, final String collectionEL,
 			final String valueEL) {
-		String id = null;//context.addGlobalObject(TextContains.class, null);
+		String id = context.addGlobalObject(TextContains.class, null);
+		//__contains_text__
 		return id + "(" + collectionEL + "," + valueEL + ")";
 	}
 
 	private String buildNullEmptyEL(ParseContext context, final String valueEL) {
+		Object id = context.getAttribute(NULL_EMPTY_FN_KEY);
+		if(id == null){
+			id = context.allocateId();
+			context.setAttribute(NULL_EMPTY_FN_KEY, id);
+			String exp = CoreXMLNodeParser.createMacro(id+"(param)");
+			context.appendAdvice(MacroAdvice.class, context.parseEL(exp));
+			context.appendIf("param != null");
+			context.appendXmlText("param");
+			context.appendEnd();
+			context.appendEnd();
+		}
 		//String id = context.addGlobalObject(TextNullEmpty.class, null);
-		return "${(" + valueEL + ") == null ?'':"+valueEL+"}";
+		return "${"+id+"("+valueEL +")}";
+		//"${(" + valueEL + ") == null ?'':"+valueEL+"}";
 	}
 
 }

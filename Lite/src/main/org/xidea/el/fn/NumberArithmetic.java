@@ -1,4 +1,4 @@
-package org.xidea.el.impl;
+package org.xidea.el.fn;
 
 /**
  * 数字加减乘除四则运算，主要处理类型混合运算，如：Integer + Double
@@ -30,7 +30,7 @@ public class NumberArithmetic {
 		return clazz.isInstance(n1) || clazz.isInstance(n2);
 	}
 
-	static Number getValue(Class<? extends Object> type, Number value) {
+	public static Number getValue(Class<? extends Object> type, Number value) {
 		if (type.isAssignableFrom(Long.class)) {
 			return value.longValue();
 		} else if (type.isAssignableFrom(Integer.class)) {

@@ -22,7 +22,7 @@ import org.xidea.lite.parser.ResultTranslator;
  */
 public class ResultContextImpl implements ResultContext {
 	private HashMap<String, String> typeIdMap = new HashMap<String, String>();
-	private HashMap<Object, String> objectIdMap = new HashMap<Object, String>();
+//	private HashMap<Object, String> objectIdMap = new HashMap<Object, String>();
 	private int inc = 0;
 
 	private final ArrayList<Object> result = new ArrayList<Object>();
@@ -255,8 +255,8 @@ public class ResultContextImpl implements ResultContext {
 	private void appendGlobalsAddOn() {
 		appendVarAdvice(typeIdMap, "type");
 		this.typeIdMap = null;
-		appendVarAdvice(objectIdMap, "value");
-		this.objectIdMap = null;
+//		appendVarAdvice(objectIdMap, "value");
+//		this.objectIdMap = null;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -272,27 +272,27 @@ public class ResultContextImpl implements ResultContext {
 			}
 		}
 	}
-
+//
 	public String addGlobalObject(Class<? extends Object> class1, String key) {
 		String name = class1.getName();
 		return addGlobalObject(typeIdMap, name, key);
 	}
-
-	public String addGlobalObject(Object object, String key) {
-		return addGlobalObject(objectIdMap, object, key);
-	}
-
+//
+//	public String addGlobalObject(Object object, String key) {
+//		return addGlobalObject(objectIdMap, object, key);
+//	}
+//
 	@SuppressWarnings("unchecked")
 	private String addGlobalObject(Map objectIdMap, Object object, String key) {
 		String id = (String) (key == null ? objectIdMap.get(object) : key);
 		if (id == null) {
-			id = newId();
+			id = allocateId();
 			objectIdMap.put(object, id);
 		}
 		return id;
 	}
 
-	public String newId() {
+	public String allocateId() {
 		String id;
 		id = "__" + inc++ + "__";
 		return id;

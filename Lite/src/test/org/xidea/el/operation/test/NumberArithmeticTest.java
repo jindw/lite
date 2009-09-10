@@ -3,7 +3,7 @@ package org.xidea.el.operation.test;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
-import org.xidea.el.impl.NumberArithmetic;
+import org.xidea.el.fn.NumberArithmetic;
 
 public class NumberArithmeticTest {
 	NumberArithmetic na = new NumberArithmetic();

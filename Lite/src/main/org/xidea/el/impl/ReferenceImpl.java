@@ -5,6 +5,8 @@ import java.util.Map;
 
 import org.xidea.el.Invocable;
 import org.xidea.el.Reference;
+import org.xidea.el.fn.ECMA262Impl;
+import org.xidea.el.fn.NumberArithmetic;
 
 class ReferenceImpl implements Reference {
 	private Object base;
