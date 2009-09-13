@@ -91,7 +91,7 @@ public class XMLContextImpl implements XMLContext {
 				in2 = new SequenceInputStream(in2,new ByteArrayInputStream(DEFAULT_ENDS));
 				return documentBuilder.parse(in2, uri.toString());
 			}catch(Exception ex){
-				ex.printStackTrace();
+				log.debug(ex);
 			}finally{
 				in2.close();
 			}
