@@ -1,5 +1,7 @@
 package org.xidea.lite.parser.impl;
 
+import java.util.regex.Pattern;
+
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xidea.el.Expression;
@@ -11,6 +13,7 @@ import org.xidea.lite.parser.TextParser;
 
 public class ClientParser extends ELParser implements NodeParser<Element>, TextParser,
 		ExpressionFactory {
+	static Pattern SCRIPT_END_PATTERN = Pattern.compile("</script>",Pattern.CASE_INSENSITIVE);
 	protected ClientParser() {
 		super("client", true);
 	}
@@ -92,6 +95,7 @@ public class ClientParser extends ELParser implements NodeParser<Element>, TextP
 		if (clientContext.isCompress()) {
 			js = proxy.compress(js);
 		}
+		js = SCRIPT_END_PATTERN.matcher(js).replaceAll("<\\/script>");
 		if (needScript) {
 			context.append("<!--//--><script>//<![CDATA[\n" + js
 					+ "//]]></script>\n");
