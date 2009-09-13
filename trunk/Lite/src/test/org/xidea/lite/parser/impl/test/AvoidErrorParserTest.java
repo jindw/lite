@@ -14,6 +14,7 @@ import java.util.Map;
 
 import javax.print.URIException;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xidea.el.impl.ReflectUtil;
@@ -48,11 +49,23 @@ public class AvoidErrorParserTest {
 	public void testAutoDTD() throws SAXException, IOException,
 			URISyntaxException {
 		ParseContextImpl context = createContext();
-		Document doc = toDoc(context, "<!DOCTYPE *[<!ENTITY nbsp   \"&#160;\">]> <xml>&#160;</xml>");
+		Document doc = toDoc(context, "<xml>&nbsp;</xml>");
 		System.out.println(doc);
 		context.parse(doc);
 		String result = toString(context);
 		System.out.println(result);
+	}
+
+	@Test
+	public void testNoDTD() throws SAXException, IOException,
+			URISyntaxException {
+		ParseContextImpl context = createContext();
+		String source = "<xml>1</xml><xml>2</xml>";
+		Document doc = toDoc(context, source);
+		System.out.println(doc);
+		context.parse(doc);
+		String result = toString(context);
+		Assert.assertEquals(source, result);
 	}
 
 	private Document toDoc(ParseContextImpl context, String source)

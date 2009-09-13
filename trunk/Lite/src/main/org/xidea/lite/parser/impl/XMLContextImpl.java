@@ -1,8 +1,10 @@
 package org.xidea.lite.parser.impl;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.SequenceInputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,13 +43,13 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
 public class XMLContextImpl implements XMLContext {
+
 	private static Log log = LogFactory.getLog(XMLContextImpl.class);
 
 	private ArrayList<Boolean> indentStatus = new ArrayList<Boolean>();
 	private int depth = 0;
-	private static final byte[] DEFAULT_STARTS = ("<x xmlns:c='http://www.xidea.org/ns/lite/core'><c:comment>"+
-	"<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'></c:comment>").getBytes();
-	private static final byte[] DEFAULT_ENDS = "</x>".getBytes();
+	private static final byte[] DEFAULT_STARTS = ("<!DOCTYPE html PUBLIC '"+DefaultEntityResolver.DEFAULT__HTML_DTD+"' '.'><c:group xmlns:c='http://www.xidea.org/ns/lite/core'>").getBytes();
+	private static final byte[] DEFAULT_ENDS = "</c:group>".getBytes();
 	private boolean reserveSpace;
 	private boolean format = false;
 	private boolean compress = true;
@@ -85,7 +87,8 @@ public class XMLContextImpl implements XMLContext {
 			InputStream in2 = toXMLStream(uri);
 			try{
 				//做一次容错处理
-				in2 = new JoinedStream(DEFAULT_STARTS,in2,DEFAULT_ENDS);
+				in2 = new SequenceInputStream(new ByteArrayInputStream(DEFAULT_STARTS),in2);
+				in2 = new SequenceInputStream(in2,new ByteArrayInputStream(DEFAULT_ENDS));
 				return documentBuilder.parse(in2, uri.toString());
 			}catch(Exception ex){
 				ex.printStackTrace();

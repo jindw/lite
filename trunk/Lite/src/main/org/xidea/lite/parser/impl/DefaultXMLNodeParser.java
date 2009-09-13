@@ -15,6 +15,7 @@ import org.xidea.lite.Template;
 import org.xidea.lite.parser.ParseChain;
 import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.NodeParser;
+import org.xidea.lite.parser.impl.dtd.DefaultEntityResolver;
 
 public class DefaultXMLNodeParser implements NodeParser<Node> {
 
@@ -95,21 +96,28 @@ public class DefaultXMLNodeParser implements NodeParser<Node> {
 
 	private void parseDocumentType(Node node0, ParseContext context) {
 		DocumentType node = (DocumentType) node0;
-		if (node.getPublicId() != null) {
+		String pubid = node.getPublicId();
+		String sysid = node.getSystemId();
+		
+		if (pubid != null) {
+			if(pubid.equals(DefaultEntityResolver.DEFAULT__HTML_DTD)){
+				//跳过容错补充dtd申明
+				return;
+			}
 			context.append("<!DOCTYPE ");
 			context.append(node.getNodeName());
 			context.append(" PUBLIC \"");
-			context.append(node.getPublicId());
-			if (node.getSystemId() == null) {
+			context.append(pubid);
+			if (sysid == null) {
 				context.append("\" \"");
-				context.append(node.getSystemId());
+				context.append(sysid);
 			}
 			context.append("\">");
-		} else if (node.getSystemId() != null) {
+		} else if (sysid != null) {
 			context.append("<!DOCTYPE ");
 			context.append(node.getNodeName());
 			context.append(" SYSTEM \"");
-			context.append(node.getSystemId());
+			context.append(sysid);
 			context.append("\">");
 		} else {
 			context.append("<!DOCTYPE ");

@@ -8,8 +8,11 @@ import org.xml.sax.SAXException;
 import org.xml.sax.ext.EntityResolver2;
 
 public class DefaultEntityResolver implements EntityResolver2 {
+
+	public static final String DEFAULT__HTML_DTD = "org.xidea.lite.html.DEFAULT";
 	private static HashMap<String, String> DEFAULT_DTD_MAP = new HashMap<String, String>();
 	static {
+		DEFAULT_DTD_MAP.put(DEFAULT__HTML_DTD,"xhtml1.dtd");
 		DEFAULT_DTD_MAP.put("-//W3C//DTD XHTML 1.0 Transitional//EN",
 				"xhtml1.dtd");
 		DEFAULT_DTD_MAP.put("-//W3C//DTD XHTML 1.0 Strict//EN",
