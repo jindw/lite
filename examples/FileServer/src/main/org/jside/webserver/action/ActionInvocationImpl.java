@@ -51,7 +51,7 @@ public class ActionInvocationImpl implements ActionInvocation {
 	static void doExecute(RequestContext context, Object action, Method method)
 			throws IllegalAccessException, InvocationTargetException {
 		try {
-			new CommandParser().setup(action, context.getParams());
+			new CommandParser(null).setup(action, context.getParams());
 		} catch (Exception e) {
 			log.warn("无效参数:" + context.getParam(), e);
 		}

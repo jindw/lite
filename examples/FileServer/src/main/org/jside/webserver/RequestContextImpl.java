@@ -32,7 +32,7 @@ public class RequestContextImpl extends RequestContext {
 			.compile("([^=&]+)(?:=([^&]+))?");
 	private ArrayList<Object> valueStack = new ArrayList<Object>();
 
-	private String encoding = null;
+	private String encoding;
 	private String requestURI = "/";
 	private ArrayList<String> headers = new ArrayList<String>();
 	private Map<String, String[]> paramsMap;
@@ -51,6 +51,7 @@ public class RequestContextImpl extends RequestContext {
 	RequestContextImpl(WebServer server, InputStream sin, OutputStream out) {
 		this.push(server);
 		this.push(this);
+		this.encoding = server.getEncoding();
 		base = server.getWebBase();
 		try {
 			this.cin = new BufferedReader(
@@ -222,9 +223,6 @@ public class RequestContextImpl extends RequestContext {
 				String value = matcher.group(2);
 				try {
 					String encoding = this.getEncoding();
-					if (encoding == null) {
-						encoding = "UTF-8";
-					}
 					addStrings(paramsMap, URLDecoder.decode(name, encoding),
 							value == null?"":URLDecoder.decode(value, encoding));
 				} catch (Exception e) {
@@ -399,15 +397,15 @@ class ResponseOutputStream extends FilterOutputStream {
 			int extIndex = uri.lastIndexOf('.');
 			contentType = extIndex > 0 ? HttpUtil.getContentType(uri
 					.substring(extIndex + 1)) : "text/html";
-			setContentType(contentType);
+			String encoding = context.getEncoding();
+			setContentType(contentType+";charset="+encoding);
 		}
-		String encoding = context.getEncoding();
-		if (contentType.indexOf("text/") >= 0 && encoding != null) {
-			if (contentType.indexOf("charset=") < 0) {
-				contentType += ";charset=" + encoding;
-				setContentType(contentType);
-			}
-		}
+//		if (contentType.indexOf("text/") >= 0 && encoding != null) {
+//			if (contentType.indexOf("charset=") < 0) {
+//				contentType += ";charset=" + encoding;
+//				setContentType(contentType);
+//			}
+//		}
 	}
 
 	public void flush() throws IOException {

@@ -53,27 +53,27 @@ public class HttpUtil {
 		return contentType == null ? "application/octet-stream" : contentType;
 	}
 
-	private final static void print(RequestContext context, Object newParam)
+	private final static void print(RequestContext context, Object data)
 			throws IOException {
 		OutputStream out = context.getOutputStream();
-		if (newParam instanceof InputStream) {
-			InputStream in = (InputStream) newParam;
+		if (data instanceof InputStream) {
+			InputStream in = (InputStream) data;
 			int len;
 			byte[] buf = new byte[1024];
 			while ((len = in.read(buf)) > -1) {
 				out.write(buf, 0, len);
 			}
 
-		} else if (newParam instanceof byte[]) {
-			out.write((byte[]) newParam);
-		} else if (newParam instanceof Throwable) {
+		} else if (data instanceof byte[]) {
+			out.write((byte[]) data);
+		} else if (data instanceof Throwable) {
 			PrintWriter pout = new PrintWriter(out);
-			((Throwable) newParam).printStackTrace(pout);
+			((Throwable) data).printStackTrace(pout);
 			pout.flush();
 		} else {
 			String encoding = context.getEncoding();
-			out.write(String.valueOf(newParam).getBytes(
-					encoding == null ? "UTF-8" : encoding));
+			out.write(String.valueOf(data).getBytes(
+					encoding));
 		}
 		out.write('\r');
 		out.write('\n');

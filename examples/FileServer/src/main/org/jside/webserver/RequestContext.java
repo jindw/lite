@@ -49,7 +49,7 @@ public abstract class RequestContext {
 	public abstract OutputStream getOutputStream();
 	public void println(String line){
 		try {
-			getOutputStream().write(line.getBytes("UTF-8"));
+			getOutputStream().write(line.getBytes(getEncoding()));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

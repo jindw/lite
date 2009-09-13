@@ -41,7 +41,15 @@ public abstract class SimpleWebServer implements WebServer {
 			}
 		}
 	}
+	
+	private String encoding = "utf-8";
 
+	public String getEncoding() {
+		return encoding ;
+	}
+	public void setEncoding(String encoding) {
+		this.encoding = encoding ;
+	}
 	/**
 	 * @see org.jside.webserver.WebServer#getApplication()
 	 */
