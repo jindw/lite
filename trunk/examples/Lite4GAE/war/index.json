@@ -1,9 +1,9 @@
 {
-  "userList":[
+  "userList":[				//用户列表（这里可以补充接口文档）
     {
-       "name":"张三",
-       "company":"百度",
-       "age":28,
+       "name":"张三",		//姓名（中文）
+       "company":"百度",		//公司简称
+       "age":28,			//年龄（数值）
        "city":"北京",
        "icon":"http://otho.douban.com/icon/ul1814230-5.jpg"
     },
