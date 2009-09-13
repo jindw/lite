@@ -25,8 +25,22 @@ public class CommandParser {
 	public static final Map<Class<?>, Convertor<? extends Object>> CONVERTOR_MAP;
 	public Map<Class<?>, Convertor<? extends Object>> convertorMap = CONVERTOR_MAP;
 
-	public CommandParser(){
+	private Map<String, String[]> params;
+
+	public CommandParser(String[] args) {
+		if(args!=null){
+			this.params = parseArgs(args);
+		}
 	}
+
+	public Map<String, String[]> getParams() {
+		return params;
+	}
+
+	public void setParams(Map<String, String[]> params) {
+		this.params = params;
+	}
+
 	public void addConvertor(Convertor<? extends Object> convertor){
 		if(!(convertorMap instanceof HashMap)){
 			convertorMap = new HashMap<Class<?>, Convertor<? extends Object>>(convertorMap);
@@ -35,12 +49,15 @@ public class CommandParser {
 		
 	}
 
-	public void setup(Object result,String[] args) {
-		setup(result, parseArgs(args));
+	public static void setup(Object result,String[] args) {
+		CommandParser parser = new CommandParser(args);
+		parser.setup(result);
+	}
+	public void setup(final Object context) {
+		this.setup(context,params);
 	}
 
-
-	public void setup(final Object context, Map<String,String[]> params) {
+	public void setup(final Object context,Map<String, String[]> params) {
 		for (String name : params.keySet()) {
 			if (name!=null && name.length() > 0) {
 				if (Character.isJavaIdentifierStart(name.charAt(0))) {
@@ -76,7 +93,7 @@ public class CommandParser {
 		}
 		log.info("当前对象可能属性有：" + properties);
 	}
-
+	
 	@SuppressWarnings("unchecked")
 	protected static Map<String, String[]> parseArgs(String[] args) {
 		Map result = new HashMap();
@@ -224,7 +241,11 @@ public class CommandParser {
 					Class<? extends Boolean> expectedType, Object context,
 					String key) {
 				try {
-					return "true".equals(value);
+					if(value==null || value.length()==0){
+						return false;
+					}
+					value = value.toLowerCase();
+					return !("0".equals(value) || "false".equals(value));
 				} catch (Exception ex) {
 					return false;
 				}
@@ -241,6 +262,27 @@ public class CommandParser {
 		};
 		convertorMap.put(Object.class, c);
 		CONVERTOR_MAP = Collections.unmodifiableMap(convertorMap);
+	}
+	public String toString() {
+		if(params == null){
+			return "*EMPTY*";
+		}else{
+			StringBuilder buf = new StringBuilder();
+			for (String key : params.keySet()) {
+				buf.append(key );
+				buf.append("=>\n");
+				String[] list = params.get(key);
+				if (params != null) {
+					for (String value : list) {
+						buf.append("\t");
+						buf.append(value);
+						buf.append("\n");
+					}
+				}
+			}
+			return buf.toString();
+		}
+		
 	}
 
 

@@ -45,6 +45,9 @@ public class XMLContextImpl implements XMLContext {
 
 	private ArrayList<Boolean> indentStatus = new ArrayList<Boolean>();
 	private int depth = 0;
+	private static final byte[] DEFAULT_STARTS = ("<x xmlns:c='http://www.xidea.org/ns/lite/core'><c:comment>"+
+	"<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'></c:comment>").getBytes();
+	private static final byte[] DEFAULT_ENDS = "</x>".getBytes();
 	private boolean reserveSpace;
 	private boolean format = false;
 	private boolean compress = true;
@@ -72,11 +75,33 @@ public class XMLContextImpl implements XMLContext {
 		}
 	}
 
-	public Document loadXML(URI url) throws SAXException, IOException {
-		context.setCurrentURI(url);
-		InputStream in = context.openInputStream(url);
+	public Document loadXML(URI uri) throws SAXException, IOException {
+		context.setCurrentURI(uri);
+		InputStream in1 = toXMLStream(uri);
+		try {
+			Document doc = documentBuilder.parse(in1, uri.toString());
+			return doc;
+		} catch (SAXParseException e) {
+			InputStream in2 = toXMLStream(uri);
+			try{
+				//做一次容错处理
+				in2 = new JoinedStream(DEFAULT_STARTS,in2,DEFAULT_ENDS);
+				return documentBuilder.parse(in2, uri.toString());
+			}catch(Exception ex){
+				ex.printStackTrace();
+			}finally{
+				in2.close();
+			}
+			throw new SAXException("XML Parser Error:" + uri + "("
+					+ e.getLineNumber() + "," + e.getColumnNumber() + ")\r\n"
+					+ e.getMessage());
+		} finally {
+			in1.close();
+		}
+	}
 
-		in = new BufferedInputStream(in, 1);
+	private InputStream toXMLStream(URI uri) throws IOException {
+		BufferedInputStream in = new BufferedInputStream(context.openInputStream(uri), 1);
 		int c;
 		do {// bugfix \ufeff
 			in.mark(1);
@@ -86,16 +111,7 @@ public class XMLContextImpl implements XMLContext {
 				break;
 			}
 		} while (c >= 0);
-		try {
-			Document doc = documentBuilder.parse(in, url.toString());
-			return doc;
-		} catch (SAXParseException e) {
-			throw new SAXException("XML Parser Error:" + url + "("
-					+ e.getLineNumber() + "," + e.getColumnNumber() + ")\r\n"
-					+ e.getMessage());
-		} finally {
-			in.close();
-		}
+		return in;
 	}
 
 	protected NamespaceContext createNamespaceContext(Document doc) {

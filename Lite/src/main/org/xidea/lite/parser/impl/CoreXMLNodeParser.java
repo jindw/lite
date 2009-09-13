@@ -52,6 +52,7 @@ public class CoreXMLNodeParser implements NodeParser<Element> {
 					parseForTag(el, context);
 				} else if ("var".equals(name)) {
 					parseVarTag(el, context);
+				} else if ("comment".equals(name)) {
 				}else{
 					log.error("未知核心标记" +name);
 					chain.process(el);
