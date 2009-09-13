@@ -95,7 +95,7 @@ public class ClientParser extends ELParser implements NodeParser<Element>, TextP
 		if (clientContext.isCompress()) {
 			js = proxy.compress(js);
 		}
-		js = SCRIPT_END_PATTERN.matcher(js).replaceAll("<\\/script>");
+		js = SCRIPT_END_PATTERN.matcher(js).replaceAll("<\\\\/script>");
 		if (needScript) {
 			context.append("<!--//--><script>//<![CDATA[\n" + js
 					+ "//]]></script>\n");

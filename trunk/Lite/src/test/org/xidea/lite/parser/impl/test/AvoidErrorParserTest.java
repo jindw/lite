@@ -68,6 +68,26 @@ public class AvoidErrorParserTest {
 		Assert.assertEquals(source, result);
 	}
 
+	@Test
+	public void testScriptClient() throws SAXException, IOException,
+			URISyntaxException {
+		ParseContextImpl context = createContext();
+		String source = "<c:client id='tt'><script/><script/></c:client>";
+		Document doc = toDoc(context, source);
+		context.parse(doc);
+		String result = toString(context);
+		System.out.println(result);
+		Assert.assertTrue("只能剩下最后一个外部script",findCount(result,"</script>") == 1);
+		Assert.assertTrue("确保所有的</script>都被编码了",findCount(result,"<\\/script>") == 2);
+	}
+	int findCount(String text,String sub){
+		int p = -1,inc=0;
+		while((p = text.indexOf(sub,p+1))>=0){
+			inc++;
+		}
+		return inc;
+	}
+
 	private Document toDoc(ParseContextImpl context, String source)
 			throws SAXException, IOException, URISyntaxException,
 			UnsupportedEncodingException {
