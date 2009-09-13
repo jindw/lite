@@ -78,7 +78,7 @@ public class FileServer extends ActionWebServer {
 				String href = file.toURI().toURL().getFile();
 				href = URLEncoder.encode(href,"UTF-8").replace("%2F", "/");
 				context.setHeader("Refresh:1;URL="+href);
-				context.addHeader("Content-Type:text/html;charset=utf-8");
+				context.addHeader("Content-Type:text/html;charset="+context.getEncoding());
 				OutputStream out = context.getOutputStream();
 				StringBuilder buf = new StringBuilder("<a href='");
 				buf.append(href).append("'>");
@@ -88,7 +88,7 @@ public class FileServer extends ActionWebServer {
 					buf.append("操作失败");
 				}
 				buf.append(",马上回来...</a>");
-				out.write(buf.toString().getBytes("UTF-8"));
+				out.write(buf.toString().getBytes(context.getEncoding()));
 				// TODO.redirect
 			} else {
 				//long t1 = System.currentTimeMillis(),t2=t1,t3=t1;
@@ -98,11 +98,11 @@ public class FileServer extends ActionWebServer {
 					data.put("path", file.getCanonicalFile().getAbsolutePath()
 							.replace('\\', '/'));
 					data.put("fileList", list);
-					context.setContentType("text/html;charset=utf-8");
+					context.setContentType("text/html;charset="+context.getEncoding());
 
 					try {
 						OutputStreamWriter out = new OutputStreamWriter(context
-								.getOutputStream(), "UTF-8");
+								.getOutputStream(), context.getEncoding());
 						engine.render("/dir.xhtml", data, out);
 						//t3 = System.currentTimeMillis();
 						//out.write((t2-t1)+"/"+(t3-t2));

@@ -13,7 +13,7 @@ import org.xidea.lite.TemplateEngine;
 
 public class TemplateAction extends TemplateEngine {
 	protected URL root = this.getClass().getResource("./");
-	private String contentType = "text/html;charset=UTF-8";
+	private String contentType = "text/html;charset=";
 	private boolean fromWeb = true;
 
 	public static TemplateAction create(URL root, boolean fromWeb) {
@@ -40,9 +40,13 @@ public class TemplateAction extends TemplateEngine {
 		RequestContext context = RequestContext.get();
 		reset(context);
 		OutputStreamWriter out = new OutputStreamWriter(context
-				.getOutputStream(), "UTF-8");
+				.getOutputStream(), context.getEncoding());
 		if(contentType!=null){
-			context.setContentType(contentType);
+			if(contentType.endsWith("=")){
+				context.setContentType(contentType+context.getEncoding());
+			}else{
+				context.setContentType(contentType);
+			}
 		}
 		render(context.getRequestURI(), context.getValueStack(), out);
 //		HttpUtil.printResource(out, contentType);

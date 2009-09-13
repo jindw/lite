@@ -14,6 +14,8 @@ public interface WebServer {
 
 	public URL getWebBase();
 
+	public String getEncoding();
+
 	public int getPort();
 
 	public void start();
