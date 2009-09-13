@@ -28,7 +28,7 @@ public class LiteCompiler {
 	private TemplateCompilerEngine engine;
 
 	public LiteCompiler(String[] args) {
-		new CommandParser().setup(this, args);
+		new CommandParser(args).setup(this);
 	}
 
 	public static void main(String[] args) {
