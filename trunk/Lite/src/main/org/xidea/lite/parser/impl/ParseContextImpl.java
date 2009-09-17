@@ -124,7 +124,7 @@ public class ParseContextImpl implements ParseContext {
 		getTopChain().process(source);
 	}
 
-	public final TextParser[] getTextParsers() {
+	public TextParser[] getTextParsers() {
 		return parserHolder.getTextParsers();
 	}
 
@@ -178,10 +178,6 @@ public class ParseContextImpl implements ParseContext {
 	public String allocateId(){
 		return resultContext.allocateId();
 	}
-//
-//	public final String addGlobalObject(Object object, String key) {
-//		return resultContext.addGlobalObject(object, key);
-//	}
 
 	public final void append(String text) {
 		resultContext.append(text);

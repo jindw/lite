@@ -9,15 +9,13 @@ import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.HashMap;
 
-import javax.swing.JOptionPane;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.lite.Template;
 
 public class LiteCompiler {
 	private static final Log log = LogFactory.getLog(LiteCompiler.class);
-	private File webRoot;
+	private File root;
 	private String path;
 	private String[] parsers;
 	private String[] featrues;
@@ -39,12 +37,12 @@ public class LiteCompiler {
 		try {
 			initialize();
 			if (path == null) {
-				this.processDir(webRoot, "/");
+				this.processDir(root, "/");
 			} else {
 				this.processFile(path);
 			}
 		} catch (Exception e) {
-			File file = new File(webRoot, "log.txt");
+			File file = new File(root, "log.txt");
 			try {
 				if (!file.exists()) {
 					file.createNewFile();
@@ -69,7 +67,7 @@ public class LiteCompiler {
 						.trim());
 			}
 		}
-		engine = new TemplateCompilerEngine(webRoot, parsers, featrueMap);
+		engine = new TemplateCompilerEngine(root, parsers, featrueMap);
 
 		litecached = createIfNotExist(litecached, "WEB-INF/litecached/");
 		htmlcached = createIfNotExist(htmlcached, null);
@@ -77,7 +75,7 @@ public class LiteCompiler {
 
 	protected File createIfNotExist(File cached, String defaultPath) {
 		if (cached == null && defaultPath != null) {
-			cached = new File(webRoot, defaultPath);
+			cached = new File(root, defaultPath);
 		}
 		if (cached != null) {
 			if (!cached.exists()) {
@@ -88,7 +86,7 @@ public class LiteCompiler {
 		return cached;
 	}
 
-	public void processFile(final String path) {
+	public boolean processFile(final String path) {
 		log.info("处理文件："+path);
 		try {
 			{
@@ -126,9 +124,11 @@ public class LiteCompiler {
 					out.close();
 				}
 			}
-		} catch (IOException e) {
-			JOptionPane.showConfirmDialog(null, e);
+			return true;
+		} catch (Exception e) {
+			//JOptionPane.showConfirmDialog(null, e);
 			log.error("处理模板异常（可能是模板文件生成异常）：" + path, e);
+			return false;
 		}
 	}
 
@@ -156,8 +156,8 @@ public class LiteCompiler {
 		return file.getName().endsWith(".xhtml");
 	}
 
-	public void setWebRoot(File webRoot) {
-		this.webRoot = webRoot;
+	public void setRoot(File webRoot) {
+		this.root = webRoot;
 	}
 
 	public void setHtmlcached(File htmlcached) {
