@@ -86,7 +86,7 @@ public class Template {
 				switch (type) {
 				case ADD_ON_TYPE:
 					compilePlugin(cmd, result);
-					continue;// continue for
+					break;// continue for
 				case XML_ATTRIBUTE_TYPE:
 					if (cmd[2] != null) {
 						cmd[2] = " " + cmd[2] + "=\"";

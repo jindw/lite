@@ -209,6 +209,7 @@ public class ResultContextImpl implements ResultContext {
 		ArrayList<Object> current = new ArrayList<Object>();
 		stack.add(current);
 		int stackTop = 0;
+		ArrayList<ArrayList<Object>> previous = new ArrayList<ArrayList<Object>>();
 		for (Object item : result2) {
 			if (item instanceof Object[]) {
 				Object[] cmd = (Object[]) item;
@@ -216,8 +217,17 @@ public class ResultContextImpl implements ResultContext {
 				if (cmd.length == 0) {
 					ArrayList<Object> children = stack.remove(stackTop--);
 					current = stack.get(stackTop);
-					((ArrayList) current.get(current.size() - 1)).set(1,
-							children);
+					
+					int currentTop = current.size() - 1;
+					ArrayList instruction = ((ArrayList) current.get(currentTop));
+					instruction.set(1,children);
+					Number type = (Number)instruction.get(0);
+					if(type.intValue() == Template.ADD_ON_TYPE){
+						if(DefinePlugin.class.getName().equals((instruction.get(3)))){
+							previous.add(instruction);
+							current.remove(currentTop);
+						}
+					}
 				} else {
 					int type = (Integer) cmd[0];
 					ArrayList<Object> cmd2 = new ArrayList<Object>(
@@ -244,6 +254,7 @@ public class ResultContextImpl implements ResultContext {
 				current.add(item.toString());
 			} 
 		}
+		current.addAll(0, previous);
 		return current;
 	}
 
@@ -279,6 +290,11 @@ public class ResultContextImpl implements ResultContext {
 		return id;
 	}
 
+	/**
+	 * 合并相邻文本
+	 * @param result
+	 * @return
+	 */
 	protected List<Object> optimizeResult(List<Object> result) {
 		ArrayList<Object> optimizeResult = new ArrayList<Object>(result.size());
 		StringBuilder buf = new StringBuilder();
