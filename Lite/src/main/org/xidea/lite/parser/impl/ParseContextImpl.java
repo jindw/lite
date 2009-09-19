@@ -20,7 +20,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Node;
 import org.xidea.el.ExpressionFactory;
-import org.xidea.lite.parser.ResultItem;
+import org.xidea.lite.Plugin;
+//import org.xidea.lite.parser.ResultItem;
 import org.xidea.lite.parser.TextParser;
 import org.xidea.lite.parser.ParseChain;
 import org.xidea.lite.parser.ParseContext;
@@ -182,9 +183,9 @@ public class ParseContextImpl implements ParseContext {
 	public final void append(String text) {
 		resultContext.append(text);
 	}
-	public final void append(ResultItem text) {
-		resultContext.append(text);
-	}
+//	public final void append(ResultItem text) {
+//		resultContext.append(text);
+//	}
 
 	public final void append(String text, boolean encode, char escapeQute) {
 		resultContext.append(text, encode, escapeQute);
@@ -230,8 +231,8 @@ public class ParseContextImpl implements ParseContext {
 		resultContext.appendXmlText(el);
 	}
 
-	public final void appendAdvice(Class<? extends Object> clazz, Object el) {
-		resultContext.appendAdvice(clazz, el);
+	public final void appendPlugin(Class<? extends Plugin> clazz, Object el) {
+		resultContext.appendPlugin(clazz, el);
 	}
 
 	public final int mark() {

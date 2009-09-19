@@ -16,7 +16,6 @@ import org.xidea.el.Expression;
 import org.xidea.el.ExpressionFactory;
 import org.xidea.el.impl.ExpressionFactoryImpl;
 import org.xidea.el.impl.ReflectUtil;
-import org.xidea.el.impl.ValueStackImpl;
 
 public class Template {
 	private static Log log = LogFactory.getLog(Template.class);
@@ -86,7 +85,7 @@ public class Template {
 
 				switch (type) {
 				case ADD_ON_TYPE:
-					compileAddOns(cmd, result);
+					compilePlugin(cmd, result);
 					continue;// continue for
 				case XML_ATTRIBUTE_TYPE:
 					if (cmd[2] != null) {
@@ -117,36 +116,15 @@ public class Template {
 	}
 
 	@SuppressWarnings("unchecked")
-	protected void compileAddOns(final Object[] cmd, List<Object> result) {
+	protected void compilePlugin(final Object[] cmd, List<Object> result) {
 		try {
 			Object[] children = compile((List<Object>) cmd[1]);
-			cmd[1] = children;
 			Expression el = createExpression(cmd[2]);
-			cmd[2] = el;
-			String cn = String.valueOf(cmd[3]);
-			Class<? extends Object> addOnType;
-			if("#def".equals(cn)){
-				addOnType = MacroAdvice.class;
-			}else if("#var".equals(cn)){
-				addOnType = StaticAdvice.class;
-			}else{
-				addOnType = Class.forName(cn);
-			}
-			cmd[3] = addOnType;
-			if (CompileAdvice.class.isAssignableFrom(addOnType)) {
-				Map attributeMap = (Map) el.evaluate(null);
-				CompileAdvice addOnInstance = (CompileAdvice) addOnType
-						.newInstance();
-				ReflectUtil.setValues(addOnInstance, attributeMap);
-				List<Object> result2 = addOnInstance.compile(this.gloabls,
-						children);
-				if (result2 != null) {
-					result.addAll(result2);
-				}
-			}
-			if (RuntimeAdvice.class.isAssignableFrom(addOnType)) {
-				result.add(cmd);
-			}
+			Class<Plugin> addonType = (Class<Plugin>) Class.forName((String)cmd[3]);
+			Plugin addon = addonType.newInstance();
+			ReflectUtil.setValues(addon, (Map) el.evaluate(null));
+			addon.initialize(children);
+			cmd[3] = addon;
 		} catch (Exception e) {
 			log.error("装载扩展失败", e);
 		}
@@ -185,7 +163,7 @@ public class Template {
 					case BREAK_TYPE://
 						prossesBreak(data);
 					case ADD_ON_TYPE://
-						prossesAddons(context, data, out);
+						prossesPlugin(context, data, out);
 						break;
 					case VAR_TYPE:// ":set"://var
 						processVar(context, data);
@@ -208,13 +186,10 @@ public class Template {
 	}
 
 	@SuppressWarnings("unchecked")
-	private void prossesAddons(Context context, Object[] data, Writer out)
+	private void prossesPlugin(Context context, Object[] data, Writer out)
 			throws Exception {
-		Map<String, Object> attributeMap = (Map) ((Expression) data[1])
-				.evaluate(context);
-		RuntimeAdvice tag = (RuntimeAdvice) ((Class) data[2]).newInstance();
-		ReflectUtil.setValues(tag, attributeMap);
-		tag.execute(context, out);
+		Plugin addon = (Plugin)data[3];
+		addon.execute(context,out);
 	}
 
 	protected void processExpression(Context context, Object[] data,
@@ -408,58 +383,6 @@ public class Template {
 
 		protected boolean isValid() {
 			return --depth > 0;
-		}
-	}
-
-	/**
-	 * @author jindw
-	 */
-	protected static class Context extends ValueStackImpl {
-		boolean ifStatus = false;
-		private int readLength;
-		private Context root;
-		private Template template;
-
-		public Context(Template template, Object... stack) {
-			super(stack);
-			this.readLength = stack.length;
-			this.root = this;
-			this.template = template;
-		}
-
-		Context(Context root) {
-			this(root.template, root.stack);
-			this.root = root;
-			this.requireWrite();
-		}
-
-		public void put(Object key, Object value) {
-			requireWrite();
-			ReflectUtil.setValue(stack[stack.length - 1], key, value);
-		}
-
-		/**
-		 * 创建新域,需要处理局部域短路问题,倒霉,真想用栈:( 貌似有问题..添加测试吧
-		 */
-		public Context newScope() {
-			root.requireWrite();
-			return new Context(root);
-		}
-
-		/**
-		 * 安需创建新HashMap
-		 */
-		private void requireWrite() {
-			if (stack.length == readLength) {
-				Object[] newStack = new Object[stack.length + 1];
-				System.arraycopy(stack, 0, newStack, 0, stack.length);
-				newStack[stack.length] = new HashMap<Object, Object>();
-				stack = newStack;
-			}
-		}
-
-		public void renderList(Object[] children, StringWriter out) {
-			this.template.renderList(this, children, out);
 		}
 	}
 
