@@ -11,7 +11,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xidea.el.json.JSONEncoder;
-import org.xidea.lite.MacroAdvice;
+import org.xidea.lite.DefinePlugin;
 import org.xidea.lite.Template;
 import org.xidea.lite.parser.ParseChain;
 import org.xidea.lite.parser.ParseContext;
@@ -72,7 +72,7 @@ public class CoreXMLNodeParser implements NodeParser<Element> {
 	protected void parseMacroTag(Element el, ParseContext context) {
 		String name = el.getAttribute("name");
 		String exp = createMacro(name);
-		context.appendAdvice(MacroAdvice.class, context.parseEL(exp));
+		context.appendPlugin(DefinePlugin.class, context.parseEL(exp));
 		
 		if(el.hasChildNodes()){
 			ParseUtil.parseChild(el.getFirstChild(), context);

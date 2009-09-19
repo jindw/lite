@@ -4,16 +4,15 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.xidea.el.ExpressionFactory;
 import org.xidea.el.impl.ExpressionFactoryImpl;
 import org.xidea.el.json.JSONEncoder;
-import org.xidea.lite.BuildInAdvice;
+import org.xidea.lite.DefinePlugin;
+import org.xidea.lite.Plugin;
 import org.xidea.lite.Template;
 import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.ResultContext;
-import org.xidea.lite.parser.ResultItem;
 import org.xidea.lite.parser.ResultTranslator;
 
 /**
@@ -58,9 +57,9 @@ public class ResultContextImpl implements ResultContext {
 		}
 	}
 
-	public void append(ResultItem item) {
-		this.result.add(item);
-	}
+//	public void append(ResultItem item) {
+//		this.result.add(item);
+//	}
 
 	public void append(String text, boolean encode, char quteChar) {
 		if (encode) {
@@ -112,8 +111,8 @@ public class ResultContextImpl implements ResultContext {
 		for (Object text : items) {
 			if (text instanceof String) {
 				this.append((String) text);
-			} else if(text instanceof ResultItem){
-				this.append((ResultItem)text);
+//			} else if(text instanceof ResultItem){
+//				this.append((ResultItem)text);
 			} else{
 				this.append((Object[]) text);
 			}
@@ -181,7 +180,7 @@ public class ResultContextImpl implements ResultContext {
 		this.append(new Object[] { Template.XML_TEXT_TYPE, el });
 	}
 
-	public final void appendAdvice(Class<? extends Object> clazz, Object el) {
+	public final void appendPlugin(Class<? extends Plugin> clazz, Object el) {
 		this.append(new Object[] { Template.ADD_ON_TYPE, requrieEL(el), clazz.getName() });
 	}
 
@@ -202,22 +201,15 @@ public class ResultContextImpl implements ResultContext {
 
 	@SuppressWarnings("unchecked")
 	public List<Object> toList() {
-		appendGlobalsAddOn();
-
+		appendVarPlugin();
 		List<Object> result2 = optimizeResult(this.result);
 		ArrayList<ArrayList<Object>> stack = new ArrayList<ArrayList<Object>>();
 		ArrayList<Object> current = new ArrayList<Object>();
 		stack.add(current);
 		int stackTop = 0;
 		for (Object item : result2) {
-			if (item instanceof String) {
-				// System.out.println(item);
-				current.add(item);
-			} else if(item instanceof ResultItem){
-				current.addAll(((ResultItem)item).compile());
-			} else {
+			if (item instanceof Object[]) {
 				Object[] cmd = (Object[]) item;
-
 				// System.out.println(Arrays.asList(cmd));
 				if (cmd.length == 0) {
 					ArrayList<Object> children = stack.remove(stackTop--);
@@ -246,51 +238,38 @@ public class ResultContextImpl implements ResultContext {
 					}
 
 				}
-			}
+			}else{
+				current.add(item.toString());
+			} 
 		}
 		return current;
 	}
 
 	@SuppressWarnings("unchecked")
-	private void appendGlobalsAddOn() {
-		appendVarAdvice(typeIdMap, "type");
-		this.typeIdMap = null;
-//		appendVarAdvice(objectIdMap, "value");
-//		this.objectIdMap = null;
-	}
-
-	@SuppressWarnings("unchecked")
-	private void appendVarAdvice(Map valueIdMap, String valueKey) {
-		if (valueIdMap != null && !valueIdMap.isEmpty()) {
+	private void appendVarPlugin() {
+		if (typeIdMap != null && !typeIdMap.isEmpty()) {
 			HashMap<String, Object> attributeMap = new HashMap<String, Object>();
-			for (Object value : valueIdMap.keySet()) {
-				attributeMap.put("name", valueIdMap.get(value));
-				attributeMap.put(valueKey, value);
+			for (Object value : typeIdMap.keySet()) {
+				attributeMap.put("name", typeIdMap.get(value));
+				attributeMap.put("type", value);
 				Object valueEL = this.parseEL(JSONEncoder.encode(attributeMap));
-				this.appendAdvice(BuildInAdvice.class, valueEL);
+				this.appendPlugin(DefinePlugin.class, valueEL);
 				this.appendEnd();
 			}
 		}
+		this.typeIdMap = null;
 	}
-//
 	public String addGlobalObject(Class<? extends Object> class1, String key) {
 		String name = class1.getName();
-		return addGlobalObject(typeIdMap, name, key);
-	}
-//
-//	public String addGlobalObject(Object object, String key) {
-//		return addGlobalObject(objectIdMap, object, key);
-//	}
-//
-	@SuppressWarnings("unchecked")
-	private String addGlobalObject(Map objectIdMap, Object object, String key) {
-		String id = (String) (key == null ? objectIdMap.get(object) : key);
+		String id = (String) (key == null ? typeIdMap.get(name) : key);
 		if (id == null) {
 			id = allocateId();
-			objectIdMap.put(object, id);
+			typeIdMap.put(name, id);
 		}
 		return id;
 	}
+
+
 
 	public String allocateId() {
 		String id;

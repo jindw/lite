@@ -3,6 +3,7 @@ package org.xidea.lite.parser;
 import java.util.List;
 
 import org.xidea.el.ExpressionFactory;
+import org.xidea.lite.Plugin;
 
 /**
  * 要设计为继承安全，这个接口不能滥用
@@ -78,7 +79,7 @@ public interface ResultContext {
 	 * 添加一段呆编译的中间代码
 	 * @param item
 	 */
-	public void append(ResultItem item);
+//	public void append(ResultItem item);
 
 	/**
 	 * 添加模板指令
@@ -111,7 +112,7 @@ public interface ResultContext {
 
 	public void appendCaptrue(String varName);
 
-	public void appendAdvice(Class<? extends Object> class1, Object parseEL);
+	public void appendPlugin(Class<? extends Plugin> class1, Object propertiesEL);
 
 	public String addGlobalObject(Class<? extends Object> impl, String key);
 //

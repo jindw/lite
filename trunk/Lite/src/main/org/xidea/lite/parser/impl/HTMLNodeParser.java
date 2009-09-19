@@ -12,7 +12,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.Text;
 import org.xidea.el.fn.TextContains;
 import org.xidea.el.json.JSONEncoder;
-import org.xidea.lite.MacroAdvice;
+import org.xidea.lite.DefinePlugin;
 import org.xidea.lite.Template;
 import org.xidea.lite.parser.ParseChain;
 import org.xidea.lite.parser.ParseContext;
@@ -192,7 +192,7 @@ public class HTMLNodeParser extends AbstractHTMLNodeParser implements NodeParser
 			id = context.allocateId();
 			context.setAttribute(NULL_EMPTY_FN_KEY, id);
 			String exp = CoreXMLNodeParser.createMacro(id+"(param)");
-			context.appendAdvice(MacroAdvice.class, context.parseEL(exp));
+			context.appendPlugin(DefinePlugin.class, context.parseEL(exp));
 			context.appendIf("param != null");
 			context.appendXmlText("param");
 			context.appendEnd();
