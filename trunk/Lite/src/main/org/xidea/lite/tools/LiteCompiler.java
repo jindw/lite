@@ -115,9 +115,7 @@ public class LiteCompiler {
 					template.render(new HashMap<String, String>(), out);
 				} catch (Exception e) {
 					if(writeError){
-						if(writeError){
-							out.write(engine.buildLiteCode(path,e));
-						}
+						out.write(engine.buildLiteCode(path,e));
 					}
 					log.error("生成HTML 静态数据出错：" + path, e);
 				} finally {

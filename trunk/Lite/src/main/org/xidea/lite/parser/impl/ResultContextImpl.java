@@ -149,8 +149,10 @@ public class ResultContextImpl implements ResultContext {
 		this.append(new Object[] { Template.ELSE_TYPE, requrieEL(testEL) });
 	}
 
-	public final void appendEnd() {
+	public final int appendEnd() {
+		int type = this.findBeginType();
 		this.result.add(END_INSTRUCTION);
+		return type;
 	}
 
 	public final void appendVar(String name, Object valueEL) {

@@ -35,6 +35,7 @@ import org.xml.sax.SAXException;
 
 /**
  * 不要较差调用，交叉调用，用this代替，确保继承安全
+ * 取消final 之后，容易引发一个短路bug，等到发现之后再修复吧。
  * @author jindw
  */
 public class ParseContextImpl implements ParseContext {
@@ -180,170 +181,170 @@ public class ParseContextImpl implements ParseContext {
 		return resultContext.allocateId();
 	}
 
-	public final void append(String text) {
+	public void append(String text) {
 		resultContext.append(text);
 	}
 //	public final void append(ResultItem text) {
 //		resultContext.append(text);
 //	}
 
-	public final void append(String text, boolean encode, char escapeQute) {
+	public void append(String text, boolean encode, char escapeQute) {
 		resultContext.append(text, encode, escapeQute);
 	}
 
-	public final void appendAll(List<Object> instruction) {
+	public void appendAll(List<Object> instruction) {
 		resultContext.appendAll(instruction);
 	}
 
-	public final void appendAttribute(String name, Object el) {
+	public void appendAttribute(String name, Object el) {
 		resultContext.appendAttribute(name, el);
 	}
 
-	public final void appendCaptrue(String varName) {
+	public void appendCaptrue(String varName) {
 		resultContext.appendCaptrue(varName);
 	}
 
-	public final void appendEL(Object el) {
+	public void appendEL(Object el) {
 		resultContext.appendEL(el);
 	}
 
-	public final void appendElse(Object testEL) {
+	public void appendElse(Object testEL) {
 		resultContext.appendElse(testEL);
 	}
 
-	public final void appendEnd() {
-		resultContext.appendEnd();
+	public int appendEnd() {
+		return resultContext.appendEnd();
 	}
 
-	public final void appendFor(String var, Object itemsEL, String status) {
+	public void appendFor(String var, Object itemsEL, String status) {
 		resultContext.appendFor(var, itemsEL, status);
 	}
 
-	public final void appendIf(Object testEL) {
+	public void appendIf(Object testEL) {
 		resultContext.appendIf(testEL);
 	}
 
-	public final void appendVar(String name, Object valueEL) {
+	public void appendVar(String name, Object valueEL) {
 		resultContext.appendVar(name, valueEL);
 	}
 
-	public final void appendXmlText(Object el) {
+	public void appendXmlText(Object el) {
 		resultContext.appendXmlText(el);
 	}
 
-	public final void appendPlugin(Class<? extends Plugin> clazz, Object el) {
+	public void appendPlugin(Class<? extends Plugin> clazz, Object el) {
 		resultContext.appendPlugin(clazz, el);
 	}
 
-	public final int mark() {
+	public int mark() {
 		return resultContext.mark();
 	}
 
-	public final Object parseEL(String eltext) {
+	public Object parseEL(String eltext) {
 		return resultContext.parseEL(eltext);
 	}
 
 
-	public final List<Object> reset(int mark) {
+	public List<Object> reset(int mark) {
 		return resultContext.reset(mark);
 	}
 
-	public final void setExpressionFactory(ExpressionFactory expressionFactory) {
+	public void setExpressionFactory(ExpressionFactory expressionFactory) {
 		resultContext.setExpressionFactory(expressionFactory);
 	}
 
-	public final int findBeginType() {
+	public int findBeginType() {
 		return resultContext.findBeginType();
 	}
 
-	public final int findBegin() {
+	public int findBegin() {
 		return resultContext.findBegin();
 	}
 
-	public final int getDepth() {
+	public int getDepth() {
 		return resultContext.getDepth();
 	}
 
-	public final int getType(int offset) {
+	public int getType(int offset) {
 		return resultContext.getType(offset);
 	}
 
-	public final List<Object> toList() {
+	public List<Object> toList() {
 		return resultContext.toList();
 	}
-	public final String toCode() {
+	public String toCode() {
 		return resultContext.toCode();
 	}
 
-	public final void beginIndent() {
+	public void beginIndent() {
 		xmlContext.beginIndent();
 	}
 
-	public final void endIndent() {
+	public void endIndent() {
 		xmlContext.endIndent();
 	}
 
-	public final boolean isCompress() {
+	public boolean isCompress() {
 		return xmlContext.isCompress();
 	}
 
-	public final boolean isFormat() {
+	public boolean isFormat() {
 		return xmlContext.isFormat();
 	}
 
-	public final boolean isReserveSpace() {
+	public boolean isReserveSpace() {
 		return xmlContext.isReserveSpace();
 	}
 
-	public final void setCompress(boolean compress) {
+	public void setCompress(boolean compress) {
 		xmlContext.setCompress(compress);
 	}
 
-	public final void setFormat(boolean format) {
+	public void setFormat(boolean format) {
 		xmlContext.setFormat(format);
 	}
 
-	public final void setReserveSpace(boolean keepSpace) {
+	public void setReserveSpace(boolean keepSpace) {
 		xmlContext.setReserveSpace(keepSpace);
 	}
 
-	public final int getTextType() {
+	public int getTextType() {
 		return resourceContext.getTextType();
 	}
 
-	public final Document loadXML(URI url) throws SAXException, IOException {
+	public Document loadXML(URI url) throws SAXException, IOException {
 		return xmlContext.loadXML(url);
 	}
 
-	public final DocumentFragment selectNodes(Node doc, String xpath)
+	public DocumentFragment selectNodes(Node doc, String xpath)
 			throws XPathExpressionException {
 		return xmlContext.selectNodes(doc, xpath);
 	}
 
-	public final Node transform(URI parentURI, Node doc, String xslt)
+	public Node transform(URI parentURI, Node doc, String xslt)
 			throws TransformerConfigurationException,
 			TransformerFactoryConfigurationError, TransformerException,
 			IOException {
 		return xmlContext.transform(parentURI, doc, xslt);
 	}
 
-	public final void addTextParser(TextParser iparser) {
+	public void addTextParser(TextParser iparser) {
 		parserHolder.addTextParser(iparser);
 	}
 
-	public final void addNodeParser(NodeParser<? extends Node> iparser) {
+	public void addNodeParser(NodeParser<? extends Node> iparser) {
 		parserHolder.addNodeParser(iparser);
 	}
 
-	public final ParseChain getTopChain() {
+	public ParseChain getTopChain() {
 		return parserHolder.getTopChain();
 	}
 
-	public final void setTextType(int textType) {
+	public void setTextType(int textType) {
 		resourceContext.setTextType(textType);
 	}
 
-	public final void setResultTranslator(ResultTranslator translator) {
+	public void setResultTranslator(ResultTranslator translator) {
 		Collection<String> featrueKeys = featrueMap.keySet();
 		Collection<String> support = Collections.emptyList();
 		try{
