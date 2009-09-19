@@ -106,7 +106,7 @@ public interface ResultContext {
 
 	public void appendFor(String var, Object itemsEL, String status);
 
-	public void appendEnd();
+	public int appendEnd();
 
 	public void appendVar(String name, Object valueEL);
 
