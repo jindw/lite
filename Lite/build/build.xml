@@ -95,7 +95,7 @@
 			</zipfileset>
 		</jar>
 		<jar destfile="build/dest/TemplateRuntime.jar" compress="true">
-			<zipfileset src="build/dest/template.jar">
+			<zipfileset src="build/dest/Template.jar">
 				<include name="org/xidea/**/*.*" />
 				<exclude name="**/*.java" />
 				<exclude name="**/*.js" />
@@ -106,6 +106,7 @@
 		</jar>
 		<delete file="build/dest/jslite/__package__.js" />
 		<copy tofile="build/dest/Template-${version}.jar" file="build/dest/Template.jar" />
+		<copy tofile="build/dest/TemplateRuntime-${version}.jar" file="build/dest/TemplateRuntime.jar" />
 
 		<zip destfile="build/dest/Example.zip">
 			<zipfileset dir="build/dest/" prefix="WEB-INF/lib/">
