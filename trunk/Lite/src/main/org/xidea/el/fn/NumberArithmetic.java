@@ -8,6 +8,30 @@ package org.xidea.el.fn;
  */
 
 public class NumberArithmetic {
+	public final static Class<? extends Object> toWrapper(
+			Class<? extends Object> type) {
+		if (type.isPrimitive()) {
+			if (Byte.TYPE == type) {
+				return Byte.class;
+			} else if (Short.TYPE == type) {
+				return Short.class;
+			} else if (Integer.TYPE == type) {
+				return Integer.class;
+			} else if (Long.TYPE == type) {
+				return Long.class;
+			} else if (Float.TYPE == type) {
+				return Float.class;
+			} else if (Double.TYPE == type) {
+				return Double.class;
+			} else if (Character.TYPE == type) {
+				return Character.class;
+			} else if (Boolean.TYPE == type) {
+				return Boolean.class;
+			}
+		}
+		return type;
+	}
+
 	public final static boolean isNaN(Number n1) {
 		if (n1 instanceof Double || n1 instanceof Float) {
 			float f = n1.floatValue();
@@ -35,15 +59,15 @@ public class NumberArithmetic {
 			return value.longValue();
 		} else if (type.isAssignableFrom(Integer.class)) {
 			return value.intValue();
-		}else if (type.isAssignableFrom(Short.class)) {
+		} else if (type.isAssignableFrom(Short.class)) {
 			return value.shortValue();
-		}else if (type.isAssignableFrom(Byte.class)) {
+		} else if (type.isAssignableFrom(Byte.class)) {
 			return value.byteValue();
-		}else if (type.isAssignableFrom(Double.class)) {
+		} else if (type.isAssignableFrom(Double.class)) {
 			return value.doubleValue();
-		}else if (type.isAssignableFrom(Float.class)) {
+		} else if (type.isAssignableFrom(Float.class)) {
 			return value.floatValue();
-		}else{
+		} else {
 			return null;
 		}
 	}
@@ -60,10 +84,10 @@ public class NumberArithmetic {
 	public int compare(Number n1, Number n2, int validReturn) {
 		if (isNaN(n1) || isNaN(n2)) {
 			return validReturn;
-		} else if (isPI(n1) ) {
-			return isPI(n2)?0:1;
+		} else if (isPI(n1)) {
+			return isPI(n2) ? 0 : 1;
 		} else if (isNI(n1)) {
-			return isNI(n2)?0:-1;
+			return isNI(n2) ? 0 : -1;
 		} else if (isNI(n2)) {
 			return 1;
 		} else if (isPI(n2)) {
@@ -172,7 +196,7 @@ public class NumberArithmetic {
 			if (isType(Long.class, n1, n2)) {
 				long right = n2.longValue();
 				if (right == 0) {
-					return n1.floatValue()/0;
+					return n1.floatValue() / 0;
 				}
 				if (!exact || n1.longValue() % right == 0) {
 					return n1.longValue() / right;
@@ -182,7 +206,7 @@ public class NumberArithmetic {
 					|| isType(Byte.class, n1, n2)) {
 				int right = n2.intValue();
 				if (right == 0) {
-					return n1.floatValue()/0;
+					return n1.floatValue() / 0;
 				}
 				if (!exact || n1.intValue() % right == 0) {
 					return n1.intValue() / right;

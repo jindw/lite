@@ -158,7 +158,7 @@ ParseContext.prototype = {
 	appendCaptrue:function(varName){
 		this.result.push([CAPTRUE_TYPE,varName]);
 	},
-	appendAdvice:function(clazz, el){
+	appendPlugin:function(clazz, el){
 		this.result.push([ADD_ON_TYPE,el,clazz]);
 	},
 	toList:function(){

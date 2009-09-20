@@ -149,7 +149,7 @@ function doFind(code,vs){
         if(item instanceof Array){
 			switch (item[0]) {
 			case ADD_ON_TYPE:
-				if(item[3] == '#def'){
+				if(item[3] == '#def' || item[3] == PLUGIN_DEFINE){
 					doFindDef(item,vs)
 				}
 				break;

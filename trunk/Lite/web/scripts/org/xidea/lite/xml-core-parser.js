@@ -86,7 +86,7 @@ function parseDefTag(node,context,chain){
     }
     el.push("]}")
     //prompt('',el.join(''))
-    context.appendAdvice("#def",context.parseEL(el.join('')));
+    context.appendPlugin(PLUGIN_DEFINE,context.parseEL(el.join('')));
     if(next){
         do{
             context.parse(next)
