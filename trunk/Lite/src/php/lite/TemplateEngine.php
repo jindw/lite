@@ -117,9 +117,10 @@ class TemplateEngine{
 			}
 			
 			$main = "org.xidea.lite.tools.LiteCompiler";
-			$cmd = "java -cp escapeshellarg($cp) $main";
-			$cmd = "$cmd -path escapeshellarg($path) -root escapeshellarg($litebase)";
+			$cmd = 'java -cp '.escapeshellarg($cp).' '.$main;
+			$cmd = $cmd.' -path '.escapeshellarg($path).' -root '.escapeshellarg($litebase);
 			$time = time();
+			echo($cmd);
 			exec($cmd);
 			sleep(1);
 			if(file_exists($litefile) && $time < filemtime($litefile)){
