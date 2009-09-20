@@ -5,17 +5,21 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map;
 
+import org.junit.Assert;
 import org.junit.Test;
+import org.xidea.el.Reference;
+import org.xidea.el.impl.ExpressionImpl;
 import org.xidea.el.impl.ReflectUtil;
 
 
 public class CollectionTypeTest {
-	public ArrayList<? extends Collection<Double>> stringCollection = new ArrayList<Collection<Double>>();
-	public StringList<? extends Integer> stringCollection2 = new StringList<Integer>();
-	public StringList2<Integer,? extends String> stringCollection3 = new StringList2<Integer,String>();
+	public ArrayList<? extends Collection<Double>> collectionList = new ArrayList<Collection<Double>>();
+	public StringList<? extends Integer> stringList2 = new StringList<Integer>();
+	public StringList2<Integer,? extends String> stringList3 = new StringList2<Integer,String>();
 
-	public Collection<String> stringMap = new ArrayList<String>();
+//	public Collection<String> stringMap = new ArrayList<String>();
 	public StringMap<String, Boolean> stringMap2 = new StringMap<String, Boolean>();
 
 	public static class StringList<T> extends ArrayList<String> implements
@@ -41,26 +45,44 @@ public class CollectionTypeTest {
 
 	@Test
 	public void testGetListType() throws Exception {
-		try {
-			testField("stringCollection");
-			testField("stringCollection2");
-			testField("stringCollection3");
-		} catch (Throwable e) {
-			e.printStackTrace();
-		}
+		testField("collectionList",Collection.class);
+		testField("stringList2",String.class);
+		testField("stringList3",String.class);
+		testField("stringMap2", String.class);
 	}
 
-	private void testField(String key) throws NoSuchFieldException {
+	private void testField(String key,Class<?> expectType) throws NoSuchFieldException {
 		Field field = this.getClass().getField(key);
-		Class<?> type = field.getType();
 		Type gtype = field.getGenericType();
-		System.out.println(":" + ReflectUtil.getValueType(gtype));
+		Assert.assertEquals(expectType, ReflectUtil.getValueType(gtype));
 	}
 
 	@Test
 	public void testGetMapKeyType() throws SecurityException,
 			NoSuchFieldException {
-
+		Field field = this.getClass().getField("stringMap2");
+		Type gtype = field.getGenericType();
+		Assert.assertEquals(Boolean.class, ReflectUtil.getKeyType(gtype));
 	}
+
+
+	@Test
+	public void testMapSetter() throws SecurityException,
+			NoSuchFieldException {
+		final  Map<String, Integer> data = new HashMap<String, Integer>();
+		Object context = new Object(){
+			public Map<String, Integer> getData() {
+				return data;
+			}
+			
+		};
+		ExpressionImpl el = new ExpressionImpl("data.key1");
+		Reference result = el.prepare(context);
+		System.out.println(data);
+		result.setValue(123);
+		System.out.println(data);
+		Assert.assertEquals(123, data.get("key1"));
+	}
+	
 
 }

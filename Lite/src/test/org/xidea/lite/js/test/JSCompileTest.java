@@ -154,6 +154,7 @@ public class JSCompileTest {
 
 			System.out.println("\n======" + key + "======\n");
 			System.out.println(engine.eval("jsTemplate.data+''"));
+//			System.out.println(contextJSON);
 			// System.out.println(engine.eval("liteTemplate.data+''"));
 			Object jsJSON = engine.eval("liteTemplate.render(" + contextJSON
 					+ ")");

@@ -17,6 +17,7 @@ var VAR_TYPE = 8;// [8,'value','name']
 var CAPTRUE_TYPE = 9;// [9,[...],'var']
 var IF_KEY = "if";
 var FOR_KEY = "for";
+var PLUGIN_DEFINE = "org.xidea.lite.DefinePlugin";
 /**
  * 如果传入的是json 数组 或者是函数对象，直接作为编译结果初始化，否则，作为源代码编译。
  * @param data 模板源代码或者编译结果
@@ -89,7 +90,7 @@ Template.prototype.render = function(context){
         while(i--){//本来是编译期处理的,偷懒,性能优化在toNative中处理吧:(
             var item = data[i];
             if(item instanceof Array && item[0] == ADD_ON_TYPE){
-                if(item[3] == '#def'){
+                if(item[3] == PLUGIN_DEFINE){
                     processDef(context2, item);
                 }
             }

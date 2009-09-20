@@ -1,6 +1,6 @@
 this.addScript('parse-context.js','ParseContext'
                 ,['xml-context.js','ParseChain']
-                ,['buildNativeJS','parseEL','stringifyJSON','VAR_TYPE','XML_ATTRIBUTE_TYPE','ELSE_TYPE','ADD_ON_TYPE','CAPTRUE_TYPE','IF_TYPE','EL_TYPE','XML_TEXT_TYPE','FOR_TYPE']);
+                ,["PLUGIN_DEFINE",'buildNativeJS','parseEL','stringifyJSON','VAR_TYPE','XML_ATTRIBUTE_TYPE','ELSE_TYPE','ADD_ON_TYPE','CAPTRUE_TYPE','IF_TYPE','EL_TYPE','XML_TEXT_TYPE','FOR_TYPE']);
 
 this.addScript('native-compiler.js',["ResultTranslator",'buildNativeJS','checkEL']
                 ,0
@@ -8,7 +8,7 @@ this.addScript('native-compiler.js',["ResultTranslator",'buildNativeJS','checkEL
 
 this.addScript('variable-finder.js','findStatus'
                 ,0
-                ,['ExpressionTokenizer','org.xidea.jsidoc.util:$log','VALUE_VAR','OP_STATIC_GET_PROP','VALUE_LAZY','VAR_TYPE','XML_ATTRIBUTE_TYPE','ELSE_TYPE','ADD_ON_TYPE','CAPTRUE_TYPE','IF_TYPE','XML_TEXT_TYPE','EL_TYPE','FOR_TYPE']);
+                ,["PLUGIN_DEFINE",'ExpressionTokenizer','org.xidea.jsidoc.util:$log','VALUE_VAR','OP_STATIC_GET_PROP','VALUE_LAZY','VAR_TYPE','XML_ATTRIBUTE_TYPE','ELSE_TYPE','ADD_ON_TYPE','CAPTRUE_TYPE','IF_TYPE','XML_TEXT_TYPE','EL_TYPE','FOR_TYPE']);
 
 this.addScript('xml-context.js',['loadXML','selectNodes','parseXMLText']
                 ,0
@@ -30,13 +30,13 @@ this.addScript('parse-chain.js','ParseChain');
 
 this.addScript('xml-core-parser.js','parseCoreNode'
                 ,0
-                ,['org.xidea.jsidoc.util:$log','selectNodes','ELSE_TYPE','EL_TYPE']);
+                ,["PLUGIN_DEFINE",'org.xidea.jsidoc.util:$log','selectNodes','ELSE_TYPE','EL_TYPE']);
 
 this.addScript('xml-default-parser.js','parseXMLNode'
                 ,0
                 ,['XML_ATTRIBUTE_TYPE','EL_TYPE','XML_TEXT_TYPE']);
 
-this.addScript('template.js',['VAR_TYPE','XML_ATTRIBUTE_TYPE','Template','ELSE_TYPE','ADD_ON_TYPE','CAPTRUE_TYPE','IF_TYPE','EL_TYPE','BREAK_TYPE','XML_TEXT_TYPE','FOR_TYPE']
+this.addScript('template.js',["Template","PLUGIN_DEFINE",'VAR_TYPE','XML_ATTRIBUTE_TYPE','ELSE_TYPE','ADD_ON_TYPE','CAPTRUE_TYPE','IF_TYPE','EL_TYPE','BREAK_TYPE','XML_TEXT_TYPE','FOR_TYPE']
                 ,0
                 ,['XMLParser','org.xidea.jsidoc.util:$log','evaluate']);
 

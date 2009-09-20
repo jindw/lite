@@ -21,7 +21,7 @@ public class ValueStackImpl implements ValueStack {
 				}
 			}else if(context!=null) {
 				Object result = ReflectUtil.getValue(context, key);
-				if(result != null || ReflectUtil.getType(context.getClass(), key) != null){
+				if(result != null || ReflectUtil.getPropertyType(context.getClass(), key) != null){
 					return result;
 				}
 			}
