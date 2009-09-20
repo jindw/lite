@@ -115,14 +115,10 @@ class TemplateEngine{
 			if(!$cp){
 				$cp = realpath("$litebase/../build/dest/Template.jar");
 			}
-			//.PATH_SEPARATOR;
+			
 			$main = "org.xidea.lite.tools.LiteCompiler";
-			$args = array("-cp",$cp,$main,"-path",$path,"-webRoot",$litebase);
-			//echo json_encode($args);
-			$cmd = "java";
-			foreach($args as $arg){
-				$cmd="$cmd $arg";
-			}
+			$cmd = "java -cp escapeshellarg($cp) $main";
+			$cmd = "$cmd -path escapeshellarg($path) -root escapeshellarg($litebase)";
 			$time = time();
 			exec($cmd);
 			sleep(1);
