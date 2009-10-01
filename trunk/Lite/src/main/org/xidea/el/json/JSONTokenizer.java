@@ -223,7 +223,7 @@ public class JSONTokenizer {
 			}
 			return (value.substring(start, start = p));
 		}
-		throw new ExpressionSyntaxException("无效id");
+		throw new ExpressionSyntaxException("无效id"+value);
 
 	}
 

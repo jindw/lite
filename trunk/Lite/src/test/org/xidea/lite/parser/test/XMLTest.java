@@ -53,6 +53,10 @@ public class XMLTest {
 	}
 	@Test
 	public void runELTest() throws Exception {
+//		runAutoFormTest();
+//		String source = "${'11'.length()}${'a'.length()?'1':'2'}";
+//		String result = "1%3A1";
+//		test(1111,source,result);
 		runTest("ELTest");
 	}
 	@Test

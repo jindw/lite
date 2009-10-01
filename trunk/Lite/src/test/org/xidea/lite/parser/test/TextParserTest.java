@@ -28,7 +28,12 @@ public class TextParserTest {
 
 	@Test
 	public void test1() throws Exception {
+		
+		test("${1+1}", "2");
+		
 		HashMap<String, String> testCase = new LinkedHashMap<String, String>();
+		
+		
 		testCase.put("${1}:${1}", "1:1");
 		testCase.put("${1+1}", "2");
 		testCase.put("${}", "${}");

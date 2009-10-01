@@ -50,7 +50,7 @@ public class ExpressionParseTimelTest {
 					break;
 				case ExpressionToken.VALUE_VAR:
 				case ExpressionToken.OP_MAP_PUSH:
-				case ExpressionToken.OP_STATIC_GET_PROP:
+				case ExpressionToken.OP_GET_STATIC_PROP:
 					print(new Object[] { type, token.getParam() }, out, cached);
 					break;
 				default:
@@ -64,7 +64,7 @@ public class ExpressionParseTimelTest {
 
 	private void test(String el) throws IOException {
 		ExpressionTokenizer tokener = new ExpressionTokenizer(el);
-		ExpressionToken[] els = tokener.getTokens().getData();
+		ExpressionToken els = tokener.getResult();
 		StringWriter out = new StringWriter();
 		encoder.encode(els, out, null);
 		String jsonel = out.toString();

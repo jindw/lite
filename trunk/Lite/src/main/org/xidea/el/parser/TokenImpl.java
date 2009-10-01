@@ -1,25 +1,97 @@
 package org.xidea.el.parser;
 
+import java.util.AbstractList;
+import java.util.List;
+
+import org.xidea.el.ExpressionSyntaxException;
 import org.xidea.el.ExpressionToken;
 
-public class TokenImpl implements ExpressionToken {
+public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
+	private int type;
+	private ExpressionToken left;
+	private ExpressionToken right;
+	private Object param;
 
-	private final static ExpressionToken TOKEN_TRUE = new TokenImpl(
-			VALUE_CONSTANTS, Boolean.TRUE);
-	private final static ExpressionToken TOKEN_FALSE = new TokenImpl(
-			VALUE_CONSTANTS, Boolean.FALSE);
-	private final static ExpressionToken TOKEN_NULL = new TokenImpl(
-			VALUE_CONSTANTS, null);
+	public TokenImpl(int type, Object param) {
+		this.type = type;
+		this.param = param;
+	}
 
-	protected static ExpressionToken getConstainsToken(String key) {
-		if ("true".equals(key)) {
-			return TOKEN_TRUE;
-		} else if ("false".equals(key)) {
-			return TOKEN_FALSE;
-		} else if ("null".equals(key)) {
-			return TOKEN_NULL;
+	public int getType() {
+		return type;
+	}
+
+	public ExpressionToken getLeft() {
+		return left;
+	}
+
+	public ExpressionToken getRight() {
+		return right;
+	}
+
+	public Object getParam() {
+		return param;
+	}
+
+	public void setLeft(ExpressionToken left) {
+		this.left = left;
+	}
+
+	public void setRight(ExpressionToken right) {
+		this.right = right;
+	}
+
+	public void setParam(Object param) {
+		this.param = param;
+	}
+
+	public String toString() {
+		switch (type) {
+		case VALUE_CONSTANTS:
+			return "#" + getParam();
+		case VALUE_VAR:
+			return "$" + getParam();
+		case VALUE_NEW_LIST:
+			return "[]";
+		case VALUE_NEW_MAP:
+			return "{}";
+		default:
+			for (int i = 0; i < OP_LIST.length; i += 2) {
+				if (type == ((Integer) OP_LIST[i]).intValue()) {
+					String text = (String) OP_LIST[i + 1];
+					return text;
+				}
+			}
 		}
-		return null;
+		return "?" + type;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static ExpressionToken toToken(List<Object> tokens) {
+		if (tokens == null) {
+			return null;
+		} else {
+			int type = ((Number) tokens.get(0)).intValue();
+			TokenImpl impl = new TokenImpl(type, null);
+			switch (tokens.size()) {
+			case 4:
+				impl.setParam(tokens.get(3));
+			case 3:
+				impl.setRight(toToken((List<Object>) tokens.get(2)));
+			case 2:
+				if(type>0){
+					impl.setLeft(toToken((List<Object>) tokens.get(1)));
+				}else{
+					impl.setParam(tokens.get(1));
+				}
+			case 1:
+				break;
+			default:
+				throw new ExpressionSyntaxException("tokens 長度最大為4");
+			}
+			
+			return impl;
+		}
 	}
 
 	private static Object[] OP_LIST = { OP_ADD, "+", OP_SUB, "-", OP_MUL, "*",
@@ -31,10 +103,11 @@ public class TokenImpl implements ExpressionToken {
 			"||",// boolean
 			OP_QUESTION, "?", OP_QUESTION_SELECT,
 			":",// 3op
-			OP_POS, "+", OP_NEG,
+			OP_POS, "+",
+			OP_NEG,
 			"-",// +-
-			//BRACKET_BEGIN, "(", BRACKET_END,
-			//")", // group
+			// BRACKET_BEGIN, "(", BRACKET_END,
+			// ")", // group
 			VALUE_NEW_LIST, "[", VALUE_NEW_MAP, "{", OP_MAP_PUSH, ":",
 			OP_PARAM_JOIN, ",",// map list,
 			OP_GET_PROP, ".",// prop
@@ -51,47 +124,48 @@ public class TokenImpl implements ExpressionToken {
 		return -1;
 	}
 
-	private int type;
-	private Object param;
-
-	public TokenImpl(int type, Object param) {
-		this.type = type;
-		this.param = param;
-	}
-
-	public int getType() {
-		return type;
-	}
-
-	public Object getParam() {
-		return param;
-	}
-
-	public void setParam(Object param) {
-		this.param = param;
-	}
-
-	public String toString() {
-		switch (type) {
-		case VALUE_CONSTANTS:
-			return "#" + getParam();
-		case VALUE_VAR:
-			return "$" + getParam();
-		case VALUE_LAZY:
-			return "[" + getParam()+"]";
-		case VALUE_NEW_LIST:
-			return "[]";
-		case VALUE_NEW_MAP:
-			return "{}" ;
-		default:
-			for (int i = 0; i < OP_LIST.length; i += 2) {
-				if (type == ((Integer) OP_LIST[i]).intValue()) {
-					String text = (String) OP_LIST[i + 1];
-					return text;
-				}
-			}
+	@Override
+	public Object get(int index) {
+		if (index == 0) {
+			return type;
 		}
-		return "?" + type;
+		if (type > 0) {
+			switch (index) {
+			case 3:
+				return param;
+			case 1:
+				return left;
+			case 2:
+				return right;
+			}
+		} else if (index == 1) {
+			return param;
+		}
+		return null;
+	}
+
+	@Override
+	public int size() {
+		switch (type) {
+		case ExpressionToken.VALUE_NEW_LIST:
+		case ExpressionToken.VALUE_NEW_MAP:
+			return 1;
+		case ExpressionToken.VALUE_VAR:
+		case ExpressionToken.VALUE_CONSTANTS:
+			return 2;
+		case ExpressionToken.OP_GET_STATIC_PROP:
+		case ExpressionToken.OP_INVOKE_METHOD_WITH_STATIC_PARAM:
+		case ExpressionToken.OP_MAP_PUSH:
+			return 4;
+		default:
+			return getArgCount() + 1;
+		}
+
+	}
+
+	private int getArgCount() {
+		int c = (type & ExpressionToken.BIT_PARAM) >> 6;
+		return c + 1;
 	}
 
 }
