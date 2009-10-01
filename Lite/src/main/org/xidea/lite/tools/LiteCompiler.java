@@ -67,6 +67,9 @@ public class LiteCompiler {
 						.trim());
 			}
 		}
+		if(root == null){
+			root = new File(".");
+		}
 		engine = new TemplateCompilerEngine(root, parsers, featrueMap);
 
 		litecached = createIfNotExist(litecached, "WEB-INF/litecached/");
