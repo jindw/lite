@@ -1,0 +1,12 @@
+#summary One-sentence summary of this page.
+#labels Phase-Design
+
+== Lite1.1重构计划 ==
+  * 逆波兰式=> 运算树
+     一种尝试吧，原先的逆波兰式解析不但有延迟计算的麻烦，而且做代码翻译的时候还不现实
+  * 增加二级运算符优先级定义
+     原先的算符优先级因为只有一级，而且还是相邻的不能自行扩充级别。
+  * 新增两种invoke 运算符实现
+     原先的方法调用都必须构造一个list 作为参数，整个函数调用在java实现中成本较高。
+     * OP_INVOKE_STATIC_PARAM
+     * OP_INVOKE_ONE_PARAM
