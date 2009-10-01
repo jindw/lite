@@ -14,7 +14,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.xidea.el.Invocable;
-import org.xidea.el.impl.CalculaterImpl;
+import org.xidea.el.impl.OperationStrategyImpl;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.el.json.JSONTokenizer;
 
@@ -26,15 +26,18 @@ import org.xidea.el.json.JSONTokenizer;
  */
 public abstract class ECMA262Impl {
 	@SuppressWarnings("unchecked")
-	private final static Class[] arrayClasses = new Class[] { List.class, Object[].class,
-			int[].class, float[].class, double[].class, long[].class,
-			short[].class, byte[].class, char[].class };
-	public static void setup(CalculaterImpl calculater) {
-		setup(calculater,JSArray.class,arrayClasses);
-		setup(calculater,JSNumber.class,Number.class);
+	private final static Class[] arrayClasses = new Class[] { List.class,
+			Object[].class, int[].class, float[].class, double[].class,
+			long[].class, short[].class, byte[].class, char[].class };
+
+	public static void setup(OperationStrategyImpl calculater) {
+		setup(calculater, JSArray.class, arrayClasses);
+		setup(calculater, JSNumber.class, Number.class);
 	}
+
 	@SuppressWarnings("unchecked")
-	private static void setup(CalculaterImpl calculater,Class impl,Class... forClass) {
+	private static void setup(OperationStrategyImpl calculater, Class impl,
+			Class... forClass) {
 		Field[] fields = impl.getFields();
 		for (Field field : fields) {
 			if (field.getType().isAssignableFrom(Invocable.class)
@@ -53,17 +56,17 @@ public abstract class ECMA262Impl {
 	}
 
 	public static void setup(Map<String, Object> globalInvocableMap) {
-		globalInvocableMap.put("encodeURI", new EncodeURI());
-		globalInvocableMap.put("decodeURI", new DecodeURI());
+		globalInvocableMap.put("encodeURI", new URI(true));
+		globalInvocableMap.put("decodeURI", new URI(false));
 
-		globalInvocableMap.put("encodeURIComponent", new EncodeURIComponent());
-		globalInvocableMap.put("decodeURIComponent", new DecodeURIComponent());
+		globalInvocableMap.put("encodeURIComponent", new URIComponent(true));
+		globalInvocableMap.put("decodeURIComponent", new URIComponent(false));
 
-		globalInvocableMap.put("isFinite", new IsFinite());
-		globalInvocableMap.put("isNaN", new IsNaN());
+		globalInvocableMap.put("isFinite", new IsFiniteNaN(true));
+		globalInvocableMap.put("isNaN", new IsFiniteNaN(false));
 
-		globalInvocableMap.put("parseFloat", new ParseFloat());
-		globalInvocableMap.put("parseInt", new ParseInt());
+		globalInvocableMap.put("parseFloat", new ParseNumber(true));
+		globalInvocableMap.put("parseInt", new ParseNumber(false));
 		globalInvocableMap.put("Math", math);
 		globalInvocableMap.put("Infinity", Double.POSITIVE_INFINITY);
 		globalInvocableMap.put("NaN", Double.NaN);
@@ -72,144 +75,100 @@ public abstract class ECMA262Impl {
 
 	private static NumberArithmetic na = new NumberArithmetic();
 
-	private static Map<String, Object> math;
-	static {
-		double LN10 = Math.log(10);
-		double LN2 = Math.log(2);
-		math = new HashMap<String, Object>();
-		math.put("E", Math.E);
-		math.put("PI", Math.PI);
-		math.put("LN10", LN10);
-		math.put("LN2", LN2);
-		math.put("LOG2E", 1 / LN2);
-		math.put("LOG10E", 1 / LN10);
-		math.put("SQRT1_2", Math.sqrt(0.5));
-		math.put("SQRT2", Math.sqrt(2));
-		//15.8.2.11 max([ value1 [, value2 [,...]]])
-		math.put("min", new MaxMin(false));
-		//15.8.2.12 min([ value1 [, value2 [,...]]])
-		math.put("max", new MaxMin(true));
-		//15.8.2.14 random()
-		math.put("random", new Invocable() {
-			// 15.8.2.14 random()
-			public Object invoke(Object thizz, Object... args) throws Exception {
+	private static Map<String, Object> math = MathInvocable.create();
+
+	private static class MathInvocable implements Invocable {
+		private static String[] args = {
+		// 0,6
+			"abs", "acos", "asin", "atan", "ceil", "asin", "cos",
+				// 6,10
+				"exp", "floor", "log", "round",
+				// 11,13
+				"sin", "sqrt", "tan"
+				// 14,15,16,17
+				, "random", "min", "max", "pow" };
+		final int type;
+
+		MathInvocable(int type) {
+			this.type = type;
+		}
+
+		static Map<String, Object> create() {
+			math = new HashMap<String, Object>();
+			double LN10 = Math.log(10);
+			double LN2 = Math.log(2);
+			math.put("E", Math.E);
+			math.put("PI", Math.PI);
+			math.put("LN10", LN10);
+			math.put("LN2", LN2);
+			math.put("LOG2E", 1 / LN2);
+			math.put("LOG10E", 1 / LN10);
+			math.put("SQRT1_2", Math.sqrt(0.5));
+			math.put("SQRT2", Math.sqrt(2));
+			for (int i = 0; i < args.length; i++) {
+				math.put(args[i], new MathInvocable(i));
+			}
+			return Collections.unmodifiableMap(math);
+		}
+
+		public Object invoke(Object thiz, Object... args) throws Exception {
+			switch (type) {
+			case 14:
+				// 15.8.2.14 random()
 				return Math.random();
-			}
-		});
-		//15.8.2.1 abs(x)
-		math.put("abs", new DoubleInvocable(){
-			@Override
-			Object compute(Number x) {
-				if(na.compare(0,x, 2) == 1){
-					x = na.subtract(0, x);
-				}
-				return x;
-			}
-		});
-		//15.8.2.2 acos(x) 
-		math.put("acos", new DoubleInvocable(){
-			Object compute(Number x) {
-				return Math.acos(x.doubleValue());
-			}
-		});
-		//15.8.2.3 asin(x)
-		math.put("asin", new DoubleInvocable(){
-			Object compute(Number x) {
-				return Math.asin(x.doubleValue());
-			}
-		});
-		//15.8.2.4 atan(x)
-		math.put("atan", new DoubleInvocable(){
-			Object compute(Number x) {
-				return Math.atan(x.doubleValue());
-			}
-		});
-		//15.8.2.6 ceil(x)
-		math.put("ceil", new DoubleInvocable(){
-			Object compute(Number x) {
-				return Math.ceil(x.doubleValue());
-			}
-		});
-		//15.8.2.7 cos(x)
-		math.put("cos", new DoubleInvocable(){
-			Object compute(Number x) {
-				return Math.cos(x.doubleValue());
-			}
-		});
-		//15.8.2.8 exp(x)
-		math.put("exp", new DoubleInvocable(){
-			Object compute(Number x) {
-				return Math.exp(x.doubleValue());
-			}
-		});
-		//15.8.2.9 floor(x)
-		math.put("floor", new DoubleInvocable(){
-			Object compute(Number x) {
-				return Math.floor(x.doubleValue());
-			}
-		});
-		//15.8.2.10 log(x)
-		math.put("log", new DoubleInvocable(){
-			Object compute(Number x) {
-				return Math.log(x.doubleValue());
-			}
-		});
-		//15.8.2.13 pow(x, y)
-		math.put("pow", new Double2Invocable(){
-			Object compute(Number x,Number y) {
-				return Math.pow(x.doubleValue(),y.doubleValue());
-			}
-		});
-		//15.8.2.15 round(x)
-		math.put("round", new DoubleInvocable(){
-			Object compute(Number x) {
-				return Math.round(x.doubleValue());
-			}
-		});
-		//15.8.2.16 sin(x)
-		math.put("sin", new DoubleInvocable(){
-			Object compute(Number x) {
-				return Math.sin(x.doubleValue());
-			}
-		});
-		//15.8.2.17 sqrt(x)
-		math.put("sqrt", new DoubleInvocable(){
-			Object compute(Number x) {
-				return Math.sqrt(x.doubleValue());
-			}
-		});
-		//15.8.2.18 tan(x)
-		math.put("tan", new DoubleInvocable(){
-			Object compute(Number x) {
-				return Math.tan(x.doubleValue());
-			}
-		});
-		math = Collections.unmodifiableMap(math);
-	}
-	private abstract static class DoubleInvocable implements Invocable {
-		public Object invoke(Object thiz, Object... args) throws Exception {
-			Number n1 = ToNumber(getArg(args, 0, Double.NaN));
-			return this.compute(n1);
-		}
-		abstract Object compute(Number x) ;
-	}
-	private abstract static class Double2Invocable implements Invocable {
-		public Object invoke(Object thiz, Object... args) throws Exception {
-			Number n1 = ToNumber(getArg(args, 0, Double.NaN));
-			Number n2 = ToNumber(getArg(args, 1, Double.NaN));
-			return this.compute(n1,n2);
-		}
-		abstract Object compute(Number x,Number y) ;
-	}
+			case 15:
+				// 15.8.2.12 min([ value1 [, value2 [,...]]])
+				return mimax(false, args);// min
+			case 16:
+				// 15.8.2.11 max([ value1 [, value2 [,...]]])
+				return mimax(true, args);// max
+			case 17:
+				// 15.8.2.13 pow(x, y)
+				Number x = getNumberArg(args, 0, Double.NaN);
+				Number y = getNumberArg(args, 1, Double.NaN);
+				return Math.pow(x.doubleValue(), y.doubleValue());
 
-	private static class MaxMin implements Invocable {
-		private boolean max;
+			}
 
-		public MaxMin(boolean max) {
-			this.max = max;
+			Number n1 = getNumberArg(args, 0, Double.NaN);
+
+			switch (type) {
+			case 0:
+				return abs(n1);
+			case 1:
+				return acos(n1);
+			case 2:
+				return asin(n1);
+			case 3:
+				return atan(n1);
+			case 4:
+				return ceil(n1);
+			case 5:
+				return asin(n1);
+			case 6:
+				return cos(n1);
+				
+			//"exp", "floor", "log", "round",
+			case 7:
+				return exp(n1);
+			case 8:
+				return floor(n1);
+			case 9:
+				return log(n1);
+			case 10:
+				return round(n1);
+			//"sin", "sqrt", "tan"
+			case 11:
+				return sin(n1);
+			case 12:
+				return sqrt(n1);
+			case 13:
+				return tan(n1);
+			}
+			return 0;
 		}
 
-		public Object invoke(Object thiz, Object... args) throws Exception {
+		public Object mimax(boolean max, Object... args) throws Exception {
 			Number n1 = null;
 			for (int i = 0; i < args.length; i++) {
 				Number n2 = ToNumber(getArg(args, i, Float.NaN));
@@ -229,12 +188,12 @@ public abstract class ECMA262Impl {
 					n1 = n2;
 				} else {
 					switch (na.compare(n1, n2, 8)) {
-					case 1://n1>n2
+					case 1:// n1>n2
 						if (!max) {// min
 							n1 = n2;
 						}
 						break;
-					case -1://n2>n1
+					case -1:// n2>n1
 						if (max) {
 							n1 = n2;
 						}
@@ -243,6 +202,75 @@ public abstract class ECMA262Impl {
 			}
 			return n1;
 		}
+
+		// 15.8.2.1 abs(x)
+		public Object abs(Number x) {
+			if (na.compare(0, x, 2) == 1) {
+				x = na.subtract(0, x);
+			}
+			return x;
+		}
+
+		// 15.8.2.2 acos(x)
+		public Object acos(Number x) {
+			return Math.acos(x.doubleValue());
+		}
+
+		// 15.8.2.3 asin(x);
+		public Object asin(Number x) {
+			return Math.asin(x.doubleValue());
+		}
+
+		// 15.8.2.4 atan(x)
+		public Object atan(Number x) {
+			return Math.atan(x.doubleValue());
+		}
+
+		// 15.8.2.6 ceil(x)
+		public Object ceil(Number x) {
+			return Math.ceil(x.doubleValue());
+		}
+
+		// 15.8.2.7 cos(x)
+		public Object cos(Number x) {
+			return Math.cos(x.doubleValue());
+		}
+
+		// 15.8.2.8 exp(x)
+		public Object exp(Number x) {
+			return Math.exp(x.doubleValue());
+		}
+
+		// 15.8.2.9 floor(x)
+		public Object floor(Number x) {
+			return Math.floor(x.doubleValue());
+		}
+
+		// 15.8.2.10 log(x)
+		public Object log(Number x) {
+			return Math.log(x.doubleValue());
+		}
+
+		// 15.8.2.15 round(x)
+		public Object round(Number x) {
+			return Math.round(x.doubleValue());
+		}
+
+		// 15.8.2.16 sin(x)
+		public Object sin(Number x) {
+			return Math.sin(x.doubleValue());
+		}
+
+		// 15.8.2.17 sqrt(x)
+		public Object sqrt(Number x) {
+			return Math.sqrt(x.doubleValue());
+		}
+
+		// 15.8.2.18 tan(x)
+		public Object tan(Number x) {
+			return Math.tan(x.doubleValue());
+		}
+
 	}
 
 	public static class JSON {
@@ -265,7 +293,13 @@ public abstract class ECMA262Impl {
 
 	}
 
-	public static class EncodeURIComponent implements Invocable {
+	public static class URIComponent implements Invocable {
+		final boolean encode;
+
+		URIComponent(boolean encode) {
+			this.encode = encode;
+		}
+
 		public Object invoke(Object thiz, Object... args) throws Exception {
 			// 不完全等价于 ECMA 262标准，主要是' '->+|%20
 			// 编码标准参照：application/x-www-form-urlencoded
@@ -276,19 +310,16 @@ public abstract class ECMA262Impl {
 
 		protected Object process(final String text, String charset)
 				throws UnsupportedEncodingException {
-			return URLEncoder.encode(text, charset);
+			return encode ? URLEncoder.encode(text, charset) : URLDecoder
+					.decode(text, charset);
 		}
 	}
 
-	public static class DecodeURIComponent extends EncodeURIComponent {
-		@Override
-		protected Object process(final String text, String charset)
-				throws UnsupportedEncodingException {
-			return URLDecoder.decode(text, charset);
+	public static class URI extends URIComponent {
+		URI(boolean encode) {
+			super(encode);
 		}
-	}
 
-	public static class EncodeURI extends EncodeURIComponent {
 		private static final Pattern URL_SPLIT = Pattern
 				.compile("[\\/\\:&\\?=]");
 
@@ -313,19 +344,17 @@ public abstract class ECMA262Impl {
 
 		protected Object processPart(final String text, String charset)
 				throws UnsupportedEncodingException {
-			return URLEncoder.encode(text, charset);
+			return super.process(text, charset);
 		}
 	}
 
-	public static class DecodeURI extends EncodeURI {
-		@Override
-		protected Object processPart(final String text, String charset)
-				throws UnsupportedEncodingException {
-			return URLDecoder.decode(text, charset);
-		}
-	}
+	public static class IsFiniteNaN implements Invocable {
+		private boolean isFinite;
 
-	public static class IsFinite implements Invocable {
+		IsFiniteNaN(boolean isFinite) {
+			this.isFinite = isFinite;
+		}
+
 		public Object invoke(Object thiz, Object... args) throws Exception {
 			Object o = getArg(args, 0, Float.NaN);
 			Number number = ToNumber(o);
@@ -337,27 +366,32 @@ public abstract class ECMA262Impl {
 		}
 
 		protected Object check(float d) {
-			return d == d && !Double.isInfinite(d);
+			if (isFinite) {
+				return d == d && !Double.isInfinite(d);
+			} else {
+				return d != d;
+			}
 		}
 	}
 
-	public static class IsNaN extends IsFinite {
-		@Override
-		protected Object check(float d) {
-			return d != d;
-		}
-	}
-
-	public static class ParseInt implements Invocable {
+	public static class ParseNumber implements Invocable {
 		private static final Pattern INT_PARTTERN = Pattern
 				.compile("^0x[0-9a-f]+|^0+[0-7]*|^[0-9]+");
+		private static final Pattern FLOAT_PARTTERN = Pattern
+				.compile("^[0-9]*\\.[0-9]+");
+
+		private boolean parseFloat;
+
+		ParseNumber(boolean parseFloat) {
+			this.parseFloat = parseFloat;
+		}
 
 		public Object invoke(Object thiz, Object... args) throws Exception {
 			String text = String.valueOf(getArg(args, 0, null)).trim()
 					.toLowerCase();
 			int length = text.length();
 			if (length > 0) {
-				Number result = parse(text);
+				Number result = parseFloat ? parseFloat(text) : parseInt(text);
 				if (result != null) {
 					return result;
 				}
@@ -366,15 +400,17 @@ public abstract class ECMA262Impl {
 			return Float.NaN;
 		}
 
-		private Number parseInt(String text, int readio) {
-			try {
-				return new Integer(Integer.parseInt(text, readio));
-			} catch (NumberFormatException e) {
-				return new Long(Long.parseLong(text, readio));
+		// ECMA 262 parseInt,parseFloat不支持E[+-]?\d+
+		protected Number parseFloat(String text) {
+			Matcher matcher = FLOAT_PARTTERN.matcher(text);
+			if (matcher.find()) {
+				return Double.parseDouble(matcher.group());
+			} else {
+				return Float.NaN;
 			}
 		}
 
-		protected Number parse(String text) {
+		protected Number parseInt(String text) {
 			Matcher matcher = INT_PARTTERN.matcher(text);
 			if (matcher.find()) {
 				text = matcher.group();
@@ -389,22 +425,15 @@ public abstract class ECMA262Impl {
 				return Float.NaN;
 			}
 		}
-	}
 
-	public static class ParseFloat extends ParseInt {
-		private static final Pattern FLOAT_PARTTERN = Pattern
-				.compile("^[0-9]*\\.[0-9]+");
-
-		// ECMA 262 parseInt,parseFloat不支持E[+-]?\d+
-		@Override
-		protected Number parse(String text) {
-			Matcher matcher = FLOAT_PARTTERN.matcher(text);
-			if (matcher.find()) {
-				return Double.parseDouble(matcher.group());
-			} else {
-				return Float.NaN;
+		private Number parseInt(String text, int readio) {
+			try {
+				return new Integer(Integer.parseInt(text, readio));
+			} catch (NumberFormatException e) {
+				return new Long(Long.parseLong(text, readio));
 			}
 		}
+
 	}
 
 	protected static Object getArg(Object[] args, int index, Object defaultValue) {
@@ -414,18 +443,25 @@ public abstract class ECMA262Impl {
 			return defaultValue;
 		}
 	}
-	public static String getStringArg(Object[] args, int index, String defaultValue) {
+
+	public static String getStringArg(Object[] args, int index,
+			String defaultValue) {
 		Object value = getArg(args, index, defaultValue);
 		return String.valueOf(ToPrimitive(value, String.class));
 	}
-	public static Number getNumberArg(Object[] args, int index, Number defaultValue) {
+
+	public static Number getNumberArg(Object[] args, int index,
+			Number defaultValue) {
 		Object value = getArg(args, index, defaultValue);
 		return ToNumber(value);
 	}
-	public static Integer getIntArg(Object[] args, int index, Integer defaultValue) {
+
+	public static Integer getIntArg(Object[] args, int index,
+			Integer defaultValue) {
 		Number value = getNumberArg(args, index, defaultValue);
 		return value.intValue();
 	}
+
 	private static Number parseNumber(String text, int radix) {
 		try {
 			return Integer.parseInt(text, radix);

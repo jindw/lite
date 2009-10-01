@@ -1,32 +1,34 @@
 package org.xidea.el.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.xidea.el.Calculater;
+import org.xidea.el.OperationStrategy;
 import org.xidea.el.ExpressionToken;
 import org.xidea.el.Invocable;
 import org.xidea.el.Reference;
-import org.xidea.el.ResultStack;
+import org.xidea.el.ValueStack;
 import org.xidea.el.fn.ECMA262Impl;
 import org.xidea.el.fn.NumberArithmetic;
 
-public class CalculaterImpl implements Calculater {
-	private static final Log log = LogFactory.getLog(CalculaterImpl.class);
+public class OperationStrategyImpl implements OperationStrategy {
+	private static final Log log = LogFactory.getLog(OperationStrategyImpl.class);
 	protected static final Object SKIP_QUESTION = new Object();
 	private static final Object[] EMPTY_ARGS = new Object[0];
 	private Map<String, Map<String, Invocable>> methodMap;
 	private NumberArithmetic arithmetic = new NumberArithmetic();
 
-	public CalculaterImpl(){
+	public OperationStrategyImpl(){
 		Map<String, Map<String, Invocable>> methodMap = new HashMap<String, Map<String, Invocable>>();
 		this.methodMap = methodMap;
 		ECMA262Impl.setup(this);
 	}
-	public CalculaterImpl(Map<String, Map<String, Invocable>> methodMap){
+	public OperationStrategyImpl(Map<String, Map<String, Invocable>> methodMap){
 		this.methodMap = methodMap;
 	}
 	
@@ -83,23 +85,48 @@ public class CalculaterImpl implements Calculater {
 	}
 
 
+	protected Object getValue(ValueStack context, ExpressionToken item) {
+		switch (item.getType()) {
+		case ExpressionToken.VALUE_VAR:
+			String value = (String) item.getParam();
+			return context.get(value);
+		case ExpressionToken.VALUE_CONSTANTS:
+			return item.getParam();
+		case ExpressionToken.VALUE_NEW_LIST:
+			return new ArrayList<Object>();
+		case ExpressionToken.VALUE_NEW_MAP:
+			return new LinkedHashMap<Object, Object>();
+		}
+		throw new IllegalArgumentException("unknow token:"+Integer.toBinaryString(item.getType()));
+	}
 	@SuppressWarnings("unchecked")
-	public Object compute(ExpressionToken op,ResultStack stack) {
+	public Object evaluate(ExpressionToken op,ValueStack vs){
 		final int type = op.getType();
-		Object arg2 = (type & 1) == 1 ? stack.pop():null;
-		Object arg1 = stack.get();
+		if(type<0){
+			return getValue(vs, op);
+		}
+
+		Object arg1 = evaluate(op.getLeft(), vs);
+		Object arg2 =  null;
 		switch (type) {
-		case ExpressionToken.OP_STATIC_GET_PROP:
+		case ExpressionToken.OP_GET_STATIC_PROP:
 		    arg2 = op.getParam();
-		case ExpressionToken.OP_GET_PROP:
-			if (arg1 instanceof Reference) {
-				return ((Reference) arg1).next(ExpressionImpl.realValue(arg2));
+		    if (arg1 instanceof Reference) {
+				return ((Reference) arg1).next(arg2);
 			} else {
-				return new ReferenceImpl(arg1, ExpressionImpl.realValue(arg2));
+				return new ReferenceImpl(arg1, arg2);
+			}
+		case ExpressionToken.OP_GET_PROP:
+			arg2 = realValue(evaluate(op.getRight(), vs));
+			if (arg1 instanceof Reference) {
+				return ((Reference) arg1).next(arg2);
+			} else {
+				return new ReferenceImpl(arg1, arg2);
 			}
 		case ExpressionToken.OP_INVOKE_METHOD:
 			try {
 				Object thiz;
+				arg2 = realValue(evaluate(op.getRight(), vs));
 				Object[] arguments = (arg2 instanceof List) ? ((List<?>) arg2)
 						.toArray() : EMPTY_ARGS;
 				Invocable invocable = null;
@@ -108,7 +135,7 @@ public class CalculaterImpl implements Calculater {
 					invocable = ReferenceImpl.getInvocable(pv,methodMap, arguments);
 					thiz = pv.getBase();
 				} else {
-					thiz = stack.getValueStack();
+					thiz = vs;
 					if (arg1 instanceof Invocable) {
 						invocable = (Invocable) arg1;
 					} else if ((arg1 instanceof java.lang.reflect.Method)) {
@@ -123,9 +150,43 @@ public class CalculaterImpl implements Calculater {
 				}
 				return null;
 			}
+		/* lazy computer elements*/
+		/* and or */
+		case ExpressionToken.OP_AND:
+			arg1 = realValue(arg1);
+			if (ECMA262Impl.ToBoolean(arg1)) {
+				return evaluate(op.getRight(), vs);// 进一步判断
+			} else {// false
+				return arg1;// //skip
+			}
+
+		case ExpressionToken.OP_OR:
+			arg1 = realValue(arg1);
+			if (ECMA262Impl.ToBoolean(arg1)) {
+				return arg1;
+			} else {
+				return evaluate(op.getRight(), vs);
+			}
+		case ExpressionToken.OP_QUESTION:// a?b:c -> a?:bc -- >a?b:c
+			arg1 = realValue(arg1);
+			if (ECMA262Impl.ToBoolean(arg1)) {// 取值1
+				return evaluate(op.getRight(), vs);
+			} else {// 跳过 取值2
+				return SKIP_QUESTION;
+			}
+		case ExpressionToken.OP_QUESTION_SELECT:
+			//arg1 一定不會是refrence
+			if (arg1 == SKIP_QUESTION) {
+				return evaluate(op.getRight(), vs);
+			} else {
+				return arg1;
+			}
 		}
-		arg1 = ExpressionImpl.realValue(arg1);
-		arg2 = ExpressionImpl.realValue(arg2);
+		arg1 = realValue(arg1);
+		if((type & ExpressionToken.BIT_PARAM) >0){
+			arg2 = evaluate(op.getRight(), vs);
+			arg2 = realValue(arg2);
+		}
 		switch (type) {
 		case ExpressionToken.OP_NOT:
 			return !ECMA262Impl.ToBoolean(arg1);
@@ -165,32 +226,6 @@ public class CalculaterImpl implements Calculater {
 		case ExpressionToken.OP_LTEQ:
 			return compare(type, arg1, arg2);
 
-			/* and or */
-		case ExpressionToken.OP_AND:
-			if (ECMA262Impl.ToBoolean(arg1)) {
-				return arg2;// 进一步判断
-			} else {// false
-				return arg1;// //skip
-			}
-
-		case ExpressionToken.OP_OR:
-			if (ECMA262Impl.ToBoolean(arg1)) {
-				return arg1;
-			} else {
-				return arg2;
-			}
-		case ExpressionToken.OP_QUESTION:// a?b:c -> a?:bc -- >a?b:c
-			if (ECMA262Impl.ToBoolean(arg1)) {// 取值1
-				return arg2;
-			} else {// 跳过 取值2
-				return SKIP_QUESTION;
-			}
-		case ExpressionToken.OP_QUESTION_SELECT:
-			if (arg1 == SKIP_QUESTION) {
-				return arg2;
-			} else {
-				return arg1;
-			}
 		case ExpressionToken.OP_PARAM_JOIN:
 			((List) arg1).add(arg2);
 			return arg1;
@@ -200,5 +235,11 @@ public class CalculaterImpl implements Calculater {
 		}
 		throw new RuntimeException("不支持的操作符" + op.getType());
 
+	}
+	private static final Object realValue(Object arg1){
+		if(arg1 instanceof Reference){
+			return  ((Reference)arg1).getValue();
+		}
+		return arg1;
 	}
 }
