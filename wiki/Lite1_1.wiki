@@ -1,9 +1,9 @@
-#summary One-sentence summary of this page.
 #labels Phase-Design
+#重构计划.
 
 == Lite1.1重构计划 ==
   * 逆波兰式=> 运算树
-     一种尝试吧，原先的逆波兰式解析不但有延迟计算的麻烦，而且做代码翻译的时候还不现实
+     一种尝试吧，原先的逆波兰式解析不但有延迟计算的麻烦，而且做代码翻译的时候还不实用
      * 从够后运算树表现形式如下：
 {{{
  * EL		=>[OP_TYPE,arg1<EL>,arg2<EL>|null,param?]
