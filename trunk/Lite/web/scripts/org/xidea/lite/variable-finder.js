@@ -6,31 +6,15 @@
  * @version $Id: template.js,v 1.4 2008/02/28 14:39:06 jindw Exp $
  */
 
-function findStatus(code){
-	var vs = new VarStatus();
-	doFind(code,vs);
-	return vs;
-}
 
-function ForStatus(code){
-    this.code = code;
-    this.index;
-    this.lastIndex;
-    this.ref;
-}
-function VarStatus(pvs){
-    this.parentStatus = pvs;
+function VarStatus(code){
 	this.needReplacer = false;
 	this.vars={};
 	this.refs={};
 	this.defs = [];
-	if(pvs){
-    	this.forInfos = pvs.forInfos;
-    	this.forStack = pvs.forStack;
-	}else{
-    	this.forInfos = [];
-    	this.forStack = [];
-	}
+    this.forInfos = [];
+    this.forStack = [];
+    code && doFind(code,vs);
 }
 VarStatus.prototype = {
     setNeedReplacer : function(){
@@ -54,43 +38,19 @@ VarStatus.prototype = {
     	this.vars[n] = true;
     },
     vistEL : function(el){
-    	var tokens = parseEL(el)
-    	var result ={};
-    	this.fillVar(tokens,result);
-    	for(var n in result){
+    	el = new PHPELTranslator(el);
+    	var fs = this.forStack[this.forStack.length-1];
+	    if(fs){
+		    fs.index = fs.index || el.forIndex;
+		    fs.lastIndex = fs.lastIndex || el.forLastIndex;
+		    fs.ref = fs.ref || el.forRef;
+	    }
+	    for(var n in el.varMap){
     		if(!this.vars[n]){
     			this.refs[n] = true;
     		}
     	}
-    },
-    fillVar : function(tokens,result){
-    	for(var i=0;i<tokens.length;i++){
-    		var item = tokens[i];
-    		if(item instanceof Array){
-    			if(item[0] == VALUE_VAR){
-    			    var varName = item[1];
-    				result[varName] = true;
-    				if(varName == 'for'){
-    				    var fs = this.forStack[this.forStack.length-1];
-    				    var next = tokens[i+1]
-    				    //next!=null &&  需要吗？貌似不会有这种情况呢！！
-    				    if(next!=null && next[0] == OP_STATIC_GET_PROP){
-    				        if(next[1] == 'index'){
-    				            fs.index = true
-    				        }else if(next[1] == 'lastIndex'){
-    				            fs.lastIndex = true
-    				        }else{
-    				            fs.ref = true;
-    				        }
-    				    }else{
-    				        fs.ref = true;
-    				    }
-    				}
-    			}else if(item[0] == VALUE_LAZY){
-    				this.fillVar(item[1],result);
-    			}
-    		}
-    	}
+    	return el;
     },
     enterFor:function(forCode){
         var fs = new ForStatus(forCode);
@@ -102,11 +62,13 @@ VarStatus.prototype = {
         this.forStack.pop()
     }
 }
-function parseEL(el){
-	return new ExpressionTokenizer(el).toTokens();
+
+function ForStatus(code){
+    this.code = code;
+    this.index;
+    this.lastIndex;
+    this.ref;
 }
-
-
 
 /**
  * 函数定义只能在根上,即不能在 if,for之内的子节点中
@@ -124,8 +86,13 @@ function doFindDef(item,pvs){
     }
 	var el = this.eval('('+item[2]+')');
 	pvs.addVar(el.name);
-	var vs = new VarStatus(pvs);
 	var args = el.params.slice(0);
+	var vs = new VarStatus(pvs);
+	//forInfos，forStack 关联
+    vs.parentStatus = pvs;
+    vs.forInfos = pvs.forInfos;
+    vs.forStack = pvs.forStack;
+    
 	vs.params = args;
 	for(var i=0;i<args.length;i++){
 	    vs.vars[args[i]] = true;
@@ -149,30 +116,30 @@ function doFind(code,vs){
         if(item instanceof Array){
 			switch (item[0]) {
 			case ADD_ON_TYPE:
-				if(item[3] == '#def' || item[3] == PLUGIN_DEFINE){
+				if(item[3] == '#def'){
 					doFindDef(item,vs)
 				}
 				break;
 			case FOR_TYPE:
-			    vs.vistEL(item[2]);
+			    item[2] = vs.vistEL(item[2]);
 			    vs.enterFor(item);
 				doFind(item[1],vs);
 				vs.exitFor();
 				break;
 			case XML_ATTRIBUTE_TYPE:
-			case VAR_TYPE:
 			case XML_TEXT_TYPE:
 				vs.setNeedReplacer();
+			case VAR_TYPE:
 			case EL_TYPE:
-			    vs.vistEL(item[1]);
+			    item[1] = vs.vistEL(item[1]);
 				break;
 			case IF_TYPE:
-			    vs.vistEL(item[2]);
+			    item[2] = vs.vistEL(item[2]);
 				doFind(item[1],vs);
 				break;
 			case ELSE_TYPE:
 				if (item[2] != null) {
-			           vs.vistEL(item[2]);
+			           item[2] = vs.vistEL(item[2]);
 				}
 				doFind(item[1],vs);
 				break;
@@ -181,7 +148,7 @@ function doFind(code,vs){
 				vs.addVar(item[2]);
 				break;
 			case VAR_TYPE:
-				vs.vistEL(item[1]);
+				item[1] = vs.vistEL(item[1]);
 				vs.addVar(item[2]);
 				break;
 			}

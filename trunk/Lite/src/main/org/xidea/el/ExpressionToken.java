@@ -81,13 +81,13 @@ public abstract interface ExpressionToken {
 	public static final int OP_NOTEQ = 0<<12 | 0<<8 | 1<<6 | 3<<2 | 1;
 	//5<<5 | 3<<1 |1;//!=;
 
-	static final int OP_BIT_AND = 3<<12 | 0<<8 | 1<<6 | 2<<2 | 0;
-	static final int OP_BIT_XOR = 2<<12 | 0<<8 | 1<<6 | 2<<2 | 0;
-	static final int OP_BIT_OR  = 1<<12 | 0<<8 | 1<<6 | 2<<2 | 0;
+	static final int OP_BIT_AND = 4<<12 | 0<<8 | 1<<6 | 2<<2 | 0;
+	static final int OP_BIT_XOR = 3<<12 | 0<<8 | 1<<6 | 2<<2 | 0;
+	static final int OP_BIT_OR  = 2<<12 | 0<<8 | 1<<6 | 2<<2 | 0;
 	
 	
 	//三：
-	public static final int OP_AND = 0<<12 | 0<<8 | 1<<6 | 2<<2 | 0;
+	public static final int OP_AND = 1<<12 | 0<<8 | 1<<6 | 2<<2 | 0;
 	//0<<5 | 2<<1 |1;//&&;
 	public static final int OP_OR =  0<<12 | 0<<8 | 1<<6 | 2<<2 | 1;
 	//1<<5 | 2<<1 |1;//||;
