@@ -76,14 +76,10 @@ function parseFN(fn,expression){
         throw new Error("不支持指令："+fn);
     }
 }
-function parseEL(expression,nativeJS){
+function parseEL(expression){
     try{
         checkEL(expression.replace(/\bfor\b/g,"f"));
-        if(nativeJS){
-            return expression;
-        }else{
-            return new ExpressionTokenizer(expression).toTokens();
-        }
+        return new ExpressionTokenizer(expression).getResult();
     }catch(e){
         $log.debug("表达式解析失败",expression,e)
         throw e;
@@ -98,4 +94,7 @@ function parseFor(el){
     }catch(e){
         checkEL(el = '['+el+']');
     }
+}
+function checkEL(el){
+    new Function("return "+el)
 }

@@ -8,69 +8,59 @@
 /**
  * 表达式对象，可以单步解释表达式中间代码
  */
-function Expression(tokens){
-	this.tokens = tokens;
+function Expression(el){
+	this.el = el;
 }
 Expression.prototype.evaluate = function(context){
-     return evaluate(this.tokens,context);
+     return evaluate(this.el,context);
 }
 /**
  * 表达式单步解析函数实现
  */
 function evaluate(el,context){
-     var stack = [];
-     _evaluate(stack,el,context)
-     return realValue(stack[0]);
+     var result = _evaluate(el,context)
+     return realValue(result);
 }
-function _evaluate(stack, tokens,context){
-    for(var i=0;i<tokens.length;i++){
-        var item = tokens[i]
-        var type = item[0];
-        var arg1 = null;
-        var arg2 = null
-        switch(type){
-            case VALUE_NEW_LIST:
-                stack.push([]);
-                break;
-            case VALUE_NEW_MAP:
-                stack.push({});
-                break;
-            case VALUE_VAR:
-                arg1 = item[1]
-                stack.push((arg1 in context?context:this)[arg1]);
-                break;
-            case VALUE_LAZY:
-                stack.push(new LazyToken(item[1]));
-                break;
-            case VALUE_CONSTANTS:
-                stack.push(item[1]);
-                break;
-            default:
-                arg1 = stack.pop();
-                if(type & 1){
-                    arg2=arg1;
-                    arg1 = stack.pop();
-                }
-                arg1 = compute(item, arg1, arg2,context)
-                if(arg1 instanceof LazyToken){
-                    _evaluate(stack, arg1.data, context)
-                } else{
-                    stack.push(arg1)
-                }
+
+
+function _evaluate(item,context){
+    var type = item[0];
+    switch(type){
+    case VALUE_NEW_LIST:
+        return [];
+    case VALUE_NEW_MAP:
+        return {};
+    case VALUE_VAR:
+        arg1 = item[1]
+        return (arg1 in context?context:this)[arg1];
+    case VALUE_CONSTANTS:
+        return item[1];
+    ///* and or */
+    case OP_AND:
+        return realValue(_evaluate(item[1],context)) && (_evaluate(item[2],context));
+    case OP_OR:
+        return realValue(_evaluate(item[1],context)) || (_evaluate(item[2],context));
+    case OP_QUESTION://// a?b:c -> a?:bc -- >a?b:c
+        if(realValue(_evaluate(item[1],context))){
+            return _evaluate(item[2],context);
+        }else{
+            return PropertyValue;//use as flag
+        }
+    case OP_QUESTION_SELECT:
+    	arg1 = realValue(_evaluate(item[1],context));
+        if(arg1 == PropertyValue){//use as flag
+            return _evaluate(item[2],context);
+        }else{
+            return arg1;
         }
     }
-}
-function realValue(arg1){
-	if(arg1 instanceof PropertyValue){
-    	return arg1[0][arg1[1]];
+    var arg1=_evaluate(item[1],context);
+    if(getParamCount(type) ==2){
+        var arg2=realValue(_evaluate(item[2],context));
     }
-    return arg1;
-}
-function compute(op,arg1,arg2,thiz){
-    var type = op[0];
     if(type == OP_INVOKE_METHOD){
     	if(arg1 instanceof Function){
-            return arg1.apply(thiz,arg2);
+            return arg1.apply(context,arg2);
     	}else if(arg1 instanceof PropertyValue){
             return arg1[0][arg1[1]].apply(arg1[0],arg2);
     	}else{
@@ -78,10 +68,10 @@ function compute(op,arg1,arg2,thiz){
     	}
     }
     arg1 = realValue(arg1);
-    arg2 = realValue(arg2);
     switch(type){
-    case OP_STATIC_GET_PROP:
-        arg2 = op[1]
+    //op
+    case OP_GET_STATIC_PROP:
+        arg2 = item[1]
     case OP_GET_PROP:
         return new PropertyValue(arg1,arg2);
     case OP_NOT:
@@ -115,36 +105,24 @@ function compute(op,arg1,arg2,thiz){
     case OP_LTEQ:
         return arg1 <= arg2;
 
-        ///* and or */
-    case OP_AND:
-        return arg2 && arg1;
-    case OP_OR:
-        return arg1 || arg2;
-    case OP_QUESTION://// a?b:c -> a?:bc -- >a?b:c
-        if(arg1){
-            return arg2;
-        }else{
-            return LazyToken;//use as flag
-        }
-    case OP_QUESTION_SELECT:
-        if(arg1 == LazyToken){//use as flag
-            return arg2;
-        }else{
-            return arg1;
-        }
+
     case OP_PARAM_JOIN:
         arg1.push(arg2)
         return arg1;
     case OP_MAP_PUSH:
-        arg1[op[1]]= arg2;
+        arg1[item[3]]= arg2;
         return arg1;
     }
 }
-function LazyToken(value){
-    this.value = value;
-}
+
 function PropertyValue(base,name){
     this[0] = base;
     this[1] = name;
+}
+function realValue(arg1){
+    if(arg1 instanceof PropertyValue){
+        return arg1[0][arg1[1]];
+    }
+    return arg1;
 }
 

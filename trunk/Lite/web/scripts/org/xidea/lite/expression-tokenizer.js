@@ -338,7 +338,7 @@ function buildTree(tokens){
                 stack.push(item);
                 break;
             default://OP
-                if(type & 1){//两个操作数
+                if(getParamCount(type) ==2){//两个操作数
                     var arg2 = stack.pop();
                     var arg1 = stack.pop();
                     var el = [type,arg1,arg2]
@@ -350,7 +350,7 @@ function buildTree(tokens){
 					case OP_GET_STATIC_PROP:
 					case OP_INVOKE_METHOD_WITH_STATIC_PARAM:
 					case OP_MAP_PUSH:
-					el.push(item[1]);
+					el[3] = item[1];
                 }
                 stack.push(el)
         }
@@ -418,7 +418,7 @@ function addRightToken(rightStack,
 	        var previous = list[last];
 	        if(previous[0] == VALUE_CONSTANTS){
 	            list.length--;
-	            token = [OP_STATIC_GET_PROP,previous[1]]; 
+	            token = [OP_GET_STATIC_PROP,previous[1]]; 
 	        }
 	    }
 	}

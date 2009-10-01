@@ -68,7 +68,7 @@ ParseContext.prototype = {
      * 异常一定要抛出去，让parseText做回退处理
      */
     parseEL : function(el){
-        return parseEL(el,this.nativeJS)
+        return parseEL(el)
     },
 	
 	mark:function(){
@@ -166,12 +166,11 @@ ParseContext.prototype = {
     	return buildTreeResult(result);
 	},
     toCode:function(){
-    	var result = this.toList();
         if(this.nativeJS){
-            var code = buildNativeJS(result);
-            return "function(){"+code+"\n}";
+	    	var translator = new Translator("");
+	    	return translator.translate(this);
         }else{
-        	return stringifyJSON(result)
+        	return stringifyJSON(this.toList())
         }
     }
 }

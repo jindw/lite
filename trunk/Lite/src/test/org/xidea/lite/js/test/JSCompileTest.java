@@ -96,7 +96,7 @@ public class JSCompileTest {
 				.getResourceAsStream("JSCompileTest.js"), "utf-8"));
 		//engine.eval("evalFile.call(null,'print(this)',111)");
 		engine.eval("$import('org.xidea.lite:Template');");
-		engine.eval("$import('org.xidea.lite:buildNativeJS');");
+		engine.eval("$import('org.xidea.lite:Translator');");
 		engine.eval("$import('org.xidea.lite:XMLParser');");
 		engine.eval("$import('org.xidea.lite:findELEnd')");
 	}
@@ -143,6 +143,7 @@ public class JSCompileTest {
 
 			String sourceJSON = JSONEncoder.encode(source);
 			String contextJSON = context;
+			System.out.println(context);
 			// engine.put(ScriptEngine.FILENAME, "<file>");
 
 			engine.eval("var jsTemplate = new Template(" + sourceJSON

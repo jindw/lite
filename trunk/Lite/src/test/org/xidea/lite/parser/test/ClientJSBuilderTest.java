@@ -32,17 +32,6 @@ import org.xidea.lite.parser.impl.RhinoProxy;
 import org.xml.sax.SAXException;
 
 public class ClientJSBuilderTest {
-	private ExpressionFactory clientExpressionFactory = new ExpressionFactory() {
-		public Expression create(Object el) {
-			throw new UnsupportedOperationException();
-		}
-
-		public Object parse(String expression) {
-			return expression;
-		}
-
-	};
-
 	@Before
 	public void setUp() throws Exception {
 	}
@@ -73,7 +62,6 @@ public class ClientJSBuilderTest {
 		// 前端直接压缩吧？反正保留那些空白也没有调试价值
 		// context2.setCompress(context.isCompress());
 		context2.setCompress(true);
-		context2.setExpressionFactory(clientExpressionFactory);
 		context2.parse(context2.loadXML(url));
 		String result = new Java6Proxy().createJSTranslator("t1").translate(context2);
 		String result2 = new RhinoProxy().createJSTranslator("t1").translate(context2);
@@ -92,7 +80,6 @@ public class ClientJSBuilderTest {
 		// 前端直接压缩吧？反正保留那些空白也没有调试价值
 		// context2.setCompress(context.isCompress());
 		context2.setCompress(true);
-		context2.setExpressionFactory(clientExpressionFactory);
 		context2.parse(context2.loadXML(url));
 
 		List<Object> clientLiteCode = context2.toList();

@@ -13,7 +13,7 @@ function ELTranslator(tokens){
 	if(tokens instanceof ELTranslator){
 		return tokens;
 	}
-	this.tree = toTree(tokens);
+	this.tree = tokens;
 	this.varMap = {};
 	walkTree(this,this.tree)
 }
@@ -29,118 +29,93 @@ ELTranslator.prototype = {
 	 * 获取某个运算符号的优先级
 	 */
 	getPriority:function(el) {
-		return type & 30;
+		return getPriority(el[0]);
 	},
 	/**
 	 * 将某一个token转化为表达式
 	 */
 	stringify:function(el){
-		var op = el[0];
-		var arg1 = el[1];
-		if(op<=0){//value
-			switch(op){
-            case VALUE_CONSTANTS:
-	            return stringifyJSON(arg1);
-            case VALUE_VAR:
-            	if(arg1 == 'for'){
-            		return "__context__";
-            	}else{
-            		return arg1;
-            	}
-            case VALUE_NEW_LIST:
-            	return "[]";
-            case VALUE_NEW_MAP:
-            	return "{}";
-			}
-		}else if(op[0] & 1){//两个操作数
-			var arg2 = el[2];
-			return this.toBothSide(op,arg1,arg2);
+		var type = el[0];
+		if(type<=0){//value
+			return this.stringifyValue(el)
+		}else if(getParamCount(type) ==2){//两个操作数
+			return this.stringifyInfix(el);
 		}else{
-			return this.toPrefix(op,arg1);
+			return this.stringifyPrefix(el);
 		}
 		
+	},
+	stringifyValue:function(el){
+		var param = el[1];
+		switch(el[0]){
+        case VALUE_CONSTANTS:
+            return stringifyJSON(param);
+        case VALUE_VAR:
+        	if(param == 'for'){
+        		return "_$context";
+        	}else{
+        		return param;
+        	}
+        case VALUE_NEW_LIST:
+        	return "[]";
+        case VALUE_NEW_MAP:
+        	return "{}";
+		}
 	},
 	/**
 	 * 翻译中缀运算符
 	 */
-	stringifyInfix:function(op){
-		var type = op[0];
-		var opc = findTokenText(op[0]);
-		var value1 = this.stringify(arg1);
-		var value2 = this.stringify(arg2);
+	stringifyInfix:function(el){
+		var type = el[0];
+		var opc = findTokenText(el[0]);
+		var value1 = this.stringify(el[1]);
+		var value2 = this.stringify(el[2]);
+		var param = el[3];
 		switch(type){
 		case OP_INVOKE_METHOD:
-			if(arg1[0] == VALUE_VAR){//globals
-				if(value2 instanceof Array){
-					value2 = "("+value2.join(',')+")";
-				}else{
-					value2 = value2.substring("array".length)
-				}
-				return "lite__"+arg1[1]+value2;
-			}else if(arg1[0][0] == OP_STATIC_GET_PROP){//members
-				var memberName = arg1[0][1];
-				var value1 = this.stringify(arg1[1]);
-				return "lite_member_"+memberName+"("+value1+","+value2.substring("array(".length);
+			value2 = value2.slice(1,-1);
+			var el1 = el[1]
+			if(el1[0] == VALUE_VAR){//globals
+				return value1+'('+value2+')';
+			}else if(el1[0] == OP_GET_STATIC_PROP){//members
+				var memberName = el1[3];
+				var value1 = this.stringify(el1[1]);
+				return value1+"."+memberName+"("+value2+')';
 			}else{
 				throw Error("只能支持全局函数调用和静态属性函数调用");
 			}
+		case OP_GET_PROP:
+			return value1+'['+value2+']';
 		case OP_PARAM_JOIN:
-			if(/\(\)$/.test(value1)){
+			if(/\[\]$/.test(value1)){
 				return value1.slice(0,-1)+value2+")"
 			}else{
 				return value1.slice(0,-1)+','+value2+")"
 			}
 			//return value1.replace(/(,?)\)$/,'$1')+value2+")"
 		case OP_MAP_PUSH:
-			value2 = unevalPHPString(op[1])+"=>"+value2+")";
-			if(/\(\)$/.test(value1)){
+			value2 = stringifyJSON(param)+":"+value2+")";
+			if(/\{\}$/.test(value1)){
 				return value1.slice(0,-1)+value2
 			}else{
 				return value1.slice(0,-1)+','+value2
 			}
-			//return value1.replace(/(,?)\)$/,'$1')+unevalPHPString(op[1])+"=>"+value2+")"
-        case OP_GET_PROP:
-            return "lite_op_get_property("+value1+","+value2+")";
-        //case OP_QUESTION:
-        //   return "lite_op_and("+value1+","+value2+")";
+        case OP_QUESTION:
+        	return null;
         case OP_QUESTION_SELECT:
         /**
      ${a?b:c}
      ${a?b1?b2:b3:c}
      ${222+2|a?b1?b2:b3:c}
          */
-        	var test = this.stringify(arg1[1]);        	var value1 = this.stringify(arg1[2]);
-        	//alert(uneval([op,arg1,arg2]))
-        	switch(findELType(arg1[1])){
-        	case 'boolean':
-        	case 'number':
-        	break;
-        	default:
-	        	if(/^[\w+\$\.'"\[\]]$/.test(test)){
-	        		test = test +"=== '0' || "+test;
-	        	}else{
-	        		//TODO:可以展开
-	        		test = "lite_op_and("+test+",true)"
-	        	}
-        	}
+         	var el1 = el[1];
+        	var test = this.stringify(el1[1]);        	var value1 = this.stringify(el1[2]);
         	return test+'?'+value1+":"+value2;
-            //return "lite_op_select("+test+","+value1+","+value2+")";
-        case OP_AND:
-            return "lite_op_and("+value1+","+value2+")";
-        case OP_OR:
-            return "lite_op_or("+value1+","+value2+")";
-		case OP_ADD:
-			if(isNumberAdder(arg1)&&isNumberAdder(arg2)){
-				return value1+"+"+value2;
-			}else if(isStringAdder(arg1) && isStringAdder(arg2)){
-				return value1+"."+value2;
-			}
-            return "lite_op_add("+value1+","+value2+")";
 		}
-		if(this.getPriority(arg1)<this.getPriority(op)){
+		if(this.getPriority(el[1])<this.getPriority(el)){
 			value1 = '('+value1+')';
 		}
-		if(this.getPriority(op)>=this.getPriority(arg2)){
+		if(this.getPriority(el)>=this.getPriority(el[2])){
 			value2 = '('+value2+')';
 		}
 		return value1 + opc + value2;
@@ -148,13 +123,14 @@ ELTranslator.prototype = {
 	/**
 	 * 翻译前缀运算符
 	 */
-	stringifyPrefix:function(op){
-		var type = op[0];
-		var el1 = op[1];
+	stringifyPrefix:function(el){
+		var type = el[0];
+		var el1 = el[1];
 		var opc = findTokenText(type);
 		var value = this.stringify(el1);
-		if(OP_STATIC_GET_PROP == type) {
-			var key = op[3];
+		if(OP_GET_STATIC_PROP == type) {
+			var key = el[3];
+			print(uneval(el)+"-\n")
 			if(typeof key == 'number'){
 				return value+'['+key+']';
 			}else{
@@ -164,7 +140,7 @@ ELTranslator.prototype = {
 				return value+'['+stringifyJSON(''+key)+']';
 			}
 		}
-		if(this.getPriority(op)>=this.getPriority(el1)){
+		if(this.getPriority(el)>=this.getPriority(el1)){
 			value = '('+value+')';
 		}
 		return opc+value;
@@ -186,7 +162,7 @@ function walkTree(thiz,el){
 	}else{
 		var arg1 = el[1];
 		var arg2 = el[2];
-		if(op[0] == OP_STATIC_GET_PROP){
+		if(op[0] == OP_GET_STATIC_PROP){
 			if(arg1[0] == VALUE_VAR && arg1[1] == 'for'){
 				if(op[1] == 'index'){
 					thiz.forIndex = true;

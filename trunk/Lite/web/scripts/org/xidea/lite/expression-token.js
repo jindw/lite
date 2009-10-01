@@ -107,9 +107,7 @@ OP_ADD, "+", OP_SUB, "-", OP_MUL, "*", OP_DIV, "/",
 		OP_POS, "+",
 		OP_NEG,
 		"-",// +-
-		BRACKET_BEGIN, "(",
-		BRACKET_END,
-		")", // group
+		// group
 		VALUE_NEW_LIST, "[", VALUE_NEW_MAP, "{", OP_MAP_PUSH, ":",
 		OP_PARAM_JOIN,
 		",",// map list,
@@ -157,11 +155,11 @@ function getTokenLength(type) {
 	case OP_MAP_PUSH:
 		return 4;
 	default:
-		return getArgCount() + 1;
+		return getParamCount(type) + 1;
 	}
 }
 
-function getArgCount() {
+function getParamCount(type) {
 	var c = (type & BIT_PARAM) >> 6;
 	return c + 1;
 }

@@ -14,7 +14,7 @@ function VarStatus(code){
 	this.defs = [];
     this.forInfos = [];
     this.forStack = [];
-    code && doFind(code,vs);
+    code && doFind(code,this);
 }
 VarStatus.prototype = {
     setNeedReplacer : function(){
@@ -38,7 +38,7 @@ VarStatus.prototype = {
     	this.vars[n] = true;
     },
     vistEL : function(el){
-    	el = new PHPELTranslator(el);
+    	el = new ELTranslator(el);
     	var fs = this.forStack[this.forStack.length-1];
 	    if(fs){
 		    fs.index = fs.index || el.forIndex;
@@ -116,7 +116,7 @@ function doFind(code,vs){
         if(item instanceof Array){
 			switch (item[0]) {
 			case ADD_ON_TYPE:
-				if(item[3] == '#def'){
+				if(item[3] == 'org.xidea.lite.DefinePlugin'){
 					doFindDef(item,vs)
 				}
 				break;

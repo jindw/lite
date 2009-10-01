@@ -70,14 +70,14 @@ public abstract class JSProxy {
 		try {
 			if (this.isJSIAvailable()) {
 				translator = this
-						.eval("new ($import('org.xidea.lite:ResultTranslator',null))('"
+						.eval("new ($import('org.xidea.lite:Translator',null))('"
 								+ id + "')");
 			} else {
 				URL compressed = loader
 						.getResource("org/xidea/lite/template.js");
 
 				this.eval(compressed);
-				translator = this.eval("new ResultTranslator('" + id + "')");
+				translator = this.eval("new Translator('" + id + "')");
 
 			}
 			return this.wrapToJava(translator, ResultTranslator.class);

@@ -23,7 +23,7 @@ EIT.VALUE_NEW_MAP = -0x04;//{;
 //符号标记 ????? !!
 //9
 EIT.OP_GET_PROP = 17;//0 | 16 | 1;
-EIT.OP_STATIC_GET_PROP = 48;//32 | 16 | 0;
+EIT.OP_GET_STATIC_PROP = 48;//32 | 16 | 0;
 EIT.OP_INVOKE_METHOD = 81;//64 | 16 | 1;
 //8
 EIT.OP_NOT = 14;//0 | 14 | 0;
