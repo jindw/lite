@@ -159,7 +159,6 @@
 			<arg value="false" />
 			<arg value="-config.features" />
 			<arg value="org.xidea.lite:Compile" />
-			<arg value="-config.features" />
 			<arg value=":Debug" />
 
 			<arg value="-exports" />

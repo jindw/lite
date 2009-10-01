@@ -9,12 +9,14 @@ public abstract interface ExpressionToken {
 	//常量标记（String,Number,Boolean,Null）
 	public static final int VALUE_CONSTANTS = -0x0;//c;
 	public static final int VALUE_VAR = -0x01;//n;
+	@Deprecated
 	public static final int VALUE_LAZY = -0x02;
 	public static final int VALUE_NEW_LIST = -0x03;//[;
 	public static final int VALUE_NEW_MAP = -0x04;//{;
 	
 	//九：（最高级别的运算符号）
 	public static final int OP_GET_PROP = 0<<5 | 8<<1 |1;//.;
+	@Deprecated
 	public static final int OP_STATIC_GET_PROP = 1<<5 | 8<<1 |0;//.#;解析时可以忽略改节点，表达式优化的时候处理
 	public static final int OP_INVOKE_METHOD = 2<<5 | 8<<1 |1;//()
 
