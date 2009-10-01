@@ -5,14 +5,12 @@ import java.util.regex.Pattern;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xidea.el.Expression;
-import org.xidea.el.ExpressionFactory;
 import org.xidea.lite.parser.NodeParser;
 import org.xidea.lite.parser.ParseChain;
 import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.TextParser;
 
-public class ClientParser extends ELParser implements NodeParser<Element>, TextParser,
-		ExpressionFactory {
+public class ClientParser extends ELParser implements NodeParser<Element>, TextParser {
 	static Pattern SCRIPT_END_PATTERN = Pattern.compile("</script>",Pattern.CASE_INSENSITIVE);
 	protected ClientParser() {
 		super("client", true);
@@ -31,7 +29,7 @@ public class ClientParser extends ELParser implements NodeParser<Element>, TextP
 		String id = text.substring(p1 + 1, p2);
 		JSProxy proxy = JSProxy.newProxy();
 		ParseContext clientContext = new ParseContextImpl(context, proxy
-				.createJSTranslator(id), this);
+				.createJSTranslator(id), null);
 		ClientEnd ce = new ClientEnd();
 		clientContext.addTextParser(ce);
 		String subtext = text.substring(p2 + 1);
@@ -81,7 +79,7 @@ public class ClientParser extends ELParser implements NodeParser<Element>, TextP
 			String id =ParseUtil.getAttributeOrNull(el, "id","name");
 			JSProxy proxy = JSProxy.newProxy();
 			ParseContext clientContext = new ParseContextImpl(context, proxy
-					.createJSTranslator(id), this);
+					.createJSTranslator(id), null);
 			// 前端直接压缩吧？反正保留那些空白也没有调试价值
 			do {
 				clientContext.parse(next);

@@ -1,7 +1,11 @@
 this.addScript('expression-token.js',
 				[
 					//函数
-					'getTokenLength','findTokenType','toTokenString','findTokenText'
+					"getParamCount",'getTokenLength','findTokenType','toTokenString','findTokenText'
+					//BIT CONSTANTS
+					,"BIT_PRIORITY_SUB","BIT_PRIORITY","BIT_PARAM"
+					//VALUES
+					,"VALUE_CONSTANTS","VALUE_VAR","VALUE_NEW_LIST","VALUE_NEW_MAP"
 					//9
 					,"OP_GET_PROP","OP_GET_STATIC_PROP","OP_INVOKE_METHOD","OP_INVOKE_METHOD_WITH_STATIC_PARAM","OP_INVOKE_METHOD_WITH_ONE_PARAM"
 					//8
@@ -28,20 +32,44 @@ this.addScript('template.js',["Template","PLUGIN_DEFINE",'VAR_TYPE','XML_ATTRIBU
                 ,['XMLParser','org.xidea.jsidoc.util:$log','evaluate']);
 
 
-this.addScript('parse-context.js','ParseContext'
-                ,['xml-context.js','ParseChain']
-                ,["PLUGIN_DEFINE",'buildNativeJS','parseEL','stringifyJSON','VAR_TYPE','XML_ATTRIBUTE_TYPE','ELSE_TYPE','ADD_ON_TYPE','CAPTRUE_TYPE','IF_TYPE','EL_TYPE','XML_TEXT_TYPE','FOR_TYPE']);
-
-this.addScript('js-translator.js',["Translator",'buildNativeJS','checkEL']
-                ,0
-                ,['org.xidea.jsidoc.util:$log','VarStatus','VAR_TYPE','XML_ATTRIBUTE_TYPE','ELSE_TYPE','ADD_ON_TYPE','CAPTRUE_TYPE','IF_TYPE','EL_TYPE','XML_TEXT_TYPE','FOR_TYPE']);
-
 this.addScript('variable-finder.js','VarStatus'
                 ,0
-                ,["PLUGIN_DEFINE",'ExpressionTokenizer','org.xidea.jsidoc.util:$log','VALUE_VAR','OP_STATIC_GET_PROP','VALUE_LAZY','VAR_TYPE','XML_ATTRIBUTE_TYPE','ELSE_TYPE','ADD_ON_TYPE','CAPTRUE_TYPE','IF_TYPE','XML_TEXT_TYPE','EL_TYPE','FOR_TYPE']);
+                ,["ELTranslator",'ExpressionTokenizer','org.xidea.jsidoc.util:$log']);
 this.addScript('js-el-translator.js','ELTranslator'
                 ,0
-                ,["findTokenText","stringifyJSON",'ExpressionTokenizer','org.xidea.jsidoc.util:$log']);
+                ,['getPriority',"findTokenText","stringifyJSON",'ExpressionTokenizer','org.xidea.jsidoc.util:$log']);
+
+this.addScript('js-translator.js',["Translator"]
+                ,0
+                ,["ELTranslator",'VarStatus','org.xidea.jsidoc.util:$log']);
+
+
+this.addScript('expression.js',['evaluate','Expression']
+                ,0);
+
+this.addScript('json-tokenizer.js','JSONTokenizer');
+
+this.addScript('expression-tokenizer.js',['getPriority','ExpressionTokenizer']
+                ,'JSONTokenizer'
+                ,['org.xidea.jsidoc.util:$log']);
+
+this.addScript('find-el-end.js','findELEnd'
+                ,0
+                ,'org.xidea.jsidoc.util:$log');
+
+
+this.addScript('parse-context.js','ParseContext'
+                ,['xml-context.js','ParseChain']
+                ,['Translator','parseEL','stringifyJSON']);
+
+this.addScript('parse-chain.js','ParseChain');
+
+this.addScript('xml-core-parser.js','parseCoreNode'
+                ,0
+                ,['org.xidea.jsidoc.util:$log','selectNodes']);
+
+this.addScript('xml-default-parser.js','parseXMLNode'
+                ,0);
 
 this.addScript('xml-context.js',['loadXML','selectNodes','parseXMLText']
                 ,0
@@ -50,34 +78,12 @@ this.addScript('xml-context.js',['loadXML','selectNodes','parseXMLText']
 this.addScript('xml-parser.js','XMLParser'
                 ,'ParseContext'
                 ,['parseText','parseCoreNode','parseXMLNode']);
-
-this.addScript('expression.js',['evaluate','Expression']
-                ,0
-                ,['OP_LTEQ','OP_MAP_PUSH','OP_AND','OP_OR','VALUE_VAR','OP_ADD','OP_MUL','OP_GT','OP_GTEQ','OP_DIV','OP_NOTEQ','OP_INVOKE_METHOD','OP_QUESTION','OP_POS','VALUE_LAZY','OP_MOD','OP_EQ','OP_SUB','OP_GET_PROP','OP_NEG','OP_QUESTION_SELECT','OP_PARAM_JOIN','VALUE_CONSTANTS','OP_STATIC_GET_PROP','OP_NOT','OP_LT','VALUE_NEW_MAP','VALUE_NEW_LIST']);
-
-this.addScript('json-tokenizer.js','JSONTokenizer');
-
-
-this.addScript('parse-chain.js','ParseChain');
-
-this.addScript('xml-core-parser.js','parseCoreNode'
-                ,0
-                ,["PLUGIN_DEFINE",'org.xidea.jsidoc.util:$log','selectNodes','ELSE_TYPE','EL_TYPE']);
-
-this.addScript('xml-default-parser.js','parseXMLNode'
-                ,0
-                ,['XML_ATTRIBUTE_TYPE','EL_TYPE','XML_TEXT_TYPE']);
-
+                
 this.addScript('text-parser.js',['parseText','parseEL']
                 ,0
-                ,['checkEL','ExpressionTokenizer','org.xidea.jsidoc.util:$log','findELEnd','XML_ATTRIBUTE_TYPE','EL_TYPE','XML_TEXT_TYPE']);
-
-this.addScript('expression-tokenizer.js','ExpressionTokenizer'
-                ,'JSONTokenizer'
-                ,['org.xidea.jsidoc.util:$log','OP_SUB','OP_GET_PROP','OP_NEG','OP_MAP_PUSH','OP_QUESTION_SELECT','getTokenLength','OP_PARAM_JOIN','OP_AND','VALUE_VAR','OP_OR','VALUE_CONSTANTS','OP_ADD','OP_STATIC_GET_PROP','findTokenType','toTokenString','VALUE_NEW_MAP','OP_INVOKE_METHOD','VALUE_NEW_LIST','OP_QUESTION','OP_POS','VALUE_LAZY']);
-
-this.addScript('find-el-end.js','findELEnd'
-                ,0
-                ,'org.xidea.jsidoc.util:$log');
+                ,['ExpressionTokenizer','org.xidea.jsidoc.util:$log','findELEnd']);
 
 this.addScript('json.js',["stringifyJSON","parseJSON"]);
+
+this.addDependence("*","expression-token.js",true);
+this.addDependence("*","template.js",true);

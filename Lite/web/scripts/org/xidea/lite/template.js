@@ -38,12 +38,13 @@ function Template(data,parser){
         parser.parse(data);
         var code = parser.toCode();
         try{
-            data =  window.eval("("+code+")||null");
+        	//print(">>>"+code+"<<<\n")
+            data =  window.eval("("+(code||null)+")");
             data.toString=function(){//_$1 encodeXML
                 return code;
             }
         }catch(e){
-        	alert("翻译结果错误："+code)
+        	$log.error("翻译结果错误："+code)
             throw e;
         }
         this.compileData = data;

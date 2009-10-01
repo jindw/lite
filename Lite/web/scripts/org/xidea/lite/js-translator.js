@@ -58,61 +58,14 @@ function parseNativeEL(expression){
     return expression.replace(/^\s+|\s+$/g,'');;
 }
 
-function checkForExpression(expression){
-    if(/\bfor\b/.test(expression)){
-        try{
-            checkEL(expression);
-        }catch(e){
-            return true;
-        }
-    }
-}
-
-function safeForKeyReplacer(){
-    return SAFE_FOR_KEY;
-}
-function compileEL(el){
-    if(!/['"\/]/.test(el)){
-        return el.replace(/\bfor\b/g,safeForKeyReplacer)
-    }
-    el = " "+el;//ie6 split buf
-    var forPattern = /\bfor\b/g;
-    var codeBuf = el.split(forPattern);
-    var forBuf= el.match(forPattern);
-    if(forBuf){
-        try{
-            checkEL(codeBuf.join("f"));
-            while(codeBuf.length>1 ){
-                var codeTail = codeBuf.pop();
-                var codePre = codeBuf.pop();
-                var forTail = forBuf.pop();
-                codeBuf.push(codePre+forTail+codeTail);
-                try{
-                    checkEL(codeBuf.join("f"));
-                }catch(e){
-                    codeBuf.pop();
-                    codeBuf.push(codePre+SAFE_FOR_KEY+codeTail);
-                }
-            }
-            return codeBuf[0];
-        }catch(e){
-            $log.debug(e)
-            throw new Error("invalid el:"+el)
-        }
-    }
-}
 
 function getEL(el){
-    if(typeof el == 'string'){
-        return parseNativeEL(el);
-    }else if(el!=null){//else 可能没有 test 属性
-        throw new Error("json->el 尚未实现：（\n"+el);
-    }
+	return el && new ELTranslator(el)
 }
 /**
  * JS原生代码翻译器实现
  */
-function ResultTranslator(id){
+function Translator(id){
     this.id = id;
 }
 function java2jsList(list){
@@ -122,11 +75,13 @@ function java2jsList(list){
 	}
 	return list;
 }
-ResultTranslator.prototype = {
+Translator.prototype = {
 	translate:function(result){
 	    try{
 	        var list = java2jsList(result.toList());
-		    var code = buildNativeJS(list);
+		    var context = new Context(list);
+		    context.parse();
+		    var code = context.toString();
 		    new Function("function x(){"+code+"\n}");
 	    }catch(e){
 	        code = "alert('生成js代码失败：'+"+encodeString(e.message+'')+');';
@@ -136,11 +91,6 @@ ResultTranslator.prototype = {
 	getSupportFeatrues:function(){
 		return java.util.Arrays.asList(["compress"]);
 	}
-}
-function buildNativeJS(code){
-    var context = new Context(code);
-    context.parse();
-    return context.toString();
 }
 /**
  * <code>
@@ -165,7 +115,7 @@ function(context){
 	replace = function(c){return "&#"+c.charCodeAt()+";";}</code>
  */
 function Context(code){
-    var vs = this.vs = findStatus(code);
+    var vs = this.vs = new VarStatus(code);
     this.code = code;
     this.hasFor = vs.forInfos.length;
     this.needReplacer = vs.needReplacer;
