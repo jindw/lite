@@ -4,6 +4,16 @@
 == Lite1.1重构计划 ==
   * 逆波兰式=> 运算树
      一种尝试吧，原先的逆波兰式解析不但有延迟计算的麻烦，而且做代码翻译的时候还不现实
+     * 从够后运算树表现形式如下：
+{{{
+ * EL		=>[OP_TYPE,arg1<EL>,arg2<EL>|null,param?]
+ *  		=>[VALUE_TYPE,param?]
+ * 
+ * OP_TYPE	=>LITE_OP_TOKENS(....)
+ * VALUE_TYPE	=>LITE_VALUE_TOKEN(VALUE_CONSTANTS,VALUE_VAR,VALUE_NEW_LIST,VALUE_NEW_MAP)
+}}}
+     * 新标准下 VALUE_LAZY 值类型已不再需要。
+
   * 增加二级运算符优先级定义
      原先的算符优先级因为只有一级，而且还是相邻的不能自行扩充级别,新定义的标准会预留更多的扩充空间。
      * 重构后的OPID分配方式如下：
