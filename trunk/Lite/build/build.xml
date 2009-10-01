@@ -175,7 +175,7 @@
 	</target>
 
 	<target name="php-example">
-		<zip comment="批量编译:java -jar ./WEB-INF/lib/Template.jar -webRoot ." file="build/dest/php-example.zip" encoding="GBK">
+		<zip comment="批量编译:java -jar ./WEB-INF/lib/Template.jar -root ." file="build/dest/php-example.zip" encoding="GBK">
 			<fileset dir="web">
 				<include name="example/test.php" />
 				<include name="example/test.xhtml" />
