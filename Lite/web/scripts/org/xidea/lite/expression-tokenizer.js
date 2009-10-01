@@ -6,11 +6,15 @@
  * @version $Id: template.js,v 1.4 2008/02/28 14:39:06 jindw Exp $
  */
 
+//编译期间标记，compile time object
+var BRACKET_BEGIN = 0xFFFE;//([{;
+var BRACKET_END = 0xFFFF;//)]};
+
 var STATUS_BEGIN = -100;
 var STATUS_EXPRESSION = -101;
 var STATUS_OPERATOR = -102;
 var fns = {
-	toTokens :function() {
+	getResult :function() {
 		return this.expression;//.slice(0).reverse();// reversed
 	},
 
@@ -175,11 +179,9 @@ var fns = {
 			case '?':// ?:
 				this.addToken([OP_QUESTION]);
 				// this.addToken(OperatorToken.getToken(SKIP_QUESTION));
-				this.addToken([VALUE_LAZY]);
 				break;
 			case ':':// :(object_setter is skiped)
 				this.addToken([OP_QUESTION_SELECT]);
-				this.addToken([VALUE_LAZY]);
 				break;
 			case ',':// :(object_setter is skiped,',' should
 				// be skip)
@@ -227,11 +229,9 @@ var fns = {
 			}
 		} else if (op == "||") { // ||
 			this.addToken([OP_OR]);
-			this.addToken([VALUE_LAZY]);
 			// this.addToken(LazyToken.LAZY_TOKEN_END);
 		} else if (op == "&&") {// &&
 			this.addToken([OP_AND]);
-			this.addToken([VALUE_LAZY]);
 			// this.addToken(OperatorToken.getToken(SKIP_AND));
 		} else {
 			this.addToken([findTokenType(op)]);
@@ -323,8 +323,39 @@ function ExpressionTokenizer(value){
 	this.previousType = STATUS_BEGIN;
 	this.tokens = [];
 	this.parseEL();
-	this.expression = trimToken(right(this.tokens));
-	
+	this.expression = buildTree(trimToken(right(this.tokens)));
+}
+function buildTree(tokens){
+	var stack = [];
+    for(var i=0;i<tokens.length;i++){
+        var item = tokens[i]
+        var type = item[0];
+        switch(type){
+            case VALUE_CONSTANTS:
+            case VALUE_VAR:
+            case VALUE_NEW_LIST:
+            case VALUE_NEW_MAP:
+                stack.push(item);
+                break;
+            default://OP
+                if(type & 1){//两个操作数
+                    var arg2 = stack.pop();
+                    var arg1 = stack.pop();
+                    var el = [type,arg1,arg2]
+                }else{//一个操作树
+                	var arg1 = stack.pop();
+                	var el = [type,arg1]
+                }
+                switch(type){
+					case OP_GET_STATIC_PROP:
+					case OP_INVOKE_METHOD_WITH_STATIC_PARAM:
+					case OP_MAP_PUSH:
+					el.push(item[1]);
+                }
+                stack.push(el)
+        }
+    }
+    return stack[0];
 }
 ExpressionTokenizer.prototype = pt;
 
@@ -348,7 +379,7 @@ function right(tokens) {
 					if (operator[0] == BRACKET_BEGIN) {
 						break;
 					}
-					addRightOperator(rightStack, operator);
+					addRightToken(rightStack, operator);
 				}
 			} else {
 				while (buffer.length!=0
@@ -356,17 +387,17 @@ function right(tokens) {
 					var operator = buffer.pop();
 					// if (operator[0] !=
 					// BRACKET_BEGIN){
-					addRightOperator(rightStack, operator);
+					addRightToken(rightStack, operator);
 				}
 				buffer.push(item);
 			}
-		} else {// lazy begin value exp
+		} else {
 			addRightToken(rightStack, item);
 		}
 	}
 	while (buffer.length !=0) {
 		var operator = buffer.pop();
-		addRightOperator(rightStack, operator);
+		addRightToken(rightStack, operator);
 	}
 	return rightStack[rightStack.length-1];
 }
@@ -376,25 +407,6 @@ function trimToken(tokens){
 		token.length = getTokenLength(token[0]);
 	}
 	return tokens;
-}
-function addRightOperator(rightStack,
-		operator) {
-	switch (operator[0]) {
-	case OP_OR:
-	case OP_AND:
-	case OP_QUESTION:
-	case OP_QUESTION_SELECT:
-		var children = rightStack.pop();
-		var list = rightStack[rightStack.length-1];
-		if (children.length == 1) {
-			list[list.length - 1]= children[0];
-		} else {
-			var token = list[list.length - 1];
-			token[1]=trimToken(children);//.slice(0).reverse();;
-
-		}
-	}
-	addRightToken(rightStack, operator);
 }
 
 function addRightToken(rightStack,
@@ -409,8 +421,6 @@ function addRightToken(rightStack,
 	            token = [OP_STATIC_GET_PROP,previous[1]]; 
 	        }
 	    }
-	}else if (token[0] == VALUE_LAZY) {
-		rightStack.push([]);
 	}
 	token.toString = toTokenString;
 	list.push(token);
@@ -422,7 +432,7 @@ function getPriority(type) {
 	case BRACKET_END:
 		return Math.MIN_VALUE;
 	default:
-	    return type & 30;
+		return (type & BIT_PRIORITY)<<4 | (type & BIT_PRIORITY_SUB)>>12;
 	}
 }
 /**
