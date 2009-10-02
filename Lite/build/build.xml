@@ -97,6 +97,8 @@
 		<jar destfile="build/dest/TemplateRuntime.jar" compress="true">
 			<zipfileset src="build/dest/Template.jar">
 				<include name="org/xidea/**/*.*" />
+				<exclude name="org/xidea/el/parser/ExpressionTokenizer.*"/>
+				<exclude name="org/xidea/el/parser/ExpressionTokenizer$*"/>
 				<exclude name="**/*.java" />
 				<exclude name="**/*.js" />
 				<exclude name="org/xidea/lite/servlet/*.*" />

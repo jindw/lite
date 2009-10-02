@@ -91,55 +91,50 @@ var OP_MAP_PUSH = 0<<12 | 0<<8 | 1<<6 | 0<<2 | 1;
 
 
 
-var OP_LIST = [
-OP_ADD, "+", OP_SUB, "-", OP_MUL, "*", OP_DIV, "/",
-		OP_MOD,
-		"%",// +-*/%
-		OP_LT, "<", OP_GT, ">", OP_LTEQ, "<=", OP_GTEQ, ">=",
-		OP_EQ,
-		"==",// relative
-		OP_NOTEQ, "!=", OP_NOT, "!", OP_AND, "&&",
-		OP_OR,
-		"||",// boolean
-		OP_QUESTION, "?",
-		OP_QUESTION_SELECT,
-		":",// 3op
-		OP_POS, "+",
-		OP_NEG,
-		"-",// +-
-		// group
-		VALUE_NEW_LIST, "[", VALUE_NEW_MAP, "{", OP_MAP_PUSH, ":",
-		OP_PARAM_JOIN,
-		",",// map list,
-		OP_GET_PROP,
-		".",// prop
-		OP_INVOKE_METHOD,"#()" // , OP_GET_GLOBAL_METHOD, "#"//method call
-
-];
-
-function findTokenType(op) {
-	for (var i = 1; i < OP_LIST.length; i += 2) {
-		if (op == (OP_LIST[i])) {
-			return OP_LIST[i-1];
-		}
-	}
-	return -1;
+var TYPE_TOKEN_MAP = {}
+var TOKEN_TYPE_MAP = {}
+function addToken(type,token){
+	TYPE_TOKEN_MAP[type] = token;
+	TOKEN_TYPE_MAP[token] = type;
 }
-function findTokenText(op) {
-	for (var i = 0; i < OP_LIST.length; i += 2) {
-		if (op == (OP_LIST[i])) {
-			return OP_LIST[i+1];
-		}
-	}
-	return "#"+op;
-}
-function toTokenString(){
-	var data = this.slice(0);
-	var type = data[0];
-	data[0] = findTokenText(type) 
-	return type+","+data.join(',')+"\n";
-}
+//9
+addToken(OP_GET_PROP,".");
+//addToken(OP_GET_STATIC_PROP,".");
+//8
+addToken(OP_NOT,"!");
+addToken(OP_POS,"+");
+addToken(OP_NEG,"-");
+//7
+addToken(OP_MUL,"*");
+addToken(OP_DIV,"/");
+addToken(OP_MOD,"%");
+//6
+addToken(OP_ADD,"+");
+addToken(OP_SUB,"-");
+//5
+addToken(OP_LT,"<");
+addToken(OP_GT,">");
+addToken(OP_LTEQ,"<=");
+addToken(OP_GTEQ,">=");
+//4
+addToken(OP_EQ,"==");
+addToken(OP_NOTEQ,"!=");
+//3
+addToken(OP_AND,"&&");
+addToken(OP_OR,"||");
+//2
+addToken(OP_QUESTION,"?");
+addToken(OP_QUESTION_SELECT,":");//map 中的：被直接skip了
+//1
+addToken(OP_PARAM_JOIN,",");
 
+
+function findTokenType(token) {
+	return TOKEN_TYPE_MAP[token];
+}
+function findTokenText(type) {
+	return TYPE_TOKEN_MAP[type];
+}
 
 
 function getTokenLength(type) {

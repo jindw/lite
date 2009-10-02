@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.xidea.el.ExpressionSyntaxException;
 import org.xidea.el.ExpressionToken;
+import org.xidea.el.json.JSONEncoder;
 
 public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 	private int type;
@@ -46,24 +47,7 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 	}
 
 	public String toString() {
-		switch (type) {
-		case VALUE_CONSTANTS:
-			return "#" + getParam();
-		case VALUE_VAR:
-			return "$" + getParam();
-		case VALUE_NEW_LIST:
-			return "[]";
-		case VALUE_NEW_MAP:
-			return "{}";
-		default:
-			for (int i = 0; i < OP_LIST.length; i += 2) {
-				if (type == ((Integer) OP_LIST[i]).intValue()) {
-					String text = (String) OP_LIST[i + 1];
-					return text;
-				}
-			}
-		}
-		return "?" + type;
+		return JSONEncoder.encode(this);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -92,36 +76,6 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 			
 			return impl;
 		}
-	}
-
-	private static Object[] OP_LIST = { OP_ADD, "+", OP_SUB, "-", OP_MUL, "*",
-			OP_DIV, "/", OP_MOD,
-			"%",// +-*/%
-			OP_LT, "<", OP_GT, ">", OP_LTEQ, "<=", OP_GTEQ, ">=", OP_EQ,
-			"==",// relative
-			OP_NOTEQ, "!=", OP_NOT, "!", OP_AND, "&&", OP_OR,
-			"||",// boolean
-			OP_QUESTION, "?", OP_QUESTION_SELECT,
-			":",// 3op
-			OP_POS, "+",
-			OP_NEG,
-			"-",// +-
-			// BRACKET_BEGIN, "(", BRACKET_END,
-			// ")", // group
-			VALUE_NEW_LIST, "[", VALUE_NEW_MAP, "{", OP_MAP_PUSH, ":",
-			OP_PARAM_JOIN, ",",// map list,
-			OP_GET_PROP, ".",// prop
-			OP_INVOKE_METHOD, "#()" // , OP_GET_GLOBAL_METHOD, "#"//method call
-
-	};
-
-	public static int findType(String op) {
-		for (int i = 1; i < OP_LIST.length; i += 2) {
-			if (op.equals(OP_LIST[i])) {
-				return ((Integer) OP_LIST[i - 1]).intValue();
-			}
-		}
-		return -1;
 	}
 
 	@Override

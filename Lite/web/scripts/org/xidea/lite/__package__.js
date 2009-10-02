@@ -1,7 +1,7 @@
 this.addScript('expression-token.js',
 				[
 					//函数
-					"getParamCount",'getTokenLength','findTokenType','toTokenString','findTokenText'
+					"getParamCount",'getTokenLength','findTokenType','findTokenText'
 					//BIT CONSTANTS
 					,"BIT_PRIORITY_SUB","BIT_PRIORITY","BIT_PARAM"
 					//VALUES
