@@ -51,14 +51,6 @@ function checkEL(el){
     new Function("return "+el)
 }
 
-function parseNativeEL(expression){
-    if(checkForExpression(expression)){
-        expression = compileEL(expression)
-    }
-    return expression.replace(/^\s+|\s+$/g,'');;
-}
-
-
 function getEL(el){
 	return el && new ELTranslator(el)
 }
@@ -84,7 +76,12 @@ Translator.prototype = {
 		    var code = context.toString();
 		    new Function("function x(){"+code+"\n}");
 	    }catch(e){
-	        code = "alert('生成js代码失败：'+"+encodeString(e.message+'')+');';
+	    	var buf = [];
+	    	for(var n in e){
+	    		buf.push(n+':'+e[n]);
+	    	}
+	    	$log.error(e);
+	        code = "return ('生成js代码失败：'+"+encodeString(buf.join("\n"))+');';
 	    }
 		return "function"+(this.id?" "+this.id:'')+"(){"+code+"\n}"
 	},
@@ -152,18 +149,17 @@ Context.prototype = {
 	     	this.append('if("',n,'" in _$context){',n,'=_$context["',n,'"];}')
 	    }
 	    if(this.hasFor){
-	        this.append('function _$items(source,objectType){');
-	        this.append('    if(objectType){');
-	        this.append('        var result = [];');
-	        this.append('        for(objectType in source){');
-	        this.append('            result.push({key:objectType,value:source[objectType]})');
+	        this.append('function _$items(source,buf){');
+	        this.append('    if(buf){');
+	        this.append('        for(source in source){');
+	        this.append('            buf.push(source)');
 	        this.append('        }');
-	        this.append('        return result;');
+	        this.append('        return buf;');
 	        this.append('    }');
-	        this.append('    objectType = typeof source;');
-	        this.append('    return objectType == "number"? new Array(source):');
-	        this.append('        objectType == "string"?source.split(""):');
-	        this.append('        source instanceof Array?source:_$items(source,1);');
+	        this.append('    buf = typeof source');
+	        this.append('    return source instanceof Array?source:' )
+	        this.append('        buf == "number"? Array(source):');
+	        this.append('        buf == "string"? source.split(""):_$items(source,[]);');
 	        this.append('}');
 	    }
 	    if(this.needReplacer){

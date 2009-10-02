@@ -34,7 +34,7 @@ this.addScript('template.js',["Template","PLUGIN_DEFINE",'VAR_TYPE','XML_ATTRIBU
 
 this.addScript('variable-finder.js','VarStatus'
                 ,0
-                ,["ELTranslator",'ExpressionTokenizer','org.xidea.jsidoc.util:$log']);
+                ,["evaluate","ELTranslator",'ExpressionTokenizer','org.xidea.jsidoc.util:$log']);
 this.addScript('js-el-translator.js','ELTranslator'
                 ,0
                 ,['getPriority',"findTokenText","stringifyJSON",'ExpressionTokenizer','org.xidea.jsidoc.util:$log']);

@@ -68,7 +68,12 @@ public class ExpressionImpl implements Expression ,ReferenceExpression {
 
 	@Override
 	public String toString() {
-		return source == null?JSONEncoder.encode(expression):source;
+		if(source == null){
+			//TODO:jsel stringify
+			return JSONEncoder.encode(expression);
+		}else{
+			return source;
+		}
 	}
 
 }

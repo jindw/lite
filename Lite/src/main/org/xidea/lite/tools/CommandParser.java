@@ -15,13 +15,15 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.xidea.el.impl.ExpressionImpl;
+import org.xidea.el.impl.ExpressionFactoryImpl;
+import org.xidea.el.ExpressionFactory;
 import org.xidea.el.Reference;
 import org.xidea.el.ReferenceExpression;
 
 public class CommandParser {
 	private static final Log log = LogFactory.getLog(CommandParser.class);
 
+	private static final ExpressionFactory factory = ExpressionFactoryImpl.getInstance();
 	public static final Map<Class<?>, Convertor<? extends Object>> CONVERTOR_MAP;
 	public Map<Class<?>, Convertor<? extends Object>> convertorMap = CONVERTOR_MAP;
 
@@ -61,7 +63,7 @@ public class CommandParser {
 		for (String name : params.keySet()) {
 			if (name!=null && name.length() > 0) {
 				if (Character.isJavaIdentifierStart(name.charAt(0))) {
-					ReferenceExpression el = new ExpressionImpl(name);
+					ReferenceExpression el = (ReferenceExpression) factory.create(name);
 					Reference result = el.prepare(context);
 					if (result != null && result.getType() != null) {
 						Class<? extends Object> type = result.getType();

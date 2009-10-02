@@ -4,6 +4,7 @@ package org.xidea.el.test.json;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.xidea.el.impl.ExpressionFactoryImpl;
 import org.xidea.el.impl.ExpressionImpl;
 
 public class JSONNumberParserTest {
@@ -30,7 +31,7 @@ public class JSONNumberParserTest {
 	}
 
 	public void doTestNumber(Object expected,String json){
-		Assert.assertEquals(expected, new ExpressionImpl(json).evaluate(null));
-		Assert.assertEquals(expected, new ExpressionImpl(json+" ").evaluate(null));
+		Assert.assertEquals(expected, ((ExpressionImpl)(ExpressionFactoryImpl.getInstance().create(json))).evaluate(null));
+		Assert.assertEquals(expected, ((ExpressionImpl)ExpressionFactoryImpl.getInstance().create(json+" ")).evaluate(null));
 	}
 }

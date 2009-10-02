@@ -71,7 +71,7 @@ function _evaluate(item,context){
     switch(type){
     //op
     case OP_GET_STATIC_PROP:
-        arg2 = item[1]
+        arg2 = item[3]
     case OP_GET_PROP:
         return new PropertyValue(arg1,arg2);
     case OP_NOT:
