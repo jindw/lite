@@ -176,13 +176,6 @@ var fns = {
 						this.status == STATUS_EXPRESSION ? OP_SUB
 								: OP_NEG]);
 				break;
-			case '?':// ?:
-				this.addToken([OP_QUESTION]);
-				// this.addToken(OperatorToken.getToken(SKIP_QUESTION));
-				break;
-			case ':':// :(object_setter is skiped)
-				this.addToken([OP_QUESTION_SELECT]);
-				break;
 			case ',':// :(object_setter is skiped,',' should
 				// be skip)
 				if (!this.isMapMethod()) {
@@ -227,12 +220,6 @@ var fns = {
 			default:
 				this.addToken([findTokenType(op)]);
 			}
-		} else if (op == "||") { // ||
-			this.addToken([OP_OR]);
-			// this.addToken(LazyToken.LAZY_TOKEN_END);
-		} else if (op == "&&") {// &&
-			this.addToken([OP_AND]);
-			// this.addToken(OperatorToken.getToken(SKIP_AND));
 		} else {
 			this.addToken([findTokenType(op)]);
 		}
@@ -422,7 +409,6 @@ function addRightToken(rightStack,
 	        }
 	    }
 	}
-	token.toString = toTokenString;
 	list.push(token);
 }
 

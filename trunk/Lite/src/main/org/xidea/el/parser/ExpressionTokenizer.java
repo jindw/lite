@@ -6,6 +6,17 @@ import static org.xidea.el.ExpressionToken.BIT_PRIORITY;
 import static org.xidea.el.ExpressionToken.BIT_PRIORITY_SUB;
 import static org.xidea.el.ExpressionToken.OP_AND;
 import static org.xidea.el.ExpressionToken.OP_GET_PROP;
+
+import static org.xidea.el.ExpressionToken.OP_MUL;
+import static org.xidea.el.ExpressionToken.OP_DIV;
+import static org.xidea.el.ExpressionToken.OP_MOD;
+import static org.xidea.el.ExpressionToken.OP_LT;
+import static org.xidea.el.ExpressionToken.OP_GT;
+import static org.xidea.el.ExpressionToken.OP_LTEQ;
+import static org.xidea.el.ExpressionToken.OP_GTEQ;
+import static org.xidea.el.ExpressionToken.OP_EQ;
+import static org.xidea.el.ExpressionToken.OP_NOTEQ;
+import static org.xidea.el.ExpressionToken.OP_NOT;
 import static org.xidea.el.ExpressionToken.OP_INVOKE_METHOD;
 import static org.xidea.el.ExpressionToken.OP_MAP_PUSH;
 import static org.xidea.el.ExpressionToken.OP_NEG;
@@ -23,9 +34,11 @@ import static org.xidea.el.ExpressionToken.VALUE_VAR;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.xidea.el.ExpressionSyntaxException;
 import org.xidea.el.ExpressionToken;
@@ -335,20 +348,11 @@ public class ExpressionTokenizer extends JSONTokenizer {
 				addToken(new TokenImpl(
 						status == Status.STATUS_EXPRESSION ? OP_ADD : OP_POS,
 						null));
-				// addToken(OperatorToken.getToken(SKIP_AND));
 				break;
 			case '-':
 				addToken(new TokenImpl(
 						status == Status.STATUS_EXPRESSION ? OP_SUB : OP_NEG,
 						null));
-				// addToken(OperatorToken.getToken(SKIP_AND));
-				break;
-			case '?':// ?:
-				addToken(new TokenImpl(OP_QUESTION, null));
-				// addToken(OperatorToken.getToken(SKIP_QUESTION));
-				break;
-			case ':':// :(object_setter is skiped)
-				addToken(new TokenImpl(OP_QUESTION_SELECT, null));
 				break;
 			case ',':// :(object_setter is skiped,',' should
 				// be skip)
@@ -365,19 +369,55 @@ public class ExpressionTokenizer extends JSONTokenizer {
 					break;
 				}
 			default:
-				addToken(new TokenImpl(TokenImpl.findType(op), null));
+				addToken(new TokenImpl(TOKEN_MAP.get(op), null));
 			}
-		} else if (op.equals("||")) { // ||
-			addToken(new TokenImpl(OP_OR, null));
-			// addToken(LazyToken.LAZY_TOKEN_END);
-		} else if (op.equals("&&")) {// &&
-			addToken(new TokenImpl(OP_AND, null));
-			// addToken(OperatorToken.getToken(SKIP_AND));
 		} else {
-			addToken(new TokenImpl(TokenImpl.findType(op), null));
+			addToken(new TokenImpl(TOKEN_MAP.get(op), null));
 		}
 
 	}
+
+	private static final Map<String, Integer> TOKEN_MAP = new HashMap<String, Integer>();
+	static{
+
+		//9
+		TOKEN_MAP.put(".",OP_GET_PROP);
+		//8
+		TOKEN_MAP.put("!",OP_NOT);
+//		TOKEN_MAP.put("+",OP_POS);
+//		TOKEN_MAP.put("-",OP_NEG);
+		//7
+		TOKEN_MAP.put("*",OP_MUL);
+		TOKEN_MAP.put("/",OP_DIV);
+		TOKEN_MAP.put("%",OP_MOD);
+		//6
+//		TOKEN_MAP.put("+",OP_ADD);
+//		TOKEN_MAP.put("-",OP_SUB);
+		//5
+		TOKEN_MAP.put("<",OP_LT);
+		TOKEN_MAP.put(">",OP_GT);
+		TOKEN_MAP.put("<=",OP_LTEQ);
+		TOKEN_MAP.put(">=",OP_GTEQ);
+		//4
+		TOKEN_MAP.put("==",OP_EQ);
+		TOKEN_MAP.put("!=",OP_NOTEQ);
+		//3
+		TOKEN_MAP.put("&&",OP_AND);
+		TOKEN_MAP.put("||",OP_OR);
+		//2
+		TOKEN_MAP.put("?",OP_QUESTION);
+		TOKEN_MAP.put(":",OP_QUESTION_SELECT);//map 中的：被直接skip了
+		//1
+		TOKEN_MAP.put(",",OP_PARAM_JOIN);
+
+		//BRACKET_BEGIN
+		//BRACKET_END
+		//VALUE_NEW_LIST
+		//VALUE_NEW_MAP
+		//OP_MAP_PUSH
+		//OP_INVOKE_METHOD
+	}
+
 
 	private void addToken(TokenImpl token) {
 		switch (token.getType()) {
