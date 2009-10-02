@@ -1,8 +1,6 @@
 package org.xidea.el.fn;
 
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Collections;
@@ -26,52 +24,33 @@ import org.xidea.el.json.JSONTokenizer;
  */
 public abstract class ECMA262Impl {
 	@SuppressWarnings("unchecked")
-	private final static Class[] arrayClasses = new Class[] { List.class,
+	private final static Class[] ARRAY_CLASSES = new Class[] { List.class,
 			Object[].class, int[].class, float[].class, double[].class,
 			long[].class, short[].class, byte[].class, char[].class };
 
 	public static void setup(OperationStrategyImpl calculater) {
-		setup(calculater, JSArray.class, arrayClasses);
-		setup(calculater, JSNumber.class, Number.class);
+		JSObject.setup(calculater, JSArray.class, ARRAY_CLASSES);
+		JSObject.setup(calculater, JSNumber.class, Number.class);
 	}
 
-	@SuppressWarnings("unchecked")
-	private static void setup(OperationStrategyImpl calculater, Class impl,
-			Class... forClass) {
-		Field[] fields = impl.getFields();
-		for (Field field : fields) {
-			if (field.getType().isAssignableFrom(Invocable.class)
-					&& (field.getModifiers() & Modifier.STATIC) > 0) {
-				try {
-					Invocable inv = (Invocable) field.get(null);
-					for (Class type : forClass) {
-						calculater.addMethod(type, field.getName(), inv);
-					}
-				} catch (Exception e) {
-				}
+	public static void setup(Map<String, Object> globalMap) {
+		globalMap.put("encodeURI", new URI(true));
+		globalMap.put("decodeURI", new URI(false));
 
-			}
-		}
+		globalMap.put("encodeURIComponent", new URIComponent(true));
+		globalMap.put("decodeURIComponent", new URIComponent(false));
 
+		globalMap.put("isFinite", new IsFiniteNaN(true));
+		globalMap.put("isNaN", new IsFiniteNaN(false));
+
+		globalMap.put("parseFloat", new ParseNumber(true));
+		globalMap.put("parseInt", new ParseNumber(false));
+		globalMap.put("Math", math);
+		globalMap.put("Infinity", Double.POSITIVE_INFINITY);
+		globalMap.put("NaN", Double.NaN);
+		globalMap.put("JSON", new JSON());
 	}
 
-	public static void setup(Map<String, Object> globalInvocableMap) {
-		globalInvocableMap.put("encodeURI", new URI(true));
-		globalInvocableMap.put("decodeURI", new URI(false));
-
-		globalInvocableMap.put("encodeURIComponent", new URIComponent(true));
-		globalInvocableMap.put("decodeURIComponent", new URIComponent(false));
-
-		globalInvocableMap.put("isFinite", new IsFiniteNaN(true));
-		globalInvocableMap.put("isNaN", new IsFiniteNaN(false));
-
-		globalInvocableMap.put("parseFloat", new ParseNumber(true));
-		globalInvocableMap.put("parseInt", new ParseNumber(false));
-		globalInvocableMap.put("Math", math);
-		globalInvocableMap.put("Infinity", Double.POSITIVE_INFINITY);
-		globalInvocableMap.put("NaN", Double.NaN);
-		globalInvocableMap.put("JSON", new JSON());
-	}
 
 	private static NumberArithmetic na = new NumberArithmetic();
 
@@ -456,7 +435,7 @@ public abstract class ECMA262Impl {
 		return ToNumber(value);
 	}
 
-	public static Integer getIntArg(Object[] args, int index,
+	public static int getIntArg(Object[] args, int index,
 			Integer defaultValue) {
 		Number value = getNumberArg(args, index, defaultValue);
 		return value.intValue();

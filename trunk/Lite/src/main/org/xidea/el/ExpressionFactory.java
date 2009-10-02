@@ -18,4 +18,6 @@ public interface ExpressionFactory {
 	 * @return
 	 */
 	public Object parse(String expression);
+	
+//	public String stringify(Object el);
 }

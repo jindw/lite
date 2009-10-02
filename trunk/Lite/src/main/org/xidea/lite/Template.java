@@ -242,7 +242,7 @@ public class Template {
 		try {// hack return 代替ifelse，减少一些判断
 
 			if (list instanceof Map) {
-				list = ((Map) list).entrySet();
+				list = ((Map) list).keySet();
 			}
 			if (list instanceof Collection) {
 				Collection<Object> items = (Collection<Object>) list;

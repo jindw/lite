@@ -12,6 +12,7 @@ import org.xidea.el.ExpressionFactory;
 import org.xidea.el.ExpressionSyntaxException;
 import org.xidea.el.ExpressionToken;
 import org.xidea.el.fn.ECMA262Impl;
+import org.xidea.el.json.JSONEncoder;
 import org.xidea.el.parser.ExpressionTokenizer;
 import org.xidea.el.parser.TokenImpl;
 
@@ -44,9 +45,9 @@ public class ExpressionFactoryImpl implements ExpressionFactory {
 			return new ExpressionImpl((String) elo);
 		} else {
 			ExpressionToken el;
-//			if (elo instanceof ExpressionToken) {
-//				el = (ExpressionToken) elo;
-//			} else 
+			if (elo instanceof ExpressionToken) {
+				el = (ExpressionToken) elo;
+			} else 
 			{
 				el = TokenImpl.toToken((List<Object>) elo);
 			}
@@ -57,7 +58,7 @@ public class ExpressionFactoryImpl implements ExpressionFactory {
 	}
 
 	private Expression getOptimizedExpression(ExpressionToken el) {
-		Expression ressult = OptimizeExpressionImpl.create(el,
+		Expression ressult = OptimizeExpressionImpl.create(this,el,
 				DEFAULT_CALCULATER, globals);
 		return ressult != null ? ressult : new ExpressionImpl(null, el,
 				DEFAULT_CALCULATER, globals);
@@ -128,6 +129,10 @@ public class ExpressionFactoryImpl implements ExpressionFactory {
 		ExpressionToken tokens = new ExpressionTokenizer(el).getResult();
 		return tokens;
 	}
+
+	public String stringify(Object el) {
+		return JSONEncoder.encode(el);
+	}
 //
 //	private void check(ExpressionToken[] list) {
 //		int index = list.length;
@@ -147,4 +152,5 @@ public class ExpressionFactoryImpl implements ExpressionFactory {
 //			throw new ExpressionSyntaxException("表达式最终计算结果数不为1");
 //		}
 //	}
+
 }

@@ -69,7 +69,7 @@
 			</fileset>
 		</delete>
 
-		<echo file="build/dest/jslite/__package__.js">this.addScript("template.js",["Template","ParseContext","XMLParser","ResultTranslator"])</echo>
+		<echo file="build/dest/jslite/__package__.js">this.addScript("template.js",["Template","ParseContext","XMLParser","ELTranslator","Translator"])</echo>
 		<jar destfile="build/dest/Template.jar" compress="true">
 			<manifest>
 				<attribute name="Main-Class" value="org.xidea.lite.tools.LiteCompiler" />
@@ -131,7 +131,7 @@
 
 	<target name="compress" depends="init">
 		<echo>—πÀıJSLite µœ÷</echo>
-		<java classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
+		<java failonerror="true" classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
 			<arg value="-scriptBase" />
 			<arg value="${basedir}/web/scripts" />
 
@@ -145,7 +145,8 @@
 			<arg value="org.xidea.lite:ParseContext" />
 			<arg value="org.xidea.lite:XMLParser" />
 			<arg value="org.xidea.lite:ParseContext" />
-			<arg value="org.xidea.lite:ResultTranslator" />
+			<arg value="org.xidea.lite:ELTranslator" />
+			<arg value="org.xidea.lite:Translator" />
 
 			<arg value="-outputExported" />
 			<arg value="${basedir}/build/dest/jslite/template.js" />
@@ -192,7 +193,7 @@
 	</target>
 
 	<target name="static">
-		<java classname="org.xidea.lite.tools.Build" classpath="web/WEB-INF/classes;web/WEB-INF/lib/commons-logging-1.0.4.jar;web/WEB-INF/lib/js.jar;web/WEB-INF/lib/JSI.jar">
+		<java classname="org.xidea.lite.tools.LiteCompiler" classpath="web/WEB-INF/classes;web/WEB-INF/lib/commons-logging-1.0.4.jar;web/WEB-INF/lib/js.jar;web/WEB-INF/lib/JSI.jar">
 			<arg value="-webRoot" />
 			<arg value="${basedir}/web/" />
 

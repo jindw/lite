@@ -3,6 +3,7 @@ package org.xidea.el.impl;
 import java.util.ArrayList;
 import java.util.Map;
 
+import org.xidea.el.ExpressionFactory;
 import org.xidea.el.OperationStrategy;
 import org.xidea.el.Expression;
 import org.xidea.el.ExpressionToken;
@@ -12,7 +13,7 @@ public class OptimizeExpressionImpl extends ExpressionImpl {
 
 	protected Object name;
 
-	public OptimizeExpressionImpl(ExpressionToken expression,
+	public OptimizeExpressionImpl(ExpressionFactory factory,ExpressionToken expression,
 			OperationStrategy calculater, Map<String, Object> globalMap, Object name) {
 		super(null, expression, calculater, globalMap);
 		this.name = name;
@@ -35,10 +36,10 @@ public class OptimizeExpressionImpl extends ExpressionImpl {
 		return valueStack.get(name);
 	}
 
-	public static Expression create(final ExpressionToken el,
+	public static Expression create(ExpressionFactory factory,final ExpressionToken el,
 			OperationStrategy calculater, Map<String, Object> globals) {
 		if (el.getType() == ExpressionToken.VALUE_VAR) {
-			return new OptimizeExpressionImpl(el, calculater, globals,
+			return new OptimizeExpressionImpl(factory,el, calculater, globals,
 					el.getParam());
 		}else if (el.getType() == ExpressionToken.OP_GET_STATIC_PROP) {
 					ArrayList<Object> props = new ArrayList<Object>();
@@ -60,10 +61,10 @@ public class OptimizeExpressionImpl extends ExpressionImpl {
 			final Object[] properties = props.toArray();
 			switch (properties.length) {
 			case 1:
-				return new PropertyExpression(el, calculater, globals,
+				return new PropertyExpression(factory,el, calculater, globals,
 						baseName,properties[0]);
 			default:
-				return new PropertiesExpression(el, calculater, globals,
+				return new PropertiesExpression(factory,el, calculater, globals,
 						baseName,properties);
 			}
 
@@ -73,10 +74,10 @@ public class OptimizeExpressionImpl extends ExpressionImpl {
 
 	static class PropertyExpression extends OptimizeExpressionImpl {
 		private Object key;
-		public PropertyExpression(ExpressionToken expression,
+		public PropertyExpression(ExpressionFactory factory,ExpressionToken expression,
 				OperationStrategy calculater, Map<String, Object> globalMap,
 				Object name, Object key) {
-			super(expression, calculater, globalMap, name);
+			super(factory,expression, calculater, globalMap, name);
 			this.key = key;
 		}
 		protected Object compute(ValueStack valueStack) {
@@ -87,10 +88,10 @@ public class OptimizeExpressionImpl extends ExpressionImpl {
 
 	static class PropertiesExpression extends PropertyExpression {
 		private Object[] keys;
-		public PropertiesExpression(ExpressionToken expression,
+		public PropertiesExpression(ExpressionFactory factory,ExpressionToken expression,
 				OperationStrategy calculater, Map<String, Object> globalMap,
 				Object name, Object[] keys) {
-			super(expression, calculater, globalMap, name,null);
+			super(factory,expression, calculater, globalMap, name,null);
 			this.keys = keys;
 		}
 		protected Object compute(ValueStack valueStack) {

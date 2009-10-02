@@ -5,7 +5,7 @@
  * @author jindw
  * @version $Id: template.js,v 1.4 2008/02/28 14:39:06 jindw Exp $
  */
-
+var ID_PATTERN = /^[a-zA-Z_\$]\w*$/;
 /**
  * 将Lite的逆波兰式序列转化为php表达式
  */
@@ -74,15 +74,13 @@ ELTranslator.prototype = {
 		switch(type){
 		case OP_INVOKE_METHOD:
 			value2 = value2.slice(1,-1);
-			var el1 = el[1]
-			if(el1[0] == VALUE_VAR){//globals
-				return value1+'('+value2+')';
-			}else if(el1[0] == OP_GET_STATIC_PROP){//members
-				var memberName = el1[3];
-				var value1 = this.stringify(el1[1]);
-				return value1+"."+memberName+"("+value2+')';
+			return value1+"("+value2+')';
+		case OP_GET_STATIC_PROP:
+			var memberName = el[3];
+			if(ID_PATTERN.test(memberName)){
+				return value1+'.'+memberName
 			}else{
-				throw Error("只能支持全局函数调用和静态属性函数调用");
+				return value1+'['+stringifyJSON(memberName)+']';
 			}
 		case OP_GET_PROP:
 			return value1+'['+value2+']';
@@ -130,11 +128,10 @@ ELTranslator.prototype = {
 		var value = this.stringify(el1);
 		if(OP_GET_STATIC_PROP == type) {
 			var key = el[3];
-			print(uneval(el)+"-\n")
 			if(typeof key == 'number'){
 				return value+'['+key+']';
 			}else{
-				if(/^[a-zA-Z_\$]\w*$/.test(key)){
+				if(ID_PATTERN.test(key)){
 					return value+'.'+key;
 				}
 				return value+'['+stringifyJSON(''+key)+']';

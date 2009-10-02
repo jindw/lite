@@ -84,7 +84,7 @@ function doFindDef(item,pvs){
         $log.error(error)
         throw new Error(error)
     }
-	var el = this.eval('('+item[2]+')');
+	var el = evaluate(item[2],{});
 	pvs.addVar(el.name);
 	var args = el.params.slice(0);
 	var vs = new VarStatus(pvs);

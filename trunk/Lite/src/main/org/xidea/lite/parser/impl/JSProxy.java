@@ -78,7 +78,6 @@ public abstract class JSProxy {
 
 				this.eval(compressed);
 				translator = this.eval("new Translator('" + id + "')");
-
 			}
 			return this.wrapToJava(translator, ResultTranslator.class);
 		} catch (Exception e) {
