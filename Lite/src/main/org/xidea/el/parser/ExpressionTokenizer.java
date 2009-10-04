@@ -173,7 +173,7 @@ public class ExpressionTokenizer extends JSONTokenizer {
 		list.add(token);
 	}
 
-	private int getPriority(int type) {
+	protected int getPriority(int type) {
 		switch (type) {
 		case BRACKET_BEGIN:
 		case BRACKET_END:
