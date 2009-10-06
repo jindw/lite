@@ -16,7 +16,7 @@ public class HotTemplateAction extends TemplateAction {
 		
 	};
 
-	public HotTemplateAction(URL file) throws MalformedURLException {
+	public HotTemplateAction(URI file) throws MalformedURLException {
 		super(file);
 	}
 

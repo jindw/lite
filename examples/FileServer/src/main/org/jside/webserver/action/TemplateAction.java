@@ -12,24 +12,21 @@ import org.jside.webserver.RequestContext;
 import org.xidea.lite.TemplateEngine;
 
 public class TemplateAction extends TemplateEngine {
-	protected URL root = this.getClass().getResource("./");
 	private String contentType = "text/html;charset=";
-	private boolean fromWeb = true;
+	private Object root;
 
-	public static TemplateAction create(URL root, boolean fromWeb) {
+	public static TemplateAction create(URI root) {
 		TemplateAction ta;
 		try {
 			ta = new HotTemplateAction(root);
 		} catch (Throwable w) {
 			ta = new TemplateAction(root);
 		}
-		ta.fromWeb = fromWeb;
 		return ta;
 	}
 
-	public TemplateAction(URL root) {
-		super((URI) null);
-		this.reset(root);
+	public TemplateAction(URI root) {
+		super(root);
 	}
 
 	public void setContentType(String contentType) {
@@ -49,30 +46,22 @@ public class TemplateAction extends TemplateEngine {
 			}
 		}
 		render(context.getRequestURI(), context.getValueStack(), out);
-//		HttpUtil.printResource(out, contentType);
 	}
 
-	public void reset(RequestContext requestContext) {
+	protected void reset(RequestContext requestContext) {
 		URL newRoot = requestContext.getResource("/");
 		if (newRoot != null) {
 			if (!newRoot.equals(root)) {
-				reset(newRoot);
+				root = newRoot;
+				templateMap.clear();
 			}
 		}
 	}
 
-	public URL getRoot() {
-		return root;
-	}
-
-	public void reset(URL newRoot) {
-		templateMap.clear();
-		root = newRoot;
-	}
-
 	protected URI getResource(String pagePath) {
 		try {
-			if (fromWeb) {
+			
+			if (baseURI == null) {
 				RequestContext context = RequestContext.get();
 				URL url = context.getResource(pagePath);
 				if (url != null) {
@@ -82,9 +71,11 @@ public class TemplateAction extends TemplateEngine {
 						return uri;
 					}
 				}
-			}
-			if (root != null) {
-				URI uri = new URL(root, pagePath).toURI();
+			}else{
+				if(pagePath.startsWith("/")){
+					pagePath = pagePath.substring(1);
+				}
+				URI uri = new URL(baseURI.toURL(), pagePath).toURI();
 				uri = toExistResource(uri);
 				if (uri != null) {
 					return uri;
