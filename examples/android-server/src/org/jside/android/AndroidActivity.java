@@ -1,4 +1,4 @@
-package org.jside.android.fileserver;
+package org.jside.android;
 
 import java.net.MalformedURLException;
 
@@ -15,8 +15,8 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 
-public class AndroidServer extends Activity{
-	static AndroidServer instance;
+public class AndroidActivity extends Activity{
+	static AndroidActivity instance;
 	/** Called when the activity is first created. */
 	private org.jside.fileserver.FileServer ws;
 
@@ -32,7 +32,6 @@ public class AndroidServer extends Activity{
 		setContentView(R.layout.main);
 		Button exit = (Button) super.findViewById(R.id.exit);
 		exit.setOnClickListener(new OnClickListener() {
-			@Override
 			public void onClick(View v) {
 				System.exit(0);
 			}

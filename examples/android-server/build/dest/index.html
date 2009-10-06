@@ -1,0 +1,178 @@
+<html>
+<head>
+<meta content="text/html; charset=UTF-8" http-equiv="content-type"/>
+<title>Andriod 文件管理</title>
+</head>
+<body>
+<!--//--><script>//<![CDATA[
+function renderDelete() {function _$replacer(k) {return k in _$context ? _$context[k] : this[k];}var _$context = arguments[0];var _$out = [];var name = _$replacer("name");var path = _$replacer("path");_$replacer = function (c) {return "&#" + c.charCodeAt() + ";";};function _$replace(text) {return String(text).replace(/[<>&"]/g, _$replacer);}_$out.push("\n<form action=\"");_$out.push(_$replace(path));_$out.push(_$replace(name));_$out.push(";delete\" method=\"POST\">\n<lable for=\"fileName\">\u6587\u4ef6\u540d:</lable>\n<input id=\"fileName\" readyonly=\"true\"");var _$0 = name.length;if (_$0 != null) {_$out.push(" size=\"", _$replace(_$0), "\"");}_$out.push(" type=\"text\"");var _$0 = name;if (_$0 != null) {_$out.push(" value=\"", _$replace(_$0), "\"");}_$out.push("/>\n<input type=\"submit\" value=\"\u786e\u8ba4\u5220\u9664\"/>\n<input onclick=\"closeDialog()\" type=\"reset\" value=\"\u53d6\u6d88\"/>\n</form>\n");return _$out.join("");}//]]></script>
+
+<!--//--><script>//<![CDATA[
+function renderRename() {function _$replacer(k) {return k in _$context ? _$context[k] : this[k];}var _$context = arguments[0];var _$out = [];var name = _$replacer("name");var path = _$replacer("path");_$replacer = function (c) {return "&#" + c.charCodeAt() + ";";};function _$replace(text) {return String(text).replace(/[<>&"]/g, _$replacer);}_$out.push("\n<form action=\"");_$out.push(_$replace(path));_$out.push(_$replace(name));_$out.push(";rename\" method=\"POST\">\n<lable for=\"newName\">\u65b0\u540d\u5b57:</lable>\n<input id=\"newName\" name=\"name\"");var _$0 = name.length + 5;if (_$0 != null) {_$out.push(" size=\"", _$replace(_$0), "\"");}_$out.push(" type=\"text\"");var _$0 = name;if (_$0 != null) {_$out.push(" value=\"", _$replace(_$0), "\"");}_$out.push("/>\n<input type=\"submit\" value=\"\u786e\u8ba4\u91cd\u547d\u540d\"/>\n<input onclick=\"closeDialog()\" type=\"reset\" value=\"\u53d6\u6d88\"/>\n</form>\n");return _$out.join("");}//]]></script>
+
+<!--//--><script>//<![CDATA[
+function renderMove() {function _$replacer(k) {return k in _$context ? _$context[k] : this[k];}var _$context = arguments[0];var _$out = [];var decodeURIComponent = _$replacer("decodeURIComponent");var name = _$replacer("name");var path = _$replacer("path");_$replacer = function (c) {return "&#" + c.charCodeAt() + ";";};function _$replace(text) {return String(text).replace(/[<>&"]/g, _$replacer);}_$out.push("\n<form action=\"");_$out.push(_$replace(path));_$out.push(_$replace(name));_$out.push(";move\" method=\"POST\">\n<lable for=\"fileName\">\u79fb\u52a8\u6587\u4ef6:</lable>\n<input id=\"fileName\" readyonly=\"true\"");var _$0 = name.length;if (_$0 != null) {_$out.push(" size=\"", _$replace(_$0), "\"");}_$out.push(" type=\"text\"");var _$0 = name;if (_$0 != null) {_$out.push(" value=\"", _$replace(_$0), "\"");}_$out.push("/>\n<hr/>\n<lable for=\"newPath\">\u65b0\u76ee\u6807\u5730\u5740:</lable>\n<input id=\"newPath\" name=\"path\"");var _$0 = path.length + 5;if (_$0 != null) {_$out.push(" size=\"", _$replace(_$0), "\"");}_$out.push(" type=\"text\"");var _$0 = decodeURIComponent(path);if (_$0 != null) {_$out.push(" value=\"", _$replace(_$0), "\"");}_$out.push("/>\n<input type=\"submit\" value=\"\u786e\u8ba4\u79fb\u52a8\"/>\n<input onclick=\"closeDialog()\" type=\"reset\" value=\"\u53d6\u6d88\"/>\n</form>\n");return _$out.join("");}//]]></script>
+
+<!--//--><script>//<![CDATA[
+function renderMkdir() {function _$replacer(k) {return k in _$context ? _$context[k] : this[k];}var _$context = arguments[0];var _$out = [];var path = _$replacer("path");_$replacer = function (c) {return "&#" + c.charCodeAt() + ";";};function _$replace(text) {return String(text).replace(/[<>&"]/g, _$replacer);}_$out.push("\n<form action=\"");_$out.push(_$replace(path));_$out.push(";mkdir\" method=\"POST\">\n<lable for=\"fileName\">\u521b\u5efa\u76ee\u5f55:</lable>\n<input id=\"fileName\" name=\"name\" size=\"40\" type=\"text\" value=\"\u65b0\u5efa\u6587\u4ef6\u5939\"/>\n<input type=\"submit\" value=\"\u786e\u8ba4\u521b\u5efa\"/>\n<input onclick=\"closeDialog()\" type=\"reset\" value=\"\u53d6\u6d88\"/>\n</form>\n");return _$out.join("");}//]]></script>
+
+<script>
+			//<![CDATA[
+	var path = "C:/Users/jindw/workspace/android-server/build/dest".replace(':','%3A').replace(/^\/?|\/?$/g,'/');
+	function E(id){
+		return document.getElementById(id)
+	}
+	function showDialog(content){
+		E("dialogContent").innerHTML = content;
+		E("dialog").style.display='block';
+	}
+	function closeDialog(){
+		E("dialog").style.display='none';
+	}
+	function doRename(name){
+		showDialog(renderRename({name:name}));
+	}
+	function doDelete(name){
+		showDialog(renderDelete({name:name}));
+	}
+	function doMove(name){
+		showDialog(renderMove({name:name}));
+	}
+	function doMkdir(){
+		showDialog(renderMkdir({}));
+	}
+	function doUpload(){
+		alert("尚未支持");
+	}
+	//]]>
+		</script>
+<h2>
+
+
+
+
+<a href="/C%3A/">C:</a>
+
+
+
+
+
+/
+<a href="/C%3A/Users/">Users</a>
+
+
+
+
+/
+<a href="/C%3A/Users/jindw/">jindw</a>
+
+
+
+
+/
+<a href="/C%3A/Users/jindw/workspace/">workspace</a>
+
+
+
+/
+<a href="/C%3A/Users/jindw/workspace/android-server/">android-server</a>
+
+
+
+
+/
+<a href="/C%3A/Users/jindw/workspace/android-server/build/">build</a>
+
+
+
+
+/
+<a href="/C%3A/Users/jindw/workspace/android-server/build/dest/">dest</a>
+
+
+</h2>
+<div id="dialog" style="padding:12px;border:3px yellow solid">
+<div id="dialogContent"></div>
+</div>
+<table width="98%">
+
+<tr>
+<td>
+
+
+<a href="android-server.apk">
+android-server.apk
+</a>
+
+(86.65K)
+
+
+</td>
+<td>
+<a href="#" onclick="doDelete('android-server.apk')">刪除</a>
+<a href="#" onclick="doMove('android-server.apk')">移动</a>
+<a href="#" onclick="doRename('android-server.apk')">
+重命名
+</a>
+</td>
+</tr>
+
+<tr>
+<td>
+
+
+<a href="fs.jar">
+
+fs.jar
+</a>
+
+(214.33K)
+
+</td>
+<td>
+<a href="#" onclick="doDelete('fs.jar')">刪除</a>
+<a href="#" onclick="doMove('fs.jar')">移动</a>
+<a href="#" onclick="doRename('fs.jar')">
+重命名
+</a>
+</td>
+</tr>
+
+<tr>
+
+<td>
+
+
+<a href="index.html">
+index.html
+</a>
+
+(6.19K)
+
+</td>
+<td>
+<a href="#" onclick="doDelete('index.html')">刪除</a>
+<a href="#" onclick="doMove('index.html')">移动</a>
+<a href="#" onclick="doRename('index.html')">
+重命名
+</a>
+
+</td>
+</tr>
+
+<tr>
+<td colspan="2" style="padding-top:14px;border-bottom:1px solid blue">
+ 
+</td>
+</tr>
+<tr>
+<td colspan="2">
+<a href="#" onclick="doMkdir()">创建目录</a>
+<a href="#" onclick="doUpload()">上传文件</a>
+</td>
+</tr>
+</table>
+
+</body>
+<link href="http://www.xidea.org/project/jsi/styles/default.css" rel="Stylesheet" type="text/css"/>
+</html>
