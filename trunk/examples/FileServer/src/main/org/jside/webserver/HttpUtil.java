@@ -185,4 +185,12 @@ public class HttpUtil {
 		}
 
 	}
+
+	public static void sendRedirect(String href) {
+		RequestContext context = RequestContext.get();
+		context.setHeader("Refresh:0;URL=" + href);
+		context.addHeader("Content-Type:text/html;charset="
+					+ context.getEncoding());
+		
+	}
 }
