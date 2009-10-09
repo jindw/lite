@@ -10,14 +10,14 @@
 		<antcall target="compileLite" />
 		<jar destfile="${basedir}/build/dest/fs.jar">
 			<manifest>
-				<attribute name="Main-Class" value="org.jside.fileserver.FileServer" />
+				<attribute name="Main-Class" value="org.jside.filemanager.FileManager" />
 			</manifest>
 			<fileset dir="${basedir}/web/WEB-INF/classes">
 				<include name="**/*.class" />
 				<include name="**/mime.types" />
 				<exclude name="**/test/**/*.*" />
 			</fileset>
-			<zipfileset prefix="org/jside/webserver/action/" dir="${basedir}/build/dest/lite">
+			<zipfileset prefix="org/jside/filemanager/" dir="${basedir}/build/dest/lite">
 				<include name=".*.xhtml" />
 			</zipfileset>
 			<zipfileset src="${basedir}/web/WEB-INF/lib/Template.jar">
@@ -26,6 +26,10 @@
 				<exclude name="org/xidea/lite/parser/**/*.*" />
 				<exclude name="org/xidea/lite/servlet/**/*.*" />
 				<exclude name="org/xidea/lite/tools/**/*.*" />
+				<include name="org/xidea/lite/tools/CommandParser*.class" />
+			</zipfileset>
+			<zipfileset src="${basedir}/web/WEB-INF/lib/Template.jar">
+				<include name="org/xidea/lite/tools/CommandParser*.class" />
 			</zipfileset>
 		</jar>
 	</target>
@@ -33,8 +37,8 @@
 		<delete dir="${basedir}/build/dest/lite" />
 		<mkdir dir="${basedir}/build/dest/lite" />
 		<java classname="org.xidea.lite.tools.LiteCompiler" classpath="../Lite/build/dest/Template.jar;../Lite/web/WEB-INF/lib/js.jar">
-			<arg value="-webRoot" />
-			<arg value="${basedir}/web/" />
+			<arg value="-root" />
+			<arg value="${basedir}/src/main/org/jside/filemanager/" />
 			<arg value="-litecached" />
 			<arg value="${basedir}/build/dest/lite" />
 		</java>

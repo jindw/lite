@@ -25,7 +25,10 @@ public class FileManager {
 	public FileManager(File base, String contextPath) {
 		this.contextPath = contextPath;
 		this.base = base;
-		URL classbase = this.getClass().getResource("./");
+		Class<? extends FileManager> cls = this.getClass();
+		URL classbase = cls.getResource(cls.getSimpleName()+".class");
+		System.out.println(classbase);
+		System.out.println(this.getClass().getResource("/"));
 		try {
 			engine = TemplateAction.create(classbase.toURI());
 		} catch (URISyntaxException e) {
