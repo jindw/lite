@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="hide">Hide</string>
-    <string name="welcome">G2 WiFi Web Based FileManager!</string>
+    <string name="welcome">AndServer(FTP,HTTP,and Web Based App)</string>
+    <string name="open">Open</string>
     <string name="exit">Exit!</string>
-    <string name="app_name">AndroidServer</string>
+    <string name="app_name">AndServer</string>
 </resources>

@@ -5,14 +5,14 @@
 	<application android:icon="@drawable/icon"
 		android:label="@string/app_name">
 		<activity android:label="@string/app_name"
-			android:name="AndroidActivity">
+			android:name="AndActivity">
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />
 				<category
 					android:name="android.intent.category.LAUNCHER" />
 			</intent-filter>
 		</activity>
-		<service android:name="AndroidServer"></service>
+		<service android:name="AndServer"></service>
 	</application>
 	<uses-sdk android:minSdkVersion="3" />
 	<uses-permission

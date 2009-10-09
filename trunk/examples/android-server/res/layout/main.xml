@@ -16,6 +16,10 @@
 			</TextView>
 			<EditText android:layout_height="wrap_content" android:id="@+id/link" android:layout_width="fill_parent">
 			</EditText>
+			<Button android:text="@string/open" android:id="@+id/open"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content">
+			</Button>
 			<Button android:text="@string/exit" android:id="@+id/exit"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content">
