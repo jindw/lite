@@ -66,24 +66,23 @@ public abstract interface ExpressionToken {
 	
 
 	//五
-	public static final int OP_LT =    0<<12 | 0<<8 | 1<<6 | 4<<2 | 0;
+	public static final int OP_LT =    1<<12 | 0<<8 | 1<<6 | 4<<2 | 0;
 	//0<<5 | 4<<1 |1;//<;
-	public static final int OP_GT =    0<<12 | 0<<8 | 1<<6 | 4<<2 | 1;
+	public static final int OP_GT =    1<<12 | 0<<8 | 1<<6 | 4<<2 | 1;
 	//1<<5 | 4<<1 |1;//>;
-	public static final int OP_LTEQ =  0<<12 | 0<<8 | 1<<6 | 4<<2 | 2;
+	public static final int OP_LTEQ =  1<<12 | 0<<8 | 1<<6 | 4<<2 | 2;
 	//2<<5 | 4<<1 |1;//<=;
-	public static final int OP_GTEQ =  0<<12 | 0<<8 | 1<<6 | 4<<2 | 3;
+	public static final int OP_GTEQ =  1<<12 | 0<<8 | 1<<6 | 4<<2 | 3;
 	//3<<5 | 4<<1 |1;//>=;
+	public static final int OP_EQ =    0<<12 | 0<<8 | 1<<6 | 4<<2 | 0;
+	//4<<5 | 3<<1 |1;//==;
+	public static final int OP_NOTEQ = 0<<12 | 0<<8 | 1<<6 | 4<<2 | 1;
+	//5<<5 | 3<<1 |1;//!=;
 	
 	//四:
-	public static final int OP_EQ =    0<<12 | 0<<8 | 1<<6 | 3<<2 | 0;
-	//4<<5 | 3<<1 |1;//==;
-	public static final int OP_NOTEQ = 0<<12 | 0<<8 | 1<<6 | 3<<2 | 1;
-	//5<<5 | 3<<1 |1;//!=;
-
-	static final int OP_BIT_AND = 4<<12 | 0<<8 | 1<<6 | 2<<2 | 0;
-	static final int OP_BIT_XOR = 3<<12 | 0<<8 | 1<<6 | 2<<2 | 0;
-	static final int OP_BIT_OR  = 2<<12 | 0<<8 | 1<<6 | 2<<2 | 0;
+	public static final int OP_BIT_AND = 2<<12 | 0<<8 | 1<<6 | 3<<2 | 0;
+	public static final int OP_BIT_XOR = 1<<12 | 0<<8 | 1<<6 | 3<<2 | 0;
+	public static final int OP_BIT_OR  = 0<<12 | 0<<8 | 1<<6 | 3<<2 | 0;
 	
 	
 	//三：
