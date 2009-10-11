@@ -5,6 +5,9 @@ import static org.xidea.el.ExpressionToken.BIT_PARAM;
 import static org.xidea.el.ExpressionToken.BIT_PRIORITY;
 import static org.xidea.el.ExpressionToken.BIT_PRIORITY_SUB;
 import static org.xidea.el.ExpressionToken.OP_AND;
+import static org.xidea.el.ExpressionToken.OP_BIT_AND;
+import static org.xidea.el.ExpressionToken.OP_BIT_OR;
+import static org.xidea.el.ExpressionToken.OP_BIT_XOR;
 import static org.xidea.el.ExpressionToken.OP_GET_PROP;
 
 import static org.xidea.el.ExpressionToken.OP_MUL;
@@ -17,6 +20,7 @@ import static org.xidea.el.ExpressionToken.OP_GTEQ;
 import static org.xidea.el.ExpressionToken.OP_EQ;
 import static org.xidea.el.ExpressionToken.OP_NOTEQ;
 import static org.xidea.el.ExpressionToken.OP_NOT;
+import static org.xidea.el.ExpressionToken.OP_BIT_NOT;
 import static org.xidea.el.ExpressionToken.OP_INVOKE_METHOD;
 import static org.xidea.el.ExpressionToken.OP_MAP_PUSH;
 import static org.xidea.el.ExpressionToken.OP_NEG;
@@ -237,8 +241,7 @@ public class ExpressionTokenizer extends JSONTokenizer {
 				if (op != null) {
 					parseOperator(op);
 				} else {
-					throw new ExpressionSyntaxException("语法错误:" + value + "@"
-							+ start);
+					this.reportError("未知操作符:");
 				}
 			}
 			skipSpace(0);
@@ -246,13 +249,10 @@ public class ExpressionTokenizer extends JSONTokenizer {
 	}
 
 	private String findOperator() {// optimize json ,:[{}]
-		switch (value.charAt(start)) {
-		case '!':// !,!=
-		case '>':// >,>=
-		case '<':// <,<=
-			if (value.charAt(start + 1) == '=') {
-				return value.substring(start, start += 2);
-			}
+		char c = value.charAt(start);
+		int end = start+1;
+		char next = value.length()>end?value.charAt(end):0;
+		switch (c) {
 		case ',':// optimize for json
 		case ':':// 3op,map key
 		case '[':// list
@@ -265,18 +265,52 @@ public class ExpressionTokenizer extends JSONTokenizer {
 		case '?':// 3op
 		case '+':// 5op
 		case '-':
+		case '~':
+		case '^':
 		case '*':
 		case '/':
 		case '%':
-			return value.substring(start, start += 1);
-
+			break;
 		case '=':// ==
-		case '&':// &&
-		case '|':// ||
-			assert (value.charAt(start) == value.charAt(start + 1));
-			return value.substring(start, start += 2);
+			if(next == '='){
+				end++;
+				if(value.length()>end && value.charAt(end)=='='){
+					this.reportError("不支持=== 和!==操作符，请使用==,!=");
+				}
+			}else{
+				this.reportError("不支持赋值操作:");
+			}
+			break;
+		case '!':// !,!=
+			if(next == '='){
+				end++;
+				if(value.length()>end && value.charAt(end)=='='){
+					this.reportError("不支持=== 和!==操作符，请使用==,!=");
+				}
+			}
+			break;
+		case '>':// >,>=
+		case '<':// <,<=
+			if (next == '=') {
+				end++;
+			}
+			break;
+		case '&':// && / &
+		case '|':// || /|
+			if( (c == next)){
+				end++;
+			}
+			break;
+		default:
+			return null;
 		}
-		return null;
+
+		return value.substring(start, start = end);
+	}
+
+	private void reportError(String msg) {
+		throw new ExpressionSyntaxException(msg+"\n@"+ start + "\n"
+				+ value.substring(start)+"\n----\n"+value);
 	}
 
 	/**
@@ -384,6 +418,7 @@ public class ExpressionTokenizer extends JSONTokenizer {
 		TOKEN_MAP.put(".",OP_GET_PROP);
 		//8
 		TOKEN_MAP.put("!",OP_NOT);
+		TOKEN_MAP.put("^",OP_BIT_NOT);
 //		TOKEN_MAP.put("+",OP_POS);
 //		TOKEN_MAP.put("-",OP_NEG);
 		//7
@@ -398,9 +433,13 @@ public class ExpressionTokenizer extends JSONTokenizer {
 		TOKEN_MAP.put(">",OP_GT);
 		TOKEN_MAP.put("<=",OP_LTEQ);
 		TOKEN_MAP.put(">=",OP_GTEQ);
-		//4
 		TOKEN_MAP.put("==",OP_EQ);
 		TOKEN_MAP.put("!=",OP_NOTEQ);
+
+		//4
+		TOKEN_MAP.put("&",OP_BIT_AND);
+		TOKEN_MAP.put("^",OP_BIT_XOR);
+		TOKEN_MAP.put("|",OP_BIT_OR);
 		//3
 		TOKEN_MAP.put("&&",OP_AND);
 		TOKEN_MAP.put("||",OP_OR);
@@ -410,10 +449,6 @@ public class ExpressionTokenizer extends JSONTokenizer {
 		//1
 		TOKEN_MAP.put(",",OP_PARAM_JOIN);
 
-		//BRACKET_BEGIN
-		//BRACKET_END
-		//VALUE_NEW_LIST
-		//VALUE_NEW_MAP
 		//OP_MAP_PUSH
 		//OP_INVOKE_METHOD
 	}

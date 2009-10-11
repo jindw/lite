@@ -54,22 +54,23 @@ var fns = {
 				// if (this.value.startsWith(op, this.start))
 				this.parseOperator(op);
 				if (op == null) {
-					throw new Error("语法错误:" + this.value + "@"
-							+ this.start);
+					this.parseError("未知操作符:");
 				}
 			}
 			this.skipSpace(0);
 		}
 	},
-
+	parseError:function(msg){
+	    msg = msg+"\n@"+ this.start + "\n"
+				+ this.value.substring(this.start)+"\n----\n"+this.value
+		$log.error(msg);
+		throw new Error(msg);
+	},
 	findOperator :function() {// optimize json ,:[{}]
-		switch (this.value.charAt(this.start)) {
-		case '!':// !,!=
-		case '>':// >,>=
-		case '<':// <,<=
-			if (this.value.charAt(this.start + 1) == '=') {
-				return this.value.substring(this.start, this.start += 2);
-			}
+		var c = this.value.charAt(this.start);
+		var end = this.start+1;
+		var next = this.value.charAt(end);
+		switch (c) {
 		case ',':// optimize for json
 		case ':':// 3op,map key
 		case '[':// list
@@ -82,23 +83,46 @@ var fns = {
 		case '?':// 3op
 		case '+':// 5op
 		case '-':
+		case '~':
+		case '^':
 		case '*':
 		case '/':
 		case '%':
-			return this.value.substring(this.start, this.start += 1);
-
+			break;
 		case '=':// ==
-		case '&':// &&
-		case '|':// ||
-    		if(":debug"){
-    			if (this.value.charAt(this.start) != this.value.charAt(this.start + 1)){
-    			    $log.error("未知符号:" , this.value.substring(this.start),this.value)
-    			}
-    		}
-			return this.value.substring(this.start, this.start += 2);
+			if(next == '='){
+				end++;
+				if(this.value.charAt(end) == '='){
+				    this.parseError("不支持=== 和!==操作符，请使用==,!=");
+				}
+			}else{
+				this.parseError("不支持赋值操作:");
+			}
+			break;
+		case '!':// !,!=
+			if(next == '='){
+				end++;
+				if(this.value.charAt(end) == '='){
+				    this.parseError("不支持=== 和!==操作符，请使用==,!=");
+				}
+			}
+			break;
+		case '>':// >,>=
+		case '<':// <,<=
+			if (next == '=') {
+				end++;
+			}
+			break;
+		case '&':// && / &
+		case '|':// || /|
+			if( (c == next)){
+				end++;
+			}
+			break;
+		default:
+			return null;
 		}
-		$log.error("未知符号",this.value,this.value.substring(this.start))
-		return null;
+		return this.value.substring(this.start, this.start = end);
 	},
 
 	/**
