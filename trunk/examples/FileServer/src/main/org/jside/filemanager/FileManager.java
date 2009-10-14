@@ -149,7 +149,11 @@ public class FileManager {
 
 	public static void main(String[] args) throws MalformedURLException {
 		ActionWebServer aws = new ActionWebServer(null);
-		aws.addAction("/**", new FileManager(new File("."), "/"));
+		String file = ".";
+		if(args != null && args.length>0){
+			file = args[0];
+		}
+		aws.addAction("/**", new FileManager(new File(file), "/"));
 		aws.start();
 	}
 
