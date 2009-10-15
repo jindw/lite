@@ -54,13 +54,23 @@ public class ExpressionTokenizer extends JSONTokenizer {
 	}
 
 	private int getPriority(int type) {
-		switch (type) {
+		int p = type & 30;
+		switch(type){
 		case BRACKET_BEGIN:
 		case BRACKET_END:
 			return Integer.MIN_VALUE;
-		default:
-			return type & 30;
+		case ExpressionToken.OP_LT:
+		case ExpressionToken.OP_GT:
+		case ExpressionToken.OP_LTEQ:
+		case ExpressionToken.OP_GTEQ:
+		case OP_AND:
+			p++;
+			break;
+		case OP_ADD:
+			p-=2;
+			break;
 		}
+		return p;
 	}
 
 	private boolean rightEnd(ExpressionToken item, ExpressionToken privious) {
