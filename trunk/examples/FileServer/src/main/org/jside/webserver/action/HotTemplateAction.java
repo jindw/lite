@@ -2,7 +2,6 @@ package org.jside.webserver.action;
 
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URL;
 
 import org.xidea.lite.Template;
 import org.xidea.lite.parser.impl.HotTemplateEngine;
