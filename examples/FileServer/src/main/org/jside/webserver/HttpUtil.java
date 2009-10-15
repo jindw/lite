@@ -3,6 +3,7 @@ package org.jside.webserver;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -56,6 +57,9 @@ public class HttpUtil {
 	private final static void print(RequestContext context, Object data)
 			throws IOException {
 		OutputStream out = context.getOutputStream();
+		if (data instanceof File) {
+			data = new FileInputStream((File)data);
+		}
 		if (data instanceof InputStream) {
 			InputStream in = (InputStream) data;
 			int len;
@@ -121,12 +125,7 @@ public class HttpUtil {
 	private static void printData(Object data, String contentType)
 			throws IOException {
 		RequestContext context = RequestContext.get();
-		if (data instanceof Throwable) {
-			try {
-				context.setContentType(contentType);
-			} catch (Exception e) {
-			}
-		}
+		context.setContentType(contentType);
 		print(context, data);
 	}
 

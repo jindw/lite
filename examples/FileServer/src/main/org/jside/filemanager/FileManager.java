@@ -141,7 +141,7 @@ public class FileManager {
 
 	private String decodePath(String path) {
 		try {
-			return URLDecoder.decode(path, "UTF-8");
+			return URLDecoder.decode(path, "UTF-8").replace('+', ' ');
 		} catch (UnsupportedEncodingException e) {
 			return null;
 		}
