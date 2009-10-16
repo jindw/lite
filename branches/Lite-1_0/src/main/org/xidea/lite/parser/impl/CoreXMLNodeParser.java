@@ -296,6 +296,9 @@ public class CoreXMLNodeParser implements NodeParser<Element> {
 
 	protected void parseOutTag(Element el, ParseContext context) {
 		String value = ParseUtil.getAttributeOrNull(el, "value");
+		if(value == null){
+			value = el.getTextContent();
+		}
 		context.appendAll(context.parseText(value,Template.EL_TYPE));
 	}
 }
