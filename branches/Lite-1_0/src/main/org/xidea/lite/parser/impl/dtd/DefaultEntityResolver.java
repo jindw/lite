@@ -13,14 +13,18 @@ public class DefaultEntityResolver implements EntityResolver2 {
 	private static HashMap<String, String> DEFAULT_DTD_MAP = new HashMap<String, String>();
 	static {
 		DEFAULT_DTD_MAP.put(DEFAULT__HTML_DTD,"xhtml1.dtd");
+//		DEFAULT_DTD_MAP.put("-//W3C//DTD XHTML 1.0 Transitional//EN",
+//		"xhtml1-transitional.dtd");
+//DEFAULT_DTD_MAP.put("-//W3C//DTD XHTML 1.0 Strict//EN",
+//		"xhtml1-strict.dtd");
 		DEFAULT_DTD_MAP.put("-//W3C//DTD XHTML 1.0 Transitional//EN",
 				"xhtml1.dtd");
 		DEFAULT_DTD_MAP.put("-//W3C//DTD XHTML 1.0 Strict//EN",
 				"xhtml1.dtd");
-//		DEFAULT_DTD_MAP.put("-//W3C//DTD XHTML 1.0 Transitional//EN",
-//				"xhtml1-transitional.dtd");
-//		DEFAULT_DTD_MAP.put("-//W3C//DTD XHTML 1.0 Strict//EN",
-//				"xhtml1-strict.dtd");
+		DEFAULT_DTD_MAP.put("-//W3C//DTD HTML 4.01//EN", "xhtml1.dtd");
+		DEFAULT_DTD_MAP.put("-//W3C//DTD HTML 4.01 Transitional//EN", "xhtml1.dtd");
+		DEFAULT_DTD_MAP.put("-//W3C//DTD HTML 4.01 Frameset//EN", "xhtml1.dtd");
+		
 		DEFAULT_DTD_MAP.put("-//W3C//ENTITIES Latin 1 for XHTML//EN",
 				"xhtml-lat1.ent");
 		DEFAULT_DTD_MAP.put("-//W3C//ENTITIES Symbols for XHTML//EN",
