@@ -1,8 +1,5 @@
 package org.xidea.lite.tools;
 
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
 import java.io.File;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -16,6 +13,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.el.impl.ExpressionFactoryImpl;
+import org.xidea.el.impl.ReflectUtil;
 import org.xidea.el.ExpressionFactory;
 import org.xidea.el.Reference;
 import org.xidea.el.ReferenceExpression;
@@ -81,18 +79,7 @@ public class CommandParser {
 	}
 
 	protected void traceBeanInfo(final Object context) {
-		ArrayList<String> properties = new ArrayList<String>();
-		try {
-			PropertyDescriptor[] ps = Introspector.getBeanInfo(
-					context.getClass())
-					.getPropertyDescriptors();
-
-			for (PropertyDescriptor p : ps) {
-				properties.add(p.getName());
-			}
-		} catch (IntrospectionException e) {
-			log.error(e);
-		}
+		Object properties = ReflectUtil.map(context).keySet();
 		log.info("当前对象可能属性有：" + properties);
 	}
 	
