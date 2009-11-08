@@ -35,12 +35,6 @@ public interface ParseContext extends ParserHolder,ResourceContext,ResultContext
 
 	
 	/**
-	 * 设置translator，同时更新featrueMap（结果翻译起对某些特征可能不支持）
-	 * @param translator
-	 */
-	public void setResultTranslator(ResultTranslator translator);
-
-	/**
 	 * 自定义表达式解析器
 	 * 
 	 * @param expressionFactory
@@ -49,10 +43,6 @@ public interface ParseContext extends ParserHolder,ResourceContext,ResultContext
 
 	public Object parseEL(String eltext);
 
-	/**
-	 * @return 经过结果转换后的代码
-	 */
-	public String toCode();
 
 	/**
 	 * 获取当前正在解析的模版URI

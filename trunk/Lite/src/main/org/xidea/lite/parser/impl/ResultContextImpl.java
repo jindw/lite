@@ -2,23 +2,32 @@ package org.xidea.lite.parser.impl;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.DefinePlugin;
 import org.xidea.lite.Plugin;
 import org.xidea.lite.Template;
 import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.ResultContext;
+import org.xidea.lite.parser.ResultTranslator;
 
 /**
  * 接口函数不能直接相互调用，用context对象！！！
  * @author jindw
  */
 public class ResultContextImpl implements ResultContext {
+	private static final Log log = LogFactory.getLog(ParseContextImpl.class);
+	
+	private ResultTranslator translator;
 	private HashMap<String, String> typeIdMap = new HashMap<String, String>();
-//	private HashMap<Object, String> objectIdMap = new HashMap<Object, String>();
+	//	private HashMap<Object, String> objectIdMap = new HashMap<Object, String>();
 	private int inc = 0;
 
 	private final ArrayList<Object> result = new ArrayList<Object>();
@@ -360,5 +369,35 @@ public class ResultContextImpl implements ResultContext {
 		return -2;// string type
 	}
 
+	
+	public void setResultTranslator(ResultTranslator translator) {
+		final Map<String, String> featrueMap = context.getFeatrueMap();
+		Collection<String> featrueKeys =featrueMap.keySet();
+		//featrueMap.keySet();
+		Collection<String> support = Collections.emptyList();
+		try{
+			support = translator.getSupportFeatrues();
+		}catch (Exception e) {
+			log.warn("未指定支持的特征，设空处理",e);
+		}
+		if (support == null) {
+			featrueMap.clear();
+		}else{
+			for (String key : featrueKeys) {
+				if (!support.contains(key)) {
+					featrueMap.remove(key);
+				}
+			}
+		}
+		this.translator = translator;
+	}
+
+	public String toCode() {
+		if(translator==null){
+			return JSONEncoder.encode(context.toList());
+		}else{
+			return translator.translate(context);
+		}
+	}
 
 }
