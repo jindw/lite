@@ -2,6 +2,9 @@ package org.jside.android;
 
 
 
+import org.jside.android.AndServer.AndBinder;
+import org.jside.webserver.action.ActionWebServer;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ComponentName;
@@ -14,6 +17,7 @@ import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Vibrator;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -21,6 +25,7 @@ import android.widget.Button;
 import android.widget.EditText;
 
 public class AndActivity extends Activity implements ServiceConnection{
+	private ActionWebServer ws;
 	/** Called when the activity is first created. */
 
 	@Override
@@ -34,34 +39,26 @@ public class AndActivity extends Activity implements ServiceConnection{
 		open.setOnClickListener(new OnClickListener(){
 			public void onClick(View v) {
 				Intent browseIntent = new Intent(
-						Intent.ACTION_VIEW,Uri.parse("http://localhost:1981"));
+						Intent.ACTION_VIEW,Uri.parse("http://127.0.0.1:"+ws.getPort()+"/fs/"));
 				startActivity(browseIntent);
 			}
 		});
 		Button exit = (Button) super.findViewById(R.id.exit);
 		exit.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				finish();
+				//finish();
+				System.exit(1);
 			}
 		});
+//		Vibrator vb = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+//		vb.vibrate(1000*60*10);
 	}
 	public void onServiceConnected(ComponentName name, IBinder service) {
+		ws = ((AndBinder)service).getWebServer();
 		this.initailize();
 	}
 
 	public void onServiceDisconnected(ComponentName name) {
-	}
-	public void alert(String msg){
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage(msg)
-		       .setCancelable(true)
-		       .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-		           public void onClick(DialogInterface dialog, int id) {
-		                dialog.cancel();
-		           }
-		       });
-		AlertDialog alert = builder.create();
-		alert.show();
 	}
 
 	public void initailize() {
@@ -76,9 +73,9 @@ public class AndActivity extends Activity implements ServiceConnection{
 					ip = getIp(dh.ipAddress);
 				}
 			}
-			link.setText("http://" + ip + ":1981");
+			link.setText("http://" + ip+":"+ws.getPort()+"/");
 		} catch (Throwable e) {
-			alert(Log.getStackTraceString(e));
+			Log.e("And Error:",Log.getStackTraceString(e));
 		}
 	}
 	private String getIp(int i) {

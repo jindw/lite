@@ -28,4 +28,5 @@
 		android:name="android.permission.WRITE_OWNER_DATA">
 	</uses-permission>
 	<uses-permission android:name="android.permission.INTERNET"></uses-permission>
+<uses-permission android:name="android.permission.VIBRATE"></uses-permission>
 </manifest>
