@@ -2,7 +2,6 @@ package org.xidea.lite.parser;
 
 import java.util.List;
 
-import org.xidea.el.ExpressionFactory;
 import org.xidea.lite.Plugin;
 
 /**
@@ -13,13 +12,6 @@ import org.xidea.lite.Plugin;
 public interface ResultContext {
 	public static final Object END_INSTRUCTION = new Object[0];
 	
-	
-	/**
-	 * 设置translator，同时更新featrueMap（结果翻译起对某些特征可能不支持）
-	 * @param translator
-	 */
-	public void setResultTranslator(ResultTranslator translator);
-
 	/**
 	 * 记录一下当前位置，reset的参考位置
 	 * 
@@ -60,10 +52,6 @@ public interface ResultContext {
 	 * @return 经过优化后的树形结果集
 	 */
 	public List<Object> toList();
-	/**
-	 * @return 经过结果转换后的代码
-	 */
-	public String toCode();
 
 	/**
 	 * 添加静态文本（不编码）
@@ -115,16 +103,6 @@ public interface ResultContext {
 	public void appendPlugin(Class<? extends Plugin> class1, Object propertiesEL);
 
 	public String addGlobalObject(Class<? extends Object> impl, String key);
-//
-//	public String addGlobalObject(Object object, String key);
 
 	public String allocateId();
-	/**
-	 * 自定义表达式解析器
-	 * 
-	 * @param expressionFactory
-	 */
-	public void setExpressionFactory(ExpressionFactory expressionFactory);
-
-	public Object parseEL(String eltext);
 }

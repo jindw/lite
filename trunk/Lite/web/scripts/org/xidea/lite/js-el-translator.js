@@ -49,7 +49,7 @@ ELTranslator.prototype = {
 		var param = el[1];
 		switch(el[0]){
         case VALUE_CONSTANTS:
-            return stringifyJSON(param);
+            return (param && param.source) || stringifyJSON(param);
         case VALUE_VAR:
         	if(param == 'for'){
         		return "_$context";

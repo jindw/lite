@@ -27,7 +27,7 @@ public class Template {
 	public static final int FOR_TYPE = 5; // [5,[...],<items el>,'varName']/
 	public static final int ELSE_TYPE = 6; // [6,[...],<test el>] //<test el>
 	// 可为null
-	public static final int ADD_ON_TYPE = 7; // [7,[...],<add on
+	public static final int PLUGIN_TYPE = 7; // [7,[...],<add on
 	// el>,'<addon-class>']
 	public static final int VAR_TYPE = 8; // [8,<value el>,'name']
 	public static final int CAPTRUE_TYPE = 9; // [9,[...],'var']
@@ -84,7 +84,7 @@ public class Template {
 				cmd[0] = type;
 
 				switch (type) {
-				case ADD_ON_TYPE:
+				case PLUGIN_TYPE:
 					compilePlugin(cmd, result);
 					break;// continue for
 				case XML_ATTRIBUTE_TYPE:
@@ -162,7 +162,7 @@ public class Template {
 						break;
 					case BREAK_TYPE://
 						prossesBreak(data);
-					case ADD_ON_TYPE://
+					case PLUGIN_TYPE://
 						prossesPlugin(context, data, out);
 						break;
 					case VAR_TYPE:// ":set"://var

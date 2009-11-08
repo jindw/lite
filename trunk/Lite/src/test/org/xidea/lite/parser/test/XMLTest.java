@@ -131,7 +131,7 @@ public class XMLTest {
 				case Template.FOR_TYPE:
 				case Template.CAPTRUE_TYPE:
 				case Template.IF_TYPE:
-				case Template.ADD_ON_TYPE:
+				case Template.PLUGIN_TYPE:
 					checkElse((List<Object>)data.get(1),info);
 					
 				}

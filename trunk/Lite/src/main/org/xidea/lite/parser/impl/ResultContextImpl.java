@@ -5,15 +5,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.xidea.el.ExpressionFactory;
-import org.xidea.el.impl.ExpressionFactoryImpl;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.DefinePlugin;
 import org.xidea.lite.Plugin;
 import org.xidea.lite.Template;
 import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.ResultContext;
-import org.xidea.lite.parser.ResultTranslator;
 
 /**
  * 接口函数不能直接相互调用，用context对象！！！
@@ -25,28 +22,16 @@ public class ResultContextImpl implements ResultContext {
 	private int inc = 0;
 
 	private final ArrayList<Object> result = new ArrayList<Object>();
-	private ExpressionFactory expressionFactory = ExpressionFactoryImpl
-			.getInstance();
-	private ResultTranslator translator;
+
 	private ParseContext context;
 
 	public ResultContextImpl(ParseContext context) {
 		this.context = context;
 	}
 
-	public void setExpressionFactory(ExpressionFactory expressionFactory) {
-		this.expressionFactory = expressionFactory;
-	}
-
-	public void setResultTranslator(ResultTranslator translator) {
-		this.translator = translator;
-	}
-	public Object parseEL(String expression) {
-		return expressionFactory.parse(expression);
-	}
 	private Object requrieEL(Object expression){
 		if(expression instanceof String){
-			expression = parseEL((String)expression);
+			expression = this.context.parseEL((String)expression);
 		}
 		return expression;
 	}
@@ -168,7 +153,7 @@ public class ResultContextImpl implements ResultContext {
 		itemsEL = requrieEL(itemsEL);
 		this.append(new Object[] { Template.FOR_TYPE, itemsEL, var });
 		if (status != null && status.length() > 0) {
-			this.appendVar(status, this.parseEL("for"));
+			this.appendVar(status, this.context.parseEL("for"));
 		}
 	}
 
@@ -183,7 +168,7 @@ public class ResultContextImpl implements ResultContext {
 	}
 
 	public final void appendPlugin(Class<? extends Plugin> clazz, Object el) {
-		this.append(new Object[] { Template.ADD_ON_TYPE, requrieEL(el), clazz.getName() });
+		this.append(new Object[] { Template.PLUGIN_TYPE, requrieEL(el), clazz.getName() });
 	}
 
 	public final int mark() {
@@ -222,7 +207,7 @@ public class ResultContextImpl implements ResultContext {
 					ArrayList instruction = ((ArrayList) current.get(currentTop));
 					instruction.set(1,children);
 					Number type = (Number)instruction.get(0);
-					if(type.intValue() == Template.ADD_ON_TYPE){
+					if(type.intValue() == Template.PLUGIN_TYPE){
 						if(DefinePlugin.class.getName().equals((instruction.get(3)))){
 							previous.add(instruction);
 							current.remove(currentTop);
@@ -239,7 +224,7 @@ public class ResultContextImpl implements ResultContext {
 					case Template.IF_TYPE:
 					case Template.ELSE_TYPE:
 					case Template.FOR_TYPE:
-					case Template.ADD_ON_TYPE:
+					case Template.PLUGIN_TYPE:
 						// case IF_STRING_IN_TYPE:
 						cmd2.add(null);
 						stackTop++;
@@ -265,7 +250,7 @@ public class ResultContextImpl implements ResultContext {
 			for (Object value : typeIdMap.keySet()) {
 				attributeMap.put("name", typeIdMap.get(value));
 				attributeMap.put("type", value);
-				Object valueEL = this.parseEL(JSONEncoder.encode(attributeMap));
+				Object valueEL = this.context.parseEL(JSONEncoder.encode(attributeMap));
 				this.appendPlugin(DefinePlugin.class, valueEL);
 				this.appendEnd();
 			}
@@ -313,14 +298,6 @@ public class ResultContextImpl implements ResultContext {
 			optimizeResult.add(buf.toString());
 		}
 		return optimizeResult;
-	}
-
-	public String toCode() {
-		if(translator==null){
-			return JSONEncoder.encode(context.toList());
-		}else{
-			return translator.translate(context);
-		}
 	}
 
 	public int findBeginType() {
