@@ -1,8 +1,8 @@
 <c:client id="test" xmlns:c="http://www.xidea.org/ns/template/core">
-	<h1>${name}</h1>
+	<h3>${name.replace(/1/ig,'#')}</h3>
 	<table border="${border}">
 		<tr>
-			<th>&#160;</th>
+			<th>&#160;${'123'.replace(2,'#')}</th>
 			<c:for var="cell" items="${data}">
 				<th>${cell}</th>
 			</c:for>

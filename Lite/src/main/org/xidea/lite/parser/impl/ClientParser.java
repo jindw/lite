@@ -10,11 +10,15 @@ import org.xidea.lite.parser.ParseChain;
 import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.TextParser;
 
-public class ClientParser extends ELParser implements NodeParser<Element>, TextParser {
-	static Pattern SCRIPT_END_PATTERN = Pattern.compile("</script>",Pattern.CASE_INSENSITIVE);
+public class ClientParser extends ELParser implements NodeParser<Element>,
+		TextParser {
+	static Pattern SCRIPT_END_PATTERN = Pattern.compile("</script>",
+			Pattern.CASE_INSENSITIVE);
+
 	protected ClientParser() {
 		super("client", true);
 	}
+
 	public Expression create(Object el) {
 		throw new UnsupportedOperationException();
 	}
@@ -29,36 +33,42 @@ public class ClientParser extends ELParser implements NodeParser<Element>, TextP
 		String id = text.substring(p1 + 1, p2);
 		JSProxy proxy = JSProxy.newProxy();
 		ParseContext clientContext = new ParseContextImpl(context, proxy
-				.createJSTranslator(id), null);
+				.createJSTranslator(id));
 		ClientEnd ce = new ClientEnd();
 		clientContext.addTextParser(ce);
 		String subtext = text.substring(p2 + 1);
 		clientContext.parse(subtext);
-		compileJS(proxy, context,clientContext,true);
+		compileJS(proxy, context, clientContext, true);
 		return p2 + 1 + ce.end;
 	}
+
 	private class ClientEnd extends ELParser {
 		private int end;
+
 		protected ClientEnd() {
 			super("end", false);
 		}
+
 		public int findStart(String text, int start, int other$start) {
 			return super.findStart(text, start, other$start);
 		}
+
 		public int parse(String text, int p$, ParseContext context) {
 			int depth = context.getDepth();
 			if (depth == 0) {
 				end = p$ + 4;
 				return text.length();
-			}else{
+			} else {
 				context.appendEnd();
 			}
 			return p$ + 4;
 		}
+
 		public int getPriority() {
 			return 1000;
 		}
-		public String toString(){
+
+		public String toString() {
 			return "Client End EL:";
 		}
 	};
@@ -76,19 +86,22 @@ public class ClientParser extends ELParser implements NodeParser<Element>, TextP
 		Node next = el.getFirstChild();
 		if (next != null) {
 			// new Java6JSBuilder();
-			String id =ParseUtil.getAttributeOrNull(el, "id","name");
+			String id = ParseUtil.getAttributeOrNull(el, "id", "name");
 			JSProxy proxy = JSProxy.newProxy();
 			ParseContext clientContext = new ParseContextImpl(context, proxy
-					.createJSTranslator(id), null);
+					.createJSTranslator(id));
 			// 前端直接压缩吧？反正保留那些空白也没有调试价值
 			do {
 				clientContext.parse(next);
 			} while ((next = next.getNextSibling()) != null);
-			compileJS(proxy, context,clientContext,needScript(el));
-			
+			//System.out.println(clientContext.toList());
+			compileJS(proxy, context, clientContext, needScript(el));
+
 		}
 	}
-	private void compileJS(JSProxy proxy, ParseContext context,ParseContext clientContext,boolean needScript) {
+
+	private void compileJS(JSProxy proxy, ParseContext context,
+			ParseContext clientContext, boolean needScript) {
 		String js = clientContext.toCode();
 		if (clientContext.isCompress()) {
 			js = proxy.compress(js);
@@ -105,6 +118,5 @@ public class ClientParser extends ELParser implements NodeParser<Element>, TextP
 	private boolean needScript(Element el) {
 		return true;
 	}
-
 
 }

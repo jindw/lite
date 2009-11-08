@@ -6,8 +6,10 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -20,6 +22,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Node;
 import org.xidea.el.ExpressionFactory;
+import org.xidea.el.impl.ExpressionFactoryImpl;
+import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.Plugin;
 //import org.xidea.lite.parser.ResultItem;
 import org.xidea.lite.parser.TextParser;
@@ -46,6 +50,14 @@ public class ParseContextImpl implements ParseContext {
 	protected ResultContext resultContext;
 	protected ParserHolder parserHolder;
 	protected final Map<String, String> featrueMap;
+	private ExpressionFactory expressionFactory = ExpressionFactoryImpl.getInstance();
+	private ResultTranslator translator;
+	private URI currentURI;
+	private int textType = 0;
+
+	private HashMap<Object, Object> attributeMap = new HashMap<Object, Object>();
+	private HashSet<URI> resources = new HashSet<URI>();
+
 	
 	protected ParseContextImpl() {
 		featrueMap = new HashMap<String, String>();
@@ -58,7 +70,7 @@ public class ParseContextImpl implements ParseContext {
 	}
 
 	public ParseContextImpl(ParseContext parent, 
-			ResultTranslator translator,ExpressionFactory ef) {
+			ResultTranslator translator) {
 		if(parent instanceof ParseContextImpl){
 			ParseContextImpl parent2 = (ParseContextImpl)parent;
 			this.resourceContext = parent2.resourceContext;
@@ -71,10 +83,6 @@ public class ParseContextImpl implements ParseContext {
 		this.parserHolder = new ParseHolderImpl(this,parent);
 		this.resultContext = new ResultContextImpl(this);
 		this.featrueMap = new HashMap<String, String>(parent.getFeatrueMap());
-		if (ef != null) {
-			this.resultContext
-					.setExpressionFactory(ef);
-		}
 		this.setResultTranslator(translator);
 	}
 
@@ -108,15 +116,22 @@ public class ParseContextImpl implements ParseContext {
 		}
 	}
 
+	public void setExpressionFactory(ExpressionFactory expressionFactory) {
+		this.expressionFactory = expressionFactory;
+	}
+
+	public Object parseEL(String expression) {
+		return expressionFactory.parse(expression);
+	}
 	public List<Object> parseText(String text, int defaultType) {
-		int type = resourceContext.getTextType();
+		int type = this.getTextType();
 		int mark = this.mark();
 		List<Object> result;
 		try {
-			resourceContext.setTextType(defaultType);
+			this.setTextType(defaultType);
 			parse(text);
 		} finally {
-			resourceContext.setTextType(type);
+			this.setTextType(type);
 			result = this.reset(mark);
 		}
 		return result;
@@ -141,37 +156,15 @@ public class ParseContextImpl implements ParseContext {
 
 	// delegate methods...
 
-	public void addResource(URI resource) {
-		resourceContext.addResource(resource);
-	}
 
 	public URI createURI(String file, URI parentURI) {
 		return resourceContext.createURI(file, parentURI);
 	}
 
-	public Object getAttribute(Object key) {
-		return resourceContext.getAttribute(key);
-	}
 
-	public void setAttribute(Object key, Object value) {
-		resourceContext.setAttribute(key, value);
-	}
-	
-	public URI getCurrentURI() {
-		return resourceContext.getCurrentURI();
-	}
 
 	public InputStream openInputStream(URI uri) {
 		return resourceContext.openInputStream(uri);
-	}
-
-	public Collection<URI> getResources() {
-		return resourceContext.getResources();
-	}
-
-
-	public void setCurrentURI(URI currentURI) {
-		resourceContext.setCurrentURI(currentURI);
 	}
 
 	public String addGlobalObject(Class<? extends Object> impl, String key) {
@@ -240,17 +233,9 @@ public class ParseContextImpl implements ParseContext {
 		return resultContext.mark();
 	}
 
-	public Object parseEL(String eltext) {
-		return resultContext.parseEL(eltext);
-	}
-
 
 	public List<Object> reset(int mark) {
 		return resultContext.reset(mark);
-	}
-
-	public void setExpressionFactory(ExpressionFactory expressionFactory) {
-		resultContext.setExpressionFactory(expressionFactory);
 	}
 
 	public int findBeginType() {
@@ -267,13 +252,6 @@ public class ParseContextImpl implements ParseContext {
 
 	public int getType(int offset) {
 		return resultContext.getType(offset);
-	}
-
-	public List<Object> toList() {
-		return resultContext.toList();
-	}
-	public String toCode() {
-		return resultContext.toCode();
 	}
 
 	public void beginIndent() {
@@ -308,10 +286,6 @@ public class ParseContextImpl implements ParseContext {
 		xmlContext.setReserveSpace(keepSpace);
 	}
 
-	public int getTextType() {
-		return resourceContext.getTextType();
-	}
-
 	public Document loadXML(URI url) throws SAXException, IOException {
 		return xmlContext.loadXML(url);
 	}
@@ -340,9 +314,42 @@ public class ParseContextImpl implements ParseContext {
 		return parserHolder.getTopChain();
 	}
 
-	public void setTextType(int textType) {
-		resourceContext.setTextType(textType);
+
+	public void setAttribute(Object key, Object value) {
+		this.attributeMap.put(key, value);
 	}
+
+	public Object getAttribute(Object key) {
+		return this.attributeMap.get(key);
+	}
+
+	public int getTextType() {
+		return textType;
+	}
+
+	public void setTextType(int textType) {
+		this.textType = textType;
+	}
+
+	public URI getCurrentURI() {
+		return currentURI;
+	}
+
+	public Set<URI> getResources() {
+		return resources;
+	}
+
+	public void addResource(URI resource) {
+		resources.add(resource);
+	}
+
+	public void setCurrentURI(URI currentURI) {
+		if (currentURI != null) {
+			resources.add(currentURI);
+		}
+		this.currentURI = currentURI;
+	}
+
 
 	public void setResultTranslator(ResultTranslator translator) {
 		Collection<String> featrueKeys = featrueMap.keySet();
@@ -361,7 +368,19 @@ public class ParseContextImpl implements ParseContext {
 				}
 			}
 		}
-		resultContext.setResultTranslator(translator);
+		this.translator = translator;
+	}
+
+	public List<Object> toList() {
+		return resultContext.toList();
+	}
+
+	public String toCode() {
+		if(translator==null){
+			return JSONEncoder.encode(this.toList());
+		}else{
+			return translator.translate(this);
+		}
 	}
 
 

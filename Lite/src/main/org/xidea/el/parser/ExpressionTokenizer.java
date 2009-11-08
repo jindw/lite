@@ -401,6 +401,20 @@ public class ExpressionTokenizer extends JSONTokenizer {
 					start--;
 					skipComment();
 					break;
+				}else if(this.status != Status.STATUS_EXPRESSION){
+					int end = findRegExp(this.value,this.start);
+					if(end>0){
+						String regexp = this.value.substring(this.start-1,end);
+						HashMap<String, String> value = new HashMap<String, String>();
+						value.put("class","RegExp");
+						value.put("source", regexp);
+						this.addToken(
+								new TokenImpl(VALUE_CONSTANTS,
+										value)
+								);
+						this.start = end;
+						break;
+					}
 				}
 			default:
 				addToken(new TokenImpl(TOKEN_MAP.get(op), null));
@@ -410,7 +424,35 @@ public class ExpressionTokenizer extends JSONTokenizer {
 		}
 
 	}
-
+	int findRegExp(String text,int start){
+		int depth=0;
+		int end = text.length();
+		char c;
+		while(start < end){
+			c = text.charAt(start++);
+		    if(c=='['){
+		    	depth = 1;
+		    }else if(c==']'){
+		    	depth = 0;
+		    }else if (c == '\\') {
+		        start++;
+		    }else if(depth == 0 && c == '/'){
+		    	while(start < end){
+		    		c = text.charAt(start++);
+		    		switch(c){
+		    			case 'g':
+		    			case 'i':
+		    			case 'm':
+		    			break;
+		    			default:
+		    			return start-1;
+		    		}
+		    	}
+		    	
+		    }
+		}
+		return -1;
+	}
 	private static final Map<String, Integer> TOKEN_MAP = new HashMap<String, Integer>();
 	static{
 
