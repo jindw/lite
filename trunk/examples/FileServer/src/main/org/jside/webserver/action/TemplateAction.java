@@ -38,10 +38,10 @@ public class TemplateAction extends TemplateEngine {
 		reset(context);
 		OutputStreamWriter out = new OutputStreamWriter(context
 				.getOutputStream(), context.getEncoding());
-		if(contentType!=null){
-			if(contentType.endsWith("=")){
-				context.setContentType(contentType+context.getEncoding());
-			}else{
+		if (contentType != null) {
+			if (contentType.endsWith("=")) {
+				context.setContentType(contentType + context.getEncoding());
+			} else {
 				context.setContentType(contentType);
 			}
 		}
@@ -70,11 +70,14 @@ public class TemplateAction extends TemplateEngine {
 						return uri;
 					}
 				}
-			}else{
-				if(pagePath.startsWith("/")){
+			} else {
+				if(pagePath.length() == 0){
+					return baseURI;
+				}
+				if (pagePath.startsWith("/")) {
 					pagePath = pagePath.substring(1);
 				}
-				URI uri = new URL(baseURI.toURL(), pagePath).toURI();
+				URI uri = baseURI.resolve(pagePath);
 				uri = toExistResource(uri);
 				if (uri != null) {
 					return uri;
@@ -87,7 +90,12 @@ public class TemplateAction extends TemplateEngine {
 	}
 
 	private URI toExistResource(URI uri) throws MalformedURLException {
-		File file = HttpUtil.getFile(uri.toURL());
+		File file = null;
+		if (uri.getScheme().equals("file")) {
+			file = HttpUtil.getFile(uri.toURL());
+		}else if (uri.getScheme().equals("classpath")) {
+			
+		}
 		if (file != null) {
 			if (file.exists()) {
 				return uri;
