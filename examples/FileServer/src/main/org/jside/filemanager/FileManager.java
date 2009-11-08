@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -18,21 +19,14 @@ import org.jside.webserver.action.ActionWebServer;
 import org.jside.webserver.action.TemplateAction;
 
 public class FileManager {
-	private String contextPath = "/filemanager/";
+	private String contextPath;
 	private File base;
 	private TemplateAction engine;
 
 	public FileManager(File base, String contextPath) {
 		this.contextPath = contextPath;
 		this.base = base;
-		Class<? extends FileManager> cls = this.getClass();
-		URL classbase = cls.getResource(cls.getSimpleName()+".class");
-		System.out.println(classbase);
-		System.out.println(this.getClass().getResource("/"));
-		try {
-			engine = TemplateAction.create(classbase.toURI());
-		} catch (URISyntaxException e) {
-		}
+		engine = TemplateAction.create(URI.create("classpath:org/jside/filemanager/"));
 	}
 
 	public boolean execute() throws IOException {

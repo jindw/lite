@@ -21,12 +21,10 @@
 				<include name=".*.xhtml" />
 			</zipfileset>
 			<zipfileset src="${basedir}/web/WEB-INF/lib/Template.jar">
-				<include name="**/*.*" />
-				<exclude name="**.java" />
+				<include name="**/*.class" />
 				<exclude name="org/xidea/lite/parser/**/*.*" />
 				<exclude name="org/xidea/lite/servlet/**/*.*" />
 				<exclude name="org/xidea/lite/tools/**/*.*" />
-				<include name="org/xidea/lite/tools/CommandParser*.class" />
 			</zipfileset>
 			<zipfileset src="${basedir}/web/WEB-INF/lib/Template.jar">
 				<include name="org/xidea/lite/tools/CommandParser*.class" />
@@ -36,7 +34,7 @@
 	<target name="compileLite">
 		<delete dir="${basedir}/build/dest/lite" />
 		<mkdir dir="${basedir}/build/dest/lite" />
-		<java classname="org.xidea.lite.tools.LiteCompiler" classpath="../Lite/build/dest/Template.jar;../Lite/web/WEB-INF/lib/js.jar">
+		<java fork="true" classname="org.xidea.lite.tools.LiteCompiler" classpath="web/WEB-INF/lib/Template.jar">
 			<arg value="-root" />
 			<arg value="${basedir}/src/main/org/jside/filemanager/" />
 			<arg value="-litecached" />
