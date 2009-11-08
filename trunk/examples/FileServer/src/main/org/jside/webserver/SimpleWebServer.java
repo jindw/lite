@@ -16,7 +16,7 @@ import org.apache.commons.logging.LogFactory;
 
 public abstract class SimpleWebServer implements WebServer {
 	private static final Log log = LogFactory.getLog(SimpleWebServer.class);
-	protected int defaultPort = 1981;
+	protected int defaultPort = 80;
 	private int port;
 	private int state = CREATED;
 	private Object stateLock = new Object();
@@ -137,6 +137,9 @@ public abstract class SimpleWebServer implements WebServer {
 				break;
 			} catch (java.net.BindException e) {
 				port++;
+				if(i ==0){
+					port+=1900;
+				}
 			} catch (Exception e) {
 				log.warn("Error: ", e);
 				return;

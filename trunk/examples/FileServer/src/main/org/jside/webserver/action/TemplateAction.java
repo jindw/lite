@@ -60,7 +60,6 @@ public class TemplateAction extends TemplateEngine {
 
 	protected URI getResource(String pagePath) {
 		try {
-			
 			if (baseURI == null) {
 				RequestContext context = RequestContext.get();
 				URL url = context.getResource(pagePath);
