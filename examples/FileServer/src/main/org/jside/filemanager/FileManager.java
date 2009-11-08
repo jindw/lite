@@ -7,8 +7,6 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.HashMap;
@@ -26,7 +24,7 @@ public class FileManager {
 	public FileManager(File base, String contextPath) {
 		this.contextPath = contextPath;
 		this.base = base;
-		engine = TemplateAction.create(URI.create("classpath:org/jside/filemanager/"));
+		engine = TemplateAction.create(URI.create("classpath:///org/jside/filemanager/"));
 	}
 
 	public boolean execute() throws IOException {
