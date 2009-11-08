@@ -45,6 +45,16 @@
 				<input type="reset" value="取消" onclick="closeDialog()" />
 			</form>
 		</c:client>
+		<c:client id="renderCreateText">
+			<form method="POST" action="${path}?action=text">
+				<lable for="fileName">创建文本文件:</lable>
+				<textarea name="content"></textarea>
+				<input type="text" size="40" id="fileName" name="name"
+					value="新建文件.txt" />
+				<input type="submit" value="确认创建" />
+				<input type="reset" value="取消" onclick="closeDialog()" />
+			</form>
+		</c:client>
 		<script>
 			//<![CDATA[
 	var path = "${path}";
@@ -70,6 +80,9 @@
 	function doMkdir(){
 		showDialog(renderMkdir({}));
 	}
+	function doCreateText(){
+		showDialog(renderCreateText({}));
+	}
 	function doUpload(){
 		alert("尚未支持");
 	}
@@ -80,11 +93,11 @@
 				<c:if test="${for.index==0}">
 					<c:if test="${item}">
 						<c:var name="href"
-							value="/${encodeURIComponent(item)}" />
+							value="${prefix}/${encodeURIComponent(item)}" />
 						<a href="${href}/">${item}</a>
 					</c:if>
 					<c:else>
-						<c:var name="href" value="" />
+						<c:var name="href" value="${prefix}/" />
 					</c:else>
 				</c:if>
 				<c:else>
@@ -137,6 +150,7 @@
 			<tr>
 				<td colspan="2">
 					<a href="#" onclick="doMkdir()">创建目录</a>
+					<a href="#" onclick="doCreateText()">创建文本文件</a>
 					<a href="#" onclick="doUpload()">上传文件</a>
 				</td>
 			</tr>

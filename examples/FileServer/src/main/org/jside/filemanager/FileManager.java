@@ -1,6 +1,7 @@
 package org.jside.filemanager;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -54,6 +55,7 @@ public class FileManager {
 				HashMap<String, Object> data = new HashMap<String, Object>();
 				data.put("path", "/" + path.replace('\\', '/'));
 				data.put("fileList", list);
+				data.put("prefix",this.contextPath);
 				context.setContentType("text/html;charset="
 						+ context.getEncoding());
 				try {
@@ -82,7 +84,15 @@ public class FileManager {
 		final File file = new File(base, path);
 		String href = "./";
 		boolean success = false;
-		if ("delete".equals(action)) {
+		if ("text".equals(action)) {
+			success = file.createNewFile();
+			OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(file),"UTF-8");
+			String content = context.getParam().get("content");
+			out.write(content);
+			out.flush();
+			out.close();
+			href = file.getName();
+		}else if ("delete".equals(action)) {
 			success = file.delete();
 			href = "./";
 		} else if ("move".equals(action)) {
@@ -145,7 +155,7 @@ public class FileManager {
 		if(args != null && args.length>0){
 			file = args[0];
 		}
-		aws.addAction("/**", new FileManager(new File(file), "/"));
+		aws.addAction("/**", new FileManager(new File(file), "/fs"));
 		aws.start();
 	}
 
