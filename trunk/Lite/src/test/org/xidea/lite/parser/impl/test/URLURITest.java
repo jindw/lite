@@ -37,10 +37,9 @@ public class URLURITest {
 	}
 	@Test
 	public void testURIRelative() throws Exception{
-		String t = "classpath:aa/bb/cc/../../dd";
-		System.out.println(new URI(t));
-		t = t.replaceFirst("([^\\/]+\\/\\.)?\\.\\/", "");
-		System.out.println(new URI(t));
+		String t = "classpath:///aa/bb/cc/.././../dd";
+		System.out.println(new URI(t).normalize());
+		System.out.println(new URI(t).resolve("xx:./test.x"));
 	}
 	@Test
 	public void testURIFile(){
