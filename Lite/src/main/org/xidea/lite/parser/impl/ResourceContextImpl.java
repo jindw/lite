@@ -19,35 +19,16 @@ public class ResourceContextImpl implements ResourceContext {
 
 	public URI createURI(String path, URI parentURI) {
 		try {
-			if (URI_ROOT.matcher(path).find()) {
-				return URI.create(path);
-			} else {
-				URI parent = parentURI != null ? parentURI : this.base;
-				if (path.startsWith("/")) {
-					if (parent.toString().startsWith(base.toString())) {
-						path = (base.getPath() + path).replaceFirst(
-								"^\\/|\\/\\/", "");
-					}
-				} else {
-					String dir = parent.getPath();
-					if (dir.endsWith("/")) {
-						dir = dir + "a";
-					}
-					path = dir + "/../" + path;
-					int length = -1;
-					while (true) {
-						path = URI_CLEAR.matcher(path).replaceFirst("/");
-						int length2 = path.length();
-						if (length2 == length) {
-							break;
-						} else {
-							length = length2;
-						}
-					}
+			URI parent = parentURI != null ? parentURI : this.base;
+			if (path.startsWith("/")) {
+				if (parentURI == null
+						|| parent.toString().startsWith(base.toString())) {
+					String prefix = base.getPath();
+					int p  =prefix.lastIndexOf('/');
+					path = prefix.substring(0,p)+path;
 				}
-				return new URI(parent.getScheme(), parent.getUserInfo(), parent
-						.getHost(), parent.getPort(), path, null, null);
 			}
+			return parent.resolve(path);
 
 		} catch (Exception e) {
 			throw new RuntimeException(e);
