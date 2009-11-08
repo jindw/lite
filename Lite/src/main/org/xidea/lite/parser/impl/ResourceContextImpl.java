@@ -3,14 +3,10 @@ package org.xidea.lite.parser.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.regex.Pattern;
 
 import org.xidea.lite.parser.ResourceContext;
 
 public class ResourceContextImpl implements ResourceContext {
-	private static Pattern URI_ROOT = Pattern.compile("^[\\w]+\\:");
-	private static Pattern URI_CLEAR = Pattern
-			.compile("\\/\\.\\/|\\/[^\\/]+\\/\\.\\.\\/");
 	protected final URI base;
 
 	public ResourceContextImpl(URI base) {
@@ -40,6 +36,7 @@ public class ResourceContextImpl implements ResourceContext {
 			if ("classpath".equalsIgnoreCase(uri.getScheme())) {
 				ClassLoader cl = this.getClass().getClassLoader();
 				String path = uri.getPath();
+				path = path.substring(1);
 				InputStream in = cl.getResourceAsStream(path);
 				if (in == null) {
 					ClassLoader cl2 = Thread.currentThread()
