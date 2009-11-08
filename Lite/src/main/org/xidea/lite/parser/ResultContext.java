@@ -48,11 +48,22 @@ public interface ResultContext {
 	 */
 	public int getType(int offset);
 
+
+	/**
+	 * 设置translator，同时更新featrueMap（结果翻译起对某些特征可能不支持）
+	 * @param translator
+	 */
+	public void setResultTranslator(ResultTranslator translator);
+
 	/**
 	 * @return 经过优化后的树形结果集
 	 */
 	public List<Object> toList();
 
+	/**
+	 * @return 经过结果转换后的代码
+	 */
+	public String toCode();
 	/**
 	 * 添加静态文本（不编码）
 	 * 
@@ -105,4 +116,6 @@ public interface ResultContext {
 	public String addGlobalObject(Class<? extends Object> impl, String key);
 
 	public String allocateId();
+	
+	
 }

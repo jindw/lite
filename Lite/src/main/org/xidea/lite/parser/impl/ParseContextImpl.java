@@ -3,8 +3,6 @@ package org.xidea.lite.parser.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -16,14 +14,11 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.xpath.XPathExpressionException;
 
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Node;
 import org.xidea.el.ExpressionFactory;
 import org.xidea.el.impl.ExpressionFactoryImpl;
-import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.Plugin;
 //import org.xidea.lite.parser.ResultItem;
 import org.xidea.lite.parser.TextParser;
@@ -44,14 +39,12 @@ import org.xml.sax.SAXException;
  */
 public class ParseContextImpl implements ParseContext {
 	private static final long serialVersionUID = 1L;
-	private static final Log log = LogFactory.getLog(ParseContextImpl.class);
 	protected ResourceContext resourceContext;
 	protected XMLContext xmlContext;
 	protected ResultContext resultContext;
 	protected ParserHolder parserHolder;
 	protected final Map<String, String> featrueMap;
 	private ExpressionFactory expressionFactory = ExpressionFactoryImpl.getInstance();
-	private ResultTranslator translator;
 	private URI currentURI;
 	private int textType = 0;
 
@@ -71,14 +64,8 @@ public class ParseContextImpl implements ParseContext {
 
 	public ParseContextImpl(ParseContext parent, 
 			ResultTranslator translator) {
-		if(parent instanceof ParseContextImpl){
-			ParseContextImpl parent2 = (ParseContextImpl)parent;
-			this.resourceContext = parent2.resourceContext;
-			this.xmlContext = parent2.xmlContext;
-		}else{
-			this.resourceContext = parent;
-			this.xmlContext = parent;
-		}
+		this.resourceContext = parent;
+		this.xmlContext = parent;
 		//需要重设 ParseChain 的context
 		this.parserHolder = new ParseHolderImpl(this,parent);
 		this.resultContext = new ResultContextImpl(this);
@@ -91,8 +78,8 @@ public class ParseContextImpl implements ParseContext {
 	protected void initialize(URI base, Map<String, String> featrues,
 			NodeParser<? extends Object>[] parsers, TextParser[] ips) {
 		resourceContext = new ResourceContextImpl(base);
-		resultContext = new ResultContextImpl(this);
 		xmlContext = new XMLContextImpl(this);
+		resultContext = new ResultContextImpl(this);
 		parserHolder = new ParseHolderImpl(this, parsers, ips);
 		initializeFeatrues(featrues);
 	}
@@ -351,36 +338,16 @@ public class ParseContextImpl implements ParseContext {
 	}
 
 
-	public void setResultTranslator(ResultTranslator translator) {
-		Collection<String> featrueKeys = featrueMap.keySet();
-		Collection<String> support = Collections.emptyList();
-		try{
-			support = translator.getSupportFeatrues();
-		}catch (Exception e) {
-			log.warn("未指定支持的特征，设空处理",e);
-		}
-		if (support == null) {
-			featrueMap.clear();
-		}else{
-			for (String key : featrueKeys) {
-				if (!support.contains(key)) {
-					featrueMap.remove(key);
-				}
-			}
-		}
-		this.translator = translator;
-	}
-
 	public List<Object> toList() {
 		return resultContext.toList();
 	}
 
 	public String toCode() {
-		if(translator==null){
-			return JSONEncoder.encode(this.toList());
-		}else{
-			return translator.translate(this);
-		}
+		return resultContext.toCode();
+	}
+
+	public void setResultTranslator(ResultTranslator translator) {
+		resultContext.setResultTranslator(translator);
 	}
 
 
