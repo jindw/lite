@@ -44,13 +44,16 @@ cursor:pointer;
 #menu #menuContent li.selected{
 background:#DDD
 }
-#context{
+#jsonSource{
 width:98%;
 height:200px
 }
 #templateSource{
 width:98%;
 height:200px
+}
+.source{
+border:1px solid #000;
 }
 .action ,.source{
 text-align:right;
@@ -70,7 +73,7 @@ height:125px
 }
 			/*]]> /* */
 		</style>
-		<script src="scripts/?path=boot.js"></script>
+		<script src="scripts/index.php/?path=boot.js"></script>
 		<script>$import("org.xidea.lite.demo.TestCase",true)</script>
 	</head>
 	<body>
@@ -82,7 +85,7 @@ height:125px
 				</tr>
 				<tr>
 					<td class="source">
-						<textarea id="context">
+						<textarea id="jsonSource">
 {
   "blocks":[
     [0,0,19,100],
@@ -110,7 +113,7 @@ height:125px
 				</tr>
 				<tr>
 					<td colspan="2" class="action">
-						<button onclick="TestCase.runTest()">
+						<button onclick="prepare();TestCase.runTest()">
 							测试模板
 						</button>
 					</td>
@@ -122,20 +125,20 @@ height:125px
 					<th>模板渲染结果</th>
 				</tr>
 				<tr>
-					<td class="source" title="标准中间代码 ">
+					<td class="code" title="标准中间代码 ">
 						<textarea id="templateCode" title="双击显示指令助记名" readonly="true" ondblclick="TestCase.liteFormat(this.value)">JSON数组形式的中间代码</textarea>
 					</td>
-					<td class="source">
+					<td class="code">
 						<textarea id="templateResult" readonly="true">模板渲染的目标代码</textarea>
 					</td>
 				</tr>
 				<tr>
-					<td class="source" title="优化后JS目标代码">
+					<td class="code" title="优化后JS目标代码">
 						<textarea id="optimizedResult"
 							readonly="true">优化后的JS目标代码
 						</textarea>
 					</td>
-					<td class="source">
+					<td class="code">
 						<iframe id="htmlResult"></iframe>
 					</td>
 				</tr>
@@ -150,6 +153,64 @@ height:125px
 			</div>
 			<div id="description"></div>
 		</div>
-		<script>TestCase.initialize();</script>
+		
+		<script>
+		TestCase.initialize();
+		</script>
+		
+		<style type="text/css">
+			.CodeMirror-line-numbers {
+			 width: 2.2em; 
+			 color: #aaa;
+			 background-color: #eee;
+			 text-align: right; 
+			 padding-right:.3em; 
+			 font-size: 10pt; 
+			 font-family: monospace; 
+			 padding-top:.4em; 
+			}
+			td{ vertical-align: top }
+		</style>
+		<link rel="stylesheet" type="text/css"
+			href="/styles/default.css" />
+		<script src="http://www.xidea.org/project/lite/codemirror/codemirror.js"
+			type="text/javascript" ></script>
+		<script type="text/javascript">
+			//<![CDATA[
+  var jsonSourceEditor,templateSourceEditor;
+  function setupCodeArea(area,type){
+      area = document.getElementById(area);
+      var base = "http://www.xidea.org/project/lite/codemirror/";
+	  var config = {
+		readOnly:false,
+		path: base,//"file:///C:/Users/jindw/workspace/Ark/admin.jside.org/scripts/codemirror/",
+		continuousScanning: 400,
+		lineNumbers: true,
+		height:"200px",
+		textWrapping: false
+	  }
+	  switch(type){
+	  case 'js':
+	    config.parserfile= ["tokenizejavascript.js", "parsejavascript.js"];
+		config.stylesheet= base+"jscolors.css";
+	  case 'xml':
+	    config.parserfile= ["tokenize.js","parsexml.js"];
+		config.stylesheet= base+"xmlcolors.css";
+	  }
+	  return CodeMirror.fromTextArea(area, config);
+  }
+  jsonSourceEditor = setupCodeArea("jsonSource","js");
+  templateSourceEditor = setupCodeArea("templateSource","xml");
+		
+  TestCase.setSource = function(jsonSource,templateSource){
+     jsonSourceEditor.setCode(jsonSource);
+     templateSourceEditor.setCode(templateSource);
+  }
+  function prepare(){
+  	 document.getElementById("jsonSource").value = jsonSourceEditor.getCode();
+	 document.getElementById("templateSource").value = templateSourceEditor.getCode();
+  }
+  //]]>
+		</script>
 	</body>
 </html>

@@ -1,9 +1,9 @@
 var TestCase = {
 	runTest:function (){
-	    var context = document.getElementById("context").value;
+	    var jsonSource = document.getElementById("jsonSource").value;
 	    var templateSource = E("templateSource").value;
 	    try{
-	        context = parseJSON(context);//JSON.decode(context);
+	        jsonSource = parseJSON(jsonSource);//JSON.decode(context);
 	    }catch(e){
 	        $log.error("数据源解析失败",e);
 	        return false;
@@ -22,8 +22,8 @@ var TestCase = {
 	    	var parser = new XMLParser(true);
 	    	parser.parse(parseXMLText(templateSource));
 	    	var jsCode = parser.toCode();
-	        var jsTemplate = new Template(window.eval("("+(jsCode || null)+")"));
-	        jsCode = jsCode
+	        var fn = window.eval("["+(jsCode || null)+"][0]");
+	    	var jsTemplate = new Template(fn);
 	    }catch(e){
 	        $log.error("模板解析失败（JS）",e);
 	        return false;
@@ -47,7 +47,7 @@ var TestCase = {
 	        var t1 = new Date();
 	        var count = testCount;
 	        while(count--){
-	            var jsResult = jsTemplate.render(context);
+	            var jsResult = jsTemplate.render(jsonSource);
 	        }
 	        jsTime = new Date()-t1;
 	    }catch(e){
@@ -57,7 +57,7 @@ var TestCase = {
 	        var t1 = new Date();
 	        var count = testCount;
 	        while(count--){
-	            var jsonResult = jsonTemplate.render(context);
+	            var jsonResult = jsonTemplate.render(jsonSource);
 	        }
 	        $log.info("模版消耗时间（？毫秒/"+testCount+"次）：",
 	        "jsTime:"+jsTime,
@@ -106,9 +106,7 @@ var TestCase = {
 	},
 	prepare:function(thiz,key){
 		E("description").innerHTML = data[key]["description"];
-		E("context").value = data[key]["context"];
-		E("templateSource").value = data[key]["source"];
-		
+		this.setSource(data[key]["context"],data[key]["source"]);
 		var nodes = thiz.parentNode.childNodes;
 		var i = nodes.length;
 		while(i--){
@@ -119,6 +117,10 @@ var TestCase = {
 				node.className = ""
 			}
 		}
+	},
+	setSource:function(jsonSource,templateSource){
+		E("jsonSource").value = jsonSource;
+		E("templateSource").value = templateSource;
 	},
 	liteFormat:function(text){
 	    confirm(liteFormat(parseJSON(text),true));

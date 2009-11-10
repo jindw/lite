@@ -141,6 +141,7 @@
 			<arg value="false" />
 			<arg value="-config.features" />
 			<arg value="org.xidea.lite:Compile" />
+			<arg value="org.xidea.jsi.boot:$log" />
 
 			<arg value="-exports" />
 			<arg value="org.xidea.lite:Template" />

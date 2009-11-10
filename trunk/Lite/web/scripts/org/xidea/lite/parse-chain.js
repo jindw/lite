@@ -21,6 +21,9 @@ ParseChain.prototype = {
 	    this.initialize = Function.prototype;
     },
 	process:function(node){
+		if(null == node){
+			return null;
+		}
 	    this.initialize();
         var parser = this.parser;
         var nextChain = this.nextChain;

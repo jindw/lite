@@ -159,7 +159,7 @@ ParseContext.prototype = {
 		this.result.push([CAPTRUE_TYPE,varName]);
 	},
 	appendPlugin:function(clazz, el){
-		this.result.push([ADD_ON_TYPE,el,clazz]);
+		this.result.push([PLUGIN_TYPE,el,clazz]);
 	},
 	toList:function(){
 		var result = optimizeResult(this.result);
@@ -238,7 +238,7 @@ function buildTreeResult(result){
 				case CAPTRUE_TYPE:
 				case IF_TYPE:
 				case ELSE_TYPE:
-				case ADD_ON_TYPE:
+				case PLUGIN_TYPE:
 				case FOR_TYPE:
 					cmd2.push(null);
 					stack.push(current = []);
