@@ -7,52 +7,50 @@ TIT.XML_ATTRIBUTE_TYPE = 3;// [3,'value','name']
 TIT.XML_TEXT_TYPE = 4;// [4,'el']
 TIT.FOR_TYPE = 5;// [5,[...],'items','var','status']//status
 TIT.ELSE_TYPE = 6;// [6,[...],'test']//test opt?
-TIT.ADD_ON_TYPE =7;// [7,[...],'var']
+TIT.PLUGIN_TYPE =7;// [7,[...],'var']
 TIT.VAR_TYPE = 8;// [8,'value','name']
 TIT.CAPTRUE_TYPE = 9;// [9,[...],'var']
 
 
 //值类型（<=0）
 //常量标记（String,Number,Boolean,Null）
-EIT.VALUE_CONSTANTS = -0x00;//c;
-EIT.VALUE_VAR = -0x01;//n;
-EIT.VALUE_LAZY = -0x02;
-EIT.VALUE_NEW_LIST = -0x03;//[;
-EIT.VALUE_NEW_MAP = -0x04;//{;
-	
 //符号标记 ????? !!
 //9
-EIT.OP_GET_PROP = 17;//0 | 16 | 1;
-EIT.OP_GET_STATIC_PROP = 48;//32 | 16 | 0;
-EIT.OP_INVOKE_METHOD = 81;//64 | 16 | 1;
-//8
-EIT.OP_NOT = 14;//0 | 14 | 0;
-EIT.OP_POS = 46;//32 | 14 | 0;
-EIT.OP_NEG = 78;//64 | 14 | 0;
-//7
-EIT.OP_MUL = 13;//0 | 12 | 1;
-EIT.OP_DIV = 45;//32 | 12 | 1;
-EIT.OP_MOD = 77;//64 | 12 | 1;
-//6
-EIT.OP_ADD = 11;//0 | 10 | 1;
-//5
-EIT.OP_SUB = 41;//32 | 8 | 1;
-//4
-EIT.OP_LT = 7;//0 | 6 | 1;
-EIT.OP_GT = 39;//32 | 6 | 1;
-EIT.OP_LTEQ = 71;//64 | 6 | 1;
-EIT.OP_GTEQ = 103;//96 | 6 | 1;
-EIT.OP_EQ = 135;//128 | 6 | 1;
-EIT.OP_NOTEQ = 167;//160 | 6 | 1;
-//3
-EIT.OP_AND = 5;//0 | 4 | 1;
-EIT.OP_OR = 37;//32 | 4 | 1;
-//2
-EIT.OP_QUESTION = 3;//0 | 2 | 1;
-EIT.OP_QUESTION_SELECT = 35;//32 | 2 | 1;
-//1
-EIT.OP_PARAM_JOIN = 1;//0 | 0 | 1;
-EIT.OP_MAP_PUSH = 33;//32 | 0 | 1;
+
+EIT.VALUE_CONSTANTS= -1;
+EIT.VALUE_VAR= -2;
+EIT.VALUE_NEW_LIST= -3;
+EIT.VALUE_NEW_MAP= -4;
+var OP_GET_PROP= 96;
+EIT.OP_GET_STATIC_PROP= 33;
+EIT.OP_INVOKE_METHOD= 98;
+EIT.OP_INVOKE_METHOD_WITH_STATIC_PARAM= 35;
+EIT.OP_INVOKE_METHOD_WITH_ONE_PARAM= 352;
+EIT.OP_NOT= 28;
+EIT.OP_BIT_NOT= 29;
+EIT.OP_POS= 30;
+EIT.OP_NEG= 31;
+EIT.OP_MUL= 88;
+EIT.OP_DIV= 89;
+EIT.OP_MOD= 90;
+EIT.OP_ADD= 84;
+EIT.OP_SUB= 85;
+EIT.OP_LT= 4176;
+EIT.OP_GT= 4177;
+EIT.OP_LTEQ= 4178;
+EIT.OP_GTEQ= 4179;
+EIT.OP_EQ= 80;
+EIT.OP_NOTEQ= 81;
+EIT.OP_BIT_AND= 8268;
+EIT.OP_BIT_XOR= 4172;
+EIT.OP_BIT_OR= 76;
+EIT.OP_AND= 4168;
+EIT.OP_OR= 73;
+EIT.OP_QUESTION= 68;
+EIT.OP_QUESTION_SELECT= 69;
+EIT.OP_PARAM_JOIN= 64;
+EIT.OP_MAP_PUSH= 65;
+
 var EIN = {};
 for(var n in EIT){
     EIN[EIT[n]] = n;
@@ -111,28 +109,29 @@ function doLiteFormat(json,prefix,showName){
 
 function doFormatEL(json,showName){
     if(showName){
-        var buf = ["["]
-        for(var i =0;i<json.length;i++){
-            if(i){
-                buf.push(",");
-            }
-            var item = json[i];
-            var type = item[0];
-            buf.push("[",EIN[type]);
-            if(type == EIT.VALUE_LAZY){
-                buf.push(",");
-                buf.push(doFormatEL(item[1],showName));
-            }else{
-                for(var j = 1;j<item.length;j++){
-                    buf.push(",",stringifyJSON(item[j]));
-                }
-            }
-            buf.push("]");
-        }
-        buf.push("]");
-        return  buf.join("");
+        return stringifyLabel(json);
     }else{
         return stringifyJSON(json);
     }
-
+}
+function stringifyLabel(json){
+	if(json instanceof Array){
+		var buf = ["["]
+	    for(var i =0;i<json.length;i++){
+	        if(i){
+	            buf.push(",",stringifyLabel(json[i]));
+	        }else{
+	        	var type = json[0];
+	        	var type2 = EIN[type];
+	        	if(type2){
+	        		buf.push(type2);
+	        	}else{
+	        		buf.push(stringifyLabel(type));
+	        	}
+	        }
+	    }
+	    buf.push("]");
+	    return  buf.join("");
+	}
+	return stringifyJSON(json);
 }

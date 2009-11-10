@@ -12,7 +12,7 @@ var XML_ATTRIBUTE_TYPE = 3;// [3,'value','name']
 var XML_TEXT_TYPE = 4;// [4,'el']
 var FOR_TYPE = 5;// [5,[...],'items','var']
 var ELSE_TYPE = 6;// [6,[...],'test']//test opt?
-var ADD_ON_TYPE =7;// [7,[...],'el','clazz']
+var PLUGIN_TYPE =7;// [7,[...],'el','clazz']
 var VAR_TYPE = 8;// [8,'value','name']
 var CAPTRUE_TYPE = 9;// [9,[...],'var']
 var IF_KEY = "if";
@@ -90,7 +90,7 @@ Template.prototype.render = function(context){
         var context2 = {};
         while(i--){//本来是编译期处理的,偷懒,性能优化在toNative中处理吧:(
             var item = data[i];
-            if(item instanceof Array && item[0] == ADD_ON_TYPE){
+            if(item instanceof Array && item[0] == PLUGIN_TYPE){
                 if(item[3] == PLUGIN_DEFINE){
                     processDef(context2, item);
                 }

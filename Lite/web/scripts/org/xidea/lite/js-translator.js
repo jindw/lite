@@ -231,7 +231,7 @@ Context.prototype = {
                 case FOR_TYPE:
                     i = this.processFor(code,i);
                     break;
-    			case ADD_ON_TYPE://not support
+    			case PLUGIN_TYPE://not support
     				break;
                 //case ELSE_TYPE:
                 default:

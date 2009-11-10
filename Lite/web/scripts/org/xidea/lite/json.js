@@ -72,6 +72,8 @@ function stringifyJSON(value) {
                 }
             }
             return '{' + buf.join(',') + '}';
+        case 'undefined':
+        	return 'null';
         case 'number':
             if(!isFinite(value)){
                 value = 'null';

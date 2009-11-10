@@ -115,7 +115,7 @@ function doFind(code,vs){
         var item = code[i];
         if(item instanceof Array){
 			switch (item[0]) {
-			case ADD_ON_TYPE:
+			case PLUGIN_TYPE:
 				if(item[3] == 'org.xidea.lite.DefinePlugin'){
 					doFindDef(item,vs)
 				}
