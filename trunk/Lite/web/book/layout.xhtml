@@ -1,0 +1,152 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://www.xidea.org/ns/lite/core"
+	xmlns:fk="http://firekylin.my.baidu.com/ns/doc">
+	<head>
+		<title>前端编程我做主-- 基于模板的Web UI</title>
+		<c:include path="#page" xpath="//xhtml:head/*" />
+		<link href="default.css" media="screen" rel="stylesheet"
+			type="text/css" />
+	</head>
+	<body>
+		<div id="header">
+			<h1>
+				<c:include path="#page" xpath="//xhtml:title/text()" />
+			</h1>
+		</div>
+		<div id="body">
+			<div id="menu">
+				<h3>前言</h3>
+				<ul>
+					<li>
+						<a href="preface-history.xhtml" title="小往大来，吉亨">模板语言的前生今世</a>
+					</li>
+					<li>
+						<a href="preface-thinking.xhtml" title="兵马未动，粮草先行">模板编程思想介绍</a>
+					</li>
+				</ul>
+
+				<h3>入门篇</h3>
+				<ul>
+					<li>
+						<a href="#" title="小试一麾行促诏，暂留千骑且飞觞">Hello world</a>
+					</li>
+					<li>
+						<a href="#" title="春风得意马蹄疾 一日看尽长安花">基本语法纵览</a>
+					</li>
+				</ul>
+				<h3>特色篇</h3>
+				<ul>
+					<li>
+						<a href="#" title="满堂花醉三千客 一剑霜寒十四州">发挥前端模板的优势</a>
+					</li>
+					<li>
+						<a href="#" title="蓬莱此去无多路 青鸟殷勤为探看">发挥表达式的优势 </a>
+					</li>
+					<li>
+						<a href="#" title="书山墨海群芳竞，画里乾坤日月新">发挥自定义语法的优势 </a>
+					</li>
+				</ul>
+				<h3>环境篇</h3>
+				<ul>
+					<li>
+						<a href="#" title="*** 自定义首页 环境下创建自己的模块">见龙在田 </a>
+					</li>
+					<li>
+						<a href="#" title="JavaScript环境下的***">或越在渊 </a>
+					</li>
+					<li>
+						<a href="#" title="Php环境下的***">龙战于野 </a>
+					</li>
+					<li>
+						<a href="#" title="Java环境下的***">飞龙在天 </a>
+					</li>
+
+				</ul>
+				<h3>深入篇</h3>
+				<ul>
+					<li>
+						<a href="#" title="九层之台 起于垒土">JSEL表达式详解 </a>
+					</li>
+					
+					<li>
+						<a href="#" title="好水好山看不足 马蹄催趁月明归">模板语法详解 </a>
+					</li>
+					
+					<li>
+						<a href="#" title="且放白鹿青崖间 须行即骑访名山">模板函数详解 </a>
+					</li>
+					
+					<li>
+						<a href="#" title="事了拂衣去，深藏身与名">编译扩展详解 </a>
+					</li>
+					
+					<li>
+						<a href="#" title="凡治众如治寡，分数是也">模板组织详解 </a>
+					</li>
+					
+					<li>
+						<a href="#" title="兵者，不祥之器">运行插件详解 </a>
+					</li>
+					
+					<li>
+						<a href="#" title="人过留名，雁过留声">运行时调试详解 </a>
+					</li>
+					
+				</ul>
+				<h3>实例篇</h3>
+				<ul>
+					<li>
+						<a href="#" title="模板也疯狂。">聚言堂运用实例 </a>
+					</li>
+					<li>
+						<a href="#" title="一百零八的神话。">精悍的Suggest运用 </a>
+					</li>
+					<li>
+						<a href="#" title="手机开发也精彩">基于Lite的Andriod手机文档系统 -</a>
+					</li>
+				</ul>
+				<h3>超越篇</h3>
+				<ul>
+					<li>
+						<a href="#" title="我的地盘我作主">实现自己的风格模板语法 </a>
+					</li>
+					<li>
+						<a href="#" title="我们无所不能">基于Lite XML 的web编程 </a>
+					</li>
+				</ul>
+
+				<h3>兼听偏</h3>
+				<ul>
+					<li>
+						<a href="#">CommenTemplate简明教程</a>
+					</li>
+					<li>
+						<a href="#">FreeMarker简明教程</a>
+					</li>
+					<li>
+						<a href="#">Smarty简明教程</a>
+					</li>
+					<li>
+						<a href="#">Google Closure Template 简明教程</a>
+					</li>
+				</ul>
+				<h3>参考</h3>
+				<ul>
+					<li>
+						<a href="#">Lite XML语法参考</a>
+					</li>
+					<li>
+						<a href="#">FireKylin 引擎实现</a>
+					</li>
+					<li>
+						<a href="#">Lite2PHP翻译内幕</a>
+					</li>
+				</ul>
+			</div>
+			<div id="content">
+				<c:include path="#page" xpath="//xhtml:body/node()" />
+			</div>
+		</div>
+		<div id="footer"></div>
+	</body>
+</html>
