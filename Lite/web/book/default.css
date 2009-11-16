@@ -1,0 +1,220 @@
+html {
+	color: #000;
+	background: #FFF;
+}
+
+body,
+div,
+dl,
+dt,
+dd,
+ol,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+pre,
+code,
+form,
+fieldset,
+legend,
+input,
+button,
+textarea,
+p,
+blockquote,
+th,
+td {
+	margin: 0;
+	padding: 0;
+}
+
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+
+fieldset,
+img {
+	border: 0;
+}
+
+address,
+caption,
+cite,
+code,
+dfn,
+em,
+
+var,
+optgroup {
+	font-style: inherit;
+	font-weight: inherit;
+}
+
+del,
+ins {
+	text-decoration: none;
+}
+
+#menu li {
+	list-style: none;
+}
+
+caption,
+th {
+	text-align: left;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	font-size: 100%;
+	font-weight: blod;
+	margin-top:4px;
+}
+
+q:before,
+q:after {
+	content: '';
+}
+
+abbr,
+acronym {
+	border: 0;
+	font-variant: normal;
+}
+
+sup {
+	vertical-align: baseline;
+}
+
+sub {
+	vertical-align: baseline;
+}
+
+/*because legend doesn't inherit in IE */
+legend {
+	color: #000;
+}
+
+input,
+button,
+textarea,
+select,
+optgroup,
+option {
+	font-family: inherit;
+	font-size: inherit;
+	font-style: inherit;
+	font-weight: inherit;
+}
+
+/*@purpose To enable resizing for IE */
+/*@branch For IE6-Win, IE7-Win */
+input,
+button,
+textarea,
+select {
+	*font-size: 100%;
+}
+
+/*Custom css*/
+a:link{
+    color:#0479A7;
+    text-decoration:none;
+}
+
+a:visited,a:active,a:focus{
+    text-decoration:none;
+    color:#0479A7;
+}
+
+a:hover{
+    text-decoration:underline;
+}
+
+
+
+
+#header{
+  background:url(logo.png) 40px no-repeat;
+  height:80px;
+  margin-bottom:20px;
+  border-bottom:5px solid #d3232a;
+}
+#header h1{
+    font-size:28px;
+    font-weight:700;
+    padding:15px 180px;
+}
+/* body */
+#body{
+  clear:both;
+  width:90%;
+  margin:0 auto;
+}
+
+/* menu */
+#menu{
+  float:left;
+  border:1px solid #ECF1F3;
+  width:250px;
+  background:#F1F6F8;
+  padding:15px 0;
+}
+
+#menu h3{
+    font-size:14px;
+    font-weight:700;
+    padding:5px 10px;
+}
+
+#menu ul{
+    padding-left:30px;
+}
+
+#menu li{
+    padding:3px 0;
+    font-size:12px;
+}
+
+/*content*/
+#content{
+  margin-left:260px;
+  padding:5px 0;
+}
+
+#content h3,
+#content h4{
+    font-size:14px;
+    font-weight:700;
+    margin:15px 15px 5px;
+    padding:2px 5px;
+    border-bottom:1px solid #E2E1DE;
+}
+#content h2{
+    font-size:18px;
+    border-bottom:3px solid #E2E1DE;
+}
+#content h3{
+    font-size:16px;
+    border-bottom:2px solid #E2E1DE;
+}
+#content p,
+#content ul{
+    font-size:14px;
+    margin:20px 30px;
+}
+
+#content ul li{
+    margin:10px 0;
+}
+
+
+
