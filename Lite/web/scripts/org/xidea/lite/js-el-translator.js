@@ -72,6 +72,8 @@ ELTranslator.prototype = {
 		var value2 = this.stringify(el[2]);
 		var param = el[3];
 		switch(type){
+		case OP_INVOKE_METHOD_WITH_ONE_PARAM:
+			value2="["+value2+']';
 		case OP_INVOKE_METHOD:
 			value2 = value2.slice(1,-1);
 			return value1+"("+value2+')';
@@ -85,16 +87,16 @@ ELTranslator.prototype = {
 		case OP_GET_PROP:
 			return value1+'['+value2+']';
 		case OP_PARAM_JOIN:
-			if(/\[\]$/.test(value1)){
-				return value1.slice(0,-1)+value2+")"
+			if("[]"==value1){
+				return "["+value2+"]"
 			}else{
-				return value1.slice(0,-1)+','+value2+")"
+				return value1.slice(0,-1)+','+value2+"]"
 			}
 			//return value1.replace(/(,?)\)$/,'$1')+value2+")"
 		case OP_MAP_PUSH:
-			value2 = stringifyJSON(param)+":"+value2+")";
-			if(/\{\}$/.test(value1)){
-				return value1.slice(0,-1)+value2
+			value2 = stringifyJSON(param)+":"+value2+"}";
+			if("{}"==value1){
+				return "{"+value2
 			}else{
 				return value1.slice(0,-1)+','+value2
 			}
@@ -124,9 +126,11 @@ ELTranslator.prototype = {
 	stringifyPrefix:function(el){
 		var type = el[0];
 		var el1 = el[1];
-		var opc = findTokenText(type);
 		var value = this.stringify(el1);
-		if(OP_GET_STATIC_PROP == type) {
+		if(OP_INVOKE_METHOD_WITH_STATIC_PARAM == type){
+			var value2 = this.stringify(el[3]).slice(1,-1);
+			return value+"("+value2+')';
+		}else if(OP_GET_STATIC_PROP == type) {//已经是最高优先级了,
 			var key = el[3];
 			if(typeof key == 'number'){
 				return value+'['+key+']';
@@ -136,11 +140,13 @@ ELTranslator.prototype = {
 				}
 				return value+'['+stringifyJSON(''+key)+']';
 			}
+		}else{
+		    var opc = findTokenText(type);
+    		if(this.getPriority(el)>=this.getPriority(el1)){
+    			value = '('+value+')';
+    		}
+    		return opc+value;
 		}
-		if(this.getPriority(el)>=this.getPriority(el1)){
-			value = '('+value+')';
-		}
-		return opc+value;
 	}
 }
 
