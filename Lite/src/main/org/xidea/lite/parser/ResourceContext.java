@@ -18,6 +18,7 @@ public interface ResourceContext{
 	 * @param file
 	 * @param parentURI
 	 * @see org.xidea.lite.parser.impl.ParseContextImpl#createURI
+	 * @see org.xidea.lite.parser.impl.ResourceContextImpl#createURI
 	 * @return
 	 */
 	public URI createURI(String file, URI parentURI);

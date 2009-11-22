@@ -147,7 +147,13 @@ public class CoreXMLNodeParser implements NodeParser<Element> {
 				doc = context.selectNodes(doc, xpath);
 			}
 			if (xslt != null) {
-				doc = context.transform(parentURI, doc, xslt);
+				Node xsltNode = null;
+				if (xslt.startsWith("#")) {
+					xsltNode = ((Node) context.getAttribute(xslt));
+				}else{
+					xsltNode = context.loadXML(context.createURI(xslt, context.getCurrentURI()));
+				}
+				doc = context.transform(parentURI, doc, xsltNode);
 			}
 			context.parse(doc);
 		} catch (Exception e) {
