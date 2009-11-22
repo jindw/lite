@@ -55,7 +55,10 @@ public class ParseContextImpl implements ParseContext {
 	protected ParseContextImpl() {
 		featrueMap = new HashMap<String, String>();
 	}
-
+	public ParseContextImpl(URI base){
+		this();
+		initialize(base, null, null, null);
+	}
 	public ParseContextImpl(URI base, Map<String, String> featrues,
 			NodeParser<? extends Object>[] parsers, TextParser[] ips) {
 		this();
@@ -273,6 +276,9 @@ public class ParseContextImpl implements ParseContext {
 		xmlContext.setReserveSpace(keepSpace);
 	}
 
+	public Document loadXML(String path) throws SAXException, IOException{
+		return loadXML(URI.create(path));
+	}
 	public Document loadXML(URI url) throws SAXException, IOException {
 		return xmlContext.loadXML(url);
 	}

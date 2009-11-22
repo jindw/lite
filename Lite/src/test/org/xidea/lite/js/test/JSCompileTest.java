@@ -124,8 +124,15 @@ public class JSCompileTest {
 	}
 
 	@Test
+	public void testClasspath() throws Exception {
+		String obj = (String)engine.eval("$import('org.xidea.lite:Template');new Template('classpath:///org/xidea/lite/test/input.xml').render({})");
+		Assert.assertTrue(obj.startsWith("<!DOCTYPE html PUBLIC"));
+		System.out.println(obj);
+	}
+
+	@Test
 	public void testExample() throws Exception {
-		
+			
 		URI menuURL = new File(webRoot, "menu.xml").toURI();
 		Document doc = context.loadXML(menuURL);
 		String defaultContext = getText(doc, "/root/context");
