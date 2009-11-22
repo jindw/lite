@@ -282,7 +282,7 @@ public class ParseContextImpl implements ParseContext {
 		return xmlContext.selectNodes(doc, xpath);
 	}
 
-	public Node transform(URI parentURI, Node doc, String xslt)
+	public Node transform(URI parentURI, Node doc, Node xslt)
 			throws TransformerConfigurationException,
 			TransformerFactoryConfigurationError, TransformerException,
 			IOException {

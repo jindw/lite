@@ -91,7 +91,7 @@ public interface XMLContext {
 	 * @throws TransformerException
 	 * @throws IOException
 	 */
-	public Node transform(URI parentURI, Node doc, String xslt)
+	public Node transform(URI parentURI, Node doc, Node xslt)
 			throws TransformerConfigurationException,
 			TransformerFactoryConfigurationError, TransformerException,
 			IOException;

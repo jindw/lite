@@ -177,35 +177,27 @@ public class XMLContextImpl implements XMLContext {
 		return frm;
 	}
 
-	public Node transform(URI parentURI, Node doc, String xslt)
+	public Node transform(URI parentURI, Node doc, Node xslt)
 			throws TransformerConfigurationException,
 			TransformerFactoryConfigurationError, TransformerException,
 			IOException {
-		Source xsltSource;
-		if (xslt.startsWith("#")) {
-			Node node1 = ((Node) context.getAttribute(xslt));
-			Transformer transformer = createTransformer();
-			DOMResult result = new DOMResult();
-			if (node1.getNodeType() == Node.DOCUMENT_FRAGMENT_NODE) {
-				node1 = node1.getFirstChild();
-				while (node1.getNodeType() != Node.ELEMENT_NODE) {
-					node1 = node1.getNextSibling();
-				}
+		Source xsltSource; // create an instance of TransformerFactory
+		
+		if (xslt.getNodeType() == Node.DOCUMENT_FRAGMENT_NODE) {
+			xslt = xslt.getFirstChild();
+			while (xslt.getNodeType() != Node.ELEMENT_NODE) {
+				xslt = xslt.getNextSibling();
 			}
-			transformer.transform(new DOMSource(node1), result);
+			DOMResult result = new DOMResult();
+			Transformer transformer = createTransformer(null);
+			transformer.transform(new DOMSource(xslt), result);
 			xsltSource = new javax.xml.transform.dom.DOMSource(result.getNode());
-		} else {
-			xsltSource = new javax.xml.transform.stream.StreamSource(context
-					.openInputStream(context.createURI(xslt, parentURI)));
+
+		}else{
+			xsltSource = new javax.xml.transform.dom.DOMSource(xslt);
+			
 		}
-
-		// create an instance of TransformerFactory
-		Transformer transformer = javax.xml.transform.TransformerFactory
-				.newInstance().newTransformer(xsltSource);
-		// javax.xml.transform.TransformerFactory
-		// .newInstance().set
-		// transformer.setNamespaceContext(parser.createNamespaceContext(doc.getOwnerDocument()));
-
+		Transformer transformer = createTransformer(xsltSource);
 		Source xmlSource;
 		if (doc.getNodeType() == Node.DOCUMENT_FRAGMENT_NODE) {
 			Element root = doc.getOwnerDocument().createElement("root");
@@ -251,7 +243,7 @@ public class XMLContextImpl implements XMLContext {
 		return xpathFactory.newXPath();
 	}
 
-	protected Transformer createTransformer()
+	protected Transformer createTransformer(Source source)
 			throws TransformerConfigurationException,
 			TransformerFactoryConfigurationError {
 		if (transformerFactory == null) {
@@ -262,7 +254,6 @@ public class XMLContextImpl implements XMLContext {
 					transformerFactory = TransformerFactory.newInstance(
 							transformerFactoryClass, this.getClass()
 									.getClassLoader());
-					return transformerFactory.newTransformer();
 				} catch (Exception e) {
 					log
 							.error("创建xslt转换器失败<" + transformerFactoryClass
@@ -273,7 +264,11 @@ public class XMLContextImpl implements XMLContext {
 				transformerFactory = TransformerFactory.newInstance();
 			}
 		}
-		return transformerFactory.newTransformer();
+		if(source == null){
+			return transformerFactory.newTransformer();
+		}else{
+			return transformerFactory.newTransformer(source);
+		}
 	}
 
 	public static DocumentFragment toDocumentFragment(Node node, NodeList nodes) {
