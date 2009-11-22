@@ -12,7 +12,7 @@
 function ParseContext(){
 	this.initialize();
 }
-function URL(path){
+function URI(path){
 	this.path = path;
 }
 ParseContext.prototype = {
@@ -27,17 +27,17 @@ ParseContext.prototype = {
 	    this.result = [];
 	    this.topChain = new ParseChain(this);
 	},
-    createURL:function(path,parentURL) {
-    	path = (parentURL||this.currentURL || '')+(path||'')
-		return new URL(path);
+    createURI:function(path,parentURI) {
+    	path = (parentURI||this.parentURI || '')+(path||'')
+		return new URI(path);
     },
     //nativeJS:false,
     parserList : [],
     loadXML:function(path){
     	if(/^[\s\ufeff]*</.test(path)){
-    		//this.currentURL = "data:text/xml,"+encodeURIComponent(path)
+    		//this.currentURI = "data:text/xml,"+encodeURIComponent(path)
     	}else{
-    		this.currentURL = path.replace(/#.*/,'');
+    		this.currentURI = path.replace(/#.*/,'');
     	}
     	return loadXML(path)
     },
@@ -58,7 +58,7 @@ ParseContext.prototype = {
      * @abstract
      */
 	parse:function(source) {
-		if(source instanceof URL){
+		if(source instanceof URI){
 			source = this.loadXML(source.path);
 		}
 		this.topChain.process(source);

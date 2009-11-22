@@ -100,7 +100,7 @@ function processIncludeTag(node,context,chain){
     var xpath = getAttributeText(context,node,'xpath');
     var name = getAttributeText(context,node,'name');
     var doc = node.ownerDocument || node;
-    var parentURL = context.currentURL;
+    var parentURI = context.currentURI;
 	try{
 		if(name){
 			var docFragment = doc.createDocumentFragment();
@@ -125,9 +125,9 @@ function processIncludeTag(node,context,chain){
 	    if(path!=null){
 	    	if(path.charAt() == '#'){
 	    		doc = context['#'+name];
-	    		context.currentURL = doc.documentURI;
+	    		context.currentURI = doc.documentURI;
 	    	}else{
-		        var url = parentURL?parentURL.replace(/[^\/]*(?:[#\?].*)?$/,path):path;
+		        var url = parentURI?parentURI.replace(/[^\/]*(?:[#\?].*)?$/,path):path;
 		        var doc = context.loadXML(url);
 	    	}
 	    }
@@ -136,7 +136,7 @@ function processIncludeTag(node,context,chain){
 	    }
 	    context.parse(doc)
     }finally{
-        context.currentURL = parentURL;
+        context.currentURI = parentURI;
     }
 }
 function parseIfTag(node,context,chain){

@@ -33,7 +33,7 @@ function Template(data,parser){
             parser = new $import(parser)(true);
         }
         if(typeof data == 'string'){
-        	data = parser.createURL(data);
+        	data = parser.createURI(data);
         }
         parser.parse(data);
         var code = parser.toCode();

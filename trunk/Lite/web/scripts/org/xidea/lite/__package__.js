@@ -71,7 +71,7 @@ this.addScript('xml-core-parser.js','parseCoreNode'
 this.addScript('xml-default-parser.js','parseXMLNode'
                 ,0);
 
-this.addScript('xml-context.js',['loadXML','selectNodes','parseXMLText']
+this.addScript('xml-context.js',['loadXML','selectNodes']
                 ,0
                 ,['org.xidea.jsidoc.util:$log','org.xidea.jsidoc.util:XMLHttpRequest']);
 
