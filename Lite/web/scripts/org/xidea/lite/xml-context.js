@@ -4,7 +4,7 @@
 function loadXML(url){
 	try{
         if(/^[\s\ufeff]*</.test(url)){
-    	    var doc =parseXMLText(url)
+    	    var doc =parseXMLText(url.substring(url.indexOf('<')))
     	    //alert([data,doc.documentElement.tagName])
     	}else{
     		//print(url)

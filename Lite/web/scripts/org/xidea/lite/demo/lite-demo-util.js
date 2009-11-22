@@ -10,7 +10,7 @@ var TestCase = {
 	    }
 	    try{
 	    	var parser = new XMLParser(false);
-	    	parser.parse(parseXMLText(templateSource));
+	    	parser.parse(loadXML(templateSource));
 	    	var jsonCode = parser.toList();
 	        var jsonTemplate = new Template(jsonCode);
 	    }catch(e){
@@ -20,7 +20,7 @@ var TestCase = {
 	    E("templateCode").value = liteFormat(jsonCode,false);
 	    try{
 	    	var parser = new XMLParser(true);
-	    	parser.parse(parseXMLText(templateSource));
+	    	parser.parse(loadXML(templateSource));
 	    	var jsCode = parser.toCode();
 	        var fn = window.eval("["+(jsCode || null)+"][0]");
 	    	var jsTemplate = new Template(fn);
