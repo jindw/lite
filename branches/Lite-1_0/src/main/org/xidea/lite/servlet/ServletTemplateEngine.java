@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
-import java.net.URLEncoder;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -51,7 +50,7 @@ public class ServletTemplateEngine extends HotTemplateEngine {
 			return super.createTemplate(path, parseContext);
 		}else{
 			try {
-				File file = new File(context.getRealPath("/WEB-INF/litecached/"+path.replace('/', '.')));
+				File file = new File(context.getRealPath("/WEB-INF/litecached/"+path.replace('/', '^').replace('\\', '^')));
 				List<Object> list = JSONDecoder.decode(loadText(file));
 				parseContext.addResource(file.toURI());
 				return new Template((List<Object>)list.get(1));
