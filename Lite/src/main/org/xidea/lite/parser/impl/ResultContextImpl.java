@@ -383,7 +383,7 @@ public class ResultContextImpl implements ResultContext {
 		if (support == null) {
 			featrueMap.clear();
 		}else{
-			for (String key : featrueKeys) {
+			for (Object key : featrueKeys.toArray()) {
 				if (!support.contains(key)) {
 					featrueMap.remove(key);
 				}
