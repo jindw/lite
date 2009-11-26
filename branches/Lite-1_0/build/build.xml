@@ -69,7 +69,7 @@
 			</fileset>
 		</delete>
 
-		<echo file="build/dest/jslite/__package__.js">this.addScript("template.js",["Template","ParseContext","XMLParser","ResultTranslator"])</echo>
+		<echo file="build/dest/jslite/__package__.js">this.addScript("template.js",["Template","Expression","ParseContext","XMLParser","ResultTranslator"])</echo>
 		<jar destfile="build/dest/Template.jar" compress="true">
 			<manifest>
 				<attribute name="Main-Class" value="org.xidea.lite.tools.LiteCompiler" />
@@ -142,6 +142,7 @@
 
 			<arg value="-exports" />
 			<arg value="org.xidea.lite:Template" />
+			<arg value="org.xidea.lite:Expression" />
 			<arg value="org.xidea.lite:ParseContext" />
 			<arg value="org.xidea.lite:XMLParser" />
 			<arg value="org.xidea.lite:ParseContext" />
