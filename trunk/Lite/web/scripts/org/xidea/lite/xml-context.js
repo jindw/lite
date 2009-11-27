@@ -106,6 +106,7 @@ function selectNodes(currentNode,xpath){
     if(!(this.DOMParser && this.XMLHttpRequest || this.ActiveXObject)){
         var pc = Packages.org.xidea.lite.parser.impl.ParseContextImpl(null);
         loadXML = function(path){
+        	//TODO:data for text
             return pc.loadXML(path);
         }
         selectNodes = function(node,path){

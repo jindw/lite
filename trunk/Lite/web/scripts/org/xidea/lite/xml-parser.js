@@ -9,8 +9,9 @@
  * XML 模板解释引擎，集成自 ParseContext。
  * 该引擎带有parseCoreNode,parseXMLNode,parseText三个节点解析器实现
  */
-function XMLParser(nativeJS){
+function XMLParser(nativeJS,base){
 	this.nativeJS = nativeJS;
+	this.currentURI = base;
 	this.initialize(parseCoreNode,parseXMLNode,parseText);
 }
 XMLParser.prototype = new ParseContext();

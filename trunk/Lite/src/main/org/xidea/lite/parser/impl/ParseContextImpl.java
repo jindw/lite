@@ -3,6 +3,7 @@ package org.xidea.lite.parser.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -277,6 +278,9 @@ public class ParseContextImpl implements ParseContext {
 	}
 
 	public Document loadXML(String path) throws SAXException, IOException{
+		if(path.startsWith("<")){
+			path = "data:text/xml;charset=utf-8,"+URLEncoder.encode(path, "UTF-8");
+		}
 		return loadXML(URI.create(path));
 	}
 	public Document loadXML(URI url) throws SAXException, IOException {

@@ -34,6 +34,7 @@ import org.xidea.el.json.JSONDecoder;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.Template;
 import org.xidea.lite.parser.impl.ParseContextImpl;
+import org.xidea.lite.parser.impl.XMLContextImpl;
 import org.xidea.lite.parser.impl.dtd.DefaultEntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -92,8 +93,6 @@ public class JSCompileTest {
 			}
 
 		});
-		engine.eval(new InputStreamReader(JSCompileTest.class
-				.getResourceAsStream("JSCompileTest.js"), "utf-8"));
 		//engine.eval("evalFile.call(null,'print(this)',111)");
 		engine.eval("$import('org.xidea.lite:Template');");
 		engine.eval("$import('org.xidea.lite:Translator');");
@@ -136,10 +135,7 @@ public class JSCompileTest {
 		URI menuURL = new File(webRoot, "menu.xml").toURI();
 		Document doc = context.loadXML(menuURL);
 		String defaultContext = getText(doc, "/root/context");
-		engine.getContext().setAttribute("testMenuDoc", doc,
-				ScriptContext.ENGINE_SCOPE);
-		engine
-				.eval("XMLHttpRequest['menu.xml'] = {responseXML:testMenuDoc,'#getResponseHeader':{'Content-Type':'text/xml'}}");
+
 		DocumentFragment node = context.selectNodes(doc, "/root/entry");
 		Element child = (Element) node.getFirstChild();
 		while (child != null) {
@@ -154,10 +150,10 @@ public class JSCompileTest {
 			// engine.put(ScriptEngine.FILENAME, "<file>");
 
 			engine.eval("var jsTemplate = new Template(" + sourceJSON
-					+ ",new XMLParser(true))");
+					+ ",new XMLParser(true,'"+menuURL+"'))");
 
 			engine.eval("var liteTemplate = new Template(" + sourceJSON
-					+ ",new XMLParser(false))");
+					+ ",new XMLParser(false,'"+menuURL+"'))");
 			// .buildResult()");
 
 			System.out.println("\n======" + key + "======\n");
@@ -169,7 +165,7 @@ public class JSCompileTest {
 			Object jsJS = engine.eval("jsTemplate.render(" + contextJSON + ")");
 			Assert.assertEquals("JS编译后结果不一致"+source, jsJSON, jsJS);
 			ParseContextImpl pc = new ParseContextImpl(menuURL,null,null,null);
-			pc.parse(DOMParser.parseFromString(source, ""));
+			pc.parse(pc.loadXML(source));
 			StringWriter out = new StringWriter();
 			new Template(pc.toList()).render(JSONDecoder.decode(contextJSON),
 					out);
@@ -189,53 +185,4 @@ public class JSCompileTest {
 		return java;
 	}
 
-	public static class DOMParser {
-		private static DocumentBuilder documentBuilder;
-
-		static {
-			try {
-				DocumentBuilderFactory factory = DocumentBuilderFactory
-						.newInstance();
-				factory.setNamespaceAware(true);
-				factory.setValidating(false);
-				// factory.setExpandEntityReferences(false);
-				factory.setCoalescing(false);
-				// factory.setXIncludeAware(true);
-				documentBuilder = factory.newDocumentBuilder();
-				documentBuilder.setEntityResolver(new DefaultEntityResolver());
-			} catch (ParserConfigurationException e) {
-				throw new RuntimeException(e);
-			}
-		}
-
-		public static Document parseFromString(String text, String contentType)
-				throws SAXException, IOException, ParserConfigurationException {
-			InputSource is = new InputSource();
-			is.setCharacterStream(new StringReader(text));
-			return documentBuilder.parse(is);
-		}
-	}
-
-	public static class XPathEvaluator {
-		private NodeList nodeList;
-		private int index;
-
-		// .evaluate(xpath, currentNode, function(prefix){return nsMap[prefix]},
-		// 5, null);
-		public Object evaluate(String path, Node node, Object map, int type,
-				Object x) throws XPathExpressionException {
-			XPath xpath = XPathFactory.newInstance().newXPath();
-			this.nodeList = (NodeList) xpath.evaluate(path, node,
-					XPathConstants.NODESET);
-			this.index = 0;
-			return this;
-		}
-
-		public Node iterateNext() {
-			if (index < nodeList.getLength()) {
-				return nodeList.item(index++);
-			}
-			return null;
-		}
-	}
 }
