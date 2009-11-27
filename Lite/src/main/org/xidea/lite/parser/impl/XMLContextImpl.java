@@ -78,7 +78,10 @@ public class XMLContextImpl implements XMLContext {
 	}
 
 	public Document loadXML(URI uri) throws SAXException, IOException {
+//		System.out.println(uri+"/"+uri.isAbsolute());
+//		if(uri.isAbsolute()){
 		context.setCurrentURI(uri);
+//		}
 		InputStream in1 = toXMLStream(uri);
 		try {
 			Document doc = documentBuilder.parse(in1, uri.toString());
