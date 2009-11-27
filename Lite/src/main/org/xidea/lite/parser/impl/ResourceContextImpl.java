@@ -1,8 +1,10 @@
 package org.xidea.lite.parser.impl;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URLDecoder;
 
 import org.xidea.lite.parser.ResourceContext;
 
@@ -33,7 +35,19 @@ public class ResourceContextImpl implements ResourceContext {
 
 	public InputStream openInputStream(URI uri) {
 		try {
-			if ("classpath".equalsIgnoreCase(uri.getScheme())) {
+			if ("data".equalsIgnoreCase(uri.getScheme())) {
+				String data = uri.getRawSchemeSpecificPart();
+				int p = data.indexOf(',')+1;
+				String h = data.substring(0,p).toLowerCase();
+				String charset = "UTF-8";
+				data = data.substring(p);
+				p = h.indexOf("charset=");
+				if(p >0){
+					charset = h.substring(h.indexOf('=',p)+1,h.indexOf(',',p));
+				}
+				return new ByteArrayInputStream(URLDecoder.decode(data,charset).getBytes(charset));
+				//charset=
+			}else if ("classpath".equalsIgnoreCase(uri.getScheme())) {
 				ClassLoader cl = this.getClass().getClassLoader();
 				String path = uri.getPath();
 				path = path.substring(1);
