@@ -165,6 +165,8 @@ public class JSCompileTest {
 			Object jsJS = engine.eval("jsTemplate.render(" + contextJSON + ")");
 			Assert.assertEquals("JS编译后结果不一致"+source, jsJSON, jsJS);
 			ParseContextImpl pc = new ParseContextImpl(menuURL,null,null,null);
+			source = source.replace("=\"menu.xml\"", "=\""+menuURL+"\"");
+			System.out.println(source);
 			pc.parse(pc.loadXML(source));
 			StringWriter out = new StringWriter();
 			new Template(pc.toList()).render(JSONDecoder.decode(contextJSON),
