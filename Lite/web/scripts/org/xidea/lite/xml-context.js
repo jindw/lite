@@ -103,7 +103,7 @@ function selectNodes(currentNode,xpath){
 
 
 +function(){
-    if(this.DOMParser && this.XMLHttpRequest || this.ActiveXObject){
+    if(!(this.DOMParser && this.XMLHttpRequest || this.ActiveXObject)){
         var pc = Packages.org.xidea.lite.parser.impl.ParseContextImpl(null);
         loadXML = function(path){
             return pc.loadXML(path);
