@@ -4,21 +4,14 @@
 function loadXML(url){
 	try{
         if(/^[\s\ufeff]*</.test(url)){
-    	    var doc =parseXMLText(url.substring(url.indexOf('<')))
+    	    var doc =parseXMLByText(url.substring(url.indexOf('<')))
     	    //alert([data,doc.documentElement.tagName])
     	}else{
     		//print(url)
     	    var pos = url.indexOf('#')+1;
     	    var xpath = pos && url.substr(pos);
     	    var url = pos?url.substr(0,pos-1):url;
-    	    var xhr = new XMLHttpRequest();
-    	    xhr.open("GET",url,false)
-    	    xhr.send('');
-    	    if(/\/xml/.test(xhr.getResponseHeader("Content-Type"))){//text/xml,application/xml...
-    	        var doc = xhr.responseXML;
-    	    }else{
-    	        var doc = parseXMLText(xhr.responseText)
-    	    }
+    	    var doc = parseXMLByURL(url);
     	    if(xpath){
     	        doc = selectNodes(doc,xpath);
     	    }
@@ -29,7 +22,17 @@ function loadXML(url){
 	}
 	return doc;
 }
-function parseXMLText(text){
+function parseXMLByURL(){
+	var xhr = new XMLHttpRequest();
+    xhr.open("GET",url,false)
+    xhr.send('');
+    if(/\/xml/.test(xhr.getResponseHeader("Content-Type"))){//text/xml,application/xml...
+        return xhr.responseXML;
+    }else{
+        return parseXMLByText(xhr.responseText)
+    }
+}
+function parseXMLByText(text){
 	try{
 		if(this.DOMParser){
 	        var doc = new DOMParser().parseFromString(text,"text/xml");
@@ -105,9 +108,10 @@ function selectNodes(currentNode,xpath){
 +function(){
     if(!(this.DOMParser && this.XMLHttpRequest || this.ActiveXObject)){
         var pc = Packages.org.xidea.lite.parser.impl.ParseContextImpl(null);
-        loadXML = function(path){
+        parseXMLByURL = parseXMLByText = function(url){
         	//TODO:data for text
-            return pc.loadXML(path);
+        	url = $JSI.loadText&&$JSI.loadText(url) || url;
+        	return pc.loadXML(url);
         }
         selectNodes = function(node,path){
             return pc.selectNodes(node,path);
