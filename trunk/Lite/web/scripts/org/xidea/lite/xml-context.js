@@ -22,7 +22,7 @@ function loadXML(url){
 	}
 	return doc;
 }
-function parseXMLByURL(){
+function parseXMLByURL(url){
 	var xhr = new XMLHttpRequest();
     xhr.open("GET",url,false)
     xhr.send('');
