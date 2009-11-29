@@ -283,8 +283,8 @@ public class ParseContextImpl implements ParseContext {
 		}
 		return loadXML(URI.create(path));
 	}
-	public Document loadXML(URI url) throws SAXException, IOException {
-		return xmlContext.loadXML(url);
+	public Document loadXML(URI uri) throws SAXException, IOException {
+		return xmlContext.loadXML(uri.normalize());
 	}
 
 	public DocumentFragment selectNodes(Node doc, String xpath)
