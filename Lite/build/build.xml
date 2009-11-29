@@ -136,7 +136,10 @@
 		<java failonerror="true" classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
 			<arg value="-scriptBase" />
 			<arg value="${basedir}/web/scripts" />
-
+			<!--
+			<arg value="-sourceBases" />
+			<arg value="${basedir}/../JSI2/web/scripts" />
+-->
 			<arg value="-config.ascii" />
 			<arg value="false" />
 			<arg value="-config.features" />
@@ -158,7 +161,10 @@
 		<java classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
 			<arg value="-scriptBase" />
 			<arg value="${basedir}/web/scripts" />
-
+			<!--
+			<arg value="-sourceBases" />
+			<arg value="${basedir}/../JSI2/web/scripts" />
+-->
 			<arg value="-config.ascii" />
 			<arg value="false" />
 			<arg value="-config.features" />
