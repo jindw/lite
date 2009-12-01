@@ -2,129 +2,23 @@
 	xmlns:fk="http://firekylin.my.baidu.com/ns/doc" xml:lang="zh-CN"
 	dir="ltr">
 	<head>
-		<title></title>
+		<title>Hello World </title>
 	</head>
 	<body>
-		<p>还是先解释一下什么是模板吧...</p>
-		<p>模板是一种用来描述如何把数据变成文本的语言。</p>
-		<p>依然很晕，算了，实例说话：</p>
-		<table>
-			<tr>
-				<th>
-					<h6>先模板时代，来自火星问候</h6>
-				</th>
-				<th>
-					<h6>后模板时代，我们可以简化为：</h6>
-				</th>
-			</tr>
-			<tr>
-				<td>
-					<div
-						style="margin-left:-60px;margin-right:-60px;width:400px">
-						<fk:code>
-							<![CDATA[
-#include <stdio.h>
-int main(void) {
-  printf("Content-Type:");
-  printf("text/plain;charset=GBK\n\n");
-  say_hello("welcome","火星人","地球");
-  return 0;
-}
-/**
- * 模板输出函数，将参数按照html格式输出
- * @param message_type
- * @param my_name
- * @param your_name
- */
-void say_hello(char* message_type,
-        char* my_name, 
-        char* your_name ) {
-  printf("<html>\n");
-  printf("<body>\n");
-  printf("<h1 class=\"");
-  printf(message_type);
-  printf("\">");
-  printf(your_name);
-  printf("您好,我是");
-  printf(my_name);
-  printf("</h1>\n");
-  printf("</body>\n");
-  printf("</html>\n");
-  return 0;
-}]]>
-						</fk:code>
-					</div>
-				</td>
-				<td valign="top">
-					<div style="margin-left:-50px;width:400px">
-						<fk:code>
-							<![CDATA[
-<html>
-  <body>
-    <h1 class="${messageType}">
-      ${yourName}您好,我是${myName}
-    </h1>
-  </body>
-</html>]]>
-						</fk:code>
-					</div>
-					<p>对比一下两边的代码的可维护性如何？</p>
-					<ul>
-						<li>代码的多少？</li>
-						<li>书写的便捷？</li>
-						<li>阅读的清晰？</li>
-						<li>排错的明了？</li>
-					</ul>
-					<p>设计良好的模板语言的基本特征</p>
-					<ul>
-						<li>源代码接近目标代码</li>
-						<li>支持可置换的变量/表达式</li>
-						<li>支持条件控制，循环控制逻辑</li>
-						<li>源代码一般独立存在</li>
-					</ul>
-				</td>
-			</tr>
-		</table>
+		<h3>如何搭建开发环境</h3>
+		<p>为了简化环境搭建，我们专门开发了一个模板测试专用服务器。</p>
 		<p>
-			从这个实例可以看出，模板是一种更加方便的文本生成语言。 他可以通过更加简洁的代码，清晰的描述出数据将如何变成文本输出。
+			这是一个webstart 程序，需要Java5+。安装了Java5的同学可以直接点击链接运行，否则先安装JRE吧：
+			webstart地址：
 		</p>
-		<p>本节内容就是介绍这个看似简单的改进的进化过程：</p>
-		<h3>元气未分，浑沌为一</h3>
+		<h3>调试环境如何使用</h3>
 		<p>
-			在古老的CGI时代，网页程序通常是C/Perl编写的；里面无所谓模板，也无所谓逻辑，大家都交织在一起。浑浑沌沌，暗无天日。
-		</p>
-
-		<h3>阳清为天，阴浊为地</h3>
-		<p>然而随着程序逻辑的复杂化，这个混沌的UI层已经难以应付日渐复杂的Web程序。</p>
-		<p>于是，出现了一些创新的web编程技术，如ASP，PHP，JSP。</p>
-		<p>
-			他们都有一个共同的特点，在代码中可以直接插入最终输出的html代码，简化了输出内容的组合工作。同时也方便IDE的可视化支持。
-		</p>
-		<p>这些新的技术可以认为是一种模板的雏形，但是他们也都带有未进化完整的程序的尾巴。</p>
-		<p>这些技术可以看成是模板语言和编程语言的混合体。</p>
-		<p>
-			里面总可以有一些足够你不安的行为,我们可以在JSP里面把你的服务强行关闭，可以在php上删掉你的配置文件，等等等等。这并不是模板逻辑的要求。
-		</p>
-		<p>为了概念的清晰，和分工的明确。我们需要在这个基础上作一些改进。</p>
-		<p>
-			其中一种思路就是：把代码按功能层次分离，逻辑的归逻辑，展示的归展示。逻辑代码可以由专业的业务逻辑程序员去处理。而展示模板代码，可以有专业前端前端工程师处理，甚至可以交由UI设计人员去自己去优化。
+		启动测试服务器后，窗口处在最前端，您可以选择需要测试的网站目录。
 		</p>
 		<p>
-			于是，一些更加纯粹的模板技术出现了，比如Velocity，FreeMarker，Smarty等等。一个模板技术百家争鸣的时代到了。
+		点击部署测试模板，系统将自动将本书的测试用例拷贝到您的网站目录下。
+		浏览修改吧。。。。
 		</p>
-		<h3>天得一以清，地得一以宁</h3>
-		<p>然而，这些模板技术只是简化了后端开发的工作，却把前端开发遗忘在原始社会。</p>
-		<p>随着浏览器功能的逐渐强大，越来越多的逻辑在前端发生。这就是所谓的Ajax时代。</p>
-		<p>
-			Ajax提出一个概念，拼凑了一些现有的技术。却没有真正提出任何解决问题的有效办法。
-			他只是把我们前端程序带入一个更加混乱的场景，如同前面提到的CGI时代一样：前端的业务，前端的展示，混杂一起，混混沌沌，暗无天日。
-		</p>
-		<p>我们局部刷新着UI，随时改动着当前的页面的结构，却没有一个真正适合做这种工作的实用技术。</p>
-		<p>
-			随着这种运用场景的逐渐丰富，一些前端模板的思想开始活跃起来，这就包括JST，Lite，Google Clourse
-			Template。
-
-		</p>
-
+		<h3>我的第一个模板程序</h3>
 	</body>
 </html>
