@@ -83,7 +83,19 @@ Translator.prototype = {
 	    	$log.error(e);
 	        code = "return ('生成js代码失败：'+"+encodeString(buf.join("\n"))+');';
 	    }
-		return "function"+(this.id?" "+this.id:'')+"(){"+code+"\n}"
+	    var body = "(){"+code+"\n}";
+	    if(this.id){
+	    	try{
+	    		new Function("function "+this.id+"(){}");
+	    		return "function "+this.id+body;
+	    	}catch(e){
+	    		return this.id+"=function"+body;
+	    	}
+	    	
+	    }else{
+	    	return "function"+body;
+	    }
+		
 	},
 	getSupportFeatrues:function(){
 		return java.util.Arrays.asList(["compress"]);
