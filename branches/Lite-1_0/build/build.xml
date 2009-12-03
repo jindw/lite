@@ -3,7 +3,7 @@
 	<tstamp>
 		<format property="version" pattern="yyyyMMdd" />
 	</tstamp>
-	<available file="../JSA/build/dest/JSA-CMD.jar" property="JSAPath" value="../JSA/build/dest/JSA-CMD.jar;" />
+	<available file="../JSA/build/dest/JSide.jar" property="JSAPath" value="../JSA/build/dest/JSide.jar;" />
 
 	<target name="init">
 		<delete dir="build/temp">

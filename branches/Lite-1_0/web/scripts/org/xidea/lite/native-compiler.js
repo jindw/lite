@@ -131,7 +131,16 @@ ResultTranslator.prototype = {
 	    }catch(e){
 	        code = "alert('生成js代码失败：'+"+encodeString(e.message+'')+');';
 	    }
-		return "function"+(this.id?" "+this.id:'')+"(){"+code+"\n}"
+	    if(this.id){
+	    	try{
+	    		new Function("function "+this.id+"(){}")
+	    		return "function "+this.id+"(){"+code+"\n}"
+	    	}catch(e){
+	        	return this.id +"=function (){"+code+"\n}"
+	    	}
+	    }else{
+	    	return "function (){"+code+"\n}";
+	    }
 	},
 	getSupportFeatrues:function(){
 		return java.util.Arrays.asList(["compress"]);
