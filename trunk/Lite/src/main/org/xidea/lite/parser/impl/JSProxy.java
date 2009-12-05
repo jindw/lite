@@ -1,10 +1,11 @@
 package org.xidea.lite.parser.impl;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.io.Reader;
-import java.io.StringWriter;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,41 +31,71 @@ public abstract class JSProxy {
 
 	private boolean jsiAvailable = false;
 
-	protected abstract Object eval(String source, String pathInfo);
-
-	public abstract <T> T wrapToJava(Object thiz, Class<T> clasz);
+	public abstract Object eval(String source, String pathInfo,Map<String, Object> varMap);
 
 	public abstract Object invoke(Object thiz, String methodName,
 			Object... args);
 
+	public abstract <T> T wrapToJava(Object thiz, Class<T> clasz);
 
 	public abstract String compress(String source);
+	
+	public Object eval(String source, String fileName) {
+		return eval(source, fileName, null);
+	}
+	private Object eval(String... scripts) {
+		Object o = null;
+		for (String s:scripts) {
+			o = eval(s);
+		}
+		return o;
+	}
+
+	public Object eval(URL resource) throws IOException {
+		InputStream stream = resource.openStream();
+		try {
+			String text = ParseUtil.loadText(stream,"utf-8");
+			return eval(text, resource.toString());
+		} finally {
+			stream.close();
+		}
+	}
+
+	public Object eval(Reader in, String pathInfo) throws IOException {
+		String text = ParseUtil.loadText(in);
+		return eval(text, pathInfo);
+	}
+
+
+
+	public Object eval(String source) {
+		return this.eval(source, "source:" + source);
+	}
 
 	public <T> T createObject(Class<T> clasz,String... scripts){
-		Object o = null;
-		for (String s:scripts) {
-			o = eval(s);
-		}
+		Object o = eval(scripts);
 		return wrapToJava(o, clasz);
 	}
-	public TextParser createTextParser(String... scripts){
-		Object o = null;
-		for (String s:scripts) {
-			o = eval(s);
-		}
-		Object fn = eval("{wrap:function(o){o.getPriority||this.getPriority;return o},getPriority:function(){return o.priority || 1;}}");
-		return wrapToJava(invoke(fn, "wrap", o), TextParser.class);
+	public TextParser createTextParser(Object o){
+		HashMap<String, Object> varMap = new HashMap<String, Object>();
+		varMap.put("impl", o);
+		eval(
+				"if(impl instanceof Function){impl.parse=impl,impl.findStart=impl}" +
+				"if(!impl.getPriority) {" +
+				"impl.getPriority=function(){" +
+				"return impl.priority || 1;" +
+				"}};",this.getClass().toString(),varMap);
+		return wrapToJava(o, TextParser.class);
 	}
 	@SuppressWarnings("unchecked")
-	public NodeParser<Object> createNodeParser(String... scripts){
-		Object o = null;
-		for (String s:scripts) {
-			o = eval(s);
-		}
-		Object fn = eval("{wrap:function(o){return o instanceof Function?{parse:o}:o}}");
-		return wrapToJava(invoke(fn, "wrap", o), NodeParser.class);
+	public NodeParser<? extends Object> createNodeParser(Object o){
+		HashMap<String, Object> varMap = new HashMap<String, Object>();
+		varMap.put("impl", o);
+		eval(
+				"if(impl instanceof Function){impl.parse=impl};"
+				,this.getClass().toString(),varMap);
+		return wrapToJava(o, NodeParser.class);
 	}
-	
 	public ResultTranslator createJSTranslator(String id) {
 		Object translator = null;
 		try {
@@ -101,30 +132,6 @@ public abstract class JSProxy {
 				log.debug("尝试JSI启动编译脚本失败", e);
 			}
 		}
-	}
-
-	public Object eval(URL resource) throws IOException {
-		InputStreamReader in = new InputStreamReader(resource.openStream(),
-				"utf-8");
-		try {
-			return eval(in, resource.toString());
-		} finally {
-			in.close();
-		}
-	}
-
-	public Object eval(Reader in, String pathInfo) throws IOException {
-		StringWriter out = new StringWriter();
-		int count;
-		char[] cbuf = new char[1024];
-		while ((count = in.read(cbuf)) > -1) {
-			out.write(cbuf, 0, count);
-		}
-		return eval(out.toString(), pathInfo);
-	}
-
-	public Object eval(String source) {
-		return this.eval(source, "source:" + source);
 	}
 
 	public void error(String message, String sourceName, int line,

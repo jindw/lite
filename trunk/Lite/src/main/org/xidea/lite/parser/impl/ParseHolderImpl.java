@@ -2,7 +2,6 @@ package org.xidea.lite.parser.impl;
 
 import java.util.ArrayList;
 
-import org.w3c.dom.Node;
 import org.xidea.lite.parser.TextParser;
 import org.xidea.lite.parser.ParseChain;
 import org.xidea.lite.parser.ParseContext;
@@ -14,7 +13,7 @@ public class ParseHolderImpl implements ParserHolder {
 
 	@SuppressWarnings("unchecked")
 	protected static NodeParser[] DEFAULT_PARSER_LIST = { new HTMLNodeParser(),
-			new CoreXMLNodeParser(), new DefaultXMLNodeParser(), new TextNodeParser() };
+			new CoreXMLNodeParser(), new DefaultXMLNodeParser(),new InputStreamNodeParser(), new TextNodeParser() };
 	protected static TextParser[] DEFAULT_TEXT_PARSER_LIST = { ELParser.EL };
 	protected ParseChainImpl topChain;
 	protected TextParser[] ips ;
@@ -54,7 +53,7 @@ public class ParseHolderImpl implements ParserHolder {
 		this.ips = ips2;
 	}
 
-	public void addNodeParser(NodeParser<? extends Node> iparser) {
+	public void addNodeParser(NodeParser<? extends Object> iparser) {
 		ParseChainImpl chain = new ParseChainImpl(context, iparser);
 		topChain.insertBefore(chain);
 		topChain = chain;

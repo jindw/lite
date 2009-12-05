@@ -1,6 +1,5 @@
 package org.xidea.lite.parser;
 
-import org.w3c.dom.Node;
 import org.xidea.lite.parser.impl.ParseContextImpl;
 
 /**
@@ -25,7 +24,7 @@ public interface ParserHolder{
 	 * 添加节点解析器
 	 * @param nodeParser
 	 */
-	public void addNodeParser(NodeParser<? extends Node> nodeParser);
+	public void addNodeParser(NodeParser<? extends Object> nodeParser);
 	
 	/**
 	 * 获取当前context的顶级 parseChain对象

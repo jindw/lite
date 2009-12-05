@@ -1,6 +1,5 @@
 package org.xidea.lite.parser.impl;
 
-import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -78,16 +77,20 @@ public class XMLContextImpl implements XMLContext {
 	}
 
 	public Document loadXML(URI uri) throws SAXException, IOException {
-//		System.out.println(uri+"/"+uri.isAbsolute());
-//		if(uri.isAbsolute()){
-		context.setCurrentURI(uri);
-//		}
-		InputStream in1 = toXMLStream(uri);
+		return parse(uri);
+	}
+
+	private Document parse(URI uri) throws IOException, SAXException {
+		InputStream in1 = ParseUtil.trimBOM(context.openInputStream(uri));
+		in1.mark(1);
+		if(in1.read() != '<'){
+			return null;
+		}
+		in1.reset();
 		try {
-			Document doc = documentBuilder.parse(in1, uri.toString());
-			return doc;
+			return documentBuilder.parse(in1, uri.toString());
 		} catch (SAXParseException e) {
-			InputStream in2 = toXMLStream(uri);
+			InputStream in2 = ParseUtil.trimBOM(context.openInputStream(uri));
 			try{
 				//做一次容错处理
 				in2 = new SequenceInputStream(new ByteArrayInputStream(DEFAULT_STARTS),in2);
@@ -106,19 +109,7 @@ public class XMLContextImpl implements XMLContext {
 		}
 	}
 
-	private InputStream toXMLStream(URI uri) throws IOException {
-		BufferedInputStream in = new BufferedInputStream(context.openInputStream(uri), 1);
-		int c;
-		do {// bugfix \ufeff
-			in.mark(1);
-			c = in.read();
-			if (c == '<') {
-				in.reset();
-				break;
-			}
-		} while (c >= 0);
-		return in;
-	}
+
 
 	protected NamespaceContext createNamespaceContext(Document doc) {
 		// nekohtml bug,not use doc.getDocumentElement()

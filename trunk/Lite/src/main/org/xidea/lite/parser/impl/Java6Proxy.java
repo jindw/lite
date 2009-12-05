@@ -1,6 +1,10 @@
 package org.xidea.lite.parser.impl;
 
+import java.util.Map;
+
+import javax.script.Bindings;
 import javax.script.Invocable;
+import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
@@ -52,14 +56,22 @@ public class Java6Proxy extends JSProxy implements ErrorReporter {
 	}
 
 	@Override
-	public Object eval(String source, String pathInfo) {
+	public Object eval(String source, String pathInfo,Map<String, Object> varMap) {
 		//log.info(jsengine.getClass());
 		Object file = jsengine.get(ScriptEngine.FILENAME);
 		try {
 			Context context = Context.enter();
 			context.getWrapFactory().setJavaPrimitiveWrap(false);
 			jsengine.put(ScriptEngine.FILENAME, pathInfo);
-			return jsengine.eval(source);
+			if(varMap == null){
+				return jsengine.eval(source);
+			}else{
+				Bindings parent = jsengine.getBindings(ScriptContext.ENGINE_SCOPE);
+				Bindings bs = jsengine.createBindings();
+				bs.putAll(parent);
+				bs.putAll(varMap);
+				return jsengine.eval(source,bs);
+			}
 		} catch (ScriptException e) {
 			log.error(e);
 			throw new RuntimeException(e);

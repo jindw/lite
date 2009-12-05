@@ -1,9 +1,12 @@
 package org.xidea.lite.parser.impl;
 
+import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.NodeList;
 import org.xidea.lite.parser.ParseChain;
@@ -53,13 +56,22 @@ public class ParseChainImpl implements ParseChain {
 			} else {
 				if (node instanceof URL) {
 					try {
-						context.parse(context.loadXML(((URL)node).toURI()));
-					} catch (Exception e) {
+						node = ((URL)node).toURI();
+					} catch (URISyntaxException e) {
 						throw new RuntimeException(e);
 					}
-				}else if (node instanceof URI) {
+				}
+				if (node instanceof URI) {
 					try {
-						context.parse(context.loadXML((URI) node));
+						URI uri = (URI)node;
+						context.setCurrentURI(uri);
+						Document doc = context.loadXML(uri);
+						if(doc == null){
+							InputStream in = context.openInputStream(uri);
+							context.parse(in);
+						}else{
+							context.parse(doc);
+						}
 					} catch (Exception e) {
 						throw new RuntimeException(e);
 					}
@@ -78,6 +90,7 @@ public class ParseChainImpl implements ParseChain {
 				}else {
 					throw new RuntimeException("找不到数据类型对应的解析器"+node);
 				}
+				
 			}
 		}
 

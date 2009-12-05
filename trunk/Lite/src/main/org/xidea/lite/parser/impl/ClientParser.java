@@ -76,13 +76,13 @@ public class ClientParser extends ELParser implements NodeParser<Element>,
 	public void parse(Element el, ParseContext context, ParseChain chain) {
 		if ("client".equals(el.getLocalName())
 				&& ParseUtil.isCoreNS(el.getPrefix(), el.getNamespaceURI())) {
-			parseClientTag(el, context);
+			parse(el, context);
 		} else {
 			chain.process(el);
 		}
 	}
 
-	void parseClientTag(Element el, ParseContext context) {
+	void parse(Element el, ParseContext context) {
 		Node next = el.getFirstChild();
 		if (next != null) {
 			// new Java6JSBuilder();
