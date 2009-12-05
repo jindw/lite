@@ -23,10 +23,10 @@ public class ExtensionParser implements NodeParser<Element> {
 				"url");
 
 		if (src.length() > 0) {
-			processText(src, proxy, varMap);
+			processResource(src.split("[\\s*,\\s*]"), context,proxy, varMap);
 		}
 		if (script != null && script.trim().length() > 0) {
-			proxy.eval(script, this.getClass().getName(), varMap);
+			processText(script, proxy, varMap);
 		}
 	}
 
@@ -34,16 +34,19 @@ public class ExtensionParser implements NodeParser<Element> {
 		JSProxy proxy = JSProxy.newProxy();
 		Map<String, Object> varMap = new HashMap<String, Object>();
 		varMap.put("context", new JSContextProxy(context, proxy));
-		for (String path : paths.split("[,]")) {
+		processResource(paths.split("[\\s*,\\s*]"), context, proxy, varMap);
+
+	}
+
+	private void processResource(String[] paths, ParseContext context,
+			JSProxy proxy, Map<String, Object> varMap) {
+		for (String path : paths) {
 			URI uri = context.createURI(path, null);
-			String script;
 			InputStream in = context.openInputStream(uri);
 			if (in != null) {
 				try {
-
-					script = ParseUtil.loadText(in, "utf-8");
+					String script = ParseUtil.loadText(in, "utf-8");
 					proxy.eval(script, this.getClass().getName(), varMap);
-
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				} finally {
@@ -54,7 +57,6 @@ public class ExtensionParser implements NodeParser<Element> {
 				}
 			}
 		}
-
 	}
 
 	public void processText(String text, ParseContext context) {
