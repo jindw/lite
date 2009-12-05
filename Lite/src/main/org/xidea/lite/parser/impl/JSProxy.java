@@ -83,7 +83,7 @@ public abstract class JSProxy {
 				"if(impl instanceof Function){impl.parse=impl,impl.findStart=impl}" +
 				"if(!impl.getPriority) {" +
 				"impl.getPriority=function(){" +
-				"return impl.priority || 1;" +
+				"return impl.priority == null? 1 : impl.priority;" +
 				"}};",this.getClass().toString(),varMap);
 		return wrapToJava(o, TextParser.class);
 	}
