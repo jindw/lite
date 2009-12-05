@@ -68,7 +68,14 @@ public class ParseChainImpl implements ParseChain {
 						Document doc = context.loadXML(uri);
 						if(doc == null){
 							InputStream in = context.openInputStream(uri);
-							context.parse(in);
+							try{
+								context.parse(in);
+							}finally{
+								try{
+									in.close();
+								}catch (Exception e) {
+								}
+							}
 						}else{
 							context.parse(doc);
 						}
