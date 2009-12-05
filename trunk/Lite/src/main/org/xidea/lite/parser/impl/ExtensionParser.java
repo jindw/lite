@@ -13,63 +13,80 @@ import org.xidea.lite.parser.ParseChain;
 import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.TextParser;
 
-public class ExtensionParser implements NodeParser<Element>{
+public class ExtensionParser implements NodeParser<Element> {
 	public void parse(Element el, ParseContext context, ParseChain chain) {
 		String script = el.getTextContent();
 		JSProxy proxy = JSProxy.newProxy();
 		Map<String, Object> varMap = new HashMap<String, Object>();
-		varMap.put("context",new JSContextProxy(context,proxy));
-		String src = ParseUtil.getAttributeOrNull(el, "src","href","uri","url");
-		
-		if(src.length()>0){
-			processText(src,proxy,varMap);
+		varMap.put("context", new JSContextProxy(context, proxy));
+		String src = ParseUtil.getAttributeOrNull(el, "src", "href", "uri",
+				"url");
+
+		if (src.length() > 0) {
+			processText(src, proxy, varMap);
 		}
-		if(script!= null && script.trim().length()>0){
-			proxy.eval(script,this.getClass().getName(),varMap);
+		if (script != null && script.trim().length() > 0) {
+			proxy.eval(script, this.getClass().getName(), varMap);
 		}
 	}
+
 	public void processResource(String paths, ParseContext context) {
 		JSProxy proxy = JSProxy.newProxy();
 		Map<String, Object> varMap = new HashMap<String, Object>();
-		varMap.put("context",new JSContextProxy(context,proxy));
-		for(String path:paths.split("[,]")){
+		varMap.put("context", new JSContextProxy(context, proxy));
+		for (String path : paths.split("[,]")) {
 			URI uri = context.createURI(path, null);
 			String script;
-			try {
-				InputStream in = context.openInputStream(uri);
-				if(in != null){
-					script = ParseUtil.loadText(in,"utf-8");
-					proxy.eval(script,this.getClass().getName(),varMap);
+			InputStream in = context.openInputStream(uri);
+			if (in != null) {
+				try {
+
+					script = ParseUtil.loadText(in, "utf-8");
+					proxy.eval(script, this.getClass().getName(), varMap);
+
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				} finally {
+					try {
+						in.close();
+					} catch (Exception e) {
+					}
 				}
-			} catch (IOException e) {
-				throw new RuntimeException(e);
 			}
 		}
-		
+
 	}
+
 	public void processText(String text, ParseContext context) {
 		JSProxy proxy = JSProxy.newProxy();
 		Map<String, Object> varMap = new HashMap<String, Object>();
-		varMap.put("context",new JSContextProxy(context,proxy));
-		proxy.eval(text,this.getClass().getName(),varMap);
+		varMap.put("context", new JSContextProxy(context, proxy));
+		proxy.eval(text, this.getClass().getName(), varMap);
 	}
-	private void processText(String script, JSProxy proxy,Map<String, Object> varMap) {
-		proxy.eval(script,this.getClass().getName(),varMap);
+
+	private void processText(String script, JSProxy proxy,
+			Map<String, Object> varMap) {
+		proxy.eval(script, this.getClass().getName(), varMap);
 	}
-	public static class JSContextProxy  extends ParseContextProxy implements ParseContext{
+
+	public static class JSContextProxy extends ParseContextProxy implements
+			ParseContext {
 		private ParseContext context;
 		private JSProxy proxy;
 
-		public JSContextProxy(ParseContext parent,JSProxy proxy) {
+		public JSContextProxy(ParseContext parent, JSProxy proxy) {
 			super(parent);
 			this.context = parent;
 			this.proxy = proxy;
 		}
-		public void addNodeParser(Object function){
-			NodeParser<? extends Object> nodeParser = proxy.createNodeParser(function);
+
+		public void addNodeParser(Object function) {
+			NodeParser<? extends Object> nodeParser = proxy
+					.createNodeParser(function);
 			context.addNodeParser(nodeParser);
 		}
-		public void addTextParser(Object function){
+
+		public void addTextParser(Object function) {
 			TextParser nodeParser = proxy.createTextParser(function);
 			context.addTextParser(nodeParser);
 		}
@@ -89,6 +106,6 @@ public class ExtensionParser implements NodeParser<Element>{
 		public List<Object> parseText(String text, int textType) {
 			return context.parseText(text, textType);
 		}
-		
+
 	}
 }
