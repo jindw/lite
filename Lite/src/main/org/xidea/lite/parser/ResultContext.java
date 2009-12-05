@@ -1,7 +1,10 @@
 package org.xidea.lite.parser;
 
+import java.net.URI;
+import java.util.Collection;
 import java.util.List;
 
+import org.xidea.el.ExpressionFactory;
 import org.xidea.lite.Plugin;
 
 /**
@@ -11,7 +14,26 @@ import org.xidea.lite.Plugin;
  */
 public interface ResultContext {
 	public static final Object END_INSTRUCTION = new Object[0];
+
+	/**
+	 * 记录一下编译上下文状态
+	 * @param key
+	 * @param value
+	 */
+	public void setAttribute(Object key, Object value);
+	public Object getAttribute(Object key);
 	
+
+	/**
+	 * 当前代码类型；
+	 * 直接使用Template中的常量定义：
+	 * Template.XML_TEXT_TYPE
+	 * Template.XML_ATTRIBUTE_TYPE
+	 * Template.EL_TYPE
+	 * @return
+	 */
+	public int getTextType();
+	public void setTextType(int textType);
 	/**
 	 * 记录一下当前位置，reset的参考位置
 	 * 
@@ -48,6 +70,33 @@ public interface ResultContext {
 	 */
 	public int getType(int offset);
 
+	public Object parseEL(String eltext);
+
+	/**
+	 * 获取当前正在解析的模版URI
+	 * @return
+	 */
+	public URI getCurrentURI();
+
+	/**
+	 * 获取当前正在解析的模版URI
+	 * 同事将该url记录在资源列表中
+	 * @return
+	 */
+	public void setCurrentURI(URI currentURI);
+	/**
+	 * 添加（记录）解析相关的资源
+	 * @param resource
+	 */
+	public void addResource(URI resource);
+	
+	public Collection<URI> getResources();
+	/**
+	 * 自定义表达式解析器
+	 * 
+	 * @param expressionFactory
+	 */
+	public void setExpressionFactory(ExpressionFactory expressionFactory);
 
 	/**
 	 * 设置translator，同时更新featrueMap（结果翻译起对某些特征可能不支持）
@@ -55,15 +104,7 @@ public interface ResultContext {
 	 */
 	public void setResultTranslator(ResultTranslator translator);
 
-	/**
-	 * @return 经过优化后的树形结果集
-	 */
-	public List<Object> toList();
 
-	/**
-	 * @return 经过结果转换后的代码
-	 */
-	public String toCode();
 	/**
 	 * 添加静态文本（不编码）
 	 * 
@@ -116,6 +157,14 @@ public interface ResultContext {
 	public String addGlobalObject(Class<? extends Object> impl, String key);
 
 	public String allocateId();
-	
+	/**
+	 * @return 经过优化后的树形结果集
+	 */
+	public List<Object> toList();
+
+	/**
+	 * @return 经过结果转换后的代码
+	 */
+	public String toCode();
 	
 }

@@ -1,15 +1,20 @@
 package org.xidea.lite.parser.impl;
 
 import java.io.StringWriter;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.xidea.el.ExpressionFactory;
+import org.xidea.el.impl.ExpressionFactoryImpl;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.DefinePlugin;
 import org.xidea.lite.Plugin;
@@ -25,7 +30,13 @@ import org.xidea.lite.parser.ResultTranslator;
 public class ResultContextImpl implements ResultContext {
 	private static final Log log = LogFactory.getLog(ParseContextImpl.class);
 	
+
+	private HashMap<Object, Object> attributeMap = new HashMap<Object, Object>();
+	private HashSet<URI> resources = new HashSet<URI>();
+	private int textType = 0;
+	private URI currentURI;
 	private ResultTranslator translator;
+	private ExpressionFactory expressionFactory = ExpressionFactoryImpl.getInstance();
 	private HashMap<String, String> typeIdMap = new HashMap<String, String>();
 	//	private HashMap<Object, String> objectIdMap = new HashMap<Object, String>();
 	private int inc = 0;
@@ -36,6 +47,10 @@ public class ResultContextImpl implements ResultContext {
 
 	public ResultContextImpl(ParseContext context) {
 		this.context = context;
+	}
+
+	public Object parseEL(String expression) {
+		return expressionFactory.parse(expression);
 	}
 
 	private Object requrieEL(Object expression){
@@ -369,7 +384,10 @@ public class ResultContextImpl implements ResultContext {
 		return -2;// string type
 	}
 
-	
+
+	public void setExpressionFactory(ExpressionFactory expressionFactory) {
+		this.expressionFactory = expressionFactory;
+	}
 	public void setResultTranslator(ResultTranslator translator) {
 		final Map<String, String> featrueMap = context.getFeatrueMap();
 		Collection<String> featrueKeys =featrueMap.keySet();
@@ -398,6 +416,41 @@ public class ResultContextImpl implements ResultContext {
 		}else{
 			return translator.translate(context);
 		}
+	}
+
+	public URI getCurrentURI() {
+		return currentURI;
+	}
+
+	public Set<URI> getResources() {
+		return resources;
+	}
+
+	public void addResource(URI resource) {
+		resources.add(resource);
+	}
+
+	public void setCurrentURI(URI currentURI) {
+		if (currentURI != null) {
+			context.addResource(currentURI);
+		}
+		this.currentURI = currentURI;
+	}
+
+	public void setAttribute(Object key, Object value) {
+		this.attributeMap.put(key, value);
+	}
+
+	public Object getAttribute(Object key) {
+		return this.attributeMap.get(key);
+	}
+
+	public int getTextType() {
+		return textType;
+	}
+
+	public void setTextType(int textType) {
+		this.textType = textType;
 	}
 
 }

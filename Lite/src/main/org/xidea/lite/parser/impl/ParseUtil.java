@@ -1,5 +1,11 @@
 package org.xidea.lite.parser.impl;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringWriter;
 import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
@@ -76,5 +82,66 @@ class ParseUtil {
 		}
 		return context.parseEL(value);
 	}
+	static String loadText(InputStream in,String charset) throws IOException {
+		return loadText(new InputStreamReader(in,charset));
+	}
 
+	static InputStream trimBOM(InputStream in) throws IOException {
+		in = new BufferedInputStream(in, 3);
+		int trim = 0;
+		in.mark(3);
+		outer:for(int i = 0;i<3;i++){// bugfix \ufeff
+			//Unicode(UTF-16)      FF-FE      31 00 32 00 33 00 34 00
+			//Unicode big endian   FE-FF      00 31 00 32 00 33 00 34
+			//UTF-8                 EF-BB-BF 31 32 33 34
+			//ASCII                         31 32 33 34
+			
+			int c = in.read();
+			switch(c){
+			//UTF-16
+			case 0xFF:
+			case 0xFE:
+				if(i == 1){
+					trim = 2;
+					break outer;
+				}else if(i>1){
+					break outer;
+				}
+			//UTF-8
+			case 0xEF:
+				if(i != 0){
+					break outer;
+				}
+				break;
+			case 0xBB:
+				if(i != 1){
+					break outer;
+				}
+				break;
+			case 0xBF:
+				if(i != 2){
+					break outer;
+				}else{
+					trim=3;
+				}
+				break;
+			default:
+				break outer;
+			}
+		};
+		in.reset();
+		while(trim-->0){
+			in.read();
+		}
+		return in;
+	}
+	static String loadText(Reader reader) throws IOException {
+		StringWriter out = new StringWriter();
+		int count;
+		char[] cbuf = new char[1024];
+		while ((count = reader.read(cbuf)) > -1) {
+			out.write(cbuf, 0, count);
+		}
+		return out.toString();
+	}
 }

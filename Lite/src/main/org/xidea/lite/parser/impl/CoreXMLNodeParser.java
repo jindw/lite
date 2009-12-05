@@ -20,8 +20,8 @@ import org.xidea.lite.parser.NodeParser;
 public class CoreXMLNodeParser implements NodeParser<Element> {
 	private static Log log = LogFactory.getLog(CoreXMLNodeParser.class);
 	private static ClientParser clientParser = new ClientParser();
+	private static ExtensionParser extensionParser = new ExtensionParser();
 	
-
 	public void parse( final Element el,ParseContext context,ParseChain chain) {
 			String prefix = el.getPrefix();
 			String namespaceURI = el.getNamespaceURI();
@@ -30,7 +30,7 @@ public class CoreXMLNodeParser implements NodeParser<Element> {
 				if ("include".equals(name)) {
 					 parseIncludeTag(el, context);
 				} else if ("client".equals(name)) {
-					clientParser.parseClientTag(el, context);
+					clientParser.parse(el, context);
 				} else if ("group".equals(name) || "context".equals(name)) {
 					parseContextTag(el, context);
 				} else if ("json".equals(name)) {
@@ -53,6 +53,10 @@ public class CoreXMLNodeParser implements NodeParser<Element> {
 				} else if ("var".equals(name)) {
 					parseVarTag(el, context);
 				} else if ("comment".equals(name)) {
+				} else if ("extension".equals(name)
+						|| "extention".equals(name)
+						|| "ext".equals(name)) {
+					extensionParser.parse(el,context,chain);
 				}else{
 					log.error("未知核心标记" +name);
 					chain.process(el);

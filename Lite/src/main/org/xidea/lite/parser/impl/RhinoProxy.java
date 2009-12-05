@@ -3,6 +3,7 @@ package org.xidea.lite.parser.impl;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Map;
 
 import org.mozilla.javascript.CompilerEnvirons;
 import org.mozilla.javascript.Context;
@@ -62,9 +63,9 @@ public class RhinoProxy extends JSProxy implements ErrorReporter {
 					name);
 			// return null;
 			Object result = fn.call(cx, globals, rhinoThiz, args);
-			if(type == Void.TYPE){
+			if (type == Void.TYPE) {
 				return null;
-			}else{
+			} else {
 				return Context.jsToJava(result, type);
 			}
 		} finally {
@@ -72,11 +73,27 @@ public class RhinoProxy extends JSProxy implements ErrorReporter {
 		}
 	}
 
-	public Object eval(String source,String fileName) {
+
+	public Object eval(String source, String fileName,
+			Map<String, Object> varMap) {
 		try {
 			Context cx = Context.enter();
 			cx.getWrapFactory().setJavaPrimitiveWrap(false);
-			return cx.evaluateString(globals, source, fileName, 1, null);
+			Scriptable localScope = globals;
+			if (varMap != null) {
+				localScope = cx.newObject(globals);
+				for (Object key : globals.getIds()) {
+					if(key instanceof String){
+						String index = (String)key;
+						Object value = globals.get(index, globals);
+						localScope.put(index, localScope, value);
+					}
+				}
+				for (String key : varMap.keySet()) {
+					localScope.put(key, localScope, varMap.get(key));
+				}
+			}
+			return cx.evaluateString(localScope, source, fileName, 1, null);
 		} finally {
 			Context.exit();
 		}

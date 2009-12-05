@@ -255,4 +255,15 @@
 			 -->
 		</xs:complexType>
 	</xs:element>
+	<xs:element name="extension">
+		<xs:annotation>
+			<xs:documentation>
+				通过嵌入脚本或者外联脚本扩展当前解析器集合。
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType mixed="true">
+			<xs:attribute name="src" type="xs:string" use="optional" />
+		</xs:complexType>
+	</xs:element>
+	
 </xs:schema>
