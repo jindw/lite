@@ -39,12 +39,12 @@ function Template(data,parser){
         var code = parser.toCode();
         try{
         	//print(">>>"+code+"<<<\n")
-            data =  window.eval("("+(code||null)+")");
+            data =  window.eval("["+(code||null)+"][0]");
             data.toString=function(){//_$1 encodeXML
                 return code;
             }
         }catch(e){
-        	$log.error("翻译结果错误："+code)
+        	$log.error("翻译结果错误：",e,code)
             throw e;
         }
         this.compileData = data;
