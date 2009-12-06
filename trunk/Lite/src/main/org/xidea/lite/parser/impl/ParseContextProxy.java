@@ -174,7 +174,7 @@ public class ParseContextProxy implements ParserHolder,ResourceContext,ResultCon
 	}
 
 	public Document loadXML(URI uri) throws SAXException, IOException {
-		return xmlContext.loadXML(uri.normalize());
+		return xmlContext.loadXML(uri);
 	}
 
 	public DocumentFragment selectNodes(Node doc, String xpath)

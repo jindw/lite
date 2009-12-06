@@ -49,6 +49,7 @@ public class ResourceContextImpl implements ResourceContext {
 				//charset=
 			}else if ("classpath".equalsIgnoreCase(uri.getScheme())) {
 				ClassLoader cl = this.getClass().getClassLoader();
+				uri = uri.normalize();
 				String path = uri.getPath();
 				path = path.substring(1);
 				InputStream in = cl.getResourceAsStream(path);
