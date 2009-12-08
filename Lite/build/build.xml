@@ -61,7 +61,7 @@
 			<replacefilter token="&#10;?&gt;&lt;?php" value="&#10;//?&gt;&lt;?php" />
 		</replace>
 	</target>
-	<target name="jar-template" depends="init,join-php">
+	<target name="jar" depends="init,join-php">
 		<delete>
 			<fileset dir="build/dest/">
 				<include name="Example-*.zip" />
@@ -180,7 +180,7 @@
 			<arg value="${basedir}/build/dest/jslite/demo.js" />
 		</java>
 	</target>
-	<target name="build" depends="compress,jar-template,php-example">
+	<target name="build" depends="compress,jar,php-example">
 
 	</target>
 
