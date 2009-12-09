@@ -1,5 +1,5 @@
 <?php
-require_once("TemplateEngine.php");
+require_once("../WEB-INF/classes/lite/TemplateEngine.php");
 $engine = new TemplateEngine();
 $engine->encoding="UTF-8";
 header("Content-type: text/html;charset=UTF-8");

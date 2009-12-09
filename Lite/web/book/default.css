@@ -143,15 +143,24 @@ a:hover{
 
 
 #header{
-  background:url(logo.png) 40px no-repeat;
-  height:80px;
+  height:100px;
   margin-bottom:20px;
-  border-bottom:5px solid #d3232a;
+  border-bottom:5px solid #033;
+}
+#header #logo{
+   position:absolute;
+   top:1px;
+   left:10px;
+}
+#header #logo div{
+	position:absolute;
+	background:#048;
+	font-size:1px;
 }
 #header h1{
     font-size:28px;
     font-weight:700;
-    padding:15px 180px;
+    padding:30px 100px;
 }
 /* body */
 #body{

@@ -19,29 +19,29 @@
 require_once('Template.php');
 
 class TemplateEngine{
-	var $litebase;
+	var $root;
 	/**
 	 * 上线后建议关闭
 	 */
 	var $autocompile = true;
 	var $liteservice = null; //'http://litecompiler.appspot.com';
 	var $litecached;
-	function TemplateEngine($litebase=null,$liteservice=null){
-		if($litebase == null){
+	function TemplateEngine($root=null,$liteservice=null){
+		if($root == null){
 			//自动探测虚拟目录
-			$litebase = $_SERVER['DOCUMENT_ROOT'];
+			$root = $_SERVER['DOCUMENT_ROOT'];
 			$dir = realpath($_SERVER['SCRIPT_FILENAME']);
 			while($dir!=($dir2 = dirname($dir))){
 				$dir=$dir2;
 				if(file_exists($dir.'/WEB-INF')){
-					$litebase = $dir;
+					$root = $dir;
 					break;
 				}
 			}
 		}
-		$litebase = realpath($litebase);
-		if(!file_exists($litebase)){
-			echo 'litebase not found:'.$litebase;
+		$root = realpath($root);
+		if(!file_exists($root)){
+			echo 'root not found:'.$root;
 			exit();
 		}
 		if($liteservice == null){
@@ -49,11 +49,11 @@ class TemplateEngine{
 		}else{
 			$this->liteservice = $liteservice;
 		}
-		$this->litebase = $litebase;
-		$this->litecached = $litebase.'/WEB-INF/litecached/';
+		$this->root = $root;
+		$this->litecached = $root.'/WEB-INF/litecached/';
 		if(!file_exists($this->litecached)){
-			if(!file_exists($litebase.'/WEB-INF')){
-				mkdir($litebase.'/WEB-INF');
+			if(!file_exists($root.'/WEB-INF')){
+				mkdir($root.'/WEB-INF');
 			}
 			mkdir($this->litecached);
 		}
@@ -77,7 +77,7 @@ class TemplateEngine{
 			    	$fileTime = $liteTime;
 			    	$i=count($paths);
 					while($i--){
-						$fileTime = max($fileTime,filemtime($this->litebase.$paths[$i]));
+						$fileTime = max($fileTime,filemtime($this->root.$paths[$i]));
 					}
 					if($fileTime<=$liteTime){
 						return $lite[1];
@@ -110,15 +110,20 @@ class TemplateEngine{
 	}
 	function javaCompile($path,$litefile){
 		try{
-			$litebase = $this->litebase;
-			$cp = realpath("$litebase/WEB-INF/lib/Template.jar");
-			if(!$cp){
-				$cp = realpath("$litebase/../build/dest/Template.jar");
+			$root = $this->root;
+			$cp = realpath($root.'/WEB-INF/classes');
+			$lib = realpath($root.'/WEB-INF/lib');
+			if($lib){
+		        $lib_file = dir($lib); 
+		        while (false !== ($file = $lib_file->read())){
+				    if(preg_match('/.*\.(?:jar|zip)$/i',$file)){
+				    	$cp.=PATH_SEPARATOR.$lib.'/'.$file;
+				    }
+				}
 			}
-			
 			$main = "org.xidea.lite.tools.LiteCompiler";
 			$cmd = 'java -cp '.escapeshellarg($cp).' '.$main;
-			$cmd = $cmd.' -path '.escapeshellarg($path).' -root '.escapeshellarg($litebase);
+			$cmd = $cmd.' -path '.escapeshellarg($path).' -root '.escapeshellarg($root);
 			$time = time();
 			echo($cmd);
 			exec($cmd);
@@ -135,9 +140,9 @@ class TemplateEngine{
 	}
 	function httpCompile($path,$litefile){
 		$paths = array($path);
-		$sources = array(file_get_contents(realpath($this->litebase.$path)));
+		$sources = array(file_get_contents(realpath($this->root.$path)));
 		$decoratorPath = '/WEB-INF/decorators.xml';
-		$decoratorXml = file_get_contents(realpath($this->litebase.$decoratorPath));
+		$decoratorXml = file_get_contents(realpath($this->root.$decoratorPath));
 		if($decoratorXml){
 			array_push($sources,$decoratorXml);
 			array_push($paths,$decoratorPath);
@@ -163,7 +168,7 @@ class TemplateEngine{
 				$retry = false;
 				foreach($missed as $path){
 					if(!in_array($path,$paths)){
-						$content = file_get_contents(realpath($this->litebase.$path));
+						$content = file_get_contents(realpath($this->root.$path));
 						array_push($sources,$content);
 						array_push($paths,$path);
 						$retry = true;

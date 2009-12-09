@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+/**
+ * !!!! Lite2 之后中间代码重构，实现已失效
+ *
+ */
 #value token（<=0）
 VALUE_CONSTANTS = -0x00;#c;
 VALUE_VAR = -0x01;#n;
