@@ -21,7 +21,8 @@ public class ExpressionTokenGenTest {
 			}else{
 				values.put(name,value);
 			}
-			System.out.println("var "+name + "= "+value+";");
+			//System.out.println("var "+name + "= "+value+";");
+			System.out.println("define('"+name + "',"+value+");");
 		}
 	}
 

@@ -1,44 +1,40 @@
 <?php
-# 值标示定义
-define('LITE_VALUE_CONSTANTS', 0);#c;
-define('LITE_VALUE_VAR', -1);#n;
-define('LITE_VALUE_LAZY', -2);
-define('LITE_VALUE_NEW_LIST', -3);#[;
-define('LITE_VALUE_NEW_MAP', -4);#{;
-	
-# 操作符标示定义
-#9
-define('LITE_OP_GET_PROP', 17);#0 | 16 | 1;
-define('LITE_OP_STATIC_GET_PROP', 48);#32 | 16 | 0;
-define('LITE_OP_INVOKE_METHOD', 81);#64 | 16 | 1;
-#8
-define('LITE_OP_NOT', 14);#0 | 14 | 0;
-define('LITE_OP_POS', 46);#32 | 14 | 0;
-define('LITE_OP_NEG', 78);#64 | 14 | 0;
-#7
-define('LITE_OP_MUL', 13);#0 | 12 | 1;
-define('LITE_OP_DIV', 45);#32 | 12 | 1;
-define('LITE_OP_MOD', 77);#64 | 12 | 1;
-#6
-define('LITE_OP_ADD', 11);#0 | 10 | 1;
-#5
-define('LITE_OP_SUB', 41);#32 | 8 | 1;
-#4
-define('LITE_OP_LT', 7);#0 | 6 | 1;
-define('LITE_OP_GT', 39);#32 | 6 | 1;
-define('LITE_OP_LTEQ', 71);#64 | 6 | 1;
-define('LITE_OP_GTEQ', 103);#96 | 6 | 1;
-define('LITE_OP_EQ', 135);#128 | 6 | 1;
-define('LITE_OP_NOTEQ', 167);#160 | 6 | 1;
-#3
-define('LITE_OP_AND', 5);#0 | 4 | 1;
-define('LITE_OP_OR', 37);#32 | 4 | 1;
-#2
-define('LITE_OP_QUESTION', 3);#0 | 2 | 1;
-define('LITE_OP_QUESTION_SELECT', 35);#32 | 2 | 1;
-#1
-define('LITE_OP_PARAM_JOIN', 1);#0 | 0 | 1;
-define('LITE_OP_MAP_PUSH', 33);#32 | 0 | 1;
+
+define('LITE_BIT_PARAM',192);
+define('LITE_VALUE_CONSTANTS',-1);
+define('LITE_VALUE_VAR',-2);
+define('LITE_VALUE_NEW_LIST',-3);
+define('LITE_VALUE_NEW_MAP',-4);
+define('LITE_OP_GET_PROP',96);
+define('LITE_OP_GET_STATIC_PROP',33);
+define('LITE_OP_INVOKE_METHOD',98);
+define('LITE_OP_INVOKE_METHOD_WITH_STATIC_PARAM',35);
+define('LITE_OP_INVOKE_METHOD_WITH_ONE_PARAM',352);
+define('LITE_OP_NOT',28);
+define('LITE_OP_BIT_NOT',29);
+define('LITE_OP_POS',30);
+define('LITE_OP_NEG',31);
+define('LITE_OP_MUL',88);
+define('LITE_OP_DIV',89);
+define('LITE_OP_MOD',90);
+define('LITE_OP_ADD',84);
+define('LITE_OP_SUB',85);
+define('LITE_OP_LT',4176);
+define('LITE_OP_GT',4177);
+define('LITE_OP_LTEQ',4178);
+define('LITE_OP_GTEQ',4179);
+define('LITE_OP_EQ',80);
+define('LITE_OP_NOTEQ',81);
+define('LITE_OP_BIT_AND',8268);
+define('LITE_OP_BIT_XOR',4172);
+define('LITE_OP_BIT_OR',76);
+define('LITE_OP_AND',4168);
+define('LITE_OP_OR',73);
+define('LITE_OP_QUESTION',68);
+define('LITE_OP_QUESTION_SELECT',69);
+define('LITE_OP_PARAM_JOIN',64);
+define('LITE_OP_MAP_PUSH',65);
+
 
 $LITE_QUESTION_NEXT = new stdClass();
 class Expression{
@@ -57,79 +53,64 @@ class Expression{
 	}
 }
 
-function lite_evaluate(&$context,&$tokens) {
-	if(count($tokens)==1){
-	    $stack = lite_value($context,$tokens[0]);
-	}else{
-		$stack = array();
-		_lite_evaluate($stack, $context, $tokens);
-		$stack=$stack[0];
-		if ($stack instanceof _LitePropertyValue){
-			$stack = $stack->get();
-		}
+function lite_evaluate(&$context,&$item) {
+	$result = _lite_evaluate($context, $item);
+	if ($result instanceof _LitePropertyValue) {
+		$result = $result->get();
 	}
-	return $stack;
+	return $result;
 }
-function _lite_evaluate(&$stack, &$context, &$tokens) {
-	foreach($tokens as &$item) {
-		if(is_array($item)) {
-			$type = &$item[0];
-			if($type > 0) {
-				if($type & 1) {
-					$result = lite_compute($item, array_pop($stack), array_pop($stack));
-				}else{
-					$arg2 = null;
-					$result = lite_compute($item, $arg2, array_pop($stack));
-				}
-				
-				if($result instanceof _LiteLazyToken) {
-					_lite_evaluate($stack, $context, $result->children);
-				} else {
-					$stack[] = $result;
-				}
-			} else {
-				$stack[] = lite_value($context, $item);
+function _lite_evaluate(&$context, &$item) {
+    $type = $item[0];
+    switch($type){
+    case LITE_VALUE_NEW_LIST:
+    case LITE_VALUE_NEW_MAP:
+        return array();
+    case LITE_VALUE_VAR:
+        $arg1 = $item[1];
+		if (array_key_exists($arg1, $context)) {
+			return $context[$arg1];
+		} else {
+			switch ($arg1) {
+			case "JSON":
+				return "Expression";
+			case "encodeURIComponent": 
+				return "urlencode";
+			case "decodeURIComponent": 
+				return "urldecode";
 			}
 		}
-	}
-}
-function lite_value(&$context, &$item) {
-	switch($item[0]){
-		case LITE_VALUE_VAR:
-			$value = $item[1];
-			if (array_key_exists($value, $context)) {
-				return $context[$value];
-			} else {
-				switch ($value) {
-				case "JSON":
-					return "Expression";
-				case "encodeURIComponent": 
-					return "urlencode";
-				case "decodeURIComponent": 
-					return "urldecode";
-				}
-			}
-			return null;//您如果需要仅用默认函数，那么 return null吧
-		case LITE_VALUE_CONSTANTS:
-			return $item[1];
-		case LITE_VALUE_NEW_LIST:
-			return array();
-		case LITE_VALUE_NEW_MAP:
-			return new stdClass();
-		case LITE_VALUE_LAZY:
-			return new _LiteLazyToken($item[1]);
-	}
-}
-
-/**
- * 丑陋的PHP引用：（，引用传递，传入前的变量不能随便修改，都不能随便修改的：（
- * @param $op
- * @param $arg1
- * @param $arg2 
- */
-function lite_compute(&$op, &$arg2, &$arg1) {
-    global $LITE_QUESTION_NEXT;
-	$type = $op[0];
+		return null;
+    case LITE_VALUE_CONSTANTS:
+        return $item[1];
+    ///* and or */
+    case LITE_OP_AND:
+    	$arg1 = lite_evaluate($context,$item[1]);
+        return $arg1?$arg1 : lite_evaluate($context,$item[2]);
+    case LITE_OP_OR:
+    	$arg1 = lite_evaluate($context,$item[1]);
+        return $arg1?lite_evaluate($context,$item[2]):$arg1;
+    case LITE_OP_QUESTION://// a?b:c -> a?:bc -- >a?b:c
+    	global $LITE_QUESTION_NEXT;
+    	$arg1 = lite_evaluate($context,$item[1]);
+        if(!arg1){
+            return lite_evaluate($context,$item[2]);
+        }else{
+            return $LITE_QUESTION_NEXT;//use as flag
+        }
+    case LITE_OP_QUESTION_SELECT:
+    	global $LITE_QUESTION_NEXT;
+    	$arg1 = lite_evaluate($context,$item[1]);
+        if(arg1 == $LITE_QUESTION_NEXT){//use as flag
+            return lite_evaluate($context,$item[2]);
+        }else{
+            return $arg1;
+        }
+    }
+    $arg1=_lite_evaluate($context,$item[1]);
+    if((($type & LITE_BIT_PARAM) >> 6) == 1){//if(getParamCount(type) ==2){//
+        $arg2=lite_evaluate($context,$item[2]);
+    }
 	if ($type == LITE_OP_INVOKE_METHOD) {
 		if($arg1 instanceof _LitePropertyValue) {
 			return $arg1->call($arg2);
@@ -141,18 +122,19 @@ function lite_compute(&$op, &$arg2, &$arg1) {
 	if ($arg1 instanceof _LitePropertyValue) {
 		$arg1 = $arg1->get();
 	}
-	if ($arg2 instanceof _LitePropertyValue) {
-		$arg2 = $arg2->get();
-	}
 	switch($type) {
-		case LITE_OP_STATIC_GET_PROP:
-			return new _LitePropertyValue($arg1, $op[1]);
+		case LITE_OP_GET_STATIC_PROP:
+			return new _LitePropertyValue($arg1, $item[3]);
 		case LITE_OP_GET_PROP:
 			return new _LitePropertyValue($arg1, $arg2);
 		case LITE_OP_PARAM_JOIN:
 			$arg1[]=$arg2;return $arg1;
 		case LITE_OP_MAP_PUSH:
-			$arg1->$op[1] = $arg2;
+			if(is_array($arg1)){
+				$arg1[$item[3]] = $arg2;
+			}else{
+				$arg1->$item[3] = $arg2;
+			}
 			return $arg1;
 		case LITE_OP_NOT:
 			return !$arg1;
@@ -192,29 +174,11 @@ function lite_compute(&$op, &$arg2, &$arg1) {
 		case LITE_OP_LTEQ:
 			return $arg1<=$arg2;
 
-		/* and or */
-		case LITE_OP_AND:
-			return $arg1 ? $arg2 : $arg1;
-		case LITE_OP_OR:
-			return $arg1 ? $arg1 : $arg2;
-		case LITE_OP_QUESTION:
-			return $arg1 ? $arg2 : $LITE_QUESTION_NEXT;
-		case LITE_OP_QUESTION_SELECT:
-			return $arg1 == $LITE_QUESTION_NEXT ? $arg2:$arg1;
-		case LITE_OP_MAP_PUSH:
-			$arg1[$op[1]] = $arg2;return $arg1;
 		default:break;
 	}
 }
 		
 
-
-class _LiteLazyToken {
-	var $children;
-	function _LiteLazyToken(&$children) {
-		$this->children = &$children;
-	}
-}
 
 class _LitePropertyValue {
 	var $base;
