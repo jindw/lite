@@ -9,8 +9,8 @@
 	</head>
 	<body>
 		<div id="header">
-			<h1>
-			<div id="logo">
+			
+			<div class="logo">
 			<c:for var="item" items="${
   [
     [0,0,19,100],
@@ -25,10 +25,16 @@
 			<div style='left:${item[0]}px;top:${item[1]}px;width:${item[2]}px;height:${item[3]}px;'>&#160;</div>
 			</c:for>
 			</div>
+			<h1>
 				<c:include path="#page" xpath="//xhtml:title/text()" />
 			</h1>
+			
+			<div class="line"/>
 		</div>
 		<div id="body">
+			<div id="content">
+				<c:include path="#page" xpath="//xhtml:body/node()" />
+			</div>
 			<div id="menu">
 				<h3>前言</h3>
 				<ul>
@@ -157,9 +163,6 @@
 						<a href="#">Lite2PHP翻译内幕</a>
 					</li>
 				</ul>
-			</div>
-			<div id="content">
-				<c:include path="#page" xpath="//xhtml:body/node()" />
 			</div>
 		</div>
 		<div id="footer"></div>
