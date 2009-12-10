@@ -135,7 +135,7 @@ public abstract class SimpleWebServer implements WebServer {
 				this.port = port;
 				log.debug("Waiting for connection:" + port);
 				break;
-			} catch (java.net.BindException e) {
+			} catch (java.net.SocketException e) {
 				port++;
 				if(i ==0){
 					port+=1900;
