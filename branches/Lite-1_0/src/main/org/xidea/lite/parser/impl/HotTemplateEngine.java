@@ -111,8 +111,8 @@ public class HotTemplateEngine extends TemplateEngine {
 			lock.remove(path);
 			return template;
 		} else {
-			templateMap.remove(path);
-			infoMap.remove(path);
+			//templateMap.remove(path);
+			//infoMap.remove(path);
 			// return getTemplate(path);
 			return template;
 		}
