@@ -18,7 +18,10 @@ public class TemplateEngine {
 	private static final Log log = LogFactory.getLog(TemplateEngine.class);
 	protected URI baseURI;
 	protected File baseFile;
-	protected Map<String, Template> templateMap = new java.util.WeakHashMap<String, Template>();
+	/**
+	 * WeakHashMap 回收的太快了：（
+	 */
+	protected Map<String, Template> templateMap = new java.util.HashMap<String, Template>();
 
 	public TemplateEngine(File base) {
 		this.baseFile = base;
