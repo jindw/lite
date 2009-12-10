@@ -18,7 +18,7 @@ public class TemplateEngine {
 	private static final Log log = LogFactory.getLog(TemplateEngine.class);
 	protected URI baseURI;
 	protected File baseFile;
-	protected Map<String, Template> templateMap = new java.util.WeakHashMap<String, Template>();
+	protected Map<String, Template> templateMap = new java.util.HashMap<String, Template>();
 
 	public TemplateEngine(File base) {
 		this.baseFile = base;
