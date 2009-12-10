@@ -22,7 +22,7 @@ public class ExtensionParser implements NodeParser<Element> {
 		String src = ParseUtil.getAttributeOrNull(el, "src", "href", "uri",
 				"url");
 
-		if (src.length() > 0) {
+		if (src != null && src.length() > 0) {
 			processResource(src.split("[\\s*,\\s*]"), context,proxy, varMap);
 		}
 		if (script != null && script.trim().length() > 0) {

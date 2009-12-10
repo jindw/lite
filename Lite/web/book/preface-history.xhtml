@@ -1,27 +1,27 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:fk="http://firekylin.my.baidu.com/ns/doc" xml:lang="zh-CN"
-	dir="ltr">
+	xmlns:ex="http://www.xidea.org/ns/lite/example"
+	>
 	<head>
 		<title>模板引擎的前身今世</title>
 	</head>
 	<body>
-		<p>还是先解释一下什么是模板吧...</p>
-		<p>模板是一种用来描述如何把数据变成文本的语言。</p>
-		<p>依然很晕，算了，实例说话：</p>
+	<h3>小往大来，吉亨</h3>
+		<p>首先我们来解释一下什么是模板：</p>
+		<p>模板是一种用来描述如何把数据变成文本的语言。依然很晕？算了，实例说话：</p>
 		<table>
 			<tr>
 				<th>
-					<h6>先模板时代，来自火星问候</h6>
+					<h6>先模板时代，来自远古问候</h6>
 				</th>
 				<th>
-					<h6>后模板时代，我们可以简化为：</h6>
+					<h6>模板时代，我们可以简化为：</h6>
 				</th>
 			</tr>
 			<tr>
 				<td>
 					<div
-						style="margin-left:-60px;margin-right:-60px;width:400px">
-						<fk:code>
+						style="width:300px">
+						<ex:code>
 							<![CDATA[
 #include <stdio.h>
 int main(void) {
@@ -52,12 +52,12 @@ void say_hello(char* message_type,
   printf("</html>\n");
   return 0;
 }]]>
-						</fk:code>
+						</ex:code>
 					</div>
 				</td>
 				<td valign="top">
-					<div style="margin-left:-50px;width:400px">
-						<fk:code>
+					<div style="width:260px">
+						<ex:code>
 							<![CDATA[
 <html>
   <body>
@@ -66,16 +66,16 @@ void say_hello(char* message_type,
     </h1>
   </body>
 </html>]]>
-						</fk:code>
+						</ex:code>
 					</div>
-					<p>对比一下两边的代码的可维护性如何？</p>
+					<p><strong>对比一下两边的代码的可维护性如何？</strong></p>
 					<ul>
 						<li>代码的多少？</li>
 						<li>书写的便捷？</li>
 						<li>阅读的清晰？</li>
-						<li>排错的明了？</li>
+						<li>排错的简单？</li>
 					</ul>
-					<p>设计良好的模板语言的基本特征</p>
+					<p><strong>设计良好的模板语言的基本特征</strong></p>
 					<ul>
 						<li>源代码接近目标代码</li>
 						<li>支持可置换的变量/表达式</li>
@@ -123,7 +123,6 @@ void say_hello(char* message_type,
 		<p>
 			随着这种运用场景的逐渐丰富，一些前端模板的思想开始活跃起来，这就包括JST，Lite，Google Clourse
 			Template。
-
 		</p>
 
 	</body>

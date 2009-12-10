@@ -3,30 +3,9 @@ html {
 	background: #FFF;
 }
 
-body,
-div,
-dl,
-dt,
-dd,
-ol,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-pre,
-code,
-form,
-fieldset,
-legend,
-input,
-button,
-textarea,
-p,
-blockquote,
-th,
-td {
+body,div,dl,dt,dd,ol,h1,h2,h3,h4,h5,h6,
+pre,code,form,fieldset,legend,input,button,
+textarea,p,blockquote,th,td {
 	margin: 0;
 	padding: 0;
 }
@@ -36,26 +15,16 @@ table {
 	border-spacing: 0;
 }
 
-fieldset,
-img {
+fieldset,img {
 	border: 0;
 }
 
-address,
-caption,
-cite,
-code,
-dfn,
-em,
-
-var,
-optgroup {
+address,caption,cite,code,dfn,em,var,optgroup {
 	font-style: inherit;
 	font-weight: inherit;
 }
 
-del,
-ins {
+del,ins {
 	text-decoration: none;
 }
 
@@ -63,17 +32,11 @@ ins {
 	list-style: none;
 }
 
-caption,
-th {
+caption,th {
 	text-align: left;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+h1,h2,h3,h4,h5,h6 {
 	font-size: 100%;
 	font-weight: blod;
 	margin-top:4px;
@@ -103,12 +66,7 @@ legend {
 	color: #000;
 }
 
-input,
-button,
-textarea,
-select,
-optgroup,
-option {
+input,button,textarea,select,optgroup,option {
 	font-family: inherit;
 	font-size: inherit;
 	font-style: inherit;
@@ -117,10 +75,7 @@ option {
 
 /*@purpose To enable resizing for IE */
 /*@branch For IE6-Win, IE7-Win */
-input,
-button,
-textarea,
-select {
+input,button,textarea,select {
 	*font-size: 100%;
 }
 
@@ -139,6 +94,33 @@ a:hover{
     text-decoration:underline;
 }
 
+
+
+/* menu */
+#menu{
+  position:absolute;
+  right:15px;
+  top:15px;
+  border:1px solid #ECF1F3;
+  width:210px;
+  background:#F1F6F8;
+  padding:6px 0;
+}
+
+#menu h3{
+    font-size:14px;
+    font-weight:700;
+    padding:5px 10px;
+}
+
+#menu ul{
+    padding-left:30px;
+}
+
+#menu li{
+    padding:3px 0;
+    font-size:12px;
+}
 
 
 
@@ -171,48 +153,21 @@ a:hover{
 /* body */
 #body{
   clear:both;
-  width:90%;
+  width:99%;
   margin:0 auto;
 }
-
-/* menu */
-#menu{
-  position:absolute;
-  right:15px;
-  top:15px;
-  border:1px solid #ECF1F3;
-  width:210px;
-  background:#F1F6F8;
-  padding:6px 0;
-}
-
-#menu h3{
-    font-size:14px;
-    font-weight:700;
-    padding:5px 10px;
-}
-
-#menu ul{
-    padding-left:30px;
-}
-
-#menu li{
-    padding:3px 0;
-    font-size:12px;
-}
-
 /*content*/
 #content{
   padding:5px 0;
-  margin-right:220px;
-  margin-left:40px;
+  margin-right:230px;
+  margin-left:65px;
 }
 
 #content h3,
 #content h4{
     font-size:14px;
     font-weight:700;
-    margin:15px 15px 5px;
+    margin:35px 15px 5px;
     padding:2px 5px;
     border-bottom:1px solid #E2E1DE;
 }

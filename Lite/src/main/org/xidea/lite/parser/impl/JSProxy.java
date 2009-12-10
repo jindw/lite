@@ -30,6 +30,9 @@ public abstract class JSProxy {
 	}
 
 	private boolean jsiAvailable = false;
+	
+	protected boolean primitiveToJS = false;
+	
 
 	public abstract Object eval(String source, String pathInfo,Map<String, Object> varMap);
 

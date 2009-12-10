@@ -57,7 +57,7 @@ public class RhinoProxy extends JSProxy implements ErrorReporter {
 		}
 		try {
 			Context cx = Context.enter();
-			cx.getWrapFactory().setJavaPrimitiveWrap(false);
+			cx.getWrapFactory().setJavaPrimitiveWrap(primitiveToJS);
 			Scriptable rhinoThiz = Context.toObject(thiz, globals);
 			Function fn = (Function) ScriptableObject.getProperty(rhinoThiz,
 					name);
@@ -78,7 +78,7 @@ public class RhinoProxy extends JSProxy implements ErrorReporter {
 			Map<String, Object> varMap) {
 		try {
 			Context cx = Context.enter();
-			cx.getWrapFactory().setJavaPrimitiveWrap(false);
+			cx.getWrapFactory().setJavaPrimitiveWrap(primitiveToJS);
 			Scriptable localScope = globals;
 			if (varMap != null) {
 				localScope = cx.newObject(globals);
