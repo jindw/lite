@@ -30,6 +30,7 @@ public class LiteCompiler {
 	}
 
 	public static void main(String[] args) {
+		//args = new String[]{"-path", "/book/preface-history.xhtml","-root", "C:/Users/jindw/workspace/Lite2/web"};
 		new LiteCompiler(args).execute();
 	}
 

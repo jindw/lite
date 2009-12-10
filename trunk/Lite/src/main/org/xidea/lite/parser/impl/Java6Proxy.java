@@ -46,7 +46,7 @@ public class Java6Proxy extends JSProxy implements ErrorReporter {
 	public Object invoke(Object thiz, String name, Object... args) {
 		try {
 			Context context = Context.enter();
-			context.getWrapFactory().setJavaPrimitiveWrap(false);
+			context.getWrapFactory().setJavaPrimitiveWrap(primitiveToJS);
 			return ((Invocable) jsengine).invokeMethod(thiz, name, args);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -61,7 +61,7 @@ public class Java6Proxy extends JSProxy implements ErrorReporter {
 		Object file = jsengine.get(ScriptEngine.FILENAME);
 		try {
 			Context context = Context.enter();
-			context.getWrapFactory().setJavaPrimitiveWrap(false);
+			context.getWrapFactory().setJavaPrimitiveWrap(primitiveToJS);
 			jsengine.put(ScriptEngine.FILENAME, pathInfo);
 			if(varMap == null){
 				return jsengine.eval(source);
