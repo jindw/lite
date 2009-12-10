@@ -10,11 +10,40 @@ import java.util.List;
 
 import org.xidea.el.Invocable;
 
-abstract class JSArray extends ECMA262Impl implements Invocable {
+public class JSArray extends JSObject implements Invocable {
+	public static final String MEMBERS =
+	// 0-3
+	"slice,splice,concat,join" +
+	// 4-7
+			",push,pop,shift,unshift" +
+			// 8-9
+			",reverse,sort";
+
 	@SuppressWarnings("unchecked")
 	public Object invoke(Object thiz, Object... args) throws Exception {
-		thiz = toList(thiz);
-		return this.invoke((List<Object>) thiz, args);
+		List<Object> list = (List<Object>) toList(thiz);
+		switch (type) {
+		case 0:
+		case 1:
+			return slice(list, args);
+		case 2:
+			return concat(list, args);
+		case 3:
+			return join(list, args);
+		case 4:
+			return push(list, args);
+		case 5:
+			return pop(list, args);
+		case 6:
+			return shift(list, args);
+		case 7:
+			return unshift(list, args);
+		case 8:
+			return reverse(list, args);
+		case 9:
+			return sort(list, args);
+		}
+		throw new UnsupportedOperationException("不支持方法：" + type);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -32,110 +61,95 @@ abstract class JSArray extends ECMA262Impl implements Invocable {
 		return thiz;
 	}
 
-	public abstract Object invoke(List<Object> thiz, Object... args)
-			throws Exception;
+	public Object slice(List<Object> thiz, Object... args) throws Exception {
+		int begin = getIntArg(args, 0, 0);
+		int size = thiz.size();
+		int end = getIntArg(args, 1, size);
+		return thiz.subList(toValid(begin, size), toValid(end, size));
+	}
 
-	public static final Invocable slice = new JSArray() {
-		@Override
-		public Object invoke(List<Object> thiz, Object... args)
-				throws Exception {
-			return thiz.subList(getIntArg(args, 0, 0), getIntArg(args, 1, thiz
-					.size()));
+	private int toValid(int begin, int size) {
+		if(begin<0){
+			begin = Math.max(begin+size, 0);
+		}else{
+			begin = Math.min(begin, size);
 		}
+		return begin;
 	};
-	public static final Invocable join = new JSArray() {
-		@Override
-		public Object invoke(List<Object> thiz, Object... args)
-				throws Exception {
-			StringBuilder buf = new StringBuilder();
-			String joiner = null;
-			for (Object o : thiz) {
-				if (joiner == null) {
-					joiner = getStringArg(args, 0, ",");
-				} else {
-					buf.append(joiner);
-				}
-				buf.append(ToPrimitive(o, String.class));
 
+	public Object join(List<Object> thiz, Object... args) throws Exception {
+		StringBuilder buf = new StringBuilder();
+		String joiner = null;
+		for (Object o : thiz) {
+			if (joiner == null) {
+				joiner = getStringArg(args, 0, ",");
+			} else {
+				buf.append(joiner);
 			}
-			return buf.toString();
-		}
-	};
-	public static final Invocable splice = slice;
+			buf.append(ToPrimitive(o, String.class));
 
-	public static final Invocable push = new JSArray() {
-		@Override
-		public Object invoke(List<Object> thiz, Object... args) {
-			for (Object o : args) {
-				thiz.add(o);
+		}
+		return buf.toString();
+	}
+
+	public Object push(List<Object> thiz, Object... args) {
+		for (Object o : args) {
+			thiz.add(o);
+		}
+		return thiz.size();
+	}
+
+	public Object pop(List<Object> thiz, Object... args) {
+		int size = thiz.size();
+		if (size > 0) {
+			return thiz.remove(size - 1);
+		}
+		return null;
+	}
+
+	public Object shift(List<Object> thiz, Object... args) {
+		int size = thiz.size();
+		if (size > 0) {
+			return thiz.remove(0);
+		}
+		return null;
+	}
+
+	public Object unshift(List<Object> thiz, Object... args) {
+		for (int i = 0; i < args.length; i++) {
+			thiz.add(i, args[i]);
+		}
+		return thiz.size();
+	}
+
+	@SuppressWarnings("unchecked")
+	public Object concat(List<Object> thiz, Object... args) {
+		List<Object> result = new ArrayList<Object>(thiz);
+		for (Object o : args) {
+			o = toList(o);
+			if (o instanceof Collection) {
+				result.addAll((Collection) o);
+			} else {
+				result.add(o);
 			}
-			return null;
 		}
-	};
-	public static final Invocable pop = new JSArray() {
-		@Override
-		public Object invoke(List<Object> thiz, Object... args) {
-			int size = thiz.size();
-			if (size > 0) {
-				return thiz.remove(size - 1);
-			}
-			return null;
+		return result;
+	}
+
+	public Object reverse(List<Object> thiz, Object... args) {
+		Collections.reverse(thiz);
+		return thiz;
+	}
+
+	@SuppressWarnings("unchecked")
+	public Object sort(List<Object> thiz, Object... args) {
+		Object o = getArg(args, 0, null);
+		Comparator<Object> c = null;
+		if (o instanceof Comparator) {
+			c = (Comparator<Object>) o;
 		}
-	};
-	public static final Invocable shift = new JSArray() {
-		@Override
-		public Object invoke(List<Object> thiz, Object... args) {
-			int size = thiz.size();
-			if (size > 0) {
-				return thiz.remove(0);
-			}
-			return null;
-		}
-	};
-	public static final Invocable unshift = new JSArray() {
-		@Override
-		public Object invoke(List<Object> thiz, Object... args) {
-			for (int i = 0; i < args.length; i++) {
-				thiz.add(i,args[i]);
-			}
-			return thiz.size();
-		}
-	};
-	public static final Invocable concat = new JSArray() {
-		@SuppressWarnings("unchecked")
-		@Override
-		public Object invoke(List<Object> thiz, Object... args) {
-			List<Object > result = new ArrayList<Object>(thiz);
-			for (Object o:args) {
-				o = toList(o);
-				if(o instanceof Collection){
-					result.addAll((Collection)o);
-				}else{
-					result.add(o);
-				}
-			}
-			return result;
-		}
-	};
-	public static final Invocable reverse = new JSArray() {
-		@Override
-		public Object invoke(List<Object> thiz, Object... args) {
-			Collections.reverse(thiz);
-			return thiz;
-		}
-	};
-	public static final Invocable sort = new JSArray() {
-		@SuppressWarnings("unchecked")
-		@Override
-		public Object invoke(List thiz, Object... args) {
-			Object o = getArg(args, 0, null);
-			Comparator c = null;
-			if(o instanceof Comparator){
-				c = (Comparator)o;
-			}
-			Collections.sort(thiz,c);
-			return thiz;
-		}
-	};
+		Collections.sort(thiz, c);
+		return thiz;
+	}
 
 }
