@@ -149,7 +149,9 @@ public class HTMLNodeParser extends AbstractHTMLNodeParser implements NodeParser
 			if (selectNode.hasAttribute(ATTRIBUTE_NAME)
 					&& element.hasAttribute(ATTRIBUTE_VALUE)) {
 				String name = selectNode.getAttribute(ATTRIBUTE_NAME);
-				String value = element.getAttribute(ATTRIBUTE_VALUE);
+				String value = element.hasAttribute(ATTRIBUTE_VALUE)?
+							element.getAttribute(ATTRIBUTE_VALUE):
+							element.getTextContent();
 				attributes = buildCheckedAttribute(context, name, value,
 						ATTRIBUTE_SELECTED);
 			}
