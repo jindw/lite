@@ -105,6 +105,7 @@ public class HotTemplateEngine extends TemplateEngine {
 					File[] files = getAssociatedFiles(parseContext);
 					Info entry = new Info(files);
 					infoMap.put(path, entry);
+					templateMap.put(path, template);
 				}
 			}
 			lock.remove(path);
