@@ -30,16 +30,28 @@ public class ClientParser extends ELParser implements NodeParser<Element>,
 	public int parse(final String text, final int p$, ParseContext context) {
 		int p1 = text.indexOf('{', p$);
 		int p2 = text.indexOf('}', p1);
-		String id = text.substring(p1 + 1, p2);
+		String id = text.substring(p1 + 1, p2).trim();
+
+		ClientEnd ce = new ClientEnd();
+
+		parseClient(id, text.substring(p2 + 1),  context,ce);
+		return p2 + 1 + ce.end;
+	}
+
+	public void parseClient(String id, final String text,
+			ParseContext context) {
+		parseClient(id, text, context, null);
+	}
+	private void parseClient(String id, final String text,
+			ParseContext context,TextParser ce) {
 		JSProxy proxy = JSProxy.newProxy();
 		ParseContext clientContext = new ParseContextImpl(context, proxy
 				.createJSTranslator(id));
-		ClientEnd ce = new ClientEnd();
-		clientContext.addTextParser(ce);
-		String subtext = text.substring(p2 + 1);
-		clientContext.parse(subtext);
+		if(ce!=null){
+			clientContext.addTextParser(ce);
+		}
+		clientContext.parse(text);
 		compileJS(proxy, context, clientContext, true);
-		return p2 + 1 + ce.end;
 	}
 
 	private class ClientEnd extends ELParser {
