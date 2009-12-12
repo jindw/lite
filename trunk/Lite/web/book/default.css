@@ -10,6 +10,11 @@ textarea,p,blockquote,th,td {
 	padding: 0;
 }
 
+h1,h2,h3,h4,h5,h6 {
+	font-size: 100%;
+	font-weight: blod;
+	margin-top:4px;
+}
 table {
 	border-collapse: collapse;
 	border-spacing: 0;
@@ -34,12 +39,6 @@ del,ins {
 
 caption,th {
 	text-align: left;
-}
-
-h1,h2,h3,h4,h5,h6 {
-	font-size: 100%;
-	font-weight: blod;
-	margin-top:4px;
 }
 
 q:before,
@@ -163,13 +162,12 @@ a:hover{
   margin-left:65px;
 }
 
+#content h2,
 #content h3,
 #content h4{
-    font-size:14px;
     font-weight:700;
     margin:35px 15px 5px;
     padding:2px 5px;
-    border-bottom:1px solid #E2E1DE;
 }
 #content h2{
     font-size:18px;
@@ -179,11 +177,8 @@ a:hover{
     font-size:16px;
     border-bottom:2px solid #E2E1DE;
 }
-#content h6{
+#content h4{
     font-size:12px;
-	padding:0px;
-	margin:0px;
-	padding-left:64px;
 }
 #content p,
 #content ul{

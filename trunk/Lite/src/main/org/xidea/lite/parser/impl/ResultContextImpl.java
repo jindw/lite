@@ -19,6 +19,7 @@ import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.DefinePlugin;
 import org.xidea.lite.Plugin;
 import org.xidea.lite.Template;
+import org.xidea.lite.parser.IllegalEndException;
 import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.ResultContext;
 import org.xidea.lite.parser.ResultTranslator;
@@ -160,6 +161,9 @@ public class ResultContextImpl implements ResultContext {
 
 	public final int appendEnd() {
 		int type = this.findBeginType();
+		if(type<0){
+			throw new IllegalEndException();
+		}
 		this.result.add(END_INSTRUCTION);
 		return type;
 	}
