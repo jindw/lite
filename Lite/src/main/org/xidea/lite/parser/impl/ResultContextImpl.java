@@ -160,7 +160,7 @@ public class ResultContextImpl implements ResultContext {
 	}
 
 	public final int appendEnd() {
-		int type = this.findBeginType();
+		int type = this.findBegin();
 		if(type<0){
 			throw new IllegalEndException();
 		}
@@ -345,6 +345,7 @@ public class ResultContextImpl implements ResultContext {
 			case Template.IF_TYPE:
 			case Template.ELSE_TYPE:
 			case Template.FOR_TYPE:
+			case Template.PLUGIN_TYPE:
 				depth--;
 				break;
 			case -1:
