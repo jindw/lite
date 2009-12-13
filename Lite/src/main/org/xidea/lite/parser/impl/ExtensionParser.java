@@ -42,6 +42,7 @@ public class ExtensionParser implements NodeParser<Element> {
 			JSProxy proxy, Map<String, Object> varMap) {
 		for (String path : paths) {
 			URI uri = context.createURI(path, null);
+			context.addResource(uri);
 			InputStream in = context.openInputStream(uri);
 			if (in != null) {
 				try {

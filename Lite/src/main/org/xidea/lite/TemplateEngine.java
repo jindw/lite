@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Writer;
 import java.net.URI;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -15,6 +16,7 @@ import org.xidea.el.json.JSONDecoder;
 
 public class TemplateEngine {
 	private static final Log log = LogFactory.getLog(TemplateEngine.class);
+	private HashMap<String, Object> lock = new HashMap<String, Object>();
 	protected URI baseURI;
 	protected File baseFile;
 	/**
@@ -38,12 +40,30 @@ public class TemplateEngine {
 	}
 
 	public Template getTemplate(String path) {
-		Template o = templateMap.get(path);
-		if (o == null) {
-			o = createTemplate(path);
-			templateMap.put(path, o);
+		Template template = (Template) templateMap.get(path);
+		if (template == null || isModified(path)) {
+			Object lock2 = null;
+			synchronized (lock) {
+				lock2 = lock.get(path);
+				if (lock2 == null) {
+					lock.put(path, lock2 = new Object());
+				}
+			}
+			synchronized (lock2) {
+				template = (Template) templateMap.get(path);
+				if (template == null || isModified(path)) {
+					template = createTemplate(path);
+					templateMap.put(path, template);
+				}
+			}
+			lock.remove(path);
+			return template;
+		} else {
+			return template;
 		}
-		return (Template) o;
+	}
+	protected boolean isModified(String path) {
+		return false;
 	}
 
 	@SuppressWarnings("unchecked")

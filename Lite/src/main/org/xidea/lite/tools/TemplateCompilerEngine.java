@@ -93,9 +93,9 @@ public class TemplateCompilerEngine extends HotTemplateEngine {
 		return fileList;
 	}
 
-	protected Template createTemplate(String path, ParseContext context) {
+	protected Template createTemplate(String path,ParseContext context) {
 		try{
-			return super.createTemplate(path, context);
+			return super.createTemplate(path,context);
 		}finally{
 			this.itemsMap.put(path, context.toList());
 			this.filesMap.put(path, this.getAssociatedFiles(context));
