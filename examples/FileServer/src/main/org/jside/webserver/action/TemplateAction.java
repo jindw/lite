@@ -6,6 +6,8 @@ import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.jside.webserver.HttpUtil;
 import org.jside.webserver.RequestContext;
@@ -14,6 +16,7 @@ import org.xidea.lite.TemplateEngine;
 public class TemplateAction extends TemplateEngine {
 	private String contentType = "text/html;charset=";
 	private Object root;
+	protected Map<String, String> featrueMap = new HashMap<String, String>();
 
 	public static TemplateAction create(URI root) {
 		TemplateAction ta;
@@ -27,6 +30,10 @@ public class TemplateAction extends TemplateEngine {
 
 	public TemplateAction(URI root) {
 		super(root);
+	}
+
+	public void addFeatrue(String key,String value){
+		featrueMap.put(key, value);
 	}
 
 	public void setContentType(String contentType) {

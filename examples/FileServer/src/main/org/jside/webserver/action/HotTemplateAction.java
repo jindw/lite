@@ -4,17 +4,25 @@ import java.net.MalformedURLException;
 import java.net.URI;
 
 import org.xidea.lite.Template;
+import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.impl.HotTemplateEngine;
 
 public class HotTemplateAction extends TemplateAction {
+	
 	private HotTemplateEngine engine = new HotTemplateEngine((URI)null,null){
+		
 		@Override
 		protected URI getResource(String path) {
 			return HotTemplateAction.this.getResource(path);
 		}
-		
-	};
 
+		@Override
+		protected ParseContext createParseContext() {
+			ParseContext context =  super.createParseContext();
+			context.getFeatrueMap().putAll(featrueMap);
+			return context;
+		}
+	};
 	public HotTemplateAction(URI file) throws MalformedURLException {
 		super(file);
 	}
