@@ -18,7 +18,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.el.json.JSONDecoder;
 import org.xidea.lite.Template;
-import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.impl.DecoratorContextImpl;
 import org.xidea.lite.parser.impl.HotTemplateEngine;
 
@@ -46,14 +45,13 @@ public class ServletTemplateEngine extends HotTemplateEngine {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	protected Template createTemplate(String path, ParseContext parseContext){
+	protected Template createTemplate(String path){
 		if(autocompile){
-			return super.createTemplate(path, parseContext);
+			return super.createTemplate(path);
 		}else{
 			try {
 				File file = new File(context.getRealPath("/WEB-INF/litecached/"+URLEncoder.encode(path,"UTF-8")));
 				List<Object> list = JSONDecoder.decode(loadText(file));
-				parseContext.addResource(file.toURI());
 				return new Template((List<Object>)list.get(1));
 			} catch (IOException e) {
 				log.error(e);

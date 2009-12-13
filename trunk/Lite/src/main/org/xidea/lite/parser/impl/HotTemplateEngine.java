@@ -20,7 +20,6 @@ import org.xidea.lite.parser.ParseContext;
 public class HotTemplateEngine extends TemplateEngine {
 	public static final String DEFAULT_DECORATOR_MAPPING = "/WEB-INF/decorators.xml";
 	private static final Log log = LogFactory.getLog(HotTemplateEngine.class);
-	private HashMap<String, Object> lock = new HashMap<String, Object>();
 	private HashMap<String, Info> infoMap = new HashMap<String, Info>();
 	protected Map<String, String> featrues = new HashMap<String, String>();
 	protected DecoratorContext decoratorContext;
@@ -47,6 +46,51 @@ public class HotTemplateEngine extends TemplateEngine {
 				log.info("没有找到装饰器配置信息:" + config.getAbsolutePath());
 			}
 		}
+	}
+
+
+	protected ParseContext createParseContext() {
+		return new ParseContextImpl(getResource("/"), featrues, null, null);
+	}
+	@Override
+	protected Template createTemplate(String path) {
+		ParseContext parseContext = createParseContext();
+		Template template = createTemplate(path, parseContext);
+		File[] files = getAssociatedFiles(parseContext);
+		Info entry = new Info(files);
+		infoMap.put(path, entry);
+		return template; 
+	}
+
+	protected Template createTemplate(String path, ParseContext parseContext) {
+		String decoratorPath = null;
+		if (decoratorContext != null) {
+			decoratorPath = decoratorContext.getDecotatorPage(path);
+		}
+		if (decoratorPath != null && !decoratorPath.equals(path)) {
+			try {
+				Node node = parseContext.loadXML(getResource(path));
+				parseContext.setAttribute("#page", node);
+				path = decoratorPath;
+			} catch (Exception e) {
+				log.error("模板解析失败", e);
+				StringWriter out = new StringWriter();
+				out.append("模板编译失败：\r\n<hr>");
+				PrintWriter pout = new PrintWriter(out, true);
+				e.printStackTrace(pout);
+				parseContext.append(out.toString());
+			}
+		}
+		parseContext.parse(getResource(path));
+		List<Object> items = parseContext.toList();
+		return new Template(items);
+	}
+
+
+	@Override
+	public boolean isModified(String path) {
+		Info templateEntry = (Info) infoMap.get(path);
+		return templateEntry == null || templateEntry.isModified();
 	}
 
 	class Info {
@@ -85,74 +129,6 @@ public class HotTemplateEngine extends TemplateEngine {
 			i = Math.max(k, i);
 		}
 		return i + j;
-	}
-
-	public Template getTemplate(String path) {
-		Template template = (Template) templateMap.get(path);
-		if (template == null || isModified(path)) {
-			Object lock2 = null;
-			synchronized (lock) {
-				lock2 = lock.get(path);
-				if (lock2 == null) {
-					lock.put(path, lock2 = new Object());
-				}
-			}
-			synchronized (lock2) {
-				template = (Template) templateMap.get(path);
-				if (template == null || isModified(path)) {
-					ParseContext parseContext = createParseContext();
-					template = createTemplate(path, parseContext);
-					File[] files = getAssociatedFiles(parseContext);
-					Info entry = new Info(files);
-					infoMap.put(path, entry);
-					templateMap.put(path, template);
-				}
-			}
-			lock.remove(path);
-			return template;
-		} else {
-//			templateMap.remove(path);
-//			infoMap.remove(path);
-			// return getTemplate(path);
-			return template;
-		}
-	}
-
-	private boolean isModified(String path) {
-		Info templateEntry = (Info) infoMap.get(path);
-		return templateEntry == null || templateEntry.isModified();
-	}
-
-	protected Template createTemplate(String path) {
-		throw new UnsupportedOperationException();
-	}
-
-	protected ParseContext createParseContext() {
-		return new ParseContextImpl(getResource("/"), featrues, null, null);
-	}
-
-	protected Template createTemplate(String path, ParseContext parseContext) {
-		String decoratorPath = null;
-		if (decoratorContext != null) {
-			decoratorPath = decoratorContext.getDecotatorPage(path);
-		}
-		if (decoratorPath != null && !decoratorPath.equals(path)) {
-			try {
-				Node node = parseContext.loadXML(getResource(path));
-				parseContext.setAttribute("#page", node);
-				path = decoratorPath;
-			} catch (Exception e) {
-				log.error("模板解析失败", e);
-				StringWriter out = new StringWriter();
-				out.append("模板编译失败：\r\n<hr>");
-				PrintWriter pout = new PrintWriter(out, true);
-				e.printStackTrace(pout);
-				parseContext.append(out.toString());
-			}
-		}
-		parseContext.parse(getResource(path));
-		List<Object> items = parseContext.toList();
-		return new Template(items);
 	}
 
 }
