@@ -15,7 +15,7 @@ public class ClientParser extends ELParser implements NodeParser<Element>,
 	static Pattern SCRIPT_END_PATTERN = Pattern.compile("</script>",
 			Pattern.CASE_INSENSITIVE);
 
-	protected ClientParser() {
+	public ClientParser() {
 		super("client", true);
 	}
 
@@ -34,15 +34,15 @@ public class ClientParser extends ELParser implements NodeParser<Element>,
 
 		ClientEnd ce = new ClientEnd();
 
-		parseClient(id, text.substring(p2 + 1),  context,ce);
+		parse(id, text.substring(p2 + 1),  context,ce);
 		return p2 + 1 + ce.end;
 	}
 
-	public void parseClient(String id, final String text,
+	public void parse(String id, final String text,
 			ParseContext context) {
-		parseClient(id, text, context, null);
+		parse(id, text, context, null);
 	}
-	private void parseClient(String id, final String text,
+	private void parse(String id, final String text,
 			ParseContext context,TextParser ce) {
 		JSProxy proxy = JSProxy.newProxy();
 		ParseContext clientContext = new ParseContextImpl(context, proxy
