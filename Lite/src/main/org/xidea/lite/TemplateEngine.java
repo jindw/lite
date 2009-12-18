@@ -20,9 +20,9 @@ public class TemplateEngine {
 	protected URI baseURI;
 	protected File baseFile;
 	/**
-	 * WeakHashMap 回收的太快了：（
+	 * WeakHashMap 回收的太快了?
 	 */
-	protected Map<String, Template> templateMap = new java.util.HashMap<String, Template>();
+	protected Map<String, Template> templateMap = new java.util.WeakHashMap<String, Template>();
 
 	public TemplateEngine(File base) {
 		this.baseFile = base;
