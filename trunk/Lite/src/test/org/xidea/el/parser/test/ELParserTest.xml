@@ -15,6 +15,16 @@
 		</void>
 	</object>
 	<object class="java.util.LinkedHashMap">
+	<!-- 字符转义 -->
+		<void method="put">
+			<string><![CDATA["\u91D1\u5927\u4E3A"]]></string>
+			<string><![CDATA[金大为]]></string>
+		</void>
+		<void method="put">
+			<string><![CDATA["\x21\x32\x42"]]></string>
+			<string><![CDATA[!2B]]></string>
+		</void>
+		<!-- 三目运算 -->
 		<void method="put">
 			<string><![CDATA[(1?1:3) + (0?5:7)]]></string>
 			<string><![CDATA[8]]></string>

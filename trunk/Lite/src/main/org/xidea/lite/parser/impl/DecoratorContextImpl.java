@@ -28,8 +28,10 @@ public class DecoratorContextImpl implements DecoratorContext {
 	protected File checkFile;
 
 	public DecoratorContextImpl(URI config,File checkFile) {
-		this.config = config;
-		this.checkFile = checkFile;
+		if (checkFile == null || checkFile.exists()) {
+			this.config = config;
+			this.checkFile = checkFile;
+		}
 	}
 
 	protected long lastModified() {

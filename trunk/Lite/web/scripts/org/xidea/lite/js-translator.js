@@ -160,18 +160,42 @@ Context.prototype = {
 	        this.append("}");
 	     	this.append('if("',n,'" in _$context){',n,'=_$context["',n,'"];}')
 	    }
+	    /**
+function _$items(source,result,type) {
+  if (result){
+    if(type == "number" && source>0){
+      while(source--){
+        result[source] = source+1;
+      }
+//    }else if(type == "string"){
+//      result = source.split('')
+    }else{
+      for (type in source) {
+        result.push(type);
+      }
+    }
+    return result;
+  }
+  return source instanceof Array ? source
+            : _$items(source, [],typeof source);
+}
+	     */
 	    if(this.hasFor){
-	        this.append('function _$items(source,buf){');
-	        this.append('    if(buf){');
-	        this.append('        for(source in source){');
-	        this.append('            buf.push(source)');
-	        this.append('        }');
-	        this.append('        return buf;');
+	        this.append('function _$items(source,result,type) {');
+	        this.append('  if (result){');
+	        this.append('    if(type == "number" && source>0){');
+	        this.append('      while(source--){');
+	        this.append('        result[source] = source+1;');
+	        this.append('      }');
+	        this.append('    }else{');
+	        this.append('      for(type in source){');
+	        this.append('        result.push(type);');
+ 	        this.append('      }');
 	        this.append('    }');
-	        this.append('    buf = typeof source');
-	        this.append('    return source instanceof Array?source:' )
-	        this.append('        buf == "number"? Array(source):');
-	        this.append('        buf == "string"? source.split(""):_$items(source,[]);');
+	        this.append('    return result;');
+	        this.append('  }');
+	        this.append('  return source instanceof Array ? source');
+	        this.append('            : _$items(source, [],typeof source);');
 	        this.append('}');
 	    }
 	    if(this.needReplacer){

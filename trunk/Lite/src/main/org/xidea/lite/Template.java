@@ -240,7 +240,6 @@ public class Template {
 		int len = 0;
 		Object list = ((Expression) data[2]).evaluate(context);
 		try {// hack return 代替ifelse，减少一些判断
-
 			if (list instanceof Map) {
 				list = ((Map) list).keySet();
 			}
@@ -256,8 +255,11 @@ public class Template {
 				}
 			} else {
 				if (list instanceof Number) {// 算是比较少见吧
-					len = ((Number) list).intValue();
-					list = null;
+					len = Math.max(((Number) list).intValue(), 0);
+					list = new Object[len];
+					for(int i=0;i<len;){
+						((Object[])list)[i]=i++;
+					}
 				} else {
 					if (list instanceof CharSequence) {
 						list = ((CharSequence) list).toString().toCharArray();
@@ -269,9 +271,7 @@ public class Template {
 				ForStatus forStatus = new ForStatus(len);
 				context.put(FOR_KEY, forStatus);
 				while (++forStatus.index < len) {
-					if (list != null) {
-						context.put(varName, Array.get(list, forStatus.index));
-					}
+					context.put(varName, Array.get(list, forStatus.index));
 					renderList(context, children, out);
 				}
 			}

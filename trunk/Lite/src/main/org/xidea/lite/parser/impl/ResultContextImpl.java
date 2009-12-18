@@ -143,20 +143,23 @@ public class ResultContextImpl implements ResultContext {
 	}
 
 	public final void appendAttribute(String name, Object el) {
-		this.append(new Object[] { Template.XML_ATTRIBUTE_TYPE, requrieEL(el), name });
+		el = requrieEL(el);
+		this.append(new Object[] { Template.XML_ATTRIBUTE_TYPE, el, name });
 
 	}
 
 	public final void appendIf(Object testEL) {
-		this.append(new Object[] { Template.IF_TYPE, requrieEL(testEL) });
+		testEL = requrieEL(testEL);
+		this.append(new Object[] { Template.IF_TYPE, testEL });
 	}
 
 	public final void appendElse(Object testEL) {
 		this.clearPreviousText();
+		testEL = requrieEL(testEL);
 		if (this.getType(this.result.size() - 1) != -1) {
 			this.appendEnd();
 		}
-		this.append(new Object[] { Template.ELSE_TYPE, requrieEL(testEL) });
+		this.append(new Object[] { Template.ELSE_TYPE, testEL });
 	}
 
 	public final int appendEnd() {
@@ -168,8 +171,9 @@ public class ResultContextImpl implements ResultContext {
 		return type;
 	}
 
-	public final void appendVar(String name, Object valueEL) {
-		this.append(new Object[] { Template.VAR_TYPE, requrieEL(valueEL), name });
+	public final void appendVar(String name, Object el) {
+		el = requrieEL(el);
+		this.append(new Object[] { Template.VAR_TYPE, el, name });
 	}
 
 	public final void appendCaptrue(String varName) {
@@ -192,11 +196,13 @@ public class ResultContextImpl implements ResultContext {
 	}
 
 	public final void appendXmlText(Object el) {
+		el = requrieEL(el);
 		this.append(new Object[] { Template.XML_TEXT_TYPE, el });
 	}
 
 	public final void appendPlugin(Class<? extends Plugin> clazz, Object el) {
-		this.append(new Object[] { Template.PLUGIN_TYPE, requrieEL(el), clazz.getName() });
+		el = requrieEL(el);
+		this.append(new Object[] { Template.PLUGIN_TYPE, el, clazz.getName() });
 	}
 
 	public final int mark() {

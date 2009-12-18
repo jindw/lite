@@ -271,12 +271,12 @@ public class JSONTokenizer {
 					break;
 				case 'u':
 					buf.append((char) Integer.parseInt(value.substring(
-							start + 1, start + 5), 16));
+							start, start + 4), 16));
 					start += 4;
 					break;
 				case 'x':
 					buf.append((char) Integer.parseInt(value.substring(
-							start + 1, start + 3), 16));
+							start, start + 2), 16));
 					start += 2;
 					break;
 				}
