@@ -179,6 +179,7 @@ public class ResultContextImpl implements ResultContext {
 	}
 
 	public final void appendXmlText(Object el) {
+		el = requrieEL(el);
 		this.append(new Object[] { Template.XML_TEXT_TYPE, el });
 	}
 

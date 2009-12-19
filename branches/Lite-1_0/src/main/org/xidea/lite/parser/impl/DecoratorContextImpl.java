@@ -20,16 +20,19 @@ import org.xidea.lite.parser.DecoratorContext;
 import org.xml.sax.InputSource;
 
 public class DecoratorContextImpl implements DecoratorContext {
-	private static final Log log = LogFactory.getLog(DecoratorContextImpl.class);
+	private static final Log log = LogFactory
+			.getLog(DecoratorContextImpl.class);
 	protected URLMatcher excludeMatcher;
 	protected Map<URLMatcher, String> decoratorMap;
 	protected long lastModified = -1;// not found or error :0
 	protected URI config;
 	protected File checkFile;
 
-	public DecoratorContextImpl(URI config,File checkFile) {
-		this.config = config;
-		this.checkFile = checkFile;
+	public DecoratorContextImpl(URI config, File checkFile) {
+		if (checkFile == null || checkFile.exists()) {
+			this.config = config;
+			this.checkFile = checkFile;
+		}
 	}
 
 	protected long lastModified() {
@@ -55,8 +58,8 @@ public class DecoratorContextImpl implements DecoratorContext {
 			for (Map.Entry<URLMatcher, String> entry : decoratorMap.entrySet()) {
 				if (entry.getKey().match(path)) {
 					String decorator = entry.getValue();
-					log.info("装饰器配置："+path+"->"+decorator);
-					return path.equals(decorator)?null:decorator;
+					log.info("装饰器配置：" + path + "->" + decorator);
+					return path.equals(decorator) ? null : decorator;
 				}
 			}
 		}
