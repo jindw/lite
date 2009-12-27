@@ -17,9 +17,19 @@ var style = 'border: 1px solid #DFECF1;'
 context.addNodeParser(function(node,context,chain){
     if(node.namespaceURI == "http://www.xidea.org/ns/lite/example"
     	 && node.localName == 'code'){
+    	//代码高亮组件
     	var text = String(node.textContent);
     	text = text.replace(/^\s+|\s+$/g,'');
 		context.append("<pre style='"+style+"'>"+text.replace(/[<>&]/g,xmlReplacer)+"</pre>");
+    }else if(node.namespaceURI == "http://www.w3.org/1999/xhtml"){
+    	if(node.localName == 'a'){//连接简写，没有文本的时候，直接使用href作为文本节点
+    		if(node.firstChild == null){
+    			node.appendChild(node.ownerDocument.createTextNode(node.getAttribute('href')));
+    		}
+    		chain.process(node);
+    	}else{
+    		chain.process(node);
+    	}
     }else{
     	chain.process(node);
     }
@@ -33,7 +43,7 @@ function xmlReplacer(c){
 	<body>
 		<div id="header">
 			
-			<div class="logo">
+			<div class="logo" onclick="location = 'index.xhtml'">
 			<c:for var="item" items="${
   [
     [0,0,19,100],
@@ -67,6 +77,9 @@ function xmlReplacer(c){
 					<li>
 						<a href="preface-thinking.xhtml" title="兵马未动，粮草先行">模板编程思想介绍</a>
 					</li>
+					<li>
+						<a href="preface-lite.xhtml" title="仁者无敌，王者无剑">Lite模板平台介绍</a>
+					</li>
 				</ul>
 
 				<h3>入门篇</h3>
@@ -81,13 +94,13 @@ function xmlReplacer(c){
 				<h3>特色篇</h3>
 				<ul>
 					<li>
-						<a href="#" title="满堂花醉三千客 一剑霜寒十四州">发挥前端模板的优势</a>
+						<a href="featrue-client.xhtml" title="满堂花醉三千客 一剑霜寒十四州">发挥前端模板的优势</a>
 					</li>
 					<li>
-						<a href="#" title="蓬莱此去无多路 青鸟殷勤为探看">发挥表达式的优势 </a>
+						<a href="featrue-el.xhtml" title="蓬莱此去无多路 青鸟殷勤为探看">发挥表达式的优势 </a>
 					</li>
 					<li>
-						<a href="#" title="书山墨海群芳竞，画里乾坤日月新">发挥自定义语法的优势 </a>
+						<a href="featrue-extension.xhtml" title="书山墨海群芳竞，画里乾坤日月新">发挥自定义语法的优势 </a>
 					</li>
 				</ul>
 				<h3>深入篇</h3>
