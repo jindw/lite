@@ -73,7 +73,7 @@ height:125px
 }
 			/*]]> /* */
 		</style>
-		<script src="scripts/index.php/?path=boot.js"></script>
+		<script src="scripts/?path=boot.js"></script>
 		<script>$import("org.xidea.lite.demo.TestCase",true)</script>
 	</head>
 	<body>
@@ -208,8 +208,10 @@ height:125px
      templateSourceEditor.setCode(templateSource);
   }
   function prepare(){
-  	 document.getElementById("jsonSource").value = jsonSourceEditor.getCode();
-	 document.getElementById("templateSource").value = templateSourceEditor.getCode();
+     try{
+  	    document.getElementById("jsonSource").value = jsonSourceEditor.getCode();
+	    document.getElementById("templateSource").value = templateSourceEditor.getCode();
+	 }catch(e){}
   }
   //]]>
 		</script>
