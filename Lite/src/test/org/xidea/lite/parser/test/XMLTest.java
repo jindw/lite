@@ -100,8 +100,8 @@ public class XMLTest {
 	public void test(int index,String text, String result) throws Exception {
 
 		String info = "第"+index+"个测试错误：";
-		ParseContextImpl parseContext = new ParseContextImpl(this.getClass()
-				.getResource("/").toURI(),null,null,null);
+		ParseContextImpl parseContext = new ParseContextImpl(new org.xidea.lite.TemplateEngine(this.getClass()
+				.getResource("/").toURI()),null,null,null);
 		parseContext.getFeatrueMap().put(HTMLNodeParser.AUTO_FORM_FEATRUE_URI, HTMLNodeParser.AUTO_IN_FORM);
 		
 		parseContext.setCompress(true);

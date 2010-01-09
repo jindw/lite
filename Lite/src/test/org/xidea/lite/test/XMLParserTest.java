@@ -23,6 +23,7 @@ import org.w3c.dom.Document;
 import org.xidea.el.impl.ExpressionFactoryImpl;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.Template;
+import org.xidea.lite.TemplateEngine;
 import org.xidea.lite.parser.impl.ParseContextImpl;
 import org.xidea.lite.parser.impl.dtd.DefaultEntityResolver;
 import org.xidea.lite.parser.test.XMLParser;
@@ -43,7 +44,7 @@ public class XMLParserTest {
 		System.out.println(JSONEncoder.encode("<"
 				+ (trim.matcher("\r\n\r\n\r\n sdsdsd\r\n")
 						.replaceAll("$1$2$3$4")) + ">"));
-		ParseContextImpl context = new ParseContextImpl(new URI("http://localhost/"),null,null,null);
+		ParseContextImpl context = new ParseContextImpl(new TemplateEngine(new URI("http://localhost/")),null,null,null);
 		context.setCompress(true);
 		Object s = new XMLParser().parse(
 				"<xml>\r\n\r\n\r\n\t\t\t\t\r\n\r\n</xml>",context).get(0);

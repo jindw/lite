@@ -9,7 +9,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.xidea.el.impl.ReflectUtil;
-import org.xidea.lite.parser.impl.ResourceContextImpl;
+import org.xidea.lite.TemplateEngine;
 
 
 public class URLURITest {
@@ -20,12 +20,12 @@ public class URLURITest {
 	@Test
 	public void testResourceContext() throws Exception{
 		String base = "http://lh:8080/test";
-		ResourceContextImpl rc = new ResourceContextImpl(new URI(base));
+		TemplateEngine rc = new TemplateEngine(new URI(base));
 		Assert.assertEquals(base+".xml", rc.createURI("test.xml", null).toString());
 		Assert.assertEquals(base+".xml", rc.createURI("./test.xml", null).toString());
 		
 		base = "http://lh:8080/test/aa/bb/";
-		rc = new ResourceContextImpl(new URI(base));
+		rc = new TemplateEngine(new URI(base));
 		System.out.println(ReflectUtil.map(new URI("classpath:///aa/bb")));
 		Assert.assertEquals(base+"test.xml", rc.createURI("test.xml", null).toString());
 		Assert.assertEquals("http://lh:8080/test/test.xml", rc.createURI("../../test.xml", null).toString());
