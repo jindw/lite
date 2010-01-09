@@ -12,6 +12,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.Template;
 
 public class LiteCompiler {
@@ -27,6 +28,8 @@ public class LiteCompiler {
 	private TemplateCompilerEngine engine;
 
 	public LiteCompiler(String[] args) {
+		System.out.println(JSONEncoder.encode(args));
+		//args = new String[]{"-root","C:\\Users\\jindw\\workspace\\android-server/res","-featrueMap['http://www.xidea.org/ns/lite/autoform']","form","-litecached","C:\\Users\\jindw\\workspace\\android-server/src/org/jside/android/web/"};
 		new CommandParser(args).setup(this);
 	}
 
@@ -163,6 +166,9 @@ public class LiteCompiler {
 		this.litecached = litecached;
 	}
 
+	public Map<String, String> getFeatrueMap() {
+		return this.featrueMap;
+	}
 	public void setFeatrueMap(Map<String, String>featrueMap) {
 		this.featrueMap = featrueMap;
 	}
