@@ -8,6 +8,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -18,7 +19,7 @@ public class LiteCompiler {
 	private File root;
 	private String path;
 	private String[] parsers;
-	private String[] featrues;
+	private Map<String,String> featrueMap = new HashMap<String, String>();
 	private File htmlcached;
 	private File litecached;
 	private String encoding = "utf-8";
@@ -60,14 +61,6 @@ public class LiteCompiler {
 	}
 
 	protected void initialize() throws IOException {
-		HashMap<String, String> featrueMap = new HashMap<String, String>();
-		if (featrues != null) {
-			for (String f : featrues) {
-				int p = f.indexOf("=");
-				featrueMap.put(f.substring(0, p).trim(), f.substring(p + 1)
-						.trim());
-			}
-		}
 		if(root == null){
 			root = new File(".");
 		}
@@ -170,8 +163,8 @@ public class LiteCompiler {
 		this.litecached = litecached;
 	}
 
-	public void setFeatrues(String[] featrues) {
-		this.featrues = featrues;
+	public void setFeatrueMap(Map<String, String>featrueMap) {
+		this.featrueMap = featrueMap;
 	}
 
 	public void setParsers(String[] additional) {
