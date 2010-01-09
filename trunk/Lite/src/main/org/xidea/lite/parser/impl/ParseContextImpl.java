@@ -9,6 +9,7 @@ import java.util.Map;
 
 
 import org.w3c.dom.Document;
+import org.xidea.lite.parser.ResourceContext;
 import org.xidea.lite.parser.TextParser;
 import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.NodeParser;
@@ -27,10 +28,10 @@ public class ParseContextImpl extends ParseContextProxy implements ParseContext 
 	
 	protected ParseContextImpl() {
 	}
-	public ParseContextImpl(URI base){
+	public ParseContextImpl(ResourceContext base){
 		initialize(base, null, null, null);
 	}
-	public ParseContextImpl(URI base, Map<String, String> featrues,
+	public ParseContextImpl(ResourceContext base, Map<String, String> featrues,
 			NodeParser<? extends Object>[] parsers, TextParser[] ips) {
 		initialize(base, featrues, parsers, ips);
 	}
@@ -47,9 +48,9 @@ public class ParseContextImpl extends ParseContextProxy implements ParseContext 
 
 
 	@SuppressWarnings("unchecked")
-	protected void initialize(URI base, Map<String, String> featrues,
+	protected void initialize(ResourceContext base, Map<String, String> featrues,
 			NodeParser<? extends Object>[] parsers, TextParser[] ips) {
-		resourceContext = new ResourceContextImpl(base);
+		resourceContext = base;
 		xmlContext = new XMLContextImpl(this);
 		resultContext = new ResultContextImpl(this);
 		parserHolder = new ParseHolderImpl(this, parsers, ips);

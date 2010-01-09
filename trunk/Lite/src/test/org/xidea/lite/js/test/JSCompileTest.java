@@ -33,6 +33,7 @@ import org.w3c.dom.NodeList;
 import org.xidea.el.json.JSONDecoder;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.Template;
+import org.xidea.lite.TemplateEngine;
 import org.xidea.lite.parser.impl.ParseContextImpl;
 import org.xidea.lite.parser.impl.XMLContextImpl;
 import org.xidea.lite.parser.impl.dtd.DefaultEntityResolver;
@@ -55,7 +56,7 @@ public class JSCompileTest {
 	ParseContextImpl context;
 
 	public JSCompileTest() throws MalformedURLException {
-		context = new ParseContextImpl(webRoot.toURI(),null,null,null);
+		context = new ParseContextImpl(new TemplateEngine(webRoot.toURI()),null,null,null);
 	}
 
 	public String getText(Node doc, String xpath)
@@ -164,7 +165,7 @@ public class JSCompileTest {
 					+ ")");
 			Object jsJS = engine.eval("jsTemplate.render(" + contextJSON + ")");
 			Assert.assertEquals("JS编译后结果不一致"+source, jsJSON, jsJS);
-			ParseContextImpl pc = new ParseContextImpl(menuURL,null,null,null);
+			ParseContextImpl pc = new ParseContextImpl(new TemplateEngine(menuURL),null,null,null);
 			source = source.replace("=\"menu.xml\"", "=\""+menuURL+"\"");
 			System.out.println(source);
 			pc.parse(pc.loadXML(source));

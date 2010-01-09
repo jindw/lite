@@ -48,7 +48,7 @@ class XMLParser extends TextNodeParser{
 		}
 	}
 	public List<Object> parse(Object data) throws MalformedURLException, URISyntaxException {
-		return parse(data,new ParseContextImpl(new URI("http://xx/"),null,null,null));
+		return parse(data,new ParseContextImpl(new org.xidea.lite.TemplateEngine(new URI("http://xx/")),null,null,null));
 	}
 	public List<Object> parse(Object data, ParseContext context) {
 		try {

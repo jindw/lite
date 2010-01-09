@@ -19,6 +19,7 @@ import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xidea.el.impl.ReflectUtil;
 import org.xidea.lite.Template;
+import org.xidea.lite.TemplateEngine;
 import org.xidea.lite.parser.impl.ParseContextImpl;
 import org.xml.sax.SAXException;
 
@@ -104,7 +105,7 @@ public class AvoidErrorParserTest {
 	}
 
 	private ParseContextImpl createContext() {
-		ParseContextImpl context = new ParseContextImpl(new File(".").toURI(),
+		ParseContextImpl context = new ParseContextImpl(new TemplateEngine(new File(".").toURI()),
 				null, null, null) {
 
 			@Override

@@ -37,7 +37,7 @@ public class HotTemplateEngine extends TemplateEngine {
 	}
 
 	public HotTemplateEngine(File webRoot, File config) {
-		super(webRoot);
+		super(webRoot.toURI());
 		if (config != null) {
 			if (config.exists()) {
 				this.decoratorContext = new DecoratorContextImpl(
@@ -50,7 +50,7 @@ public class HotTemplateEngine extends TemplateEngine {
 
 
 	protected ParseContext createParseContext() {
-		return new ParseContextImpl(getResource("/"), featrues, null, null);
+		return new ParseContextImpl(this, featrues, null, null);
 	}
 	@Override
 	protected Template createTemplate(String path) {

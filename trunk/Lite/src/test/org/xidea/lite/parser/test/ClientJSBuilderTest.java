@@ -22,6 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.xidea.el.Expression;
 import org.xidea.el.ExpressionFactory;
+import org.xidea.lite.TemplateEngine;
 import org.xidea.lite.parser.ResultTranslator;
 import org.xidea.lite.parser.TextParser;
 import org.xidea.lite.parser.ParseContext;
@@ -58,7 +59,7 @@ public class ClientJSBuilderTest {
 	@Test
 	public void testBuildJS() throws SAXException, IOException, URISyntaxException {
 		URI url = this.getClass().getResource("format-test.xhtml").toURI();
-		ParseContext context2 = new ParseContextImpl(url,null,null,null);
+		ParseContext context2 = new ParseContextImpl(new TemplateEngine(url),null,null,null);
 		// 前端直接压缩吧？反正保留那些空白也没有调试价值
 		// context2.setCompress(context.isCompress());
 		context2.setCompress(true);
@@ -76,7 +77,7 @@ public class ClientJSBuilderTest {
 	@Test
 	public void testClient() throws SAXException, IOException, URISyntaxException {
 		URI url = this.getClass().getResource("asciitable-client.xhtml").toURI();
-		ParseContext context2 = new ParseContextImpl(url,null,null,null);
+		ParseContext context2 = new ParseContextImpl(new TemplateEngine(url),null,null,null);
 		// 前端直接压缩吧？反正保留那些空白也没有调试价值
 		// context2.setCompress(context.isCompress());
 		context2.setCompress(true);
@@ -95,7 +96,7 @@ public class ClientJSBuilderTest {
 	public void testCTClient() throws SAXException, IOException, URISyntaxException {
 		InputStreamReader source = new InputStreamReader(this.getClass()
 				.getResourceAsStream("ct-client.txt"), "utf-8");
-		ParseContext context2 = new ParseContextImpl(new URI("http://w/"),
+		ParseContext context2 = new ParseContextImpl(new TemplateEngine(new URI("http://w/")),
 				null, null, new TextParser[] { ELParser.EL, ELParser.IF,
 						ELParser.FOR, ELParser.ELSE, ELParser.CLIENT,
 						ELParser.END, ELParser.VAR });

@@ -36,7 +36,7 @@ public class XMLParserTest {
 	@Test
 	public void testSelect() throws Exception {
 		URI url = this.getClass().getResource("include-test.xml").toURI();
-		ParseContextImpl context = new ParseContextImpl(url,null,null,null); 
+		ParseContextImpl context = new ParseContextImpl(new org.xidea.lite.TemplateEngine(url),null,null,null); 
 		org.w3c.dom.Document doc = new XMLParser().loadXML(url, context);
 		
 		Node node = new XMLContextImpl(new ParseContextImpl(null,null,null,null)){
@@ -53,7 +53,7 @@ public class XMLParserTest {
 	@Test
 	public void testFormat() throws Exception {
 		URI url = this.getClass().getResource("format-test.xhtml").toURI();
-		ParseContextImpl parseContext = new ParseContextImpl(url,null,null,null); 
+		ParseContextImpl parseContext = new ParseContextImpl(new org.xidea.lite.TemplateEngine(url),null,null,null); 
 		parseContext.setFormat(true);
 		HashMap context = new HashMap();
 		context.put("data", Arrays.asList("0", "1", "2", "3", "4", "5", "6",

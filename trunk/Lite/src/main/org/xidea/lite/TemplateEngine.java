@@ -1,11 +1,12 @@
 package org.xidea.lite;
 
-import java.io.File;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Writer;
 import java.net.URI;
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,21 +14,17 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.el.json.JSONDecoder;
+import org.xidea.lite.parser.ResourceContext;
 
-public class TemplateEngine {
+public class TemplateEngine implements ResourceContext{
+	@SuppressWarnings("unused")
 	private static final Log log = LogFactory.getLog(TemplateEngine.class);
 	private HashMap<String, Object> lock = new HashMap<String, Object>();
 	protected URI baseURI;
-	protected File baseFile;
 	/**
 	 * WeakHashMap 回收的太快了?
 	 */
 	protected Map<String, Template> templateMap = new java.util.WeakHashMap<String, Template>();
-
-	public TemplateEngine(File base) {
-		this.baseFile = base;
-		this.baseURI = base.toURI();
-	}
 
 	public TemplateEngine(URI base) {
 		this.baseURI = base;
@@ -69,8 +66,8 @@ public class TemplateEngine {
 	@SuppressWarnings("unchecked")
 	protected Template createTemplate(String path) {
 		try {
-			URI url = getResource(path.replace('/', '.'));
-			InputStream in = url.toURL().openStream();
+			URI uri = getResource(path.replace('/', '.'));
+			InputStream in = openInputStream(uri);
 			try {
 				List data = (List) JSONDecoder.decode(loadText(in, "utf-8"));
 				return new Template((List) data.get(1));
@@ -83,24 +80,62 @@ public class TemplateEngine {
 	}
 
 	protected URI getResource(String path) {
-		try {
-			if (baseFile != null) {
-				// path 必须是 /开头。
-				File file = new File(baseFile, path);
-				if (file.exists()) {
-					return file.toURI();
-				}
-			}
-			if (baseURI != null) {
-				return baseURI.resolve(path);
-
-			}
-		} catch (Exception e) {
-			log.warn(e);
-		}
-		return null;
+		return createURI(path,null);
 	}
 
+	public URI createURI(String path, URI parentURI) {
+		try {
+			URI parent = parentURI != null ? parentURI : this.baseURI;
+			if (path.startsWith("/")) {
+				if (parentURI == null
+						|| parent.toString().startsWith(baseURI.toString())) {
+					String prefix = baseURI.getPath();
+					int p  =prefix.lastIndexOf('/');
+					path = prefix.substring(0,p)+path;
+				}
+			}
+			return parent.resolve(path);
+
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public InputStream openInputStream(URI uri) {
+		try {
+			if ("data".equalsIgnoreCase(uri.getScheme())) {
+				String data = uri.getRawSchemeSpecificPart();
+				int p = data.indexOf(',')+1;
+				String h = data.substring(0,p).toLowerCase();
+				String charset = "UTF-8";
+				data = data.substring(p);
+				p = h.indexOf("charset=");
+				if(p >0){
+					charset = h.substring(h.indexOf('=',p)+1,h.indexOf(',',p));
+				}
+				return new ByteArrayInputStream(URLDecoder.decode(data,charset).getBytes(charset));
+				//charset=
+			}else if ("classpath".equalsIgnoreCase(uri.getScheme())) {
+				ClassLoader cl = this.getClass().getClassLoader();
+				uri = uri.normalize();
+				String path = uri.getPath();
+				path = path.substring(1);
+				InputStream in = cl.getResourceAsStream(path);
+				if (in == null) {
+					ClassLoader cl2 = Thread.currentThread()
+							.getContextClassLoader();
+					if (cl2 != null) {
+						in = cl2.getResourceAsStream(path);
+					}
+				}
+				return in;
+			} else {
+				return uri.toURL().openStream();
+			}
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
 	static String loadText(InputStream in, String encoding) throws IOException {
 		InputStreamReader reader = new InputStreamReader(in, encoding);
 		StringBuilder buf = new StringBuilder();
