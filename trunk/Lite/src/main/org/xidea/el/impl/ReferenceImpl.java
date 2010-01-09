@@ -53,7 +53,8 @@ class ReferenceImpl implements Reference {
 			if (value != null) {
 				return value.getClass();
 			} else {
-				return ReflectUtil.getPropertyType(base.getClass(), name);
+				Class<? extends Object> t = ReflectUtil.getPropertyType(base.getClass(), name);
+				return t == null?Object.class:t;
 			}
 		}
 	}
