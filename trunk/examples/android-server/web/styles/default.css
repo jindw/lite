@@ -1,0 +1,41 @@
+html{
+	text-align:center;
+	font-size:12px;
+	background:#333;
+	padding:20px;
+	margin:0px;
+}
+body{
+    width:650px;
+    min-height:600px;
+    text-align:left;
+    margin:auto;
+    padding:8px;
+    background:#fefefe;
+    border:3px double #DDD;
+}
+p,h3{
+	text-align:left;
+}
+ul{
+    padding-left: 20px;
+}
+ul,li{
+    margin:0px;
+    text-align:left;
+    list-style-position: inside;
+    list-style-type: disc;
+}
+.block-row{
+	clear: both;
+}
+.block-item{
+	width:50%;
+	float:left;
+	margin-bottom: 20px;
+}
+.code{
+	color:#9966CC;
+	line-height:13px;
+	height:13px;
+}

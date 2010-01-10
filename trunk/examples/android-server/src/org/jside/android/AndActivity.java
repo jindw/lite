@@ -6,10 +6,8 @@ import org.jside.android.AndServer.AndBinder;
 import org.jside.webserver.action.ActionWebServer;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.net.DhcpInfo;
@@ -17,7 +15,6 @@ import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.Vibrator;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
