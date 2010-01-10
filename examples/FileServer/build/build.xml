@@ -22,7 +22,8 @@
 			</zipfileset>
 			<zipfileset src="${basedir}/web/WEB-INF/lib/Template.jar">
 				<include name="**/*.class" />
-				<exclude name="org/xidea/lite/parser/**/*.*" />
+				<include name="org/xidea/lite/parser/ResourceContext.class" />
+				<exclude name="org/xidea/lite/parser/impl/**/*.*" />
 				<exclude name="org/xidea/lite/servlet/**/*.*" />
 				<exclude name="org/xidea/lite/tools/**/*.*" />
 			</zipfileset>
