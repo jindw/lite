@@ -5,12 +5,18 @@
 	</tstamp>
 
 	<target name="build">
-		<java classname="org.xidea.lite.tools.LiteCompiler" classpath="../Lite/build/dest/Template.jar">
-			<arg value="-webRoot" />
-			<arg value="${basedir}/web/" />
+		<java classname="org.xidea.lite.tools.LiteCompiler" classpath="../Lite2/web/WEB-INF/lib/js.jar;../Lite2/build/dest/Template.jar">
+			<arg value="-root" />
+			<arg value="${basedir}/web" />
+			<arg value="-featrueMap['http://www.xidea.org/ns/lite/autoform']" />
+			<arg value="form" />
 			<arg value="-litecached" />
-			<arg value="${basedir}/src/org/jside/server/web" />
-
+			<arg value="${basedir}/src/org/jside/android/web/" />
 		</java>
+		<copy todir="${basedir}/src/org/jside/android/web/">
+			<fileset dir="web">
+				<include name="/styles/*.*" />
+			</fileset>
+		</copy>
 	</target>
 </project>

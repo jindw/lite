@@ -1,0 +1,83 @@
+<html xmlns:c="http://www.xidea.org/ns/lite/core">
+	<head>
+		<meta http-equiv="content-type"
+			content="text/html; charset=UTF-8" />
+		<title>Andriod 短信客户端</title>
+		<link href="/styles/default.css" rel="Stylesheet"
+			type="text/css" />
+	</head>
+	<body>
+	${message}
+		<form method="POST">
+			<div>
+				<label for="content">短信内容:</label>
+			</div>
+			<textarea name="body" style="width:98%;height:80px;"></textarea>
+			<div>
+				<label for="content">发送目标:</label>
+			</div>
+			<div style="clear:both">
+				<c:for var="entry" items="${addressEntries}">
+					<div
+						style="width:33%;overflow:hidden;display:block;float:left">
+						<label>
+							<input type="checkbox" name="addresses" value="${entry.key}" />
+							${entry.value}
+						</label>
+					</div>
+				</c:for>
+			</div>
+			<div id="external">
+				<c:client id="externalTemplate">
+					<c:for var="item" items="${list}">
+						<c:if test="${for.index == 0}">
+							<br />
+							外部联系人（点击链接删除）
+							<hr style="clear:both" />
+						</c:if>
+						<div
+							style="width:33%;overflow:hidden;display:block;float:left">
+							<input type="hidden" name="addresses" value="${item}" />
+							<a href="##" title="点击删除"
+								onclick="removeUser('${item}')">
+								${item}
+							</a>
+						</div>
+					</c:for>
+					<div style="clear:both" />
+				</c:client>
+			</div>
+			<script>
+				/*<![CDATA[*/
+			var users = [];
+			function addUser(){
+				var user = prompt("添加用户名");
+				if(user){
+					users.push(user);
+					refreshExternal();
+				}
+			}
+			function removeUser(id){
+				var i = users.length;
+				while(i--){
+					if(users[i] == id){
+						users.splice(i,1);
+					}
+				}
+				refreshExternal();
+			}
+			function refreshExternal(){
+				var container = document.getElementById("external");
+				container.innerHTML = externalTemplate({list:users});
+			}
+			/*]]>*/
+			</script>
+			<div style="align:right">
+				<input type="button" onclick="addUser()"
+					value="添加其他联系人" />
+				<input type="submit" value="发送短信" />
+			</div>
+		</form>
+	</body>
+
+</html>
