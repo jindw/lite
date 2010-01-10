@@ -61,7 +61,11 @@ public class AndServer extends Service {
 			ws.addAction("/fs/**", fs);
 			ws.addAction("/**", new Object(){
 				public boolean execute(){
-					URI uri = engine.createURI(RequestContext.get().getRequestURI(), null);
+					String path = RequestContext.get().getRequestURI();
+					if(path.equals("/")){
+						path = "index.html";
+					}
+					URI uri = engine.createURI(path, null);
 					try {
 						HttpUtil.printResource(engine.openInputStream(uri));
 						return true;

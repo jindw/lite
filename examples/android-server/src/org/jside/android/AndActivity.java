@@ -36,7 +36,7 @@ public class AndActivity extends Activity implements ServiceConnection{
 		open.setOnClickListener(new OnClickListener(){
 			public void onClick(View v) {
 				Intent browseIntent = new Intent(
-						Intent.ACTION_VIEW,Uri.parse("http://127.0.0.1:"+ws.getPort()+"/fs/"));
+						Intent.ACTION_VIEW,Uri.parse("http://127.0.0.1:"+ws.getPort()+"/"));
 				startActivity(browseIntent);
 			}
 		});
