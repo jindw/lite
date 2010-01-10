@@ -40,6 +40,7 @@ public class TemplateAction extends TemplateEngine {
 		this.contentType = contentType;
 	}
 
+
 	public void execute() throws IOException {
 		RequestContext context = RequestContext.get();
 		reset(context);
@@ -100,8 +101,7 @@ public class TemplateAction extends TemplateEngine {
 		File file = null;
 		if (uri.getScheme().equals("file")) {
 			file = HttpUtil.getFile(uri.toURL());
-		}else if (uri.getScheme().equals("classpath")) {
-			
+		//}else if (uri.getScheme().equals("classpath")) {
 		}
 		if (file != null) {
 			if (file.exists()) {
