@@ -36,52 +36,52 @@ AutoForm是XML_Lite编译器的一个特征，他负责自动对form标签做适
   * XML Lite
 {{{
 <select name="keys">
-  <option value="23213">商品1</option>
-  <option value="2345">商品2</option>
-  <option value="235656">商品3</option>
+  <option>1981</option>
+  <option>1982</option>
+  <option>1983</option>
 </select>
 }}}
   * Struts1.x
 {{{
 <html:select property="keys">
-  <html:option value="23213">商品1</html:option>
-  <html:option value="2345">商品2</html:option>
-  <html:option value="235656">商品3</html:option>
+  <html:option value="1981">1981</html:option>
+  <html:option value="1981">1982</html:option>
+  <html:option value="1983">1983</html:option>
 </html:select>
 }}}
   * Struts2.x
 {{{
 <s:select label="keys"
        name="keys"
-       list="#{'23213':'商品1', '2345':'商品2','235656':'商品3'}"
+       list="#{'1981':'1981', '1982':'1982','1983':'1983'}"
 />
 }}}
   * Velocity
 {{{
 <select name="keys">
-  <option value="23213" 
-#if(${ArrayUtil.contains($keys,23213)}) selected="selected"
-#end>商品1</option>
-  <option value="2345" 
-#if(${ArrayUtil.contains($keys,2345)}) selected="selected"
-#end>商品2</option>
-  <option value="235656" 
-#if(${ArrayUtil.contains($keys,235656)}) selected="selected"
-#end>商品3</option>
+  <option value="1981" 
+#if(${ArrayUtil.contains($keys,1981)}) selected="selected"
+#end>1981</option>
+  <option value="1982" 
+#if(${ArrayUtil.contains($keys,1982)}) selected="selected"
+#end>1982</option>
+  <option value="1983" 
+#if(${ArrayUtil.contains($keys,1983)}) selected="selected"
+#end>1983</option>
 </select>
 }}}
   * JSTL
 {{{
 <select name="keys">
-  <option value="23213"
+  <option value="1981"
  <c:if test="${myfn:contains(keys,23213)}">
- selected="selected"</c:if>>商品1</option>
-  <option value="2345"
+ selected="selected"</c:if>>1981</option>
+  <option value="1982"
  <c:if test="${myfn:contains(keys,2345)}">
- selected="selected"</c:if>商品2</option>
-  <option value="235656"
+ selected="selected"</c:if>1982</option>
+  <option value="1983"
  <c:if test="${myfn:contains(keys,235656)}">
- selected="selected"</c:if>>商品3</option>
+ selected="selected"</c:if>>1983</option>
 </select>
 }}}
 
