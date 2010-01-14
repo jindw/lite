@@ -59,27 +59,30 @@ AutoForm是XML_Lite编译器的一个特征，他负责自动对form标签做适
   * Velocity
 {{{
 <select name="keys">
-  <option value="1981" 
-#if(${ArrayUtil.contains($keys,1981)}) selected="selected"
+  <option 
+#if(${ArrayUtil.contains($keys,1981)})
+ selected="selected"
 #end>1981</option>
-  <option value="1982" 
-#if(${ArrayUtil.contains($keys,1982)}) selected="selected"
+  <option 
+#if(${ArrayUtil.contains($keys,1982)})
+ selected="selected"
 #end>1982</option>
-  <option value="1983" 
-#if(${ArrayUtil.contains($keys,1983)}) selected="selected"
+  <option 
+#if(${ArrayUtil.contains($keys,1983)})
+ selected="selected"
 #end>1983</option>
 </select>
 }}}
   * JSTL
 {{{
 <select name="keys">
-  <option value="1981"
+  <option 
  <c:if test="${myfn:contains(keys,23213)}">
  selected="selected"</c:if>>1981</option>
-  <option value="1982"
+  <option 
  <c:if test="${myfn:contains(keys,2345)}">
  selected="selected"</c:if>1982</option>
-  <option value="1983"
+  <option 
  <c:if test="${myfn:contains(keys,235656)}">
  selected="selected"</c:if>>1983</option>
 </select>
