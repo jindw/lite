@@ -194,6 +194,8 @@ public class JSONTokenizer {
 			seekDecimal();
 			if(start == p){//复位
 				start--;
+				String ns = value.substring(begin, start);
+				return Long.parseLong(ns);
 			}else{
 				isFloatingPoint=true;
 				if(start<end){
