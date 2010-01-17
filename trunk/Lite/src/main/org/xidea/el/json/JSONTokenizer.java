@@ -187,9 +187,9 @@ public class JSONTokenizer {
 			if (c == '+' || c == '-') {
 				c = value.charAt(i++);
 			}
-			while (c >= '0' && c <= '9') {
+			for (;c < '0' || c > '9';i++) {
 				if (i < end) {
-					c = value.charAt(i++);
+					c = value.charAt(i);
 				} else {
 					break;
 				}
