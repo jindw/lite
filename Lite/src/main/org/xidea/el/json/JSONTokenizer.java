@@ -122,6 +122,20 @@ public class JSONTokenizer {
 		start = i;
 		return lvalue;
 	}
+	private int parseOctal(int i) {
+		int lvalue = 0;//
+		while (i < end) {
+			char c = value.charAt(i++);
+			if (c >= '0' && c < '8') {
+				lvalue = (lvalue << 3) + (c - '0');
+			} else {
+				i--;
+				break;
+			}
+		}
+		start = i;
+		return lvalue;
+	}
 	//还是改成JDK自己的parser？
 	protected Number findNumber() {
 		int i = start;// skip -;
@@ -139,6 +153,12 @@ public class JSONTokenizer {
 				c = value.charAt(i++);
 				if (c == 'x' || c == 'X') {
 					long value = parseHex(i);
+					if(neg){
+						value = -value;
+					}
+					return value;
+				} else if(c > '0' && c<='7'){
+					int value = parseOctal(i);
 					if(neg){
 						value = -value;
 					}

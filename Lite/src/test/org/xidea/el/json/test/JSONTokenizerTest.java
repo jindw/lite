@@ -20,10 +20,16 @@ public class JSONTokenizerTest {
 		double expected = 0xfff2ed /19.5e-2+ 2 +19.5E-2;
 		doTest(word,(float) expected);
 		doTest("(19E2)", (float)(19E2));
+		//doTest("(0xCCFF%2)+(0676/(19.5E-2)-(19.5E-2))*(0676/(19.5E-2)-(19.5E-2))",(float)((0xCCFF%2)+(0676/(19.5E-2)-(19.5E-2))*(0676/(19.5E-2)-(19.5E-2))));
+		System.out.println(010);
+		doTest("067",(float)(067));
+		//doTest("0676/(19.5E-2)-(19.5E-2)",(float)(0676/(19.5E-2)-(19.5E-2)));
+		
 	}
 
 	private void doTest(String word, Float expected) {
 		Float actual = ((Number) ExpressionFactoryImpl.getInstance().create(word).evaluate("")).floatValue();
-		Assert.assertEquals(new Float(actual*1000).intValue(), new Float(expected*1000).intValue());
+		System.out.println(actual);
+		Assert.assertEquals( new Float(expected*1000).intValue(),new Float(actual*1000).intValue());
 	}
 }
