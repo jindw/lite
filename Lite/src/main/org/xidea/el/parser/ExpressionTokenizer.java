@@ -56,13 +56,14 @@ public class ExpressionTokenizer extends JSONTokenizer {
 	private final static TokenImpl TOKEN_NULL = new TokenImpl(VALUE_CONSTANTS,
 			null);
 
-	//编译期间标记，compile time object
-	static final int BRACKET_BEGIN = 0xFFFE;//([{;
-	static final int BRACKET_END = 0xFFFF;//)]};
-	
+	// 编译期间标记，compile time object
+	static final int BRACKET_BEGIN = 0xFFFE;// ([{;
+	static final int BRACKET_END = 0xFFFF;// )]};
+
 	private static enum Status {
 		STATUS_BEGIN, STATUS_EXPRESSION, STATUS_OPERATOR
 	}
+
 	private Status status = Status.STATUS_BEGIN;
 	private int previousType = Integer.MIN_VALUE;
 
@@ -72,49 +73,102 @@ public class ExpressionTokenizer extends JSONTokenizer {
 	public ExpressionTokenizer(String value) {
 		super(value);
 		parseEL();
+		prepareSelect();
 		LinkedList<TokenImpl> stack = new LinkedList<TokenImpl>();
-		try{
-			toTree(right(this.tokens.iterator()),stack);
-		}catch(Exception e){
+		try {
+			toTree(right(this.tokens.iterator()), stack);
+		} catch (Exception e) {
 			throw new ExpressionSyntaxException(e);
 		}
-		if(stack.size() !=1){
-			new ExpressionSyntaxException("表达式语法错误："+value);
+		if (stack.size() != 1) {
+			new ExpressionSyntaxException("表达式语法错误：" + value);
 		}
 		this.expression = stack.getFirst();
+	}
+
+	private void prepareSelect() {
+		int p1 = tokens.size();
+		while (p1-- > 0) {
+			int type1 = tokens.get(p1).getType();
+			int dep = 0;
+			int p2 = p1;
+			int pos = 0;
+			if (type1 == OP_QUESTION ) { //(a?b
+				while(p2-->0) {
+					int type2 = tokens.get(p2).getType();
+					if (type2 > 0) {// op
+						if (type2 == BRACKET_BEGIN) {
+							dep++;
+						} else if (type2 == BRACKET_END) {
+							dep--;
+						}
+						if (dep == 0
+								&& getPriority(type2) <= getPriority(OP_QUESTION)) {
+							pos = p2+1;
+//							System.out.println("&&&&&&");
+							break;
+						}
+					}
+				} 
+				tokens.add(pos, new TokenImpl(BRACKET_BEGIN, null));
+				p1++;
+			}else if(type1 == OP_QUESTION_SELECT){
+				int end = tokens.size();
+				while(++p2<end) {
+					int type2 = tokens.get(p2).getType();
+					if (type2 > 0) {// op
+						if (type2 == BRACKET_BEGIN) {
+							dep++;
+						} else if (type2 == BRACKET_END) {
+							dep--;
+						}
+						if (dep == 0
+								&& getPriority(type2) <= getPriority(OP_QUESTION)) {
+							pos = p2;
+//							System.out.println("###########");
+							break;
+						}
+					}
+				} 
+				if(pos>0){
+					tokens.add(pos, new TokenImpl(BRACKET_END, null));
+				}else{
+					tokens.add(new TokenImpl(BRACKET_END, null));
+				}
+			}
+		}
 	}
 
 	public ExpressionToken getResult() {
 		return expression;
 	}
 
-	private void toTree(Iterator<TokenImpl> tokens,LinkedList<TokenImpl> stack) {
+	private void toTree(Iterator<TokenImpl> tokens, LinkedList<TokenImpl> stack) {
 		while (tokens.hasNext()) {
 			final TokenImpl item = tokens.next();
-	        int type = item.getType();
-	        switch(type){
-	            case VALUE_CONSTANTS:
-	            case VALUE_VAR:
-	            case VALUE_NEW_LIST:
-	            case VALUE_NEW_MAP:
-	            	stack.addFirst(item);
-	                break;
-	            default://OP
-	                if((type & BIT_PARAM)>0){//两个操作数
-	                	TokenImpl arg2 = stack.removeFirst();
-	                	TokenImpl arg1 = stack.removeFirst();
-	                	item.setLeft(arg1);
-	                	item.setRight(arg2);
-	                    stack.addFirst(item);
-	                }else{//一个操作树
-	                	TokenImpl arg1 = stack.removeFirst();
-	                	item.setLeft(arg1);
-	                	stack.addFirst(item);
-	                }
-	        }
-	    }
+			int type = item.getType();
+			switch (type) {
+			case VALUE_CONSTANTS:
+			case VALUE_VAR:
+			case VALUE_NEW_LIST:
+			case VALUE_NEW_MAP:
+				stack.addFirst(item);
+				break;
+			default:// OP
+				if ((type & BIT_PARAM) > 0) {// 两个操作数
+					TokenImpl arg2 = stack.removeFirst();
+					TokenImpl arg1 = stack.removeFirst();
+					item.setLeft(arg1);
+					item.setRight(arg2);
+					stack.addFirst(item);
+				} else {// 一个操作树
+					TokenImpl arg1 = stack.removeFirst();
+					item.setLeft(arg1);
+					stack.addFirst(item);
+				}
+			}
+		}
 	}
-
 
 	// 将中序表达式转换为右序表达式
 	private Iterator<TokenImpl> right(Iterator<TokenImpl> tokens) {
@@ -159,7 +213,6 @@ public class ExpressionTokenizer extends JSONTokenizer {
 		return rightStack.getFirst().iterator();
 	}
 
-
 	private void addRightToken(LinkedList<List<TokenImpl>> rightStack,
 			TokenImpl token) {
 		List<TokenImpl> list = rightStack.getFirst();
@@ -183,7 +236,7 @@ public class ExpressionTokenizer extends JSONTokenizer {
 		case BRACKET_END:
 			return Integer.MIN_VALUE;
 		default:
-			return (type & BIT_PRIORITY)<<4 | (type & BIT_PRIORITY_SUB)>>12;
+			return (type & BIT_PRIORITY) << 4 | (type & BIT_PRIORITY_SUB) >> 12;
 		}
 	}
 
@@ -192,19 +245,22 @@ public class ExpressionTokenizer extends JSONTokenizer {
 		int t2 = item.getType();
 		int p1 = getPriority(t1);
 		int p2 = getPriority(t2);
-		//1?1:3 + 0?5:7 ==>1
-		//1?0?5:7:3 ==>7
-		//1?0?5:0?11:13:3 ==>13
-		if(p2 <= p1){
-			if(p2 == p1){
-				if(t2 == OP_QUESTION_SELECT){
-					return t1 == OP_QUESTION;
-				}else if(t2 == OP_QUESTION){
-					return t1 != OP_QUESTION_SELECT;
-				}
-			}
+		// 1+2*2
+		// (a?b:c) == > (a?b):c
+		// (a?b:ca:cb:cc) => (a?b):((ca?cb):cc)
+		// 1?1:3 + 0?5:7 ==>1 //1?1:(3 + 0?5:7 )
+		// 1?0?5:7:3 ==>7 //1?(0?5:7):3
+		// 1?0?5:0?11:13:3 ==>13 //1?((0?5:0)?11:13):3
+		if (p2 <= p1) {
+			// if(p2 == p1){
+			// if(t2 == OP_QUESTION_SELECT){
+			// return true;//t1 == OP_QUESTION;
+			// }else if(t2 == OP_QUESTION){
+			// return false;//t1 == OP_QUESTION_SELECT;
+			// }
+			// }
 			return true;
-		}else{
+		} else {
 			return false;
 		}
 	}
@@ -227,7 +283,7 @@ public class ExpressionTokenizer extends JSONTokenizer {
 					addToken(TOKEN_FALSE);
 				} else if ("null".equals(id)) {
 					addToken(TOKEN_NULL);
-				}else {
+				} else {
 					skipSpace(0);
 					if (previousType == OP_GET_PROP) {
 						addToken(new TokenImpl(VALUE_CONSTANTS, id));
@@ -250,8 +306,8 @@ public class ExpressionTokenizer extends JSONTokenizer {
 
 	private String findOperator() {// optimize json ,:[{}]
 		char c = value.charAt(start);
-		int end = start+1;
-		char next = value.length()>end?value.charAt(end):0;
+		int end = start + 1;
+		char next = value.length() > end ? value.charAt(end) : 0;
 		switch (c) {
 		case ',':// optimize for json
 		case ':':// 3op,map key
@@ -272,19 +328,19 @@ public class ExpressionTokenizer extends JSONTokenizer {
 		case '%':
 			break;
 		case '=':// ==
-			if(next == '='){
+			if (next == '=') {
 				end++;
-				if(value.length()>end && value.charAt(end)=='='){
+				if (value.length() > end && value.charAt(end) == '=') {
 					this.reportError("不支持=== 和!==操作符，请使用==,!=");
 				}
-			}else{
+			} else {
 				this.reportError("不支持赋值操作:");
 			}
 			break;
 		case '!':// !,!=
-			if(next == '='){
+			if (next == '=') {
 				end++;
-				if(value.length()>end && value.charAt(end)=='='){
+				if (value.length() > end && value.charAt(end) == '=') {
 					this.reportError("不支持=== 和!==操作符，请使用==,!=");
 				}
 			}
@@ -297,7 +353,7 @@ public class ExpressionTokenizer extends JSONTokenizer {
 			break;
 		case '&':// && / &
 		case '|':// || /|
-			if( (c == next)){
+			if ((c == next)) {
 				end++;
 			}
 			break;
@@ -309,8 +365,8 @@ public class ExpressionTokenizer extends JSONTokenizer {
 	}
 
 	private void reportError(String msg) {
-		throw new ExpressionSyntaxException(msg+"\n@"+ start + "\n"
-				+ value.substring(start)+"\n----\n"+value);
+		throw new ExpressionSyntaxException(msg + "\n@" + start + "\n"
+				+ value.substring(start) + "\n----\n" + value);
 	}
 
 	/**
@@ -401,21 +457,21 @@ public class ExpressionTokenizer extends JSONTokenizer {
 					start--;
 					skipComment();
 					break;
-				}else if(this.status != Status.STATUS_EXPRESSION){
-					int end = findRegExp(this.value,this.start);
-					if(end>0){
-						String regexp = this.value.substring(this.start-1,end);
+				} else if (this.status != Status.STATUS_EXPRESSION) {
+					int end = findRegExp(this.value, this.start);
+					if (end > 0) {
+						String regexp = this.value.substring(this.start - 1,
+								end);
 						HashMap<String, String> value = new HashMap<String, String>();
-						value.put("class","RegExp");
+						value.put("class", "RegExp");
 						value.put("source", regexp);
-						this.addToken(
-								new TokenImpl(VALUE_CONSTANTS,
-										value)
-								);
+						this.addToken(new TokenImpl(VALUE_CONSTANTS, value));
 						this.start = end;
 						break;
 					}
 				}
+				addToken(new TokenImpl(TOKEN_MAP.get(op), null));
+				break;
 			default:
 				addToken(new TokenImpl(TOKEN_MAP.get(op), null));
 			}
@@ -424,77 +480,6 @@ public class ExpressionTokenizer extends JSONTokenizer {
 		}
 
 	}
-	int findRegExp(String text,int start){
-		int depth=0;
-		int end = text.length();
-		char c;
-		while(start < end){
-			c = text.charAt(start++);
-		    if(c=='['){
-		    	depth = 1;
-		    }else if(c==']'){
-		    	depth = 0;
-		    }else if (c == '\\') {
-		        start++;
-		    }else if(depth == 0 && c == '/'){
-		    	while(start < end){
-		    		c = text.charAt(start++);
-		    		switch(c){
-		    			case 'g':
-		    			case 'i':
-		    			case 'm':
-		    			break;
-		    			default:
-		    			return start-1;
-		    		}
-		    	}
-		    	
-		    }
-		}
-		return -1;
-	}
-	private static final Map<String, Integer> TOKEN_MAP = new HashMap<String, Integer>();
-	static{
-
-		//9
-		TOKEN_MAP.put(".",OP_GET_PROP);
-		//8
-		TOKEN_MAP.put("!",OP_NOT);
-		TOKEN_MAP.put("^",OP_BIT_NOT);
-//		TOKEN_MAP.put("+",OP_POS);
-//		TOKEN_MAP.put("-",OP_NEG);
-		//7
-		TOKEN_MAP.put("*",OP_MUL);
-		TOKEN_MAP.put("/",OP_DIV);
-		TOKEN_MAP.put("%",OP_MOD);
-		//6
-//		TOKEN_MAP.put("+",OP_ADD);
-//		TOKEN_MAP.put("-",OP_SUB);
-		//5
-		TOKEN_MAP.put("<",OP_LT);
-		TOKEN_MAP.put(">",OP_GT);
-		TOKEN_MAP.put("<=",OP_LTEQ);
-		TOKEN_MAP.put(">=",OP_GTEQ);
-		TOKEN_MAP.put("==",OP_EQ);
-		TOKEN_MAP.put("!=",OP_NOTEQ);
-
-		//4
-		TOKEN_MAP.put("&",OP_BIT_AND);
-		TOKEN_MAP.put("^",OP_BIT_XOR);
-		TOKEN_MAP.put("|",OP_BIT_OR);
-		//3
-		TOKEN_MAP.put("&&",OP_AND);
-		TOKEN_MAP.put("||",OP_OR);
-		//2
-		TOKEN_MAP.put("?",OP_QUESTION);
-		TOKEN_MAP.put(":",OP_QUESTION_SELECT);//map 中的：被直接skip了
-		//1
-		TOKEN_MAP.put(",",OP_PARAM_JOIN);
-
-		//OP_MAP_PUSH
-		//OP_INVOKE_METHOD
-	}
-
 
 	private void addToken(TokenImpl token) {
 		switch (token.getType()) {
@@ -539,5 +524,76 @@ public class ExpressionTokenizer extends JSONTokenizer {
 		addToken(new TokenImpl(VALUE_NEW_MAP, null));
 	}
 
+	int findRegExp(String text, int start) {
+		int depth = 0;
+		int end = text.length();
+		char c;
+		while (start < end) {
+			c = text.charAt(start++);
+			if (c == '[') {
+				depth = 1;
+			} else if (c == ']') {
+				depth = 0;
+			} else if (c == '\\') {
+				start++;
+			} else if (depth == 0 && c == '/') {
+				while (start < end) {
+					c = text.charAt(start++);
+					switch (c) {
+					case 'g':
+					case 'i':
+					case 'm':
+						break;
+					default:
+						return start - 1;
+					}
+				}
+
+			}
+		}
+		return -1;
+	}
+
+	private static final Map<String, Integer> TOKEN_MAP = new HashMap<String, Integer>();
+	static {
+
+		// 9
+		TOKEN_MAP.put(".", OP_GET_PROP);
+		// 8
+		TOKEN_MAP.put("!", OP_NOT);
+		TOKEN_MAP.put("^", OP_BIT_NOT);
+		// TOKEN_MAP.put("+",OP_POS);
+		// TOKEN_MAP.put("-",OP_NEG);
+		// 7
+		TOKEN_MAP.put("*", OP_MUL);
+		TOKEN_MAP.put("/", OP_DIV);
+		TOKEN_MAP.put("%", OP_MOD);
+		// 6
+		// TOKEN_MAP.put("+",OP_ADD);
+		// TOKEN_MAP.put("-",OP_SUB);
+		// 5
+		TOKEN_MAP.put("<", OP_LT);
+		TOKEN_MAP.put(">", OP_GT);
+		TOKEN_MAP.put("<=", OP_LTEQ);
+		TOKEN_MAP.put(">=", OP_GTEQ);
+		TOKEN_MAP.put("==", OP_EQ);
+		TOKEN_MAP.put("!=", OP_NOTEQ);
+
+		// 4
+		TOKEN_MAP.put("&", OP_BIT_AND);
+		TOKEN_MAP.put("^", OP_BIT_XOR);
+		TOKEN_MAP.put("|", OP_BIT_OR);
+		// 3
+		TOKEN_MAP.put("&&", OP_AND);
+		TOKEN_MAP.put("||", OP_OR);
+		// 2
+		TOKEN_MAP.put("?", OP_QUESTION);
+		TOKEN_MAP.put(":", OP_QUESTION_SELECT);// map 中的：被直接skip了
+		// 1
+		TOKEN_MAP.put(",", OP_PARAM_JOIN);
+
+		// OP_MAP_PUSH
+		// OP_INVOKE_METHOD
+	}
 
 }
