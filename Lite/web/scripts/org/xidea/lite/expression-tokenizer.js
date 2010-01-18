@@ -334,7 +334,57 @@ function ExpressionTokenizer(value){
 	this.previousType = STATUS_BEGIN;
 	this.tokens = [];
 	this.parseEL();
+	prepareSelect(this.tokens)
 	this.expression = buildTree(trimToken(right(this.tokens)));
+}
+
+function prepareSelect(tokens) {
+    function checkSelect(p2){
+		var type2 = tokens[p2][0];
+		if (type2 > 0) {// op
+			if (type2 == BRACKET_BEGIN) {
+				dep++;
+			} else if (type2 == BRACKET_END) {
+				dep--;
+			}
+			if (dep == 0
+					&& getPriority(type2) <= getPriority(OP_QUESTION)) {
+				return true;
+				//break;
+			}
+		}
+		return false;
+    }
+	var p1 = tokens.length;
+	while (p1-- > 0) {
+		var type1 = tokens[p1][0];
+		var end = tokens.length;
+		var p2 = p1;
+		var pos = 0;
+		var dep = 0;
+		if (type1 == OP_QUESTION ) { //(a?b
+			while(p2-->0) {
+				if(checkSelect(p2)){
+					pos = p2+1;
+					break;
+				}
+			} 
+			tokens.splice(pos,0, [BRACKET_BEGIN]);
+			p1++;
+		}else if(type1 == OP_QUESTION_SELECT){
+			while(++p2<end) {
+				if(checkSelect(p2)){
+					pos = p2;
+					break;
+				}
+			} 
+			if(pos>0){
+			   tokens.splice(pos,0, [BRACKET_END]);
+			}else{
+			   tokens.push(pos,0, [BRACKET_END]);
+			}
+		}
+	}
 }
 function buildTree(tokens){
 	var stack = [];
@@ -450,19 +500,5 @@ function getPriority(type) {
 function rightEnd(currentType, priviousType) {
 	var priviousPriority = getPriority(priviousType);
 	var currentPriority = getPriority(currentType);
-	//1?1:3 + 0?5:7 ==>1
-	//1?0?5:7:3 ==>7
-	//1?0?5:0?11:13:3 ==>13
-	if(currentPriority <= priviousPriority){
-		if(currentPriority == priviousPriority){
-			if(currentType == OP_QUESTION_SELECT){
-				return priviousType == OP_QUESTION;
-			}else if(currentType == OP_QUESTION){
-				return priviousType != OP_QUESTION_SELECT;
-			}
-		}
-		return true;
-	}else{
-		return false;
-	}
+	return currentPriority <= priviousPriority;
 }
