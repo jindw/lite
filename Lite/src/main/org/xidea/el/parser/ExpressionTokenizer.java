@@ -125,15 +125,15 @@ public class ExpressionTokenizer extends JSONTokenizer {
 	private boolean checkSelect(int p2,int[] dep) {
 		int type2 = tokens.get(p2).getType();
 		if (type2 > 0) {// op
-			if (type2 == BRACKET_BEGIN) {
-				dep[0]++;
-			} else if (type2 == BRACKET_END) {
-				dep[0]--;
-			}
 			if (dep[0] == 0
 					&& getPriority(type2) <= getPriority(OP_QUESTION)) {
 				return true;
 				//break;
+			}
+			if (type2 == BRACKET_BEGIN) {
+				dep[0]++;
+			} else if (type2 == BRACKET_END) {
+				dep[0]--;
 			}
 		}
 		return false;
