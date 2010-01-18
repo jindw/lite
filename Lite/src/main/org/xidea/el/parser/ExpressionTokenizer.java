@@ -100,7 +100,7 @@ public class ExpressionTokenizer extends JSONTokenizer {
 						break;
 					}
 				} 
-				tokens.add(pos+1, new TokenImpl(BRACKET_BEGIN, null));
+				tokens.add(pos, new TokenImpl(BRACKET_BEGIN, null));
 				p1++;
 			}else if(type1 == OP_QUESTION_SELECT){
 				int end = tokens.size();
