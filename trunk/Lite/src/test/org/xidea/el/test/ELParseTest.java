@@ -2,8 +2,10 @@ package org.xidea.el.test;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.xidea.el.Expression;
 import org.xidea.el.impl.ExpressionFactoryImpl;
 import org.xidea.el.json.JSONEncoder;
+import org.xidea.lite.parser.impl.JSProxy;
 
 public class ELParseTest {
 	private ExpressionFactoryImpl ef = new ExpressionFactoryImpl();
@@ -14,4 +16,20 @@ public class ELParseTest {
 		Assert.assertEquals("[98,[33,[-2,\"object\"],null,\"test\"],[64,[-3],[-1,123]]]", el);
 	}
 
+	@Test
+	public void test3op(){
+		System.out.println(JSONEncoder.encode( ef.parse("0?0?5:7:3")));
+		System.out.println(JSONEncoder.encode( ef.parse("0?(0?5:7):3")));
+		testEL("1?1:3 + 0?5:7");
+		testEL("1?0?5:7:3 ");
+		testEL("0?0?5:7:3 ");
+		testEL("1?0?5:0?11:13:3");
+		testEL("1?1?0?5:0?11:13:3?1?0?5:0?11:13:3:0?11:13:3");
+	}
+
+	private void testEL(String elt) {
+		Expression el = ef.create(elt);
+		System.out.println(JSONEncoder.encode(elt));
+		Assert.assertEquals(JSProxy.newProxy().eval(elt),el.evaluate(""));
+	}
 }
