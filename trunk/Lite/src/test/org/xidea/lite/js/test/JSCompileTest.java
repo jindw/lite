@@ -24,33 +24,25 @@ import javax.xml.xpath.XPathFactory;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mozilla.javascript.Script;
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.xidea.el.json.JSONDecoder;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.Template;
 import org.xidea.lite.TemplateEngine;
 import org.xidea.lite.parser.impl.ParseContextImpl;
-import org.xidea.lite.parser.impl.XMLContextImpl;
-import org.xidea.lite.parser.impl.dtd.DefaultEntityResolver;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import sun.org.mozilla.javascript.internal.BaseFunction;
 import sun.org.mozilla.javascript.internal.Callable;
 import sun.org.mozilla.javascript.internal.Context;
-import sun.org.mozilla.javascript.internal.IdFunctionObject;
-import sun.org.mozilla.javascript.internal.NativeFunction;
-import sun.org.mozilla.javascript.internal.ScriptRuntime;
 import sun.org.mozilla.javascript.internal.Scriptable;
 
 public class JSCompileTest {
 	ScriptEngine engine = new ScriptEngineManager().getEngineByExtension("js");
-
+	URI menuURL;
 	File webRoot = new File(new File(JSCompileTest.class.getResource("/")
 			.getFile()), "../../");
 	ParseContextImpl context;
@@ -70,6 +62,8 @@ public class JSCompileTest {
 
 	@Before
 	public void setup() throws Exception, ScriptException {
+
+		menuURL = new File(webRoot, "menu.xml").toURI();
 		engine.eval("this['javax.script.filename']='<boot.js>'");
 		engine.eval(new InputStreamReader(this.getClass().getResourceAsStream(
 				"/boot.js"), "utf-8"));
@@ -132,8 +126,6 @@ public class JSCompileTest {
 
 	@Test
 	public void testExample() throws Exception {
-			
-		URI menuURL = new File(webRoot, "menu.xml").toURI();
 		Document doc = context.loadXML(menuURL);
 		String defaultContext = getText(doc, "/root/context");
 
@@ -145,39 +137,57 @@ public class JSCompileTest {
 			String context = getText(child, "context");
 			context = context == null ? defaultContext : context;
 
-			String sourceJSON = JSONEncoder.encode(source);
-			String contextJSON = context;
 			System.out.println(context);
 			// engine.put(ScriptEngine.FILENAME, "<file>");
 
-			engine.eval("var jsTemplate = new Template(" + sourceJSON
-					+ ",new XMLParser(true,'"+menuURL+"'))");
-
-			engine.eval("var liteTemplate = new Template(" + sourceJSON
-					+ ",new XMLParser(false,'"+menuURL+"'))");
-			// .buildResult()");
-
-			System.out.println("\n======" + key + "======\n");
-			System.out.println(engine.eval("jsTemplate.data+''"));
-//			System.out.println(contextJSON);
-			// System.out.println(engine.eval("liteTemplate.data+''"));
-			Object jsJSON = engine.eval("liteTemplate.render(" + contextJSON
-					+ ")");
-			Object jsJS = engine.eval("jsTemplate.render(" + contextJSON + ")");
-			Assert.assertEquals("JS编译后结果不一致"+source, jsJSON, jsJS);
-			ParseContextImpl pc = new ParseContextImpl(new TemplateEngine(menuURL),null,null,null);
-			source = source.replace("=\"menu.xml\"", "=\""+menuURL+"\"");
-			System.out.println(source);
-			pc.parse(pc.loadXML(source));
-			StringWriter out = new StringWriter();
-			new Template(pc.toList()).render(JSONDecoder.decode(contextJSON),
-					out);
-			String java = out.toString();
-			Assert.assertEquals("JS结果与Java不一致", sumText((String) jsJSON),
-					sumText(java));
+			doTestItem(key, source,  context);
 
 			child = (Element) child.getNextSibling();
 		}
+	}
+
+	@Test
+	public void test3op() throws Exception{
+		testEL("1?1:3 + 0?5:7");
+		testEL("1?0?5:7:3 ");
+		testEL("0?0?5:7:3 ");
+		testEL("1?0?5:0?11:13:3");
+		testEL("1?1?0?5:0?11:13:3?1?0?5:0?11:13:3:0?11:13:3");
+	}
+
+	private void testEL(String el) throws Exception {
+		doTestItem(el,"<xml>${"+el+"}</xml>","{}");
+	}
+
+	private void doTestItem(String key, String source,
+			String contextJSON) throws ScriptException,
+			SAXException, IOException {
+		System.out.println("\n======" + key + "======\n");
+		String sourceJSON = JSONEncoder.encode(source);
+		engine.eval("var jsTemplate = new Template(" + sourceJSON
+				+ ",new XMLParser(true,'"+menuURL+"'))");
+
+		engine.eval("var liteTemplate = new Template(" + sourceJSON
+				+ ",new XMLParser(false,'"+menuURL+"'))");
+		// .buildResult()");
+
+		System.out.println(engine.eval("jsTemplate.data+''"));
+//			System.out.println(contextJSON);
+		// System.out.println(engine.eval("liteTemplate.data+''"));
+		Object jsJSON = engine.eval("liteTemplate.render(" + contextJSON
+				+ ")");
+		Object jsJS = engine.eval("jsTemplate.render(" + contextJSON + ")");
+		Assert.assertEquals("JS编译后结果不一致"+source, jsJSON, jsJS);
+		ParseContextImpl pc = new ParseContextImpl(new TemplateEngine(menuURL),null,null,null);
+		source = source.replace("=\"menu.xml\"", "=\""+menuURL+"\"");
+		System.out.println(source);
+		pc.parse(pc.loadXML(source));
+		StringWriter out = new StringWriter();
+		new Template(pc.toList()).render(JSONDecoder.decode(contextJSON),
+				out);
+		String java = out.toString();
+		Assert.assertEquals("JS结果与Java不一致", sumText((String) jsJSON),
+				sumText(java));
 	}
 
 	private String sumText(String java) {

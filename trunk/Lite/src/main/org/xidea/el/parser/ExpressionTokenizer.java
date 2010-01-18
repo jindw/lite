@@ -90,44 +90,27 @@ public class ExpressionTokenizer extends JSONTokenizer {
 		int p1 = tokens.size();
 		while (p1-- > 0) {
 			int type1 = tokens.get(p1).getType();
-			int dep = 0;
-			int p2 = p1;
-			int pos = 0;
 			if (type1 == OP_QUESTION ) { //(a?b
+				int p2 = p1;
+				int pos = 0;
+				int[] info = new int[1];
 				while(p2-->0) {
-					int type2 = tokens.get(p2).getType();
-					if (type2 > 0) {// op
-						if (type2 == BRACKET_BEGIN) {
-							dep++;
-						} else if (type2 == BRACKET_END) {
-							dep--;
-						}
-						if (dep == 0
-								&& getPriority(type2) <= getPriority(OP_QUESTION)) {
-							pos = p2+1;
-//							System.out.println("&&&&&&");
-							break;
-						}
+					if(checkSelect(p2,info)){
+						pos = p2+1;
+						break;
 					}
 				} 
-				tokens.add(pos, new TokenImpl(BRACKET_BEGIN, null));
+				tokens.add(pos+1, new TokenImpl(BRACKET_BEGIN, null));
 				p1++;
 			}else if(type1 == OP_QUESTION_SELECT){
 				int end = tokens.size();
+				int p2 = p1;
+				int pos = 0;
+				int[] info = new int[1];
 				while(++p2<end) {
-					int type2 = tokens.get(p2).getType();
-					if (type2 > 0) {// op
-						if (type2 == BRACKET_BEGIN) {
-							dep++;
-						} else if (type2 == BRACKET_END) {
-							dep--;
-						}
-						if (dep == 0
-								&& getPriority(type2) <= getPriority(OP_QUESTION)) {
-							pos = p2;
-//							System.out.println("###########");
-							break;
-						}
+					if(checkSelect(p2,info)){
+						pos = p2;
+						break;
 					}
 				} 
 				if(pos>0){
@@ -137,6 +120,23 @@ public class ExpressionTokenizer extends JSONTokenizer {
 				}
 			}
 		}
+	}
+
+	private boolean checkSelect(int p2,int[] dep) {
+		int type2 = tokens.get(p2).getType();
+		if (type2 > 0) {// op
+			if (type2 == BRACKET_BEGIN) {
+				dep[0]++;
+			} else if (type2 == BRACKET_END) {
+				dep[0]--;
+			}
+			if (dep[0] == 0
+					&& getPriority(type2) <= getPriority(OP_QUESTION)) {
+				return true;
+				//break;
+			}
+		}
+		return false;
 	}
 
 	public ExpressionToken getResult() {
