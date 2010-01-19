@@ -3,6 +3,7 @@ package org.xidea.el.operation.test;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
+import org.xidea.el.fn.ECMA262Impl;
 import org.xidea.el.fn.NumberArithmetic;
 
 public class NumberArithmeticTest {
@@ -94,6 +95,25 @@ public class NumberArithmeticTest {
 	public void testModulus() {
 		assertEquals(1, na.modulus(1, 2));
 		assertEquals(0, na.modulus(2, 2));
+	}
+
+
+	@Test
+	public void testToNumber() {
+		assertEquals(17, ECMA262Impl.ToNumber("0x11"));
+		assertEquals(17, ECMA262Impl.ToNumber("0X11"));
+		assertEquals(9, ECMA262Impl.ToNumber("011"));;
+		assertEquals(-9, ECMA262Impl.ToNumber("-011"));
+		assertEquals(11, ECMA262Impl.ToNumber("11"));
+		assertEquals(10, ECMA262Impl.ToNumber("1E1"));
+		assertEquals(10, ECMA262Impl.ToNumber("1e1"));
+		assertEquals(1.1, ECMA262Impl.ToNumber("1.1"));;
+		assertEquals(10, ECMA262Impl.ToNumber("+1e1"));
+		assertEquals(-1.1, ECMA262Impl.ToNumber("-1.1"));
+		assertEquals(1.1E1, ECMA262Impl.ToNumber("1.1E1"));
+		assertEquals(1.1e-1, ECMA262Impl.ToNumber("1.1e-1"));
+		assertEquals(1.1E1, ECMA262Impl.ToNumber("+1.1E1"));
+		assertEquals(-1.1e-1, ECMA262Impl.ToNumber("-1.1e-1"));
 	}
 
 }

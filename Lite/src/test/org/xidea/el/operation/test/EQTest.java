@@ -20,7 +20,9 @@ public class EQTest {
 				return "v"+System.currentTimeMillis();
 			}
 		};
+		assertEquals(true, new ExpressionImpl("'0' == 0").evaluate(context));
 		assertEquals(true, new ExpressionImpl("'123' == 123").evaluate(context));
+		assertEquals(false, new ExpressionImpl("'0' != 0").evaluate(context));
 		assertEquals(true, new ExpressionImpl("this == this").evaluate(context));
 		assertEquals(true, new ExpressionImpl("this != this+1").evaluate(context));
 	}
