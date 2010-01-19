@@ -1,30 +1,17 @@
 package org.xidea.el.parser;
 
+import static org.xidea.el.parser.TokenImpl.TOKEN_MAP;
+import static org.xidea.el.parser.TokenImpl.BRACKET_BEGIN;
+import static org.xidea.el.parser.TokenImpl.BRACKET_END;
 import static org.xidea.el.ExpressionToken.OP_ADD;
 import static org.xidea.el.ExpressionToken.BIT_PARAM;
 import static org.xidea.el.ExpressionToken.BIT_PRIORITY;
 import static org.xidea.el.ExpressionToken.BIT_PRIORITY_SUB;
-import static org.xidea.el.ExpressionToken.OP_AND;
-import static org.xidea.el.ExpressionToken.OP_BIT_AND;
-import static org.xidea.el.ExpressionToken.OP_BIT_OR;
-import static org.xidea.el.ExpressionToken.OP_BIT_XOR;
 import static org.xidea.el.ExpressionToken.OP_GET_PROP;
 
-import static org.xidea.el.ExpressionToken.OP_MUL;
-import static org.xidea.el.ExpressionToken.OP_DIV;
-import static org.xidea.el.ExpressionToken.OP_MOD;
-import static org.xidea.el.ExpressionToken.OP_LT;
-import static org.xidea.el.ExpressionToken.OP_GT;
-import static org.xidea.el.ExpressionToken.OP_LTEQ;
-import static org.xidea.el.ExpressionToken.OP_GTEQ;
-import static org.xidea.el.ExpressionToken.OP_EQ;
-import static org.xidea.el.ExpressionToken.OP_NOTEQ;
-import static org.xidea.el.ExpressionToken.OP_NOT;
-import static org.xidea.el.ExpressionToken.OP_BIT_NOT;
 import static org.xidea.el.ExpressionToken.OP_INVOKE_METHOD;
 import static org.xidea.el.ExpressionToken.OP_MAP_PUSH;
 import static org.xidea.el.ExpressionToken.OP_NEG;
-import static org.xidea.el.ExpressionToken.OP_OR;
 import static org.xidea.el.ExpressionToken.OP_PARAM_JOIN;
 import static org.xidea.el.ExpressionToken.OP_POS;
 import static org.xidea.el.ExpressionToken.OP_QUESTION;
@@ -42,7 +29,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import org.xidea.el.ExpressionSyntaxException;
 import org.xidea.el.ExpressionToken;
@@ -55,10 +41,6 @@ public class ExpressionTokenizer extends JSONTokenizer {
 			Boolean.FALSE);
 	private final static TokenImpl TOKEN_NULL = new TokenImpl(VALUE_CONSTANTS,
 			null);
-
-	// 编译期间标记，compile time object
-	static final int BRACKET_BEGIN = 0xFFFE;// ([{;
-	static final int BRACKET_END = 0xFFFF;// )]};
 
 	private static enum Status {
 		STATUS_BEGIN, STATUS_EXPRESSION, STATUS_OPERATOR
@@ -90,53 +72,38 @@ public class ExpressionTokenizer extends JSONTokenizer {
 		int p1 = tokens.size();
 		while (p1-- > 0) {
 			int type1 = tokens.get(p1).getType();
-			if (type1 == OP_QUESTION ) { //(a?b
-				int p2 = p1;
-				int pos = 0;
-				int[] info = new int[1];
-				while(p2-->0) {
-					if(checkSelect(p2,info)){
-						pos = p2+1;
-						break;
-					}
-				} 
-				tokens.add(pos, new TokenImpl(BRACKET_BEGIN, null));
+			if (type1 == OP_QUESTION) { // (a?b
+				int pos = getSelectRange(p1, -1, -1);
+				tokens.add(pos + 1, new TokenImpl(BRACKET_BEGIN, null));
 				p1++;
-			}else if(type1 == OP_QUESTION_SELECT){
+			} else if (type1 == OP_QUESTION_SELECT) {
 				int end = tokens.size();
-				int p2 = p1;
-				int pos = 0;
-				int[] info = new int[1];
-				while(++p2<end) {
-					if(checkSelect(p2,info)){
-						pos = p2;
-						break;
-					}
-				} 
-				if(pos>0){
-					tokens.add(pos, new TokenImpl(BRACKET_END, null));
-				}else{
-					tokens.add(new TokenImpl(BRACKET_END, null));
-				}
+				int pos = getSelectRange(p1, 1, end);
+				tokens.add(pos, new TokenImpl(BRACKET_END, null));
 			}
 		}
 	}
 
-	private boolean checkSelect(int p2,int[] dep) {
-		int type2 = tokens.get(p2).getType();
-		if (type2 > 0) {// op
-			if (dep[0] == 0
-					&& getPriority(type2) <= getPriority(OP_QUESTION)) {
-				return true;
-				//break;
-			}
-			if (type2 == BRACKET_BEGIN) {
-				dep[0]++;
-			} else if (type2 == BRACKET_END) {
-				dep[0]--;
+	private int getSelectRange(int p2, int inc, int end) {
+		int dep = 0;
+		while ((p2 += inc) != end) {
+			int type2 = tokens.get(p2).getType();
+			if (type2 > 0) {// op
+				if (type2 == BRACKET_BEGIN) {
+					dep += inc;
+				} else if (type2 == BRACKET_END) {
+					dep -= inc;
+				} else {
+					if (dep == 0 && getPriority(type2) <= getPriority(OP_QUESTION)) {
+						return p2;
+					}
+				}
+				if (dep < 0) {
+					return p2;
+				}
 			}
 		}
-		return false;
+		return inc > 0 ? end : -1;
 	}
 
 	public ExpressionToken getResult() {
@@ -552,48 +519,6 @@ public class ExpressionTokenizer extends JSONTokenizer {
 			}
 		}
 		return -1;
-	}
-
-	private static final Map<String, Integer> TOKEN_MAP = new HashMap<String, Integer>();
-	static {
-
-		// 9
-		TOKEN_MAP.put(".", OP_GET_PROP);
-		// 8
-		TOKEN_MAP.put("!", OP_NOT);
-		TOKEN_MAP.put("^", OP_BIT_NOT);
-		// TOKEN_MAP.put("+",OP_POS);
-		// TOKEN_MAP.put("-",OP_NEG);
-		// 7
-		TOKEN_MAP.put("*", OP_MUL);
-		TOKEN_MAP.put("/", OP_DIV);
-		TOKEN_MAP.put("%", OP_MOD);
-		// 6
-		// TOKEN_MAP.put("+",OP_ADD);
-		// TOKEN_MAP.put("-",OP_SUB);
-		// 5
-		TOKEN_MAP.put("<", OP_LT);
-		TOKEN_MAP.put(">", OP_GT);
-		TOKEN_MAP.put("<=", OP_LTEQ);
-		TOKEN_MAP.put(">=", OP_GTEQ);
-		TOKEN_MAP.put("==", OP_EQ);
-		TOKEN_MAP.put("!=", OP_NOTEQ);
-
-		// 4
-		TOKEN_MAP.put("&", OP_BIT_AND);
-		TOKEN_MAP.put("^", OP_BIT_XOR);
-		TOKEN_MAP.put("|", OP_BIT_OR);
-		// 3
-		TOKEN_MAP.put("&&", OP_AND);
-		TOKEN_MAP.put("||", OP_OR);
-		// 2
-		TOKEN_MAP.put("?", OP_QUESTION);
-		TOKEN_MAP.put(":", OP_QUESTION_SELECT);// map 中的：被直接skip了
-		// 1
-		TOKEN_MAP.put(",", OP_PARAM_JOIN);
-
-		// OP_MAP_PUSH
-		// OP_INVOKE_METHOD
 	}
 
 }

@@ -339,52 +339,38 @@ function ExpressionTokenizer(value){
 }
 
 function prepareSelect(tokens) {
-    function checkSelect(p2){
+	var p1 = tokens.length;
+	while (p1--) {
+		var type1 = tokens[p1][0];
+		if (type1 == OP_QUESTION) { // (a?b
+			var pos = getSelectRange(tokens,p1, -1, -1);
+			tokens.splice(pos+1,0, [BRACKET_BEGIN]);
+			p1++;
+		} else if (type1 == OP_QUESTION_SELECT) {
+			var end = tokens.length;
+			var pos = getSelectRange(tokens,p1, 1, end);
+			tokens.splice(pos,0, [BRACKET_END]);
+		}
+	}
+}
+function getSelectRange(tokens,p2, inc, end) {
+	var dep = 0;
+	while ((p2 += inc) != end) {
 		var type2 = tokens[p2][0];
 		if (type2 > 0) {// op
 			if (type2 == BRACKET_BEGIN) {
-				dep++;
+				dep += inc;
 			} else if (type2 == BRACKET_END) {
-				dep--;
+				dep -= inc;
+			} else if (dep == 0 && getPriority(type2) <= getPriority(OP_QUESTION)) {
+				return p2;
 			}
-			if (dep == 0
-					&& getPriority(type2) <= getPriority(OP_QUESTION)) {
-				return true;
-				//break;
-			}
-		}
-		return false;
-    }
-	var p1 = tokens.length;
-	while (p1-- > 0) {
-		var type1 = tokens[p1][0];
-		var end = tokens.length;
-		var p2 = p1;
-		var pos = 0;
-		var dep = 0;
-		if (type1 == OP_QUESTION ) { //(a?b
-			while(p2-->0) {
-				if(checkSelect(p2)){
-					pos = p2+1;
-					break;
-				}
-			} 
-			tokens.splice(pos,0, [BRACKET_BEGIN]);
-			p1++;
-		}else if(type1 == OP_QUESTION_SELECT){
-			while(++p2<end) {
-				if(checkSelect(p2)){
-					pos = p2;
-					break;
-				}
-			} 
-			if(pos>0){
-			   tokens.splice(pos,0, [BRACKET_END]);
-			}else{
-			   tokens.push(pos,0, [BRACKET_END]);
+			if (dep < 0) {
+				return p2;
 			}
 		}
 	}
+	return inc > 0 ? end : -1;
 }
 function buildTree(tokens){
 	var stack = [];
