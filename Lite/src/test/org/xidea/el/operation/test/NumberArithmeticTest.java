@@ -104,6 +104,8 @@ public class NumberArithmeticTest {
 		assertEquals(17, ECMA262Impl.ToNumber("0X11"));
 		assertEquals(9, ECMA262Impl.ToNumber("011"));;
 		assertEquals(-9, ECMA262Impl.ToNumber("-011"));
+		assertEquals(-0, ECMA262Impl.ToNumber("-0"));
+		assertEquals(-0, ECMA262Impl.ToNumber("0"));
 		assertEquals(11, ECMA262Impl.ToNumber("11"));
 		assertEquals(10, ECMA262Impl.ToNumber("1E1"));
 		assertEquals(10, ECMA262Impl.ToNumber("1e1"));
