@@ -25,9 +25,12 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.junit.Assert;
+import org.xidea.el.Expression;
 import org.xidea.el.ExpressionSyntaxException;
 import org.xidea.el.ExpressionToken;
 import org.xidea.el.fn.NumberArithmetic;
+import org.xidea.el.impl.ExpressionFactoryImpl;
 import org.xidea.el.json.JSONTokenizer;
 
 public class ExpressionTokenizer extends JSONTokenizer {
@@ -50,7 +53,60 @@ public class ExpressionTokenizer extends JSONTokenizer {
 	public ExpressionTokenizer(String value) {
 		super(value);
 		parseEL();
+		prepareSelect();
 		this.expressions = right(this.tokens.iterator());
+	}
+
+	private void prepareSelect() {
+		int p1 = tokens.size();
+		while (p1-- > 0) {
+			int type1 = tokens.get(p1).getType();
+			int dep = 0;
+			int p2 = p1;
+			int pos = 0;
+			if (type1 == OP_QUESTION ) { //(a?b
+				while(p2-->0) {
+					int type2 = tokens.get(p2).getType();
+					if (type2 > 0) {// op
+						if (dep == 0
+								&& getPriority(type2) <= getPriority(OP_QUESTION)) {
+							pos = p2+1;
+							break;
+						}
+						if (type2 == BRACKET_BEGIN) {
+							dep++;
+						} else if (type2 == BRACKET_END) {
+							dep--;
+						}
+					}
+				} 
+				tokens.add(pos, new TokenImpl(BRACKET_BEGIN, null));
+				p1++;
+			}else if(type1 == OP_QUESTION_SELECT){
+				int end = tokens.size();
+				while(++p2<end) {
+					int type2 = tokens.get(p2).getType();
+					if (type2 > 0) {// op
+						if (dep == 0
+								&& getPriority(type2) <= getPriority(OP_QUESTION)) {
+							pos = p2;
+//							System.out.println("###########");
+							break;
+						}
+						if (type2 == BRACKET_BEGIN) {
+							dep++;
+						} else if (type2 == BRACKET_END) {
+							dep--;
+						}
+					}
+				} 
+				if(pos>0){
+					tokens.add(pos, new TokenImpl(BRACKET_END, null));
+				}else{
+					tokens.add(new TokenImpl(BRACKET_END, null));
+				}
+			}
+		}
 	}
 
 	private int getPriority(int type) {
@@ -82,13 +138,6 @@ public class ExpressionTokenizer extends JSONTokenizer {
 		//1?0?5:7:3 ==>7
 		//1?0?5:0?11:13:3 ==>13
 		if(p2 <= p1){
-			if(p2 == p1){
-				if(t2 == OP_QUESTION_SELECT){
-					return t1 == OP_QUESTION;
-				}else if(t2 == OP_QUESTION){
-					return t1 != OP_QUESTION_SELECT;
-				}
-			}
 			return true;
 		}else{
 			return false;
@@ -434,5 +483,9 @@ public class ExpressionTokenizer extends JSONTokenizer {
 	private void addMap() {
 		addToken(new TokenImpl(BRACKET_BEGIN, null));
 		addToken(new TokenImpl(VALUE_NEW_MAP, null));
+	}
+	public static void main(String[] args){
+		Expression el = ExpressionFactoryImpl.getInstance().create("1?0?5:7:3");
+		Assert.assertEquals((true?false?5:7:3),el.evaluate(""));
 	}
 }

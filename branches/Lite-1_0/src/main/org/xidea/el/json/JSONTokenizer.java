@@ -104,10 +104,10 @@ public class JSONTokenizer {
 		}
 	}
 
-	private long parseHex(int i) {
+	private long parseHex() {
 		long lvalue = 0;//
-		while (i < end) {
-			char c = value.charAt(i++);
+		while (start < end) {
+			char c = value.charAt(start++);
 			if (c >= '0' && c <= '9') {
 				lvalue = (lvalue << 4) + (c - '0');
 			} else if (c >= 'A' && c <= 'F') {
@@ -115,102 +115,145 @@ public class JSONTokenizer {
 			} else if (c >= 'a' && c <= 'f') {
 				lvalue = (lvalue << 4) + (c - 'a' + 10);
 			} else {
-				i--;
+				start--;
 				break;
 			}
 		}
-		start = i;
 		return lvalue;
+	}
+	private int parseOctal() {
+		int lvalue = 0;//
+		while (start < end) {
+			char c = value.charAt(start++);
+			if (c >= '0' && c < '8') {
+				lvalue = (lvalue << 3) + (c - '0');
+			} else {
+				start--;
+				break;
+			}
+		}
+		return lvalue;
+	}
+	private void seekDecimal() {
+		while (start < end) {
+			char c = value.charAt(start++);
+			if (c >= '0' && c <= '9') {
+			} else {
+				start--;
+				break;
+			}
+		}
+	}
+	private void seekNegative(){
+		char c = value.charAt(start++);
+		if(c  == '-' || c == '+'){
+		}else{
+			start--;
+		}
+		
+	}
+	private Number parseZero(boolean neg){
+		if (start < end) {
+			char c = value.charAt(start++);
+			if (c == 'x' || c == 'X') {
+				long value = parseHex();
+				if(neg){
+					value = -value;
+				}
+				return value;
+			} else if(c > '0' && c<='7'){
+				start--;
+				int value = parseOctal();
+				if(neg){
+					value = -value;
+				}
+				return value;
+			} else if(c == '.') {
+				start--;
+				return parseFloat(start-1);
+			}else{
+				start--;
+				return 0;
+			}
+		} else {
+			return 0;
+		}
+	}
+
+	/**
+	 * 当前值为 . 或者 E，e
+	 * @param begin
+	 * @return
+	 */
+	private Number parseFloat(final int begin) {
+		boolean isFloatingPoint = false;
+		char next = value.charAt(start);
+		if (next == '.') {
+			start++;
+			int p = start;
+			seekDecimal();
+			if(start == p){//复位
+				start--;
+				String ns = value.substring(begin, start);
+				return Long.parseLong(ns);
+			}else{
+				isFloatingPoint=true;
+				if(start<end){
+					next = value.charAt(start);
+				}else{
+					next = 0;
+				}
+			}
+		}
+		if (next == 'E' || next == 'e') {
+			start++;
+			isFloatingPoint=true;
+			seekNegative();
+			seekDecimal();
+		}
+		String ns = value.substring(begin, start);
+//		System.out.println(ns);
+		if (isFloatingPoint) {
+			return Float.parseFloat(ns);
+		} else {
+			return Long.parseLong(ns);
+		}
 	}
 	//还是改成JDK自己的parser？
 	protected Number findNumber() {
-		int i = start;// skip -;
-		boolean isFloatingPoint = false;
-		char c = value.charAt(i++);
-		boolean neg;
-		if (c == '-') {
-			c = value.charAt(i++);
-			neg = true;
+		//10进制优化
+		final int begin = start;
+		boolean nag = false;
+		char c = value.charAt(start++);
+		if(c == '+'){
+			c = value.charAt(start++);
+		}else if( c == '-'){
+			nag = true;
+			c = value.charAt(start++);
+		}
+		
+		if(c == '0'){
+			return parseZero(nag);
 		}else{
-			neg =false;
-		}
-		if (c == '0') {
-			if (i < end) {
-				c = value.charAt(i++);
-				if (c == 'x' || c == 'X') {
-					long value = parseHex(i);
-					if(neg){
-						value = -value;
+			long ivalue = c - '0';
+			while (start < end) {
+				c = value.charAt(start++);
+				if (c >= '0' && c <= '9') {
+					ivalue = ivalue * 10 + (c - '0');
+				} else {
+					if (c == '.' || c == 'E') {
+						start--;
+						return parseFloat(begin);
+					} else {
+						start--;
+						break;
 					}
-					return value;
-				} else {
-					c = '0';
-					i--;
-				}
-			} else {
-				start = i;
-				return 0;
-			}
-		}
-		long ivalue = c - '0';
-		while (i < end) {
-			c = value.charAt(i++);
-			if (c >= '0' && c <= '9') {
-				ivalue = (ivalue * 10) + (c - '0');
-			} else {
-				break;
-			}
-		}
-		if (c == '.') {
-			c = value.charAt(i++);
-			while (c >= '0' && c <= '9') {
-				isFloatingPoint = true;
-				if (i < end) {
-					c = value.charAt(i++);
-				} else {
-					break;
 				}
 			}
-			if (!isFloatingPoint) {
-				// c = '.';
-				// i--;
-				start = i - 2;
-				if(neg){
-					ivalue = -ivalue;
-				}
-				return  ivalue;
-			}
-		}
-		if (c == 'E' || c == 'e') {
-			isFloatingPoint = true;
-			c = value.charAt(i++);
-			if (c == '+' || c == '-') {
-				c = value.charAt(i++);
-			}
-			while (c >= '0' && c <= '9') {
-				if (i < end) {
-					c = value.charAt(i++);
-				} else {
-					break;
-				}
-			}
-		} else {
-			c = value.charAt(i - 1);
-			if (c < '0' || c > '9') {
-				i--;
-			}
-		}
-
-		if (isFloatingPoint) {
-			return /*flag **/ Float.parseFloat(value.substring(start, start = i));
-		} else {
-			start = i;
-			if(neg){
-				ivalue = -ivalue;
-			}
-			return ivalue;
+			return nag ? -ivalue : ivalue;
 		}
 	}
+
 
 	protected String findId() {
 		int p = start;
@@ -223,7 +266,7 @@ public class JSONTokenizer {
 			}
 			return (value.substring(start, start = p));
 		}
-		throw new ExpressionSyntaxException("无效id");
+		throw new ExpressionSyntaxException("无效id"+value);
 
 	}
 
@@ -271,12 +314,12 @@ public class JSONTokenizer {
 					break;
 				case 'u':
 					buf.append((char) Integer.parseInt(value.substring(
-							start , start + 4), 16));
+							start, start + 4), 16));
 					start += 4;
 					break;
 				case 'x':
 					buf.append((char) Integer.parseInt(value.substring(
-							start , start + 2), 16));
+							start, start + 2), 16));
 					start += 2;
 					break;
 				}
