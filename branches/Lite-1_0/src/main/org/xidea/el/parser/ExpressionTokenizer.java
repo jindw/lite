@@ -61,52 +61,38 @@ public class ExpressionTokenizer extends JSONTokenizer {
 		int p1 = tokens.size();
 		while (p1-- > 0) {
 			int type1 = tokens.get(p1).getType();
-			int dep = 0;
-			int p2 = p1;
-			int pos = 0;
-			if (type1 == OP_QUESTION ) { //(a?b
-				while(p2-->0) {
-					int type2 = tokens.get(p2).getType();
-					if (type2 > 0) {// op
-						if (dep == 0
-								&& getPriority(type2) <= getPriority(OP_QUESTION)) {
-							pos = p2+1;
-							break;
-						}
-						if (type2 == BRACKET_BEGIN) {
-							dep++;
-						} else if (type2 == BRACKET_END) {
-							dep--;
-						}
-					}
-				} 
-				tokens.add(pos, new TokenImpl(BRACKET_BEGIN, null));
+			if (type1 == OP_QUESTION) { // (a?b
+				int pos = getSelectRange(p1, -1, -1);
+				tokens.add(pos + 1, new TokenImpl(BRACKET_BEGIN, null));
 				p1++;
-			}else if(type1 == OP_QUESTION_SELECT){
+			} else if (type1 == OP_QUESTION_SELECT) {
 				int end = tokens.size();
-				while(++p2<end) {
-					int type2 = tokens.get(p2).getType();
-					if (type2 > 0) {// op
-						if (dep == 0
-								&& getPriority(type2) <= getPriority(OP_QUESTION)) {
-							pos = p2;
-//							System.out.println("###########");
-							break;
-						}
-						if (type2 == BRACKET_BEGIN) {
-							dep++;
-						} else if (type2 == BRACKET_END) {
-							dep--;
-						}
+				int pos = getSelectRange(p1, 1, end);
+				tokens.add(pos, new TokenImpl(BRACKET_END, null));
+			}
+		}
+	}
+
+	private int getSelectRange(int p2, int inc, int end) {
+		int dep = 0;
+		while ((p2 += inc) != end) {
+			int type2 = tokens.get(p2).getType();
+			if (type2 > 0) {// op
+				if (type2 == BRACKET_BEGIN) {
+					dep += inc;
+				} else if (type2 == BRACKET_END) {
+					dep -= inc;
+				} else {
+					if (dep == 0 && getPriority(type2) <= getPriority(OP_QUESTION)) {
+						return p2;
 					}
-				} 
-				if(pos>0){
-					tokens.add(pos, new TokenImpl(BRACKET_END, null));
-				}else{
-					tokens.add(new TokenImpl(BRACKET_END, null));
+				}
+				if (dep < 0) {
+					return p2;
 				}
 			}
 		}
+		return inc > 0 ? end : -1;
 	}
 
 	private int getPriority(int type) {

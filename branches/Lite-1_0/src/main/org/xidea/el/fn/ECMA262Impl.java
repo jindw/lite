@@ -496,13 +496,25 @@ public abstract class ECMA262Impl {
 				if (text.indexOf('.') >= 0) {
 					return Float.parseFloat(text);
 				}
-				if (text.startsWith("0x")) {
-					return parseNumber(text.substring(2), 16);
-				} else if (text.startsWith("0")) {
-					return parseNumber(text.substring(1), 8);
-				} else {
-					return parseNumber(text, 10);
+				if(text.length()>1 ){
+					char c1 = text.charAt(0);
+					char c2 = text.charAt(1);
+					if(c1 == '+' || c1 == '-'){
+						c1=c2;
+						if(text.length()>2){
+							c2 = text.charAt(2);
+						}
+					}
+					if (c1 == '0') {
+						if (c2== 'x' || c2 == 'X') {
+							return parseNumber(text.substring(2), 16);
+						}
+						return parseNumber(text, 8);
+					}else if (text.indexOf('E' )>0|| text.indexOf('e')>0) {
+						return Float.parseFloat(text);
+					}
 				}
+				return parseNumber(text, 10);
 			} catch (NumberFormatException ex) {
 				return Double.NaN;
 			}

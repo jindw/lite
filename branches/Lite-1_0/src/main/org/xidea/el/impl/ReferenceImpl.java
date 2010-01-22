@@ -1,6 +1,8 @@
 package org.xidea.el.impl;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.xidea.el.Invocable;
@@ -12,12 +14,14 @@ class ReferenceImpl implements Reference {
 	private Object base;
 	private Object name;
 	private Class<? extends Object> type;
+	private static Map<String, Invocable> cachedInvocableMap = new HashMap<String, Invocable>();
 
 	public ReferenceImpl(Object base, Object name) {
 		this.base = base;
 		this.name = name;
 	}
-	public String toString(){
+
+	public String toString() {
 		return String.valueOf(this.getValue());
 	}
 
@@ -53,7 +57,9 @@ class ReferenceImpl implements Reference {
 			if (value != null) {
 				return value.getClass();
 			} else {
-				return ReflectUtil.getPropertyType(base.getClass(), name);
+				Class<? extends Object> t = ReflectUtil.getPropertyType(base
+						.getClass(), name);
+				return t == null ? Object.class : t;
 			}
 		}
 	}
@@ -65,8 +71,8 @@ class ReferenceImpl implements Reference {
 
 	static Invocable getInvocable(Reference ref,
 			Map<String, Map<String, Invocable>> methodMap, Object[] args) {
-		Invocable invocable = createInvocable(methodMap, ref.getBase(), ref.getName().toString(),
-				args);
+		Invocable invocable = createInvocable(methodMap, ref.getBase(), ref
+				.getName().toString(), args);
 		if (invocable == null) {
 			Object object = ref.getValue();
 			if (object instanceof Invocable) {
@@ -78,6 +84,7 @@ class ReferenceImpl implements Reference {
 		return invocable;
 	}
 
+	@SuppressWarnings("unchecked")
 	static Invocable createInvocable(
 			Map<String, Map<String, Invocable>> methodMap,
 			final Object thisObject, final String name, Object[] args) {
@@ -87,17 +94,35 @@ class ReferenceImpl implements Reference {
 			invocable = findInvocable(invocableMap, thisObject.getClass());
 		}
 		if (invocable == null) {
-			for (java.lang.reflect.Method method : thisObject.getClass()
-					.getMethods()) {
+			invocable = getCachedInvocable(thisObject.getClass(), name,
+					args.length);
+
+			if (invocable == null && thisObject instanceof Class) {
+				invocable = getCachedInvocable((Class) thisObject, name,
+						args.length);
+			}
+		}
+		return invocable;
+	}
+
+	static Invocable getCachedInvocable(final Class<? extends Object> clazz, final String name,
+			int length) {
+		String key = clazz.getName() + '.' + length + name;
+		Invocable result = cachedInvocableMap.get(key);
+		if (result == null && !cachedInvocableMap.containsKey(key)) {
+			ArrayList<Method> methods = new ArrayList<Method>();
+			for (Method method : clazz.getMethods()) {
 				if (method.getName().equals(name)
-						&& method.getParameterTypes().length == args.length) {
-					return createProxy(method);
+						&& method.getParameterTypes().length == length) {
+					methods.add(method);
 				}
 			}
-		} else {
-			return invocable;
+			if(methods.size()>0){
+				result = createProxy(methods.toArray(new Method[methods.size()]));
+			}
+			cachedInvocableMap.put(key, result);
 		}
-		return null;
+		return result;
 	}
 
 	static Invocable findInvocable(Map<String, Invocable> methodMap,
@@ -121,23 +146,27 @@ class ReferenceImpl implements Reference {
 		return null;
 	}
 
-	static Invocable createProxy(final java.lang.reflect.Method... methods) {
+	static Invocable createProxy(final Method... methods) {
 		return new Invocable() {
 			public Object invoke(Object thiz, Object... args) throws Exception {
-				nextMethod: for (java.lang.reflect.Method method : methods) {
+				nextMethod: for (Method method : methods) {
 					Class<? extends Object> clazzs[] = method
 							.getParameterTypes();
 					if (clazzs.length == args.length) {
 						for (int i = 0; i < clazzs.length; i++) {
 							Class<? extends Object> type = clazzs[i];
 							Object value = args[i];
+							if (type.isPrimitive()) {
+								type = NumberArithmetic.toWrapper(type);
+							}
 							if (Number.class.isAssignableFrom(type)) {
-								args[i] = NumberArithmetic.getValue(type,
+								value = NumberArithmetic.getValue(type,
 										ECMA262Impl.ToNumber(value));
 							} else if (String.class.isAssignableFrom(type)) {
-								args[i] = value == null ? null : String
+								value = value == null ? null : String
 										.valueOf(value);
 							}
+							args[i] = value;
 							if (value != null) {
 								if (!type.isInstance(value)) {
 									continue nextMethod;
@@ -145,7 +174,7 @@ class ReferenceImpl implements Reference {
 							}
 						}
 					}
-					//TODO:....
+					// TODO:....
 					method.setAccessible(true);
 					return method.invoke(thiz, args);
 				}
