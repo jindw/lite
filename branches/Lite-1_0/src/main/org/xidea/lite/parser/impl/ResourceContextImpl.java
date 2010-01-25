@@ -3,7 +3,6 @@ package org.xidea.lite.parser.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -60,9 +59,9 @@ public class ResourceContextImpl implements ResourceContext {
 	public URI createURI(String path, URI parentURI) {
 		try {
 			if (path.startsWith("/")) {
-				return new URL(this.base.toURL(), path.substring(1)).toURI();
+				return this.base.resolve(path.substring(1));
 			} else {
-				return new URL(parentURI != null ? parentURI.toURL() : this.base.toURL(), path).toURI();
+				return (parentURI != null ? parentURI : this.base).resolve(path);
 			}
 
 		} catch (Exception e) {
