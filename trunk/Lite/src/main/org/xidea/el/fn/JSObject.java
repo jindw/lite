@@ -16,7 +16,7 @@ abstract class JSObject implements Invocable {
 		}else{
 			Object[] args2 = new Object[params.length];
 			for(int i = args2.length-1;i>0;i--){
-				args2[i] = ECMA262Impl.ToValue(args.length>=i?args[i-1]:null,params[1]);
+				args2[i] = ECMA262Impl.ToValue(args.length>=i?args[i-1]:null,params[i]);
 			}
 			args2[0] = thiz;
 			return method.invoke(this,args2);
