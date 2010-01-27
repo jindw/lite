@@ -16,9 +16,9 @@ public class JSStringTest {
 	ExpressionFactory factory = new ExpressionFactoryImpl();
 	@Test
 	public void testString() throws Exception{
-		testELValue("'abcdefg'.charAt(1)","b");
-		testELValue("\"abcdefg\".indexOf('g')","6");
+		testELValue("\"abcdefg\".indexOf('g')",6);
 		testELValue("\"abcdefg\".replace(\"a\", \"1\")","1bcdefg");
+		testELValue("'abcdefg'.charAt(1)",'b');
 	}
 	public void testELValue(String exp,Object value) throws Exception{
 		Expression el = factory.create(exp);
