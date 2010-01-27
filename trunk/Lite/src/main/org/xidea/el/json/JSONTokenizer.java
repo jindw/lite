@@ -212,9 +212,9 @@ public class JSONTokenizer {
 			seekDecimal();
 		}
 		String ns = value.substring(begin, start);
-		System.out.println(ns);
+//		System.out.println(ns);
 		if (isFloatingPoint) {
-			return Float.parseFloat(ns);
+			return Double.parseDouble(ns);
 		} else {
 			return Long.parseLong(ns);
 		}

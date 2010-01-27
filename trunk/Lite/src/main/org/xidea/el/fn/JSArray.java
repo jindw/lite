@@ -11,39 +11,9 @@ import java.util.List;
 import org.xidea.el.Invocable;
 
 public class JSArray extends JSObject implements Invocable {
-	public static final String MEMBERS =
-	// 0-3
-	"slice,splice,concat,join" +
-	// 4-7
-			",push,pop,shift,unshift" +
-			// 8-9
-			",reverse,sort";
-
 	@SuppressWarnings("unchecked")
 	public Object invoke(Object thiz, Object... args) throws Exception {
-		List<Object> list = (List<Object>) toList(thiz);
-		switch (type) {
-		case 0:
-		case 1:
-			return slice(list, args);
-		case 2:
-			return concat(list, args);
-		case 3:
-			return join(list, args);
-		case 4:
-			return push(list, args);
-		case 5:
-			return pop(list, args);
-		case 6:
-			return shift(list, args);
-		case 7:
-			return unshift(list, args);
-		case 8:
-			return reverse(list, args);
-		case 9:
-			return sort(list, args);
-		}
-		throw new UnsupportedOperationException("不支持方法：" + type);
+		return method.invoke(toList(thiz), args);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -60,33 +30,40 @@ public class JSArray extends JSObject implements Invocable {
 		}
 		return thiz;
 	}
-
-	public Object slice(List<Object> thiz, Object... args) throws Exception {
-		int begin = getIntArg(args, 0, 0);
-		int size = thiz.size();
-		int end = getIntArg(args, 1, size);
-		return thiz.subList(toValid(begin, size), toValid(end, size));
-	}
-
-	private int toValid(int begin, int size) {
-		if(begin<0){
-			begin = Math.max(begin+size, 0);
+	static int toSliceRange(int pos, int size) {
+		if(pos<0){
+			pos = Math.max(pos+size, 0);
 		}else{
-			begin = Math.min(begin, size);
+			pos = Math.min(pos, size);
 		}
-		return begin;
+		return pos;
 	};
+
+
+	public Object splice(List<Object> thiz, Object... args) throws Exception {
+		return slice(thiz,args);
+	}
+	public Object slice(List<Object> thiz, Object... args) throws Exception {
+		int size = thiz.size();
+		int begin = toSliceRange(ECMA262Impl.getIntArg(args, 0, 0),size);
+		int end = toSliceRange(ECMA262Impl.getIntArg(args, 1, size),size);
+		if(begin<end){
+			return thiz.subList(begin, end);
+		}else{
+			return Collections.EMPTY_LIST;
+		}
+	}
 
 	public Object join(List<Object> thiz, Object... args) throws Exception {
 		StringBuilder buf = new StringBuilder();
 		String joiner = null;
 		for (Object o : thiz) {
 			if (joiner == null) {
-				joiner = getStringArg(args, 0, ",");
+				joiner = ECMA262Impl.getStringArg(args, 0, ",");
 			} else {
 				buf.append(joiner);
 			}
-			buf.append(ToPrimitive(o, String.class));
+			buf.append(ECMA262Impl.ToPrimitive(o, String.class));
 
 		}
 		return buf.toString();
@@ -143,7 +120,7 @@ public class JSArray extends JSObject implements Invocable {
 
 	@SuppressWarnings("unchecked")
 	public Object sort(List<Object> thiz, Object... args) {
-		Object o = getArg(args, 0, null);
+		Object o = ECMA262Impl.getArg(args, 0, null);
 		Comparator<Object> c = null;
 		if (o instanceof Comparator) {
 			c = (Comparator<Object>) o;

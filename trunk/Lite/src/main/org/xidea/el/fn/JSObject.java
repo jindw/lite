@@ -1,32 +1,29 @@
 package org.xidea.el.fn;
 
+import java.lang.reflect.Method;
+
 import org.xidea.el.Invocable;
-import org.xidea.el.impl.OperationStrategyImpl;
 
-abstract class JSObject extends ECMA262Impl implements Invocable {
-	int type;
-	String name;
+abstract class JSObject implements Invocable {
+	protected Method method;
+	public Class<?>[] params;
+	public boolean directly;
 
-	@SuppressWarnings("unchecked")
-	static void setup(OperationStrategyImpl calculater, Class<? extends JSObject> impl,
-			Class... forClass) {
-		try {
-			String[] members = ((String) impl.getField("MEMBERS").get(null)).split("[,]");
-			for (int i = 0; i < members.length; i++) {
-				JSObject inv = impl.newInstance();
-				inv.name = members[i];
-				inv.type = i;
-				for (Class type : forClass) {
-					calculater.addMethod(type, members[i], inv);
-				}
 
+	public Object invoke(Object thiz, Object... args) throws Exception {
+		if(directly){
+			return method.invoke(thiz, (Object)args);
+		}else{
+			Object[] args2 = new Object[params.length];
+			for(int i = args2.length-1;i>0;i--){
+				args2[i] = ECMA262Impl.ToValue(args.length>i?args[i]:null,params[1]);
 			}
-		} catch (Exception e) {
+			return method.invoke(thiz, (Object)args2);
 		}
-
 	}
 
+
 	public String toString() {
-		return name;
+		return method.getName();
 	}
 }
