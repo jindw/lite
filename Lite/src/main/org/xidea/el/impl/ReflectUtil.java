@@ -255,6 +255,10 @@ public abstract class ReflectUtil {
 					} else if (context instanceof List<?>) {
 						return ((List<?>) context).get(toIndex(key));
 					}
+				}else if (context instanceof String) {
+					if (LENGTH.equals(key)) {
+						return ((String)context).length();
+					}
 				}
 				if (context instanceof Map) {
 					return ((Map<?, ?>) context).get(key);

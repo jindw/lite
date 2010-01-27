@@ -1,6 +1,7 @@
 package org.xidea.el.fn;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Method;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Collections;
@@ -29,10 +30,35 @@ public abstract class ECMA262Impl {
 			long[].class, short[].class, byte[].class, char[].class };
 
 	public static void setup(OperationStrategyImpl calculater) {
-		JSObject.setup(calculater, JSArray.class, ARRAY_CLASSES);
-		JSObject.setup(calculater, JSNumber.class, Number.class);
+		setup(calculater, JSArray.class, ARRAY_CLASSES);
+		setup(calculater, JSNumber.class, Number.class);
+		setup(calculater, JSString.class, String.class);
 	}
+	@SuppressWarnings("unchecked")
+	public static void setup(OperationStrategyImpl calculater,
+			Class<? extends JSObject> impl, Class... forClass) {
+		try {
+			Method[] dms = impl.getMethods();
+			for (Method method : dms) {
+				if (method.getDeclaringClass() == impl) {
+					JSObject inv = impl.newInstance();
+					Class<?>[] params = method.getParameterTypes();
+					inv.method = method;
+					inv.params = params;
+					inv.directly = params.length ==2 && params[1] == Object[].class;
+					try {
+						method.setAccessible(true);
+					} catch (Exception e) {
+					}
+					for (Class type : forClass) {
+						calculater.addMethod(type, method.getName(), inv);
+					}
+				}
+			}
+		} catch (Exception e) {
+		}
 
+	}
 	public static void setup(Map<String, Object> globalMap) {
 		globalMap.put("encodeURI", new URI(true));
 		globalMap.put("decodeURI", new URI(false));
@@ -64,8 +90,8 @@ public abstract class ECMA262Impl {
 				"exp", "floor", "log", "round",
 				// 11,13
 				"sin", "sqrt", "tan"
-				// 14,15,16,17
-				, "random", "min", "max", "pow" };
+				// 14,15,16,17+18
+				, "random", "min", "max", "pow" ,"atan2"};
 		final int type;
 
 		MathInvocable(int type) {
@@ -91,6 +117,8 @@ public abstract class ECMA262Impl {
 		}
 
 		public Object invoke(Object thiz, Object... args) throws Exception {
+
+			Number n1 = getNumberArg(args, 0, Double.NaN);
 			switch (type) {
 			case 14:
 				// 15.8.2.14 random()
@@ -103,15 +131,9 @@ public abstract class ECMA262Impl {
 				return mimax(true, args);// max
 			case 17:
 				// 15.8.2.13 pow(x, y)
-				Number x = getNumberArg(args, 0, Double.NaN);
-				Number y = getNumberArg(args, 1, Double.NaN);
-				return Math.pow(x.doubleValue(), y.doubleValue());
-
-			}
-
-			Number n1 = getNumberArg(args, 0, Double.NaN);
-
-			switch (type) {
+				return Math.pow(n1.doubleValue(), getNumberArg(args, 1, Double.NaN).doubleValue());
+			case 18:
+				return atan2(n1.doubleValue(), getNumberArg(args, 1, Double.NaN).doubleValue());
 			case 0:
 				return abs(n1);
 			case 1:
@@ -203,6 +225,10 @@ public abstract class ECMA262Impl {
 		// 15.8.2.4 atan(x)
 		public Object atan(Number x) {
 			return Math.atan(x.doubleValue());
+		}
+		// 15.8.2.5 atan2(x)
+		public Object atan2(Number x,Number y) {
+			return Math.atan2(x.doubleValue(),y.doubleValue());
 		}
 
 		// 15.8.2.6 ceil(x)
@@ -337,11 +363,8 @@ public abstract class ECMA262Impl {
 		public Object invoke(Object thiz, Object... args) throws Exception {
 			Object o = getArg(args, 0, Float.NaN);
 			Number number = ToNumber(o);
-			if (number instanceof Float || number instanceof Double) {
-				float d = number.floatValue();
-				return check(d);
-			}
-			return true;
+			float d = number.floatValue();
+			return check(d);
 		}
 
 		protected Object check(float d) {
@@ -355,9 +378,11 @@ public abstract class ECMA262Impl {
 
 	public static class ParseNumber implements Invocable {
 		private static final Pattern INT_PARTTERN = Pattern
-				.compile("^0x[0-9a-f]+|^0+[0-7]*|^[0-9]+");
+			.compile("^[\\+\\-]?(0x[0-9a-fA-F]+" +
+					"|0+[0-7]*" +
+					"|[1-9][0-9]*)");
 		private static final Pattern FLOAT_PARTTERN = Pattern
-				.compile("^[0-9]*\\.[0-9]+");
+			.compile("^[\\+\\-]?[0-9]*(?:\\.[0-9]+)?");
 
 		private boolean parseFloat;
 
@@ -383,7 +408,7 @@ public abstract class ECMA262Impl {
 		protected Number parseFloat(String text) {
 			Matcher matcher = FLOAT_PARTTERN.matcher(text);
 			if (matcher.find()) {
-				return Double.parseDouble(matcher.group());
+				return Double.parseDouble(matcher.group(0));
 			} else {
 				return Float.NaN;
 			}
@@ -392,16 +417,17 @@ public abstract class ECMA262Impl {
 		protected Number parseInt(String text) {
 			Matcher matcher = INT_PARTTERN.matcher(text);
 			if (matcher.find()) {
-				text = matcher.group();
-				if (text.startsWith("0x")) {
-					return parseInt(text, 16);
-				} else if (text.startsWith("0")) {
+				text = matcher.group(0);
+				String n = matcher.group(1);
+				if (n.startsWith("0x")) {
+					return Long.parseLong(text.replaceFirst("0x", ""), 16);
+				} else if (n.startsWith("0")) {
 					return parseInt(text, 8);
 				} else {
 					return parseInt(text, 10);
 				}
 			} else {
-				return Float.NaN;
+				return parseFloat(text).intValue();
 			}
 		}
 
@@ -423,19 +449,22 @@ public abstract class ECMA262Impl {
 		}
 	}
 
-	public static String getStringArg(Object[] args, int index,
+	static String getStringArg(Object[] args, int index,
 			String defaultValue) {
-		Object value = getArg(args, index, defaultValue);
-		return String.valueOf(ToPrimitive(value, String.class));
+		Object value = getArg(args, index, null);
+		if(value == null){
+			return null;
+		}
+		return ToString(value);
 	}
 
-	public static Number getNumberArg(Object[] args, int index,
+	static Number getNumberArg(Object[] args, int index,
 			Number defaultValue) {
 		Object value = getArg(args, index, defaultValue);
 		return ToNumber(value);
 	}
 
-	public static int getIntArg(Object[] args, int index,
+	static int getIntArg(Object[] args, int index,
 			Integer defaultValue) {
 		Number value = getNumberArg(args, index, defaultValue);
 		return value.intValue();
@@ -460,7 +489,8 @@ public abstract class ECMA262Impl {
 			return false;
 		} else if (value instanceof Number) {
 			if (value instanceof Float || value instanceof Double) {
-				return ((Number) value).floatValue() != 0;
+				float f = ((Number) value).floatValue();
+				return  f != 0 && f==f;
 			} else if (value instanceof Long) {
 				return ((Number) value).longValue() != 0;
 			} else {
@@ -562,5 +592,31 @@ public abstract class ECMA262Impl {
 				return String.valueOf(value);
 			}
 		}
+	}
+	public static Object ToValue(Object value, Class<?> type) {
+		if(type == String.class || type == Character.class){
+			return value == null?null:value.toString();
+		}
+		type = NumberArithmetic.toWrapper(type);
+		
+		if(Number.class.isAssignableFrom(type)){
+			Number n = ToNumber(value);
+			return NumberArithmetic.getValue(type, n);
+		}
+		
+		//Boolean
+		if(type == Boolean.class){
+			return ToBoolean(ToPrimitive(value,type));
+		}
+		return value;
+	}
+	public static String ToString(Object value) {
+		value = ToPrimitive(value, String.class);
+		if(value instanceof Number){
+			if(((Number)value).doubleValue() == 0){
+				return "0";
+			}
+		}
+		return String.valueOf(value);
 	}
 }

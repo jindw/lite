@@ -2,7 +2,6 @@ package org.xidea.el.operation.test;
 
 import static org.junit.Assert.assertEquals;
 
-import java.lang.reflect.Constructor;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -10,28 +9,15 @@ import org.junit.Test;
 import org.xidea.el.Expression;
 import org.xidea.el.ExpressionFactory;
 import org.xidea.el.Invocable;
-import org.xidea.el.fn.ECMA262Impl;
 import org.xidea.el.impl.ExpressionFactoryImpl;
 
 public class ECMA262FunctionTest {
 	ExpressionFactory factory = new ExpressionFactoryImpl();
-	Invocable encodeURI = buildInvocable(ECMA262Impl.URI.class, true);
-	Invocable decodeURI = buildInvocable(ECMA262Impl.URI.class, false);
-	Invocable encodeURIComponent = buildInvocable(
-			ECMA262Impl.URIComponent.class, true);
-	Invocable decodeURIComponent = buildInvocable(
-			ECMA262Impl.URIComponent.class, false);
+	Invocable encodeURI = (Invocable)factory.create("encodeURI").evaluate("");
+	Invocable decodeURI = (Invocable)factory.create("decodeURI").evaluate("");
+	Invocable encodeURIComponent = (Invocable)factory.create("encodeURIComponent").evaluate("");
+	Invocable decodeURIComponent = (Invocable)factory.create("decodeURIComponent").evaluate("");
 
-	static Invocable buildInvocable(Class<? extends Invocable> clz, boolean flag) {
-		try {
-			Constructor<? extends Invocable> c = clz.getDeclaredConstructor(Boolean.TYPE);
-			c.setAccessible(true);
-			return c.newInstance(flag);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
 
 	@Test
 	public void testEncodeURLComponentEL() throws Exception {
