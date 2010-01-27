@@ -8,7 +8,6 @@ import java.util.Map;
 import org.xidea.el.Invocable;
 import org.xidea.el.Reference;
 import org.xidea.el.fn.ECMA262Impl;
-import org.xidea.el.fn.NumberArithmetic;
 
 class ReferenceImpl implements Reference {
 	private Object base;
@@ -147,6 +146,12 @@ class ReferenceImpl implements Reference {
 	}
 
 	static Invocable createProxy(final Method... methods) {
+		for (Method method : methods) {
+			try{
+				method.setAccessible(true);
+			}catch (Exception e) {
+			}
+		}
 		return new Invocable() {
 			public Object invoke(Object thiz, Object... args) throws Exception {
 				nextMethod: for (Method method : methods) {
@@ -156,16 +161,7 @@ class ReferenceImpl implements Reference {
 						for (int i = 0; i < clazzs.length; i++) {
 							Class<? extends Object> type = clazzs[i];
 							Object value = args[i];
-							if (type.isPrimitive()) {
-								type = NumberArithmetic.toWrapper(type);
-							}
-							if (Number.class.isAssignableFrom(type)) {
-								value = NumberArithmetic.getValue(type,
-										ECMA262Impl.ToNumber(value));
-							} else if (String.class.isAssignableFrom(type)) {
-								value = value == null ? null : String
-										.valueOf(value);
-							}
+							value = ECMA262Impl.ToValue(value, type);
 							args[i] = value;
 							if (value != null) {
 								if (!type.isInstance(value)) {
@@ -174,8 +170,6 @@ class ReferenceImpl implements Reference {
 							}
 						}
 					}
-					// TODO:....
-					method.setAccessible(true);
 					return method.invoke(thiz, args);
 				}
 				return null;

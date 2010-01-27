@@ -594,8 +594,22 @@ public abstract class ECMA262Impl {
 		}
 	}
 	public static Object ToValue(Object value, Class<?> type) {
-		if(type == String.class || type == Character.class){
+		if(type == String.class){
 			return value == null?null:value.toString();
+		}else if(type == Character.class){
+			if(value == null){
+				return (char)0;
+			}
+			value = ToPrimitive(value, String.class);
+			if(value instanceof Number){
+				return (char)((Number)value).intValue();
+			}
+			String text = (String)value;
+			if(text.length()>0){
+				return text.charAt(0);
+			}else{
+				return 0;
+			}
 		}
 		type = NumberArithmetic.toWrapper(type);
 		
