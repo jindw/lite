@@ -196,9 +196,9 @@ public class Template {
 			Writer out, boolean encodeXML) throws IOException {
 		Object value = ((Expression) data[1]).evaluate(context);
 		if (encodeXML && value != null) {
-			printXMLText(String.valueOf(value), out);
+			printXMLText(toString(value), out);
 		} else {
-			out.write(String.valueOf(value));
+			out.write(toString(value));
 		}
 	}
 
@@ -291,15 +291,23 @@ public class Template {
 		renderList(context, (Object[]) data[1], buf);
 		context.put(data[2], buf.toString());
 	}
+	protected String toString(Object value){
+		if(value instanceof Number){
+			if(((Number)value).floatValue() == 0.0f){
+				return "0";
+			}
+		}
+		return String.valueOf(value);
+	}
 
 	protected void processAttribute(Context context, Object[] data, Writer out)
 			throws IOException {
 		Object result = ((Expression) data[1]).evaluate(context);
 		if (data[2] == null) {
-			printXMLAttribute(String.valueOf(result), out, false);
+			printXMLAttribute(toString(result), out, false);
 		} else if (result != null) {
 			out.write((String) data[2]);// prefix
-			printXMLAttribute(String.valueOf(result), out, false);
+			printXMLAttribute(toString(result), out, false);
 			out.write('"');
 		}
 

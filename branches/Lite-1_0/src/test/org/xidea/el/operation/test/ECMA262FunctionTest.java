@@ -16,10 +16,10 @@ import org.xidea.el.impl.ExpressionFactoryImpl;
 
 public class ECMA262FunctionTest {
 	ExpressionFactory factory = new ExpressionFactoryImpl();
-	Invocable encodeURI = new ECMA262Impl.URI(true);
-	Invocable decodeURI = new ECMA262Impl.URI(false);;
-	Invocable encodeURIComponent = new ECMA262Impl.URIComponent(true);
-	Invocable decodeURIComponent = new ECMA262Impl.URIComponent(false);
+	Invocable encodeURI = (Invocable)factory.create("encodeURI").evaluate("");
+	Invocable decodeURI = (Invocable)factory.create("decodeURI").evaluate("");
+	Invocable encodeURIComponent = (Invocable)factory.create("encodeURIComponent").evaluate("");
+	Invocable decodeURIComponent = (Invocable)factory.create("decodeURIComponent").evaluate("");
 
 	@Test
 	public void testEncodeURLComponentEL() throws Exception{
