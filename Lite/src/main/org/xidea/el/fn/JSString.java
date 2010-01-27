@@ -34,7 +34,7 @@ public class JSString extends JSObject implements Invocable {
 	//	15.5.4.1 String.fromCharCode([ char0[, char1 [,...]]]) 
 	public String fromCharCode(String thiz, Object[] args) {
 		char[] codes = new char[args.length];
-		for (int i = codes.length - 1; i > 0; i--) {
+		for (int i = codes.length - 1; i >= 0; ) {
 			codes[i] = (char) ECMA262Impl.ToNumber(args[i]).intValue();
 		}
 		return new String(codes);
@@ -53,7 +53,7 @@ public class JSString extends JSObject implements Invocable {
 	// 15.5.4.6 String.prototype.concat([ string1[, string2 [,...]]])
 	public String concat(String thiz, Object[] args) {
 		StringBuilder buf = new StringBuilder(thiz);
-		for (int i = args.length - 1; i > 0; i--) {
+		for (int i = args.length - 1; i >= 0; ) {
 			buf.append( ECMA262Impl.ToString(args[i]));
 		}
 		return buf.toString();
