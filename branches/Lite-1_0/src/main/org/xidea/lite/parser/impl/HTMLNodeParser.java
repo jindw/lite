@@ -159,7 +159,7 @@ public class HTMLNodeParser extends AbstractHTMLNodeParser implements NodeParser
 	}
 
 	protected List<Object> buildCheckedAttribute(ParseContext context,
-			String name, String value, String attributeName) {
+			final String name, String value, String attributeName) {
 		List<Object> attributes = new ArrayList<Object>();
 		final String valueEL;
 		if (value.startsWith("${") && value.endsWith("}")) {
@@ -168,7 +168,7 @@ public class HTMLNodeParser extends AbstractHTMLNodeParser implements NodeParser
 		} else {
 			valueEL = JSONEncoder.encode(value);
 		}
-		final String collectionEL = name;
+		final String collectionEL = name.replaceFirst("\\[\\]\\s*$", "");
 		attributes
 				.add(new Object[] {
 						Template.IF_TYPE,
