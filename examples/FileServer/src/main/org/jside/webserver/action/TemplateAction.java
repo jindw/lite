@@ -5,11 +5,10 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jside.webserver.HttpUtil;
+import org.jside.webserver.RequestUtil;
 import org.jside.webserver.RequestContext;
 import org.xidea.lite.TemplateEngine;
 
@@ -57,7 +56,7 @@ public class TemplateAction extends TemplateEngine {
 	}
 
 	protected void reset(RequestContext requestContext) {
-		URL newRoot = requestContext.getResource("/");
+		URI newRoot = requestContext.getResource("/");
 		if (newRoot != null) {
 			if (!newRoot.equals(root)) {
 				root = newRoot;
@@ -70,9 +69,8 @@ public class TemplateAction extends TemplateEngine {
 		try {
 			if (baseURI == null) {
 				RequestContext context = RequestContext.get();
-				URL url = context.getResource(pagePath);
-				if (url != null) {
-					URI uri = url.toURI();
+				URI uri = context.getResource(pagePath);
+				if (uri != null) {
 					uri = toExistResource(uri);
 					if (uri != null) {
 						return uri;
@@ -100,7 +98,7 @@ public class TemplateAction extends TemplateEngine {
 	private URI toExistResource(URI uri) throws MalformedURLException {
 		File file = null;
 		if (uri.getScheme().equals("file")) {
-			file = HttpUtil.getFile(uri.toURL());
+			file = RequestUtil.getFile(uri.toURL());
 		//}else if (uri.getScheme().equals("classpath")) {
 		}
 		if (file != null) {

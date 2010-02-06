@@ -4,7 +4,7 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URI;
 
-import org.jside.webserver.HttpUtil;
+import org.jside.webserver.RequestUtil;
 import org.xidea.lite.Template;
 import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.impl.DecoratorContextImpl;
@@ -24,14 +24,10 @@ public class HotTemplateAction extends TemplateAction {
 		@Override
 		protected Template createTemplate(String path, ParseContext parseContext) {
 			URI config = getResource("/WEB-INF/decorators.xml");
-			try {
-				if (config != null && !config.equals(decoratorConfig)) {
-					File file = HttpUtil.getFile(config.toURL());
-					decoratorContext = new DecoratorContextImpl(config, file);
-					decoratorConfig = config;
-				}
-			} catch (MalformedURLException e) {
-				e.printStackTrace();
+			if (config != null && !config.equals(decoratorConfig)) {
+				File file = RequestUtil.getFile(config);
+				decoratorContext = new DecoratorContextImpl(config, file);
+				decoratorConfig = config;
 			}
 			return super.createTemplate(path, parseContext);
 		}

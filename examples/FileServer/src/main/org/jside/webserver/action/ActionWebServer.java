@@ -1,13 +1,13 @@
 package org.jside.webserver.action;
 
 import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jside.webserver.HttpUtil;
+import org.jside.webserver.RequestUtil;
 import org.jside.webserver.MutiThreadWebServer;
 import org.jside.webserver.RequestContext;
 
@@ -16,7 +16,7 @@ public class ActionWebServer extends MutiThreadWebServer {
 	private static final Log log = LogFactory.getLog(ActionWebServer.class);
 	protected List<ActionInvocation> invocationList = new ArrayList<ActionInvocation>();
 
-	public ActionWebServer(URL webBase) {
+	public ActionWebServer(URI webBase) {
 		super(webBase);
 	}
 
@@ -55,6 +55,6 @@ public class ActionWebServer extends MutiThreadWebServer {
 				}
 			}
 		}
-		HttpUtil.printResource(new URL(webBase, uri.substring(1)));
+		RequestUtil.printResource(webBase.resolve(uri.substring(1)));
 	}
 }

@@ -12,7 +12,7 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.HashMap;
 
-import org.jside.webserver.HttpUtil;
+import org.jside.webserver.RequestUtil;
 import org.jside.webserver.RequestContext;
 import org.jside.webserver.action.ActionWebServer;
 import org.jside.webserver.action.TemplateAction;
@@ -71,10 +71,10 @@ public class FileManager {
 				}
 
 			} else {
-				HttpUtil.sendRedirect(contextPath + path + "/");
+				RequestUtil.sendRedirect(contextPath + path + "/");
 			}
 		} else {
-			HttpUtil.printResource(file);
+			RequestUtil.printResource(file);
 		}
 	}
 
@@ -119,7 +119,7 @@ public class FileManager {
 			}
 		}
 		href = URLEncoder.encode(href, "UTF-8").replace("%2F", "/");
-		HttpUtil.sendRedirect(href);
+		RequestUtil.sendRedirect(href);
 		OutputStream out = context.getOutputStream();
 		StringBuilder buf = new StringBuilder("<a href='");
 		buf.append(href).append("'>");
