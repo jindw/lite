@@ -2,18 +2,17 @@ package org.jside.webserver;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FilterOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
-import java.net.URL;
+import java.net.URI;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +42,6 @@ public class RequestContextImpl extends RequestContext {
 	private String requestLine;
 	private String method;
 	private String query;
-	private URL base;
 	public BufferedReader getInput(){
 		return cin;
 	}
@@ -52,7 +50,8 @@ public class RequestContextImpl extends RequestContext {
 		this.push(server);
 		this.push(this);
 		this.encoding = server.getEncoding();
-		base = server.getWebBase();
+		this.server = server;
+//		URI base = server.getWebBase();
 		try {
 			this.cin = new BufferedReader(
 					new InputStreamReader(sin, ISO_8859_1));
@@ -89,10 +88,6 @@ public class RequestContextImpl extends RequestContext {
 		return requestURI;
 	}
 
-	@Override
-	public String getQuery() {
-		return query;
-	}
 
 	public String getMethod() {
 		return method;
@@ -234,45 +229,44 @@ public class RequestContextImpl extends RequestContext {
 	}
 
 	@Override
-	public URL getResource(String path) {
+	public URI getResource(String path) {
 		if (path.startsWith("/")) {
 			path = path.substring(1);
 		}
+		return server.getWebBase();
+	}
+	@Override
+	public InputStream openStream(URI url){
 		try {
-			URL url = new URL(base , path);
-			if(!url.getProtocol().equals("file") || new File(URLDecoder.decode(url.getFile(),"UTF-8")).exists()){
-				return url;
+			if("file".equals(url.getScheme())){
+				File file = new File(URLDecoder.decode(url.getPath(),"UTF-8"));
+				if(file.exists()){
+					return new FileInputStream(file);
+				}
+				return null;
 			}
 			String host = findHeader("Host");
-			int p = host.indexOf(':');
-			if(p>0){
-				host = host.substring(0,p);
-			}
-			String jsideHome = System.getProperty("jside.home");
-			if(jsideHome != null){
-				File hostFile = new File(new File(jsideHome,host),path);
-				if(hostFile.exists()){
-					return hostFile.toURI().toURL();
-				}
-			}
-			String name = toResourceRoot(host);
-			return server.getClass().getClassLoader().getResource(name);
+			return getClassResource(host);
 		} catch (IOException e) {
 			log.warn(e);
 			return null;
 		}
 	}
-	private String toResourceRoot(String host) {
+	private InputStream getClassResource(String host) {
+		int p = host.indexOf(':');
+		if(p>0){
+			host = host.substring(0,p);
+		}
 		String[] data = host.split("[\\.]");
 		StringBuilder buf = new StringBuilder();
-		int p = data.length;
+		p = data.length;
 		while (p-- > 0) {
 			buf.append(data[p]);
 			buf.append('/');
 		}
 		buf.append("web/");
 		String name = buf.toString();
-		return name;
+		return server.getClass().getClassLoader().getResourceAsStream(name);
 	}
 
 	@Override
@@ -323,109 +317,3 @@ public class RequestContextImpl extends RequestContext {
 
 }
 
-class ResponseOutputStream extends FilterOutputStream {
-	static final String CONTENT_TYPE = "Content-Type";
-	private String httpVersion = "HTTP/1.1";
-	String status = "200 OK";
-	ArrayList<String> headers = new ArrayList<String>();
-
-	public ResponseOutputStream(OutputStream out) {
-		super(out);
-		headers.add("Server:JSA Server");
-		headers.add("Date:" + new Date());
-		headers.add("Connection:close");
-	}
-
-	void setContentType(String contentType) {
-		setHeader(CONTENT_TYPE + ':' + contentType);
-	}
-
-//	OutputStream getBase() {
-//		return out;
-//	}
-
-	public void addHeader(String value) {
-		int length = value.indexOf(':');
-		String name = value.substring(0, length);
-		if ("Server".equals(name) || "Date".equals(name)) {
-			setHeader(value);
-		} else if (CONTENT_TYPE.equalsIgnoreCase(name)) {
-			setHeader(value);
-		} else {
-			headers.add(value);
-		}
-	}
-
-	public void setHeader(String value) {
-		int length = value.indexOf(':');
-		for (int i = headers.size() - 1; i >= 0; i--) {
-			String key = headers.get(i);
-			if (key.regionMatches(true, 0, value, 0, length)) {
-				headers.set(i, value);
-				return;
-			}
-		}
-		headers.add(value);
-	}
-
-	private void printHeader(String msg) throws IOException {
-		out.write(msg.getBytes());
-		out.write('\r');
-		out.write('\n');
-	}
-
-	private synchronized void beforeWrite() throws IOException {
-		if (headers != null) {
-			printHeader(httpVersion + ' ' + status);
-			initializeContentType();
-			//System.out.println(RequestContext.get().getRequestURI());
-			for (String h : headers) {
-				printHeader(h);
-			}
-			printHeader("");
-			headers = null;
-		}
-	}
-
-	private void initializeContentType() {
-		RequestContext context = RequestContext.get();
-		String uri = context.getRequestURI();
-		String contentType = RequestContextImpl.findHeader(headers,
-				CONTENT_TYPE);
-		if (contentType == null) {
-			uri = uri.substring(uri.lastIndexOf('/') + 1);
-			int extIndex = uri.lastIndexOf('.');
-			contentType = extIndex > 0 ? HttpUtil.getContentType(uri
-					.substring(extIndex + 1)) : "text/html";
-			String encoding = context.getEncoding();
-			setContentType(contentType+";charset="+encoding);
-		}
-//		if (contentType.indexOf("text/") >= 0 && encoding != null) {
-//			if (contentType.indexOf("charset=") < 0) {
-//				contentType += ";charset=" + encoding;
-//				setContentType(contentType);
-//			}
-//		}
-	}
-
-	public void flush() throws IOException {
-		this.beforeWrite();
-		super.flush();
-	}
-
-	public void close() throws IOException {
-		this.flush();
-		super.close();
-	}
-
-	@Override
-	public void write(byte[] b, int off, int len) throws IOException {
-		this.beforeWrite();
-		out.write(b, off, len);
-	}
-
-	public void write(int b) throws IOException {
-		this.beforeWrite();
-		out.write(b);
-	}
-}

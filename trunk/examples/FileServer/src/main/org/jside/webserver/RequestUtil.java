@@ -7,9 +7,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.net.URL;
-import java.net.URLDecoder;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,18 +16,18 @@ import java.util.Properties;
 
 
 @SuppressWarnings("unchecked")
-public class HttpUtil {
+public abstract class RequestUtil {
 	public static final String PLAIN_TEXT = "text/plain";
 	private static Map<String, String> contentTypeMap = new HashMap<String, String>();
 
 	static {
 		try {
 			Properties props = new Properties();
-			InputStream in = HttpUtil.class.getResourceAsStream("mime.types");
+			InputStream in = RequestUtil.class.getResourceAsStream("mime.types");
 			if (in != null) {
 				props.load(in);
 			}
-			in = HttpUtil.class.getResourceAsStream("/mime.types");
+			in = RequestUtil.class.getResourceAsStream("/mime.types");
 			if (in != null) {
 				props.load(in);
 			}
@@ -53,7 +52,7 @@ public class HttpUtil {
 		return contentType == null ? "application/octet-stream" : contentType;
 	}
 
-	private final static void print(RequestContext context, Object data)
+	private final static void write(RequestContext context, Object data)
 			throws IOException {
 		OutputStream out = context.getOutputStream();
 		if (data instanceof File) {
@@ -96,12 +95,11 @@ public class HttpUtil {
 				contentType = getContentType(resource.getFile());
 			}
 			if ("file".equals(resource.getProtocol())) {
-				File file = new File(URLDecoder.decode(resource.getFile(),
-						"UTF-8"));
+				File file = getFile(resource);
 				printFile(file, contentType);
 			} else {
 				InputStream in = resource.openStream();
-				print(RequestContext.get(), in);
+				write(RequestContext.get(), in);
 				in.close();
 			}
 		} else {
@@ -118,21 +116,20 @@ public class HttpUtil {
 	private static void printNotFound(String message) throws IOException {
 		RequestContext context = RequestContext.get();
 		context.setStatus(404, message);
-		print(context, message);
+		write(context, message);
 	}
 
 	private static void printData(Object data, String contentType)
 			throws IOException {
 		RequestContext context = RequestContext.get();
 		context.setContentType(contentType);
-		print(context, data);
+		write(context, data);
 	}
 
 	private static void printFile(File file, String contentType)
 			throws IOException, FileNotFoundException {
-
 		RequestContext context = RequestContext.get();
-		if (!file.exists()) {
+		if (file == null || !file.exists()) {
 			// rCode = HTTP_NOT_FOUND;
 			printNotFound(file + " not found");
 			return;
@@ -141,13 +138,13 @@ public class HttpUtil {
 		if (file.isDirectory()) {
 			context.setContentType("text/html");
 			File[] list = file.listFiles();
-			print(context, "<h2>");
-			print(context, file.getAbsolutePath());
-			print(context, "</h2>");
+			write(context, "<h2>");
+			write(context, file.getAbsolutePath());
+			write(context, "</h2>");
 			for (File sub : list) {
 				String name = sub.isDirectory() ? sub.getName() + '/' : sub
 						.getName();
-				print(context, "<a href='" + name + "'>" + name + "</a><br/>");
+				write(context, "<a href='" + name + "'>" + name + "</a><br/>");
 			}
 		} else {
 			context.setContentType(contentType);
@@ -162,7 +159,7 @@ public class HttpUtil {
 
 				FileInputStream in = new FileInputStream(file);
 				try {
-					print(context, in);
+					write(context, in);
 
 				} finally {
 					in.close();
@@ -172,18 +169,18 @@ public class HttpUtil {
 		}
 	}
 	public static File getFile(URL root) {
-		if (root != null && root.getProtocol().equals("file")) {
-			try {
-				return new File(URLDecoder.decode(root.getFile(), "UTF-8"));
-			} catch (UnsupportedEncodingException e) {
-				throw new RuntimeException(e);
-			}
-		} else {
+		try {
+			return getFile(root.toURI());
+		} catch (Exception e) {
 			return null;
 		}
-
 	}
-
+	public static File getFile(URI root) {
+		if (root != null && "file".equals(root.getScheme())) {
+			return new File(root.getPath());
+		}
+		return null;
+	}
 	public static void sendRedirect(String href) {
 		RequestContext context = RequestContext.get();
 		context.setHeader("Refresh:0;URL=" + href);
@@ -191,4 +188,5 @@ public class HttpUtil {
 					+ context.getEncoding());
 		
 	}
+
 }

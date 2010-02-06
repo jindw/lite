@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URL;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -19,11 +19,7 @@ public class MutiThreadWebServer extends SimpleWebServer {
 	private List<Socket> taskList = Collections
 			.synchronizedList(new ArrayList<Socket>());
 
-	public MutiThreadWebServer(URL webRoot) {
-		super(webRoot);
-	}
-
-	public MutiThreadWebServer(String webRoot) {
+	public MutiThreadWebServer(URI webRoot) {
 		super(webRoot);
 	}
 
@@ -53,13 +49,13 @@ public class MutiThreadWebServer extends SimpleWebServer {
 		try {
 			InputStream in = remote.getInputStream();
 			OutputStream out = remote.getOutputStream();
-			RequestContext context = RequestContext.enter(this, in, out);
+			RequestContext context = RequestContext.enter(createRequestContext(this, in, out));
 			try {
 				processRequest(context);
 			} catch (Exception e) {
 				e.printStackTrace();
-				log.warn(e);
-				HttpUtil.printResource(e, "text");
+				log.warn(context.getRequestURI() +":"+e);
+				RequestUtil.printResource(e, "text");
 			}
 			context.getOutputStream().flush();
 			in.close();

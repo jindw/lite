@@ -1,25 +1,22 @@
 package org.jside.webserver;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URL;
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
 public abstract class RequestContext {
-	private static ThreadLocal<RequestContext> tl = new ThreadLocal<RequestContext>();
+	static ThreadLocal<RequestContext> holder = new ThreadLocal<RequestContext>();
 
-	public static RequestContext enter(WebServer server, InputStream in, OutputStream out) {
-		RequestContext context = new RequestContextImpl(server, in, out);
-		tl.set(context);
+	public static RequestContext enter(RequestContext context) {
+		holder.set(context);
 		return context;
 	}
 
 	public static RequestContext get() {
-		return tl.get();
+		return holder.get();
 	}
-
 	public abstract Map<String, Object> getApplication();
 
 	public abstract String getRequestURI();
@@ -46,16 +43,11 @@ public abstract class RequestContext {
 
 	public abstract void setStatus(int status, String message);
 
-	public abstract OutputStream getOutputStream();
-	public void println(String line){
-		try {
-			getOutputStream().write(line.getBytes(getEncoding()));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+	public abstract void setContentType(String contentType);
 
-	public abstract URL getResource(String path);
+	public abstract boolean isAccept();
+	
+	public abstract OutputStream getOutputStream();
 
 	public abstract Object[] getValueStack();
 
@@ -63,10 +55,9 @@ public abstract class RequestContext {
 
 	public abstract Object pop();
 
-	public abstract void setContentType(String contentType);
+	
+	public abstract URI getResource(String path);
 
-	public abstract String getQuery();
-
-	public abstract boolean isAccept();
+	public abstract InputStream openStream(URI path);
 
 }

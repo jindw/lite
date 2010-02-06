@@ -1,47 +1,42 @@
 package org.jside.webserver;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.MalformedURLException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.URL;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+
 public abstract class SimpleWebServer implements WebServer {
+
+	private enum Status{
+		CREATED,
+		STARTING,
+		RUNNING,
+		STOPING,
+		CLOSED
+	}
+	
 	private static final Log log = LogFactory.getLog(SimpleWebServer.class);
 	protected int defaultPort = 80;
 	private int port;
-	private int state = CREATED;
+	private Status state = Status.CREATED;
 	private Object stateLock = new Object();
 
 	private ServerSocket serverSocket;
 
-	protected URL webBase;
+	protected URI webBase;
 	protected Map<String, Object> application = new HashMap<String, Object>();
 
-	public SimpleWebServer(URL webRoot) {
+	public SimpleWebServer(URI webRoot) {
 		this.webBase = webRoot;
 	}
-	public SimpleWebServer(String webRoot) {
-		try{
-			this.webBase = new URL(webRoot);
-		}catch (MalformedURLException e) {
-			try {
-				this.webBase = new File(webRoot).toURI().toURL();
-			} catch (MalformedURLException e2) {
-				log.error(e2);
-				throw new RuntimeException(e2);
-			}
-		}
-	}
-	
 	private String encoding = "utf-8";
 
 	public String getEncoding() {
@@ -60,7 +55,7 @@ public abstract class SimpleWebServer implements WebServer {
 	/**
 	 * @see org.jside.webserver.WebServer#getWebBase()
 	 */
-	public URL getWebBase() {
+	public URI getWebBase() {
 		return webBase;
 	}
 
@@ -75,11 +70,11 @@ public abstract class SimpleWebServer implements WebServer {
 	 * @see org.jside.webserver.WebServer#start()
 	 */
 	public void start() {
-		if (state != CREATED && state != CLOSED) {
+		if (state != Status.CREATED && state != Status.CLOSED) {
 			stop();
 		}
 		synchronized (stateLock) {
-			state = STARTING;
+			state = Status.STARTING;
 			Thread thread = new RunThread();
 			thread.setName("WebServer");
 			resetSocket();
@@ -93,20 +88,16 @@ public abstract class SimpleWebServer implements WebServer {
 	 */
 	public void stop() {
 		synchronized (stateLock) {
-			if (state == STARTING) {
-				waitTo(RUNNING);
-			}
-			if (state == RUNNING) {
-				state = STOPING;
-			}
-			waitTo(CLOSED);
+			waitWhen(Status.STARTING);
+			state = Status.STOPING;
+			waitWhen(Status.STOPING);
 		}
 
 	}
 
-	private void waitTo(int state) {
+	private void waitWhen(Status state) {
 		while (true) {
-			if (state >= this.state) {
+			if (state != this.state) {
 				return;
 			}
 			try {
@@ -133,6 +124,7 @@ public abstract class SimpleWebServer implements WebServer {
 				// create the main server socket
 				serverSocket = new ServerSocket(port);
 				this.port = port;
+				log.info("Webserver started on port:"+port);
 				log.debug("Waiting for connection:" + port);
 				break;
 			} catch (java.net.SocketException e) {
@@ -150,8 +142,8 @@ public abstract class SimpleWebServer implements WebServer {
 	private class RunThread extends Thread {
 
 		public void run() {
-			state = RUNNING;
-			while (state == RUNNING) {// STOPING
+			state = Status.RUNNING;
+			while (state == Status.RUNNING) {// STOPING
 				try {
 					if (serverSocket.isBound() && !serverSocket.isClosed()) {
 						Socket remote = serverSocket.accept();
@@ -166,7 +158,7 @@ public abstract class SimpleWebServer implements WebServer {
 					log.error(e);
 				}
 			}
-			state = CLOSED;
+			state = Status.CLOSED;
 
 		}
 	}
@@ -175,7 +167,7 @@ public abstract class SimpleWebServer implements WebServer {
 		InputStream in = remote.getInputStream();
 		OutputStream out = remote.getOutputStream();
 		// remote.setSoTimeout(1000 * 60);
-		RequestContext context = RequestContext.enter(this, in, out);
+		RequestContext context = RequestContext.enter(createRequestContext(this, in, out));
 		processRequest(context);
 		context.getOutputStream().flush();
 		in.close();
@@ -184,8 +176,10 @@ public abstract class SimpleWebServer implements WebServer {
 	}
 
 	public void processRequest(RequestContext context) throws Exception {
-		HttpUtil.printResource(new URL(webBase, context.getRequestURI()
+		RequestUtil.printResource(webBase.resolve(context.getRequestURI()
 				.substring(1)));
 	}
-
+	protected RequestContext createRequestContext(WebServer server, InputStream in, OutputStream out) {
+		return new RequestContextImpl(server, in, out);
+	}
 }
