@@ -313,7 +313,7 @@ public abstract class ReflectUtil {
 						if (value != null) {
 							Class<? extends Object>  type = pd.type;
 							if (!type.isInstance(value)) {
-								type = NumberArithmetic.toWrapper(type);
+								type = toWrapper(type);
 								if (Number.class.isAssignableFrom(type)) {
 									value = NumberArithmetic.getValue(type,
 											(Number) value);
@@ -330,5 +330,29 @@ public abstract class ReflectUtil {
 			}
 		}
 
+	}
+
+	public final static Class<? extends Object> toWrapper(
+			Class<? extends Object> type) {
+		if (type.isPrimitive()) {
+			if (Byte.TYPE == type) {
+				return Byte.class;
+			} else if (Short.TYPE == type) {
+				return Short.class;
+			} else if (Integer.TYPE == type) {
+				return Integer.class;
+			} else if (Long.TYPE == type) {
+				return Long.class;
+			} else if (Float.TYPE == type) {
+				return Float.class;
+			} else if (Double.TYPE == type) {
+				return Double.class;
+			} else if (Character.TYPE == type) {
+				return Character.class;
+			} else if (Boolean.TYPE == type) {
+				return Boolean.class;
+			}
+		}
+		return type;
 	}
 }

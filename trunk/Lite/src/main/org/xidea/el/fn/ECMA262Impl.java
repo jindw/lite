@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 
 import org.xidea.el.Invocable;
 import org.xidea.el.impl.OperationStrategyImpl;
+import org.xidea.el.impl.ReflectUtil;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.el.json.JSONTokenizer;
 
@@ -611,7 +612,7 @@ public abstract class ECMA262Impl {
 				return 0;
 			}
 		}
-		type = NumberArithmetic.toWrapper(type);
+		type = ReflectUtil.toWrapper(type);
 		
 		if(Number.class.isAssignableFrom(type)){
 			Number n = ToNumber(value);

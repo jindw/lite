@@ -1,10 +1,8 @@
-package org.xidea.lite.tools;
+package org.xidea.el.impl;
 
-import java.io.File;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -12,21 +10,15 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.xidea.el.impl.ExpressionFactoryImpl;
-import org.xidea.el.impl.ReflectUtil;
 import org.xidea.el.ExpressionFactory;
 import org.xidea.el.Reference;
 import org.xidea.el.ReferenceExpression;
 
 public class CommandParser {
 	private static final Log log = LogFactory.getLog(CommandParser.class);
-
 	private static final ExpressionFactory factory = ExpressionFactoryImpl.getInstance();
-	public static final Map<Class<?>, Convertor<? extends Object>> CONVERTOR_MAP;
-	public Map<Class<?>, Convertor<? extends Object>> convertorMap = CONVERTOR_MAP;
-
+	public Map<Class<?>, Convertor<? extends Object>> convertorMap = Convertor.DEFAULT_MAP;
 	private Map<String, String[]> params;
-
 	public CommandParser(String[] args) {
 		if(args!=null){
 			this.params = parseArgs(args);
@@ -70,7 +62,8 @@ public class CommandParser {
 					} else if (context != null) {
 						log.warn("找不到相关属性：" + name);
 						if (log.isInfoEnabled()) {
-							traceBeanInfo(context);
+							Object properties = ReflectUtil.map(context).keySet();
+							log.info("当前对象可能属性有：" + properties);
 						}
 					}
 				}
@@ -78,11 +71,6 @@ public class CommandParser {
 		}
 	}
 
-	protected void traceBeanInfo(final Object context) {
-		Object properties = ReflectUtil.map(context).keySet();
-		log.info("当前对象可能属性有：" + properties);
-	}
-	
 	@SuppressWarnings("unchecked")
 	protected static Map<String, String[]> parseArgs(String[] args) {
 		Map result = new HashMap();
@@ -152,106 +140,7 @@ public class CommandParser {
 		}
 		return null;
 	}
-	public static interface Convertor<T> {
-		public T getValue(String values, Class<? extends T> expectedType,
-				Object context, String key);
-	}
 
-	static {
-		Map<Class<?>, Convertor<?>> convertorMap = new HashMap<Class<?>, Convertor<?>>();
-
-		convertorMap.put(File.class, new Convertor<File>() {
-			public File getValue(String value,
-					Class<? extends File> expectedType, Object context,
-					String key) {
-				return new File(value);
-			}
-		});
-
-		convertorMap.put(String.class, new Convertor<String>() {
-			public String getValue(String value,
-					Class<? extends String> expectedType, Object context,
-					String key) {
-				return value;
-			}
-		});
-		Convertor<? extends Object> c = new Convertor<Long>() {
-			public Long getValue(String value,
-					Class<? extends Long> expectedType, Object context,
-					String key) {
-				try {
-					return Long.parseLong(value);
-				} catch (Exception ex) {
-					return 0l;
-				}
-			}
-		};
-		convertorMap.put(Long.TYPE, c);
-		convertorMap.put(Long.class, c);
-		c = new Convertor<Integer>() {
-			public Integer getValue(String value,
-					Class<? extends Integer> expectedType, Object context,
-					String key) {
-				try {
-					return Integer.parseInt(value);
-				} catch (Exception ex) {
-					return 0;
-				}
-			}
-		};
-		convertorMap.put(Integer.TYPE, c);
-		convertorMap.put(Integer.class, c);
-		c = new Convertor<Double>() {
-			public Double getValue(String value,
-					Class<? extends Double> expectedType, Object context,
-					String key) {
-				try {
-					return Double.parseDouble(value);
-				} catch (Exception ex) {
-					return 0d;
-				}
-			}
-		};
-		convertorMap.put(Double.TYPE, c);
-		convertorMap.put(Double.class, c);
-		convertorMap.put(Float.class, new Convertor<Float>() {
-			public Float getValue(String value,
-					Class<? extends Float> expectedType, Object context,
-					String key) {
-				try {
-					return Float.parseFloat(value);
-				} catch (Exception ex) {
-					return 0f;
-				}
-			}
-		});
-		c = new Convertor<Boolean>() {
-			public Boolean getValue(String value,
-					Class<? extends Boolean> expectedType, Object context,
-					String key) {
-				try {
-					if(value==null || value.length()==0){
-						return false;
-					}
-					value = value.toLowerCase();
-					return !("0".equals(value) || "false".equals(value));
-				} catch (Exception ex) {
-					return false;
-				}
-			}
-		};
-		convertorMap.put(Boolean.TYPE, c);
-		convertorMap.put(Boolean.class, c);
-		c = new Convertor<Object>() {
-			public Object getValue(String value,
-					Class<? extends Object> expectedType, Object context,
-					String key) {
-				return value;
-			}
-		};
-		convertorMap.put(Object.class, c);
-		CONVERTOR_MAP = Collections.unmodifiableMap(convertorMap);
-	}
 	public String toString() {
 		if(params == null){
 			return "*EMPTY*";

@@ -12,6 +12,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.xidea.el.impl.CommandParser;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.Template;
 
