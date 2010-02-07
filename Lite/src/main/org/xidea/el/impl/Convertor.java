@@ -1,10 +1,11 @@
 package org.xidea.el.impl;
 
 import java.io.File;
-import java.lang.reflect.Constructor;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.xidea.el.fn.NumberArithmetic;
 
 public interface Convertor<T> {
 	public T getValue(String value, Class<? extends T> expectedType,
@@ -35,17 +36,8 @@ public interface Convertor<T> {
 					if(expectedType == clazz){
 						return null;
 					}
-					if(clazz == Long.class){
-						return 0l;
-					}else if(clazz == Integer.class){
-						return 0;
-					}else if(clazz == Byte.class){
-						return Byte.parseByte(value);
-					}else if(clazz == Double.class){
-						return 0d;
-					}else if(clazz == Short.class){
-						return 0f;
-					}
+					return NumberArithmetic.getValue(clazz, 0);
+
 				}
 			}else if (Boolean.class == clazz){
 				try {
