@@ -18,15 +18,14 @@ public class ExpressionFactoryImpl implements ExpressionFactory {
 	public static final Map<String, Object> DEFAULT_GLOBAL_MAP;
 	
 	private static ExpressionFactoryImpl expressionFactory = new ExpressionFactoryImpl();
-	protected final Map<String,String> operatorAliasMap = new HashMap<String, String>();
+	protected final Map<String,Integer> operatorAliasMap = new HashMap<String, Integer>();
 	protected Map<String, Object> globals;
 	protected final Map<Object, Expression> cached = new WeakHashMap<Object, Expression>();
 	static {
 		HashMap<String, Object> global = new HashMap<String, Object>();
 		ECMA262Impl.setup(global);
 		DEFAULT_GLOBAL_MAP = Collections.unmodifiableMap(global);
-		//TODO:解析缺陷
-		//expressionFactory.addOperatorAlias("!","not");//取非
+		expressionFactory.addOperatorAlias("!","not");//取非
 		expressionFactory.addOperatorAlias(">", "gt");//大于;
 		expressionFactory.addOperatorAlias("<","lt");//小于
 		expressionFactory.addOperatorAlias(">=","ge");//大于等于
@@ -77,9 +76,14 @@ public class ExpressionFactoryImpl implements ExpressionFactory {
 
 		}
 	}
-	public void addOperatorAlias(String op,String... alias){
-		for(String s:alias){
-			this.operatorAliasMap.put(s,op);
+	public void addOperatorAlias(Object op,String... alias){
+		if(op instanceof String){
+			op = new TokenImpl((String)op).getType();
+		}
+		if(op!= null){
+			for(String as:alias){
+				this.operatorAliasMap.put(as,(Integer)op);
+			}
 		}
 		
 	}

@@ -33,7 +33,9 @@ import java.util.List;
 import org.xidea.el.ExpressionSyntaxException;
 import org.xidea.el.ExpressionToken;
 import org.xidea.el.json.JSONTokenizer;
-
+/**
+ * 首次遍历的时候，不支持后缀运算，单参数表达式只能前缀。
+ */
 public class ExpressionTokenizer extends JSONTokenizer {
 	private final static TokenImpl TOKEN_TRUE = new TokenImpl(VALUE_CONSTANTS,
 			Boolean.TRUE);
@@ -48,13 +50,13 @@ public class ExpressionTokenizer extends JSONTokenizer {
 
 	private Status status = Status.BEGIN;
 	private int previousType = Integer.MIN_VALUE;
-	private Map<String, String> aliasMap;
+	private Map<String, Integer> aliasMap;
 
 	protected ArrayList<TokenImpl> tokens = new ArrayList<TokenImpl>();
 	protected TokenImpl expression;
 	private int depth;
 
-	public ExpressionTokenizer(String value,Map<String, String> aliasMap) {
+	public ExpressionTokenizer(String value,Map<String, Integer> aliasMap) {
 		super(value);
 		this.aliasMap = aliasMap;
 		parseEL();
@@ -224,6 +226,11 @@ public class ExpressionTokenizer extends JSONTokenizer {
 		// 1?1:3 + 0?5:7 ==>1 //1?1:(3 + 0?5:7 )
 		// 1?0?5:7:3 ==>7 //1?(0?5:7):3
 		// 1?0?5:0?11:13:3 ==>13 //1?((0?5:0)?11:13):3
+		if(p1 == p2){
+			if(TokenImpl.isPrefix(t2)){
+				return false;
+			}
+		}
 		if (p2 <= p1) {
 			// if(p2 == p1){
 			// if(t2 == OP_QUESTION_SELECT){
@@ -250,12 +257,7 @@ public class ExpressionTokenizer extends JSONTokenizer {
 				addKeyOrObject(number, false);
 			} else if (Character.isJavaIdentifierStart(c)) {
 				String id = findId();
-				if(status == Status.EXPRESSION){
-					String op = aliasMap.get(id);
-					addOperator(op);
-				}else{
-					addId(id);
-				}
+				addId(id);
 			} else {
 				String op = findOperator();
 				addOperator(op);
@@ -264,6 +266,60 @@ public class ExpressionTokenizer extends JSONTokenizer {
 		}
 	}
 
+	private void addToken(TokenImpl token) {
+		int type = token.getType();
+		//invoke 处歧异在invoke解析时处理
+		if (type == BRACKET_BEGIN || type < 0) {
+			replacePrevious();
+		}
+		if(type == VALUE_VAR){
+			Integer op = aliasMap.get(token.getParam());
+			if(op!=null){
+				int c = TokenImpl.getArgCount(op);
+				if(c == 2 && status == Status.EXPRESSION
+						||c == 1 &&status != Status.EXPRESSION){
+					token = new TokenImpl(op,null);
+				}
+			}
+		}
+		
+		switch (token.getType()) {
+		case BRACKET_BEGIN:
+			depth++;
+			status = Status.BEGIN;
+			break;
+		case BRACKET_END:
+			depth--;
+			if(depth<0){
+				fail("括弧异常");
+			}
+		case VALUE_CONSTANTS:
+		case VALUE_VAR:
+		case VALUE_NEW_LIST:
+		case VALUE_NEW_MAP:
+			status = Status.EXPRESSION;
+			break;
+		default:
+			status = Status.OPERATOR;
+			break;
+		}
+		// previousType2 = previousType;
+		previousType = type;
+		tokens.add(token);
+	}
+
+	private void replacePrevious() {
+		int last = tokens.size()-1;
+		if(previousType == VALUE_VAR && last>=0){
+			TokenImpl lt = tokens.get(last);
+			Integer op = aliasMap.get(lt.getParam());
+			if(op!=null){
+				tokens.set(last, new TokenImpl(op,null));
+				status = Status.OPERATOR;
+				previousType = op;
+			}
+		}
+	}
 	private void addId(String id) {
 		if ("true".equals(id)) {
 			addToken(TOKEN_TRUE);
@@ -338,11 +394,12 @@ public class ExpressionTokenizer extends JSONTokenizer {
 			}
 			break;
 		default:
-			String v = this.aliasMap.get(""+c+next);
-			if(v!=null){
-				return v;
-			}
-			return this.aliasMap.get(""+c);
+//			String v = this.aliasMap.get(""+c+next);
+//			if(v!=null){
+//				return v;
+//			}
+//			return this.aliasMap.get(""+c);
+			return null;
 		}
 
 		return value.substring(start, start = end);
@@ -398,6 +455,7 @@ public class ExpressionTokenizer extends JSONTokenizer {
 		if (op.length() == 1) {
 			switch (op.charAt(0)) {
 			case '(':
+				replacePrevious();
 				if (status == Status.EXPRESSION) {
 					addToken(new TokenImpl(OP_INVOKE_METHOD, null));
 					if (skipSpace(')')) {
@@ -475,29 +533,6 @@ public class ExpressionTokenizer extends JSONTokenizer {
 		}
 	}
 
-	private void addToken(TokenImpl token) {
-		switch (token.getType()) {
-		case BRACKET_BEGIN:
-			depth++;
-			status = Status.BEGIN;
-			break;
-		case BRACKET_END:
-			depth--;
-			if(depth<0){
-				fail("括弧异常");
-			}
-		case VALUE_CONSTANTS:
-		case VALUE_VAR:
-			status = Status.EXPRESSION;
-			break;
-		default:
-			status = Status.OPERATOR;
-			break;
-		}
-		// previousType2 = previousType;
-		previousType = token.getType();
-		tokens.add(token);
-	}
 
 	private void addKeyOrObject(Object object, boolean isVar) {
 		if (skipSpace(':') && isMapMethod()) {// object key
