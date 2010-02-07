@@ -1,4 +1,4 @@
-package org.xidea.el.parser;
+package org.xidea.el.impl;
 
 
 import java.lang.reflect.Field;
@@ -24,6 +24,13 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 	public TokenImpl(int type, Object param) {
 		this.type = type;
 		this.param = param;
+	}
+	public TokenImpl(String name) {
+		if(TOKEN_MAP.containsKey(name)){
+			this.type = TOKEN_MAP.get(name);
+		}else{
+			throw new ExpressionSyntaxException("未知操作符："+name);
+		}
 	}
 
 	public int getType() {
@@ -130,8 +137,8 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 		return c + 1;
 	}
 
-	static final Map<String, Integer> TOKEN_MAP = new HashMap<String, Integer>();
-	static final Map<Integer,String> LABEL_MAP = new HashMap<Integer,String>();
+	private static final Map<String, Integer> TOKEN_MAP = new HashMap<String, Integer>();
+	private static final Map<Integer,String> LABEL_MAP = new HashMap<Integer,String>();
 	static {
 
 		for (Field f : ExpressionToken.class.getFields()) {

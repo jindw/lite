@@ -1,5 +1,7 @@
 package org.xidea.el.fn;
 
+import org.xidea.el.impl.ReflectUtil;
+
 /**
  * 数字加减乘除四则运算，主要处理类型混合运算，如：Integer + Double
  * 
@@ -31,20 +33,26 @@ public class NumberArithmetic {
 	}
 
 	public static Number getValue(Class<? extends Object> type, Number value) {
-		if (type.isAssignableFrom(Long.class)) {
+		if (type == Long.class) {
 			return value.longValue();
-		} else if (type.isAssignableFrom(Integer.class)) {
+		} else if (type == Integer.class) {
 			return value.intValue();
-		} else if (type.isAssignableFrom(Short.class)) {
+		} else if (type == Short.class) {
 			return value.shortValue();
-		} else if (type.isAssignableFrom(Byte.class)) {
+		} else if (type == Byte.class) {
 			return value.byteValue();
-		} else if (type.isAssignableFrom(Double.class)) {
+		} else if (type == Double.class) {
 			return value.doubleValue();
-		} else if (type.isAssignableFrom(Float.class)) {
+		} else if (type == Float.class) {
 			return value.floatValue();
 		} else {
-			return null;
+			Class<? extends Object> clazz = ReflectUtil.toWrapper(type);
+			if(clazz == type){
+				return null;
+			}else{
+				return getValue(clazz, value);
+			}
+			
 		}
 	}
 

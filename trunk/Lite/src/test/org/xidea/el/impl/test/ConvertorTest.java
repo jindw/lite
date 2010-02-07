@@ -12,6 +12,10 @@ public class ConvertorTest {
 	Map<Object, Object> context = new HashMap<Object, Object>();
 	@Test
 	public void test(){
+		System.out.println(Character.isTitleCase('。'));
+		System.out.println(Character.isTitleCase('．'));
+		System.out.println(Long.class.isAssignableFrom(Long.class));
+		System.out.println(Long.TYPE.isAssignableFrom(Long.class));
 		System.out.println(Number.class.isAssignableFrom(int.class));
 		System.out.println(Integer.TYPE == Integer.class);
 		System.out.println(Integer.TYPE.isAssignableFrom(Integer.class));
@@ -23,6 +27,8 @@ public class ConvertorTest {
 		doTest(value,Integer.TYPE,123);
 		doTest(value,Integer.class,123);
 		doTest(value,Double.TYPE,123d);
+		doTest(null,Double.TYPE,0d);
+		doTest(null,Double.class,null);
 		doTest("D"+value,Double.TYPE,0d);
 		doTest("D"+value,Double.class,null);
 		doTest(value,Boolean.TYPE,true);

@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Set;
 
 
-public class ProxyMap extends HashMap<String, Object> {
+class ProxyMap extends HashMap<String, Object> {
 	/**
 	 * 
 	 */

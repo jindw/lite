@@ -11,15 +11,16 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.xidea.el.ExpressionToken;
+import org.xidea.el.ExpressionFactory;
+import org.xidea.el.impl.ExpressionFactoryImpl;
 import org.xidea.el.impl.ExpressionImpl;
 import org.xidea.el.json.JSONEncoder;
-import org.xidea.el.parser.ExpressionTokenizer;
 
 public class ELParserTest {
 
 	protected Map<String, Object> context;
 	protected Map<String, String> elResultMap;
+	ExpressionFactory factory = ExpressionFactoryImpl.getInstance();
 
 	@Before
 	public void setUp() throws Exception {
@@ -57,8 +58,7 @@ public class ELParserTest {
 
 	public void test(String text, String result) throws Exception {
 		if(result.trim().startsWith("[")){
-			ExpressionTokenizer tokenizer = new ExpressionTokenizer(text);
-			ExpressionToken el = tokenizer.getResult();
+			Object el = factory.parse(text);
 			String eljson = JSONEncoder.encode(el);
 			Assert.assertEquals(result, eljson);
 		}else{

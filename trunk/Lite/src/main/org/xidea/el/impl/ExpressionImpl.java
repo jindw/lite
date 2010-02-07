@@ -9,7 +9,6 @@ import org.xidea.el.Reference;
 import org.xidea.el.ReferenceExpression;
 import org.xidea.el.ValueStack;
 import org.xidea.el.json.JSONEncoder;
-import org.xidea.el.parser.ExpressionTokenizer;
 
 public class ExpressionImpl implements Expression ,ReferenceExpression {
 	protected final OperationStrategy calculater;
@@ -19,7 +18,7 @@ public class ExpressionImpl implements Expression ,ReferenceExpression {
 
 
 	public ExpressionImpl(String el) {
-		this(el, new ExpressionTokenizer(el).getResult(),
+		this(el, (ExpressionToken)ExpressionFactoryImpl.getInstance().parse(el),
 				ExpressionFactoryImpl.DEFAULT_CALCULATER,ExpressionFactoryImpl.DEFAULT_GLOBAL_MAP);
 	}
 

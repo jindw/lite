@@ -10,7 +10,6 @@ import org.xidea.el.ExpressionToken;
 import org.xidea.el.impl.ExpressionFactoryImpl;
 import org.xidea.el.json.JSONDecoder;
 import org.xidea.el.json.JSONEncoder;
-import org.xidea.el.parser.ExpressionTokenizer;
 
 public class ExpressionParseTimelTest {
 	private ExpressionFactoryImpl factory = new ExpressionFactoryImpl();
@@ -63,8 +62,7 @@ public class ExpressionParseTimelTest {
 	};
 
 	private void test(String el) throws IOException {
-		ExpressionTokenizer tokener = new ExpressionTokenizer(el);
-		ExpressionToken els = tokener.getResult();
+		Object els = factory.parse(el);
 		StringWriter out = new StringWriter();
 		encoder.encode(els, out, null);
 		String jsonel = out.toString();

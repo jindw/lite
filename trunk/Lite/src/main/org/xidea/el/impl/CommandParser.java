@@ -53,7 +53,7 @@ public class CommandParser {
 		for (String name : params.keySet()) {
 			if (name!=null && name.length() > 0) {
 				if (Character.isJavaIdentifierStart(name.charAt(0))) {
-					ReferenceExpression el = (ReferenceExpression) factory.create(name);
+					ReferenceExpression el = getReference(name);
 					Reference result = el.prepare(context);
 					if (result != null && result.getType() != null) {
 						Class<? extends Object> type = result.getType();
@@ -71,8 +71,13 @@ public class CommandParser {
 		}
 	}
 
+	private ReferenceExpression getReference(String name) {
+		ReferenceExpression el = (ReferenceExpression) factory.create(name);
+		return el;
+	}
+
 	@SuppressWarnings("unchecked")
-	protected static Map<String, String[]> parseArgs(String[] args) {
+	protected Map<String, String[]> parseArgs(String[] args) {
 		Map result = new HashMap();
 		String name = null;
 		for (int i = 0; i < args.length; i++) {
@@ -125,7 +130,7 @@ public class CommandParser {
 			}
 			return (T) buf;
 		} else {
-			return getValue(values[0], expectedType, context, key);
+			return getValue(values[values.length-1], expectedType, context, key);
 		}
 	}
 
