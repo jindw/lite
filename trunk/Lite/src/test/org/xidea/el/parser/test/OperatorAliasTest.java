@@ -2,13 +2,10 @@ package org.xidea.el.parser.test;
 
 import static org.junit.Assert.fail;
 
-import java.lang.reflect.Field;
-import java.util.HashMap;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.xidea.el.ExpressionFactory;
-import org.xidea.el.ExpressionToken;
 import org.xidea.el.impl.ExpressionFactoryImpl;
 
 public class OperatorAliasTest {
