@@ -127,16 +127,19 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 		case ExpressionToken.OP_MAP_PUSH:
 			return 4;
 		default:
-			return getArgCount() + 1;
+			return getArgCount(type) + 1;
 		}
 
 	}
 
-	private int getArgCount() {
+	static int getArgCount(int type) {
 		int c = (type & ExpressionToken.BIT_PARAM) >> 6;
 		return c + 1;
 	}
 
+	/**
+	 * 只能收录没有歧异的操作符
+	 */
 	private static final Map<String, Integer> TOKEN_MAP = new HashMap<String, Integer>();
 	private static final Map<Integer,String> LABEL_MAP = new HashMap<Integer,String>();
 	static {
@@ -191,5 +194,9 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 
 		// OP_MAP_PUSH
 		// OP_INVOKE_METHOD
+	}
+	public static boolean isPrefix(int type) {
+		//TODO:
+		return getArgCount(type)==1;
 	}
 }
