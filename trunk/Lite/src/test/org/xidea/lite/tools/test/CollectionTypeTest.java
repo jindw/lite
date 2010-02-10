@@ -82,7 +82,7 @@ public class CollectionTypeTest {
 		System.out.println(data);
 		result.setValue(123);
 		System.out.println(data);
-		Assert.assertEquals(123, data.get("key1"));
+		Assert.assertEquals((Object)123, data.get("key1"));
 	}
 	
 
