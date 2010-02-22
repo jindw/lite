@@ -11,7 +11,6 @@ import java.util.List;
 import org.xidea.el.Invocable;
 
 public class JSArray extends JSObject implements Invocable {
-	@SuppressWarnings("unchecked")
 	public Object invoke(Object thiz, Object... args) throws Exception {
 		return method.invoke(this,toList(thiz), args);
 	}

@@ -34,7 +34,7 @@ public class CommandParser {
 	}
 
 	public void addConvertor(Convertor<? extends Object> convertor){
-		if(!(convertorMap instanceof HashMap)){
+		if(!(convertorMap instanceof HashMap<?, ?>)){
 			convertorMap = new HashMap<Class<?>, Convertor<? extends Object>>(convertorMap);
 		}
 		convertorMap.put(convertor.getClass(), convertor);

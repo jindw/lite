@@ -133,6 +133,7 @@ public class Template {
 	protected void renderList(final Context context, final Object[] children,
 			final Writer out) {
 		int index = children.length;
+		boolean ifpassed = false;
 		// for (final Object item : children) {
 		while (index-- > 0) {
 			final Object item = children[index];
@@ -146,13 +147,15 @@ public class Template {
 						processExpression(context, data, out, false);
 						break;
 					case IF_TYPE:// ":if":
-						processIf(context, data, out);
+						ifpassed = processIf(context, data, out);
 						break;
 					case ELSE_TYPE:// ":else-if":":else":
-						processElse(context, data, out);
+						if(!ifpassed){
+							ifpassed = processElse(context, data, out);
+						}
 						break;
 					case FOR_TYPE:// ":for":
-						processFor(context, data, out);
+						ifpassed = processFor(context, data, out);
 						break;
 					case XML_TEXT_TYPE:// ":el":
 						processExpression(context, data, out, true);
@@ -185,7 +188,6 @@ public class Template {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	private void prossesPlugin(Context context, Object[] data, Writer out)
 			throws Exception {
 		Plugin addon = (Plugin)data[3];
@@ -202,48 +204,37 @@ public class Template {
 		}
 	}
 
-	protected void processIf(Context context, Object[] data, Writer out) {
-		Boolean test = Boolean.TRUE;
-		try {
-			if (toBoolean(((Expression) data[2]).evaluate(context))) {
-				renderList(context, (Object[]) data[1], out);
-			} else {
-				test = Boolean.FALSE;
-			}
-		} finally {
-			context.ifStatus = test;
+	protected boolean processIf(Context context, Object[] data, Writer out) {
+		if (toBoolean(((Expression) data[2]).evaluate(context))) {
+			renderList(context, (Object[]) data[1], out);
+			return true;
+		} else {
+			return false;
 		}
-
 	}
 
-	protected void processElse(Context context, Object[] data, Writer out) {
-		if (!context.ifStatus) {
-			Boolean test = Boolean.TRUE;
-			try {
-				if (data[2] == null
-						|| toBoolean(((Expression) data[2]).evaluate(context))) {// if
-					renderList(context, (Object[]) data[1], out);
-				} else {
-					test = Boolean.FALSE;
-				}
-			} finally {
-				context.ifStatus = test;
+	protected boolean processElse(Context context, Object[] data, Writer out) {
+			if (data[2] == null
+					|| toBoolean(((Expression) data[2]).evaluate(context))) {// if
+				renderList(context, (Object[]) data[1], out);
+				return true;
+			} else {
+				return false;
 			}
-		}
 	}
 
 	@SuppressWarnings("unchecked")
-	protected void processFor(Context context, Object[] data, Writer out) {
+	protected boolean processFor(Context context, Object[] data, Writer out) {
 		final Object[] children = (Object[]) data[1];
 		final String varName = (String) data[3];
 		final ForStatus preiousStatus = (ForStatus) context.get(FOR_KEY);
 		int len = 0;
 		Object list = ((Expression) data[2]).evaluate(context);
 		try {// hack return 代替ifelse，减少一些判断
-			if (list instanceof Map) {
-				list = ((Map) list).keySet();
+			if (list instanceof Map<?,?>) {
+				list = ((Map<?,?>) list).keySet();
 			}
-			if (list instanceof Collection) {
+			if (list instanceof Collection<?>) {
 				Collection<Object> items = (Collection<Object>) list;
 				len = items.size();
 				ForStatus forStatus = new ForStatus(len);
@@ -278,8 +269,8 @@ public class Template {
 		} finally {
 			// context.put("for", preiousStatus);
 			context.put(FOR_KEY, preiousStatus);// for key
-			context.ifStatus = len > 0;// if key
 		}
+		return len > 0;// if key
 	}
 
 	protected void processVar(Context context, Object[] data) {

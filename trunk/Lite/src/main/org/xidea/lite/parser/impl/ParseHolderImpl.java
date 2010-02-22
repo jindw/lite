@@ -11,8 +11,7 @@ import org.xidea.lite.parser.ParserHolder;
 public class ParseHolderImpl implements ParserHolder {
 	private static final long serialVersionUID = 1L;
 
-	@SuppressWarnings("unchecked")
-	protected static NodeParser[] DEFAULT_PARSER_LIST = { new HTMLNodeParser(),
+	protected static NodeParser<?>[] DEFAULT_PARSER_LIST = { new HTMLNodeParser(),
 			new CoreXMLNodeParser(), new DefaultXMLNodeParser(),new InputStreamNodeParser(), new TextNodeParser() };
 	protected static TextParser[] DEFAULT_TEXT_PARSER_LIST = { ELParser.EL };
 	protected ParseChainImpl topChain;
@@ -20,7 +19,6 @@ public class ParseHolderImpl implements ParserHolder {
 
 	private ParseContext context;
 
-	@SuppressWarnings("unchecked")
 	public ParseHolderImpl(ParseContext context,
 			NodeParser<? extends Object>[] parsers, TextParser[] ips) {
 		initialize(context, parsers, ips);
@@ -37,7 +35,6 @@ public class ParseHolderImpl implements ParserHolder {
 		initialize(context, cs.toArray(new NodeParser[cs.size()]), parentHolder.getTextParsers());
 	}
 
-	@SuppressWarnings("unchecked")
 	protected void initialize(ParseContext context,
 			NodeParser<? extends Object>[] parsers, TextParser[] ips) {
 		this.context = context;

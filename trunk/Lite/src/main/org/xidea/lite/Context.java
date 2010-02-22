@@ -7,7 +7,6 @@ import org.xidea.el.impl.ReflectUtil;
 import org.xidea.el.impl.ValueStackImpl;
 
 public class Context extends ValueStackImpl {
-	boolean ifStatus = false;
 	private int readLength;
 	private Context root;
 	private Template template;

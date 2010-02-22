@@ -123,7 +123,6 @@ public abstract class JSProxy {
 		return jsiAvailable;
 	}
 
-	@SuppressWarnings("unchecked")
 	protected void initialize() {
 		eval("window = this;");
 		URL boot = loader.getResource("boot.js");

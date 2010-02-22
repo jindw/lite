@@ -25,8 +25,7 @@ import org.xidea.el.json.JSONTokenizer;
  * @see org.mozilla.javascript.NativeGlobal
  */
 public abstract class ECMA262Impl {
-	@SuppressWarnings("unchecked")
-	private final static Class[] ARRAY_CLASSES = new Class[] { List.class,
+	private final static Class<?>[] ARRAY_CLASSES = new Class[] { List.class,
 			Object[].class, int[].class, float[].class, double[].class,
 			long[].class, short[].class, byte[].class, char[].class };
 
@@ -35,9 +34,8 @@ public abstract class ECMA262Impl {
 		setup(calculater, JSNumber.class, Number.class);
 		setup(calculater, JSString.class, String.class);
 	}
-	@SuppressWarnings("unchecked")
 	public static void setup(OperationStrategyImpl calculater,
-			Class<? extends JSObject> impl, Class... forClass) {
+			Class<? extends JSObject> impl, Class<?>... forClass) {
 		try {
 			Method[] dms = impl.getMethods();
 			for (Method method : dms) {
@@ -51,7 +49,7 @@ public abstract class ECMA262Impl {
 						method.setAccessible(true);
 					} catch (Exception e) {
 					}
-					for (Class type : forClass) {
+					for (Class<?> type : forClass) {
 						calculater.addMethod(type, method.getName(), inv);
 					}
 				}
@@ -370,9 +368,9 @@ public abstract class ECMA262Impl {
 
 		protected Object check(float d) {
 			if (isFinite) {
-				return d == d && !Double.isInfinite(d);
+				return !Float.isNaN(d) && !Float.isInfinite(d);
 			} else {
-				return d != d;
+				return Float.isNaN(d);
 			}
 		}
 	}
@@ -561,7 +559,6 @@ public abstract class ECMA262Impl {
 	 *      href="http://www.ecma-international.org/publications/standards/Ecma-262.htm">Ecma262</a>
 	 * @return <null|Number|Boolean|String>
 	 */
-	@SuppressWarnings("unchecked")
 	public static Object ToPrimitive(Object value, Class<?> expectedType) {
 		boolean toString;
 		if (expectedType == Number.class) {

@@ -60,7 +60,7 @@ public class JSONEncoder {
 			out.write(String.valueOf(object));
 		} else if (object instanceof Number) {
 			out.write(String.valueOf(object));
-		} else if (object instanceof Class) {
+		} else if (object instanceof Class<?>) {
 			//Class 系列化容易导致死循环
 			print(((Class<?>) object).getName(), out);
 		} else if (object instanceof String) {
@@ -79,13 +79,13 @@ public class JSONEncoder {
 					cached.add(object);
 				}
 			}
-			if (object instanceof Map) {
+			if (object instanceof Map<?, ?>) {
 				print((Map<?, ?>) object, out, cached);
 			} else if (object instanceof Object[]) {
 				print((Object[]) object, out, cached);
-			} else if (object instanceof Iterator) {
+			} else if (object instanceof Iterator<?>) {
 				print((Iterator<?>) object, out, cached);
-			} else if (object instanceof Collection) {
+			} else if (object instanceof Collection<?>) {
 				print(((Collection<?>) object).iterator(), out, cached);
 			} else {
 				printBean(object, out, cached);
