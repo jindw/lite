@@ -13,7 +13,7 @@ public class ValueStackImpl implements ValueStack {
 		int i = stack.length;
 		while(i-->0){
 			Object context = stack[i];
-			if (context instanceof Map) {
+			if (context instanceof Map<?,?>) {
 				Map<?, ?> contextMap = (Map<?, ?>) context;
 				Object result = contextMap.get(key);
 				if (result !=null || contextMap.containsKey(key)){

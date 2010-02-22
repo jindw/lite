@@ -27,7 +27,7 @@ public class TextContains implements Invocable {
 					return Boolean.TRUE;
 				}
 			}
-		} else if (value instanceof Collection) {
+		} else if (value instanceof Collection<?>) {
 			for (Object item : (Collection<?>) value) {
 				if (item != null && key.equals(String.valueOf(item))) {
 					return Boolean.TRUE;

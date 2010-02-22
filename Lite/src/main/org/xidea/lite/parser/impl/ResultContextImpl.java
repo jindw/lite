@@ -277,7 +277,6 @@ public class ResultContextImpl implements ResultContext {
 		return current;
 	}
 
-	@SuppressWarnings("unchecked")
 	private void appendVarPlugin() {
 		if (typeIdMap != null && !typeIdMap.isEmpty()) {
 			HashMap<String, Object> attributeMap = new HashMap<String, Object>();

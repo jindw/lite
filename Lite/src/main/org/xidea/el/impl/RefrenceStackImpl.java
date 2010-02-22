@@ -13,7 +13,7 @@ class RefrenceStackImpl extends ValueStackImpl {
 		int i = stack.length;
 		while (i-- > 0) {
 			Object context = stack[i];
-			if (context instanceof Map) {
+			if (context instanceof Map<?,?>) {
 				return new ReferenceImpl(context, key);
 			} else if (ReflectUtil.getPropertyType(context.getClass(), key) != null) {
 				return new ReferenceImpl(context, key);

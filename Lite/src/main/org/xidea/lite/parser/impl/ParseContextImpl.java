@@ -47,7 +47,6 @@ public class ParseContextImpl extends ParseContextProxy implements ParseContext 
 	}
 
 
-	@SuppressWarnings("unchecked")
 	protected void initialize(ResourceContext base, Map<String, String> featrues,
 			NodeParser<? extends Object>[] parsers, TextParser[] ips) {
 		resourceContext = base;

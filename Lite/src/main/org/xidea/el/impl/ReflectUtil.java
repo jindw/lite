@@ -204,8 +204,8 @@ public abstract class ReflectUtil {
 		return type;
 	}
 
-	private static Class<?> findClass(Type result) {
-		if (result instanceof Class) {
+	private static Class<? extends Object> findClass(Type result) {
+		if (result instanceof Class<?>) {
 			return (Class<?>) result;
 		} else if (result instanceof ParameterizedType) {
 			return findClass(((ParameterizedType) result).getRawType());
@@ -249,7 +249,7 @@ public abstract class ReflectUtil {
 					} else {
 						return Array.get(context, toIndex(key));
 					}
-				} else if (context instanceof Collection) {
+				} else if (context instanceof Collection<?>) {
 					if (LENGTH.equals(key)) {
 						return ((Collection<?>) context).size();
 					} else if (context instanceof List<?>) {
@@ -260,7 +260,7 @@ public abstract class ReflectUtil {
 						return ((String)context).length();
 					}
 				}
-				if (context instanceof Map) {
+				if (context instanceof Map<?, ?>) {
 					return ((Map<?, ?>) context).get(key);
 				}
 				AccessDescriptor pd = getPropertyDescriptor(context.getClass(),
@@ -286,7 +286,6 @@ public abstract class ReflectUtil {
 		return pm.get(key);
 	}
 
-	@SuppressWarnings("unchecked")
 	public static void setValues(Object base, Map<String, Object> attributeMap) {
 		for (String key : attributeMap.keySet()) {
 			ReflectUtil.setValue(base, key, attributeMap.get(key));

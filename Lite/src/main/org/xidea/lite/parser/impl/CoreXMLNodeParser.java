@@ -228,7 +228,7 @@ public class CoreXMLNodeParser implements NodeParser<Element> {
 	}
 
 	protected Node parseForTag(Element el, ParseContext context) {
-		Object items = ParseUtil.getAttributeEL(context, el, "items","values","value");
+		Object items = ParseUtil.getAttributeEL(context, el,"list", "items","values","value");
 		String var = ParseUtil.getAttributeOrNull(el, "var","name","id");
 		String status = ParseUtil.getAttributeOrNull(el, "status");
 		context.appendFor(var, items, status);

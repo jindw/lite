@@ -14,7 +14,6 @@ class ProxyMap extends HashMap<String, Object> {
 			super.put(key, new ReferenceImpl(base,key));
 		}
 	}
-	@SuppressWarnings("unchecked")
 	@Override
 	public Object get(Object key) {
 		Object v = super.get(key);
