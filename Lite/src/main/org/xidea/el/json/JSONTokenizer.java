@@ -368,6 +368,8 @@ public class JSONTokenizer {
 							if (this.value.charAt(cend - 1) == '*') {
 								start = cend + 1;
 								break;
+							}else{
+								cend++;
 							}
 						} else {
 							throw new ExpressionSyntaxException("未結束注釋:"
