@@ -26,13 +26,14 @@ public class XMLFixerImpl{
 			"([\\s\\S]*)" +
 			")?$");
 	private final static Pattern rootPattern = Pattern.compile("<[\\w\\-]");
-	//
+	//&#[integer]; 或者 &#x[hex]; 
 	private final static Pattern replacePattern = Pattern.compile("<!--[\\s\\S]*-->|" +
 			"<!\\[CDATA\\[[\\s\\S]*\\]\\]>|" +
+			"<." +
 			"&&|" +
-			"&[^;]+=|" +
-			"&nbsp;|" +
-			"<.");
+			"&#\\d+;|"+
+			"&#x[\\da-fA-F]+;|"+
+			"&");
 	private final static Pattern coreUsePattern = Pattern.compile("<c\\:[\\w\\-]+",Pattern.CASE_INSENSITIVE);
 	private final static Pattern coreDecPattern = Pattern.compile("\\sxmlns:c\\s*=\\s*['\"]",Pattern.CASE_INSENSITIVE);
 	public static InputStream create(byte[] data) throws IOException{
@@ -79,8 +80,8 @@ public class XMLFixerImpl{
 				token = "&amp;&amp;";
 			}else if(token.equals("&nbsp;")){
 				token = "&#160;";
-			}else if(token.startsWith("&") && token.endsWith("=")){
-				token = "&amp;"+token.substring(1);
+			}else if(token.equals("&")){
+				token = "&amp;";
 			}
 			buf.append(token);
 			begin = matchs.end();
