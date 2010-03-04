@@ -90,7 +90,7 @@ public class XMLContextImpl implements XMLContext {
 			InputStream in2 = ParseUtil.trimBOM(context.openInputStream(uri));
 			try{
 				//做一次容错处理
-				return new XMLFixer().parse(documentBuilder,in2,id);
+				return new XMLFixerImpl().parse(documentBuilder,in2,id);
 				//in2 = new SequenceInputStream(new ByteArrayInputStream(DEFAULT_STARTS),in2);
 				//return documentBuilder.parse(in2, uri.toString());
 			}catch(Exception ex){
