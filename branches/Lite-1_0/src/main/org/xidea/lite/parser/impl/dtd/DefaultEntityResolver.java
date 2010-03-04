@@ -54,7 +54,11 @@ public class DefaultEntityResolver implements EntityResolver2 {
 
 	public InputSource getExternalSubset(String name, String baseURI)
 			throws SAXException, IOException {
-		return null;
+		if("HTML".equals(name)){
+			return resolveEntity(DEFAULT__HTML_DTD,".");
+		}else{
+			return null;
+		}
 	}
 
 }

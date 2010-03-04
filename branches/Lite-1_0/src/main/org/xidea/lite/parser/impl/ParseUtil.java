@@ -1,5 +1,10 @@
 package org.xidea.lite.parser.impl;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringWriter;
 import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
@@ -14,12 +19,25 @@ class ParseUtil {
 	private static Log log = LogFactory.getLog(CoreXMLNodeParser.class);
 	private static final Pattern TEMPLATE_NAMESPACE_CORE = Pattern
 			.compile("^http:\\/\\/www.xidea.org\\/ns\\/(?:template|lite)(?:\\/core)?\\/?$");
-
+	static final String CORE_URI = "http://www.xidea.org/ns/lite/core/";
 	static boolean isCoreNS(String prefix, String url) {
 		return ("c".equals(prefix) && ("#".equals(url) || "#core".equals(url)))
 				|| TEMPLATE_NAMESPACE_CORE.matcher(url).find();
 	}
 
+	static String loadText(InputStream in,String charset) throws IOException {
+		return loadText(new InputStreamReader(in,charset));
+	}
+
+	static String loadText(Reader reader) throws IOException {
+		StringWriter out = new StringWriter();
+		int count;
+		char[] cbuf = new char[1024];
+		while ((count = reader.read(cbuf)) > -1) {
+			out.write(cbuf, 0, count);
+		}
+		return out.toString();
+	}
 	/**
 	 * 如果属性不存在，返回null
 	 * 

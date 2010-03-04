@@ -48,8 +48,6 @@ public class XMLContextImpl implements XMLContext {
 
 	private ArrayList<Boolean> indentStatus = new ArrayList<Boolean>();
 	private int depth = 0;
-	private static final byte[] DEFAULT_STARTS = ("<!DOCTYPE html PUBLIC '"+DefaultEntityResolver.DEFAULT__HTML_DTD+"' '.'><c:group xmlns:c='http://www.xidea.org/ns/lite/core'>").getBytes();
-	private static final byte[] DEFAULT_ENDS = "</c:group>".getBytes();
 	private boolean reserveSpace;
 	private boolean format = false;
 	private boolean compress = true;
@@ -79,17 +77,15 @@ public class XMLContextImpl implements XMLContext {
 
 	public Document loadXML(URI uri) throws SAXException, IOException {
 		context.setCurrentURI(uri);
-		InputStream in1 = toXMLStream(uri);
+		InputStream in1 = trimXML(uri);
 		try {
 			Document doc = documentBuilder.parse(in1, uri.toString());
 			return doc;
 		} catch (SAXParseException e) {
-			InputStream in2 = toXMLStream(uri);
+			InputStream in2 = trimXML(uri);
 			try{
 				//做一次容错处理
-				in2 = new SequenceInputStream(new ByteArrayInputStream(DEFAULT_STARTS),in2);
-				in2 = new SequenceInputStream(in2,new ByteArrayInputStream(DEFAULT_ENDS));
-				return documentBuilder.parse(in2, uri.toString());
+				return new XMLFixerImpl().parse(documentBuilder,in2, uri.toString());
 			}catch(Exception ex){
 				log.debug(ex);
 			}finally{
@@ -103,7 +99,7 @@ public class XMLContextImpl implements XMLContext {
 		}
 	}
 
-	private InputStream toXMLStream(URI uri) throws IOException {
+	private InputStream trimXML(URI uri) throws IOException {
 		BufferedInputStream in = new BufferedInputStream(context.openInputStream(uri), 1);
 		int c;
 		do {// bugfix \ufeff
