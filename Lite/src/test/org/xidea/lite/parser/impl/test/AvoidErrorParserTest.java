@@ -68,6 +68,17 @@ public class AvoidErrorParserTest {
 		System.out.println(result);
 	}
 	@Test
+	public void testEncoding() throws SAXException, IOException,
+			URISyntaxException {
+		ParseContextImpl context = createContext();
+		Document doc = toDoc(context, "<!doctype html><xml>&nbsp;金大为</xml>");
+		doc = toDoc(context, "<!doctype html><xml>&nbsp;金大为</xml>");
+		System.out.println(doc);
+		context.parse(doc);
+		String result = toString(context);
+		System.out.println("result:"+result);
+	}
+	@Test
 	public void testAnd() throws SAXException, IOException,
 			URISyntaxException {
 		ParseContextImpl context = createContext();
