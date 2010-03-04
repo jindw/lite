@@ -30,8 +30,9 @@ public class XMLFixerImpl{
 	private final static Pattern replacePattern = Pattern.compile("<!--[\\s\\S]*-->|" +
 			"<!\\[CDATA\\[[\\s\\S]*\\]\\]>|" +
 			"&&|" +
+			"&[^;]+=|" +
 			"&nbsp;|" +
-			"<.|");
+			"<.");
 	private final static Pattern coreUsePattern = Pattern.compile("<c\\:[\\w\\-]+",Pattern.CASE_INSENSITIVE);
 	private final static Pattern coreDecPattern = Pattern.compile("\\sxmlns:c\\s*=\\s*['\"]",Pattern.CASE_INSENSITIVE);
 	public static InputStream create(byte[] data) throws IOException{
@@ -76,6 +77,10 @@ public class XMLFixerImpl{
 				}
 			}else if(token.equals("&&")){
 				token = "&amp;&amp;";
+			}else if(token.equals("&nbsp;")){
+				token = "&#160;";
+			}else if(token.startsWith("&") && token.endsWith("=")){
+				token = "&amp;"+token.substring(1);
 			}
 			buf.append(token);
 			begin = matchs.end();
