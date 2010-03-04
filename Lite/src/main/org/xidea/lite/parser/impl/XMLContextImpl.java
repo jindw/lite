@@ -47,8 +47,6 @@ public class XMLContextImpl implements XMLContext {
 
 	private ArrayList<Boolean> indentStatus = new ArrayList<Boolean>();
 	private int depth = 0;
-	private static final byte[] DEFAULT_STARTS = ("<!DOCTYPE html PUBLIC '"+DefaultEntityResolver.DEFAULT__HTML_DTD+"' '.'><c:group xmlns:c='http://www.xidea.org/ns/lite/core'>").getBytes();
-	private static final byte[] DEFAULT_ENDS = "</c:group>".getBytes();
 	private boolean reserveSpace;
 	private boolean format = false;
 	private boolean compress = true;
@@ -87,21 +85,22 @@ public class XMLContextImpl implements XMLContext {
 			return null;
 		}
 		in1.reset();
+		String id = uri.toString();
 		try {
-			return documentBuilder.parse(in1, uri.toString());
+			return documentBuilder.parse(in1, id);
 		} catch (SAXParseException e) {
 			InputStream in2 = ParseUtil.trimBOM(context.openInputStream(uri));
 			try{
 				//做一次容错处理
-				in2 = new SequenceInputStream(new ByteArrayInputStream(DEFAULT_STARTS),in2);
-				in2 = new SequenceInputStream(in2,new ByteArrayInputStream(DEFAULT_ENDS));
-				return documentBuilder.parse(in2, uri.toString());
+				return new XMLFixer().parse(documentBuilder,in2,id);
+				//in2 = new SequenceInputStream(new ByteArrayInputStream(DEFAULT_STARTS),in2);
+				//return documentBuilder.parse(in2, uri.toString());
 			}catch(Exception ex){
 				log.debug(ex);
 			}finally{
 				in2.close();
 			}
-			throw new SAXException("XML Parser Error:" + uri + "("
+			throw new SAXException("XML Parser Error:" + id + "("
 					+ e.getLineNumber() + "," + e.getColumnNumber() + ")\r\n"
 					+ e.getMessage());
 		} finally {
