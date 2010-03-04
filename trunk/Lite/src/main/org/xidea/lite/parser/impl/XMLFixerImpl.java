@@ -17,9 +17,10 @@ import org.xidea.lite.parser.impl.dtd.DefaultEntityResolver;
 import org.xml.sax.SAXException;
 
 public class XMLFixerImpl{
-	private static final String ISO8859_1 = "ISO8859-1";
 	private static final Log log = LogFactory.getLog(XMLFixerImpl.class);
-	private static final String html5doctype = "<!doctype html>";
+	private static final String DOCTYPE_HTML_4_01 = "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">\n";
+	private static final String ISO8859_1 = "ISO8859-1";
+	private static final Pattern html5doctype = Pattern.compile("^\\s*<!doctype\\s+html>");
 	private static final String DEFAULT_STARTS = ("<!DOCTYPE html PUBLIC '"+DefaultEntityResolver.DEFAULT__HTML_DTD+"' '.'>");
 	private final static Pattern encodingPattern = Pattern.compile("^(?:(\\s*<\\?xml[^>]+encoding=['\"])" +
 			"([\\w\\-]+)" +
@@ -31,6 +32,7 @@ public class XMLFixerImpl{
 			"<!\\[CDATA\\[[\\s\\S]*\\]\\]>|" +
 			"<." +
 			"&&|" +
+			"&\\w+;|"+
 			"&#\\d+;|"+
 			"&#x[\\da-fA-F]+;|"+
 			"&");
@@ -41,18 +43,18 @@ public class XMLFixerImpl{
 		String encoding = encodingPattern.matcher(text).replaceAll("$2");
 		if(encoding.equals(text)){
 			encoding = "UTF-8";
-		}
-		String[] ens = new String[]{encoding,"UTF-8","GB18030"};
-		text = toString(data,ens);
-		if(ens[0] != encoding){
-			log.error("XML 编码错误");
-			text = encodingPattern.matcher(text).replaceAll("$1"+ens[0]+"$3");
-			encoding = ens[0];
+			text = toString(data,new String[]{"UTF-8","GB18030"});
+		}else{
+			String[] ens = new String[]{encoding,"UTF-8","GB18030"};
+			text = toString(data,ens);
+			if(ens[0] != encoding){
+				log.error("XML 编码错误");
+				text = encodingPattern.matcher(text).replaceAll("$1"+ens[0]+"$3");
+				encoding = ens[0];
+			}
 		}
 		
-		if(text.startsWith(html5doctype)){
-			text = html5doctype.toUpperCase()+text.substring(html5doctype.length());
-		}
+		text = html5doctype.matcher(text).replaceFirst(DOCTYPE_HTML_4_01);
 		text = replaceInValidChar(text);
 		if( coreUsePattern.matcher(text).find()&& !coreDecPattern.matcher(text).find()){
 			text = rootPattern.matcher(text).replaceFirst("$0 xmlns:c='"+ParseUtil.CORE_URI+"'");

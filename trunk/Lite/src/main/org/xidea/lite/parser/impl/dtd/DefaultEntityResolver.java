@@ -17,6 +17,9 @@ public class DefaultEntityResolver implements EntityResolver2 {
 				"xhtml1.dtd");
 		DEFAULT_DTD_MAP.put("-//W3C//DTD XHTML 1.0 Strict//EN",
 				"xhtml1.dtd");
+		DEFAULT_DTD_MAP.put("-//W3C//DTD HTML 4.01//EN", "xhtml1.dtd");
+		DEFAULT_DTD_MAP.put("-//W3C//DTD HTML 4.01//EN", "xhtml1.dtd");
+		DEFAULT_DTD_MAP.put("-//W3C//DTD HTML 4.01 Transitional//EN", "xhtml1.dtd");
 //		DEFAULT_DTD_MAP.put("-//W3C//DTD XHTML 1.0 Transitional//EN",
 //				"xhtml1-transitional.dtd");
 //		DEFAULT_DTD_MAP.put("-//W3C//DTD XHTML 1.0 Strict//EN",
