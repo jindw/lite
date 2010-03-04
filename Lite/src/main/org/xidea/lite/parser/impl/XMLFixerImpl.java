@@ -16,9 +16,9 @@ import org.w3c.dom.Document;
 import org.xidea.lite.parser.impl.dtd.DefaultEntityResolver;
 import org.xml.sax.SAXException;
 
-public class XMLFixer{
+public class XMLFixerImpl{
 	private static final String ISO8859_1 = "ISO8859-1";
-	private static final Log log = LogFactory.getLog(XMLFixer.class);
+	private static final Log log = LogFactory.getLog(XMLFixerImpl.class);
 	private static final String html5doctype = "<!doctype html>";
 	private static final String DEFAULT_STARTS = ("<!DOCTYPE html PUBLIC '"+DefaultEntityResolver.DEFAULT__HTML_DTD+"' '.'>");
 	private final static Pattern encodingPattern = Pattern.compile("^(?:(\\s*<\\?xml[^>]+encoding=['\"])" +
@@ -30,8 +30,9 @@ public class XMLFixer{
 	private final static Pattern replacePattern = Pattern.compile("<!--[\\s\\S]*-->|" +
 			"<!\\[CDATA\\[[\\s\\S]*\\]\\]>|" +
 			"&&|" +
+			"&[^;]+=|" +
 			"&nbsp;|" +
-			"<.|");
+			"<.");
 	private final static Pattern coreUsePattern = Pattern.compile("<c\\:[\\w\\-]+",Pattern.CASE_INSENSITIVE);
 	private final static Pattern coreDecPattern = Pattern.compile("\\sxmlns:c\\s*=\\s*['\"]",Pattern.CASE_INSENSITIVE);
 	public static InputStream create(byte[] data) throws IOException{
@@ -76,6 +77,10 @@ public class XMLFixer{
 				}
 			}else if(token.equals("&&")){
 				token = "&amp;&amp;";
+			}else if(token.equals("&nbsp;")){
+				token = "&#160;";
+			}else if(token.startsWith("&") && token.endsWith("=")){
+				token = "&amp;"+token.substring(1);
 			}
 			buf.append(token);
 			begin = matchs.end();
