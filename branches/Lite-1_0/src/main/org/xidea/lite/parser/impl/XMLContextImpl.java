@@ -84,6 +84,7 @@ public class XMLContextImpl implements XMLContext {
 		} catch (SAXParseException e) {
 			InputStream in2 = trimXML(uri);
 			try{
+				log.warn("Invalid xml source:"+e.toString()+",try to fix it：");
 				//做一次容错处理
 				return new XMLFixerImpl().parse(documentBuilder,in2, uri.toString());
 			}catch(Exception ex){
