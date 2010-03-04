@@ -58,6 +58,17 @@ public class AvoidErrorParserTest {
 	}
 
 	@Test
+	public void testHTML5() throws SAXException, IOException,
+			URISyntaxException {
+		ParseContextImpl context = createContext();
+		Document doc = toDoc(context, "<!doctype html><xml>&nbsp;</xml>");
+		System.out.println(doc);
+		context.parse(doc);
+		String result = toString(context);
+		System.out.println(result);
+	}
+
+	@Test
 	public void testNoDTD() throws SAXException, IOException,
 			URISyntaxException {
 		ParseContextImpl context = createContext();
