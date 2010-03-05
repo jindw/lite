@@ -6,25 +6,50 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
+import java.net.URI;
+import java.net.URLEncoder;
 import java.util.regex.Pattern;
+
+import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.parser.ParseContext;
+import org.xml.sax.SAXException;
 
-class ParseUtil {
+public class ParseUtil {
 
 	private static Log log = LogFactory.getLog(CoreXMLNodeParser.class);
 	private static final Pattern TEMPLATE_NAMESPACE_CORE = Pattern
 			.compile("^http:\\/\\/www.xidea.org\\/ns\\/(?:template|lite)(?:\\/core)?\\/?$");
 
 	static final String CORE_URI = "http://www.xidea.org/ns/lite/core/";
+
 	static boolean isCoreNS(String prefix, String url) {
 		return ("c".equals(prefix) && ("#".equals(url) || "#core".equals(url)))
 				|| TEMPLATE_NAMESPACE_CORE.matcher(url).find();
+	}
+
+	private static final ParseContextImpl PC = new ParseContextImpl(
+			new ResourceContextImpl(null));
+
+	public static Document loadXML(String path) throws SAXException,
+			IOException {
+		if (path.startsWith("<")) {
+			path = "data:text/xml;charset=utf-8,"
+					+ URLEncoder.encode(path, "UTF-8");
+		}
+		return PC.loadXML(URI.create(path));
+	}
+
+	public static DocumentFragment selectNodes(Node doc, String xpath)
+			throws XPathExpressionException {
+		return PC.selectNodes(doc, xpath);
 	}
 
 	/**
@@ -83,59 +108,62 @@ class ParseUtil {
 		}
 		return context.parseEL(value);
 	}
-	static String loadText(InputStream in,String charset) throws IOException {
-		return loadText(new InputStreamReader(in,charset));
+
+	static String loadText(InputStream in, String charset) throws IOException {
+		return loadText(new InputStreamReader(in, charset));
 	}
 
 	static InputStream trimBOM(InputStream in) throws IOException {
 		in = new BufferedInputStream(in, 3);
 		int trim = 0;
 		in.mark(3);
-		outer:for(int i = 0;i<3;i++){// bugfix \ufeff
-			//Unicode(UTF-16)      FF-FE      31 00 32 00 33 00 34 00
-			//Unicode big endian   FE-FF      00 31 00 32 00 33 00 34
-			//UTF-8                 EF-BB-BF 31 32 33 34
-			//ASCII                         31 32 33 34
-			
+		outer: for (int i = 0; i < 3; i++) {// bugfix \ufeff
+			// Unicode(UTF-16) FF-FE 31 00 32 00 33 00 34 00
+			// Unicode big endian FE-FF 00 31 00 32 00 33 00 34
+			// UTF-8 EF-BB-BF 31 32 33 34
+			// ASCII 31 32 33 34
+
 			int c = in.read();
-			switch(c){
-			//UTF-16
+			switch (c) {
+			// UTF-16
 			case 0xFF:
 			case 0xFE:
-				if(i == 1){
+				if (i == 1) {
 					trim = 2;
 					break outer;
-				}else if(i>1){
+				} else if (i > 1) {
 					break outer;
 				}
-			//UTF-8
+				// UTF-8
 			case 0xEF:
-				if(i != 0){
+				if (i != 0) {
 					break outer;
 				}
 				break;
 			case 0xBB:
-				if(i != 1){
+				if (i != 1) {
 					break outer;
 				}
 				break;
 			case 0xBF:
-				if(i != 2){
+				if (i != 2) {
 					break outer;
-				}else{
-					trim=3;
+				} else {
+					trim = 3;
 				}
 				break;
 			default:
 				break outer;
 			}
-		};
+		}
+		;
 		in.reset();
-		while(trim-->0){
+		while (trim-- > 0) {
 			in.read();
 		}
 		return in;
 	}
+
 	static String loadText(Reader reader) throws IOException {
 		StringWriter out = new StringWriter();
 		int count;

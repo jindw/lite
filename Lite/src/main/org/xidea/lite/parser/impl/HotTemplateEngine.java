@@ -50,7 +50,7 @@ public class HotTemplateEngine extends TemplateEngine {
 
 
 	protected ParseContext createParseContext() {
-		return new ParseContextImpl(this, featrues, null, null);
+		return new ParseContextImpl(base, decoratorContext,featrues, null, null);
 	}
 	@Override
 	protected Template createTemplate(String path) {
@@ -63,25 +63,17 @@ public class HotTemplateEngine extends TemplateEngine {
 	}
 
 	protected Template createTemplate(String path, ParseContext parseContext) {
-		String decoratorPath = null;
-		if (decoratorContext != null) {
-			decoratorPath = decoratorContext.getDecotatorPage(path);
+		try {
+			parseContext.setAttribute(ParseContext.PATH, path);
+			parseContext.parse(base.createURI(path, null));
+		} catch (Exception e) {
+			log.error("模板解析失败", e);
+			StringWriter out = new StringWriter();
+			out.append("模板编译失败：\r\n<hr>");
+			PrintWriter pout = new PrintWriter(out, true);
+			e.printStackTrace(pout);
+			parseContext.append(out.toString());
 		}
-		if (decoratorPath != null && !decoratorPath.equals(path)) {
-			try {
-				Node node = parseContext.loadXML(getResource(path));
-				parseContext.setAttribute("#page", node);
-				path = decoratorPath;
-			} catch (Exception e) {
-				log.error("模板解析失败", e);
-				StringWriter out = new StringWriter();
-				out.append("模板编译失败：\r\n<hr>");
-				PrintWriter pout = new PrintWriter(out, true);
-				e.printStackTrace(pout);
-				parseContext.append(out.toString());
-			}
-		}
-		parseContext.parse(getResource(path));
 		List<Object> items = parseContext.toList();
 		return new Template(items);
 	}

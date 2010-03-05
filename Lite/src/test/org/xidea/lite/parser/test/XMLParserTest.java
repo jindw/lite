@@ -20,6 +20,7 @@ import org.w3c.dom.Node;
 import org.xidea.lite.Template;
 import org.xidea.lite.parser.impl.ParseContextImpl;
 import org.xidea.lite.parser.impl.XMLContextImpl;
+import org.xidea.lite.test.TestUtil;
 
 
 public class XMLParserTest {
@@ -36,10 +37,10 @@ public class XMLParserTest {
 	@Test
 	public void testSelect() throws Exception {
 		URI url = this.getClass().getResource("include-test.xml").toURI();
-		ParseContextImpl context = new ParseContextImpl(new org.xidea.lite.TemplateEngine(url),null,null,null); 
+		ParseContextImpl context =TestUtil.buildParseContext(url); 
 		org.w3c.dom.Document doc = new XMLParser().loadXML(url, context);
 		
-		Node node = new XMLContextImpl(new ParseContextImpl(null,null,null,null)){
+		Node node = new XMLContextImpl(new ParseContextImpl(null,null,null,null,null)){
 			@Override
 			public DocumentFragment selectNodes(Node currentNode,
 					String xpath) throws XPathExpressionException {
@@ -53,7 +54,7 @@ public class XMLParserTest {
 	@Test
 	public void testFormat() throws Exception {
 		URI url = this.getClass().getResource("format-test.xhtml").toURI();
-		ParseContextImpl parseContext = new ParseContextImpl(new org.xidea.lite.TemplateEngine(url),null,null,null); 
+		ParseContextImpl parseContext =TestUtil.buildParseContext(url); 
 		parseContext.setFormat(true);
 		HashMap context = new HashMap();
 		context.put("data", Arrays.asList("0", "1", "2", "3", "4", "5", "6",

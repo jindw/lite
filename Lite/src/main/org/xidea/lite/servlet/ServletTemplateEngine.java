@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URI;
 import java.net.URLEncoder;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -28,7 +27,7 @@ public class ServletTemplateEngine extends HotTemplateEngine {
 	private boolean autocompile = true;
 
 	public ServletTemplateEngine(ServletConfig config) {
-		super((URI)null,null);
+		super(new File(config.getServletContext().getRealPath("/")).toURI(),null);
 		//this.parser = new XMLParser(transformerFactory,xpathFactory);
 		this.config = config;
 		this.context = config.getServletContext();
@@ -88,10 +87,5 @@ public class ServletTemplateEngine extends HotTemplateEngine {
 			decoratorPath = defaultValue;
 		}
 		return decoratorPath;
-	}
-
-	@Override
-	protected URI getResource(String path){
-		return new File(context.getRealPath(path)).toURI();
 	}
 }

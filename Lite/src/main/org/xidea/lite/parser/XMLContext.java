@@ -12,6 +12,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Node;
 import org.xidea.lite.parser.impl.ParseContextImpl;
+import org.xidea.lite.parser.impl.XMLContextImpl;
 import org.xml.sax.SAXException;
 /**
  * @author jindw
@@ -64,7 +65,7 @@ public interface XMLContext {
 
 	/**
 	 * 装载指定文档。数据源需要从ResourceContext中获取资源数据
-	 * @see ResourceContext#openInputStream(parentURI)
+	 * @see ResourceContext#openStream(parentURI)
 	 * @param createURI
 	 * @return
 	 * @throws SAXException
@@ -85,13 +86,14 @@ public interface XMLContext {
 	 * @param parentURI
 	 * @param doc
 	 * @param xslt
+	 * @see XMLContextImpl#transform(URI, Node, Node)
 	 * @return
 	 * @throws TransformerConfigurationException
 	 * @throws TransformerFactoryConfigurationError
 	 * @throws TransformerException
 	 * @throws IOException
 	 */
-	public Node transform(URI parentURI, Node doc, Node xslt)
+	public Node transform(Node doc, Node xslt)
 			throws TransformerConfigurationException,
 			TransformerFactoryConfigurationError, TransformerException,
 			IOException;
