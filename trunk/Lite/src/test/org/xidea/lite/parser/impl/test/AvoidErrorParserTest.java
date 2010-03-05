@@ -76,6 +76,7 @@ public class AvoidErrorParserTest {
 		System.out.println(doc);
 		context.parse(doc);
 		String result = toString(context);
+		Assert.assertTrue("",result.indexOf("&amp;") == -1);
 		System.out.println("result:"+result);
 	}
 	@Test
