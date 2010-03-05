@@ -19,7 +19,7 @@ class ParseUtil {
 	private static Log log = LogFactory.getLog(CoreXMLNodeParser.class);
 	private static final Pattern TEMPLATE_NAMESPACE_CORE = Pattern
 			.compile("^http:\\/\\/www.xidea.org\\/ns\\/(?:template|lite)(?:\\/core)?\\/?$");
-	static final String CORE_URI = "http://www.xidea.org/ns/lite/core/";
+	static final String CORE_URI = "http://www.xidea.org/ns/lite/core";
 	static boolean isCoreNS(String prefix, String url) {
 		return ("c".equals(prefix) && ("#".equals(url) || "#core".equals(url)))
 				|| TEMPLATE_NAMESPACE_CORE.matcher(url).find();

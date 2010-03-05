@@ -1,10 +1,8 @@
 package org.xidea.lite.parser.impl;
 
 import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.SequenceInputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -122,6 +120,7 @@ public class XMLContextImpl implements XMLContext {
 		}
 		NamedNodeMap attributes = node.getAttributes();
 		final HashMap<String, String> prefixMap = new HashMap<String, String>();
+		prefixMap.put("c", ParseUtil.CORE_URI);
 		for (int i = 0; i < attributes.getLength(); i++) {
 			Attr attr = (Attr) attributes.item(i);
 			String value = attr.getNodeValue();

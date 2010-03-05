@@ -11,7 +11,11 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.DocumentFragment;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xidea.lite.Template;
 import org.xidea.lite.TemplateEngine;
 import org.xidea.lite.parser.DecoratorContext;
@@ -27,9 +31,8 @@ public class HotTemplateEngine extends TemplateEngine {
 
 	public HotTemplateEngine(URI webRoot, URI config) {
 		super(webRoot);
-		if (config!=null) {
-			this.decoratorContext = new DecoratorContextImpl(
-					config,null);
+		if (config != null) {
+			this.decoratorContext = new DecoratorContextImpl(config, null);
 		}
 	}
 
@@ -111,8 +114,8 @@ public class HotTemplateEngine extends TemplateEngine {
 			lock.remove(path);
 			return template;
 		} else {
-			//templateMap.remove(path);
-			//infoMap.remove(path);
+			// templateMap.remove(path);
+			// infoMap.remove(path);
 			// return getTemplate(path);
 			return template;
 		}
@@ -132,25 +135,50 @@ public class HotTemplateEngine extends TemplateEngine {
 	}
 
 	protected Template createTemplate(String path, ParseContext parseContext) {
-		String decoratorPath = null;
-		if (decoratorContext != null) {
-			decoratorPath = decoratorContext.getDecotatorPage(path);
-		}
-		if (decoratorPath != null && !decoratorPath.equals(path)) {
-			try {
-				Node node = parseContext.loadXML(getResource(path));
-				parseContext.setAttribute("#page", node);
-				path = decoratorPath;
-			} catch (Exception e) {
-				log.error("模板解析失败", e);
-				StringWriter out = new StringWriter();
-				out.append("模板编译失败：\r\n<hr>");
-				PrintWriter pout = new PrintWriter(out, true);
-				e.printStackTrace(pout);
-				parseContext.append(out.toString());
+		try {
+			int depth = 0;
+			Document root;
+			String parent = null;
+			while (true) {
+				URI uri = parent == null ? getResource(path) : parseContext
+						.createURI(parent, null);
+				root = parseContext.loadXML(uri);
+				parent = root.getDocumentElement().getAttribute("extends");
+				if (parent.length() > 0) {
+					depth++;
+					DocumentFragment nodes = parseContext.selectNodes(root,
+							"//c:block");
+					if (nodes.hasChildNodes()) {
+						Node child = nodes.getFirstChild();
+						do {
+							String id = "#"
+									+ ParseUtil.getAttributeOrNull(
+											(Element) child, "id", "name");
+							if (parseContext.getAttribute(id) == null) {
+								parseContext.setAttribute(id, child);
+							}
+						} while ((child = child.getNextSibling()) != null);
+					}
+				} else {
+					break;
+				}
 			}
+			if (depth == 0 && decoratorContext != null) {
+				String decoratorPath = decoratorContext.getDecotatorPage(path);
+				if (decoratorPath != null && !decoratorPath.equals(path)) {
+					parseContext.setAttribute("#page", root);
+					root = parseContext.loadXML(getResource(decoratorPath));
+				}
+			}
+			parseContext.parse(root);
+		} catch (Exception e) {
+			log.error("模板解析失败", e);
+			StringWriter out = new StringWriter();
+			out.append("模板编译失败：\r\n<hr>");
+			PrintWriter pout = new PrintWriter(out, true);
+			e.printStackTrace(pout);
+			parseContext.append(out.toString());
 		}
-		parseContext.parse(getResource(path));
 		List<Object> items = parseContext.toList();
 		return new Template(items);
 	}

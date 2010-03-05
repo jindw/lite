@@ -16,7 +16,6 @@ import sun.org.mozilla.javascript.internal.EvaluatorException;
 import sun.org.mozilla.javascript.internal.Parser;
 import sun.org.mozilla.javascript.internal.UintMap;
 
-@SuppressWarnings("unchecked")
 public class Java6Proxy extends JSProxy implements ErrorReporter {
 	private static Log log = LogFactory.getLog(CoreXMLNodeParser.class);
 	private ScriptEngine jsengine;
