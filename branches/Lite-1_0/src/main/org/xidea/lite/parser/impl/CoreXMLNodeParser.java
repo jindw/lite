@@ -31,8 +31,8 @@ public class CoreXMLNodeParser implements NodeParser<Element> {
 					 parseIncludeTag(el, context);
 				} else if ("client".equals(name)) {
 					clientParser.parseClientTag(el, context);
-				} else if ("group".equals(name) || "context".equals(name)) {
-					parseContextTag(el, context);
+				} else if ("block".equals(name) || "group".equals(name) || "context".equals(name)) {
+					parseBlockTag(el, context);
 				} else if ("json".equals(name)) {
 				} else if ("macro".equals(name) || "def".equals(name)) {
 					parseMacroTag(el, context);
@@ -252,10 +252,17 @@ public class CoreXMLNodeParser implements NodeParser<Element> {
 		return null;
 	}
 
-	protected void parseContextTag(Element el, ParseContext context) {
-		ParseUtil.parseChild(el.getFirstChild(), context);
+	protected void parseBlockTag(Element el, ParseContext context) {
+		if(el.hasAttribute("output")){
+			String output = el.getAttribute("output");
+			if("false".equals(output)){
+				return;
+			}
+		}
+		String key = ParseUtil.getAttributeOrNull(el, "id","name","key");
+		Node n = (Node)context.getAttribute("#"+key);
+		ParseUtil.parseChild(n.getFirstChild(), context);
 	}
-
 	protected void parseJSONTag(final Element el, ParseContext context) {
 		String var = ParseUtil.getAttributeOrNull(el, "var");
 		String file = ParseUtil.getAttributeOrNull(el, "file");
