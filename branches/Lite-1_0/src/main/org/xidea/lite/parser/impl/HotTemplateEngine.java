@@ -135,27 +135,27 @@ public class HotTemplateEngine extends TemplateEngine {
 		return new ParseContextImpl(getResource("/"), featrues, null, null);
 	}
 
-	protected Template createTemplate(String path, ParseContext parseContext) {
+	protected Template createTemplate(String path, ParseContext context) {
 		try {
 			Document root;//last
 			String parent = null;
 			ArrayList<Document> docs = new ArrayList<Document>();
 			do{
-				URI uri = docs.isEmpty() ? getResource(path) : parseContext
+				URI uri = docs.isEmpty() ? getResource(path) : context
 						.createURI(parent, null);
-				root = parseContext.loadXML(uri);
+				root = context.loadXML(uri);
 				docs.add(root);
 				parent = root.getDocumentElement().getAttribute("extends");
 			}while(parent.length() >0);
 			Collections.reverse(docs);
 			for(Document doc:docs){
-				DocumentFragment nodes = parseContext.selectNodes(doc,"//c:block");
+				DocumentFragment nodes = context.selectNodes(doc,"//c:block");
 				if (nodes.hasChildNodes()) {
 					Node child = nodes.getFirstChild();
 					do {
 						String id = ParseUtil.getAttributeOrNull(
 										(Element) child, "id", "name");
-						parseContext.setAttribute("#"+ id, child);
+						context.setAttribute("#"+ id, child);
 					} while ((child = child.getNextSibling()) != null);
 				}
 					
@@ -164,22 +164,22 @@ public class HotTemplateEngine extends TemplateEngine {
 			if (docs.size()==1 && decoratorContext != null) {
 				String decoratorPath = decoratorContext.getDecotatorPage(path);
 				if (decoratorPath != null && !decoratorPath.equals(path)) {
-					parseContext.setAttribute("#page", root);
-					parseContext.setAttribute("#content", root);
-					parseContext.setAttribute("#main", root);
-					root = parseContext.loadXML(getResource(decoratorPath));
+					context.setAttribute("#page", root);
+					context.setAttribute("#content", root);
+					context.setAttribute("#main", root);
+					root = context.loadXML(getResource(decoratorPath));
 				}
 			}
-			parseContext.parse(root);
+			context.parse(root);
 		} catch (Exception e) {
 			log.error("模板解析失败", e);
 			StringWriter out = new StringWriter();
 			out.append("模板编译失败：\r\n<hr>");
 			PrintWriter pout = new PrintWriter(out, true);
 			e.printStackTrace(pout);
-			parseContext.append(out.toString());
+			context.append(out.toString());
 		}
-		List<Object> items = parseContext.toList();
+		List<Object> items = context.toList();
 		return new Template(items);
 	}
 
