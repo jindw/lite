@@ -261,7 +261,7 @@ public class CoreXMLNodeParser implements NodeParser<Element> {
 		}
 		String key = ParseUtil.getAttributeOrNull(el, "id","name","key");
 		Node n = (Node)context.getAttribute("#"+key);
-		ParseUtil.parseChild(n.getFirstChild(), context);
+		ParseUtil.parseChild((n==null?el:n).getFirstChild(), context);
 	}
 	protected void parseJSONTag(final Element el, ParseContext context) {
 		String var = ParseUtil.getAttributeOrNull(el, "var");
