@@ -1,20 +1,16 @@
 package org.xidea.lite.parser.impl;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 
-import org.w3c.dom.Document;
+import org.xidea.lite.parser.DecoratorContext;
 import org.xidea.lite.parser.ResourceContext;
 import org.xidea.lite.parser.TextParser;
 import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.NodeParser;
 import org.xidea.lite.parser.ResultTranslator;
-import org.xml.sax.SAXException;
 
 /**
  * 不要较差调用，交叉调用，用this代替，确保继承安全
@@ -29,11 +25,11 @@ public class ParseContextImpl extends ParseContextProxy implements ParseContext 
 	protected ParseContextImpl() {
 	}
 	public ParseContextImpl(ResourceContext base){
-		initialize(base, null, null, null);
+		initialize(base, null, null, null, null);
 	}
-	public ParseContextImpl(ResourceContext base, Map<String, String> featrues,
+	public ParseContextImpl(ResourceContext base,DecoratorContext decoratorContext, Map<String, String> featrues,
 			NodeParser<? extends Object>[] parsers, TextParser[] ips) {
-		initialize(base, featrues, parsers, ips);
+		initialize(base, decoratorContext,featrues, parsers, ips);
 	}
 
 	public ParseContextImpl(ParseContext parent, 
@@ -47,9 +43,10 @@ public class ParseContextImpl extends ParseContextProxy implements ParseContext 
 	}
 
 
-	protected void initialize(ResourceContext base, Map<String, String> featrues,
+	protected void initialize(ResourceContext base,DecoratorContext decoratorContext, Map<String, String> featrues,
 			NodeParser<? extends Object>[] parsers, TextParser[] ips) {
 		resourceContext = base;
+		this.decoratorContext = decoratorContext;
 		xmlContext = new XMLContextImpl(this);
 		resultContext = new ResultContextImpl(this);
 		parserHolder = new ParseHolderImpl(this, parsers, ips);
@@ -81,13 +78,6 @@ public class ParseContextImpl extends ParseContextProxy implements ParseContext 
 
 	public Map<String, String> getFeatrueMap() {
 		return featrueMap;
-	}
-
-	public Document loadXML(String path) throws SAXException, IOException{
-		if(path.startsWith("<")){
-			path = "data:text/xml;charset=utf-8,"+URLEncoder.encode(path, "UTF-8");
-		}
-		return loadXML(URI.create(path));
 	}
 
 	public void parse(Object source) {

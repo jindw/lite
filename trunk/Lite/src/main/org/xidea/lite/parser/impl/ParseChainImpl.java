@@ -67,7 +67,7 @@ public class ParseChainImpl implements ParseChain {
 						context.setCurrentURI(uri);
 						Document doc = context.loadXML(uri);
 						if(doc == null){
-							InputStream in = context.openInputStream(uri);
+							InputStream in = context.openStream(uri);
 							try{
 								context.parse(in);
 							}finally{

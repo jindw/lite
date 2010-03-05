@@ -16,6 +16,7 @@ import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Node;
 import org.xidea.el.ExpressionFactory;
 import org.xidea.lite.Plugin;
+import org.xidea.lite.parser.DecoratorContext;
 import org.xidea.lite.parser.NodeParser;
 import org.xidea.lite.parser.ParseChain;
 import org.xidea.lite.parser.ParseContext;
@@ -27,11 +28,12 @@ import org.xidea.lite.parser.TextParser;
 import org.xidea.lite.parser.XMLContext;
 import org.xml.sax.SAXException;
 
-public class ParseContextProxy implements ParserHolder,ResourceContext,ResultContext, XMLContext  {
+public class ParseContextProxy implements ParserHolder,ResourceContext,ResultContext,DecoratorContext,XMLContext  {
 	protected ResourceContext resourceContext;
 	protected XMLContext xmlContext;
 	protected ResultContext resultContext;
 	protected ParserHolder parserHolder;
+	protected DecoratorContext decoratorContext;
 
 	protected ParseContextProxy() {
 	}
@@ -53,8 +55,8 @@ public class ParseContextProxy implements ParserHolder,ResourceContext,ResultCon
 
 
 
-	public InputStream openInputStream(URI uri) {
-		return resourceContext.openInputStream(uri);
+	public InputStream openStream(URI uri) {
+		return resourceContext.openStream(uri);
 	}
 
 	public String addGlobalObject(Class<? extends Object> impl, String key) {
@@ -182,11 +184,11 @@ public class ParseContextProxy implements ParserHolder,ResourceContext,ResultCon
 		return xmlContext.selectNodes(doc, xpath);
 	}
 
-	public Node transform(URI parentURI, Node doc, Node xslt)
+	public Node transform(Node doc, Node xslt)
 			throws TransformerConfigurationException,
 			TransformerFactoryConfigurationError, TransformerException,
 			IOException {
-		return xmlContext.transform(parentURI, doc, xslt);
+		return xmlContext.transform( doc, xslt);
 	}
 
 	public void addTextParser(TextParser textParser) {
@@ -256,6 +258,12 @@ public class ParseContextProxy implements ParserHolder,ResourceContext,ResultCon
 
 	public void setTextType(int textType) {
 		resultContext.setTextType(textType);
+	}
+	public String getDecotatorPage(String path) {
+		if(decoratorContext != null){
+			return decoratorContext.getDecotatorPage(path);
+		}
+		return null;
 	}
 
 }

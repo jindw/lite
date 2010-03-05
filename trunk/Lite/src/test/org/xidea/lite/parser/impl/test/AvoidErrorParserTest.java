@@ -21,6 +21,7 @@ import org.xidea.el.impl.ReflectUtil;
 import org.xidea.lite.Template;
 import org.xidea.lite.TemplateEngine;
 import org.xidea.lite.parser.impl.ParseContextImpl;
+import org.xidea.lite.test.TestUtil;
 import org.xml.sax.SAXException;
 
 public class AvoidErrorParserTest {
@@ -138,17 +139,17 @@ public class AvoidErrorParserTest {
 	}
 
 	private ParseContextImpl createContext() {
-		ParseContextImpl context = new ParseContextImpl(new TemplateEngine(new File(".").toURI()),
+		ParseContextImpl context = new ParseContextImpl(TestUtil.buildParseContext(new File(".").toURI()),null,
 				null, null, null) {
 
 			@Override
-			public InputStream openInputStream(URI uri) {
+			public InputStream openStream(URI uri) {
 				if (uri.getScheme().equals("text")) {
 					String data = uri.getSchemeSpecificPart().replace('+', ' ');
 					System.out.println(data);
 					return new ByteArrayInputStream(data.getBytes());
 				}
-				return super.openInputStream(uri);
+				return super.openStream(uri);
 			}
 
 		};

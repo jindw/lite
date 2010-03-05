@@ -43,7 +43,7 @@ public class ExtensionParser implements NodeParser<Element> {
 		for (String path : paths) {
 			URI uri = context.createURI(path, null);
 			context.addResource(uri);
-			InputStream in = context.openInputStream(uri);
+			InputStream in = context.openStream(uri);
 			if (in != null) {
 				try {
 					String script = ParseUtil.loadText(in, "utf-8");

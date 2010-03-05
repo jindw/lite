@@ -77,7 +77,7 @@ public class XMLContextImpl implements XMLContext {
 	}
 
 	private Document parse(URI uri) throws IOException, SAXException {
-		InputStream in1 = ParseUtil.trimBOM(context.openInputStream(uri));
+		InputStream in1 = ParseUtil.trimBOM(context.openStream(uri));
 		in1.mark(1);
 		if(in1.read() != '<'){
 			return null;
@@ -87,7 +87,7 @@ public class XMLContextImpl implements XMLContext {
 		try {
 			return documentBuilder.parse(in1, id);
 		} catch (SAXParseException e) {
-			InputStream in2 = ParseUtil.trimBOM(context.openInputStream(uri));
+			InputStream in2 = ParseUtil.trimBOM(context.openStream(uri));
 			try{
 				//做一次容错处理
 				log.warn("Invalid xml source:"+e.toString()+",try to fix it：");
@@ -169,7 +169,7 @@ public class XMLContextImpl implements XMLContext {
 		return frm;
 	}
 
-	public Node transform(URI parentURI, Node doc, Node xslt)
+	public Node transform(Node doc, Node xslt)
 			throws TransformerConfigurationException,
 			TransformerFactoryConfigurationError, TransformerException,
 			IOException {

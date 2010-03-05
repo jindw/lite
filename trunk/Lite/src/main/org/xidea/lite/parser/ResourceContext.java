@@ -22,7 +22,7 @@ public interface ResourceContext{
 	 * @return
 	 */
 	public URI createURI(String file, URI parentURI);
-	public InputStream openInputStream(URI url);
+	public InputStream openStream(URI url);
 
 
 }

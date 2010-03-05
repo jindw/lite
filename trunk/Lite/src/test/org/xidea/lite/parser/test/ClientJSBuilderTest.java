@@ -30,6 +30,7 @@ import org.xidea.lite.parser.impl.ELParser;
 import org.xidea.lite.parser.impl.Java6Proxy;
 import org.xidea.lite.parser.impl.ParseContextImpl;
 import org.xidea.lite.parser.impl.RhinoProxy;
+import org.xidea.lite.test.TestUtil;
 import org.xml.sax.SAXException;
 
 public class ClientJSBuilderTest {
@@ -59,7 +60,7 @@ public class ClientJSBuilderTest {
 	@Test
 	public void testBuildJS() throws SAXException, IOException, URISyntaxException {
 		URI url = this.getClass().getResource("format-test.xhtml").toURI();
-		ParseContext context2 = new ParseContextImpl(new TemplateEngine(url),null,null,null);
+		ParseContext context2 = TestUtil.buildParseContext(url);
 		// 前端直接压缩吧？反正保留那些空白也没有调试价值
 		// context2.setCompress(context.isCompress());
 		context2.setCompress(true);
@@ -74,10 +75,11 @@ public class ClientJSBuilderTest {
 		Assert.assertTrue("生成失败" + result, !isError);
 	}
 
+
 	@Test
 	public void testClient() throws SAXException, IOException, URISyntaxException {
 		URI url = this.getClass().getResource("asciitable-client.xhtml").toURI();
-		ParseContext context2 = new ParseContextImpl(new TemplateEngine(url),null,null,null);
+		ParseContext context2 = TestUtil.buildParseContext(url);
 		// 前端直接压缩吧？反正保留那些空白也没有调试价值
 		// context2.setCompress(context.isCompress());
 		context2.setCompress(true);
@@ -96,8 +98,8 @@ public class ClientJSBuilderTest {
 	public void testCTClient() throws SAXException, IOException, URISyntaxException {
 		InputStreamReader source = new InputStreamReader(this.getClass()
 				.getResourceAsStream("ct-client.txt"), "utf-8");
-		ParseContext context2 = new ParseContextImpl(new TemplateEngine(new URI("http://w/")),
-				null, null, new TextParser[] { ELParser.EL, ELParser.IF,
+		ParseContext context2 = new ParseContextImpl(TestUtil.buildParseContext(new URI("http://w/")),
+				null,null, null, new TextParser[] { ELParser.EL, ELParser.IF,
 						ELParser.FOR, ELParser.ELSE, ELParser.CLIENT,
 						ELParser.END, ELParser.VAR });
 		// 前端直接压缩吧？反正保留那些空白也没有调试价值
