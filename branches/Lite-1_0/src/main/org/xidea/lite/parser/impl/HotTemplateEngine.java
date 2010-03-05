@@ -5,6 +5,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -136,37 +137,36 @@ public class HotTemplateEngine extends TemplateEngine {
 
 	protected Template createTemplate(String path, ParseContext parseContext) {
 		try {
-			int depth = 0;
-			Document root;
+			Document root;//last
 			String parent = null;
-			while (true) {
-				URI uri = parent == null ? getResource(path) : parseContext
+			ArrayList<Document> docs = new ArrayList<Document>();
+			do{
+				URI uri = docs.isEmpty() ? getResource(path) : parseContext
 						.createURI(parent, null);
 				root = parseContext.loadXML(uri);
+				docs.add(root);
 				parent = root.getDocumentElement().getAttribute("extends");
-				if (parent.length() > 0) {
-					depth++;
-					DocumentFragment nodes = parseContext.selectNodes(root,
-							"//c:block");
-					if (nodes.hasChildNodes()) {
-						Node child = nodes.getFirstChild();
-						do {
-							String id = "#"
-									+ ParseUtil.getAttributeOrNull(
-											(Element) child, "id", "name");
-							if (parseContext.getAttribute(id) == null) {
-								parseContext.setAttribute(id, child);
-							}
-						} while ((child = child.getNextSibling()) != null);
-					}
-				} else {
-					break;
+			}while(parent.length() >0);
+			Collections.reverse(docs);
+			for(Document doc:docs){
+				DocumentFragment nodes = parseContext.selectNodes(doc,"//c:block");
+				if (nodes.hasChildNodes()) {
+					Node child = nodes.getFirstChild();
+					do {
+						String id = ParseUtil.getAttributeOrNull(
+										(Element) child, "id", "name");
+						parseContext.setAttribute("#"+ id, child);
+					} while ((child = child.getNextSibling()) != null);
 				}
+					
 			}
-			if (depth == 0 && decoratorContext != null) {
+
+			if (docs.size()==1 && decoratorContext != null) {
 				String decoratorPath = decoratorContext.getDecotatorPage(path);
 				if (decoratorPath != null && !decoratorPath.equals(path)) {
 					parseContext.setAttribute("#page", root);
+					parseContext.setAttribute("#content", root);
+					parseContext.setAttribute("#main", root);
 					root = parseContext.loadXML(getResource(decoratorPath));
 				}
 			}
