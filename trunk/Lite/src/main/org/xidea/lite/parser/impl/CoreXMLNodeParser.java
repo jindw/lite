@@ -4,12 +4,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -351,7 +348,7 @@ public class CoreXMLNodeParser implements NodeParser<Node> {
 			}
 		}
 		String key = ParseUtil.getAttributeOrNull(el, "id", "name", "key");
-		Node n = (Node) context.getAttribute("#" + key);
+		Node n = key == null?null:(Node) context.getAttribute("#" + key);
 		ParseUtil.parseChild((n == null ? el : n).getFirstChild(), context);
 	}
 
