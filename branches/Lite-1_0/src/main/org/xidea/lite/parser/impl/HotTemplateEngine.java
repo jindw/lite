@@ -5,7 +5,6 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,10 +12,6 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
-import org.w3c.dom.DocumentFragment;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.xidea.lite.Template;
 import org.xidea.lite.TemplateEngine;
 import org.xidea.lite.parser.DecoratorContext;
@@ -137,31 +132,10 @@ public class HotTemplateEngine extends TemplateEngine {
 
 	protected Template createTemplate(String path, ParseContext context) {
 		try {
-			Document root;//last
-			String parent = null;
-			ArrayList<Document> docs = new ArrayList<Document>();
-			do{
-				URI uri = docs.isEmpty() ? getResource(path) : context
-						.createURI(parent, null);
-				root = context.loadXML(uri);
-				docs.add(root);
-				parent = root.getDocumentElement().getAttribute("extends");
-			}while(parent.length() >0);
-			Collections.reverse(docs);
-			for(Document doc:docs){
-				DocumentFragment nodes = context.selectNodes(doc,"//c:block");
-				if (nodes.hasChildNodes()) {
-					Node child = nodes.getFirstChild();
-					do {
-						String id = ParseUtil.getAttributeOrNull(
-										(Element) child, "id", "name");
-						context.setAttribute("#"+ id, child);
-					} while ((child = child.getNextSibling()) != null);
-				}
-					
-			}
+			URI uri =  getResource(path);
+			Document root = context.loadXML(uri);
 
-			if (docs.size()==1 && decoratorContext != null) {
+			if ( decoratorContext != null) {
 				String decoratorPath = decoratorContext.getDecotatorPage(path);
 				if (decoratorPath != null && !decoratorPath.equals(path)) {
 					context.setAttribute("#page", root);

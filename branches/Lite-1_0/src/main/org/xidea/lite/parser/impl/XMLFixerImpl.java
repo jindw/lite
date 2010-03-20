@@ -18,10 +18,11 @@ import org.xml.sax.SAXException;
 
 public class XMLFixerImpl{
 	private static final Log log = LogFactory.getLog(XMLFixerImpl.class);
-	private static final String DOCTYPE_HTML_4_01 = "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">\n";
+	private static final String DOCTYPE_HTML_4_01 = "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n";
 	private static final String ISO8859_1 = "ISO8859-1";
 	private static final Pattern html5doctype = Pattern.compile("^\\s*<!doctype\\s+html>");
-	private static final String DEFAULT_STARTS = ("<!DOCTYPE html PUBLIC '"+DefaultEntityResolver.DEFAULT__HTML_DTD+"' '.'>");
+	private static final Pattern htmlSingle = Pattern.compile("(<(?:link|input|meta|img|br|hr)\\b(?:'[^']*'|\"[^\"]*\"|[^'\"])*?)/?>\\s*(?:</[\\w]+>)?",Pattern.CASE_INSENSITIVE);
+	private static final String DEFAULT_STARTS = ("<!DOCTYPE html PUBLIC '"+DefaultEntityResolver.DEFAULT__HTML_DTD+"' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>");
 	private final static Pattern encodingPattern = Pattern.compile("^(?:(\\s*<\\?xml[^>]+encoding=['\"])" +
 			"([\\w\\-]+)" +
 			"([\\s\\S]*)" +
@@ -58,6 +59,11 @@ public class XMLFixerImpl{
 		text = replaceInValidChar(text);
 		if( coreUsePattern.matcher(text).find()&& !coreDecPattern.matcher(text).find()){
 			text = rootPattern.matcher(text).replaceFirst("$0 xmlns:c='"+ParseUtil.CORE_URI+"'");
+		}
+		text = text.trim();
+		//xml 都剔除至 <开头
+		if(text.indexOf("<!")!=0){
+			text = DEFAULT_STARTS + text;
 		}
 		return new ByteArrayInputStream(text.getBytes(encoding));
 		
@@ -107,21 +113,19 @@ public class XMLFixerImpl{
 		String text = ParseUtil.loadText(in, ISO8859_1);
 		byte[] data =text.getBytes(ISO8859_1);
 		try {
-			in = create(data);
-			return documentBuilder.parse(in, uri);
+			log.warn("修复特殊字符");
+			return documentBuilder.parse(create(data), uri);
 		} catch (SAXException e) {
-			text = DEFAULT_STARTS+text;
+			log.warn("修复XML匹对（link|input|meta|img|br|hr）");
+			text = htmlSingle.matcher(text).replaceAll("$1/>");
 			data =text.getBytes(ISO8859_1);
-			in = create(data) ;
 			try {
-				return documentBuilder.parse(in, uri);
+				return documentBuilder.parse(create(data), uri);
 			} catch (SAXException e2) {
 				text = rootPattern.matcher(text).replaceFirst("<c:group xmlns:c='"+ParseUtil.CORE_URI+"'>$0")+"</c:group>";
-				System.out.println(text);
 				data =text.getBytes(ISO8859_1);
-				in = create(data) ;
 				try {
-					return documentBuilder.parse(in, uri);
+					return documentBuilder.parse(create(data), uri);
 				} catch (SAXException e3) {
 					log.error(e3);
 				}

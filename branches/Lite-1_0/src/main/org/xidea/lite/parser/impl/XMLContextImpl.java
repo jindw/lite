@@ -77,8 +77,12 @@ public class XMLContextImpl implements XMLContext {
 		context.setCurrentURI(uri);
 		InputStream in1 = trimXML(uri);
 		try {
-			Document doc = documentBuilder.parse(in1, uri.toString());
-			return doc;
+			try{
+				Document doc = documentBuilder.parse(in1, uri.toString());
+				return doc;
+			}catch(java.io.CharConversionException e){
+				throw new SAXParseException(e.toString(), null);
+			}
 		} catch (SAXParseException e) {
 			InputStream in2 = trimXML(uri);
 			try{

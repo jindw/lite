@@ -1,13 +1,16 @@
 package org.xidea.lite.parser.impl;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
+import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xidea.el.json.JSONEncoder;
@@ -16,22 +19,27 @@ import org.xidea.lite.Template;
 import org.xidea.lite.parser.ParseChain;
 import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.NodeParser;
+import org.xml.sax.SAXException;
 
-public class CoreXMLNodeParser implements NodeParser<Element> {
+public class CoreXMLNodeParser implements NodeParser<Node> {
 	private static Log log = LogFactory.getLog(CoreXMLNodeParser.class);
+	private final static Object FIRST_NODE = new Object();
 	private static ClientParser clientParser = new ClientParser();
-	
 
-	public void parse( final Element el,ParseContext context,ParseChain chain) {
+	public void parse(Node node, ParseContext context, ParseChain chain) {
+		if (node instanceof Element) {
+			Element el = (Element) node;
 			String prefix = el.getPrefix();
 			String namespaceURI = el.getNamespaceURI();
-			if (namespaceURI != null && ParseUtil.isCoreNS(prefix, namespaceURI)) {
+			if (namespaceURI != null
+					&& ParseUtil.isCoreNS(prefix, namespaceURI)) {
 				String name = el.getLocalName();
 				if ("include".equals(name)) {
-					 parseIncludeTag(el, context);
+					parseIncludeTag(el, context);
 				} else if ("client".equals(name)) {
 					clientParser.parseClientTag(el, context);
-				} else if ("block".equals(name) || "group".equals(name) || "context".equals(name)) {
+				} else if ("block".equals(name) || "group".equals(name)
+						|| "context".equals(name)) {
 					parseBlockTag(el, context);
 				} else if ("json".equals(name)) {
 				} else if ("macro".equals(name) || "def".equals(name)) {
@@ -53,19 +61,94 @@ public class CoreXMLNodeParser implements NodeParser<Element> {
 				} else if ("var".equals(name)) {
 					parseVarTag(el, context);
 				} else if ("comment".equals(name)) {
-				}else{
-					log.error("未知核心标记" +name);
+				} else {
+					log.error("未知核心标记" + name);
 					chain.process(el);
 				}
-			}else{
+			} else {
 				chain.process(el);
 			}
+		} else if (node instanceof Document) {
+			boolean isFirst = context.getAttribute(FIRST_NODE) == null;
+			if (isFirst) {
+				context.setAttribute(FIRST_NODE, true);
+				node = findExtends((Document) node, context);
+			}
+			chain.process(node);
+		} else {
+			chain.process(node);
+		}
+	}
+
+	private Node findExtends(Node root, ParseContext context) {
+		try {
+			LinkedList<Node> docs = new LinkedList<Node>();
+			while (true) {
+				docs.addFirst(root);
+				Element el = root instanceof Document ? ((Document) root)
+						.getDocumentElement() : (Element) root;
+				String parent = getExtends(el);
+				if (parent.length() > 0) {
+					root = loadXML(context, parent);
+				} else {
+					break;
+				}
+			}
+			for (Node doc : docs) {
+				DocumentFragment nodes = context.selectNodes(doc, "//c:block");
+				if (nodes.hasChildNodes()) {
+					Node child = nodes.getFirstChild();
+					do {
+						String id = ParseUtil.getAttributeOrNull(
+								(Element) child, "id", "name");
+						context.setAttribute("#" + id, child);
+					} while ((child = child.getNextSibling()) != null);
+				}
+			}
+			return root;
+
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private String getExtends(Element el) {
+		String tagName = el.getLocalName();
+		if(tagName.equals("extends") || ParseUtil.isCoreNS(el.getPrefix(), el.getNamespaceURI())){
+			return ParseUtil.getAttributeOrNull(el, "value","url","extends");
+		}
+		return null;
+	}
+
+	private Node loadXML(ParseContext context, String path)
+			throws SAXException, IOException {
+		Node doc;
+		if (path.startsWith("#")) {
+			doc = (Node) context.getAttribute(path);
+			if (doc == null) {
+				log.error("没找到相关命名节点：" + context.getCurrentURI() + path);
+				throw new RuntimeException();
+			}
+
+			String uri;
+			if (doc instanceof Document) {
+				uri = ((Document) doc).getDocumentURI();
+			} else {
+				uri = doc.getOwnerDocument().getDocumentURI();
+			}
+			if (uri != null) {
+				context.setCurrentURI(context.createURI(uri, null));
+			}
+		} else {
+			doc = context.loadXML(context.createURI(path, context
+					.getCurrentURI()));
+		}
+		return doc;
 	}
 
 	/**
-	 * <c:def name="test(arg1,arg2)">
-	 * ....
-	 * </c:def>
+	 * <c:def name="test(arg1,arg2)"> .... </c:def>
+	 * 
 	 * @param el
 	 * @param context
 	 */
@@ -73,13 +156,13 @@ public class CoreXMLNodeParser implements NodeParser<Element> {
 		String name = el.getAttribute("name");
 		String exp = createMacro(name);
 		context.appendPlugin(DefinePlugin.class, context.parseEL(exp));
-		
-		if(el.hasChildNodes()){
+
+		if (el.hasChildNodes()) {
 			ParseUtil.parseChild(el.getFirstChild(), context);
 		}
-		
+
 		context.appendEnd();
-		
+
 	}
 
 	static String createMacro(String name) {
@@ -89,7 +172,7 @@ public class CoreXMLNodeParser implements NodeParser<Element> {
 		buf.append(name);
 		buf.append("\",params:[");
 		for (int i = 1; i < args.length; i++) {
-			if(i>1){
+			if (i > 1) {
 				buf.append(',');
 			}
 			buf.append('"');
@@ -120,27 +203,7 @@ public class CoreXMLNodeParser implements NodeParser<Element> {
 				context.appendEnd();
 			}
 			if (path != null) {
-				if (path.startsWith("#")) {
-					doc = (Node) context.getAttribute(path);
-					if(doc==null){
-						log.error("没找到相关命名节点："+context.getCurrentURI()+ path);
-						return;
-					}
-					
-					
-					String uri;
-					if (doc instanceof Document) {
-						uri = ((Document) doc).getDocumentURI();
-					} else {
-						uri = doc.getOwnerDocument().getDocumentURI();
-					}
-					if (uri != null) {
-						context.setCurrentURI(context.createURI(uri, null));
-					}
-				} else {
-					doc = context.loadXML(context
-							.createURI(path, parentURI));
-				}
+				doc = loadXML(context, path);
 			}
 
 			if (xpath != null) {
@@ -157,7 +220,6 @@ public class CoreXMLNodeParser implements NodeParser<Element> {
 		}
 	}
 
-
 	protected Node parseIfTag(Element el, ParseContext context) {
 		Object test = ParseUtil.getAttributeEL(context, el, "test");
 		context.appendIf(test);
@@ -166,10 +228,11 @@ public class CoreXMLNodeParser implements NodeParser<Element> {
 		return null;
 	}
 
-	protected Node parseElseTag(Element el, ParseContext context, boolean requiredTest) {
+	protected Node parseElseTag(Element el, ParseContext context,
+			boolean requiredTest) {
 		Object test = ParseUtil.getAttributeEL(context, el, "test");
 		if (requiredTest) {
-			if(test == null){
+			if (test == null) {
 				throw new IllegalStateException("不能有多个连续无条件Else");
 			}
 		}
@@ -207,7 +270,7 @@ public class CoreXMLNodeParser implements NodeParser<Element> {
 						parseElseTag((Element) next, context, true);
 					}
 				} else if (next.getLocalName().equals(elseTag)) {
-					parseElseTag((Element) next, context,false);
+					parseElseTag((Element) next, context, false);
 				} else {
 					throw new RuntimeException("choose 只接受when，otherwise 节点");
 				}
@@ -218,8 +281,9 @@ public class CoreXMLNodeParser implements NodeParser<Element> {
 	}
 
 	protected Node parseForTag(Element el, ParseContext context) {
-		Object items = ParseUtil.getAttributeEL(context, el, "items","values","value");
-		String var = ParseUtil.getAttributeOrNull(el, "var","name","id");
+		Object items = ParseUtil.getAttributeEL(context, el, "items", "values",
+				"value");
+		String var = ParseUtil.getAttributeOrNull(el, "var", "name", "id");
 		String status = ParseUtil.getAttributeOrNull(el, "status");
 		context.appendFor(var, items, status);
 		ParseUtil.parseChild(el.getFirstChild(), context);
@@ -228,7 +292,7 @@ public class CoreXMLNodeParser implements NodeParser<Element> {
 	}
 
 	protected Node parseVarTag(Element el, ParseContext context) {
-		String name = ParseUtil.getAttributeOrNull(el, "name","id");
+		String name = ParseUtil.getAttributeOrNull(el, "name", "id");
 		String value = ParseUtil.getAttributeOrNull(el, "value");
 		if (value == null) {
 			context.appendCaptrue(name);
@@ -238,10 +302,11 @@ public class CoreXMLNodeParser implements NodeParser<Element> {
 			List<Object> temp = context.parseText(value, Template.EL_TYPE);
 			if (temp.size() == 1) {
 				Object item = temp.get(0);
-				if(item instanceof Object[]){//EL_TYPE
-					context.appendVar(name, ((Object[])item)[1]);
-				}else{
-					context.appendVar(name, context.parseEL(JSONEncoder.encode(item)));
+				if (item instanceof Object[]) {// EL_TYPE
+					context.appendVar(name, ((Object[]) item)[1]);
+				} else {
+					context.appendVar(name, context.parseEL(JSONEncoder
+							.encode(item)));
 				}
 			} else {
 				context.appendCaptrue(name);
@@ -253,20 +318,22 @@ public class CoreXMLNodeParser implements NodeParser<Element> {
 	}
 
 	protected void parseBlockTag(Element el, ParseContext context) {
-		if(el.hasAttribute("output")){
+		if (el.hasAttribute("output")) {
 			String output = el.getAttribute("output");
-			if("false".equals(output)){
+			if ("false".equals(output)) {
 				return;
 			}
 		}
-		String key = ParseUtil.getAttributeOrNull(el, "id","name","key");
-		Node n = (Node)context.getAttribute("#"+key);
-		ParseUtil.parseChild((n==null?el:n).getFirstChild(), context);
+		String key = ParseUtil.getAttributeOrNull(el, "id", "name", "key");
+		Node n = (Node) context.getAttribute("#" + key);
+		ParseUtil.parseChild((n == null ? el : n).getFirstChild(), context);
 	}
+
 	protected void parseJSONTag(final Element el, ParseContext context) {
 		String var = ParseUtil.getAttributeOrNull(el, "var");
 		String file = ParseUtil.getAttributeOrNull(el, "file");
-		String encoding = ParseUtil.getAttributeOrNull(el, "encoding", "charset");
+		String encoding = ParseUtil.getAttributeOrNull(el, "encoding",
+				"charset");
 		String content = ParseUtil.getAttributeOrNull(el, "content");
 		if (file != null) {
 			try {
@@ -303,9 +370,9 @@ public class CoreXMLNodeParser implements NodeParser<Element> {
 
 	protected void parseOutTag(Element el, ParseContext context) {
 		String value = ParseUtil.getAttributeOrNull(el, "value");
-		if(value == null){
+		if (value == null) {
 			value = el.getTextContent();
 		}
-		context.appendAll(context.parseText(value,Template.EL_TYPE));
+		context.appendAll(context.parseText(value, Template.EL_TYPE));
 	}
 }

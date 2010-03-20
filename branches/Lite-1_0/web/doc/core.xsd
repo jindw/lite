@@ -225,6 +225,48 @@
 			</xs:attribute>
 		</xs:complexType>
 	</xs:element>
+	<xs:element name="extends">
+		<xs:annotation>
+			<xs:documentation>
+				继承
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType mixed="true">
+			<xs:sequence>
+				<xs:any minOccurs="0" maxOccurs="unbounded"
+					processContents="lax">
+				</xs:any>
+			</xs:sequence>
+			<xs:attribute name="path" type="xs:NMTOKEN" use="optional" >
+				<xs:annotation>
+					<xs:documentation>
+						继承父模板路径（相对当前文件路径）
+					</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="block">
+		<xs:annotation>
+			<xs:documentation>
+				区块，可用于模板继承成员的覆盖。
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType mixed="true">
+			<xs:sequence>
+				<xs:any minOccurs="0" maxOccurs="unbounded"
+					processContents="lax">
+				</xs:any>
+			</xs:sequence>
+			<xs:attribute name="name" type="xs:NMTOKEN" use="optional" >
+				<xs:annotation>
+					<xs:documentation>
+						表示块名，用于继承覆盖
+					</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+		</xs:complexType>
+	</xs:element>
 	<xs:element name="client">
 		<xs:annotation>
 			<xs:documentation>
