@@ -32,7 +32,7 @@ public class ParseUtil {
 
 	static boolean isCoreNS(String prefix, String url) {
 		return ("c".equals(prefix) && ("#".equals(url) || "#core".equals(url)))
-				|| TEMPLATE_NAMESPACE_CORE.matcher(url).find();
+				||url != null &&  TEMPLATE_NAMESPACE_CORE.matcher(url).find();
 	}
 
 	private static final ParseContextImpl PC = new ParseContextImpl(
