@@ -1,0 +1,60 @@
+<html>
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+<title>Lite XML 模板引擎在线测试系统</title>
+<style>
+html,body{
+    width:100%;
+    height:100%;
+    margin:10px;
+    padding:10px;
+}
+.block{
+    background:#048;
+}
+.text *{
+    font-family:'Arial Black';
+    padding:0px;
+    margin:0px;
+    line-height:100%;
+    color:#048;
+}
+</style>
+</head>
+
+<body>
+<script>
+function print(x,y,w,h,c,t){
+    var html = ["<div style='position:absolute;"
+                    ,"left:",x
+                    ,"px;top:",y
+                    ,"px;width:",w
+                    ,"px;height:",h
+                    ,"px;' class='",c||"block","'>"
+                    ,t&&"<table border='0' cellpadding='0' cellspacing='0' width='100%' height='100%'>"+t.replace(/./g,"<tr><th style='font-size:"+parseInt(w*1)+"px'>$&</th></tr>")+"</table>"||"&nbsp;","</div>"];
+    //alert(html.join(''))
+    document.write(html.join(''));
+}
+//0.191 0.382 0.618 0.809 
+//x,y,w,h
+var blocks = [
+[0,0,19,100],
+[0,100-19,42,19],
+[42-19,0,19,19],
+[42-19,19+4,19,100-19-4-19-4],
+
+[42+4,0,42,19],
+[42+4,19+4,19,100-19-4],
+[42+4+4+19,100-19,19,19],
+
+[42+4+4+19,19+4,19,100-2*(19+4),"text","XML"],
+]
+
+for(var i=0;i<blocks.length;i++){
+    print.apply(null,blocks[i]);
+}
+
+</script>
+
+</body>
+</html>

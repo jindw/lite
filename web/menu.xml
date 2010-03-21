@@ -1,0 +1,258 @@
+<root>
+	<context><![CDATA[
+{
+  "items":[1,2,3,9,7,5], 
+  "test1":true, 
+  "test2":false
+}
+  
+	]]></context>
+	<entry key="表达式（编码xml特殊字符）">
+		<description><![CDATA[<h3>表达式输出（编码）</h3>
+		<ul>
+			<li>出现在XML文档的文本节点中，输出表达式值，并编码其xml特殊字符。</li>
+			<li>这个输出是自动编码的，若需要原始文本输出，需要使用：<c:out value="${html}"/>标签。 </li>
+			<li>模版表达式求值，是一个基于模板上下文数据的读值和简单只读运算的过程。 </li>
+			<li>在JavaScript?中。其功能类似于function(el){with(context){return eval(el)})</li>
+		</ul>]]>
+		</description>
+		<context><![CDATA[
+{
+  "user":"jindw",
+  "ip":{
+    "part0":192,
+     "part1":168,
+    "part2":0,
+    "part3":1
+  }
+}
+	]]></context>
+		<source><![CDATA[<div xmlns:c="http://www.xidea.org/ns/lite/core">
+  <p>您好：${user}，您的的ip地址是：${ip.part0}.${ip.part1}.${ip.part2}.${ip.part3}。</p>
+  <p>对应的整数值是：${(((ip.part0*256)+ip.part1)*256+ip.part2)*256+ip.part3}</p>
+</div>]]></source>
+	</entry>
+	<entry key="表达式（不编码xml特殊字符）">
+		<description><![CDATA[ <h3>表达式输出（不编码）</h3>
+		<p>与直接的表达式唯一的区别是：不编码。 </p>]]>
+		</description>
+		<context><![CDATA[
+{
+  "html":"Hello <b>Guest</b>!"
+}
+	]]></context>
+		<source><![CDATA[<div xmlns:c="http://www.xidea.org/ns/lite/core">
+    <p>text:${html}</p>
+    <p>html:<c:out value="${html}"/></p>
+</div>]]></source>
+	</entry>
+	<entry key="属性表达式">
+		<description><![CDATA[<h3> 属性内表达式</h3>。<br/>输出完整的XML属性节点。<br/>
+		<ul>
+			<li>当属性值为""或者null的时候，不输出 。</li>
+			<li>与直接的表达式的区别是：在xml语法约束下，省去了不必要条件判断。</li>
+		</ul> ]]>
+		</description>
+		<context><![CDATA[
+{
+  "event":{
+    "onclick":"alert(1)",
+    "onmouseover":"alert(2)"
+  }
+}
+	]]></context>
+		<source><![CDATA[<div xmlns:c="http://www.xidea.org/ns/lite/core">
+<div onclick="${event.onclick}"
+     ondblclick="${event.ondblclick}"
+     onmouseover="${event.onmouseover}"
+     onmouseout="${event.onmouseout}"/>
+</div>]]></source>
+	</entry>
+
+	<entry key="条件标签(if-else)">
+		<description><![CDATA[<h3> 条件标签。</h3>
+		<ul>
+			<li>当属性值为""或者null的时候，不输出 。</li>
+			<li>与直接的表达式的区别是：在xml语法约束下，省去了不必要条件判断。</li>
+		</ul> ]]>
+		</description>
+		<context><![CDATA[
+{
+    "test1":false,
+    "test2":false,
+    "test3":true,
+    "test4":true
+}
+	]]></context>
+		<source><![CDATA[<div xmlns:c="http://www.xidea.org/ns/lite/core">
+  <c:if test="${test1}">test1</c:if>
+  <c:else-if test="${test2}">test2</c:else-if>
+  <c:else-if test="${test3}">test3</c:else-if>
+  <c:else-if test="${test4}">test4</c:else-if>
+  <c:else>else</c:else>
+</div>]]></source>
+	</entry>
+
+	<entry key="选择标签(choose)">
+		<description><![CDATA[<h3> 选择标签。</h3>
+        <p>选择第一个条件执行，如果没有命中，执行c:otherwise节点。 </p>
+        <p>这一系列标签其实和if else系列等价，翻译后的目标代码也万全相同。他们的出现，只是为了更加清晰的语法表现手段，而非内核功能的增加。</p> ]]>
+		</description>
+		<context><![CDATA[
+{
+    "test1":false,
+    "test2":false,
+    "test3":true,
+    "test4":true
+}
+	]]></context>
+		<source><![CDATA[<div xmlns:c="http://www.xidea.org/ns/lite/core">
+    <c:choose >
+        <c:when test="${test1}">分支1</c:when >
+        <c:when test="${test2}">分支2</c:when >
+        <c:when test="${test3}">分支3</c:when >
+        <c:otherwise>分支4</c:otherwise>
+    </c:choose >
+</div>]]></source>
+	</entry>
+
+
+	<entry key="迭代标签(for)">
+		<description><![CDATA[<h3>循环标签</h3>
+		<p>对items表达式中的数据循环，将每个元素依次申明为var中制定的名称的变量。</p>
+		<h4>for标签属性：</h4><br/>
+		<ul>
+			<li>var ： 字符串，且内容为JavaScript?的合法变量名。</li>
+			<li>items ： EL,迭代内容，可以是数组，或者java,util.Collection 实例。</li>
+			<li>status ： 可选属性，表示状态变量名，是该循环内for状态的别名。 </li>
+		</ul>
+		<b>for状态数据结构说明</b><br/>
+		<p> {index:0,lastIndex:6}。</p>
+		<p> 循环过程中将维护for的状态（index属性），用户在循环体内使用${for.index}获取当前循环的重复次数（从0开始）。 </p>
+		]]></description>
+		<source><![CDATA[<div xmlns:c="http://www.xidea.org/ns/lite/core">
+    [
+    <c:for var="item" items="${items}">
+        ${item}
+        <c:if test="${for.index != for.lastIndex}">,</c:if>
+    </c:for>
+    ]
+</div>]]></source>
+	</entry>
+	<entry key="空循环处理(与for匹配的else)">
+		<description><![CDATA[<h3>循环标签的 else 标记说明：</h3>
+		<p>当其与for循环组合，当for循环执行0次后，与其配合的else节点可以执行（常见于做空循环的友好提示，如没有查询到任何数据）。 </p>
+	    ]]></description>
+		<source><![CDATA[<div xmlns:c="http://www.xidea.org/ns/lite/core">
+    [
+    <c:for var="item" items="${[]}">
+        ${item}
+        <c:if test="${for.index != for.lastIndex}">,</c:if>
+    </c:for>
+    <c:else>
+    '没有记录'
+    </c:else>
+    ]
+</div>]]></source>
+	</entry>
+
+	<entry key="通过属性申明变量">
+		<description><![CDATA[<h3>通过属性值申明变量变量：</h3>
+		<h4>属性表：</h4><ul>
+			<li>name : 变量名称。</li>
+			<li>value ： El表达式（非必要，若无，取子节点渲染数据） </li>
+		</ul>
+		<h4>功能：</h4>
+		<ul>
+			<li>定义变量，内容来自value属性。 </li>
+		</ul>]]></description>
+		<source><![CDATA[<div xmlns:c="http://www.xidea.org/ns/lite/core">
+  <c:var name="myName" value="${'jin '+'dawei'}" />
+  [${myName}]
+</div>]]></source>
+	</entry>
+	<entry key="通过子节点内容申明变量">
+		<description><![CDATA[<h3>通过子节点申明变量</h3：
+		<h4>属性表：</h4>
+		<ul>
+			<li>name : 变量名称。</li>
+			<li>value ： El表达式（非必要，若无，取子节点渲染数据） </li>
+		</ul>
+		<h4>功能：</h4>
+		<ul>
+			<li>定义变量，变量名称是name属性，内容来自子节点输出的文本。  </li>
+		</ul>]]></description>
+		<context><![CDATA[
+{
+  "user":{
+    "firstName":"jin",
+    "lastName":"dawei"
+  }
+}]]></context>
+		<source><![CDATA[<div xmlns:c="http://www.xidea.org/ns/lite/core">
+  <c:var name="myName" >
+    ${user.firstName} ${user.lastName}
+  </c:var>
+  [${myName}]
+</div>]]></source>
+	</entry>
+	<entry key="函数申明">
+		<description><![CDATA[<h3>函数申明</h3：
+		<h4>属性表：</h4>
+		<ul>
+			<li>name : 变量名称和参数列表。</li>
+		</ul>
+		<h4>功能：</h4>
+		<ul>
+			<li>定义字符串拼接函数。  </li>
+		</ul>]]></description>
+		<context><![CDATA[
+{
+  "user":{
+    "firstName":"jin",
+    "lastName":"dawei"
+  }
+}]]></context>
+		<source><![CDATA[<div xmlns:c="http://www.xidea.org/ns/lite/core">
+  <c:def name="test(user2)" >
+    ${user2.firstName} ${user2.lastName}
+  </c:def>
+  [${test(user)}]
+</div>]]></source>
+	</entry>
+
+
+	<entry key="简单包含">
+		<description><![CDATA[<h3>通过子节点申明变量:</h3>
+		<h4>属性表：</h4>
+		<ul>
+			<li>path ：字符串，可选，未指定时代表需要包含的文档为当前文档。可以是表示一个相对路径，也可以制定一个编译上文的变量（如，页面装饰其实现中，先将目标模板文档对象，作为编译上下文的#page变量，能后解析布局模板）</li>
+			<li>xpath ：字符串,可选，用于选取文档片段的xpath语句。</li>
+		</ul>
+		<h4>功能：</h4>
+		<ul>
+			<li>包含一个文档，或者文档片段。   </li>
+		</ul>
+		<ul><h4>说明：</h4>
+			<li>xpath确实有点烦琐,但毕竟事标准，标准永远不是最好的，但他是可行的。  </li>
+		</ul>
+	    ]]></description>
+		<source><![CDATA[<div xmlns:c="http://www.xidea.org/ns/lite/core">
+  <c:include path="menu.xml" xpath="//entry[@key='PageMesh']/description" >
+  </c:include>
+</div>]]></source>
+	</entry>
+
+	<entry key="PageMesh">
+		<description><![CDATA[<h3>页面装饰：</h3>
+		<p>改功能不便在此演示，希望了解更多，请参看：<a href="http://code.google.com/p/lite/wiki/XMLLitePageMesh">XMLLitePageMesh</a>
+		</p>]]></description>
+		<context><![CDATA[
+{"url":"http://code.google.com/p/lite/wiki/XMLLitePageMesh"}
+		]]></context>
+		<source><![CDATA[<!-- 
+改功能不便在此演示，希望了解更多，请参看：<a href="http://code.google.com/p/lite/wiki/XMLLitePageMesh">XMLLitePageMesh</a>
+-->
+<a href="${url}">${url}</a>]]></source>
+	</entry>
+</root>
