@@ -1,0 +1,155 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta content="text/html; charset=utf-8"
+			http-equiv="Content-Type" />
+		<title>Lite XML 模板引擎在线测试系统</title>
+		<style>
+			/*<![CDATA[/* */
+html,body{
+width:100%;
+height:100%;
+}
+#description{
+border:1px dashed #404;
+background:#EEE;
+}
+.goto-lite{
+border-botton:3px dashed #404;
+background:#FFD;
+text-align:right;
+}
+#description p{
+text-indent:20px;
+}
+#description h3,#description h4{
+font-size:90%;
+}
+#main{
+float:left;
+width:75%;
+height:95%;
+border:1px solid blue;
+margin:1%;
+}
+#menu{
+float:left;
+width:20%;
+height:95%;
+border:1px solid blue;
+margin:1%;
+}
+#menu #menuContent li{
+cursor:pointer;
+}
+#menu #menuContent li.selected{
+background:#DDD
+}
+#context{
+width:98%;
+height:200px
+}
+#templateSource{
+width:98%;
+height:200px
+}
+.action ,.source{
+text-align:right;
+}
+.action button{
+font-size:30px;
+height:38px;
+}
+#templateCode,#templateResult,#optimizedResult,#htmlResult{
+width:95%;
+background:#ddd;
+height:85px;
+white-space:nowrap;
+}
+#optimizedResult,#htmlResult{
+height:125px
+}
+			/*]]> /* */
+		</style>
+		<script src="scripts/index.php/boot.js"></script>
+		<script>$import("org.xidea.lite.demo.TestCase",true)</script>
+	</head>
+	<body>
+		<div id="main">
+			<table width="98%">
+				<tr>
+					<th width="35%">测试数据(用JSON表示)</th>
+					<th>模板源码</th>
+				</tr>
+				<tr>
+					<td class="source">
+						<textarea id="context">
+{
+  "blocks":[
+    [0,0,19,100],
+    [0,81,42,19],
+    [23,0,19,19],
+    [23,23,19,54],
+    [46,0,42,19],
+    [46,23,19,77],
+    [69,81,19,19]
+  ]
+}</textarea>
+					</td>
+					<td class="source">
+						<textarea id="templateSource">
+&lt;html style="margin:10px;" xmlns:c="http://www.xidea.org/ns/template/core"&gt;
+	&lt;body&gt;
+		&lt;c:for var="item" items="${blocks}"&gt;
+		&lt;div style='position:absolute;background:#048;font-size:1px;left:${item[0]}px;top:${item[1]}px;width:${item[2]}px;height:${item[3]}px;'&gt;&#160;&lt;/div&gt;
+		&lt;/c:for&gt;
+		&lt;div style="float:right"&gt;&lt;h2&gt;这就是Lite的logo&lt;/h2&gt;&lt;/div&gt;
+	&lt;/body&gt;
+&lt;/html&gt;
+</textarea>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2" class="action">
+						<button onclick="TestCase.runTest()">
+							测试模板
+						</button>
+					</td>
+				</tr>
+			</table>
+			<table width="98%">
+				<tr>
+					<th width="50%">中间代码数据(标准/JS优化)</th>
+					<th>模板渲染结果</th>
+				</tr>
+				<tr>
+					<td class="source" title="标准中间代码 ">
+						<textarea id="templateCode" title="双击显示指令助记名" readonly="true" ondblclick="TestCase.liteFormat(this.value)">JSON数组形式的中间代码</textarea>
+					</td>
+					<td class="source">
+						<textarea id="templateResult" readonly="true">模板渲染的目标代码</textarea>
+					</td>
+				</tr>
+				<tr>
+					<td class="source" title="优化后JS目标代码">
+						<textarea id="optimizedResult"
+							readonly="true">优化后的JS目标代码
+						</textarea>
+					</td>
+					<td class="source">
+						<iframe id="htmlResult"></iframe>
+					</td>
+				</tr>
+			</table>
+		</div>
+		<div id="menu">
+			<ul id="menuContent"></ul>
+			<div class="goto-lite">
+				<a href="http://code.google.com/p/lite/">
+					--&gt;前往 Lite GoogleCode首页
+				</a>
+			</div>
+			<div id="description"></div>
+		</div>
+		<script>TestCase.initialize();</script>
+	</body>
+</html>

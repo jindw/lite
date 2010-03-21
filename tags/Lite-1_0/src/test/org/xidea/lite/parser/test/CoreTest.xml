@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<java version="1.6.0_02" class="java.beans.XMLDecoder">
+	<object class="java.util.LinkedHashMap">
+		<void method="put">
+			<string>xml</string>
+			<string><![CDATA[<"'>]]></string>
+		</void>
+		<void method="put">
+			<string>test</string>
+			<boolean>true</boolean>
+		</void>
+		<void method="put">
+			<string>value</string>
+			<boolean>true</boolean>
+		</void>
+	</object>
+	<object class="java.util.LinkedHashMap">
+	
+
+		<!-- test if -->
+		<void method="put">
+			<string><![CDATA[<c:if test='${1}'>1</c:if>1]]></string>
+			<string><![CDATA[11]]></string>
+		</void>
+		<void method='put'>
+			<string><![CDATA[<c:if test='${test}'>${value}</c:if>]]></string>
+			<string><![CDATA[true]]></string>
+		</void>
+		<void method='put'>
+			<string><![CDATA[<c:if test='${test}'>${!value}</c:if><c:else test='${test}'>${value}</c:else>]]></string>
+			<string><![CDATA[false]]></string>
+		</void>
+		<void method='put'>
+			<string><![CDATA[<c:if test='${true}'>true</c:if><c:else test="${1}">1</c:else><c:else>2</c:else>]]></string>
+			<string><![CDATA[true]]></string>
+		</void>
+		<void method='put'>
+			<string><![CDATA[<c:choose><c:when test='${false}'>1</c:when><c:when test='${false}'>2</c:when><c:otherwise>3</c:otherwise></c:choose>]]></string>
+			<string><![CDATA[3]]></string>
+		</void>
+		<void method='put'>
+			<string><![CDATA[<c:choose><c:when test='${false}'>1</c:when><c:when test='${true}'>2</c:when><c:otherwise>3</c:otherwise></c:choose>]]></string>
+			<string><![CDATA[2]]></string>
+		</void>
+		<void method='put'>
+			<string><![CDATA[<c:choose><c:when test='${true}'>1</c:when><c:when test='${true}'>2</c:when><c:otherwise>3</c:otherwise></c:choose>]]></string>
+			<string><![CDATA[1]]></string>
+		</void>
+		<!-- test For -->
+		<void method='put'>
+			<string><![CDATA[<c:for var='value' items='${[1,2,3,4]}'>${for.index}${value}<c:if test='${for.lastIndex == for.index}'>${for.lastIndex}</c:if></c:for><c:else test='${test}'>${value}</c:else>]]></string>
+			<string><![CDATA[011223343]]></string>
+		</void>
+		<!-- Test For Else -->
+		<void method='put'>
+			<string><![CDATA[<c:for var='value' items='${[1,2,3,4]}'>${value}</c:for><c:else test='${test}'>${value}</c:else>]]></string>
+			<string><![CDATA[1234]]></string>
+		</void>
+		
+		<void method='put'>
+			<string><![CDATA[<c:for var='value' items='${[]}'>${value}</c:for><c:else test='${test}'>${value}</c:else>]]></string>
+			<string><![CDATA[true]]></string>
+		</void>
+		<!-- Test include -->
+		<void method='put'>
+			<string><![CDATA[<c:include path='/org/xidea/lite/parser/test/include-test.xslt'></c:include>]]></string>
+			<string><![CDATA[<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+			<xsl:template match="/">
+			<div>
+			<xsl:apply-templates select="//meta"/>
+			</div>
+			</xsl:template>
+			<xsl:template match="meta">
+			<xsl:value-of select="@name"/>
+			</xsl:template>
+			</xsl:stylesheet>]]></string>
+		</void>
+		<!-- testXsl-->
+		<!-- 无命名空间 -->
+		<void method='put'>
+			<string>
+		<![CDATA[<c:include name='dataValue' path='#dataValue'>
+			<c:include name='xmlValue' path='#xmlValue'>
+				<div >
+					<meta name='n1' value='v1'/>
+					<meta name='n2' value='v2'/>
+				</div>
+			</c:include>
+			<c:include
+			 	 name='thisValue' 
+				 path='#xmlValue' 
+				 xpath='//meta' 
+				 xslt='#thisValue'>
+				<xsl:stylesheet version='1.0' 
+				      xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>
+			 	<xsl:template match='/'>
+			 		<div>
+			 			<xsl:apply-templates select='//meta' />
+			 		</div>
+			 	</xsl:template>
+			 	<xsl:template match='meta'>
+			 		<xsl:value-of select='@name' />
+			 	</xsl:template>
+			 	</xsl:stylesheet>
+			 </c:include>
+	</c:include>]]></string>
+			<string><![CDATA[<div>
+			<meta name="n1" value="v1"/>
+			<meta name="n2" value="v2"/>
+		</div>
+		<div>
+		n1n2
+		</div>]]></string>
+		</void>
+		
+		<void method='put'>
+			<string>
+			<![CDATA[
+			<c:include
+			 name='thisValue' 
+			 path='#thisValue'
+			 xpath='//meta' 
+			 xslt='/org/xidea/lite/parser/test/include-test.xslt'
+			 >
+			 	<div>
+			 		<meta name='n1' value='v1'/>
+			 		<meta name='n2' value='v2'/>
+			 	</div>
+			</c:include>]]></string>
+			<string><![CDATA[<div>n1n2</div>]]></string>
+		</void>
+		<!-- 有名字空间 -->
+		<void method='put'>
+			<string><![CDATA[
+			<c:include name='thisValue'
+			   path='/org/xidea/lite/parser/test/include-test.xml'
+			   xpath='//xhtml:meta'
+			   xslt='#thisValue'>
+			<xsl:stylesheet version='1.0' 
+			 xmlns:xhtml="http://www.w3.org/1999/xhtml"
+			 xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>
+			 <xsl:template match='/'><div>
+			 <xsl:apply-templates select='//xhtml:meta' />
+			 </div></xsl:template>
+			 	<xsl:template match='xhtml:meta'>
+			 		<xsl:value-of select='@name' />
+			 	</xsl:template>
+			 </xsl:stylesheet>
+			</c:include>]]></string>
+			<string><![CDATA[<div xmlns:xhtml="http://www.w3.org/1999/xhtml">n1n2</div>]]></string>
+		</void>
+	</object>
+</java>
