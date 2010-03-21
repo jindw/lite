@@ -96,7 +96,7 @@
 					<xs:documentation>指定循环元素映射的变量名</xs:documentation>
 				</xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="items" type="EL" use="required">
+			<xs:attribute name="list" type="EL" use="required">
 				<xs:annotation>
 					<xs:documentation>用于指定循环的数据</xs:documentation>
 				</xs:annotation>
@@ -266,4 +266,46 @@
 		</xs:complexType>
 	</xs:element>
 	
+	<xs:element name="extends">
+		<xs:annotation>
+			<xs:documentation>
+				继承
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType mixed="true">
+			<xs:sequence>
+				<xs:any minOccurs="0" maxOccurs="unbounded"
+					processContents="lax">
+				</xs:any>
+			</xs:sequence>
+			<xs:attribute name="path" type="xs:NMTOKEN" use="optional" >
+				<xs:annotation>
+					<xs:documentation>
+						继承父模板路径（相对当前文件路径）
+					</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="block">
+		<xs:annotation>
+			<xs:documentation>
+				区块，可用于模板继承成员的覆盖。
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType mixed="true">
+			<xs:sequence>
+				<xs:any minOccurs="0" maxOccurs="unbounded"
+					processContents="lax">
+				</xs:any>
+			</xs:sequence>
+			<xs:attribute name="name" type="xs:NMTOKEN" use="optional" >
+				<xs:annotation>
+					<xs:documentation>
+						表示块名，用于继承覆盖
+					</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+		</xs:complexType>
+	</xs:element>
 </xs:schema>

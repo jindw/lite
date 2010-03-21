@@ -63,7 +63,6 @@ public class HotTemplateEngine extends TemplateEngine {
 
 	protected Template createTemplate(String path, ParseContext parseContext) {
 		try {
-			parseContext.setAttribute(ParseContext.PATH, path);
 			parseContext.parse(base.createURI(path, null));
 		} catch (Exception e) {
 			log.error("模板解析失败", e);

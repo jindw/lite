@@ -1,0 +1,25 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns='http://www.w3.org/1999/xhtml' xmlns:c="http://www.xidea.org/ns/lite/core">
+	<head>
+		<title>测试块继承</title>
+		<style>
+			div{
+			border:2px solid blue;
+			}
+			.menu,.content{
+			float:left;
+			width:45%;
+			}
+		</style>
+	</head>
+	<body>
+		<c:block name="header">
+			<div>Header</div>
+		</c:block>
+		<c:block name="body">
+			<div>
+				内容(test-block-super2.xhtml)
+			</div>
+		</c:block>
+	</body>
+</html>
