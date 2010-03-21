@@ -22,7 +22,7 @@ class ParseUtil {
 	static final String CORE_URI = "http://www.xidea.org/ns/lite/core";
 	static boolean isCoreNS(String prefix, String url) {
 		return ("c".equals(prefix) && ("#".equals(url) || "#core".equals(url)))
-				|| TEMPLATE_NAMESPACE_CORE.matcher(url).find();
+				|| url != null && TEMPLATE_NAMESPACE_CORE.matcher(url).find();
 	}
 
 	static String loadText(InputStream in,String charset) throws IOException {

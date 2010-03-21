@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,25 +36,15 @@ public class CoreXMLNodeParser implements NodeParser<Node> {
 			if (namespaceURI != null
 					&& ParseUtil.isCoreNS(prefix, namespaceURI)) {
 				String name = el.getLocalName();
-				if ("include".equals(name)) {
-					parseIncludeTag(el, context);
-				} else if ("client".equals(name)) {
-					clientParser.parseClientTag(el, context);
-				} else if ("block".equals(name) || "group".equals(name)
-						|| "context".equals(name)) {
-					parseBlockTag(el, context);
-				} else if ("json".equals(name)) {
-				} else if ("macro".equals(name) || "def".equals(name)) {
-					parseMacroTag(el, context);
-				} else if ("choose".equals(name)) {
-					parseChooseTag(el, context);
+				if ("if".equals(name)) {
+					parseIfTag(el, context);
 				} else if ("elseif".equals(name) || "else-if".equals(name)
 						|| "elif".equals(name)) {
 					parseElseTag(el, context, true);
 				} else if ("else".equals(name)) {
 					parseElseTag(el, context, false);
-				} else if ("if".equals(name)) {
-					parseIfTag(el, context);
+				} else if ("choose".equals(name)) {
+					parseChooseTag(el, context);
 				} else if ("out".equals(name)) {
 					parseOutTag(el, context);
 				} else if ("for".equals(name) || "forEach".equals(name)
@@ -61,6 +53,18 @@ public class CoreXMLNodeParser implements NodeParser<Node> {
 				} else if ("var".equals(name)) {
 					parseVarTag(el, context);
 				} else if ("comment".equals(name)) {
+				} else if ("include".equals(name)) {
+					parseIncludeTag(el, context);
+				} else if ("client".equals(name)) {
+					clientParser.parseClientTag(el, context);
+				} else if ("block".equals(name) || "group".equals(name)
+						|| "context".equals(name)) {
+					parseBlockTag(el, context);
+				} else if ("extends".equals(name) || "extend".equals(name)) {
+					parseExtends(el, context,chain);
+				} else if ("json".equals(name)) {
+				} else if ("macro".equals(name) || "def".equals(name)) {
+					parseMacroTag(el, context);
 				} else {
 					log.error("未知核心标记" + name);
 					chain.process(el);
@@ -72,37 +76,65 @@ public class CoreXMLNodeParser implements NodeParser<Node> {
 			boolean isFirst = context.getAttribute(FIRST_NODE) == null;
 			if (isFirst) {
 				context.setAttribute(FIRST_NODE, true);
-				node = findExtends((Document) node, context);
+				parseExtends(node, context, chain);
+			}else{
+				chain.process(node);
 			}
-			chain.process(node);
+			
 		} else {
 			chain.process(node);
 		}
 	}
 
-	private Node findExtends(Node root, ParseContext context) {
+	private void parseExtends(Node node, ParseContext context, ParseChain chain) {
+		HashMap<String, Node> blocks = new HashMap<String, Node>();
+		node = findExtends(node, context,blocks);
+
+		HashMap<String, Object> baks = new HashMap<String, Object>();
+		for(String key : blocks.keySet()){
+			baks.put(key, context.getAttribute(key));
+			Node n = blocks.get(key);
+			context.setAttribute(key,n);
+			//System.out.println(key+"/"+n.getOwnerDocument().getBaseURI());
+		}
+		chain.process(node);
+		for(String key : blocks.keySet()){
+			 context.setAttribute(key,baks.get(key));
+		}
+	}
+
+	private Node findExtends(Node root, ParseContext context,Map<String, Node> blocks) {
 		try {
 			LinkedList<Node> docs = new LinkedList<Node>();
+			URI base = context.getCurrentURI();
 			while (true) {
 				docs.addFirst(root);
 				Element el = root instanceof Document ? ((Document) root)
 						.getDocumentElement() : (Element) root;
 				String parent = getExtends(el);
-				if (parent.length() > 0) {
-					root = loadXML(context, parent);
+				if (parent!= null && parent.length() > 0) {
+					Node root2 = loadXML(context, parent);
+					if(root2 == null){
+						break;
+					}else{
+						root = root2;
+					}
 				} else {
 					break;
 				}
 			}
+			context.setCurrentURI(base);
 			for (Node doc : docs) {
 				DocumentFragment nodes = context.selectNodes(doc, "//c:block");
 				if (nodes.hasChildNodes()) {
-					Node child = nodes.getFirstChild();
+					Node child = nodes.getLastChild();
 					do {
 						String id = ParseUtil.getAttributeOrNull(
-								(Element) child, "id", "name");
-						context.setAttribute("#" + id, child);
-					} while ((child = child.getNextSibling()) != null);
+								(Element) child, "name", "id");
+
+						//log.info("@@@"+id+"/"+doc.getBaseURI());
+						blocks.put("#" + id, child);
+					} while ((child = child.getPreviousSibling()) != null);
 				}
 			}
 			return root;
@@ -115,7 +147,7 @@ public class CoreXMLNodeParser implements NodeParser<Node> {
 	private String getExtends(Element el) {
 		String tagName = el.getLocalName();
 		if(tagName.equals("extends") || ParseUtil.isCoreNS(el.getPrefix(), el.getNamespaceURI())){
-			return ParseUtil.getAttributeOrNull(el, "value","url","extends");
+			return ParseUtil.getAttributeOrNull(el, "path","value","url","extends");
 		}
 		return null;
 	}
@@ -324,7 +356,7 @@ public class CoreXMLNodeParser implements NodeParser<Node> {
 				return;
 			}
 		}
-		String key = ParseUtil.getAttributeOrNull(el, "id", "name", "key");
+		String key = ParseUtil.getAttributeOrNull(el, "name", "id", "key");
 		Node n = (Node) context.getAttribute("#" + key);
 		ParseUtil.parseChild((n == null ? el : n).getFirstChild(), context);
 	}

@@ -1,4 +1,7 @@
 <decorators>
+	<excludes>
+	<pattern>/example/block*</pattern>
+	</excludes>
     <decorator layout="/example/layout.xhtml">
         <pattern>/example/*.xhtml</pattern>
     </decorator>
