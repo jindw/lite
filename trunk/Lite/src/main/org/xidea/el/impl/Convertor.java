@@ -66,7 +66,7 @@ public interface Convertor<T> {
 			Double.TYPE,Double.class,
 			Short.TYPE,Short.class,
 			Boolean.TYPE,Boolean.class,
-			Object.class
+			String.class,Object.class
 		};
 		private Map<Class<?>, Convertor<?>> toMap(){
 			HashMap<Class<?>, Convertor<?>> map = new HashMap<Class<?>, Convertor<?>>();
