@@ -1,5 +1,8 @@
 package org.xidea.lite.parser.impl;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -102,6 +105,12 @@ public class DefaultXMLNodeParser implements NodeParser<Node> {
 		if (pubid != null) {
 			if(pubid.equals(DefaultEntityResolver.DEFAULT__HTML_DTD)){
 				//跳过容错补充dtd申明
+				if(sysid!=null && sysid.startsWith("%3")){
+					try {
+						context.append(URLDecoder.decode(sysid, "UTF-8"));
+					} catch (UnsupportedEncodingException e) {
+					}
+				}
 				return;
 			}
 			context.append("<!DOCTYPE ");
@@ -122,9 +131,14 @@ public class DefaultXMLNodeParser implements NodeParser<Node> {
 		} else {
 			context.append("<!DOCTYPE ");
 			context.append(node.getNodeName());
-			context.append("[");
-			context.append(node.getInternalSubset());
-			context.append("]>");
+			String sub = node.getInternalSubset();
+			if(sub!=null && sub.trim().length()>0){
+				context.append("[");
+				context.append(sub);
+				context.append("]");
+			}
+			context.append(">");
+			
 		}
 		// context.appendFormatEnd();
 	}
