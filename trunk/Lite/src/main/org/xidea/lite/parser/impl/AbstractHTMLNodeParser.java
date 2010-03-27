@@ -15,7 +15,7 @@ import org.xidea.lite.parser.NodeParser;
 
 public abstract class AbstractHTMLNodeParser implements NodeParser<Element> {
 	protected static final Pattern HTML_LEAF = Pattern.compile(
-			"^(?:meta|link|img|br|hr|input)$", Pattern.CASE_INSENSITIVE);
+			"^(?:link|input|meta|img|br|hr)$", Pattern.CASE_INSENSITIVE);
 	protected static final Pattern PRE_LEAF = Pattern.compile(
 			"^(?:script|style|pre|textarea)$", Pattern.CASE_INSENSITIVE);
 	protected static final String XHTMLNS = "http://www.w3.org/1999/xhtml";
