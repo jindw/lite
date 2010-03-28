@@ -45,6 +45,25 @@
 			<arg value="org.xidea.jsidoc.util" />
 		</java>
 	</target>
+	<target name="compile">
+		<copy todir="web/WEB-INF/classes">
+			<fileset dir="src/main">
+				<include name="**/*.*" />
+			</fileset>
+			<fileset dir="web/scripts">
+				<include name="**/*.*" />
+			</fileset>
+		</copy>
+		<javac srcdir="web/WEB-INF/classes"
+			fork="true" target="1.5" debug="true"
+			destdir="web/WEB-INF/classes" encoding="UTF-8">
+			<classpath>
+				<fileset dir="web/WEB-INF/lib">
+					<include name="**/*.jar" />
+				</fileset>
+			</classpath>
+		</javac>
+	</target>
 	<target name="join-php">
 		<concat destfile="build/dest/TemplateEngine.php" encoding="utf-8">
 			<path path="src/php/lite/TemplateEngine.php" />
@@ -68,7 +87,6 @@
 				<include name="Template-*.jar" />
 			</fileset>
 		</delete>
-
 		<echo file="build/dest/jslite/__package__.js">this.addScript("template.js",["Template","ParseContext","XMLParser","ELTranslator","Translator"])</echo>
 		<jar destfile="build/dest/Template.jar" compress="true">
 			<manifest>
