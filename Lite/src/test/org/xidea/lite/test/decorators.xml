@@ -1,14 +1,12 @@
-<decorators>
-    <excludes>
-		<pattern>/test1/login.action</pattern>
-	</excludes>
-    <decorator name="test1" page="/test1/template.xhtml">
-        <pattern>/test1/**</pattern>
-    </decorator>
-    <decorator name="test2" page="/test2/template.xhtml">
-        <pattern>/test2/*.action</pattern>
-    </decorator>
-    <decorator name="test3" page="/test3/template.xhtml">
-        <pattern>/test3/*.action</pattern>
-    </decorator>
-</decorators>
+<lite>
+    <exclude>/test1/login.action</exclude>
+    <group page="/test1/template.xhtml">
+        <include>/test1/**</include>
+    </group>
+    <group layout="/test2/template.xhtml">
+        <include>/test2/*.action</include>
+    </group>
+    <group page="/test3/template.xhtml">
+        <include>/test3/*.action</include>
+    </group>
+</lite>

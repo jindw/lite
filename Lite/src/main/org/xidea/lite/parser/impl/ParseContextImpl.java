@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 
-import org.xidea.lite.parser.DecoratorContext;
+import org.xidea.lite.parser.ParseConfig;
 import org.xidea.lite.parser.ResourceContext;
 import org.xidea.lite.parser.TextParser;
 import org.xidea.lite.parser.ParseContext;
@@ -24,12 +24,15 @@ public class ParseContextImpl extends ParseContextProxy implements ParseContext 
 	
 	protected ParseContextImpl() {
 	}
-	public ParseContextImpl(ResourceContext base){
-		initialize(base, null, null, null, null);
-	}
-	public ParseContextImpl(ResourceContext base,DecoratorContext decoratorContext, Map<String, String> featrues,
-			NodeParser<? extends Object>[] parsers, TextParser[] ips) {
-		initialize(base, decoratorContext,featrues, parsers, ips);
+	public ParseContextImpl(String path,ResourceContext base,ParseConfig config) {
+		if(config !=null && path!=null){
+		Map<String, String> featrues = config.getFeatrueMap(path);
+		TextParser[] ips = config.getTextParsers(path);
+		NodeParser<? extends Object>[] parsers = config.getNodeParsers(path);
+		initialize(base, config,featrues, parsers, ips);
+		}else{
+			initialize(base, config,null, null, null);
+		}
 	}
 
 	public ParseContextImpl(ParseContext parent, 
@@ -43,10 +46,10 @@ public class ParseContextImpl extends ParseContextProxy implements ParseContext 
 	}
 
 
-	protected void initialize(ResourceContext base,DecoratorContext decoratorContext, Map<String, String> featrues,
+	protected void initialize(ResourceContext base,ParseConfig decoratorContext, Map<String, String> featrues,
 			NodeParser<? extends Object>[] parsers, TextParser[] ips) {
 		resourceContext = base;
-		this.decoratorContext = decoratorContext;
+		this.config = decoratorContext;
 		xmlContext = new XMLContextImpl(this);
 		resultContext = new ResultContextImpl(this);
 		parserHolder = new ParseHolderImpl(this, parsers, ips);

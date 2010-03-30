@@ -8,7 +8,9 @@ import org.xidea.lite.parser.impl.ResourceContextImpl;
 public class TestUtil {
 
 	public static ParseContextImpl buildParseContext(URI uri){
-		return new ParseContextImpl(new ResourceContextImpl(uri),null,null,null,null);
+		ParseContextImpl context =  new ParseContextImpl(uri == null?null:uri.getPath(),new ResourceContextImpl(uri),null);
+		context.setCurrentURI(uri);
+		return context;
 	}
 
 }

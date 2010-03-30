@@ -21,7 +21,7 @@ public interface ResultContext {
 	 * @param value
 	 */
 	public void setAttribute(Object key, Object value);
-	public Object getAttribute(Object key);
+	public <T> T getAttribute(Object key);
 	
 
 	/**

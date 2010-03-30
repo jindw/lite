@@ -98,10 +98,15 @@ public class ClientJSBuilderTest {
 	public void testCTClient() throws SAXException, IOException, URISyntaxException {
 		InputStreamReader source = new InputStreamReader(this.getClass()
 				.getResourceAsStream("ct-client.txt"), "utf-8");
-		ParseContext context2 = new ParseContextImpl(TestUtil.buildParseContext(new URI("http://w/")),
-				null,null, null, new TextParser[] { ELParser.EL, ELParser.IF,
+		
+		ParseContext context2 = new ParseContextImpl(null,TestUtil.buildParseContext(new URI("http://w/")),null){
+			@Override
+			public TextParser[] getTextParsers(){
+				return new TextParser[] { ELParser.EL, ELParser.IF,
 						ELParser.FOR, ELParser.ELSE, ELParser.CLIENT,
-						ELParser.END, ELParser.VAR });
+						ELParser.END, ELParser.VAR };
+			}
+		};
 		// 前端直接压缩吧？反正保留那些空白也没有调试价值
 		// context2.setCompress(context.isCompress());
 		context2.parse(loadText(source));

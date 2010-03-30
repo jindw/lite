@@ -35,8 +35,8 @@ public class ParseUtil {
 				||url != null &&  TEMPLATE_NAMESPACE_CORE.matcher(url).find();
 	}
 
-	private static final ParseContextImpl PC = new ParseContextImpl(
-			new ResourceContextImpl(null));
+	private static final ParseContextImpl PC = new ParseContextImpl(null,
+			new ResourceContextImpl(null),null);
 
 	public static Document loadXML(String path) throws SAXException,
 			IOException {
@@ -76,6 +76,9 @@ public class ParseUtil {
 							+ "' 不被推荐；请使用是:'" + keys[0] + "'代替");
 				}
 				return el.getAttribute(key);
+			}
+			if(key.equals("#text") && el.hasChildNodes()){
+				return el.getTextContent();
 			}
 		}
 		return null;

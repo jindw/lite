@@ -17,26 +17,24 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.el.json.JSONDecoder;
 import org.xidea.lite.Template;
-import org.xidea.lite.parser.impl.DecoratorContextImpl;
+import org.xidea.lite.parser.impl.ParseConfigImpl;
 import org.xidea.lite.parser.impl.HotTemplateEngine;
 
 public class ServletTemplateEngine extends HotTemplateEngine {
 	private static final Log log = LogFactory.getLog(ServletTemplateEngine.class);
-	private ServletConfig config;
 	private ServletContext context;
-	private boolean autocompile = true;
 
 	public ServletTemplateEngine(ServletConfig config) {
 		super(new File(config.getServletContext().getRealPath("/")).toURI(),null);
 		//this.parser = new XMLParser(transformerFactory,xpathFactory);
-		this.config = config;
 		this.context = config.getServletContext();
-		this.featrues = buildFeatrueMap(config);
-		this.autocompile = getParam("autocompile", "true").equals("true");
 		try {
-			String decoratorPath = getParam("decoratorMapping","/WEB-INF/decorators.xml");
-			File file = new File(context.getRealPath(decoratorPath));
-			this.decoratorContext = new DecoratorContextImpl(file.toURI());
+			String configPath = config.getInitParameter("config");
+			if(configPath==null){
+				configPath = "/WEB-INF/lite.xml";
+			}
+			File file = new File(context.getRealPath(configPath));
+			super.config = new ParseConfigImpl(file.toURI());
 		} catch (Exception e) {
 			log.error("装载页面装饰配置信息失败", e);
 		}
@@ -45,7 +43,7 @@ public class ServletTemplateEngine extends HotTemplateEngine {
 	@SuppressWarnings("unchecked")
 	@Override
 	protected Template createTemplate(String path){
-		if(autocompile){
+		if(config.isDebugModel()){
 			return super.createTemplate(path);
 		}else{
 			try {
@@ -70,22 +68,6 @@ public class ServletTemplateEngine extends HotTemplateEngine {
 		return buf.toString();
 	}
 
-	protected Map<String, String> buildFeatrueMap(ServletConfig config) {
-		@SuppressWarnings("unchecked")
-		Enumeration<String> names = config.getInitParameterNames();
-		HashMap<String, String> featrues = new HashMap<String, String>();
-		while(names.hasMoreElements()){
-			String name = names.nextElement();
-			featrues.put(name,config.getInitParameter(name));
-		}
-		return featrues;
-	}
 
-	private String getParam(String name,String  defaultValue) {
-		String decoratorPath = config.getInitParameter(name);
-		if (decoratorPath == null) {
-			decoratorPath = defaultValue;
-		}
-		return decoratorPath;
-	}
+	
 }

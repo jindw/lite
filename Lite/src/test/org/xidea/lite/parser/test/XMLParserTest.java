@@ -40,7 +40,7 @@ public class XMLParserTest {
 		ParseContextImpl context =TestUtil.buildParseContext(url); 
 		org.w3c.dom.Document doc = new XMLParser().loadXML(url, context);
 		
-		Node node = new XMLContextImpl(new ParseContextImpl(null,null,null,null,null)){
+		Node node = new XMLContextImpl(TestUtil.buildParseContext(null)){
 			@Override
 			public DocumentFragment selectNodes(Node currentNode,
 					String xpath) throws XPathExpressionException {

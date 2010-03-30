@@ -10,8 +10,9 @@ import java.util.regex.Pattern;
  * @author Dawei.Jin
  * 
  */
-public abstract class URLMatcher implements Comparable<URLMatcher> {
-	public static final URLMatcher createMatcher(String pattern) {
+public abstract class URIMatcher implements Comparable<URIMatcher> {
+	public static final URIMatcher createMatcher(String pattern) {
+		pattern = pattern.trim();
 		int i = pattern.indexOf('*');
 		if (i < 0) {
 			return new StaticMatcher(pattern);
@@ -30,11 +31,11 @@ public abstract class URLMatcher implements Comparable<URLMatcher> {
 		return new PatternMatcher(pattern);
 	}
 
-	public static final URLMatcher createAndMatcher(URLMatcher... matchers) {
+	public static final URIMatcher createAndMatcher(URIMatcher... matchers) {
 		return new AndMatcher(matchers);
 	}
 
-	public static final URLMatcher createOrMatcher(URLMatcher... matchers) {
+	public static final URIMatcher createOrMatcher(URIMatcher... matchers) {
 		return new OrMatcher(matchers);
 	}
 
@@ -51,17 +52,17 @@ public abstract class URLMatcher implements Comparable<URLMatcher> {
 		return "length:" + length;
 	}
 
-	public int compareTo(URLMatcher o) {
+	public int compareTo(URIMatcher o) {
 		return o.length() - this.length;
 	}
 
 
-	static class AndMatcher extends URLMatcher {
-		final URLMatcher[] matchers;
+	static class AndMatcher extends URIMatcher {
+		final URIMatcher[] matchers;
 
-		public AndMatcher(URLMatcher... matchers) {
+		public AndMatcher(URIMatcher... matchers) {
 			for (int i = 0; i < matchers.length; i++) {
-				URLMatcher matcher = matchers[i];
+				URIMatcher matcher = matchers[i];
 				length = Math.min(matcher.length(), length);
 			}
 			this.matchers = matchers;
@@ -69,7 +70,7 @@ public abstract class URLMatcher implements Comparable<URLMatcher> {
 
 		public boolean match(String url) {
 			for (int i = 0; i < matchers.length; i++) {
-				URLMatcher matcher = matchers[i];
+				URIMatcher matcher = matchers[i];
 				if (!matcher.match(url)) {
 					return false;
 				}
@@ -79,7 +80,7 @@ public abstract class URLMatcher implements Comparable<URLMatcher> {
 	}
 
 	static final class OrMatcher extends AndMatcher {
-		public OrMatcher(URLMatcher... matchers) {
+		public OrMatcher(URIMatcher... matchers) {
 			super(matchers);
 		}
 		public boolean match(String url) {
@@ -92,7 +93,7 @@ public abstract class URLMatcher implements Comparable<URLMatcher> {
 		}
 	}
 
-	static final class StaticMatcher extends URLMatcher {
+	static final class StaticMatcher extends URIMatcher {
 		protected final String pattern;
 
 		public StaticMatcher(String pattern) {
@@ -105,13 +106,13 @@ public abstract class URLMatcher implements Comparable<URLMatcher> {
 		}
 	}
 
-	static final class AllMatcher extends URLMatcher {
+	static final class AllMatcher extends URIMatcher {
 		public final boolean match(String url) {
 			return true;
 		}
 	}
 
-	static final class BeginMatcher extends URLMatcher {
+	static final class BeginMatcher extends URIMatcher {
 		private final String begin;
 
 		public BeginMatcher(String begin) {
@@ -124,7 +125,7 @@ public abstract class URLMatcher implements Comparable<URLMatcher> {
 		}
 	}
 
-	static final class EndMatcher extends URLMatcher {
+	static final class EndMatcher extends URIMatcher {
 		private final String end;
 
 		public EndMatcher(String end) {
@@ -137,7 +138,7 @@ public abstract class URLMatcher implements Comparable<URLMatcher> {
 		}
 	}
 
-	static final class BothMatcher extends URLMatcher {
+	static final class BothMatcher extends URIMatcher {
 		private final String begin;
 		private final String end;
 
@@ -153,7 +154,7 @@ public abstract class URLMatcher implements Comparable<URLMatcher> {
 		}
 	}
 
-	static final class PatternMatcher extends URLMatcher {
+	static final class PatternMatcher extends URIMatcher {
 		private final Pattern pattern;
 
 		public PatternMatcher(String pattern) {

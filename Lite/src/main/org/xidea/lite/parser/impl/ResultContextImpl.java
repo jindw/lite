@@ -451,8 +451,9 @@ public class ResultContextImpl implements ResultContext {
 		this.attributeMap.put(key, value);
 	}
 
-	public Object getAttribute(Object key) {
-		return this.attributeMap.get(key);
+	@SuppressWarnings("unchecked")
+	public <T> T getAttribute(Object key) {
+		return (T)this.attributeMap.get(key);
 	}
 
 	public int getTextType() {

@@ -44,8 +44,8 @@ public class TemplateCompilerEngine extends HotTemplateEngine {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	protected ParseContext createParseContext() {
-		ParseContext context = super.createParseContext();
+	protected ParseContext createParseContext(String path) {
+		ParseContext context = super.createParseContext(path);
 		if (this.parsers != null) {
 			for (NodeParser parser : this.parsers) {
 				context.addNodeParser(parser);

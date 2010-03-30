@@ -139,8 +139,7 @@ public class AvoidErrorParserTest {
 	}
 
 	private ParseContextImpl createContext() {
-		ParseContextImpl context = new ParseContextImpl(TestUtil.buildParseContext(new File(".").toURI()),null,
-				null, null, null) {
+		ParseContextImpl context = new ParseContextImpl(null, new ParseContextImpl(TestUtil.buildParseContext(new File(".").toURI()),null) {
 
 			@Override
 			public InputStream openStream(URI uri) {
@@ -152,7 +151,7 @@ public class AvoidErrorParserTest {
 				return super.openStream(uri);
 			}
 
-		};
+		},null);
 		return context;
 	}
 
