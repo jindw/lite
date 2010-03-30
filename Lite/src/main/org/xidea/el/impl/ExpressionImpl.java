@@ -27,7 +27,7 @@ public class ExpressionImpl implements Expression ,ReferenceExpression {
 		this.source = source;
 		this.calculater = calculater;
 		this.expression = expression;
-		this.globalMap = globalMap;
+		this.globalMap = globalMap == null?ExpressionFactoryImpl.DEFAULT_GLOBAL_MAP:globalMap;
 	}
 
 	public Object evaluate(Object context) {
@@ -39,7 +39,6 @@ public class ExpressionImpl implements Expression ,ReferenceExpression {
 		}else{
 			valueStack = new ValueStackImpl(globalMap,context);
 		}
-
 		Object result = calculater.evaluate(expression,valueStack);
 		if (result instanceof Reference) {
 			return ((Reference) result).getValue();
@@ -48,7 +47,6 @@ public class ExpressionImpl implements Expression ,ReferenceExpression {
 	}
 
 	public Reference prepare(Object context) {
-
 		ValueStack valueStack;
 		if (context == null) {
 			valueStack = new ValueStackImpl(globalMap);
