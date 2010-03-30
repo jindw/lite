@@ -6,7 +6,7 @@ import java.lang.reflect.Method;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jside.webserver.RequestContext;
-import org.xidea.lite.tools.CommandParser;
+import org.xidea.el.impl.CommandParser;
 
 public class ActionInvocationImpl implements ActionInvocation {
 	private static Log log = LogFactory.getLog(ActionInvocationImpl.class);

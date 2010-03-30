@@ -25,7 +25,7 @@ public class FileManager {
 	public FileManager(File base, String contextPath) {
 		this.contextPath = contextPath;
 		this.base = base;
-		engine = TemplateAction.create(URI.create("classpath:///org/jside/filemanager/"));
+		engine = new TemplateAction(URI.create("classpath:///org/jside/filemanager/"));
 	}
 
 	public boolean execute() throws IOException {
