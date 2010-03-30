@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-
 @SuppressWarnings("unchecked")
 public abstract class RequestUtil {
 	public static final String PLAIN_TEXT = "text/plain";
@@ -23,7 +22,8 @@ public abstract class RequestUtil {
 	static {
 		try {
 			Properties props = new Properties();
-			InputStream in = RequestUtil.class.getResourceAsStream("mime.types");
+			InputStream in = RequestUtil.class
+					.getResourceAsStream("mime.types");
 			if (in != null) {
 				props.load(in);
 			}
@@ -56,14 +56,18 @@ public abstract class RequestUtil {
 			throws IOException {
 		OutputStream out = context.getOutputStream();
 		if (data instanceof File) {
-			data = new FileInputStream((File)data);
+			data = new FileInputStream((File) data);
 		}
 		if (data instanceof InputStream) {
 			InputStream in = (InputStream) data;
-			int len;
-			byte[] buf = new byte[1024];
-			while ((len = in.read(buf)) > -1) {
-				out.write(buf, 0, len);
+			try {
+				int len;
+				byte[] buf = new byte[1024];
+				while ((len = in.read(buf)) > -1) {
+					out.write(buf, 0, len);
+				}
+			} finally {
+				in.close();
 			}
 
 		} else if (data instanceof byte[]) {
@@ -74,8 +78,7 @@ public abstract class RequestUtil {
 			pout.flush();
 		} else {
 			String encoding = context.getEncoding();
-			out.write(String.valueOf(data).getBytes(
-					encoding));
+			out.write(String.valueOf(data).getBytes(encoding));
 		}
 		out.write('\r');
 		out.write('\n');
@@ -165,9 +168,10 @@ public abstract class RequestUtil {
 					in.close();
 				}
 			}
-			
+
 		}
 	}
+
 	public static File getFile(URL root) {
 		try {
 			return getFile(root.toURI());
@@ -175,18 +179,20 @@ public abstract class RequestUtil {
 			return null;
 		}
 	}
+
 	public static File getFile(URI root) {
 		if (root != null && "file".equals(root.getScheme())) {
 			return new File(root.getPath());
 		}
 		return null;
 	}
+
 	public static void sendRedirect(String href) {
 		RequestContext context = RequestContext.get();
 		context.setHeader("Refresh:0;URL=" + href);
 		context.addHeader("Content-Type:text/html;charset="
-					+ context.getEncoding());
-		
+				+ context.getEncoding());
+
 	}
 
 }

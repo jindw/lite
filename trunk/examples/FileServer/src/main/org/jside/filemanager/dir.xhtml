@@ -50,12 +50,14 @@
 		</c:client>
 		<c:client id="renderCreateText">
 			<form method="POST" action="?action=text">
-				<lable for="fileName">创建文本文件:</lable>
-				<textarea name="content"></textarea>
-				<input type="text" size="40" id="fileName" name="name"
-					value="新建文件.txt" />
-				<input type="submit" value="确认创建" />
-				<input type="reset" value="取消" onclick="closeDialog()" />
+				<div>
+					<lable for="fileName">创建文本文件:</lable>
+					<input type="text" size="40" id="fileName" name="name"
+						value="新建文件.txt" />
+					<input type="submit" value="确认创建" />
+					<input type="reset" value="取消" onclick="closeDialog()" />
+				</div>
+				<lable for="content">文件内容:</lable><textarea name="content"></textarea>
 			</form>
 		</c:client>
 		<script>
