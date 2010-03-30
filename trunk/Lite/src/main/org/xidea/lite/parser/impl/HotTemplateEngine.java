@@ -15,38 +15,33 @@ import org.xidea.lite.Template;
 import org.xidea.lite.TemplateEngine;
 import org.xidea.lite.parser.DecoratorContext;
 import org.xidea.lite.parser.ParseContext;
+import org.xidea.lite.parser.ResourceContext;
 
 public class HotTemplateEngine extends TemplateEngine {
-	public static final String DEFAULT_DECORATOR_MAPPING = "/WEB-INF/decorators.xml";
+	//public static final String DEFAULT_DECORATOR_MAPPING = "/WEB-INF/decorators.xml";
 	private static final Log log = LogFactory.getLog(HotTemplateEngine.class);
 	private HashMap<String, Info> infoMap = new HashMap<String, Info>();
 	protected Map<String, String> featrues = new HashMap<String, String>();
 	protected DecoratorContext decoratorContext;
+	private File configFile;
 
 	public HotTemplateEngine(URI webRoot, URI config) {
 		super(webRoot);
 		if (config!=null) {
-			this.decoratorContext = new DecoratorContextImpl(
-					config,null);
-		}
-	}
-
-	public HotTemplateEngine(File webRoot) {
-		this(webRoot, new File(webRoot, DEFAULT_DECORATOR_MAPPING));
-	}
-
-	public HotTemplateEngine(File webRoot, File config) {
-		super(webRoot.toURI());
-		if (config != null) {
-			if (config.exists()) {
-				this.decoratorContext = new DecoratorContextImpl(
-						config.toURI(), config);
-			} else {
-				log.info("没有找到装饰器配置信息:" + config.getAbsolutePath());
+			if(config.getScheme().equals("file")){
+				File checkFile = new File(config.getPath());
+				this.configFile = checkFile;
 			}
+			this.decoratorContext = new DecoratorContextImpl(
+					config);
 		}
 	}
-
+	public HotTemplateEngine(ResourceContext webRoot, DecoratorContext context) {
+		super(webRoot);
+		if (context!=null) {
+			this.decoratorContext = context;
+		}
+	}
 
 	protected ParseContext createParseContext() {
 		return new ParseContextImpl(base, decoratorContext,featrues, null, null);
@@ -99,6 +94,9 @@ public class HotTemplateEngine extends TemplateEngine {
 
 	protected File[] getAssociatedFiles(ParseContext context) {
 		ArrayList<File> files = new ArrayList<File>();
+		if(configFile!=null){
+			files.add(configFile);
+		}
 		for (URI url : context.getResources()) {
 			if ("file".equals(url.getScheme())) {
 				files.add(new File(url.getPath()));

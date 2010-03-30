@@ -29,6 +29,10 @@ public class TemplateEngine {
 		this.base = new ResourceContextImpl(base);
 	}
 
+	public TemplateEngine(ResourceContext base) {
+		this.base = base;
+	}
+
 	public void render(String path, Object context, Writer out)
 			throws IOException {
 		getTemplate(path).render(context, out);

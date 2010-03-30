@@ -17,7 +17,7 @@ public class DecoratorMapperTest {
 	public void setUp() throws Exception {
 		File file = new File(this.getClass().getResource(
 		"decorators.xml").getFile());
-		mapper = new DecoratorContextImpl(file.toURI(),file);
+		mapper = new DecoratorContextImpl(file.toURI());
 	}
 
 	@Test

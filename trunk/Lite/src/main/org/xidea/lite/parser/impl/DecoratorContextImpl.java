@@ -27,9 +27,10 @@ public class DecoratorContextImpl implements DecoratorContext {
 	protected URI config;
 	protected File checkFile;
 
-	public DecoratorContextImpl(URI config,File checkFile) {
-		if (checkFile == null || checkFile.exists()) {
-			this.config = config;
+	public DecoratorContextImpl(URI config) {
+		this.config = config;
+		if(config.getScheme().equals("file")){
+			File checkFile = new File(config.getPath());
 			this.checkFile = checkFile;
 		}
 	}

@@ -34,9 +34,9 @@ public class ServletTemplateEngine extends HotTemplateEngine {
 		this.featrues = buildFeatrueMap(config);
 		this.autocompile = getParam("autocompile", "true").equals("true");
 		try {
-			String decoratorPath = getParam("decoratorMapping",DEFAULT_DECORATOR_MAPPING);
+			String decoratorPath = getParam("decoratorMapping","/WEB-INF/decorators.xml");
 			File file = new File(context.getRealPath(decoratorPath));
-			this.decoratorContext = new DecoratorContextImpl(file.toURI(),file);
+			this.decoratorContext = new DecoratorContextImpl(file.toURI());
 		} catch (Exception e) {
 			log.error("装载页面装饰配置信息失败", e);
 		}
