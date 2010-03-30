@@ -4,11 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URLEncoder;
-import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -26,7 +22,6 @@ public class ServletTemplateEngine extends HotTemplateEngine {
 
 	public ServletTemplateEngine(ServletConfig config) {
 		super(new File(config.getServletContext().getRealPath("/")).toURI(),null);
-		//this.parser = new XMLParser(transformerFactory,xpathFactory);
 		this.context = config.getServletContext();
 		try {
 			String configPath = config.getInitParameter("config");
@@ -47,7 +42,7 @@ public class ServletTemplateEngine extends HotTemplateEngine {
 			return super.createTemplate(path);
 		}else{
 			try {
-				File file = new File(context.getRealPath("/WEB-INF/litecached/"+URLEncoder.encode(path,"UTF-8")));
+				File file = new File(context.getRealPath("/WEB-INF/litecached/"+path.replace('/', '^').replace('\\', '^')));
 				List<Object> list = JSONDecoder.decode(loadText(file));
 				return new Template((List<Object>)list.get(1));
 			} catch (IOException e) {
