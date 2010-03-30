@@ -7,13 +7,12 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.lite.Template;
 import org.xidea.lite.TemplateEngine;
-import org.xidea.lite.parser.DecoratorContext;
+import org.xidea.lite.parser.ParseConfig;
 import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.ResourceContext;
 
@@ -21,8 +20,7 @@ public class HotTemplateEngine extends TemplateEngine {
 	//public static final String DEFAULT_DECORATOR_MAPPING = "/WEB-INF/decorators.xml";
 	private static final Log log = LogFactory.getLog(HotTemplateEngine.class);
 	private HashMap<String, Info> infoMap = new HashMap<String, Info>();
-	protected Map<String, String> featrues = new HashMap<String, String>();
-	protected DecoratorContext decoratorContext;
+	protected ParseConfig config;
 	private File configFile;
 
 	public HotTemplateEngine(URI webRoot, URI config) {
@@ -32,23 +30,23 @@ public class HotTemplateEngine extends TemplateEngine {
 				File checkFile = new File(config.getPath());
 				this.configFile = checkFile;
 			}
-			this.decoratorContext = new DecoratorContextImpl(
+			this.config = new ParseConfigImpl(
 					config);
 		}
 	}
-	public HotTemplateEngine(ResourceContext webRoot, DecoratorContext context) {
+	public HotTemplateEngine(ResourceContext webRoot, ParseConfig context) {
 		super(webRoot);
 		if (context!=null) {
-			this.decoratorContext = context;
+			this.config = context;
 		}
 	}
 
-	protected ParseContext createParseContext() {
-		return new ParseContextImpl(base, decoratorContext,featrues, null, null);
+	protected ParseContext createParseContext(String path) {
+		return new ParseContextImpl(path,base, config);
 	}
 	@Override
 	protected Template createTemplate(String path) {
-		ParseContext parseContext = createParseContext();
+		ParseContext parseContext = createParseContext(path);
 		Template template = createTemplate(path, parseContext);
 		File[] files = getAssociatedFiles(parseContext);
 		Info entry = new Info(files);

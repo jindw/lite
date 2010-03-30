@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -16,7 +17,7 @@ import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Node;
 import org.xidea.el.ExpressionFactory;
 import org.xidea.lite.Plugin;
-import org.xidea.lite.parser.DecoratorContext;
+import org.xidea.lite.parser.ParseConfig;
 import org.xidea.lite.parser.NodeParser;
 import org.xidea.lite.parser.ParseChain;
 import org.xidea.lite.parser.ParseContext;
@@ -28,12 +29,12 @@ import org.xidea.lite.parser.TextParser;
 import org.xidea.lite.parser.XMLContext;
 import org.xml.sax.SAXException;
 
-public class ParseContextProxy implements ParserHolder,ResourceContext,ResultContext,DecoratorContext,XMLContext  {
+public class ParseContextProxy implements ParserHolder,ResourceContext,ResultContext,ParseConfig,XMLContext  {
 	protected ResourceContext resourceContext;
 	protected XMLContext xmlContext;
 	protected ResultContext resultContext;
 	protected ParserHolder parserHolder;
-	protected DecoratorContext decoratorContext;
+	protected ParseConfig config;
 
 	protected ParseContextProxy() {
 	}
@@ -244,7 +245,7 @@ public class ParseContextProxy implements ParserHolder,ResourceContext,ResultCon
 		resultContext.setCurrentURI(currentURI);
 	}
 
-	public Object getAttribute(Object key) {
+	public <T> T getAttribute(Object key) {
 		return resultContext.getAttribute(key);
 	}
 
@@ -260,10 +261,24 @@ public class ParseContextProxy implements ParserHolder,ResourceContext,ResultCon
 		resultContext.setTextType(textType);
 	}
 	public String getDecotatorPage(String path) {
-		if(decoratorContext != null){
-			return decoratorContext.getDecotatorPage(path);
+		if(config != null){
+			return config.getDecotatorPage(path);
 		}
 		return null;
 	}
-
+	public Map<String, String> getFeatrueMap(String path) {
+		if(config != null){
+			return config.getFeatrueMap(path);
+		}
+		return null;
+	}
+	public NodeParser<? extends Object>[] getNodeParsers(String path) {
+		return config.getNodeParsers(path);
+	}
+	public TextParser[] getTextParsers(String path) {
+		return config.getTextParsers(path);
+	}
+	public boolean isDebugModel() {
+		return config.isDebugModel();
+	}
 }

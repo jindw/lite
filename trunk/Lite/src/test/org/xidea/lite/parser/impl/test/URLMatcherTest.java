@@ -5,7 +5,7 @@ import junit.framework.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.xidea.lite.parser.impl.URLMatcher;
+import org.xidea.lite.parser.impl.URIMatcher;
 
 public class URLMatcherTest {
 
@@ -14,38 +14,38 @@ public class URLMatcherTest {
 	}
 	@Test
 	public void testBeginMatch(){
-		Assert.assertTrue(URLMatcher.createMatcher("**").match("/bb/aa"));
-		Assert.assertTrue(URLMatcher.createMatcher("**/aa").match("/bb/aa"));
-		Assert.assertTrue(URLMatcher.createMatcher("**b/aa").match("/bb/aa"));
-		Assert.assertTrue(URLMatcher.createMatcher("**/bb/aa").match("/bb/aa"));
-		Assert.assertTrue(!URLMatcher.createMatcher("**//bb/aa").match("/bb/aa"));
+		Assert.assertTrue(URIMatcher.createMatcher("**").match("/bb/aa"));
+		Assert.assertTrue(URIMatcher.createMatcher("**/aa").match("/bb/aa"));
+		Assert.assertTrue(URIMatcher.createMatcher("**b/aa").match("/bb/aa"));
+		Assert.assertTrue(URIMatcher.createMatcher("**/bb/aa").match("/bb/aa"));
+		Assert.assertTrue(!URIMatcher.createMatcher("**//bb/aa").match("/bb/aa"));
 	}
 	@Test
 	public void testEndMatch(){
-		Assert.assertTrue(URLMatcher.createMatcher("**").match("/bb/aa"));
-		Assert.assertTrue(URLMatcher.createMatcher("/bb**").match("/bb"));
-		Assert.assertTrue(URLMatcher.createMatcher("/bb/a**").match("/bb/aa"));
-		Assert.assertTrue(URLMatcher.createMatcher("/bb/aa**").match("/bb/aa"));
-		Assert.assertTrue(!URLMatcher.createMatcher("/bb/aa/**").match("/bb/aa"));
+		Assert.assertTrue(URIMatcher.createMatcher("**").match("/bb/aa"));
+		Assert.assertTrue(URIMatcher.createMatcher("/bb**").match("/bb"));
+		Assert.assertTrue(URIMatcher.createMatcher("/bb/a**").match("/bb/aa"));
+		Assert.assertTrue(URIMatcher.createMatcher("/bb/aa**").match("/bb/aa"));
+		Assert.assertTrue(!URIMatcher.createMatcher("/bb/aa/**").match("/bb/aa"));
 	}
 
 	@Test
 	public void test0FileMatch(){
-		Assert.assertTrue(URLMatcher.createMatcher("**").match("/bb/aa"));
-		Assert.assertTrue(URLMatcher.createMatcher("/*/bb").match("/a/bb"));
-		Assert.assertTrue(!URLMatcher.createMatcher("/*/bb").match("/a/a/bb"));
-		Assert.assertTrue(URLMatcher.createMatcher("/**/bb").match("/a/a/bb"));
-		Assert.assertTrue(URLMatcher.createMatcher("/**/bb").match("/bb"));
+		Assert.assertTrue(URIMatcher.createMatcher("**").match("/bb/aa"));
+		Assert.assertTrue(URIMatcher.createMatcher("/*/bb").match("/a/bb"));
+		Assert.assertTrue(!URIMatcher.createMatcher("/*/bb").match("/a/a/bb"));
+		Assert.assertTrue(URIMatcher.createMatcher("/**/bb").match("/a/a/bb"));
+		Assert.assertTrue(URIMatcher.createMatcher("/**/bb").match("/bb"));
 		
 	}
 
 	@Test
 	public void testBothMatch(){
-		Assert.assertTrue(URLMatcher.createMatcher("**").match("/bb/aa"));
-		Assert.assertTrue(URLMatcher.createMatcher("**/bb**").match("/bb"));
-		Assert.assertTrue(URLMatcher.createMatcher("**/bb/a**").match("/bb/aa"));
-		Assert.assertTrue(URLMatcher.createMatcher("**/bb/aa**").match("/bb/aa"));
-		Assert.assertTrue(URLMatcher.createMatcher("**/bb/aa/**/c").match("/bb/aa/c"));
+		Assert.assertTrue(URIMatcher.createMatcher("**").match("/bb/aa"));
+		Assert.assertTrue(URIMatcher.createMatcher("**/bb**").match("/bb"));
+		Assert.assertTrue(URIMatcher.createMatcher("**/bb/a**").match("/bb/aa"));
+		Assert.assertTrue(URIMatcher.createMatcher("**/bb/aa**").match("/bb/aa"));
+		Assert.assertTrue(URIMatcher.createMatcher("**/bb/aa/**/c").match("/bb/aa/c"));
 	}
 
 }

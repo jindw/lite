@@ -1,0 +1,19 @@
+<lite debug-model="true">
+    <featrue key=""></featrue>
+    <extension>
+    this.addNodeParser({
+    	namespace:null,
+    	localName:['body','html'],
+    	parse:function(){
+    		
+    	}
+    });
+    </extension>
+    <group layout="/example/layout.xhtml">
+        <include>/example/*.xhtml</include>
+        <exclude>/example/*.xhtml</exclude>
+    </group>
+    <group layout="/book/layout.xhtml">
+        <include>/book/*.xhtml</include>
+    </group>
+</lite>

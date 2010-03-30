@@ -8,9 +8,7 @@ import org.xidea.lite.parser.impl.ParseContextImpl;
 /**
  * @see ParseContextImpl
  */
-public interface ParseContext extends ParserHolder,ResourceContext,ResultContext, DecoratorContext,XMLContext {
-
-//	public String PATH = "path";
+public interface ParseContext extends ParserHolder,ResourceContext,ResultContext,ParseConfig,XMLContext {
 	/**
 	 * 给出文件内容或url，解析模版源文件
 	 */

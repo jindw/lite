@@ -7,17 +7,17 @@ import java.io.File;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.xidea.lite.parser.DecoratorContext;
-import org.xidea.lite.parser.impl.DecoratorContextImpl;
+import org.xidea.lite.parser.ParseConfig;
+import org.xidea.lite.parser.impl.ParseConfigImpl;
 
 public class DecoratorMapperTest {
-	DecoratorContext mapper;
+	ParseConfig mapper;
 
 	@Before
 	public void setUp() throws Exception {
 		File file = new File(this.getClass().getResource(
 		"decorators.xml").getFile());
-		mapper = new DecoratorContextImpl(file.toURI());
+		mapper = new ParseConfigImpl(file.toURI());
 	}
 
 	@Test

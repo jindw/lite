@@ -83,12 +83,16 @@ public class CoreXMLNodeParser implements NodeParser<Node> {
 				context.setAttribute(FIRST_NODE, true);
 				URI currentURI = context.getCurrentURI();
 				URI base = context.createURI("/", null);
-				URI relative = base.relativize(currentURI);
-				String path = null;
-				if(relative!= currentURI){
-					path = '/'+relative.getPath();
+				if (currentURI != null) {
+					URI relative = base.relativize(currentURI);
+					String path = null;
+					if (relative != currentURI) {
+						path = '/' + relative.getPath();
+					}
+					parseExtends(path, node, context, chain);
+				}else{
+					chain.process(node);
 				}
-				parseExtends(path,node, context, chain);
 			}else{
 				chain.process(node);
 			}

@@ -1,8 +1,0 @@
-<decorators>
-    <decorator layout="/example/layout.xhtml">
-        <pattern>/example/*.xhtml</pattern>
-    </decorator>
-    <decorator layout="/book/layout.xhtml">
-        <pattern>/book/*.xhtml</pattern>
-    </decorator>
-</decorators>
