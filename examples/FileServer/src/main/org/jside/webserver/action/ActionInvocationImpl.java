@@ -35,6 +35,9 @@ public class ActionInvocationImpl implements ActionInvocation {
 		this.pattern = toPathPattern(path);
 		try {
 			this.method = type.getMethod("execute");
+			try{
+				this.method.setAccessible(true);
+			}catch(Exception e){}
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

@@ -155,7 +155,12 @@ public class FileManager {
 		if(args != null && args.length>0){
 			file = args[0];
 		}
-		aws.addAction("/**", new FileManager(new File(file), "/fs"));
+		aws.addAction("/fs/**", new FileManager(new File(file), "/fs/"));
+		aws.addAction("/**",new Object(){
+			public void execute(){
+				RequestUtil.sendRedirect("/fs/");
+			}
+		});
 		aws.start();
 	}
 
