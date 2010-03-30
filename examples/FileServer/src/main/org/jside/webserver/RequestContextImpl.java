@@ -96,6 +96,9 @@ public class RequestContextImpl extends RequestContext {
 	public String getEncoding() {
 		return encoding;
 	}
+	public String getQuery() {
+		return query;
+	}
 
 	public void setEncoding(String encoding) {
 		this.encoding = encoding;
