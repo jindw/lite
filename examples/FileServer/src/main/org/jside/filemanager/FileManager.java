@@ -97,13 +97,15 @@ public class FileManager {
 		String href = "./";
 		boolean success = false;
 		if ("text".equals(action)) {
-			success = file.createNewFile();
-			OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(file),"UTF-8");
+			String fileName = context.getParam().get("name");
+			File newFile = new File(file,fileName);
+			success =newFile.createNewFile();
+			OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(newFile),"UTF-8");
 			String content = context.getParam().get("content");
 			out.write(content);
 			out.flush();
 			out.close();
-			href = file.getName();
+			href = "./";
 		}else if ("delete".equals(action)) {
 			success = file.delete();
 			href = "./";
@@ -131,7 +133,8 @@ public class FileManager {
 			}
 		}
 		href = URLEncoder.encode(href, "UTF-8").replace("%2F", "/");
-		RequestUtil.sendRedirect(href);
+		//RequestUtil.sendRedirect(href);
+		context.setContentType("text/html;charset=utf-8");
 		OutputStream out = context.getOutputStream();
 		StringBuilder buf = new StringBuilder("<a href='");
 		buf.append(href).append("'>");
