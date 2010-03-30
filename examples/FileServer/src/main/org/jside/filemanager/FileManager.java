@@ -23,6 +23,9 @@ public class FileManager {
 	private TemplateAction engine;
 
 	public FileManager(File base, String contextPath) {
+		if(contextPath.endsWith("/")){
+			contextPath = contextPath.substring(0,contextPath.length()-1);
+		}
 		this.contextPath = contextPath;
 		this.base = base;
 		engine = new TemplateAction(URI.create("classpath:///org/jside/filemanager/"));
@@ -45,6 +48,15 @@ public class FileManager {
 		return false;
 	}
 
+	/**
+	 * 
+	 * @param context
+	 * @param path  /
+	 *              /dir1/
+	 *              /file
+	 *              /dir1/file.txt
+	 * @throws IOException
+	 */
 	private void processFileView(RequestContext context, String path)
 			throws IOException {
 		// long t1 = System.currentTimeMillis(),t2=t1,t3=t1;
@@ -53,7 +65,7 @@ public class FileManager {
 			if (path.length() == 0 || path.endsWith("/")) {
 				File[] list = file.listFiles();
 				HashMap<String, Object> data = new HashMap<String, Object>();
-				data.put("path", "/" + path.replace('\\', '/'));
+				data.put("path", path.replace('\\', '/'));
 				data.put("fileList", list);
 				data.put("prefix",this.contextPath);
 				context.setContentType("text/html;charset="
@@ -155,7 +167,7 @@ public class FileManager {
 		if(args != null && args.length>0){
 			file = args[0];
 		}
-		aws.addAction("/fs/**", new FileManager(new File(file), "/fs/"));
+		aws.addAction("/fs/**", new FileManager(new File(file), "/fs"));
 		aws.addAction("/**",new Object(){
 			public void execute(){
 				RequestUtil.sendRedirect("/fs/");
