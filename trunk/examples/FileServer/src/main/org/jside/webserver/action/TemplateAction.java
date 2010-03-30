@@ -21,7 +21,7 @@ public class TemplateAction extends ResourceContextImpl {
 	static{
 		try {
 			String hotClass = "org.xidea.lite.parser.impl.HotTemplateEngine";
-			Constructor<TemplateEngine> hotEngine = (Constructor<TemplateEngine>)Class.forName(hotClass).getConstructor(URI.class,URI.class);
+			hotEngine = (Constructor<TemplateEngine>)Class.forName(hotClass).getConstructor(URI.class,URI.class);
 		} catch (Throwable w) {
 			hotEngine = null;
 		}
@@ -67,7 +67,6 @@ public class TemplateAction extends ResourceContextImpl {
 
 	public void execute() throws IOException {
 		RequestContext context = RequestContext.get();
-		reset(context);
 		OutputStreamWriter out = new OutputStreamWriter(context
 				.getOutputStream(), context.getEncoding());
 		if (contentType != null) {
@@ -81,6 +80,7 @@ public class TemplateAction extends ResourceContextImpl {
 	}
 
 	public void render(String path,Object context, Writer out) throws IOException {
+		reset(RequestContext.get());
 		engine.render(path, context, out);
 	}
 

@@ -18,7 +18,7 @@
 				<exclude name="**/test/**/*.*" />
 			</fileset>
 			<zipfileset prefix="org/jside/filemanager/" dir="${basedir}/build/dest/lite">
-				<include name=".*.xhtml" />
+				<include name="^*.xhtml" />
 			</zipfileset>
 			<zipfileset src="${basedir}/web/WEB-INF/lib/Template.jar">
 				<include name="**/*.class" />
@@ -27,7 +27,6 @@
 				<exclude name="org/xidea/lite/tools/**/*.*" />
 			</zipfileset>
 			<zipfileset src="${basedir}/web/WEB-INF/lib/Template.jar">
-				<include name="org/xidea/el/impl/CommandParser*.class" />
 				<include name="org/xidea/lite/parser/ResourceContext.class" />
 				<include name="org/xidea/lite/parser/impl/ResourceContextImpl.class" />
 			</zipfileset>
