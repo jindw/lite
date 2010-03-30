@@ -18,9 +18,6 @@ public class ExpressionFactoryImpl implements ExpressionFactory {
 	public static final Map<String, Object> DEFAULT_GLOBAL_MAP;
 	
 	private static ExpressionFactoryImpl expressionFactory = new ExpressionFactoryImpl();
-	protected final Map<String,Integer> operatorAliasMap = new HashMap<String, Integer>();
-	protected Map<String, Object> globals;
-	protected final Map<Object, Expression> cached = new WeakHashMap<Object, Expression>();
 	static {
 		HashMap<String, Object> global = new HashMap<String, Object>();
 		ECMA262Impl.setup(global);
@@ -37,13 +34,15 @@ public class ExpressionFactoryImpl implements ExpressionFactory {
 		expressionFactory.addOperatorAlias("&&","and");//且
 		expressionFactory.addOperatorAlias("||","or");//或
 	}
-
+	protected Map<String, Object> globals = DEFAULT_GLOBAL_MAP;
+	protected final Map<String,Integer> operatorAliasMap = new HashMap<String, Integer>();
+	protected final Map<Object, Expression> cached = new WeakHashMap<Object, Expression>();
+	
 	public static ExpressionFactory getInstance() {
 		return expressionFactory;
 	}
 
 	public ExpressionFactoryImpl() {
-		this(DEFAULT_GLOBAL_MAP);
 	}
 
 	public ExpressionFactoryImpl(Map<String, Object> globals) {

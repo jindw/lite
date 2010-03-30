@@ -98,7 +98,7 @@ public class LiteCompiler {
 		log.info("处理文件："+path);
 		try {
 			{
-				File cachedFile = new File(litecached, path.replace('/', '.'));
+				File cachedFile = new File(litecached, path.replace('/', '^'));
 				Writer out = new OutputStreamWriter(new FileOutputStream(
 						cachedFile), encoding);
 				try {
