@@ -22,13 +22,14 @@
 			</zipfileset>
 			<zipfileset src="${basedir}/web/WEB-INF/lib/Template.jar">
 				<include name="**/*.class" />
-				<include name="org/xidea/lite/parser/ResourceContext.class" />
-				<exclude name="org/xidea/lite/parser/impl/**/*.*" />
+				<exclude name="org/xidea/lite/parser/**/*.*" />
 				<exclude name="org/xidea/lite/servlet/**/*.*" />
 				<exclude name="org/xidea/lite/tools/**/*.*" />
 			</zipfileset>
 			<zipfileset src="${basedir}/web/WEB-INF/lib/Template.jar">
-				<include name="org/xidea/lite/tools/CommandParser*.class" />
+				<include name="org/xidea/el/impl/CommandParser*.class" />
+				<include name="org/xidea/lite/parser/ResourceContext.class" />
+				<include name="org/xidea/lite/parser/impl/ResourceContextImpl.class" />
 			</zipfileset>
 		</jar>
 	</target>
