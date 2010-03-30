@@ -13,7 +13,7 @@ import org.xidea.lite.parser.impl.HotTemplateEngine;
 public class TemplateEngineSerializeTest {
 	//@Test
 	public void test() throws IOException, ClassNotFoundException{
-		Object[] obj = new Object[]{new HotTemplateEngine(new File("."))};
+		Object[] obj = new Object[]{new HotTemplateEngine(new File(".").toURI(),null)};
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		ObjectOutputStream out2 = new ObjectOutputStream(out);
 		out2.writeObject(obj);

@@ -2,7 +2,6 @@ package org.xidea.lite.parser.impl;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.List;
 import java.util.regex.Pattern;
 

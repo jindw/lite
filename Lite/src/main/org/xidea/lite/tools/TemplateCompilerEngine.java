@@ -25,7 +25,7 @@ public class TemplateCompilerEngine extends HotTemplateEngine {
 	@SuppressWarnings("unchecked")
 	public TemplateCompilerEngine(File root, String[] parserClasses,
 			Map<String, String> featrueMap) throws IOException {
-		super(root);
+		super(root.toURI(),new File(root,"/WEB-INF/decorators.xml").toURI());
 		this.webBase = root.getCanonicalFile();
 		this.featrueMap = featrueMap;
 		if (parserClasses != null) {
