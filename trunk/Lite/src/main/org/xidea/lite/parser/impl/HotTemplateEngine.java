@@ -21,15 +21,10 @@ public class HotTemplateEngine extends TemplateEngine {
 	private static final Log log = LogFactory.getLog(HotTemplateEngine.class);
 	private HashMap<String, Info> infoMap = new HashMap<String, Info>();
 	protected ParseConfig config;
-	private File configFile;
 
 	public HotTemplateEngine(URI webRoot, URI config) {
 		super(webRoot);
 		if (config!=null) {
-			if(config.getScheme().equals("file")){
-				File checkFile = new File(config.getPath());
-				this.configFile = checkFile;
-			}
 			this.config = new ParseConfigImpl(
 					config);
 		}
@@ -92,8 +87,11 @@ public class HotTemplateEngine extends TemplateEngine {
 
 	protected File[] getAssociatedFiles(ParseContext context) {
 		ArrayList<File> files = new ArrayList<File>();
-		if(configFile!=null){
-			files.add(configFile);
+		if(config instanceof ParseConfigImpl){
+			File configFile = ((ParseConfigImpl)config).getFile();
+			if(configFile!=null){
+				files.add(configFile);
+			}
 		}
 		for (URI url : context.getResources()) {
 			if ("file".equals(url.getScheme())) {

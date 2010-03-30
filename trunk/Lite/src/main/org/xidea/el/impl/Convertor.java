@@ -1,6 +1,7 @@
 package org.xidea.el.impl;
 
 import java.io.File;
+import java.lang.reflect.Constructor;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,9 +11,9 @@ import org.xidea.el.fn.NumberArithmetic;
 public interface Convertor<T> {
 	public T getValue(String value, Class<? extends T> expectedType,
 			Object context, String key);
-	public Map<Class<?>, Convertor<?>> DEFAULT_MAP = Collections.unmodifiableMap(new Default().toMap());
+	public Map<Class<?>, Convertor<?>> DEFAULT_MAP = Collections.unmodifiableMap(Default.INSTANCE.toMap());
 	public static class Default implements Convertor<Object>{
-
+		public static Default INSTANCE = new Default();
 		public Object getValue(String value,
 				Class<? extends Object> expectedType, Object context, String key) {
 			if(File.class.isAssignableFrom(expectedType)){
@@ -56,10 +57,20 @@ public interface Convertor<T> {
 				return value;
 			}
 			try{
-				return expectedType.getConstructor(String.class).newInstance(value);
+				Constructor<? extends Object> constructor = expectedType.getConstructor(String.class);
+				return constructor.newInstance(value);
+			}catch(NoSuchMethodException e){
+				try {
+					@SuppressWarnings("unchecked")
+					Class clazz2 = Class.forName(value);
+					if(expectedType.isAssignableFrom(clazz2)){
+						return clazz2.newInstance();
+					}
+				} catch (Exception e1) {
+				}
 			}catch(Exception e){
-				return null;
 			}
+			return null;
 		}
 		private static Class<?>[] SUPPORTS = {File.class,Long.TYPE,Long.class,
 			Integer.TYPE,Integer.class,

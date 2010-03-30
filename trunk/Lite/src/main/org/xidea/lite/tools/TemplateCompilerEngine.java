@@ -22,24 +22,12 @@ public class TemplateCompilerEngine extends HotTemplateEngine {
 	private Map<String, String> featrueMap;
 	private File webBase;
 
-	@SuppressWarnings("unchecked")
-	public TemplateCompilerEngine(File root, String[] parserClasses,
+	public TemplateCompilerEngine(File root, NodeParser<Object>[] parsers,
 			Map<String, String> featrueMap) throws IOException {
-		super(root.toURI(),new File(root,"/WEB-INF/decorators.xml").toURI());
+		super(root.toURI(),new File(root,"/WEB-INF/lite.xml").toURI());
 		this.webBase = root.getCanonicalFile();
 		this.featrueMap = featrueMap;
-		if (parserClasses != null) {
-			try {
-				NodeParser[] parsers = new NodeParser[parserClasses.length];
-				for (int i = 0; i < parsers.length; i++) {
-					parsers[i] = (NodeParser) Class.forName(parserClasses[i])
-							.newInstance();
-				}
-				this.parsers = parsers;
-			} catch (Exception e) {
-			}
-		}
-
+		this.parsers = parsers;
 	}
 
 	@SuppressWarnings("unchecked")

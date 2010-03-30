@@ -32,7 +32,7 @@ public class ParseConfigImpl implements ParseConfig {
 	private TextParser[] textParsers;
 	private NodeParser<? extends Object>[] nodeParsers;
 	//check data
-	protected long lastModified = -1;// not found or error :0
+	protected long lastModified = -2;// not found or error :0
 	protected URI config;
 	protected File checkFile;
 
@@ -42,27 +42,13 @@ public class ParseConfigImpl implements ParseConfig {
 			File checkFile = new File(config.getPath());
 			this.checkFile = checkFile;
 		}
-		this.reset();
+	}
+	public File getFile(){
+		return checkFile;
 	}
 
 	protected long lastModified() {
 		return checkFile == null ? 0 : checkFile.lastModified();
-	}
-
-	protected void reset() {
-		if (config != null) {
-			reset(new InputSource(config.toString()));
-		}
-	}
-
-	protected void reset(InputSource source) {
-		try {
-			Document doc = DocumentBuilderFactory.newInstance()
-					.newDocumentBuilder().parse(source);
-			reset(doc);
-		} catch (Exception e) {
-			throw new RuntimeException("装饰配置解析失败", e);
-		}
 	}
 
 	/*
@@ -97,11 +83,30 @@ public class ParseConfigImpl implements ParseConfig {
 		return null;
 	}
 
+	protected void reset() {
+		if (config != null) {
+			reset(new InputSource(config.toString()));
+		}
+	}
+
+	protected void reset(InputSource source) {
+		try {
+			Document doc = DocumentBuilderFactory.newInstance()
+					.newDocumentBuilder().parse(source);
+			reset(doc);
+		} catch (Exception e) {
+			log.fatal("装饰配置解析失败:"+e.getMessage());
+			reset((Document)null);
+		}
+	}
+
 	protected void reset(Document config) {
 		ConfigParser pc = new ConfigParser();
-		NodeList els = config.getElementsByTagName("*");
-		for(int i = 0;i<els.getLength();i++){
-			pc.parse((Element)els.item(i));
+		if(config != null){
+			NodeList els = config.getElementsByTagName("*");
+			for(int i = 0;i<els.getLength();i++){
+				pc.parse((Element)els.item(i));
+			}
 		}
 		this.debugModel = pc.debugModel;
 		this.excludeMap = pc.getExcludeMap();

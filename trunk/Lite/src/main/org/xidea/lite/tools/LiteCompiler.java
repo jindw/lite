@@ -13,14 +13,16 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.el.impl.CommandParser;
+import org.xidea.el.impl.Convertor;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.Template;
+import org.xidea.lite.parser.NodeParser;
 
 public class LiteCompiler {
 	private static final Log log = LogFactory.getLog(LiteCompiler.class);
 	private File root;
 	private String path;
-	private String[] parsers;
+	private NodeParser<Object>[] parsers;
 	private Map<String,String> featrueMap = new HashMap<String, String>();
 	private File htmlcached;
 	private File litecached;
@@ -31,11 +33,15 @@ public class LiteCompiler {
 	public LiteCompiler(String[] args) {
 		System.out.println(JSONEncoder.encode(args));
 		//args = new String[]{"-root","C:\\Users\\jindw\\workspace\\android-server/res","-featrueMap['http://www.xidea.org/ns/lite/autoform']","form","-litecached","C:\\Users\\jindw\\workspace\\android-server/src/org/jside/android/web/"};
-		new CommandParser(args).setup(this);
+		CommandParser cp = new CommandParser(args);
+		cp.addConvertor(NodeParser.class,Convertor.Default.INSTANCE);
+		cp.setup(this);
 	}
 
 	public static void main(String[] args) {
-		//args = new String[]{"-path", "/book/preface-history.xhtml","-root", "C:/Users/jindw/workspace/Lite2/web"};
+		if(args == null || args .length == 0){
+			args = new String[]{"-root","D:\\workspace\\FileServer/src/main/org/jside/filemanager/","-litecached","D:\\workspace\\FileServer/build/dest/lite","-nodeParsers","org.xidea.lite.parser.impl.HTMLNodeParser"};
+		}
 		new LiteCompiler(args).execute();
 	}
 
@@ -48,6 +54,7 @@ public class LiteCompiler {
 				this.processFile(path);
 			}
 		} catch (Exception e) {
+			log.error(e);
 			File file = new File(root, "log.txt");
 			try {
 				if (!file.exists()) {
@@ -174,7 +181,7 @@ public class LiteCompiler {
 		this.featrueMap = featrueMap;
 	}
 
-	public void setParsers(String[] additional) {
+	public void setNodeParsers(NodeParser<Object>[] additional) {
 		this.parsers = additional;
 	}
 

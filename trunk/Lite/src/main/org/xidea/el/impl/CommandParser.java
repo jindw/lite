@@ -33,12 +33,11 @@ public class CommandParser {
 		this.params = params;
 	}
 
-	public void addConvertor(Convertor<? extends Object> convertor){
+	public void addConvertor(Class<? extends Object> clazz,Convertor<? extends Object> convertor){
 		if(!(convertorMap instanceof HashMap<?, ?>)){
 			convertorMap = new HashMap<Class<?>, Convertor<? extends Object>>(convertorMap);
 		}
-		convertorMap.put(convertor.getClass(), convertor);
-		
+		convertorMap.put(clazz, convertor);
 	}
 
 	public static void setup(Object result,String[] args) {
