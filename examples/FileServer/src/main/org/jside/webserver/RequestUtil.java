@@ -42,7 +42,6 @@ public abstract class RequestUtil {
 			throw new RuntimeException(e);
 		}
 	}
-
 	public static String getContentType(String name) {
 		int extIndex = name.lastIndexOf('.');
 		if (extIndex >= 0) {
@@ -92,6 +91,9 @@ public abstract class RequestUtil {
 
 	public static void printResource(Object data, String contentType)
 			throws IOException {
+		if(data instanceof URI){
+				data = ((URI)data).toURL();
+		}
 		if (data instanceof URL) {
 			URL resource = (URL) data;
 			if (contentType == null) {

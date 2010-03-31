@@ -236,7 +236,7 @@ public class RequestContextImpl extends RequestContext {
 		if (path.startsWith("/")) {
 			path = path.substring(1);
 		}
-		return server.getWebBase();
+		return server.getWebBase().resolve(path);
 	}
 	@Override
 	public InputStream openStream(URI url){
