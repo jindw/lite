@@ -83,6 +83,19 @@ public abstract class RequestUtil {
 		out.write('\n');
 	}
 
+	public static void printResource() throws IOException {
+		RequestContext context = RequestContext.get();
+		String uri = context.getRequestURI();
+		URI res = context.getResource(uri);
+		File file = getFile(res);
+		if(file != null && file.isDirectory() &&!uri.endsWith("/")){
+			sendRedirect(uri.replaceFirst("[\\\\]?$", "/"));
+		}else{
+			String contentType = RequestContextImpl.findHeader(RequestContext.get()
+				.getHeaders(), "Content-Type");
+			printResource(res, contentType);
+		}
+	}
 	public static void printResource(Object data) throws IOException {
 		String contentType = RequestContextImpl.findHeader(RequestContext.get()
 				.getHeaders(), "Content-Type");

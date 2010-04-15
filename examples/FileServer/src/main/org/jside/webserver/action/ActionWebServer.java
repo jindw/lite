@@ -56,7 +56,7 @@ public class ActionWebServer extends MutiThreadWebServer {
 			}
 		}
 		if(webBase!= null){
-			RequestUtil.printResource(webBase.resolve(uri.substring(1)));
+			RequestUtil.printResource();
 		}
 	}
 }
