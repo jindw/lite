@@ -176,8 +176,7 @@ public abstract class SimpleWebServer implements WebServer {
 	}
 
 	public void processRequest(RequestContext context) throws Exception {
-		RequestUtil.printResource(webBase.resolve(context.getRequestURI()
-				.substring(1)));
+		RequestUtil.printResource();
 	}
 	protected RequestContext createRequestContext(WebServer server, InputStream in, OutputStream out) {
 		return new RequestContextImpl(server, in, out);
