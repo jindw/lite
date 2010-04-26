@@ -2,29 +2,9 @@ this.addScript('expression-token.js',
 				[
 					//函数
 					"getParamCount",'getTokenLength','findTokenType','findTokenText'
-					//BIT CONSTANTS
-					,"BIT_PRIORITY_SUB","BIT_PRIORITY","BIT_PARAM"
-					//VALUES
-					,"VALUE_CONSTANTS","VALUE_VAR","VALUE_NEW_LIST","VALUE_NEW_MAP"
-					//9
-					,"OP_GET_PROP","OP_GET_STATIC_PROP","OP_INVOKE_METHOD","OP_INVOKE_METHOD_WITH_STATIC_PARAM","OP_INVOKE_METHOD_WITH_ONE_PARAM"
-					//8
-					,"OP_NOT","OP_POS","OP_NEG"
-					//7
-					,"OP_MUL","OP_DIV","OP_MOD"
-					//6
-					,"OP_ADD","OP_SUB"
-					//5
-					,"OP_LT","OP_GT","OP_LTEQ","OP_GTEQ"
-					//4
-					,"OP_EQ","OP_NOTEQ"
-					//3
-					,"OP_AND","OP_OR"
-					//2
-					,"OP_QUESTION","OP_QUESTION_SELECT"
-					//1
-					,"OP_PARAM_JOIN"
-					,"OP_MAP_PUSH"
+					,"BIT_*"
+					,"VALUE_*"
+					,"OP_*"
 					]);
 
 this.addScript('template.js',["Template","PLUGIN_DEFINE",'VAR_TYPE','XML_ATTRIBUTE_TYPE','ELSE_TYPE','PLUGIN_TYPE','CAPTRUE_TYPE','IF_TYPE','EL_TYPE','BREAK_TYPE','XML_TEXT_TYPE','FOR_TYPE']
