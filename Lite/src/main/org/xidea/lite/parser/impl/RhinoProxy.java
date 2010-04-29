@@ -3,6 +3,7 @@ package org.xidea.lite.parser.impl;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.mozilla.javascript.CompilerEnvirons;
@@ -11,15 +12,21 @@ import org.mozilla.javascript.Decompiler;
 import org.mozilla.javascript.ErrorReporter;
 import org.mozilla.javascript.EvaluatorException;
 import org.mozilla.javascript.Function;
+import org.mozilla.javascript.NativeJavaObject;
 import org.mozilla.javascript.Parser;
 import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 import org.mozilla.javascript.UintMap;
+import org.mozilla.javascript.WrapFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 @SuppressWarnings("unchecked")
 public class RhinoProxy extends JSProxy implements ErrorReporter {
 	private Scriptable globals;
+	private WrapFactoryFix  wrap = new WrapFactoryFix();
 
 	public RhinoProxy() {
 		try {
@@ -57,7 +64,9 @@ public class RhinoProxy extends JSProxy implements ErrorReporter {
 		}
 		try {
 			Context cx = Context.enter();
-			cx.getWrapFactory().setJavaPrimitiveWrap(primitiveToJS);
+			cx.setWrapFactory(wrap);
+			wrap.setJavaPrimitiveWrap(primitiveToJS);
+			
 			Scriptable rhinoThiz = Context.toObject(thiz, globals);
 			Function fn = (Function) ScriptableObject.getProperty(rhinoThiz,
 					name);
@@ -78,7 +87,8 @@ public class RhinoProxy extends JSProxy implements ErrorReporter {
 			Map<String, Object> varMap) {
 		try {
 			Context cx = Context.enter();
-			cx.getWrapFactory().setJavaPrimitiveWrap(primitiveToJS);
+			cx.setWrapFactory(wrap);
+			wrap.setJavaPrimitiveWrap(primitiveToJS);
 			Scriptable localScope = globals;
 			if (varMap != null) {
 				localScope = cx.newObject(globals);
@@ -119,5 +129,56 @@ public class RhinoProxy extends JSProxy implements ErrorReporter {
 		// return result.replaceAll("(\\}[\r\n])|[\r\n]", "$1");
 		return result.replaceAll("[\r\n]", "");
 	}
+	public static void main(String[] args) throws Exception{
+		Map<String, Object> varMap = new HashMap<String, Object>();
+		Document doc = ParseUtil.loadXML("<xml/>");
+		varMap.put("doc", doc);
+		new RhinoProxy().eval("doc.childNodes;doc.getChildNodes()", "", varMap);
+	}
 
 }
+class WrapFactoryFix extends WrapFactory{
+
+	@Override
+	public Scriptable wrapAsJavaObject(Context cx, Scriptable scope,
+			final Object javaObject, Class staticType) {
+		if(NodeList.class == staticType){
+			return super.wrapAsJavaObject(cx, scope, new NodeList() {
+				public Node item(int index) {
+					return ((NodeList)javaObject).item(index);
+				}
+				
+				public int getLength() {
+					return ((NodeList)javaObject).getLength();
+				}
+			}, staticType);
+		}
+		//Scriptable wrap = new NativeJavaObjectFix(scope, javaObject, staticType);
+        return super.wrapAsJavaObject(cx, scope, javaObject, staticType);
+	}
+}
+//class  NativeJavaObjectFix extends NativeJavaObject{
+//	public NativeJavaObjectFix(Scriptable scope, Object javaObject,
+//			Class staticType) {
+//		super(scope, javaObject, staticType);
+//		//if(Node.class.isAssignableFrom(staticType)){
+//		//}
+//	}
+//
+//	@Override
+//	public Object get(String name, Scriptable start) {
+//		// TODO Auto-generated method stub
+//		if(javaObject instanceof Node){
+//			Object value = super.get(name, start);
+//			if(name.equals("childNodes")){
+//				System.out.println(value.getClass());
+//			}else if(name.equals("getChildNodes")){
+//				System.out.println(value.getClass());
+//			}
+//			return value;
+//		}else{
+//			return super.get(name, start);
+//		}
+//	}
+//	
+//}
