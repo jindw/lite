@@ -106,7 +106,7 @@ public class ParseUtil {
 		if (value.startsWith("${") && value.endsWith("}")) {
 			value = value.substring(2, value.length() - 1);
 		} else {
-			log.warn("输入的不是有效el，系统将字符串转换成el");
+			log.warn("输入的不是有效el，系统将字符串转换成el"+value);
 			value = JSONEncoder.encode(value);
 		}
 		return context.parseEL(value);
