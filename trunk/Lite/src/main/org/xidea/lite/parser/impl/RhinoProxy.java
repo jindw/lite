@@ -3,7 +3,6 @@ package org.xidea.lite.parser.impl;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.mozilla.javascript.CompilerEnvirons;
@@ -12,14 +11,12 @@ import org.mozilla.javascript.Decompiler;
 import org.mozilla.javascript.ErrorReporter;
 import org.mozilla.javascript.EvaluatorException;
 import org.mozilla.javascript.Function;
-import org.mozilla.javascript.NativeJavaObject;
 import org.mozilla.javascript.Parser;
 import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 import org.mozilla.javascript.UintMap;
 import org.mozilla.javascript.WrapFactory;
-import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -129,16 +126,11 @@ public class RhinoProxy extends JSProxy implements ErrorReporter {
 		// return result.replaceAll("(\\}[\r\n])|[\r\n]", "$1");
 		return result.replaceAll("[\r\n]", "");
 	}
-	public static void main(String[] args) throws Exception{
-		Map<String, Object> varMap = new HashMap<String, Object>();
-		Document doc = ParseUtil.loadXML("<xml/>");
-		varMap.put("doc", doc);
-		new RhinoProxy().eval("doc.childNodes;doc.getChildNodes()", "", varMap);
-	}
 
 }
 class WrapFactoryFix extends WrapFactory{
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Scriptable wrapAsJavaObject(Context cx, Scriptable scope,
 			final Object javaObject, Class staticType) {
@@ -157,28 +149,3 @@ class WrapFactoryFix extends WrapFactory{
         return super.wrapAsJavaObject(cx, scope, javaObject, staticType);
 	}
 }
-//class  NativeJavaObjectFix extends NativeJavaObject{
-//	public NativeJavaObjectFix(Scriptable scope, Object javaObject,
-//			Class staticType) {
-//		super(scope, javaObject, staticType);
-//		//if(Node.class.isAssignableFrom(staticType)){
-//		//}
-//	}
-//
-//	@Override
-//	public Object get(String name, Scriptable start) {
-//		// TODO Auto-generated method stub
-//		if(javaObject instanceof Node){
-//			Object value = super.get(name, start);
-//			if(name.equals("childNodes")){
-//				System.out.println(value.getClass());
-//			}else if(name.equals("getChildNodes")){
-//				System.out.println(value.getClass());
-//			}
-//			return value;
-//		}else{
-//			return super.get(name, start);
-//		}
-//	}
-//	
-//}
