@@ -104,8 +104,7 @@ function selectNodes(currentNode,xpath){
     return docFragment;
 }
 
-
-if(!(this.DOMParser && this.XMLHttpRequest || this.ActiveXObject)){
+if(!(window.DOMParser && window.XMLHttpRequest || window.ActiveXObject)){
     var pu = Packages.org.xidea.lite.parser.impl.ParseUtil;
     parseXMLByURL = parseXMLByText = function(url){
     	//TODO:data for text
