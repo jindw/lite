@@ -11,16 +11,19 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.el.ExpressionFactory;
+import org.xidea.el.ExpressionSyntaxException;
 import org.xidea.el.Reference;
 import org.xidea.el.ReferenceExpression;
 
 public class CommandParser {
 	private static final Log log = LogFactory.getLog(CommandParser.class);
-	private static final ExpressionFactory factory = ExpressionFactoryImpl.getInstance();
+	private static final ExpressionFactory factory = ExpressionFactoryImpl
+			.getInstance();
 	public Map<Class<?>, Convertor<? extends Object>> convertorMap = Convertor.DEFAULT_MAP;
 	private Map<String, String[]> params;
+
 	public CommandParser(String[] args) {
-		if(args!=null){
+		if (args != null) {
 			this.params = parseArgs(args);
 		}
 	}
@@ -33,37 +36,46 @@ public class CommandParser {
 		this.params = params;
 	}
 
-	public void addConvertor(Class<? extends Object> clazz,Convertor<? extends Object> convertor){
-		if(!(convertorMap instanceof HashMap<?, ?>)){
-			convertorMap = new HashMap<Class<?>, Convertor<? extends Object>>(convertorMap);
+	public void addConvertor(Class<? extends Object> clazz,
+			Convertor<? extends Object> convertor) {
+		if (!(convertorMap instanceof HashMap<?, ?>)) {
+			convertorMap = new HashMap<Class<?>, Convertor<? extends Object>>(
+					convertorMap);
 		}
 		convertorMap.put(clazz, convertor);
 	}
 
-	public static void setup(Object result,String[] args) {
+	public static void setup(Object result, String[] args) {
 		CommandParser parser = new CommandParser(args);
 		parser.setup(result);
 	}
+
 	public void setup(final Object context) {
-		this.setup(context,params);
+		this.setup(context, params);
 	}
 
-	public void setup(final Object context,Map<String, String[]> params) {
+	public void setup(final Object context, Map<String, String[]> params) {
 		for (String name : params.keySet()) {
-			if (name!=null && name.length() > 0) {
+			if (name != null && name.length() > 0) {
 				if (Character.isJavaIdentifierStart(name.charAt(0))) {
-					ReferenceExpression el = getReference(name);
-					Reference result = el.prepare(context);
-					if (result != null && result.getType() != null) {
-						Class<? extends Object> type = result.getType();
-						String[] values = params.get(name);
-						result.setValue(getValue(values, type, context, name));
-					} else if (context != null) {
-						log.warn("找不到相关属性：" + name);
-						if (log.isInfoEnabled()) {
-							Object properties = ReflectUtil.map(context).keySet();
-							log.info("当前对象可能属性有：" + properties);
+					try {
+						ReferenceExpression el = getReference(name);
+						Reference result = el.prepare(context);
+						if (result != null && result.getType() != null) {
+							Class<? extends Object> type = result.getType();
+							String[] values = params.get(name);
+							result.setValue(getValue(values, type, context,
+									name));
+						} else if (context != null) {
+							log.warn("找不到相关属性：" + name);
+							if (log.isInfoEnabled()) {
+								Object properties = ReflectUtil.map(context)
+										.keySet();
+								log.info("当前对象可能属性有：" + properties);
+							}
 						}
+					} catch (ExpressionSyntaxException e) {
+						log.debug("无效属性："+name,e);
 					}
 				}
 			}
@@ -92,12 +104,12 @@ public class CommandParser {
 				values.add(arg);
 			}
 		}
-		for(Object item : result.entrySet()){
-			Map.Entry entry = (Map.Entry)item;
-			List<String> value = (List<String>)entry.getValue();
+		for (Object item : result.entrySet()) {
+			Map.Entry entry = (Map.Entry) item;
+			List<String> value = (List<String>) entry.getValue();
 			entry.setValue(value.toArray(new String[value.size()]));
 		}
-		return (Map<String, String[]>)result;
+		return (Map<String, String[]>) result;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -129,7 +141,8 @@ public class CommandParser {
 			}
 			return (T) buf;
 		} else {
-			return getValue(values[values.length-1], expectedType, context, key);
+			return getValue(values[values.length - 1], expectedType, context,
+					key);
 		}
 	}
 
@@ -146,12 +159,12 @@ public class CommandParser {
 	}
 
 	public String toString() {
-		if(params == null){
+		if (params == null) {
 			return "*EMPTY*";
-		}else{
+		} else {
 			StringBuilder buf = new StringBuilder();
 			for (String key : params.keySet()) {
-				buf.append(key );
+				buf.append(key);
 				buf.append("=>\n");
 				String[] list = params.get(key);
 				if (params != null) {
@@ -164,8 +177,7 @@ public class CommandParser {
 			}
 			return buf.toString();
 		}
-		
-	}
 
+	}
 
 }
