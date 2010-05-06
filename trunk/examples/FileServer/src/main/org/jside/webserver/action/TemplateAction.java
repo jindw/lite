@@ -7,57 +7,61 @@ import java.io.Writer;
 import java.lang.reflect.Constructor;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.jside.webserver.RequestContext;
 import org.jside.webserver.RequestUtil;
 import org.xidea.lite.TemplateEngine;
-import org.xidea.lite.parser.impl.HotTemplateEngine;
 import org.xidea.lite.parser.impl.ResourceContextImpl;
 
+@SuppressWarnings("unchecked")
 public class TemplateAction extends ResourceContextImpl {
 	static Constructor<TemplateEngine> hotEngine;
-	static{
+	static {
 		try {
 			String hotClass = "org.xidea.lite.parser.impl.HotTemplateEngine";
-			hotEngine = (Constructor<TemplateEngine>)Class.forName(hotClass).getConstructor(URI.class,URI.class);
+			hotEngine = (Constructor<TemplateEngine>) Class.forName(hotClass)
+					.getConstructor(URI.class, URI.class);
 		} catch (Throwable w) {
 			hotEngine = null;
 		}
 	}
 	private String contentType = "text/html;charset=";
-	private TemplateEngine engine ;
+	private TemplateEngine engine;
+
 	public TemplateAction(URI base) {
 		super(base);
 
-		
 	}
 
 	public void setContentType(String contentType) {
 		this.contentType = contentType;
 	}
 
-	protected void reset(RequestContext requestContext) {
-		URI newRoot = requestContext.getResource("/");
-		if (newRoot != null) {
-			if (!newRoot.equals(base)) {
-				base = newRoot;
-				engine = null;
+	public void reset(RequestContext requestContext) {
+		if (requestContext != null) {
+			URI newRoot = requestContext.getResource("/");
+			if (newRoot != null) {
+				if (!newRoot.equals(base)) {
+					base = newRoot;
+					engine = null;
+				}
 			}
 		}
-		if(engine == null){
+		if (engine == null) {
 			try {
-				engine = hotEngine.newInstance(base,requestContext.getResource("/WEB-INF/lite.xml"));
+				engine = hotEngine.newInstance(base,
+						requestContext == null ? null : requestContext
+								.getResource("/WEB-INF/lite.xml"));
 			} catch (Throwable w) {
 				engine = new TemplateEngine(base);
 			}
 		}
 	}
+
 	public URI createURI(String path, URI parentURI) {
-		if(parentURI==null){
+		if (parentURI == null) {
 			URI result = getResource(path);
-			if(result!=null){
+			if (result != null) {
 				return result;
 			}
 			parentURI = base;
@@ -76,11 +80,12 @@ public class TemplateAction extends ResourceContextImpl {
 				context.setContentType(contentType);
 			}
 		}
+		reset(context);
 		render(context.getRequestURI(), context.getValueStack(), out);
 	}
 
-	public void render(String path,Object context, Writer out) throws IOException {
-		reset(RequestContext.get());
+	public void render(String path, Object context, Writer out)
+			throws IOException {
 		engine.render(path, context, out);
 	}
 
@@ -96,7 +101,7 @@ public class TemplateAction extends ResourceContextImpl {
 					}
 				}
 			} else {
-				if(pagePath.length() == 0){
+				if (pagePath.length() == 0) {
 					return base;
 				}
 				if (pagePath.startsWith("/")) {
@@ -118,7 +123,7 @@ public class TemplateAction extends ResourceContextImpl {
 		File file = null;
 		if (uri.getScheme().equals("file")) {
 			file = RequestUtil.getFile(uri.toURL());
-		//}else if (uri.getScheme().equals("classpath")) {
+			// }else if (uri.getScheme().equals("classpath")) {
 		}
 		if (file != null) {
 			if (file.exists()) {
