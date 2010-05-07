@@ -38,8 +38,11 @@ public class TemplateAction extends ResourceContextImpl {
 	}
 
 	public void reset(RequestContext requestContext) {
+		URI config=null;
 		if (requestContext != null) {
 			URI newRoot = requestContext.getResource("/");
+			config = requestContext
+			.getResource("/WEB-INF/lite.xml");
 			if (newRoot != null) {
 				if (!newRoot.equals(base)) {
 					base = newRoot;
@@ -49,9 +52,7 @@ public class TemplateAction extends ResourceContextImpl {
 		}
 		if (engine == null) {
 			try {
-				engine = hotEngine.newInstance(base,
-						requestContext == null ? null : requestContext
-								.getResource("/WEB-INF/lite.xml"));
+				engine = hotEngine.newInstance(base, config);
 			} catch (Throwable w) {
 				engine = new TemplateEngine(base);
 			}
