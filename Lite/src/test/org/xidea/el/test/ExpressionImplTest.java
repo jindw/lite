@@ -68,6 +68,13 @@ public class ExpressionImplTest {
 		test(null,"Math.max(2>=0?3+2:2,1)",5, true);
 	}
 	@Test
+	public void testNotNot() {	
+		test(null,"!!1",true, true);
+		test(null,"!!1",true, true);
+		test(null,"!![1][0]",true, true);
+		test(null,"!!''.length",false, true);
+	}
+	@Test
 	public void test3op() {	
 		test(null,"(0?1+4:+2)+1",3, true);
 
