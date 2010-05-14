@@ -117,7 +117,7 @@ public abstract class SimpleWebServer implements WebServer {
 		} catch (IOException e) {
 			log.error("关闭socket异常", e);
 		}
-		log.info("Webserver starting ...");
+		log.debug("Webserver starting ...");
 		int port = this.defaultPort;
 		for (int i = 0; i < 5; i++) {
 			try {

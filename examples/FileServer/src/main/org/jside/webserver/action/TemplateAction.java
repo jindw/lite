@@ -15,14 +15,16 @@ import org.xidea.lite.parser.impl.ResourceContextImpl;
 
 @SuppressWarnings("unchecked")
 public class TemplateAction extends ResourceContextImpl {
-	static Constructor<TemplateEngine> hotEngine;
+	private static Constructor<TemplateEngine> DEFAULT_HOT_ENGINE;
+	protected Constructor<TemplateEngine> hotEngine = DEFAULT_HOT_ENGINE;
+	
 	static {
 		try {
 			String hotClass = "org.xidea.lite.parser.impl.HotTemplateEngine";
-			hotEngine = (Constructor<TemplateEngine>) Class.forName(hotClass)
+			DEFAULT_HOT_ENGINE = (Constructor<TemplateEngine>) Class.forName(hotClass)
 					.getConstructor(URI.class, URI.class);
 		} catch (Throwable w) {
-			hotEngine = null;
+			DEFAULT_HOT_ENGINE = null;
 		}
 	}
 	private String contentType = "text/html;charset=";
@@ -30,9 +32,12 @@ public class TemplateAction extends ResourceContextImpl {
 
 	public TemplateAction(URI base) {
 		super(base);
-
 	}
-
+	public TemplateAction(Constructor<TemplateEngine> hotEngine,URI base) {
+		super(base);
+		this.hotEngine = hotEngine;
+	}
+	
 	public void setContentType(String contentType) {
 		this.contentType = contentType;
 	}
@@ -41,12 +46,11 @@ public class TemplateAction extends ResourceContextImpl {
 		URI config=null;
 		if (requestContext != null) {
 			URI newRoot = requestContext.getResource("/");
-			config = requestContext
-			.getResource("/WEB-INF/lite.xml");
+			config = requestContext.getResource("/WEB-INF/lite.xml");
 			if (newRoot != null) {
-				if (!newRoot.equals(base)) {
-					base = newRoot;
+				if (base == null || !newRoot.equals(base)) {
 					engine = null;
+					base = newRoot;
 				}
 			}
 		}

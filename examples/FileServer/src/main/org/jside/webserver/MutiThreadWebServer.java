@@ -53,9 +53,8 @@ public class MutiThreadWebServer extends SimpleWebServer {
 			try {
 				processRequest(context);
 			} catch (Exception e) {
-				e.printStackTrace();
-				log.warn(context.getRequestURI() +":"+e);
-				RequestUtil.printResource(e, "text");
+				log.debug(context.getRequestURI() +":",e);
+				//RequestUtil.printResource(e, "text");
 			}
 			context.getOutputStream().flush();
 			in.close();
