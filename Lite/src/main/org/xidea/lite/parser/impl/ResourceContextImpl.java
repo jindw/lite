@@ -19,7 +19,7 @@ public class ResourceContextImpl implements ResourceContext {
 			if (path.startsWith("/")) {
 				if (parentURI == null
 						|| parent.toString().startsWith(base.toString())) {
-					String prefix = base.getPath();
+					String prefix = base.getRawPath();
 					int p  =prefix.lastIndexOf('/');
 					path = prefix.substring(0,p)+path;
 				}
