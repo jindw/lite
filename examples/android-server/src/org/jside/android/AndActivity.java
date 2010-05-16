@@ -77,6 +77,6 @@ public class AndActivity extends Activity implements ServiceConnection{
 	}
 	private String getIp(int i) {
 		return (0xFF & i) + "." + (0xFF & (i >> 8)) + '.'
-		+ (0xFF & (i >> 16)) + '.' + (i >> 24);
+		+ (0xFF & (i >> 16)) + '.' + (0xFF & (i >> 24));
 	}
 }
