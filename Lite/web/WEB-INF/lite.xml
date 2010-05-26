@@ -9,6 +9,8 @@
     	}
     });
     </extension>
+    <globals-exclude>/**-json.xhtml</globals-exclude>
+    <globals-exclude>/**-json.xhtml</globals-exclude>
     <group layout="/example/layout.xhtml">
         <include>/example/*.xhtml</include>
         <exclude>/example/*.xhtml</exclude>
