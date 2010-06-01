@@ -30,7 +30,7 @@ public class MutiThreadWebServer extends SimpleWebServer {
 
 	public void start(int threadCount) {
 		for (int i = 0; i < threadCount; i++) {
-			RequestThread thread = new RequestThread();
+			RequestThread thread = new RequestThread("Wait Request:"+i);
 			thread.start();
 			requestThreads.add(thread);
 		}
@@ -50,11 +50,18 @@ public class MutiThreadWebServer extends SimpleWebServer {
 			InputStream in = remote.getInputStream();
 			OutputStream out = remote.getOutputStream();
 			RequestContext context = RequestContext.enter(createRequestContext(this, in, out));
+			Thread t = Thread.currentThread();
+			String n  = t.getName();
 			try {
+				t.setName("Running Request:"+context.getRequestURI());
 				processRequest(context);
-			} catch (Exception e) {
+			}catch (java.net.SocketException e) {
 				log.debug(context.getRequestURI() +":",e);
+			} catch (Exception e) {
+				log.info(context.getRequestURI() +":",e);
 				//RequestUtil.printResource(e, "text");
+			}finally{
+				t.setName(n);
 			}
 			context.getOutputStream().flush();
 			in.close();
@@ -83,7 +90,8 @@ public class MutiThreadWebServer extends SimpleWebServer {
 	class RequestThread extends Thread {
 		private boolean running = true;
 
-		public RequestThread() {
+		public RequestThread(String name) {
+			super(name);
 		}
 
 		public void run() {
