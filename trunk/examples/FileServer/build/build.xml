@@ -3,7 +3,6 @@
 	<tstamp>
 		<format property="version" pattern="yyyyMMdd" />
 	</tstamp>
-
 	<target name="build">
 		<delete dir="${basedir}/build/dest/" />
 		<mkdir dir="${basedir}/build/dest/" />
