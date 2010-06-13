@@ -53,7 +53,7 @@ public class JSArray extends JSObject implements Invocable {
 		}
 	}
 
-	public Object join(List<Object> thiz, Object... args) throws Exception {
+	public Object join(List<Object> thiz, Object... args) {
 		StringBuilder buf = new StringBuilder();
 		String joiner = null;
 		for (Object o : thiz) {
@@ -62,10 +62,18 @@ public class JSArray extends JSObject implements Invocable {
 			} else {
 				buf.append(joiner);
 			}
-			buf.append(ECMA262Impl.ToPrimitive(o, String.class));
+			o = ECMA262Impl.ToPrimitive(o, String.class);
+			if(o instanceof Number){
+				o = NumberArithmetic.toString((Number)o, 10);
+			}
+			buf.append(o);
 
 		}
 		return buf.toString();
+	}
+
+	public Object toString(List<Object> thiz, Object... args) {
+		return join(thiz,",");
 	}
 
 	public Object push(List<Object> thiz, Object... args) {

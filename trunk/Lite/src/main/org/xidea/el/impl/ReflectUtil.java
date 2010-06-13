@@ -277,6 +277,21 @@ public abstract class ReflectUtil {
 				}
 			}
 		}
+		if (key instanceof String) {
+			try {
+
+				if (context instanceof Class<?>) {
+					return ((Class<?>) context).getField((String) key).get(context);
+				} else {
+					return context.getClass().getField((String)key).get(context);
+				}
+			}catch(NoSuchFieldException e){
+			} catch (Exception e) {
+				if (log.isDebugEnabled()) {
+					log.debug(e);
+				}
+			}
+		}
 		return null;
 	}
 
