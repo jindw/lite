@@ -14,6 +14,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.el.Expression;
 import org.xidea.el.ExpressionFactory;
+import org.xidea.el.fn.ECMA262Impl;
 import org.xidea.el.impl.ExpressionFactoryImpl;
 import org.xidea.el.impl.ReflectUtil;
 
@@ -198,9 +199,9 @@ public class Template {
 			Writer out, boolean encodeXML) throws IOException {
 		Object value = ((Expression) data[1]).evaluate(context);
 		if (encodeXML && value != null) {
-			printXMLText(String.valueOf(value), out);
+			printXMLText(ECMA262Impl.ToString(value), out);
 		} else {
-			out.write(String.valueOf(value));
+			out.write(ECMA262Impl.ToString(value));
 		}
 	}
 
@@ -287,10 +288,10 @@ public class Template {
 			throws IOException {
 		Object result = ((Expression) data[1]).evaluate(context);
 		if (data[2] == null) {
-			printXMLAttribute(String.valueOf(result), out, false);
+			printXMLAttribute(ECMA262Impl.ToString(result), out, false);
 		} else if (result != null) {
 			out.write((String) data[2]);// prefix
-			printXMLAttribute(String.valueOf(result), out, false);
+			printXMLAttribute(ECMA262Impl.ToString(result), out, false);
 			out.write('"');
 		}
 
