@@ -12,7 +12,7 @@ import org.xidea.el.Invocable;
 
 public class JSArray extends JSObject implements Invocable {
 	public Object invoke(Object thiz, Object... args) throws Exception {
-		return method.invoke(this,toList(thiz), args);
+		return method.invoke(this, toList(thiz), args);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -29,26 +29,27 @@ public class JSArray extends JSObject implements Invocable {
 		}
 		return thiz;
 	}
+
 	static int toSliceRange(int pos, int size) {
-		if(pos<0){
-			pos = Math.max(pos+size, 0);
-		}else{
+		if (pos < 0) {
+			pos = Math.max(pos + size, 0);
+		} else {
 			pos = Math.min(pos, size);
 		}
 		return pos;
 	};
 
-
 	public Object splice(List<Object> thiz, Object... args) throws Exception {
-		return slice(thiz,args);
+		return slice(thiz, args);
 	}
+
 	public Object slice(List<Object> thiz, Object... args) throws Exception {
 		int size = thiz.size();
-		int begin = toSliceRange(ECMA262Impl.getIntArg(args, 0, 0),size);
-		int end = toSliceRange(ECMA262Impl.getIntArg(args, 1, size),size);
-		if(begin<end){
+		int begin = toSliceRange(ECMA262Impl.getIntArg(args, 0, 0), size);
+		int end = toSliceRange(ECMA262Impl.getIntArg(args, 1, size), size);
+		if (begin < end) {
 			return thiz.subList(begin, end);
-		}else{
+		} else {
 			return Collections.EMPTY_LIST;
 		}
 	}
@@ -62,10 +63,7 @@ public class JSArray extends JSObject implements Invocable {
 			} else {
 				buf.append(joiner);
 			}
-			o = ECMA262Impl.ToPrimitive(o, String.class);
-			if(o instanceof Number){
-				o = NumberArithmetic.toString((Number)o, 10);
-			}
+			o = ECMA262Impl.ToString(o);
 			buf.append(o);
 
 		}
@@ -73,7 +71,7 @@ public class JSArray extends JSObject implements Invocable {
 	}
 
 	public Object toString(List<Object> thiz, Object... args) {
-		return join(thiz,",");
+		return join(thiz, ",");
 	}
 
 	public Object push(List<Object> thiz, Object... args) {

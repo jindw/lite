@@ -218,32 +218,4 @@ public class NumberArithmetic {
 		return n1.doubleValue() % n2.doubleValue();
 	}
 
-	public static String toString(Number thiz, int radix) {
-		if(radix <= 0  || radix > Character.MAX_RADIX){
-			radix = 10;
-		}
-		if(thiz instanceof Double || thiz instanceof Float){
-			return floatToString(thiz.doubleValue(),radix);
-		}
-		return Long.toString(thiz.longValue(), radix);
-	}
-    private static String floatToString(double d, int base) {
-        if (Double.isNaN(d)) {
-            return "NaN";
-        } else if (Double.isInfinite(d)) {
-            return (d > 0.0) ? "Infinity" : "-Infinity";
-        } else if (d == 0) {
-            // ALERT: should it distinguish -0.0 from +0.0 ?
-            return "0";
-        }
-        if (base != 10) {
-            String result = Double.toString(d);
-            if(result.endsWith(".0")){
-            	result = result.substring(0,result.length()-2);
-            }
-            return result;
-        } else {
-            return Long.toString((long)d,base);
-        }
-    }
 }
