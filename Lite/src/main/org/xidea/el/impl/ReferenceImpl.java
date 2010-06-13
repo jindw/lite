@@ -51,7 +51,7 @@ class ReferenceImpl implements Reference {
 	public Class<? extends Object> getType() {
 		if (type != null) {
 			return ReflectUtil.getPropertyType(type, name);
-		} else {
+		} else  if(base !=null){
 			Object value = getValue();
 			if (value != null) {
 				return value.getClass();
@@ -60,6 +60,8 @@ class ReferenceImpl implements Reference {
 						.getClass(), name);
 				return t == null ? Object.class : t;
 			}
+		}else{
+			return null;
 		}
 	}
 

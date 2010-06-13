@@ -487,14 +487,8 @@ public abstract class ECMA262Impl {
 		if (value == null) {
 			return false;
 		} else if (value instanceof Number) {
-			if (value instanceof Float || value instanceof Double) {
-				float f = ((Number) value).floatValue();
-				return  f != 0 && f==f;
-			} else if (value instanceof Long) {
-				return ((Number) value).longValue() != 0;
-			} else {
-				return ((Number) value).intValue() != 0;
-			}
+			float f = ((Number) value).floatValue();
+			return  f != 0 && !Float.isNaN(f);
 		} else if (value instanceof String) {
 			return ((String) value).length() > 0;
 		} else if (value instanceof Boolean) {

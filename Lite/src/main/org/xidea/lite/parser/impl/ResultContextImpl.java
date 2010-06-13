@@ -121,8 +121,8 @@ public class ResultContextImpl implements ResultContext {
 		for (Object text : items) {
 			if (text instanceof String) {
 				this.append((String) text);
-			} else if(text instanceof Collection){
-				this.append(((Collection)text).toArray());
+			} else if(text instanceof Collection<?>){
+				this.append(((Collection<?>)text).toArray());
 			} else{
 				this.append((Object[]) text);
 			}

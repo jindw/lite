@@ -31,7 +31,7 @@ public class JSONEncoder {
 	}
 
 	public JSONEncoder() {
-		this(false,16);
+		this(false,64);
 	}
 
 	public static String encode(Object value) {

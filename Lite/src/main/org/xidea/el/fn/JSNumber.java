@@ -23,4 +23,8 @@ public class JSNumber extends JSObject implements Invocable {
 	public Object toPrecision(Number thiz, Object[] args) {
 		return null;
 	}
+	public Object toString(Number thiz, Object[] args) {
+		int radix = ECMA262Impl.getIntArg(args, 0, 10);
+		return NumberArithmetic.toString(thiz,radix);
+	}
 }
