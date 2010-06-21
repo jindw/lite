@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -14,6 +16,7 @@ import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.NodeParser;
 
 public abstract class AbstractHTMLNodeParser implements NodeParser<Element> {
+	private static final Log log = LogFactory.getLog(AbstractHTMLNodeParser.class);
 	protected static final Pattern HTML_LEAF = Pattern.compile(
 			"^(?:link|input|meta|img|br|hr)$", Pattern.CASE_INSENSITIVE);
 	protected static final Pattern PRE_LEAF = Pattern.compile(
@@ -22,9 +25,20 @@ public abstract class AbstractHTMLNodeParser implements NodeParser<Element> {
 
 	protected static final Map<String, String> BOOLEAN_ATTBUTE_MAP = new HashMap<String, String>();
 	static {
-		BOOLEAN_ATTBUTE_MAP.put("checked", "checked");
-		BOOLEAN_ATTBUTE_MAP.put("selected", "selected");
-		BOOLEAN_ATTBUTE_MAP.put("disabled", "disabled");
+		BOOLEAN_ATTBUTE_MAP.put("checked", "checked");//input
+		BOOLEAN_ATTBUTE_MAP.put("selected", "selected");//option
+		BOOLEAN_ATTBUTE_MAP.put("disabled", "disabled");//any
+		BOOLEAN_ATTBUTE_MAP.put("readonly", "readonly");//input
+		BOOLEAN_ATTBUTE_MAP.put("multiple", "multiple");//selected 
+		
+		
+		BOOLEAN_ATTBUTE_MAP.put("nowrap", "nowrap");//td/th
+		BOOLEAN_ATTBUTE_MAP.put("defer", "defer");//defer script
+		BOOLEAN_ATTBUTE_MAP.put("compact", "compact");//compact ul,ol,menu,dir,dl
+		BOOLEAN_ATTBUTE_MAP.put("noshade", "noshade");//noshade hr
+		BOOLEAN_ATTBUTE_MAP.put("declare", "declare");//declare object
+		BOOLEAN_ATTBUTE_MAP.put("ismap", "ismap");//ismap img
+		BOOLEAN_ATTBUTE_MAP.put("nohref", "nohref");//nohref area
 	}
 
 	public void parse(Element node,ParseContext context,ParseChain chain) {
@@ -102,6 +116,9 @@ public abstract class AbstractHTMLNodeParser implements NodeParser<Element> {
 					context.append(trueAttr);
 					context.appendEnd();
 				} else {
+					if(!trueValue.equals(attributeValue)){
+						log.error("HTML 固定属性值不对：期待："+trueValue+ "；实际值为："+attributeValue);
+					}
 					context.append(trueAttr);
 				}
 				
