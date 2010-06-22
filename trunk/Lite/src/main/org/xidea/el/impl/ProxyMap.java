@@ -1,7 +1,9 @@
 package org.xidea.el.impl;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.Map.Entry;
 
 
 class ProxyMap extends HashMap<String, Object> {
@@ -18,15 +20,30 @@ class ProxyMap extends HashMap<String, Object> {
 	public Object get(Object key) {
 		Object v = super.get(key);
 		if (v instanceof ReferenceImpl) {
-			return (Object) ((ReferenceImpl) v).getValue();
+			return ((ReferenceImpl) v).getValue();
 		} else {
 			return v;
 		}
 	}
-//	public Object getPropertyValue(Object key){
-//		return super.get(key);
-//	}
+	
 
+
+	@Override
+	public Set<Entry<String, Object>> entrySet() {
+		Set<Entry<String, Object>> result = super.entrySet();
+		for(Entry<String, Object> x : result){
+			Object value = x.getValue();
+			if(value instanceof ReferenceImpl) {
+				x.setValue(((ReferenceImpl)value).getValue());
+			}
+		}
+		return result;
+	}
+	@Override
+	public Collection<Object> values() {
+		entrySet();
+		return super.values();
+	}
 	@Override
 	public Object put(String key, Object value) {
 		Object v = super.put(key, value);
