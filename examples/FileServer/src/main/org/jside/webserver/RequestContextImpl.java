@@ -9,16 +9,14 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.net.Socket;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,38 +26,39 @@ public class RequestContextImpl implements RequestContext {
 	private static final String CONTENT_LENGTH = "Content-Length";
 	private static final String ISO_8859_1 = "ISO-8859-1";
 
-	private static final Pattern QUERY_PATTERN = Pattern
-			.compile("([^=&]+)(?:=([^&]+))?");
 	private String encoding;
 	private String requestURI = "/";
 	private ArrayList<String> requestHeaders = new ArrayList<String>();
-	private Map<String, String[]> paramsMap;
-	private Map<String, String> paramMap;
-	private BufferedReader cin;
+	private ParamsMap paramsMap;
+	private BufferedReader in;
 	private ResponseOutputStream out;
 	private WebServer server;
 	private String requestLine;
 	private String method;
 	private String query;
 	private Map<String, Object> contextMap=new HashMap<String, Object>();
+	private Socket remote;
 	public BufferedReader getInput(){
-		return cin;
+		return in;
 	}
 
-	RequestContextImpl(WebServer server, InputStream sin, OutputStream out) {
+	RequestContextImpl(WebServer server,Socket remote) throws IOException {
+
+		InputStream sin = remote.getInputStream();
+		OutputStream out = remote.getOutputStream();
+		this.remote = remote;
 		this.encoding = server.getEncoding();
 		this.server = server;
-//		URI base = server.getWebBase();
 		try {
-			this.cin = new BufferedReader(
+			this.in = new BufferedReader(
 					new InputStreamReader(sin, ISO_8859_1));
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}
-		this.out = new ResponseOutputStream(out);
+		this.out = new ResponseOutputStream(this,out);
 		this.server = server;
 		try {
-			requestLine = cin.readLine();
+			requestLine = this.in.readLine();
 			String[] rls = requestLine.split("[\\s]");
 			method = rls[0];
 			requestURI = rls[1];
@@ -71,7 +70,7 @@ public class RequestContextImpl implements RequestContext {
 				query = requestURI.substring(p + 1);
 				requestURI = requestURI.substring(0, p);
 			}
-			parseHeaders(cin);
+			parseHeaders(this.in);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -99,6 +98,9 @@ public class RequestContextImpl implements RequestContext {
 	}
 
 	public void setEncoding(String encoding) {
+		if(paramsMap!=null){
+			paramsMap.reset(encoding);
+		}
 		this.encoding = encoding;
 	}
 
@@ -106,28 +108,27 @@ public class RequestContextImpl implements RequestContext {
 		return requestHeaders;
 	}
 
+	@Override
 	public Map<String, String[]> getParams() {
 		if (paramsMap == null) {
-			paramsMap = new LinkedHashMap<String, String[]>();
-			parseParams(query);
+			paramsMap = new ParamsMap();
+			paramsMap.parse(query);
 			String contentLength = getRequestHeader(CONTENT_LENGTH);
 			if (contentLength != null) {
 				try {
-					String post = getPost(cin, Integer.parseInt(contentLength));
-					parseParams(post);
+					String post = getPost(in, Integer.parseInt(contentLength));
+					paramsMap.parse(post);
 				} catch (Exception e) {
 					log.warn(e);
 				}
 			}
+			paramsMap.reset(this.getEncoding());
 		}
 		return paramsMap;
 	}
 
 	public Map<String, String> getParam() {
-		if (paramMap == null) {
-			paramMap = new StringMap(getParams());
-		}
-		return paramMap;
+		return ((ParamsMap)getParams()).toParam();
 	}
 
 	public String getRequestHeader(String key) {
@@ -188,18 +189,7 @@ public class RequestContextImpl implements RequestContext {
 		return null;
 	}
 
-	private void addStrings(Map<String, String[]> map, String key, String value) {
-		String[] values = map.get(key);
-		if (values == null) {
-			values = new String[] { value };
-		} else {
-			String[] values2 = new String[values.length + 1];
-			System.arraycopy(values, 0, values2, 0, values.length);
-			values2[values.length] = value;
-			values = values2;
-		}
-		map.put(key, values);
-	}
+
 
 	private String getPost(Reader in, int contentLength) throws IOException {
 		StringBuffer buf = new StringBuffer();
@@ -211,23 +201,6 @@ public class RequestContextImpl implements RequestContext {
 		return buf.toString();
 	}
 
-	private void parseParams(String query) {
-		if (query != null) {
-			Matcher matcher = QUERY_PATTERN.matcher(query);
-			while (matcher.find()) {
-				String name = matcher.group(1);
-				String value = matcher.group(2);
-				try {
-					String encoding = this.getEncoding();
-					addStrings(paramsMap, URLDecoder.decode(name, encoding),
-							value == null?"":URLDecoder.decode(value, encoding));
-				} catch (Exception e) {
-					log.info("解析失败: "+query+"\n"+name+"="+value,e);
-				}
-
-			}
-		}
-	}
 
 	@Override
 	public URI getResource(String path) {
@@ -304,6 +277,13 @@ public class RequestContextImpl implements RequestContext {
 	@Override
 	public Map<String, Object> getContextMap() {
 		return this.contextMap;
+	}
+
+	public void close() throws IOException {
+		getOutputStream().flush();
+		this.in.close();
+		this.out.close();
+		this.remote.close();
 	}
 
 }

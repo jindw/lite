@@ -1,8 +1,6 @@
 package org.jside.webserver;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URI;
 import java.util.ArrayList;
@@ -47,9 +45,7 @@ public class MutiThreadWebServer extends SimpleWebServer {
 
 	private void processRequest(final Socket remote){
 		try {
-			InputStream in = remote.getInputStream();
-			OutputStream out = remote.getOutputStream();
-			RequestContext context = RequestUtil.enter(createRequestContext(this, in, out));
+			RequestContext context = RequestUtil.enter(this, remote);
 			Thread t = Thread.currentThread();
 			String n  = t.getName();
 			try {
@@ -61,11 +57,9 @@ public class MutiThreadWebServer extends SimpleWebServer {
 				log.info(context.getRequestURI() +":",e);
 				//RequestUtil.printResource(e, "text");
 			}finally{
+				RequestUtil.exit();
 				t.setName(n);
 			}
-			context.getOutputStream().flush();
-			in.close();
-			out.close();
 		} catch (Exception e) {
 			log.error(e);
 		} finally {

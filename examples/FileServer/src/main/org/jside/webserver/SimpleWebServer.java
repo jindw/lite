@@ -1,8 +1,6 @@
 package org.jside.webserver;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URI;
@@ -164,21 +162,13 @@ public abstract class SimpleWebServer implements WebServer {
 	}
 
 	protected void scheduleRequest(Socket remote) throws Exception {
-		InputStream in = remote.getInputStream();
-		OutputStream out = remote.getOutputStream();
 		// remote.setSoTimeout(1000 * 60);
-		RequestContext context = RequestUtil.enter(createRequestContext(this, in, out));
+		RequestContext context = RequestUtil.enter(this, remote);
 		processRequest(context);
-		context.getOutputStream().flush();
-		in.close();
-		out.close();
-		remote.close();
+		RequestUtil.exit();
 	}
 
 	public void processRequest(RequestContext context) throws Exception {
 		RequestUtil.printResource();
-	}
-	protected RequestContext createRequestContext(WebServer server, InputStream in, OutputStream out) {
-		return new RequestContextImpl(server, in, out);
 	}
 }
