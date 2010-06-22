@@ -27,7 +27,7 @@ public class TemplateAction extends ResourceContextImpl {
 			DEFAULT_HOT_ENGINE = null;
 		}
 	}
-	private String contentType = "text/html;charset=";
+	private String contentType = "text/html";
 	private TemplateEngine engine;
 
 	public TemplateAction(URI base) {
@@ -75,18 +75,14 @@ public class TemplateAction extends ResourceContextImpl {
 	}
 
 	public void execute() throws IOException {
-		RequestContext context = RequestContext.get();
+		RequestContext context = RequestUtil.get();
 		OutputStreamWriter out = new OutputStreamWriter(context
 				.getOutputStream(), context.getEncoding());
 		if (contentType != null) {
-			if (contentType.endsWith("=")) {
-				context.setContentType(contentType + context.getEncoding());
-			} else {
-				context.setContentType(contentType);
-			}
+			context.setMimeType(contentType);
 		}
 		reset(context);
-		render(context.getRequestURI(), context.getValueStack(), out);
+		render(context.getRequestURI(), context.getContextMap(), out);
 	}
 
 	public void render(String path, Object context, Writer out)
@@ -97,7 +93,7 @@ public class TemplateAction extends ResourceContextImpl {
 	protected URI getResource(String pagePath) {
 		try {
 			if (base == null) {
-				RequestContext context = RequestContext.get();
+				RequestContext context = RequestUtil.get();
 				URI uri = context.getResource(pagePath);
 				if (uri != null) {
 					uri = toExistResource(uri);
@@ -127,7 +123,7 @@ public class TemplateAction extends ResourceContextImpl {
 	private URI toExistResource(URI uri) throws MalformedURLException {
 		File file = null;
 		if (uri.getScheme().equals("file")) {
-			file = RequestUtil.getFile(uri.toURL());
+			file = new File(uri);
 			// }else if (uri.getScheme().equals("classpath")) {
 		}
 		if (file != null) {

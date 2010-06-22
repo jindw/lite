@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Date;
 import java.util.HashMap;
@@ -16,7 +17,19 @@ import java.util.Properties;
 
 @SuppressWarnings("unchecked")
 public abstract class RequestUtil {
+	private static final String DEFAULT_CONTENT_TYPE = "application/octet-stream";
 	public static final String PLAIN_TEXT = "text/plain";
+	private static ThreadLocal<RequestContext> holder = new ThreadLocal<RequestContext>();
+
+	public static RequestContext enter(RequestContext context) {
+		holder.set(context);
+		return context;
+	}
+
+	public static RequestContext get() {
+		return holder.get();
+	}
+	
 	private static Map<String, String> contentTypeMap = new HashMap<String, String>();
 
 	static {
@@ -42,20 +55,142 @@ public abstract class RequestUtil {
 			throw new RuntimeException(e);
 		}
 	}
-	public static String getContentType(String name) {
+
+	public static String getMimeType(String name) {
 		int extIndex = name.lastIndexOf('.');
 		if (extIndex >= 0) {
 			name = name.substring(extIndex + 1).toLowerCase();
 		}
 		String contentType = (String) contentTypeMap.get(name);
-		return contentType == null ? "application/octet-stream" : contentType;
+		if( contentType == null ){
+			if(name.endsWith("/")){
+				contentType = "text/html";
+			}else{
+				contentType = DEFAULT_CONTENT_TYPE;
+			}
+		}
+		return contentType;
 	}
 
-	private final static void write(RequestContext context, Object data)
+	public static void printResource() throws IOException {
+		RequestContext context = get();
+		String uri = context.getRequestURI();
+		URI res = context.getResource(uri);
+		File file = getFile(res);
+		if (file != null && file.isDirectory() && !uri.endsWith("/")) {
+			sendRedirect(uri.replaceFirst("[\\\\]?$", "/"));
+		} else {
+			printResource(res, null);
+		}
+	}
+
+	public static void printResource(Object data, String contentType)
 			throws IOException {
-		OutputStream out = context.getOutputStream();
+		File f = null;
+		if (data instanceof URI) {
+			f = getFile((URI) data);
+			if (f == null) {
+				data = ((URI) data).toURL();
+			}
+		}else if (data instanceof URL) {
+			try {
+				f = getFile(((URL) data).toURI());
+			} catch (URISyntaxException e) {
+			}
+		}else if(data instanceof File){
+			f = (File)data;
+		}
+		if (f != null) {
+			printFile(f, contentType);
+			return;
+		}
+		if (data instanceof URL) {
+			URL resource = (URL) data;
+			writeContentType(contentType, resource.getFile());
+			write(resource,get().getOutputStream());
+		} else {
+			writeContentType(contentType, null);
+			write(data,get().getOutputStream());
+		}
+	}
+
+	private static void printFile(File file, String contentType)
+			throws IOException, FileNotFoundException {
+		if (contentType == null) {
+			contentType = getMimeType(file.getPath());
+		}
+		RequestContext context = get();
+		String html = null;
+		if (file == null || !file.exists()) {
+			// rCode = HTTP_NOT_FOUND;
+			String message = file + " not found";
+			context.setStatus(404, message);
+			html = message;//, context.getEncoding(), context.getOutputStream());
+			return;
+		}
+		// rCode = HTTP_OK;
+		if (file.isDirectory()) {
+			File[] list = file.listFiles();
+			StringBuilder buf = new StringBuilder();
+			buf.append("<h2>");
+			buf.append(file.getAbsolutePath());
+			buf.append("</h2>");
+			for (File sub : list) {
+				String name = sub.isDirectory() ? sub.getName() + '/' : sub
+						.getName();
+				buf.append("<a href='" + name + "'>" + name + "</a><br/>");
+			}
+			html = buf.toString();
+		}
+		if(html != null){
+			write(html.getBytes(context.getEncoding()), context
+					.getOutputStream());
+		}else{
+			context.setMimeType(contentType);
+			String fileModified = new Date(file.lastModified()).toString();
+			String headModified = context.getRequestHeader("If-Modified-Since");
+			if (fileModified.equals(headModified)) {
+				context.setStatus(304, "Not Modified");
+				context.getOutputStream().flush();
+			} else {
+				context.setResponseHeader("Content-Length: " + file.length());
+				context.setResponseHeader("Last-Modified: " + fileModified);
+				writeContentType(contentType,context.getRequestURI());
+				write(file, context.getOutputStream());
+			}
+		}
+	}
+
+	private final static void writeContentType(String contentType,String path) {
+		RequestContext context = get();
+		if (contentType == null) {
+			if (contentType == null) {
+				if(path == null){
+					path = context.getRequestURI();
+				}
+				contentType = getMimeType(path);
+			}
+		} else if (contentType.indexOf('/') < 0) {
+			contentType = getMimeType("." + contentType);
+		}
+		if(contentType.indexOf("text/") == 0 && contentType.indexOf("charset=")<0){
+			contentType += ";charset="+context.getEncoding();
+		}
+		context.setMimeType(contentType);
+	}
+
+	/**
+	 * File,InputStream,byte[],Throwable,Object.toString()
+	 * @param data
+	 * @param out
+	 * @throws IOException
+	 */
+	private final static void write(Object data, OutputStream out)
+			throws IOException {
 		if (data instanceof File) {
 			data = new FileInputStream((File) data);
+		}else if (data instanceof URL) {
+			data = ((URL) data).openStream();
 		}
 		if (data instanceof InputStream) {
 			InputStream in = (InputStream) data;
@@ -76,126 +211,14 @@ public abstract class RequestUtil {
 			((Throwable) data).printStackTrace(pout);
 			pout.flush();
 		} else {
-			String encoding = context.getEncoding();
+			String encoding = get().getEncoding();
 			out.write(String.valueOf(data).getBytes(encoding));
 		}
 		out.write('\r');
 		out.write('\n');
 	}
 
-	public static void printResource() throws IOException {
-		RequestContext context = RequestContext.get();
-		String uri = context.getRequestURI();
-		URI res = context.getResource(uri);
-		File file = getFile(res);
-		if(file != null && file.isDirectory() &&!uri.endsWith("/")){
-			sendRedirect(uri.replaceFirst("[\\\\]?$", "/"));
-		}else{
-			String contentType = RequestContextImpl.findHeader(RequestContext.get()
-				.getHeaders(), "Content-Type");
-			printResource(res, contentType);
-		}
-	}
-	public static void printResource(Object data) throws IOException {
-		String contentType = RequestContextImpl.findHeader(RequestContext.get()
-				.getHeaders(), "Content-Type");
-		printResource(data, contentType);
-	}
-
-	public static void printResource(Object data, String contentType)
-			throws IOException {
-		if(data instanceof URI){
-				data = ((URI)data).toURL();
-		}
-		if (data instanceof URL) {
-			URL resource = (URL) data;
-			if (contentType == null) {
-				contentType = getContentType(resource.getFile());
-			}
-			if ("file".equals(resource.getProtocol())) {
-				File file = getFile(resource);
-				printFile(file, contentType);
-			} else {
-				InputStream in = resource.openStream();
-				write(RequestContext.get(), in);
-				in.close();
-			}
-		} else {
-			if (contentType == null) {
-				contentType = getContentType(RequestContext.get()
-						.getRequestURI());
-			} else if (contentType.indexOf('/') < 0) {
-				contentType = getContentType("." + contentType);
-			}
-			printData(data, contentType);
-		}
-	}
-
-	private static void printNotFound(String message) throws IOException {
-		RequestContext context = RequestContext.get();
-		context.setStatus(404, message);
-		write(context, message);
-	}
-
-	private static void printData(Object data, String contentType)
-			throws IOException {
-		RequestContext context = RequestContext.get();
-		context.setContentType(contentType);
-		write(context, data);
-	}
-
-	private static void printFile(File file, String contentType)
-			throws IOException, FileNotFoundException {
-		RequestContext context = RequestContext.get();
-		if (file == null || !file.exists()) {
-			// rCode = HTTP_NOT_FOUND;
-			printNotFound(file + " not found");
-			return;
-		}
-		// rCode = HTTP_OK;
-		if (file.isDirectory()) {
-			context.setContentType("text/html");
-			File[] list = file.listFiles();
-			write(context, "<h2>");
-			write(context, file.getAbsolutePath());
-			write(context, "</h2>");
-			for (File sub : list) {
-				String name = sub.isDirectory() ? sub.getName() + '/' : sub
-						.getName();
-				write(context, "<a href='" + name + "'>" + name + "</a><br/>");
-			}
-		} else {
-			context.setContentType(contentType);
-			String fileModified = new Date(file.lastModified()).toString();
-			String headModified = context.findHeader("If-Modified-Since");
-			if (fileModified.equals(headModified)) {
-				context.setStatus(304, "Not Modified");
-				context.getOutputStream().flush();
-			} else {
-				context.addHeader("Content-Length: " + file.length());
-				context.addHeader("Last-Modified: " + fileModified);
-
-				FileInputStream in = new FileInputStream(file);
-				try {
-					write(context, in);
-
-				} finally {
-					in.close();
-				}
-			}
-
-		}
-	}
-
-	public static File getFile(URL root) {
-		try {
-			return getFile(root.toURI());
-		} catch (Exception e) {
-			return null;
-		}
-	}
-
-	public static File getFile(URI root) {
+	private static File getFile(URI root) {
 		if (root != null && "file".equals(root.getScheme())) {
 			return new File(root.getPath());
 		}
@@ -203,9 +226,9 @@ public abstract class RequestUtil {
 	}
 
 	public static void sendRedirect(String href) {
-		RequestContext context = RequestContext.get();
-		context.setHeader("Refresh:0;URL=" + href);
-		context.addHeader("Content-Type:text/html;charset="
+		RequestContext context = get();
+		context.setResponseHeader("Refresh:0;URL=" + href);
+		context.setResponseHeader("Content-Type:text/html;charset="
 				+ context.getEncoding());
 
 	}

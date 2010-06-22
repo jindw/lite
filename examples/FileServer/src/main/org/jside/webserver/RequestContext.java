@@ -6,58 +6,38 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
-public abstract class RequestContext {
-	static ThreadLocal<RequestContext> holder = new ThreadLocal<RequestContext>();
+/**
+ * @see RequestContextImpl
+ * @author test
+ *
+ */
+public interface RequestContext {
+	public Map<String, Object> getApplication();
 
-	public static RequestContext enter(RequestContext context) {
-		holder.set(context);
-		return context;
-	}
-
-	public static RequestContext get() {
-		return holder.get();
-	}
-	public abstract Map<String, Object> getApplication();
-
-	public abstract String getRequestURI();
-
-	public abstract String getMethod();
-
-	public abstract String getEncoding();
-
-	public abstract void setEncoding(String encoding);
-
-	public abstract Map<String, String[]> getParams();
-
-	public abstract Map<String, String> getParam();
-
-	public abstract List<String> getHeaders();
-
-	public abstract String findHeader(String key);
-
-	public abstract void dispatch(String result);
-
-	public abstract void setHeader(String value);
-
-	public abstract void addHeader(String value);
-
-	public abstract void setStatus(int status, String message);
-
-	public abstract void setContentType(String contentType);
-
-	public abstract boolean isAccept();
+	public String getRequestURI();
+	public String getRequestHeader(String key);
+	public List<String> getRequestHeaders();
+	public void setResponseHeader(String value);
 	
-	public abstract OutputStream getOutputStream();
+	public String getMethod();
+	public String getEncoding();
+	public void setEncoding(String encoding);
 
-	public abstract Object[] getValueStack();
+	public Map<String, String[]> getParams();
+	public Map<String, String> getParam();
+	public Map<String,Object> getContextMap();
 
-	public abstract void push(Object value);
+	public void dispatch(String path);
+	public void setStatus(int status, String message);
 
-	public abstract Object pop();
+
+	public boolean isAccept();
+	
+	public OutputStream getOutputStream();
 
 	
-	public abstract URI getResource(String path);
-
-	public abstract InputStream openStream(URI path);
+	public URI getResource(String path);
+	public void setMimeType(String mimeType);
+	public InputStream openStream(URI path);
 
 }

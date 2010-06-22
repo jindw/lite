@@ -49,7 +49,7 @@ public class MutiThreadWebServer extends SimpleWebServer {
 		try {
 			InputStream in = remote.getInputStream();
 			OutputStream out = remote.getOutputStream();
-			RequestContext context = RequestContext.enter(createRequestContext(this, in, out));
+			RequestContext context = RequestUtil.enter(createRequestContext(this, in, out));
 			Thread t = Thread.currentThread();
 			String n  = t.getName();
 			try {
@@ -71,7 +71,7 @@ public class MutiThreadWebServer extends SimpleWebServer {
 		} finally {
 			try {
 				if(log.isDebugEnabled()){
-					log.debug("complete:"+RequestContext.get().getRequestURI()+"\n"+remote);
+					log.debug("complete:"+RequestUtil.get().getRequestURI()+"\n"+remote);
 				}
 				remote.close();
 			} catch (IOException e) {

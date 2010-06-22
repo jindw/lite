@@ -13,6 +13,7 @@ import java.net.URI;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,18 +23,16 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class RequestContextImpl extends RequestContext {
+public class RequestContextImpl implements RequestContext {
 	private static final Log log = LogFactory.getLog(RequestContextImpl.class);
 	private static final String CONTENT_LENGTH = "Content-Length";
 	private static final String ISO_8859_1 = "ISO-8859-1";
 
 	private static final Pattern QUERY_PATTERN = Pattern
 			.compile("([^=&]+)(?:=([^&]+))?");
-	private ArrayList<Object> valueStack = new ArrayList<Object>();
-
 	private String encoding;
 	private String requestURI = "/";
-	private ArrayList<String> headers = new ArrayList<String>();
+	private ArrayList<String> requestHeaders = new ArrayList<String>();
 	private Map<String, String[]> paramsMap;
 	private Map<String, String> paramMap;
 	private BufferedReader cin;
@@ -42,13 +41,12 @@ public class RequestContextImpl extends RequestContext {
 	private String requestLine;
 	private String method;
 	private String query;
+	private Map<String, Object> contextMap=new HashMap<String, Object>();
 	public BufferedReader getInput(){
 		return cin;
 	}
 
 	RequestContextImpl(WebServer server, InputStream sin, OutputStream out) {
-		this.push(server);
-		this.push(this);
 		this.encoding = server.getEncoding();
 		this.server = server;
 //		URI base = server.getWebBase();
@@ -104,15 +102,15 @@ public class RequestContextImpl extends RequestContext {
 		this.encoding = encoding;
 	}
 
-	public List<String> getHeaders() {
-		return headers;
+	public List<String> getRequestHeaders() {
+		return requestHeaders;
 	}
 
 	public Map<String, String[]> getParams() {
 		if (paramsMap == null) {
 			paramsMap = new LinkedHashMap<String, String[]>();
 			parseParams(query);
-			String contentLength = findHeader(CONTENT_LENGTH);
+			String contentLength = getRequestHeader(CONTENT_LENGTH);
 			if (contentLength != null) {
 				try {
 					String post = getPost(cin, Integer.parseInt(contentLength));
@@ -132,13 +130,13 @@ public class RequestContextImpl extends RequestContext {
 		return paramMap;
 	}
 
-	public String findHeader(String key) {
-		return findHeader(headers, key);
+	public String getRequestHeader(String key) {
+		return findHeader(requestHeaders, key);
 	}
 
-	static String findHeader(List<String> headers, String key) {
+	private String findHeader(List<String> headers, String key) {
 		for (String h : headers) {
-			int p = h.indexOf(':');
+			int p = h.indexOf(':')+1;
 			if (key.equalsIgnoreCase(h.substring(0, p))) {
 				return h.substring(p + 1).trim();
 			}
@@ -181,7 +179,7 @@ public class RequestContextImpl extends RequestContext {
 				} else if (line.length() == 0) {
 					break;
 				} else {
-					this.headers.add(line);
+					this.requestHeaders.add(line);
 				}
 			}
 		} catch (IOException e) {
@@ -248,7 +246,7 @@ public class RequestContextImpl extends RequestContext {
 				}
 				return null;
 			}
-			String host = findHeader("Host");
+			String host = getRequestHeader("Host");
 			return getClassResource(host);
 		} catch (IOException e) {
 			log.warn(e);
@@ -272,28 +270,13 @@ public class RequestContextImpl extends RequestContext {
 		return server.getClass().getClassLoader().getResourceAsStream(name);
 	}
 
-	@Override
-	public Object[] getValueStack() {
-		return valueStack.toArray();
-	}
 
-	@Override
-	public Object pop() {
-		return valueStack.remove(valueStack.size() - 1);
-	}
-
-	@Override
-	public void push(Object value) {
-		this.valueStack.add(value);
-	}
-
-	@Override
-	public void addHeader(String value) {
+	public void addResponseHeader(String value) {
 		out.addHeader(value);
 	}
 
 	@Override
-	public void setHeader(String value) {
+	public void setResponseHeader(String value) {
 		out.setHeader(value);
 	}
 
@@ -309,13 +292,18 @@ public class RequestContextImpl extends RequestContext {
 	}
 
 	@Override
-	public void setContentType(String contentType) {
-		out.setContentType(contentType);
+	public void setMimeType(String mimeType) {
+		out.setMimeType(mimeType);
 	}
 
 	@Override
 	public boolean isAccept() {
 		return out.headers == null;
+	}
+
+	@Override
+	public Map<String, Object> getContextMap() {
+		return this.contextMap;
 	}
 
 }

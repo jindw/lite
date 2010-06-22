@@ -167,7 +167,7 @@ public abstract class SimpleWebServer implements WebServer {
 		InputStream in = remote.getInputStream();
 		OutputStream out = remote.getOutputStream();
 		// remote.setSoTimeout(1000 * 60);
-		RequestContext context = RequestContext.enter(createRequestContext(this, in, out));
+		RequestContext context = RequestUtil.enter(createRequestContext(this, in, out));
 		processRequest(context);
 		context.getOutputStream().flush();
 		in.close();

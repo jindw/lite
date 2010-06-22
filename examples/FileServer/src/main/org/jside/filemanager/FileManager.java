@@ -32,7 +32,7 @@ public class FileManager {
 	}
 
 	public boolean execute() throws IOException {
-		RequestContext context = RequestContext.get();
+		RequestContext context = RequestUtil.get();
 		String uri = context.getRequestURI();
 		if (uri.startsWith(contextPath)) {
 			String path = uri.substring(contextPath.length());
@@ -68,8 +68,7 @@ public class FileManager {
 				data.put("path", path.replace('\\', '/'));
 				data.put("fileList", list);
 				data.put("prefix",this.contextPath);
-				context.setContentType("text/html;charset="
-						+ context.getEncoding());
+				context.setMimeType("text/html");
 				try {
 					OutputStreamWriter out = new OutputStreamWriter(context
 							.getOutputStream(), context.getEncoding());
@@ -86,7 +85,7 @@ public class FileManager {
 				RequestUtil.sendRedirect(contextPath + path + "/");
 			}
 		} else {
-			RequestUtil.printResource(file);
+			RequestUtil.printResource(file,null);
 		}
 	}
 
@@ -134,7 +133,8 @@ public class FileManager {
 		}
 		href = URLEncoder.encode(href, "UTF-8").replace("%2F", "/");
 		//RequestUtil.sendRedirect(href);
-		context.setContentType("text/html;charset=utf-8");
+		context.setEncoding("utf-8");
+		context.setMimeType("text/html");
 		OutputStream out = context.getOutputStream();
 		StringBuilder buf = new StringBuilder("<a href='");
 		buf.append(href).append("'>");
@@ -172,6 +172,7 @@ public class FileManager {
 		}
 		aws.addAction("/fs/**", new FileManager(new File(file), "/fs"));
 		aws.addAction("/**",new Object(){
+			@SuppressWarnings("unused")
 			public void execute(){
 				RequestUtil.sendRedirect("/fs/");
 			}

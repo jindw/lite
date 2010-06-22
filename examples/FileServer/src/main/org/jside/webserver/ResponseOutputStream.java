@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 class ResponseOutputStream extends FilterOutputStream {
+	private static final String CHARSET = "charset=";
 	static final String CONTENT_TYPE = "Content-Type";
 	private String httpVersion = "HTTP/1.1";
 	String status = "200 OK";
@@ -19,16 +20,14 @@ class ResponseOutputStream extends FilterOutputStream {
 		headers.add("Connection:close");
 	}
 
-	void setContentType(String contentType) {
+	void setMimeType(String contentType) {
 		setHeader(CONTENT_TYPE + ':' + contentType);
 	}
 
 	public void addHeader(String value) {
 		int length = value.indexOf(':');
 		String name = value.substring(0, length);
-		if ("Server".equals(name) || "Date".equals(name)) {
-			setHeader(value);
-		} else if (CONTENT_TYPE.equalsIgnoreCase(name)) {
+		if (CONTENT_TYPE.equalsIgnoreCase(name)) {
 			setHeader(value);
 		} else {
 			headers.add(value);
@@ -36,7 +35,20 @@ class ResponseOutputStream extends FilterOutputStream {
 	}
 
 	public void setHeader(String value) {
-		int length = value.indexOf(':');
+		int length = value.indexOf(':')+1;
+		if (CONTENT_TYPE.regionMatches(true, 0, value, 0, length)) {
+			int p = value.indexOf(CHARSET);
+			if(p>0){
+				int pd = value.lastIndexOf(';',p);
+				if(pd > 0){
+					String charset = value.substring(p+CHARSET.length());
+					RequestUtil.get().setEncoding(charset);
+					value = value.substring(0,pd);
+				}else{
+					//error
+				}
+			}
+		}
 		for (int i = headers.size() - 1; i >= 0; i--) {
 			String key = headers.get(i);
 			if (key.regionMatches(true, 0, value, 0, length)) {
@@ -47,45 +59,39 @@ class ResponseOutputStream extends FilterOutputStream {
 		headers.add(value);
 	}
 
-	private void printHeader(String msg) throws IOException {
+	private synchronized void beforeWrite() throws IOException {
+		if (headers != null) {
+			println(httpVersion + ' ' + status);
+			int length2flag = CONTENT_TYPE.length();
+			//System.out.println(RequestContext.get().getRequestURI());
+			for (String h : headers) {
+				if (length2flag > 0 && h.regionMatches(true, 0, CONTENT_TYPE, 0, CONTENT_TYPE.length())) {
+					if (h.indexOf("text/") == 0 ) {
+						h += ";charset=" + RequestUtil.get().getEncoding();
+					}
+					length2flag = 0;
+				}
+				println(h);
+			}
+			if (length2flag > 0) {
+				String uri = RequestUtil.get().getRequestURI();
+				String contentType = RequestUtil.getMimeType(uri) ;
+				if (contentType.indexOf("text/") == 0 ) {
+					contentType += ";charset=" + RequestUtil.get().getEncoding();
+				}
+				println(CONTENT_TYPE +':'+contentType);
+			}
+			println("");
+			headers = null;
+		}
+	}
+
+	private void println(String msg) throws IOException {
 		out.write(msg.getBytes());
 		out.write('\r');
 		out.write('\n');
 	}
 
-	private synchronized void beforeWrite() throws IOException {
-		if (headers != null) {
-			printHeader(httpVersion + ' ' + status);
-			initializeContentType();
-			//System.out.println(RequestContext.get().getRequestURI());
-			for (String h : headers) {
-				printHeader(h);
-			}
-			printHeader("");
-			headers = null;
-		}
-	}
-
-	private void initializeContentType() {
-		RequestContext context = RequestContext.get();
-		String uri = context.getRequestURI();
-		String contentType = RequestContextImpl.findHeader(headers,
-				CONTENT_TYPE);
-		if (contentType == null) {
-			uri = uri.substring(uri.lastIndexOf('/') + 1);
-			int extIndex = uri.lastIndexOf('.');
-			contentType = extIndex > 0 ? RequestUtil.getContentType(uri
-					.substring(extIndex + 1)) : "text/html";
-			String encoding = context.getEncoding();
-			setContentType(contentType+";charset="+encoding);
-		}
-//		if (contentType.indexOf("text/") >= 0 && encoding != null) {
-//			if (contentType.indexOf("charset=") < 0) {
-//				contentType += ";charset=" + encoding;
-//				setContentType(contentType);
-//			}
-//		}
-	}
 
 	public void flush() throws IOException {
 		this.beforeWrite();
