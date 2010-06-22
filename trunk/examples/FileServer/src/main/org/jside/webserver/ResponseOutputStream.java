@@ -12,9 +12,11 @@ class ResponseOutputStream extends FilterOutputStream {
 	private String httpVersion = "HTTP/1.1";
 	String status = "200 OK";
 	ArrayList<String> headers = new ArrayList<String>();
+	private RequestContext context;
 
-	public ResponseOutputStream(OutputStream out) {
+	public ResponseOutputStream(RequestContext context,OutputStream out) {
 		super(out);
+		this.context = context;
 		headers.add("Server:JSA Server");
 		headers.add("Date:" + new Date());
 		headers.add("Connection:close");
@@ -42,7 +44,7 @@ class ResponseOutputStream extends FilterOutputStream {
 				int pd = value.lastIndexOf(';',p);
 				if(pd > 0){
 					String charset = value.substring(p+CHARSET.length());
-					RequestUtil.get().setEncoding(charset);
+					context.setEncoding(charset);
 					value = value.substring(0,pd);
 				}else{
 					//error
@@ -67,17 +69,17 @@ class ResponseOutputStream extends FilterOutputStream {
 			for (String h : headers) {
 				if (length2flag > 0 && h.regionMatches(true, 0, CONTENT_TYPE, 0, CONTENT_TYPE.length())) {
 					if (h.indexOf("text/") == 0 ) {
-						h += ";charset=" + RequestUtil.get().getEncoding();
+						h += ";charset=" + context.getEncoding();
 					}
 					length2flag = 0;
 				}
 				println(h);
 			}
 			if (length2flag > 0) {
-				String uri = RequestUtil.get().getRequestURI();
+				String uri = context.getRequestURI();
 				String contentType = RequestUtil.getMimeType(uri) ;
 				if (contentType.indexOf("text/") == 0 ) {
-					contentType += ";charset=" + RequestUtil.get().getEncoding();
+					contentType += ";charset=" + context.getEncoding();
 				}
 				println(CONTENT_TYPE +':'+contentType);
 			}
@@ -87,7 +89,7 @@ class ResponseOutputStream extends FilterOutputStream {
 	}
 
 	private void println(String msg) throws IOException {
-		out.write(msg.getBytes());
+		out.write(msg.getBytes(context.getEncoding()));
 		out.write('\r');
 		out.write('\n');
 	}

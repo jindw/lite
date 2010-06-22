@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -19,17 +20,27 @@ import java.util.Properties;
 public abstract class RequestUtil {
 	private static final String DEFAULT_CONTENT_TYPE = "application/octet-stream";
 	public static final String PLAIN_TEXT = "text/plain";
-	private static ThreadLocal<RequestContext> holder = new ThreadLocal<RequestContext>();
+	private static ThreadLocal<RequestContextImpl> holder = new ThreadLocal<RequestContextImpl>();
 
-	public static RequestContext enter(RequestContext context) {
+	public static RequestContext enter(WebServer server, Socket remote)
+			throws IOException {
+		RequestContextImpl context = new RequestContextImpl(server, remote);
 		holder.set(context);
 		return context;
+	}
+
+	public static void exit() throws IOException {
+		RequestContextImpl context = holder.get();
+		if (context != null) {
+			holder.remove();
+			context.close();
+		}
 	}
 
 	public static RequestContext get() {
 		return holder.get();
 	}
-	
+
 	private static Map<String, String> contentTypeMap = new HashMap<String, String>();
 
 	static {
@@ -62,10 +73,10 @@ public abstract class RequestUtil {
 			name = name.substring(extIndex + 1).toLowerCase();
 		}
 		String contentType = (String) contentTypeMap.get(name);
-		if( contentType == null ){
-			if(name.endsWith("/")){
+		if (contentType == null) {
+			if (name.endsWith("/")) {
 				contentType = "text/html";
-			}else{
+			} else {
 				contentType = DEFAULT_CONTENT_TYPE;
 			}
 		}
@@ -92,13 +103,13 @@ public abstract class RequestUtil {
 			if (f == null) {
 				data = ((URI) data).toURL();
 			}
-		}else if (data instanceof URL) {
+		} else if (data instanceof URL) {
 			try {
 				f = getFile(((URL) data).toURI());
 			} catch (URISyntaxException e) {
 			}
-		}else if(data instanceof File){
-			f = (File)data;
+		} else if (data instanceof File) {
+			f = (File) data;
 		}
 		if (f != null) {
 			printFile(f, contentType);
@@ -107,10 +118,10 @@ public abstract class RequestUtil {
 		if (data instanceof URL) {
 			URL resource = (URL) data;
 			writeContentType(contentType, resource.getFile());
-			write(resource,get().getOutputStream());
+			write(resource, get().getOutputStream());
 		} else {
 			writeContentType(contentType, null);
-			write(data,get().getOutputStream());
+			write(data, get().getOutputStream());
 		}
 	}
 
@@ -125,7 +136,8 @@ public abstract class RequestUtil {
 			// rCode = HTTP_NOT_FOUND;
 			String message = file + " not found";
 			context.setStatus(404, message);
-			html = message;//, context.getEncoding(), context.getOutputStream());
+			html = message;// , context.getEncoding(),
+							// context.getOutputStream());
 			return;
 		}
 		// rCode = HTTP_OK;
@@ -142,10 +154,10 @@ public abstract class RequestUtil {
 			}
 			html = buf.toString();
 		}
-		if(html != null){
+		if (html != null) {
 			write(html.getBytes(context.getEncoding()), context
 					.getOutputStream());
-		}else{
+		} else {
 			context.setMimeType(contentType);
 			String fileModified = new Date(file.lastModified()).toString();
 			String headModified = context.getRequestHeader("If-Modified-Since");
@@ -155,17 +167,17 @@ public abstract class RequestUtil {
 			} else {
 				context.setResponseHeader("Content-Length: " + file.length());
 				context.setResponseHeader("Last-Modified: " + fileModified);
-				writeContentType(contentType,context.getRequestURI());
+				writeContentType(contentType, context.getRequestURI());
 				write(file, context.getOutputStream());
 			}
 		}
 	}
 
-	private final static void writeContentType(String contentType,String path) {
+	private final static void writeContentType(String contentType, String path) {
 		RequestContext context = get();
 		if (contentType == null) {
 			if (contentType == null) {
-				if(path == null){
+				if (path == null) {
 					path = context.getRequestURI();
 				}
 				contentType = getMimeType(path);
@@ -173,14 +185,16 @@ public abstract class RequestUtil {
 		} else if (contentType.indexOf('/') < 0) {
 			contentType = getMimeType("." + contentType);
 		}
-		if(contentType.indexOf("text/") == 0 && contentType.indexOf("charset=")<0){
-			contentType += ";charset="+context.getEncoding();
+		if (contentType.indexOf("text/") == 0
+				&& contentType.indexOf("charset=") < 0) {
+			contentType += ";charset=" + context.getEncoding();
 		}
 		context.setMimeType(contentType);
 	}
 
 	/**
 	 * File,InputStream,byte[],Throwable,Object.toString()
+	 * 
 	 * @param data
 	 * @param out
 	 * @throws IOException
@@ -189,7 +203,7 @@ public abstract class RequestUtil {
 			throws IOException {
 		if (data instanceof File) {
 			data = new FileInputStream((File) data);
-		}else if (data instanceof URL) {
+		} else if (data instanceof URL) {
 			data = ((URL) data).openStream();
 		}
 		if (data instanceof InputStream) {

@@ -3,7 +3,6 @@ package org.jside.webserver;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -16,7 +15,7 @@ public interface RequestContext {
 
 	public String getRequestURI();
 	public String getRequestHeader(String key);
-	public List<String> getRequestHeaders();
+	
 	public void setResponseHeader(String value);
 	
 	public String getMethod();
