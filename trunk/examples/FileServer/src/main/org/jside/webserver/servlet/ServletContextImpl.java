@@ -19,7 +19,7 @@ import org.apache.commons.logging.LogFactory;
 import org.jside.webserver.WebServer;
 
 @SuppressWarnings("unchecked")
-class ServletContextImpl extends HttpServletResponseAdaptor implements
+class ServletContextImpl extends ResponseAdaptor implements
 		ServletContext, ServletConfig {
 
 	private static final String WEB_INF_CLASSES = "/WEB-INF/classes/";
@@ -28,24 +28,11 @@ class ServletContextImpl extends HttpServletResponseAdaptor implements
 		super(server);
 	}
 
-	public Object getAttribute(String key) {
-		if ("javax.servlet.include.servlet_path".equals(key)) {
-			return base().getRequestURI();
-		}
-		return null;
-	}
-
-	public Enumeration getAttributeNames() {
-		return Collections.enumeration(Collections.emptyList());
-	}
 
 	public ServletContext getContext(String arg0) {
 		return this;
 	}
 
-	public String getContextPath() {
-		return "/";
-	}
 
 	public String getInitParameter(String arg0) {
 		return null;
@@ -95,9 +82,6 @@ class ServletContextImpl extends HttpServletResponseAdaptor implements
 		}
 	}
 
-	public RequestDispatcher getRequestDispatcher(String arg0) {
-		return null;
-	}
 
 	public URL getResource(String path) throws MalformedURLException {
 		URL base = server.getWebBase().toURL();
@@ -165,14 +149,6 @@ class ServletContextImpl extends HttpServletResponseAdaptor implements
 
 	public void log(String msg, Throwable e) {
 		log.info(msg, e);
-
-	}
-
-	public void removeAttribute(String arg0) {
-
-	}
-
-	public void setAttribute(String arg0, Object arg1) {
 
 	}
 

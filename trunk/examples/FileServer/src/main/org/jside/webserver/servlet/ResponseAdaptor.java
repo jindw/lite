@@ -13,9 +13,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.jside.webserver.WebServer;
 
 
-abstract class HttpServletResponseAdaptor extends HttpServletRequestAdaptor implements HttpServletResponse{
+abstract class ResponseAdaptor extends RequestAdaptor implements HttpServletResponse{
 
-	public HttpServletResponseAdaptor(WebServer server) {
+	public ResponseAdaptor(WebServer server) {
 		super(server);
 	}
 
@@ -98,14 +98,6 @@ abstract class HttpServletResponseAdaptor extends HttpServletRequestAdaptor impl
 
 	public int getBufferSize() {
 		return 0;
-	}
-
-	public String getCharacterEncoding() {
-		return null;
-	}
-
-	public String getContentType() {
-		return null;
 	}
 
 	public Locale getLocale() {

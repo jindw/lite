@@ -24,9 +24,9 @@ import org.jside.webserver.RequestUtil;
 import org.jside.webserver.WebServer;
 
 @SuppressWarnings("unchecked")
-abstract class HttpServletRequestAdaptor implements HttpServletRequest {
+abstract class RequestAdaptor implements HttpServletRequest {
 	final WebServer server;
-	public HttpServletRequestAdaptor(WebServer server) {
+	public RequestAdaptor(WebServer server) {
 		this.server = server;
 	}
 
@@ -181,15 +181,12 @@ abstract class HttpServletRequestAdaptor implements HttpServletRequest {
 		return false;
 	}
 
-	public abstract Object getAttribute(String key);
-
 	public Enumeration getAttributeNames() {
-		return null;
+		return Collections.enumeration(Collections.emptyList());
 	}
 
 	public String getCharacterEncoding() {
-		// TODO Auto-generated method stub
-		return null;
+		return RequestUtil.get().getEncoding();
 	}
 
 	public int getContentLength() {
@@ -197,7 +194,7 @@ abstract class HttpServletRequestAdaptor implements HttpServletRequest {
 	}
 
 	public String getContentType() {
-		return null;
+		return RequestUtil.get().getRequestHeader("Content-Type");
 	}
 
 	public ServletInputStream getInputStream() throws IOException {
@@ -262,8 +259,7 @@ abstract class HttpServletRequestAdaptor implements HttpServletRequest {
 		return 0;
 	}
 
-	public RequestDispatcher getRequestDispatcher(String arg0) {
-		// TODO Auto-generated method stub
+	public RequestDispatcher getRequestDispatcher(String path) {
 		return null;
 	}
 
@@ -291,7 +287,12 @@ abstract class HttpServletRequestAdaptor implements HttpServletRequest {
 	public void setAttribute(String key, Object value) {
 		base().getContextMap().put(key,value);
 	}
-
+	public Object getAttribute(String key) {
+		if ("javax.servlet.include.servlet_path".equals(key)) {
+			return base().getRequestURI();
+		}
+		return base().getContextMap().get(key);
+	}
 	public void setCharacterEncoding(String encoding)
 			throws UnsupportedEncodingException {
 		base().setEncoding(encoding);
