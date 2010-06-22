@@ -7,6 +7,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jside.webserver.RequestContext;
 import org.xidea.el.impl.CommandParser;
+import org.xidea.el.impl.ReflectUtil;
 
 public class ActionInvocationImpl implements ActionInvocation {
 	private static Log log = LogFactory.getLog(ActionInvocationImpl.class);
@@ -60,7 +61,7 @@ public class ActionInvocationImpl implements ActionInvocation {
 		}
 		Object result = method.invoke(action);
 		if (result instanceof String) {
-			context.push(action);
+			context.getContextMap().putAll(ReflectUtil.map(result));
 			String result2 = (String) result;
 			// if (result2.matches("[\\w+"+Pattern.quote("\\/-.")+"]")) {
 			String path;
