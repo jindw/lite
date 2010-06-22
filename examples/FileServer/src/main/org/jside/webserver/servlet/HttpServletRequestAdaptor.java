@@ -24,7 +24,7 @@ import org.jside.webserver.RequestUtil;
 import org.jside.webserver.WebServer;
 
 @SuppressWarnings("unchecked")
-public abstract class HttpServletRequestAdaptor implements HttpServletRequest {
+abstract class HttpServletRequestAdaptor implements HttpServletRequest {
 	final WebServer server;
 	public HttpServletRequestAdaptor(WebServer server) {
 		this.server = server;
