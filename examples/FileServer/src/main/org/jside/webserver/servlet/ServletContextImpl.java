@@ -19,7 +19,7 @@ import org.apache.commons.logging.LogFactory;
 import org.jside.webserver.WebServer;
 
 @SuppressWarnings("unchecked")
-class ServletContextImpl extends ResponseAdaptor implements
+public class ServletContextImpl extends ResponseAdaptor implements
 		ServletContext, ServletConfig {
 
 	private static final String WEB_INF_CLASSES = "/WEB-INF/classes/";
