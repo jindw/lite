@@ -3,6 +3,22 @@
 	<tstamp>
 		<format property="version" pattern="yyyyMMdd" />
 	</tstamp>
+	<target name="compile">
+		<delete dir="build/dest/classes"/>
+		<mkdir dir="build/dest/classes"/>
+		<copy todir="build/dest/classes">
+			<fileset dir="src/main">
+				<include name="**/*"/>
+			</fileset>
+		</copy>
+		<javac target="1.5" srcdir="build/dest/classes" destdir="build/dest/classes">
+			<classpath>
+				<fileset dir="web/WEB-INF/lib">
+					<include name="*.jar"/>
+				</fileset>
+			</classpath>
+		</javac>
+	</target>
 	<target name="build">
 		<delete dir="${basedir}/build/dest/" />
 		<mkdir dir="${basedir}/build/dest/" />
