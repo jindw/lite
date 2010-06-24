@@ -138,7 +138,6 @@ public abstract class RequestUtil {
 			context.setStatus(404, message);
 			html = message;// , context.getEncoding(),
 							// context.getOutputStream());
-			return;
 		}
 		// rCode = HTTP_OK;
 		if (file.isDirectory()) {
