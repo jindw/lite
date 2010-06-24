@@ -19,7 +19,7 @@ class ParamsMap extends AbstractMap<String, String[]> implements
 		Map<String, String[]> {
 	private static final Log log = LogFactory.getLog(ParamsMap.class);
 	private static final Pattern QUERY_PATTERN = Pattern
-			.compile("([^=&]+)(?:=([^&]+))?");
+			.compile("([^=&]+)(?:=([^&]*))?");
 	private Map<String, List<String>> rawMap = new LinkedHashMap<String, List<String>>();
 	private Map<String, String[]> cacheMap = new LinkedHashMap<String, String[]>();
 	private Map<String, String> paramMap;
@@ -46,11 +46,17 @@ class ParamsMap extends AbstractMap<String, String[]> implements
 	}
 
 	void reset(String encoding) {
+		if(encoding == null){
+			encoding = "UTF-8";
+		}
 		for (Map.Entry<String, List<String>> entry : rawMap.entrySet()) {
 			List<String> vs = entry.getValue();
 			String[] values = new String[vs.size()];
 			for (int i = 0; i < values.length; i++) {
-				values[i] = decode(values[i], encoding);
+				String value = vs.get(i);
+				if(value!=null){
+					values[i] = decode(value, encoding);
+				}
 			}
 			cacheMap.put(decode(entry.getKey(), encoding), values);
 		}
