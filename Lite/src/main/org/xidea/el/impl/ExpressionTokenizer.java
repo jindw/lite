@@ -68,7 +68,7 @@ public class ExpressionTokenizer extends JSONTokenizer {
 		try {
 			toTree(right(this.tokens.iterator()), stack);
 		} catch (Exception e) {
-			throw new ExpressionSyntaxException(e);
+			throw new ExpressionSyntaxException("逆波兰式树型化异常",e);
 		}
 		if (stack.size() != 1) {
 			this.fail("表达式语法错误");
