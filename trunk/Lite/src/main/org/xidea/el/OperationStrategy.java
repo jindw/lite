@@ -4,6 +4,7 @@ package org.xidea.el;
 
 
 
+
 /**
  * 做2值之间的计算。
  * 三元运算符，需要转化为二元表示
@@ -16,6 +17,8 @@ public interface OperationStrategy {
 	 * @param op 操作符对象
 	 * @param vs 运算变量表
 	 * @return 运算结果
+	 * @see org.xidea.el.impl.OperationStrategyImpl#evaluate
 	 */
 	public Object evaluate(ExpressionToken token,ValueStack vs) ;
+	public Object getVar(ValueStack vs,Object key);
 }

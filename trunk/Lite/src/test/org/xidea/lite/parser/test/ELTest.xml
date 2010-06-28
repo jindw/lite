@@ -25,6 +25,10 @@
 			<string><![CDATA[<div>${1+1}</div>]]></string>
 		</void>
 		<void method="put">
+			<string><![CDATA[${[1>1,1<2,1>=1,1<=0,1>=NaN,NaN==NaN,Infinity>Infinity].join(',')}]]></string>
+			<string><![CDATA[false,true,true,false,false,false,false]]></string>
+		</void>
+		<void method="put">
 			<string><![CDATA[<div>\\${1+1}</div>]]></string>
 			<string><![CDATA[<div>\2</div>]]></string>
 		</void>

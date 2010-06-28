@@ -27,9 +27,13 @@ public class ELParseTest {
 		testEL("1?1?0?5:0?11:13:3?1?0?5:0?11:13:3:0?11:13:3");
 	}
 
+	@Test
+	public void testSimple(){
+		testEL("(-123).toFixed(2)");
+	}
 	private void testEL(String elt) {
 		Expression el = ef.create(elt);
-		System.out.println(JSONEncoder.encode(elt));
+		System.out.println(JSONEncoder.encode(elt)+el.evaluate(""));
 		Assert.assertEquals(JSProxy.newProxy().eval(elt),el.evaluate(""));
 	}
 }

@@ -7,6 +7,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.el.Invocable;
+import org.xidea.el.ValueStack;
 /**
  * 自定义函数和扩展函数（Invocable接口类）
  * @author jindw
@@ -19,8 +20,10 @@ public class DefinePlugin implements Plugin,Invocable {
 	
 	private String type;
 	private Object instance;
+	private Template template;
 
-	public void initialize(Object[] children) {
+	public void initialize(Template template,Object[] children) {
+		this.template = template;
 		this.children = children;
 		if(type != null){
 			try {
@@ -41,7 +44,7 @@ public class DefinePlugin implements Plugin,Invocable {
 		this.type = type;
 	}
 
-	public void execute(Context context,Writer out) {
+	public void execute(ValueStack context,Writer out) {
 		if (instance==null) {
 			context.put(this.name, this);
 		} else {
@@ -49,21 +52,20 @@ public class DefinePlugin implements Plugin,Invocable {
 		}
 	}
 
-	public Object invoke(Object thizz, Object... args) throws Exception {
+	public Object invoke(Object thiz, Object... args) throws Exception {
 		StringWriter out = new StringWriter();
-		apply(thizz, out, args);
+		apply(thiz, out, args);
 		return out.toString();
 
 	}
 
-	public void apply(Object thizz, Writer out, Object... args) {
+	public void apply(Object thiz, Writer out, Object... args) {
 		int i = Math.min(args.length, params.length);
-		Context context = (Context) thizz;
-		context = context.createScope();
+		Context context = new Context(null);
 		while (i-- > 0) {
 			context.put(params[i], args[i]);
 		}
-		context.renderList(children, out);
+		template.renderList(context,children, out);
 	}
 
 }

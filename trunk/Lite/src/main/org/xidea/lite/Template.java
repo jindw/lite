@@ -6,7 +6,6 @@ import java.io.Writer;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.el.Expression;
 import org.xidea.el.ExpressionFactory;
+import org.xidea.el.ValueStack;
 import org.xidea.el.fn.ECMA262Impl;
 import org.xidea.el.impl.ExpressionFactoryImpl;
 import org.xidea.el.impl.ReflectUtil;
@@ -34,11 +34,8 @@ public class Template {
 	public static final int CAPTRUE_TYPE = 9; // [9,[...],'var']
 
 	public static final String FOR_KEY = "for";
-	protected Map<String, Object> gloabls = new HashMap<String, Object>(
-			ExpressionFactoryImpl.DEFAULT_GLOBAL_MAP);
 
-	protected ExpressionFactory expressionFactory = new ExpressionFactoryImpl(
-			gloabls);
+	protected ExpressionFactory expressionFactory = new ExpressionFactoryImpl();
 
 	protected Object[] items;// transient＄1�7
 
@@ -50,18 +47,11 @@ public class Template {
 	}
 
 	public void render(Object context, Writer out) throws IOException {
-		Context contextMap;
-		if (context == null) {
-			contextMap = new Context(this, gloabls);
+		ValueStack contextMap;
+		if (context instanceof ValueStack) {
+			contextMap = (ValueStack)context;
 		} else {
-			if(context  instanceof Object[]){
-				Object[] values = new Object[((Object[])context).length+1];
-				System.arraycopy(context, 0, values, 1, values.length-1);
-				values[0] = gloabls;
-				contextMap = new Context(this, values);
-			}else{
-				contextMap = new Context(this, gloabls, context);
-			}
+			contextMap = new Context(context);
 		}
 		renderList(contextMap, items, out);
 	}
@@ -124,14 +114,14 @@ public class Template {
 			Class<Plugin> addonType = (Class<Plugin>) Class.forName((String)cmd[3]);
 			Plugin addon = addonType.newInstance();
 			ReflectUtil.setValues(addon, (Map) el.evaluate(null));
-			addon.initialize(children);
+			addon.initialize(this,children);
 			cmd[3] = addon;
 		} catch (Exception e) {
 			log.error("装载扩展失败", e);
 		}
 	}
 
-	protected void renderList(final Context context, final Object[] children,
+	protected void renderList(final ValueStack context, final Object[] children,
 			final Writer out) {
 		int index = children.length;
 		boolean ifpassed = false;
@@ -189,13 +179,13 @@ public class Template {
 		}
 	}
 
-	private void prossesPlugin(Context context, Object[] data, Writer out)
+	private void prossesPlugin(ValueStack context, Object[] data, Writer out)
 			throws Exception {
 		Plugin addon = (Plugin)data[3];
 		addon.execute(context,out);
 	}
 
-	protected void processExpression(Context context, Object[] data,
+	protected void processExpression(ValueStack context, Object[] data,
 			Writer out, boolean encodeXML) throws IOException {
 		Object value = ((Expression) data[1]).evaluate(context);
 		if (encodeXML && value != null) {
@@ -205,7 +195,7 @@ public class Template {
 		}
 	}
 
-	protected boolean processIf(Context context, Object[] data, Writer out) {
+	protected boolean processIf(ValueStack context, Object[] data, Writer out) {
 		if (toBoolean(((Expression) data[2]).evaluate(context))) {
 			renderList(context, (Object[]) data[1], out);
 			return true;
@@ -214,7 +204,7 @@ public class Template {
 		}
 	}
 
-	protected boolean processElse(Context context, Object[] data, Writer out) {
+	protected boolean processElse(ValueStack context, Object[] data, Writer out) {
 			if (data[2] == null
 					|| toBoolean(((Expression) data[2]).evaluate(context))) {// if
 				renderList(context, (Object[]) data[1], out);
@@ -225,7 +215,7 @@ public class Template {
 	}
 
 	@SuppressWarnings("unchecked")
-	protected boolean processFor(Context context, Object[] data, Writer out) {
+	protected boolean processFor(ValueStack context, Object[] data, Writer out) {
 		final Object[] children = (Object[]) data[1];
 		final String varName = (String) data[3];
 		final ForStatus preiousStatus = (ForStatus) context.get(FOR_KEY);
@@ -274,17 +264,17 @@ public class Template {
 		return len > 0;// if key
 	}
 
-	protected void processVar(Context context, Object[] data) {
+	protected void processVar(ValueStack context, Object[] data) {
 		context.put(data[2], ((Expression) data[1]).evaluate(context));
 	}
 
-	protected void processCaptrue(Context context, Object[] data) {
+	protected void processCaptrue(ValueStack context, Object[] data) {
 		StringWriter buf = new StringWriter();
 		renderList(context, (Object[]) data[1], buf);
 		context.put(data[2], buf.toString());
 	}
 
-	protected void processAttribute(Context context, Object[] data, Writer out)
+	protected void processAttribute(ValueStack context, Object[] data, Writer out)
 			throws IOException {
 		Object result = ((Expression) data[1]).evaluate(context);
 		if (data[2] == null) {

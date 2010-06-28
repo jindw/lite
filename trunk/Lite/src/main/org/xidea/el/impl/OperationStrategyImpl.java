@@ -14,24 +14,20 @@ import org.xidea.el.Invocable;
 import org.xidea.el.Reference;
 import org.xidea.el.ValueStack;
 import org.xidea.el.fn.ECMA262Impl;
-import org.xidea.el.fn.NumberArithmetic;
 
 public class OperationStrategyImpl implements OperationStrategy {
 	private static final Log log = LogFactory.getLog(OperationStrategyImpl.class);
 	protected static final Object SKIP_QUESTION = new Object();
 	private static final Object[] EMPTY_ARGS = new Object[0];
-	private Map<String, Map<String, Invocable>> methodMap;
-	private NumberArithmetic arithmetic = new NumberArithmetic();
+	private final Map<String, Map<String, Invocable>> methodMap = new HashMap<String, Map<String,Invocable>>();
+	private final Map<String, Object> globalMap = new HashMap<String, Object>();
 
 	public OperationStrategyImpl(){
-		Map<String, Map<String, Invocable>> methodMap = new HashMap<String, Map<String, Invocable>>();
-		this.methodMap = methodMap;
-		ECMA262Impl.setup(this);
 	}
-	public OperationStrategyImpl(Map<String, Map<String, Invocable>> methodMap){
-		this.methodMap = methodMap;
+
+	public void addVar(String var, Object value) {
+		this.globalMap.put(var, value);
 	}
-	
 	public void addMethod(Class<? extends Object> clazz, String name, Invocable invocable) {
 		Map<String, Invocable> invocableMap = this.methodMap.get(name);
 		if (invocableMap == null) {
@@ -39,24 +35,6 @@ public class OperationStrategyImpl implements OperationStrategy {
 			this.methodMap.put(name, invocableMap);
 		}
 		invocableMap.put(clazz.getName(), invocable);
-	}
-
-	protected boolean compare(int type, Object arg1, Object arg2) {
-		switch (type) {
-		case ExpressionToken.OP_EQ:
-			return compare(arg1, arg2, -1) == 0;// -1 == 0 //false
-		case ExpressionToken.OP_NOTEQ:
-			return compare(arg1, arg2, -1) != 0;// -1 != 0 //true
-		case ExpressionToken.OP_GT:
-			return compare(arg1, arg2, -1) > 0;// -1 > 0 //false
-		case ExpressionToken.OP_GTEQ:
-			return compare(arg1, arg2, -1) >= 0;// -1 >= 0 //false
-		case ExpressionToken.OP_LT:
-			return compare(arg1, arg2, 1) < 0;// 1 < 0 //false
-		case ExpressionToken.OP_LTEQ:
-			return compare(arg1, arg2, 1) <= 0;// 1 <= 0 //false
-		}
-		throw new RuntimeException("怎么可能？？？");
 	}
 
 	/**
@@ -81,7 +59,16 @@ public class OperationStrategyImpl implements OperationStrategy {
 		}
 		Number n1 = ECMA262Impl.ToNumber(arg1);
 		Number n2 = ECMA262Impl.ToNumber(arg2);
-		return arithmetic.compare(n1, n2, validReturn);
+		double d = n1.doubleValue() - n2.doubleValue();
+		if(Double.isNaN(d)){
+			return validReturn;
+		}else if(d>0){
+			return 1;
+		}else if(d<0){
+			return -1;
+		}else{
+			return 0;
+		}
 	}
 
 
@@ -90,8 +77,12 @@ public class OperationStrategyImpl implements OperationStrategy {
 		final int type = item.getType();
 		switch (type) {
 		case ExpressionToken.VALUE_VAR:
-			String value = (String) item.getParam();
-			return vs.get(value);
+			Object key = item.getParam();
+			Object v = vs.get(key);
+			if(v == null){
+				return globalMap.get(key);
+			}
+			return v;
 		case ExpressionToken.VALUE_CONSTANTS:
 			return item.getParam();
 		case ExpressionToken.VALUE_NEW_LIST:
@@ -141,6 +132,7 @@ public class OperationStrategyImpl implements OperationStrategy {
 				if (log.isDebugEnabled()) {
 					log.debug("方法调用失败:" + arg1, e);
 				}
+				e.printStackTrace();
 				return null;
 			}
 		/* lazy computer elements*/
@@ -186,7 +178,8 @@ public class OperationStrategyImpl implements OperationStrategy {
 		case ExpressionToken.OP_POS:
 			return ECMA262Impl.ToNumber(arg1);
 		case ExpressionToken.OP_NEG:
-			return arithmetic.subtract(0, ECMA262Impl.ToNumber(arg1));
+			Number n = ECMA262Impl.ToNumber(arg1);
+			return ReflectUtil.toValue(-n.doubleValue(),n.getClass());
 			/* +-*%/ */
 		case ExpressionToken.OP_ADD:
 			Object p1 = ECMA262Impl.ToPrimitive(arg1, String.class);
@@ -194,30 +187,36 @@ public class OperationStrategyImpl implements OperationStrategy {
 			if (p1 instanceof String || p2 instanceof String) {
 				return String.valueOf(p1) + p2;
 			} else {
-				return arithmetic.add(ECMA262Impl.ToNumber(p1), ECMA262Impl
-						.ToNumber(p2));
+				return ECMA262Impl.ToNumber(p1).doubleValue() + ECMA262Impl
+						.ToNumber(p2).doubleValue();
 			}
 		case ExpressionToken.OP_SUB:
-			return arithmetic.subtract(ECMA262Impl.ToNumber(arg1), ECMA262Impl
-					.ToNumber(arg2));
+			return ECMA262Impl.ToNumber(arg1).doubleValue()- ECMA262Impl
+					.ToNumber(arg2).doubleValue();
 		case ExpressionToken.OP_MUL:
-			return arithmetic.multiply(ECMA262Impl.ToNumber(arg1), ECMA262Impl
-					.ToNumber(arg2));
+			return ECMA262Impl.ToNumber(arg1).doubleValue() * ECMA262Impl
+					.ToNumber(arg2).doubleValue();
 		case ExpressionToken.OP_DIV:
-			return arithmetic.divide(ECMA262Impl.ToNumber(arg1), ECMA262Impl
-					.ToNumber(arg2), true);
+			return ECMA262Impl.ToNumber(arg1).doubleValue()/ ECMA262Impl
+					.ToNumber(arg2).doubleValue();
 		case ExpressionToken.OP_MOD:
-			return arithmetic.modulus(ECMA262Impl.ToNumber(arg1), ECMA262Impl
-					.ToNumber(arg2));
+			return ECMA262Impl.ToNumber(arg1).doubleValue() % ECMA262Impl
+					.ToNumber(arg2).doubleValue();
 
 			/* boolean */
-		case ExpressionToken.OP_GT:
-		case ExpressionToken.OP_GTEQ:
-		case ExpressionToken.OP_NOTEQ:
+			
 		case ExpressionToken.OP_EQ:
+			return compare(arg1, arg2, -1) == 0;// -1 == 0 //false
+		case ExpressionToken.OP_NOTEQ:
+			return compare(arg1, arg2, -1) != 0;// -1 != 0 //true
+		case ExpressionToken.OP_GT:
+			return compare(arg1, arg2, -1) > 0;// -1 > 0 //false
+		case ExpressionToken.OP_GTEQ:
+			return compare(arg1, arg2, -1) >= 0;// -1 >= 0 //false
 		case ExpressionToken.OP_LT:
+			return compare(arg1, arg2, 1) < 0;// 1 < 0 //false
 		case ExpressionToken.OP_LTEQ:
-			return compare(type, arg1, arg2);
+			return compare(arg1, arg2, 1) <= 0;// 1 <= 0 //false
 
 		case ExpressionToken.OP_PARAM_JOIN:
 			((List) arg1).add(arg2);
@@ -235,4 +234,13 @@ public class OperationStrategyImpl implements OperationStrategy {
 		}
 		return arg1;
 	}
+
+	public Object getVar(ValueStack vs,Object key) {
+		Object o = vs.get(key);
+		if(o == null){
+			return globalMap.get(key);
+		}
+		return o;
+	}
+
 }
