@@ -1,7 +1,5 @@
 package org.xidea.el.impl;
 
-import java.util.Map;
-
 import org.xidea.el.OperationStrategy;
 import org.xidea.el.Expression;
 import org.xidea.el.ExpressionToken;
@@ -14,30 +12,28 @@ public class ExpressionImpl implements Expression ,ReferenceExpression {
 	protected final OperationStrategy calculater;
 	protected final ExpressionToken expression;
 	protected final String source;
-	protected final Map<String, Object> globalMap;
 
 
 	public ExpressionImpl(String el) {
 		this(el, (ExpressionToken)ExpressionFactoryImpl.getInstance().parse(el),
-				ExpressionFactoryImpl.DEFAULT_CALCULATER,ExpressionFactoryImpl.DEFAULT_GLOBAL_MAP);
+				ExpressionFactoryImpl.DEFAULT_CALCULATER);
 	}
 
 	public ExpressionImpl(String source, ExpressionToken expression,
-			OperationStrategy calculater, Map<String, Object> globalMap) {
+			OperationStrategy calculater) {
 		this.source = source;
 		this.calculater = calculater;
 		this.expression = expression;
-		this.globalMap = globalMap == null?ExpressionFactoryImpl.DEFAULT_GLOBAL_MAP:globalMap;
 	}
 
 	public Object evaluate(Object context) {
 		ValueStack valueStack;
-		if (context == null) {
-			valueStack = new ValueStackImpl(globalMap);
-		}else if(context instanceof ValueStack){
+		if(context instanceof ValueStack){
 			valueStack = (ValueStack)context;
+		}else if (context == null) {
+			valueStack = new ValueStackImpl();
 		}else{
-			valueStack = new ValueStackImpl(globalMap,context);
+			valueStack = new ValueStackImpl(context);
 		}
 		Object result = calculater.evaluate(expression,valueStack);
 		if (result instanceof Reference) {
@@ -49,11 +45,11 @@ public class ExpressionImpl implements Expression ,ReferenceExpression {
 	public Reference prepare(Object context) {
 		ValueStack valueStack;
 		if (context == null) {
-			valueStack = new ValueStackImpl(globalMap);
+			valueStack = new ValueStackImpl();
 		}else if(context instanceof ValueStack){
 			valueStack = (ValueStack)context;
 		}else{
-			valueStack = new RefrenceStackImpl(globalMap,context);
+			valueStack = new RefrenceStackImpl(context);
 		}
 		Object result = calculater.evaluate(expression,valueStack);
 		if(result instanceof Reference){

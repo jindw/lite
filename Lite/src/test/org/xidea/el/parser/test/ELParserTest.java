@@ -12,6 +12,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.xidea.el.ExpressionFactory;
+import org.xidea.el.fn.ECMA262Impl;
 import org.xidea.el.impl.ExpressionFactoryImpl;
 import org.xidea.el.impl.ExpressionImpl;
 import org.xidea.el.json.JSONEncoder;
@@ -60,11 +61,11 @@ public class ELParserTest {
 		if(result.trim().startsWith("[")){
 			Object el = factory.parse(text);
 			String eljson = JSONEncoder.encode(el);
-			Assert.assertEquals(result, eljson);
+			Assert.assertEquals(text,result, eljson);
 		}else{
-			Assert.assertEquals(
+			Assert.assertEquals(text,
 					result,
-					String.valueOf(new ExpressionImpl(text).evaluate(this))
+					ECMA262Impl.ToString(new ExpressionImpl(text).evaluate(this))
 					);
 			
 		}

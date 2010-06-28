@@ -8,6 +8,7 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +16,6 @@ import java.util.WeakHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.xidea.el.fn.NumberArithmetic;
 
 public abstract class ReflectUtil {
 	private static final Log log = LogFactory.getLog(ReflectUtil.class);
@@ -97,7 +97,13 @@ public abstract class ReflectUtil {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public static Map<String, ? extends Object> map(final Object context) {
+		if(context == null){
+			return Collections.EMPTY_MAP;
+		}else if(context instanceof Map){
+			return (Map<String, ? extends Object>)context;
+		}
 		Map<String, AccessDescriptor> ps = getPropertyMap(context.getClass());
 		return new ProxyMap(context, ps.keySet());
 	}
@@ -329,8 +335,8 @@ public abstract class ReflectUtil {
 							if (!type.isInstance(value)) {
 								type = toWrapper(type);
 								if (Number.class.isAssignableFrom(type)) {
-									value = NumberArithmetic.getValue(type,
-											(Number) value);
+									value = toValue((Number) value,
+											type);
 								}
 							}
 						}
@@ -344,6 +350,28 @@ public abstract class ReflectUtil {
 			}
 		}
 
+	}
+	public static Number toValue(Number value, Class<? extends Object> type) {
+		if (type == Long.class) {
+			return value.longValue();
+		} else if (type == Integer.class) {
+			return value.intValue();
+		} else if (type == Short.class) {
+			return value.shortValue();
+		} else if (type == Byte.class) {
+			return value.byteValue();
+		} else if (type == Double.class) {
+			return value.doubleValue();
+		} else if (type == Float.class) {
+			return value.floatValue();
+		} else {
+			Class<? extends Object> clazz = ReflectUtil.toWrapper(type);
+			if(clazz == type){
+				return null;
+			}else{
+				return toValue(value, clazz);
+			}
+		}
 	}
 
 	public final static Class<? extends Object> toWrapper(

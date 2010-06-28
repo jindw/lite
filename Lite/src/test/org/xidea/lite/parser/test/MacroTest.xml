@@ -32,13 +32,13 @@
 			<string><![CDATA[1+2]]></string>
 		</void>
 		<!-- macro -->
-		<!-- 可用父域数据 -->
+		<!-- 不可用父域数据 -->
 		<void method="put">
 			<string><![CDATA[
 			<c:var name="a" value="xxx"/>
 			<c:var name="b" value="yyy"/>
 			${test(1,2)}<c:def name="test()">${a}+${b}</c:def>]]></string>
-			<string><![CDATA[xxx+yyy]]></string>
+			<string><![CDATA[null+null]]></string>
 		</void>
 		<!-- 可传递参数 -->
 		<void method="put">

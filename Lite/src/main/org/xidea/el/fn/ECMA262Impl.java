@@ -33,8 +33,26 @@ public abstract class ECMA262Impl {
 		setup(calculater, JSArray.class, ARRAY_CLASSES);
 		setup(calculater, JSNumber.class, Number.class);
 		setup(calculater, JSString.class, String.class);
+		setupVar(calculater);
 	}
-	public static void setup(OperationStrategyImpl calculater,
+	private static void setupVar(OperationStrategyImpl calculater) {
+		calculater.addVar("encodeURI", new URI(true));
+		calculater.addVar("decodeURI", new URI(false));
+
+		calculater.addVar("encodeURIComponent", new URIComponent(true));
+		calculater.addVar("decodeURIComponent", new URIComponent(false));
+
+		calculater.addVar("isFinite", new IsFiniteNaN(true));
+		calculater.addVar("isNaN", new IsFiniteNaN(false));
+
+		calculater.addVar("parseFloat", new ParseNumber(true));
+		calculater.addVar("parseInt", new ParseNumber(false));
+		calculater.addVar("Math", math);
+		calculater.addVar("Infinity", Double.POSITIVE_INFINITY);
+		calculater.addVar("NaN", Double.NaN);
+		calculater.addVar("JSON", new JSON());
+	}
+	private static void setup(OperationStrategyImpl calculater,
 			Class<? extends JSObject> impl, Class<?>... forClass) {
 		try {
 			Method[] dms = impl.getMethods();
@@ -56,28 +74,10 @@ public abstract class ECMA262Impl {
 			}
 		} catch (Exception e) {
 		}
+		
 
 	}
-	public static void setup(Map<String, Object> globalMap) {
-		globalMap.put("encodeURI", new URI(true));
-		globalMap.put("decodeURI", new URI(false));
 
-		globalMap.put("encodeURIComponent", new URIComponent(true));
-		globalMap.put("decodeURIComponent", new URIComponent(false));
-
-		globalMap.put("isFinite", new IsFiniteNaN(true));
-		globalMap.put("isNaN", new IsFiniteNaN(false));
-
-		globalMap.put("parseFloat", new ParseNumber(true));
-		globalMap.put("parseInt", new ParseNumber(false));
-		globalMap.put("Math", math);
-		globalMap.put("Infinity", Double.POSITIVE_INFINITY);
-		globalMap.put("NaN", Double.NaN);
-		globalMap.put("JSON", new JSON());
-	}
-
-
-	private static NumberArithmetic na = new NumberArithmetic();
 
 	private static Map<String, Object> math = MathInvocable.create();
 
@@ -171,30 +171,29 @@ public abstract class ECMA262Impl {
 		public Object mimax(boolean max, Object... args) throws Exception {
 			Number n1 = null;
 			for (int i = 0; i < args.length; i++) {
-				Number n2 = ToNumber(getArg(args, i, Float.NaN));
-				if (NumberArithmetic.isNaN(n2)) {
+				Number n2 = ToNumber(getArg(args, i, Double.NaN));
+				double f2 = n2.floatValue();
+				if (f2 == Float.NaN) {
 					return n2;
 				}
 				if (max) {
-					if (NumberArithmetic.isPI(n2)) {
+					if (Float.POSITIVE_INFINITY == f2) {
 						return n2;
 					}
 				} else {
-					if (NumberArithmetic.isNI(n2)) {
+					if (Float.NEGATIVE_INFINITY == f2) {
 						return n2;
 					}
 				}
 				if (i == 0) {
 					n1 = n2;
 				} else {
-					switch (na.compare(n1, n2, 8)) {
-					case 1:// n1>n2
-						if (!max) {// min
+					if (f2 > n1.doubleValue()) {//n2>n1
+						if (max) {
 							n1 = n2;
 						}
-						break;
-					case -1:// n2>n1
-						if (max) {
+					}else{// n1>=n2
+						if (!max) {// min
 							n1 = n2;
 						}
 					}
@@ -205,8 +204,9 @@ public abstract class ECMA262Impl {
 
 		// 15.8.2.1 abs(x)
 		public Object abs(Number x) {
-			if (na.compare(0, x, 2) == 1) {
-				x = na.subtract(0, x);
+			double d = x.doubleValue();
+			if (d < 0) {
+				return -d;
 			}
 			return x;
 		}
@@ -607,7 +607,7 @@ public abstract class ECMA262Impl {
 		
 		if(Number.class.isAssignableFrom(type)){
 			Number n = ToNumber(value);
-			return NumberArithmetic.getValue(type, n);
+			return ReflectUtil.toValue(n, type);
 		}
 		
 		//Boolean

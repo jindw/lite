@@ -6,8 +6,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.xidea.el.fn.NumberArithmetic;
-
 public interface Convertor<T> {
 	public T getValue(String value, Class<? extends T> expectedType,
 			Object context, String key);
@@ -37,7 +35,7 @@ public interface Convertor<T> {
 					if(expectedType == clazz){
 						return null;
 					}
-					return NumberArithmetic.getValue(clazz, 0);
+					return ReflectUtil.toValue(0, clazz);
 
 				}
 			}else if (Boolean.class == clazz){

@@ -3,6 +3,8 @@ package org.xidea.lite;
 
 import java.io.Writer;
 
+import org.xidea.el.ValueStack;
+
 
 /**
  * 插件属性可以被自动初始化。
@@ -10,6 +12,6 @@ import java.io.Writer;
  * @author jindw
  */
 public interface Plugin {
-	public void initialize(Object[] children);
-	public void execute(Context context,Writer out);
+	public void initialize(Template template,Object[] children);
+	public void execute(ValueStack context,Writer out);
 }
