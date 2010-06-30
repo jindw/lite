@@ -7,5 +7,4 @@ public interface ParseConfig {
 	public Map<String,String> getFeatrueMap(String path);
 	public TextParser[] getTextParsers(String path);
 	public NodeParser<? extends Object>[] getNodeParsers(String path);
-	public boolean isDebugModel();
 }

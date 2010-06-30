@@ -21,6 +21,7 @@ public class OperationStrategyImpl implements OperationStrategy {
 	private static final Object[] EMPTY_ARGS = new Object[0];
 	private final Map<String, Map<String, Invocable>> methodMap = new HashMap<String, Map<String,Invocable>>();
 	private final Map<String, Object> globalMap = new HashMap<String, Object>();
+	private static final NumberArithmetic na = new NumberArithmetic();
 
 	public OperationStrategyImpl(){
 	}
@@ -49,7 +50,9 @@ public class OperationStrategyImpl implements OperationStrategy {
 			if (arg2 == null) {
 				return 0;
 			}
-		} else if (arg1.equals(arg2)) {
+		} else if (arg1 instanceof Number && arg2 instanceof Number) {
+			return na.compare((Number)arg1, (Number)arg2, validReturn);
+		}else if (arg1.equals(arg2)) {
 			return 0;
 		}
 		arg1 = ECMA262Impl.ToPrimitive(arg1, Number.class);
@@ -59,16 +62,7 @@ public class OperationStrategyImpl implements OperationStrategy {
 		}
 		Number n1 = ECMA262Impl.ToNumber(arg1);
 		Number n2 = ECMA262Impl.ToNumber(arg2);
-		double d = n1.doubleValue() - n2.doubleValue();
-		if(Double.isNaN(d)){
-			return validReturn;
-		}else if(d>0){
-			return 1;
-		}else if(d<0){
-			return -1;
-		}else{
-			return 0;
-		}
+		return na.compare(n1, n2, validReturn);
 	}
 
 
@@ -132,7 +126,6 @@ public class OperationStrategyImpl implements OperationStrategy {
 				if (log.isDebugEnabled()) {
 					log.debug("方法调用失败:" + arg1, e);
 				}
-				e.printStackTrace();
 				return null;
 			}
 		/* lazy computer elements*/
@@ -178,8 +171,7 @@ public class OperationStrategyImpl implements OperationStrategy {
 		case ExpressionToken.OP_POS:
 			return ECMA262Impl.ToNumber(arg1);
 		case ExpressionToken.OP_NEG:
-			Number n = ECMA262Impl.ToNumber(arg1);
-			return ReflectUtil.toValue(-n.doubleValue(),n.getClass());
+			return na.subtract(0, ECMA262Impl.ToNumber(arg1));
 			/* +-*%/ */
 		case ExpressionToken.OP_ADD:
 			Object p1 = ECMA262Impl.ToPrimitive(arg1, String.class);
@@ -187,21 +179,21 @@ public class OperationStrategyImpl implements OperationStrategy {
 			if (p1 instanceof String || p2 instanceof String) {
 				return String.valueOf(p1) + p2;
 			} else {
-				return ECMA262Impl.ToNumber(p1).doubleValue() + ECMA262Impl
-						.ToNumber(p2).doubleValue();
+				return na.add(ECMA262Impl.ToNumber(p1), ECMA262Impl
+						.ToNumber(p2));
 			}
 		case ExpressionToken.OP_SUB:
-			return ECMA262Impl.ToNumber(arg1).doubleValue()- ECMA262Impl
-					.ToNumber(arg2).doubleValue();
+			return na.subtract(ECMA262Impl.ToNumber(arg1), ECMA262Impl
+					.ToNumber(arg2));
 		case ExpressionToken.OP_MUL:
-			return ECMA262Impl.ToNumber(arg1).doubleValue() * ECMA262Impl
-					.ToNumber(arg2).doubleValue();
+			return na.multiply(ECMA262Impl.ToNumber(arg1), ECMA262Impl
+					.ToNumber(arg2));
 		case ExpressionToken.OP_DIV:
-			return ECMA262Impl.ToNumber(arg1).doubleValue()/ ECMA262Impl
-					.ToNumber(arg2).doubleValue();
+			return na.divide(ECMA262Impl.ToNumber(arg1), ECMA262Impl
+					.ToNumber(arg2), true);
 		case ExpressionToken.OP_MOD:
-			return ECMA262Impl.ToNumber(arg1).doubleValue() % ECMA262Impl
-					.ToNumber(arg2).doubleValue();
+			return na.modulus(ECMA262Impl.ToNumber(arg1), ECMA262Impl
+					.ToNumber(arg2));
 
 			/* boolean */
 			

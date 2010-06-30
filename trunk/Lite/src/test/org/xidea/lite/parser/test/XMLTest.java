@@ -115,6 +115,7 @@ public class XMLTest {
 		Writer out = new StringWriter();
 		t.render(new HashMap(context), out);
 		assertXMLEquals(info+text+":\n"+result,"<div>" + result + "</div>", out.toString());
+		
 	}
 	
 	public static void checkElse(List<Object> insts,String info) {
