@@ -108,7 +108,7 @@ function _lite_evaluate(&$context, &$item) {
         }
     }
     $arg1=_lite_evaluate($context,$item[1]);
-    if((($type & LITE_BIT_PARAM) >> 6) == 1){//if(getParamCount(type) ==2){//
+    if((($type & LITE_BIT_PARAM) >> 6) == 1){//if(getArgCount(type) ==2){//
         $arg2=lite_evaluate($context,$item[2]);
     }
 	if ($type == LITE_OP_INVOKE_METHOD) {

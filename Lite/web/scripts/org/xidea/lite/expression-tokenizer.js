@@ -385,7 +385,7 @@ function buildTree(tokens){
                 stack.push(item);
                 break;
             default://OP
-                if(getParamCount(type) ==2){//两个操作数
+                if(getArgCount(type) ==2){//两个操作数
                     var arg2 = stack.pop();
                     var arg1 = stack.pop();
                     var el = [type,arg1,arg2]

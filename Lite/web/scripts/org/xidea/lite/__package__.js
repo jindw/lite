@@ -1,7 +1,7 @@
 this.addScript('expression-token.js',
 				[
 					//函数
-					"getParamCount",'getTokenLength','findTokenType','findTokenText'
+					"getArgCount",'getTokenLength','findTokenType','findTokenText'
 					,"BIT_*"
 					,"VALUE_*"
 					,"OP_*"
