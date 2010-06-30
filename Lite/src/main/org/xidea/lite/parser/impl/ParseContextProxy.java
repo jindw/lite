@@ -278,7 +278,4 @@ public class ParseContextProxy implements ParserHolder,ResourceContext,ResultCon
 	public TextParser[] getTextParsers(String path) {
 		return config.getTextParsers(path);
 	}
-	public boolean isDebugModel() {
-		return config.isDebugModel();
-	}
 }

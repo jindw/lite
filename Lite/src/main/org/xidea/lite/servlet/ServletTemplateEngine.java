@@ -38,7 +38,7 @@ public class ServletTemplateEngine extends HotTemplateEngine {
 	@SuppressWarnings("unchecked")
 	@Override
 	protected Template createTemplate(String path){
-		if(config.isDebugModel()){
+		if(false){
 			return super.createTemplate(path);
 		}else{
 			try {
