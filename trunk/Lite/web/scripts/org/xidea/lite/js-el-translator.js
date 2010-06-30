@@ -38,7 +38,7 @@ ELTranslator.prototype = {
 		var type = el[0];
 		if(type<=0){//value
 			return this.stringifyValue(el)
-		}else if(getParamCount(type) ==2){//两个操作数
+		}else if(getArgCount(type) ==2){//两个操作数
 			return this.stringifyInfix(el);
 		}else{
 			return this.stringifyPrefix(el);

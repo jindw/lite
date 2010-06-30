@@ -96,25 +96,27 @@ function findTokenText(type) {
 	return TYPE_TOKEN_MAP[type];
 }
 
-
-function getTokenLength(type) {
+function hasParam(type) {
 	switch (type) {
-	case VALUE_NEW_LIST:
-	case VALUE_NEW_MAP:
-		return 1;
 	case VALUE_VAR:
 	case VALUE_CONSTANTS:
-		return 2;
 	case OP_GET_STATIC_PROP:
 	case OP_INVOKE_METHOD_WITH_STATIC_PARAM:
 	case OP_MAP_PUSH:
-		return 4;
+		return true;
 	default:
-		return getParamCount(type) + 1;
+		return  false;
 	}
 }
 
-function getParamCount(type) {
+function getTokenLength(type) {
+	
+	var size = getArgCount(type)+1;
+	return hasParam(type)?size+1:size;
+
+}
+
+function getArgCount(type) {
 	var c = (type & BIT_PARAM) >> 6;
 	return c + 1;
 }

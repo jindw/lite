@@ -72,23 +72,22 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 		} else {
 			int type = ((Number) tokens.get(0)).intValue();
 			TokenImpl impl = new TokenImpl(type, null);
-			switch (tokens.size()) {
-			case 4:
-				impl.setParam(tokens.get(3));
+
+			int paramStart = getArgCount(type)+1;
+			int size = tokens.size();
+			switch (Math.min(paramStart,size)) {
 			case 3:
 				impl.setRight(toToken((List<Object>) tokens.get(2)));
 			case 2:
-				if (type > 0) {
-					impl.setLeft(toToken((List<Object>) tokens.get(1)));
-				} else {
-					impl.setParam(tokens.get(1));
-				}
+				impl.setLeft(toToken((List<Object>) tokens.get(1)));
 			case 1:
 				break;
 			default:
 				throw new ExpressionSyntaxException("tokens 長度最大為4");
 			}
-
+			if( paramStart < size){
+				impl.setParam(tokens.get(paramStart));
+			}
 			return impl;
 		}
 	}
@@ -99,14 +98,16 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 			return type;
 		}
 		if (type > 0) {
-			switch (index) {
-			case 3:
-				return param;
-			case 1:
-				return left;
-			case 2:
-				return right;
+			int paramStart = getArgCount(type)+1;
+			if(index<paramStart){
+				switch (index) {
+				case 1:
+					return left;
+				case 2:
+					return right;
+				}
 			}
+			return param;
 		} else if (index == 1) {
 			return param;
 		}
@@ -115,21 +116,22 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 
 	@Override
 	public int size() {
-		switch (type) {
-		case ExpressionToken.VALUE_NEW_LIST:
-		case ExpressionToken.VALUE_NEW_MAP:
-			return 1;
-		case ExpressionToken.VALUE_VAR:
-		case ExpressionToken.VALUE_CONSTANTS:
-			return 2;
-		case ExpressionToken.OP_GET_STATIC_PROP:
-		case ExpressionToken.OP_INVOKE_METHOD_WITH_STATIC_PARAM:
-		case ExpressionToken.OP_MAP_PUSH:
-			return 4;
-		default:
-			return getArgCount(type) + 1;
-		}
+		int size = getArgCount(type)+1;
+		return hasParam()?size+1:size;
 
+	}
+	private boolean hasParam() {
+		switch (type) {
+		case ExpressionToken.VALUE_VAR://0
+		case ExpressionToken.VALUE_CONSTANTS://0
+		case ExpressionToken.OP_GET_STATIC_PROP://1
+		case ExpressionToken.OP_INVOKE_METHOD_WITH_STATIC_PARAM://1
+		case ExpressionToken.OP_INVOKE_METHOD_WITH_ONE_PARAM://2
+		case ExpressionToken.OP_MAP_PUSH://1
+			return true;
+		default:
+			return  false;
+		}
 	}
 
 	static int getArgCount(int type) {

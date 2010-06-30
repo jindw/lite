@@ -55,7 +55,7 @@ function _evaluate(item,context){
         }
     }
     var arg1=_evaluate(item[1],context);
-    if(getParamCount(type) ==2){
+    if(getArgCount(type) ==2){
         var arg2=realValue(_evaluate(item[2],context));
     }
     if(type == OP_INVOKE_METHOD){
