@@ -81,7 +81,7 @@ function parseEL(expression){
         checkEL(expression.replace(/\bfor\b/g,"f"));
         return new ExpressionTokenizer(expression).getResult();
     }catch(e){
-        $log.debug("表达式解析失败",expression,e)
+        $log.warn("表达式解析失败",expression,e)
         throw e;
     }
 }

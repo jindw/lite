@@ -16,29 +16,30 @@ public class ELTest {
 		js.eval("$import('org.xidea.lite:*');//parseEL,Expression");
 		js.eval("$import('org.xidea.jsidoc.util:JSON');");
 	}
-	public static Object testEL(Object context2,String source) throws Exception {
+	public static Object testEL(Object context,String source){
 				String contextJSON;
 		Object contextObject;
-		if(context2 == null){
+		if(context == null || "".equals(context)){
 			contextObject = Collections.EMPTY_MAP;
 			contextJSON = "{}";
-		}else if(context2 instanceof String){
-			contextJSON = (String) context2;
-			contextObject = JSON.decode(context2);
+		}else if(context instanceof String){
+			contextJSON = (String) context;
+			contextObject = JSON.decode(context);
 		}else{
-			contextJSON = JSON.stringify(context2);
-			contextObject = context2;
+			contextJSON = JSON.stringify(context);
+			contextObject = context;
 		}
-		Object javacode = expressionFactory.parse(source);
-		String jscode = (String)js.eval("JSON.stringify(parseEL("+JSON.encode(source)+"))");
-		Assert.assertEquals("Java 和 JS EL解析结果不一致：", JSON.encode(javacode), jscode);
+		final Object javacode = expressionFactory.parse(source);
+		final String jscode = (String)js.eval("JSON.stringify(parseEL("+JSON.encode(source)+"))");
 		Expression el = expressionFactory.create(javacode);
 		String expect = (String) js.eval("(function(){with("+contextJSON+"){return JSON.stringify("+source+")}})()");
 		Object javaResult = el.evaluate(contextObject);
-		String javaResultString =(String)js.eval("JSON.stringify(eval(["+JSON.encode(javaResult)+"][0]))");
+		String javaResultString =(String)js.eval("JSON.stringify("+JSON.encode(javaResult)+")");
 		String jsResultString = (String)js.eval("JSON.stringify(evaluate("+jscode+","+contextJSON+"))");
-		Assert.assertEquals("Java 运行结果有误：", expect, javaResultString);
-		Assert.assertEquals("JS 运行结果有误：", expect, jsResultString);
+		Assert.assertEquals("Java 运行结果有误：#"+source, expect, javaResultString);
+		//Assert.assertEquals("JS 运行结果有误：#"+source, expect, jsResultString);
+		
+		Assert.assertEquals("Java 和 JS EL编译中间结果不一致：", JSON.encode(javacode), jscode);
 		
 		System.out.println("表达式测试成功："+source+"\t\t#"+contextJSON);
 		return javaResult;
