@@ -1,4 +1,4 @@
-package org.xidea.el.test.json;
+package org.xidea.el.json.test;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;

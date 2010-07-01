@@ -3,7 +3,7 @@ package org.xidea.el.impl;
 import static org.xidea.el.impl.TokenImpl.BRACKET_BEGIN;
 import static org.xidea.el.impl.TokenImpl.BRACKET_END;
 import static org.xidea.el.ExpressionToken.OP_ADD;
-import static org.xidea.el.ExpressionToken.BIT_PARAM;
+import static org.xidea.el.ExpressionToken.BIT_ARGS;
 import static org.xidea.el.ExpressionToken.BIT_PRIORITY;
 import static org.xidea.el.ExpressionToken.BIT_PRIORITY_SUB;
 import static org.xidea.el.ExpressionToken.OP_GET_PROP;
@@ -130,7 +130,7 @@ public class ExpressionTokenizer extends JSONTokenizer {
 				stack.addFirst(item);
 				break;
 			default:// OP
-				if ((type & BIT_PARAM) > 0) {// 两个操作数
+				if ((type & BIT_ARGS) > 0) {// 两个操作数
 					TokenImpl arg2 = stack.removeFirst();
 					TokenImpl arg1 = stack.removeFirst();
 					item.setLeft(arg1);

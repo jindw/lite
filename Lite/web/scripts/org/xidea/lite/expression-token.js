@@ -7,7 +7,7 @@
  */
 var BIT_PRIORITY= 60;
 var BIT_PRIORITY_SUB= 61440;
-var BIT_PARAM= 192;
+var BIT_ARGS= 192;
 var VALUE_CONSTANTS= -1;
 var VALUE_VAR= -2;
 var VALUE_NEW_LIST= -3;
@@ -117,6 +117,9 @@ function getTokenLength(type) {
 }
 
 function getArgCount(type) {
-	var c = (type & BIT_PARAM) >> 6;
+	if(type<0){
+		return 0;
+	}
+	var c = (type & BIT_ARGS) >> 6;
 	return c + 1;
 }

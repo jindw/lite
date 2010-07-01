@@ -1,4 +1,4 @@
-package org.xidea.el.test;
+package org.xidea.el.impl.test;
 
 
 import java.io.IOException;
@@ -26,46 +26,9 @@ public class ExpressionParseTimelTest {
 		test("aaa+ddd(1)+asd.cc(1,2,3)");
 	}
 
-	JSONEncoder encoder = new JSONEncoder() {
-		protected void print(Object object, Writer out,
-				Collection<Object> cached) throws IOException {
-			if (object instanceof ExpressionToken[]) {
-				ExpressionToken[] list = (ExpressionToken[]) object;
-				out.write('[');
-				int i = list.length;
-				while (i-- > 0) {
-					print(list[i], out, cached);
-					if (i > 0) {
-						out.write(',');
-					}
-				}
-				out.write(']');
-			} else if (object instanceof ExpressionToken) {
-				ExpressionToken token = (ExpressionToken) object;
-				int type = token.getType();
-				switch (type) {
-				case ExpressionToken.VALUE_CONSTANTS:
-					print(token.getParam(), out, cached);
-					break;
-				case ExpressionToken.VALUE_VAR:
-				case ExpressionToken.OP_MAP_PUSH:
-				case ExpressionToken.OP_GET_STATIC_PROP:
-					print(new Object[] { type, token.getParam() }, out, cached);
-					break;
-				default:
-					print(new Object[] { type }, out, cached);
-				}
-			} else {
-				super.print(object, out, cached);
-			}
-		}
-	};
-
 	private void test(String el) throws IOException {
 		Object els = factory.parse(el);
-		StringWriter out = new StringWriter();
-		encoder.encode(els, out, null);
-		String jsonel = out.toString();
+		final String jsonel = JSONEncoder.encode(els);
 		int count = 1000,count2;
 		long t1 = 0, t2 = 0;
 		while (count-- > 0) {

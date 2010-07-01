@@ -1,4 +1,4 @@
-package org.xidea.lite.tools.test;
+package org.xidea.lite.util.test;
 
 import static org.junit.Assert.*;
 

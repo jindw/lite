@@ -135,7 +135,10 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 	}
 
 	static int getArgCount(int type) {
-		int c = (type & ExpressionToken.BIT_PARAM) >> 6;
+		if(type<0){
+			return 0;
+		}
+		int c = (type & ExpressionToken.BIT_ARGS) >> 6;
 		return c + 1;
 	}
 

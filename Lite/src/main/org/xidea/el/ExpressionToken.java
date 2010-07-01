@@ -17,7 +17,7 @@ package org.xidea.el;
 public abstract interface ExpressionToken {
 	public static final int BIT_PRIORITY = 15<<2;
 	public static final int BIT_PRIORITY_SUB = 15<<12;
-	public static final int BIT_PARAM = 3<<6;
+	public static final int BIT_ARGS = 3<<6;
 
 	//值类型（<=0）
 	//常量标记（String,Number,Boolean,Null）
