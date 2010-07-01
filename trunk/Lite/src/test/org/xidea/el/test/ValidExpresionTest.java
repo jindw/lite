@@ -1,11 +1,13 @@
 package org.xidea.el.test;
 
+import static org.junit.Assert.fail;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.xidea.el.ExpressionFactory;
 import org.xidea.el.impl.ExpressionFactoryImpl;
 
-public class CheckTest {
+public class ValidExpresionTest {
 	ExpressionFactory expressionFactory = ExpressionFactoryImpl.getInstance();
 
 	public void invalid(String el) throws Exception {
@@ -28,6 +30,21 @@ public class CheckTest {
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail("检查失败"+e.getMessage());
+		}
+	}
+	public void testOptimizeELString() {
+		expressionFactory.parse("''");
+		expressionFactory.parse("'['");
+		try{
+			expressionFactory.parse("'''");
+			fail("无效字符串状态");
+		}catch (Exception e) {
+		}
+
+		try{
+			expressionFactory.parse("[([)]]");
+			fail("无效括弧状态");
+		}catch (Exception e) {
 		}
 	}
 

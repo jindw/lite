@@ -32,7 +32,7 @@ public class ResultExpressionTest {
 	}
 
 	@Test
-	public void testSet() {
+	public void testPropertySet() {
 		ExpressionImpl el = new ExpressionImpl("text");
 		ResultExpressionTest context = new ResultExpressionTest();
 		Reference prepare = el.prepare(context);

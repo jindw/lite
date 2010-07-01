@@ -1,4 +1,4 @@
-package org.xidea.el.test;
+package org.xidea.lite.util.test;
 
 import static org.junit.Assert.fail;
 

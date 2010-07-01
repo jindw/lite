@@ -1,4 +1,4 @@
-package org.xidea.el.test;
+package org.xidea.lite.util.test;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,7 +31,7 @@ public class ClasspathTest {
 	}
 	@Test
 	public void testURL() throws Exception{
-		String cp = "classpath:///org/xidea/el/test/test.json";
+		String cp = "classpath:///org/xidea/el/json/test/test.json";
 		URL parent = new URL("http://www.x.y");
 		URL url = new URL(parent,cp,new URLStreamHandler(){
 			@Override

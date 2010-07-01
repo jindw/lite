@@ -278,11 +278,11 @@ public abstract class ECMA262Impl {
 	}
 
 	public static class JSON {
-		public static final Object stringify(Object value) {
+		public static final String stringify(Object value) {
 			return encode(value);
 		}
 
-		public static final Object encode(Object value) {
+		public static final String encode(Object value) {
 			return JSONEncoder.encode(value);
 		}
 

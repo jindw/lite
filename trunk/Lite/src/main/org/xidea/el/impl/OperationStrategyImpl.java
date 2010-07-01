@@ -161,7 +161,7 @@ public class OperationStrategyImpl implements OperationStrategy {
 			}
 		}
 		arg1 = realValue(arg1);
-		if((type & ExpressionToken.BIT_PARAM) >0){
+		if((type & ExpressionToken.BIT_ARGS) >0){
 			arg2 = evaluate(item.getRight(), vs);
 			arg2 = realValue(arg2);
 		}

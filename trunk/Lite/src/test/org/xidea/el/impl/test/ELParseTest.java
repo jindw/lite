@@ -1,4 +1,4 @@
-package org.xidea.el.test;
+package org.xidea.el.impl.test;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -13,7 +13,7 @@ public class ELParseTest {
 	public void testMethod(){
 		Object el = ef.parse("object.test(123)");
 		el = JSONEncoder.encode(el);
-		Assert.assertEquals("[98,[33,[-2,\"object\"],null,\"test\"],[64,[-3],[-1,123]]]", el);
+		Assert.assertEquals("[98,[33,[-2,\"object\"],\"test\"],[64,[-3],[-1,123]]]", el);
 	}
 
 	@Test

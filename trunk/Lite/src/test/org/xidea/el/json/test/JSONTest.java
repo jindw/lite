@@ -1,4 +1,4 @@
-package org.xidea.el.test;
+package org.xidea.el.json.test;
 
 import static org.junit.Assert.assertEquals;
 
@@ -11,7 +11,6 @@ import org.junit.Test;
 import org.xidea.el.impl.ExpressionImpl;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.el.json.JSONTokenizer;
-import org.xidea.el.test.json.JSONWriter;
 
 @SuppressWarnings({"unused","unchecked"})
 public class JSONTest {
