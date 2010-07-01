@@ -38,7 +38,7 @@ ELTranslator.prototype = {
 		var type = el[0];
 		if(type<=0){//value
 			return this.stringifyValue(el)
-		}else if(getArgCount(type) ==2){//两个操作数
+		}else if(getTokenParamIndex(type) ==3){//两个操作数
 			return this.stringifyInfix(el);
 		}else{
 			return this.stringifyPrefix(el);
@@ -70,7 +70,7 @@ ELTranslator.prototype = {
 		var opc = findTokenText(el[0]);
 		var value1 = this.stringify(el[1]);
 		var value2 = this.stringify(el[2]);
-		var param = el[3];
+		var param = getTokenParam(el);
 		switch(type){
 		case OP_INVOKE_METHOD_WITH_ONE_PARAM:
 			value2="["+value2+']';
@@ -78,7 +78,7 @@ ELTranslator.prototype = {
 			value2 = value2.slice(1,-1);
 			return value1+"("+value2+')';
 		case OP_GET_STATIC_PROP:
-			var memberName = el[3];
+			var memberName = param;
 			if(ID_PATTERN.test(memberName)){
 				return value1+'.'+memberName
 			}else{
@@ -127,11 +127,12 @@ ELTranslator.prototype = {
 		var type = el[0];
 		var el1 = el[1];
 		var value = this.stringify(el1);
+		var param = getTokenParam(el);
 		if(OP_INVOKE_METHOD_WITH_STATIC_PARAM == type){
-			var value2 = this.stringify(el[3]).slice(1,-1);
+			var value2 = this.stringify(param).slice(1,-1);
 			return value+"("+value2+')';
 		}else if(OP_GET_STATIC_PROP == type) {//已经是最高优先级了,
-			var key = el[3];
+			var key = param;
 			if(typeof key == 'number'){
 				return value+'['+key+']';
 			}else{
@@ -165,14 +166,15 @@ function walkTree(thiz,el){
 	}else{
 		var arg1 = el[1];
 		var arg2 = el[2];
-		if(op[0] == OP_GET_STATIC_PROP){
+		if(op == OP_GET_STATIC_PROP){
 			if(arg1[0] == VALUE_VAR && arg1[1] == 'for'){
-				if(op[1] == 'index'){
+				var param = arg2;
+				if(param == 'index'){
 					thiz.forIndex = true;
-				}else if(op[1] == 'lastIndex'){
+				}else if(param == 'lastIndex'){
 					thiz.forLastIndex = true;
 				}else{
-					throw new Error("for不支持属性:"+op[1]);
+					throw new Error("for不支持属性:"+param);
 				}
 				return ;
 			}

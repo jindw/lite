@@ -532,7 +532,7 @@ public abstract class ECMA262Impl {
 						if (c2== 'x' || c2 == 'X') {
 							return parseNumber(text.substring(2), 16);
 						}
-						return parseNumber(text, 8);
+						return parseNumber(text, 10);
 					}else if (text.indexOf('E' )>0|| text.indexOf('e')>0) {
 						return Float.parseFloat(text);
 					}

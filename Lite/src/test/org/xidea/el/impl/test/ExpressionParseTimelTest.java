@@ -2,14 +2,11 @@ package org.xidea.el.impl.test;
 
 
 import java.io.IOException;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.util.Collection;
 
-import org.xidea.el.ExpressionToken;
 import org.xidea.el.impl.ExpressionFactoryImpl;
 import org.xidea.el.json.JSONDecoder;
 import org.xidea.el.json.JSONEncoder;
+import org.xidea.el.test.ELTest;
 
 public class ExpressionParseTimelTest {
 	private ExpressionFactoryImpl factory = new ExpressionFactoryImpl();
@@ -27,6 +24,7 @@ public class ExpressionParseTimelTest {
 	}
 
 	private void test(String el) throws IOException {
+		ELTest.testEL(null, el);
 		Object els = factory.parse(el);
 		final String jsonel = JSONEncoder.encode(els);
 		int count = 1000,count2;

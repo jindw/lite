@@ -1,7 +1,7 @@
 this.addScript('expression-token.js',
 				[
 					//函数
-					"getArgCount",'getTokenLength','findTokenType','findTokenText'
+					"getTokenParam","hasTokenParam","getTokenParamIndex",'getTokenLength','findTokenType','findTokenText'
 					,"BIT_*"
 					,"VALUE_*"
 					,"OP_*"
@@ -17,7 +17,7 @@ this.addScript('variable-finder.js','VarStatus'
                 ,["evaluate","ELTranslator",'ExpressionTokenizer','org.xidea.jsidoc.util:$log']);
 this.addScript('js-el-translator.js','ELTranslator'
                 ,0
-                ,['getPriority',"findTokenText","stringifyJSON",'ExpressionTokenizer','org.xidea.jsidoc.util:$log']);
+                ,['getTokenParam','getPriority',"findTokenText","stringifyJSON",'ExpressionTokenizer','org.xidea.jsidoc.util:$log']);
 
 this.addScript('js-translator.js',["Translator"]
                 ,0
@@ -25,13 +25,13 @@ this.addScript('js-translator.js',["Translator"]
 
 
 this.addScript('expression.js',['evaluate','Expression']
-                ,0);
+                ,['getTokenParam']);
 
 this.addScript('json-tokenizer.js','JSONTokenizer');
 
 this.addScript('expression-tokenizer.js',['getPriority','ExpressionTokenizer']
                 ,'JSONTokenizer'
-                ,['org.xidea.jsidoc.util:$log']);
+                ,["hasTokenParam",'org.xidea.jsidoc.util:$log']);
 
 this.addScript('find-el-end.js','findELEnd'
                 ,0

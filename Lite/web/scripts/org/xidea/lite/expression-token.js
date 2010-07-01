@@ -96,7 +96,7 @@ function findTokenText(type) {
 	return TYPE_TOKEN_MAP[type];
 }
 
-function hasParam(type) {
+function hasTokenParam(type) {
 	switch (type) {
 	case VALUE_VAR:
 	case VALUE_CONSTANTS:
@@ -108,18 +108,21 @@ function hasParam(type) {
 		return  false;
 	}
 }
+function getTokenParam(el) {
+	return el[getTokenParamIndex(el[0])]
+}
 
 function getTokenLength(type) {
 	
-	var size = getArgCount(type)+1;
-	return hasParam(type)?size+1:size;
+	var size = getTokenParamIndex(type);
+	return hasTokenParam(type)?size+1:size;
 
 }
 
-function getArgCount(type) {
+function getTokenParamIndex(type) {
 	if(type<0){
-		return 0;
+		return 1;
 	}
 	var c = (type & BIT_ARGS) >> 6;
-	return c + 1;
+	return c + 2;
 }

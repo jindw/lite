@@ -55,7 +55,7 @@ function _evaluate(item,context){
         }
     }
     var arg1=_evaluate(item[1],context);
-    if(getArgCount(type) ==2){
+    if(getTokenParamIndex(type) ==3){
         var arg2=realValue(_evaluate(item[2],context));
     }
     if(type == OP_INVOKE_METHOD){
@@ -71,7 +71,7 @@ function _evaluate(item,context){
     switch(type){
     //op
     case OP_GET_STATIC_PROP:
-        arg2 = item[3]
+        arg2 =getTokenParam(item);
     case OP_GET_PROP:
         return new PropertyValue(arg1,arg2);
     case OP_NOT:
@@ -110,7 +110,7 @@ function _evaluate(item,context){
         arg1.push(arg2)
         return arg1;
     case OP_MAP_PUSH:
-        arg1[item[3]]= arg2;
+        arg1[getTokenParam(item)]= arg2;
         return arg1;
     }
 }

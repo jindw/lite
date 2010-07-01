@@ -248,13 +248,17 @@ JSONTokenizer.prototype = {
 					buf.push('"');
 					break;
 				case 'u':
-					buf.push(parseInt(this.value.substring(
-							this.start + 1, this.start + 5), 16));
+					var c = this.value.substring(
+							this.start, this.start + 4);
+					c = parseInt(c, 16);
+					
+					buf.push(String.fromCharCode(c));
 					this.start += 4;
 					break;
 				case 'x':
-					buf.push(parseInt(this.value.substring(
-							this.start + 1, this.start + 3), 16));
+					var c = this.value.substring(this.start, this.start + 2);
+					c = parseInt(c, 16);
+					buf.push(String.fromCharCode(c));
 					this.start += 2;
 					break;
 				}

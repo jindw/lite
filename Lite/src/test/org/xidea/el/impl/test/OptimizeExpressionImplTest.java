@@ -9,6 +9,7 @@ import org.xidea.el.ExpressionToken;
 import org.xidea.el.impl.ExpressionFactoryImpl;
 import org.xidea.el.impl.OptimizeExpressionImpl;
 import org.xidea.el.json.JSONDecoder;
+import org.xidea.el.test.ELTest;
 
 public class OptimizeExpressionImplTest {
 
@@ -23,11 +24,12 @@ public class OptimizeExpressionImplTest {
 		doTest("多重屬性獲取","2","o.a.b","{\"o\":{\"a\":{\"b\":\"2\"}}}");
 	}
 
-	private void doTest(String msg,Object expected,String el,String source) {
+	private void doTest(String msg,Object expected,String el,String context) {
+		ELTest.testEL(context, el);
 		ExpressionFactory ef = ExpressionFactoryImpl.getInstance();
 		Expression exp = OptimizeExpressionImpl.create(ef,(ExpressionToken)ef.parse(el),  ExpressionFactoryImpl.DEFAULT_CALCULATER);
 		Assert.assertTrue("不需是有效的優化表達式/"+msg,exp instanceof OptimizeExpressionImpl);
-		Assert.assertEquals(msg,expected, exp.evaluate(JSONDecoder.decode(source)));
+		Assert.assertEquals(msg,expected, exp.evaluate(JSONDecoder.decode(context)));
 	}
 
 }

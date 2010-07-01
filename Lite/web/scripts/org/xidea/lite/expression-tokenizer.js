@@ -385,7 +385,7 @@ function buildTree(tokens){
                 stack.push(item);
                 break;
             default://OP
-                if(getArgCount(type) ==2){//两个操作数
+                if(getTokenParamIndex(type) ==3){//两个操作数
                     var arg2 = stack.pop();
                     var arg1 = stack.pop();
                     var el = [type,arg1,arg2]
@@ -393,11 +393,8 @@ function buildTree(tokens){
                 	var arg1 = stack.pop();
                 	var el = [type,arg1]
                 }
-                switch(type){
-					case OP_GET_STATIC_PROP:
-					case OP_INVOKE_METHOD_WITH_STATIC_PARAM:
-					case OP_MAP_PUSH:
-					el[3] = item[1];
+                if(hasTokenParam(type)){
+					el[getTokenParamIndex(type)] = item[1];
                 }
                 stack.push(el)
         }
