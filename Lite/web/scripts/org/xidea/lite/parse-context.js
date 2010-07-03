@@ -166,12 +166,7 @@ ParseContext.prototype = {
     	return buildTreeResult(result);
 	},
     toCode:function(){
-        if(this.nativeJS){
-	    	var translator = new Translator("");
-	    	return translator.translate(this);
-        }else{
-        	return stringifyJSON(this.toList())
-        }
+        return stringifyJSON(this.toList())
     }
 }
 /**

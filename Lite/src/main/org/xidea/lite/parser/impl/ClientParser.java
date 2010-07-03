@@ -9,7 +9,6 @@ import org.xidea.jsi.impl.RuntimeSupport;
 import org.xidea.lite.parser.NodeParser;
 import org.xidea.lite.parser.ParseChain;
 import org.xidea.lite.parser.ParseContext;
-import org.xidea.lite.parser.ResultTranslator;
 import org.xidea.lite.parser.TextParser;
 
 public class ClientParser extends ELParser implements NodeParser<Element>,
@@ -46,20 +45,12 @@ public class ClientParser extends ELParser implements NodeParser<Element>,
 	}
 	private void parse(String id, final String text,
 			ParseContext context,TextParser ce) {
-		ResultTranslator rt = createResultTranslator(id);
-		ParseContext clientContext = new ParseContextImpl(context, rt);
+		ParseContext clientContext = new ParseContextImpl(context);
 		if(ce!=null){
 			clientContext.addTextParser(ce);
 		}
 		clientContext.parse(text);
-		compileJS(context, clientContext, true);
-	}
-
-	private ResultTranslator createResultTranslator(String id) {
-		RuntimeSupport proxy = (RuntimeSupport) RuntimeSupport.create();
-		ResultTranslator rt = proxy.wrapToJava(proxy.eval("new ($import('org.xidea.lite:Translator',null))('"
-						+ id + "')"), ResultTranslator.class);
-		return rt;
+		compileJS(context,id, clientContext, true);
 	}
 
 	private class ClientEnd extends ELParser {
@@ -108,30 +99,35 @@ public class ClientParser extends ELParser implements NodeParser<Element>,
 			// new Java6JSBuilder();
 			String id = ParseUtil.getAttributeOrNull(el, "id", "name");
 
-			ResultTranslator rt = createResultTranslator(id);
-			ParseContext clientContext = new ParseContextImpl(context, rt);
+			ParseContext clientContext = new ParseContextImpl(context);
 			// 前端直接压缩吧？反正保留那些空白也没有调试价值
 			do {
 				clientContext.parse(next);
 			} while ((next = next.getNextSibling()) != null);
 			//System.out.println(clientContext.toList());
-			compileJS(context, clientContext, needScript(el));
+			compileJS(context,id, clientContext, needScript(el));
 
 		}
 	}
 
-	private void compileJS(ParseContext context,
+	RuntimeSupport proxy = (RuntimeSupport) RuntimeSupport.create();
+	private void compileJS(ParseContext context,String id, 
 			ParseContext clientContext, boolean needScript) {
-		String js = clientContext.toCode();
+
+		proxy.eval("$import('org.xidea.lite:Translator')");
+		Object ts = proxy.eval("new Translator('"+ id + "')");
+		String code = (String)proxy.invoke(ts, "translate", clientContext);
+		//
+
 //		if (clientContext.isCompress()) {
 //			js = proxy.compress(js);
 //		}
-		js = SCRIPT_END_PATTERN.matcher(js).replaceAll("<\\\\/script>");
+		code = SCRIPT_END_PATTERN.matcher(code).replaceAll("<\\\\/script>");
 		if (needScript) {
-			context.append("<!--//--><script>//<![CDATA[\n" + js
+			context.append("<!--//--><script>//<![CDATA[\n" + code
 					+ "//]]></script>\n");
 		} else {
-			context.append("//<![CDATA[\n" + js + "//]]>\n");
+			context.append("//<![CDATA[\n" + code + "//]]>\n");
 		}
 	}
 

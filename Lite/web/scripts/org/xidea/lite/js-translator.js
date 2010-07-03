@@ -60,17 +60,17 @@ function getEL(el){
 function Translator(id){
     this.id = id;
 }
-function java2jsList(list){
-    if(!(list instanceof Array)){
-        list = Packages.org.xidea.el.json.JSONEncoder.encode(list);
-	    list = this.eval(list);
-	}
-	return list;
-}
+
 Translator.prototype = {
 	translate:function(result){
 	    try{
-	        var list = java2jsList(result.toList());
+	    	
+	        var list = result.toList();
+	        var jf = list['class'];
+	        print([!(jf && jf.name),jf && jf.name,result.toCode()])
+	        if(jf && jf.name){
+	        	list = window.eval(result.toCode());
+	        }
 		    var context = new Context(list);
 		    context.parse();
 		    var code = context.toString();
@@ -96,9 +96,6 @@ Translator.prototype = {
 	    	return "function"+body;
 	    }
 		
-	},
-	getSupportFeatrues:function(){
-		return java.util.Arrays.asList(["compress"]);
 	}
 }
 /**
