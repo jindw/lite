@@ -24,7 +24,6 @@ import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.ParserHolder;
 import org.xidea.lite.parser.ResourceContext;
 import org.xidea.lite.parser.ResultContext;
-import org.xidea.lite.parser.ResultTranslator;
 import org.xidea.lite.parser.TextParser;
 import org.xidea.lite.parser.XMLContext;
 import org.xml.sax.SAXException;
@@ -212,9 +211,6 @@ public class ParseContextProxy implements ParserHolder,ResourceContext,ResultCon
 		return resultContext.toCode();
 	}
 
-	public void setResultTranslator(ResultTranslator translator) {
-		resultContext.setResultTranslator(translator);
-	}
 	/**
 	 * 自定义表达式解析器
 	 * 

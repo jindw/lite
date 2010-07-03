@@ -4,11 +4,9 @@ import java.io.StringWriter;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -22,13 +20,13 @@ import org.xidea.lite.Template;
 import org.xidea.lite.parser.IllegalEndException;
 import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.ResultContext;
-import org.xidea.lite.parser.ResultTranslator;
 
 /**
  * 接口函数不能直接相互调用，用context对象！！！
  * @author jindw
  */
 public class ResultContextImpl implements ResultContext {
+	@SuppressWarnings("unused")
 	private static final Log log = LogFactory.getLog(ParseContextImpl.class);
 	
 
@@ -36,7 +34,6 @@ public class ResultContextImpl implements ResultContext {
 	private HashSet<URI> resources = new HashSet<URI>();
 	private int textType = 0;
 	private URI currentURI;
-	private ResultTranslator translator;
 	private ExpressionFactory expressionFactory = ExpressionFactoryImpl.getInstance();
 	private HashMap<String, String> typeIdMap = new HashMap<String, String>();
 	//	private HashMap<Object, String> objectIdMap = new HashMap<Object, String>();
@@ -398,34 +395,9 @@ public class ResultContextImpl implements ResultContext {
 	public void setExpressionFactory(ExpressionFactory expressionFactory) {
 		this.expressionFactory = expressionFactory;
 	}
-	public void setResultTranslator(ResultTranslator translator) {
-		final Map<String, String> featrueMap = context.getFeatrueMap();
-		Collection<String> featrueKeys =featrueMap.keySet();
-		//featrueMap.keySet();
-		Collection<String> support = Collections.emptyList();
-		try{
-			support = translator.getSupportFeatrues();
-		}catch (Exception e) {
-			log.warn("未指定支持的特征，设空处理",e);
-		}
-		if (support == null) {
-			featrueMap.clear();
-		}else{
-			for (Object key : featrueKeys.toArray()) {
-				if (!support.contains(key)) {
-					featrueMap.remove(key);
-				}
-			}
-		}
-		this.translator = translator;
-	}
 
 	public String toCode() {
-		if(translator==null){
-			return JSONEncoder.encode(context.toList());
-		}else{
-			return translator.translate(context);
-		}
+		return JSONEncoder.encode(context.toList());
 	}
 
 	public URI getCurrentURI() {

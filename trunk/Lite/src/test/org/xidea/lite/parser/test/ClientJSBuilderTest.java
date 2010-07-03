@@ -25,7 +25,6 @@ import org.xidea.el.ExpressionFactory;
 import org.xidea.jsi.JSIRuntime;
 import org.xidea.jsi.impl.RuntimeSupport;
 import org.xidea.lite.TemplateEngine;
-import org.xidea.lite.parser.ResultTranslator;
 import org.xidea.lite.parser.TextParser;
 import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.impl.ELParser;
@@ -36,27 +35,12 @@ import org.xml.sax.SAXException;
 public class ClientJSBuilderTest {
 	@Before
 	public void setUp() throws Exception {
-	}
 
-	@Test
-	public void testRhinoProxy() throws SAXException, IOException, ScriptException, NoSuchMethodException {
-		JSIRuntime rp = RuntimeSupport.create();
-		
-		Object o = rp.eval("({getSupportFeatrues:function(){return new java.util.HashSet(new java.util.Arrays.asList([1,2,3]))},run:function(){print(111)}})");
-		//rp.invokeMethod(o, "run");
-		ResultTranslator r = rp.wrapToJava(o,ResultTranslator.class);
-		System.out.println(r.getSupportFeatrues());
-		
 	}
-	@Test
-	public void testScriptBind() throws SAXException, IOException, ScriptException, NoSuchMethodException {
-		ScriptEngine engine = new ScriptEngineManager().getEngineByExtension("js");
-		Object o = engine.eval("({getSupportFeatrues:function(){return new java.util.HashSet(java.util.Arrays.asList([1,2,3]))},run:function(){print(111)}})");
-		((Invocable)engine).invokeMethod(o, "run");
-		ResultTranslator r = ((Invocable)engine).getInterface(o,ResultTranslator.class);
-		System.out.println(r.getSupportFeatrues());
-		
-	}
+	RuntimeSupport proxy = (RuntimeSupport) RuntimeSupport.create();
+
+
+
 	@Test
 	public void testBuildJS() throws SAXException, IOException, URISyntaxException {
 		URI url = this.getClass().getResource("format-test.xhtml").toURI();
@@ -66,8 +50,10 @@ public class ClientJSBuilderTest {
 		context2.setCompress(true);
 		context2.parse(context2.loadXML(url));
 		JSIRuntime rt = RuntimeSupport.create();
-		Object obj = rt.eval("new ($import('org.xidea.lite:Translator',null))('t1')");
-		String result = rt.wrapToJava(obj, ResultTranslator.class).translate(context2);
+		proxy.eval("$import('org.xidea.lite:Translator')");
+		Object ts = proxy.eval("new Translator('t1')");
+		String result = (String)proxy.invoke(ts, "translate", context2);
+
 		System.out.println("==JS Code==");
 		System.out.println(result);
 		boolean isError = Pattern.compile("[\r\n]alert", Pattern.MULTILINE)

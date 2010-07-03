@@ -36,9 +36,11 @@ function Template(data,parser){
         	data = parser.createURI(data);
         }
         parser.parse(data);
-        var code = parser.toCode();
         try{
         	//print(">>>"+code+"<<<\n")
+        	
+	    	var translator = new Translator("");
+	    	var code = translator.translate(parser);
             data =  window.eval("["+(code||null)+"][0]");
             data.toString=function(){//_$1 encodeXML
                 return code;

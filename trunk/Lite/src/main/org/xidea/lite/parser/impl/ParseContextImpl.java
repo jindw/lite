@@ -10,7 +10,6 @@ import org.xidea.lite.parser.ResourceContext;
 import org.xidea.lite.parser.TextParser;
 import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.NodeParser;
-import org.xidea.lite.parser.ResultTranslator;
 
 /**
  * 不要较差调用，交叉调用，用this代替，确保继承安全
@@ -35,14 +34,12 @@ public class ParseContextImpl extends ParseContextProxy implements ParseContext 
 		}
 	}
 
-	public ParseContextImpl(ParseContext parent, 
-			ResultTranslator translator) {
+	public ParseContextImpl(ParseContext parent) {
 		super(parent);
 		//需要重设 ParseChain 的context
 		this.parserHolder = new ParseHolderImpl(this,parent);
 		this.resultContext = new ResultContextImpl(this);
 		this.featrueMap.putAll(parent.getFeatrueMap());
-		this.setResultTranslator(translator);
 	}
 
 

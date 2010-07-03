@@ -99,13 +99,6 @@ public interface ResultContext {
 	public void setExpressionFactory(ExpressionFactory expressionFactory);
 
 	/**
-	 * 设置translator，同时更新featrueMap（结果翻译起对某些特征可能不支持）
-	 * @param translator
-	 */
-	public void setResultTranslator(ResultTranslator translator);
-
-
-	/**
 	 * 添加静态文本（不编码）
 	 * 
 	 * @param text

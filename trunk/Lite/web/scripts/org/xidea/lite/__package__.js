@@ -9,7 +9,7 @@ this.addScript('expression-token.js',
 
 this.addScript('template.js',["Template","PLUGIN_DEFINE",'VAR_TYPE','XML_ATTRIBUTE_TYPE','ELSE_TYPE','PLUGIN_TYPE','CAPTRUE_TYPE','IF_TYPE','EL_TYPE','BREAK_TYPE','XML_TEXT_TYPE','FOR_TYPE']
                 ,0
-                ,['XMLParser','org.xidea.jsi:$log','evaluate']);
+                ,['Translator','XMLParser','org.xidea.jsi:$log','evaluate']);
 
 
 this.addScript('variable-finder.js','VarStatus'
@@ -40,7 +40,7 @@ this.addScript('find-el-end.js','findELEnd'
 
 this.addScript('parse-context.js','ParseContext'
                 ,['xml-context.js','ParseChain']
-                ,['Translator','parseEL','stringifyJSON']);
+                ,['parseEL','stringifyJSON']);
 
 this.addScript('parse-chain.js','ParseChain');
 
