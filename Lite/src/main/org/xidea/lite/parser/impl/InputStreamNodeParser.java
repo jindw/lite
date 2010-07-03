@@ -3,6 +3,7 @@ package org.xidea.lite.parser.impl;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -28,7 +29,8 @@ public class InputStreamNodeParser implements NodeParser<InputStream> {
 		String ext = getParam(text, IMPL_PATTERN);
 		text = text.replaceFirst("^#!.*\\r?\\n?", "");
 		if(ext != null){
-			extensionParser.processResource(ext, context);
+			URI uri = context.createURI(ext, null);
+			extensionParser.processResource(uri,context);
 		}
 		context.parse(text);
 	}

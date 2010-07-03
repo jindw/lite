@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.w3c.dom.Element;
+import org.xidea.jsi.JSIRuntime;
+import org.xidea.jsi.impl.RuntimeSupport;
 import org.xidea.lite.parser.NodeParser;
 import org.xidea.lite.parser.ParseChain;
 import org.xidea.lite.parser.ParseContext;
@@ -16,38 +18,32 @@ import org.xidea.lite.parser.TextParser;
 public class ExtensionParser implements NodeParser<Element> {
 	public void parse(Element el, ParseContext context, ParseChain chain) {
 		String script = el.getTextContent();
-		JSProxy proxy = JSProxy.newProxy();
-		Map<String, Object> varMap = new HashMap<String, Object>();
-		varMap.put("context", new JSContextProxy(context, proxy));
 		String src = ParseUtil.getAttributeOrNull(el, "src", "href", "uri",
 				"url");
 
 		if (src != null && src.length() > 0) {
-			processResource(src.split("[\\s*,\\s*]"), context,proxy, varMap);
+			for (String s : src.split("[\\s*,\\s*]")) {
+				URI uri = context.createURI(s, null);
+				processResource(uri,context);
+			}
 		}
 		if (script != null && script.trim().length() > 0) {
-			processText(script, proxy, varMap);
+			processText(script,context);
 		}
 	}
 
-	public void processResource(String paths, ParseContext context) {
-		JSProxy proxy = JSProxy.newProxy();
-		Map<String, Object> varMap = new HashMap<String, Object>();
-		varMap.put("context", new JSContextProxy(context, proxy));
-		processResource(paths.split("[\\s*,\\s*]"), context, proxy, varMap);
-
-	}
-
-	private void processResource(String[] paths, ParseContext context,
-			JSProxy proxy, Map<String, Object> varMap) {
-		for (String path : paths) {
-			URI uri = context.createURI(path, null);
+	protected void processResource(URI uri, ParseContext context) {
 			context.addResource(uri);
+			JSIRuntime proxy = context.getAttribute(JSIRuntime.class);
+			if(proxy == null){
+				proxy =RuntimeSupport.create();
+				context.setAttribute(JSIRuntime.class,proxy);
+			}
 			InputStream in = context.openStream(uri);
 			if (in != null) {
 				try {
 					String script = ParseUtil.loadText(in, "utf-8");
-					proxy.eval(script, this.getClass().getName(), varMap);
+					proxy.eval(context, script, this.getClass().getName(),null);
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				} finally {
@@ -57,41 +53,59 @@ public class ExtensionParser implements NodeParser<Element> {
 					}
 				}
 			}
+	}
+
+	private void processText(String script,ParseContext context) {
+		JSIRuntime proxy = context.getAttribute(JSIRuntime.class);
+		if(proxy == null){
+			proxy =RuntimeSupport.create();
+			context.setAttribute(JSIRuntime.class,proxy);
 		}
-	}
-
-	public void processText(String text, ParseContext context) {
-		JSProxy proxy = JSProxy.newProxy();
-		Map<String, Object> varMap = new HashMap<String, Object>();
-		varMap.put("context", new JSContextProxy(context, proxy));
-		proxy.eval(text, this.getClass().getName(), varMap);
-	}
-
-	private void processText(String script, JSProxy proxy,
-			Map<String, Object> varMap) {
-		proxy.eval(script, this.getClass().getName(), varMap);
+		proxy.eval(context, script, this.getClass().getName(), null);
 	}
 
 	public static class JSContextProxy extends ParseContextProxy implements
 			ParseContext {
 		private ParseContext context;
-		private JSProxy proxy;
+		private JSIRuntime proxy;
 
-		public JSContextProxy(ParseContext parent, JSProxy proxy) {
+		public JSContextProxy(ParseContext parent, JSIRuntime proxy) {
 			super(parent);
 			this.context = parent;
 			this.proxy = proxy;
 		}
 
 		public void addNodeParser(Object function) {
-			NodeParser<? extends Object> nodeParser = proxy
-					.createNodeParser(function);
+			NodeParser<? extends Object> nodeParser = createNodeParser(function);
 			context.addNodeParser(nodeParser);
 		}
 
 		public void addTextParser(Object function) {
-			TextParser nodeParser = proxy.createTextParser(function);
+			TextParser nodeParser = createTextParser(function);
 			context.addTextParser(nodeParser);
+		}
+
+		public TextParser createTextParser(Object o) {
+			HashMap<String, Object> varMap = new HashMap<String, Object>();
+			varMap.put("impl", o);
+			proxy
+					.eval(
+							null,
+							"if(impl instanceof Function){impl.parse=impl,impl.findStart=impl}"
+									+ "if(!impl.getPriority) {"
+									+ "impl.getPriority=function(){"
+									+ "return impl.priority == null? 1 : impl.priority;"
+									+ "}};", this.getClass().toString(), varMap);
+			return proxy.wrapToJava(o, TextParser.class);
+		}
+
+		@SuppressWarnings("unchecked")
+		public NodeParser<? extends Object> createNodeParser(Object o) {
+			HashMap<String, Object> varMap = new HashMap<String, Object>();
+			varMap.put("impl", o);
+			proxy.eval(null, "if(impl instanceof Function){impl.parse=impl};",
+					this.getClass().toString(), varMap);
+			return proxy.wrapToJava(o, NodeParser.class);
 		}
 
 		public String getFeatrue(String key) {

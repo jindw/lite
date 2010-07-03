@@ -22,14 +22,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.xidea.el.Expression;
 import org.xidea.el.ExpressionFactory;
+import org.xidea.jsi.JSIRuntime;
+import org.xidea.jsi.impl.RuntimeSupport;
 import org.xidea.lite.TemplateEngine;
 import org.xidea.lite.parser.ResultTranslator;
 import org.xidea.lite.parser.TextParser;
 import org.xidea.lite.parser.ParseContext;
 import org.xidea.lite.parser.impl.ELParser;
-import org.xidea.lite.parser.impl.Java6Proxy;
 import org.xidea.lite.parser.impl.ParseContextImpl;
-import org.xidea.lite.parser.impl.RhinoProxy;
 import org.xidea.lite.test.TestUtil;
 import org.xml.sax.SAXException;
 
@@ -40,7 +40,7 @@ public class ClientJSBuilderTest {
 
 	@Test
 	public void testRhinoProxy() throws SAXException, IOException, ScriptException, NoSuchMethodException {
-		RhinoProxy rp = new RhinoProxy();
+		JSIRuntime rp = RuntimeSupport.create();
 		
 		Object o = rp.eval("({getSupportFeatrues:function(){return new java.util.HashSet(new java.util.Arrays.asList([1,2,3]))},run:function(){print(111)}})");
 		//rp.invokeMethod(o, "run");
@@ -65,9 +65,9 @@ public class ClientJSBuilderTest {
 		// context2.setCompress(context.isCompress());
 		context2.setCompress(true);
 		context2.parse(context2.loadXML(url));
-		String result = new Java6Proxy().createJSTranslator("t1").translate(context2);
-		String result2 = new RhinoProxy().createJSTranslator("t1").translate(context2);
-		Assert.assertEquals(result, result2);
+		JSIRuntime rt = RuntimeSupport.create();
+		Object obj = rt.eval("new ($import('org.xidea.lite:Translator',null))('t1')");
+		String result = rt.wrapToJava(obj, ResultTranslator.class).translate(context2);
 		System.out.println("==JS Code==");
 		System.out.println(result);
 		boolean isError = Pattern.compile("[\r\n]alert", Pattern.MULTILINE)

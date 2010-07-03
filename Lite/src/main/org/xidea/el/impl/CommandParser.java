@@ -132,7 +132,7 @@ public class CommandParser {
 				try {
 					buf = (Collection) expectedType.newInstance();
 				} catch (Exception e) {
-					log.error(e);
+					log.error("创建对象失败"+expectedType.getName(),e);
 					throw new RuntimeException(e);
 				}
 			}
