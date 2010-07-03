@@ -8,7 +8,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.xidea.el.impl.ExpressionFactoryImpl;
 import org.xidea.el.impl.ExpressionImpl;
-import org.xidea.lite.parser.impl.JSProxy;
+import org.xidea.jsi.impl.RuntimeSupport;
 
 public class OP3Test {
 	@Test
@@ -37,7 +37,7 @@ public class OP3Test {
 	private void doTest(String el) {
 		Float actual = ((Number) ExpressionFactoryImpl.getInstance().create(el).evaluate("")).floatValue();
 		System.out.println("acture"+actual);
-		Float expected = ((Number)JSProxy.newProxy().eval(el)).floatValue();
+		Float expected = ((Number)RuntimeSupport.create().eval(el)).floatValue();
 		Assert.assertEquals(el, (expected),(actual));
 	}
 }

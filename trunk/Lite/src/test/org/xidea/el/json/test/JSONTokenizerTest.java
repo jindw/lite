@@ -6,7 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.xidea.el.impl.ExpressionFactoryImpl;
 import org.xidea.el.json.JSONTokenizer;
-import org.xidea.lite.parser.impl.JSProxy;
+import org.xidea.jsi.impl.RuntimeSupport;
 
 public class JSONTokenizerTest {
 
@@ -35,7 +35,7 @@ public class JSONTokenizerTest {
 	private void doTest(String el) {
 		Float actual = ((Number) ExpressionFactoryImpl.getInstance().create(el).evaluate("")).floatValue();
 		System.out.println("acture"+actual);
-		Float expected = ((Number)JSProxy.newProxy().eval(el)).floatValue();
+		Float expected = ((Number)RuntimeSupport.create().eval(el)).floatValue();
 		Assert.assertEquals( toInt(expected),toInt(actual));
 	}
 

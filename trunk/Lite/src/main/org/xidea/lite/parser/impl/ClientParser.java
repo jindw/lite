@@ -5,9 +5,11 @@ import java.util.regex.Pattern;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xidea.el.Expression;
+import org.xidea.jsi.impl.RuntimeSupport;
 import org.xidea.lite.parser.NodeParser;
 import org.xidea.lite.parser.ParseChain;
 import org.xidea.lite.parser.ParseContext;
+import org.xidea.lite.parser.ResultTranslator;
 import org.xidea.lite.parser.TextParser;
 
 public class ClientParser extends ELParser implements NodeParser<Element>,
@@ -44,14 +46,20 @@ public class ClientParser extends ELParser implements NodeParser<Element>,
 	}
 	private void parse(String id, final String text,
 			ParseContext context,TextParser ce) {
-		JSProxy proxy = JSProxy.newProxy();
-		ParseContext clientContext = new ParseContextImpl(context, proxy
-				.createJSTranslator(id));
+		ResultTranslator rt = createResultTranslator(id);
+		ParseContext clientContext = new ParseContextImpl(context, rt);
 		if(ce!=null){
 			clientContext.addTextParser(ce);
 		}
 		clientContext.parse(text);
-		compileJS(proxy, context, clientContext, true);
+		compileJS(context, clientContext, true);
+	}
+
+	private ResultTranslator createResultTranslator(String id) {
+		RuntimeSupport proxy = (RuntimeSupport) RuntimeSupport.create();
+		ResultTranslator rt = proxy.wrapToJava(proxy.eval("new ($import('org.xidea.lite:Translator',null))('"
+						+ id + "')"), ResultTranslator.class);
+		return rt;
 	}
 
 	private class ClientEnd extends ELParser {
@@ -99,25 +107,25 @@ public class ClientParser extends ELParser implements NodeParser<Element>,
 		if (next != null) {
 			// new Java6JSBuilder();
 			String id = ParseUtil.getAttributeOrNull(el, "id", "name");
-			JSProxy proxy = JSProxy.newProxy();
-			ParseContext clientContext = new ParseContextImpl(context, proxy
-					.createJSTranslator(id));
+
+			ResultTranslator rt = createResultTranslator(id);
+			ParseContext clientContext = new ParseContextImpl(context, rt);
 			// 前端直接压缩吧？反正保留那些空白也没有调试价值
 			do {
 				clientContext.parse(next);
 			} while ((next = next.getNextSibling()) != null);
 			//System.out.println(clientContext.toList());
-			compileJS(proxy, context, clientContext, needScript(el));
+			compileJS(context, clientContext, needScript(el));
 
 		}
 	}
 
-	private void compileJS(JSProxy proxy, ParseContext context,
+	private void compileJS(ParseContext context,
 			ParseContext clientContext, boolean needScript) {
 		String js = clientContext.toCode();
-		if (clientContext.isCompress()) {
-			js = proxy.compress(js);
-		}
+//		if (clientContext.isCompress()) {
+//			js = proxy.compress(js);
+//		}
 		js = SCRIPT_END_PATTERN.matcher(js).replaceAll("<\\\\/script>");
 		if (needScript) {
 			context.append("<!--//--><script>//<![CDATA[\n" + js
