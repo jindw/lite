@@ -88,19 +88,23 @@ public class Template {
 				cmd[0] = type;
 				switch (type) {
 				case PLUGIN_TYPE:
-					int forCount0 = forCount;
 					compilePlugin(cmd, result);
-					forCount = forCount0;
 					break;// continue for
 				case FOR_TYPE:
-					forCount0 = forCount;
-					cmd[1] = compile((List) cmd[1]);
+					//list表达式应该算外层循环的变量
 					cmd[2] = createExpression(cmd[2]);
+					int forCount0 = forCount;
+					cmd[1] = compile((List) cmd[1]);
 
+					log.info("\n"+forCount0+"/"+forCount+cmd[3]);
 					if (forCount == forCount0) {
+						log.info("no_status");
 						cmd[0] = FOR_TYPE_NO_STATUS;
 					} else if (forCount0 == 0) {
-						cmd[0] = FOR_TYPE_FIRST_STATUS;
+						log.info("first_status");
+						cmd[0] = FOR_TYPE_FIRST_STATUS;//may not first(no for status after)
+					}else{
+						log.info("full_status");
 					}
 					forCount = forCount0;
 					break;
@@ -135,12 +139,16 @@ public class Template {
 	@SuppressWarnings("unchecked")
 	protected void compilePlugin(final Object[] cmd, List<Object> result) {
 		try {
-			Object[] children = compile((List<Object>) cmd[1]);
+			int forCount0 = forCount;
 			Expression el = createExpression(cmd[2]);
-			Class<Plugin> addonType = (Class<Plugin>) Class
+			Class<? extends Plugin> addonType = (Class<? extends Plugin>) Class
 					.forName((String) cmd[3]);
 			Plugin addon = addonType.newInstance();
 			ReflectUtil.setValues(addon, (Map) el.evaluate(null));
+			Object[] children = compile((List<Object>) cmd[1]);
+			if(addonType == DefinePlugin.class){//definePlugin no status care
+				forCount = forCount0;
+			}
 			addon.initialize(this, children);
 			cmd[3] = addon;
 		} catch (Exception e) {

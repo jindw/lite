@@ -47,18 +47,35 @@
 			<string><![CDATA[1]]></string>
 		</void>
 		<!-- test For -->
+		
 		<void method='put'>
-			<string><![CDATA[<c:for var='value' items='${[1,2,3,4]}'>${for.index}${value}<c:if test='${for.lastIndex == for.index}'>${for.lastIndex}</c:if></c:for><c:else test='${test}'>${value}</c:else>]]></string>
+			<!-- test for optimize -->
+			<string><![CDATA[
+			<c:for var='value00' list='${[0]}'>
+				<c:for var='value10' list='${[1,2]}'>
+					${for.index}
+					<c:for var='value20' list='${[3,4]}'>
+						${for.index}
+					</c:for>
+				</c:for>
+				<c:for var='value11' list='${[1,2]}'>
+					${for.index}
+				</c:for>
+			</c:for>]]></string>
+			<string><![CDATA[00110101]]></string>
+		</void>
+		<void method='put'>
+			<string><![CDATA[<c:for var='value' list='${[1,2,3,4]}'>${for.index}${value}<c:if test='${for.lastIndex == for.index}'>${for.lastIndex}</c:if></c:for><c:else test='${test}'>${value}</c:else>]]></string>
 			<string><![CDATA[011223343]]></string>
 		</void>
 		<!-- Test For Else -->
 		<void method='put'>
-			<string><![CDATA[<c:for var='value' items='${[1,2,3,4]}'>${value}</c:for><c:else test='${test}'>${value}</c:else>]]></string>
+			<string><![CDATA[<c:for var='value' list='${[1,2,3,4]}'>${value}</c:for><c:else test='${test}'>${value}</c:else>]]></string>
 			<string><![CDATA[1234]]></string>
 		</void>
 		
 		<void method='put'>
-			<string><![CDATA[<c:for var='value' items='${[]}'>${value}</c:for><c:else test='${test}'>${value}</c:else>]]></string>
+			<string><![CDATA[<c:for var='value' list='${[]}'>${value}</c:for><c:else test='${test}'>${value}</c:else>]]></string>
 			<string><![CDATA[true]]></string>
 		</void>
 		<!-- Test include -->
