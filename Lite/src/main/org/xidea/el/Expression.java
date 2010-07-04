@@ -1,5 +1,6 @@
 package org.xidea.el;
 
+import java.util.List;
 import java.util.Map;
 
 import org.xidea.el.impl.ExpressionImpl;
@@ -12,6 +13,11 @@ public interface Expression{
 	 * @return
 	 */
 	public Object evaluate(Object context);
+	/**
+	 * 获取表达式涉及到的变量集合
+	 * @return
+	 */
+	public List<String> getVars();
 	/**
 	 * 返回表达式的源代码(JSON)
 	 * @return
