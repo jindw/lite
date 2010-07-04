@@ -54,7 +54,7 @@
 		<!-- captrue -->
 		<void method="put">
 			<string><![CDATA[<c:var name="var1">${300}&gt;<b>${200}</b></c:var>${var1}/<div><c:out value="${var1}"/></div>]]></string>
-			<string><![CDATA[300&amp;gt;&lt;b&gt;200&lt;/b&gt;/<div>300&gt;<b>200</b></div>]]></string>
+			<string><![CDATA[300&amp;gt;&lt;b>200&lt;/b>/<div>300&gt;<b>200</b></div>]]></string>
 		</void>
 	</object>
 </java>

@@ -83,7 +83,7 @@ public class ExpressionImpl implements Expression, ReferenceExpression {
 			if (type > 0) {
 				append(list, el.getRight());
 				append(list, el.getLeft());
-			} else if (type == ExpressionToken.VALUE_CONSTANTS) {
+			} else if (type == ExpressionToken.VALUE_VAR) {
 				list.add((String) el.getParam());
 			}
 		}
