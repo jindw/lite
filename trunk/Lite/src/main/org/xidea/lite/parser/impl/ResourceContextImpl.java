@@ -21,7 +21,9 @@ public class ResourceContextImpl implements ResourceContext {
 						|| parent.toString().startsWith(base.toString())) {
 					String prefix = base.getRawPath();
 					int p  =prefix.lastIndexOf('/');
-					path = prefix.substring(0,p)+path;
+					if(p>0){
+						path = prefix.substring(0,p)+path;
+					}
 				}
 			}
 			return parent.resolve(path);

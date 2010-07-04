@@ -26,6 +26,9 @@ public class Template {
 	public static final int XML_ATTRIBUTE_TYPE = 3; // [3,<value el>,'name']
 	public static final int XML_TEXT_TYPE = 4; // [4,<el>]
 	public static final int FOR_TYPE = 5; // [5,[...],<items el>,'varName']/
+	private static final int FOR_TYPE_NO_STATUS = FOR_TYPE | 0x100;
+	private static final int FOR_TYPE_FIRST_STATUS = FOR_TYPE | 0x200;
+
 	public static final int ELSE_TYPE = 6; // [6,[...],<test el>] //<test el>
 	// 可为null
 	public static final int PLUGIN_TYPE = 7; // [7,[...],<add on
@@ -36,6 +39,8 @@ public class Template {
 	public static final String FOR_KEY = "for";
 
 	protected ExpressionFactory expressionFactory = new ExpressionFactoryImpl();
+
+	private int forCount = 0;
 
 	protected Object[] items;// transient＄1�7
 
@@ -49,11 +54,15 @@ public class Template {
 	public void render(Object context, Writer out) throws IOException {
 		ValueStack contextMap;
 		if (context instanceof ValueStack) {
-			contextMap = (ValueStack)context;
+			contextMap = (ValueStack) context;
 		} else {
 			contextMap = new Context(context);
 		}
 		renderList(contextMap, items, out);
+	}
+
+	protected Expression createExpression(Object elo) {
+		return expressionFactory.create(elo);
 	}
 
 	/**
@@ -73,11 +82,24 @@ public class Template {
 				final Object[] cmd = data.toArray();
 				final int type = ((Number) cmd[0]).intValue();
 				cmd[0] = type;
-
 				switch (type) {
 				case PLUGIN_TYPE:
+					int forCount0 = forCount;
 					compilePlugin(cmd, result);
+					forCount = forCount0;
 					break;// continue for
+				case FOR_TYPE:
+					forCount0 = forCount;
+					cmd[1] = compile((List) cmd[1]);
+					cmd[2] = createExpression(cmd[2]);
+
+					if (forCount == forCount0) {
+						cmd[0] = FOR_TYPE_NO_STATUS;
+					} else if (forCount0 == 0) {
+						cmd[0] = FOR_TYPE_FIRST_STATUS;
+					}
+					forCount = forCount0;
+					break;
 				case XML_ATTRIBUTE_TYPE:
 					if (cmd[2] != null) {
 						cmd[2] = " " + cmd[2] + "=\"";
@@ -87,9 +109,9 @@ public class Template {
 				case EL_TYPE:
 					cmd[1] = createExpression(cmd[1]);
 					break;
+				// childable
 				case IF_TYPE:
-				case FOR_TYPE:
-				case ELSE_TYPE:
+				case ELSE_TYPE:// cmd2 mayby null
 					if (cmd[2] != null) {
 						cmd[2] = createExpression(cmd[2]);
 					}
@@ -111,18 +133,19 @@ public class Template {
 		try {
 			Object[] children = compile((List<Object>) cmd[1]);
 			Expression el = createExpression(cmd[2]);
-			Class<Plugin> addonType = (Class<Plugin>) Class.forName((String)cmd[3]);
+			Class<Plugin> addonType = (Class<Plugin>) Class
+					.forName((String) cmd[3]);
 			Plugin addon = addonType.newInstance();
 			ReflectUtil.setValues(addon, (Map) el.evaluate(null));
-			addon.initialize(this,children);
+			addon.initialize(this, children);
 			cmd[3] = addon;
 		} catch (Exception e) {
 			log.error("装载扩展失败", e);
 		}
 	}
 
-	protected void renderList(final ValueStack context, final Object[] children,
-			final Writer out) {
+	protected void renderList(final ValueStack context,
+			final Object[] children, final Writer out) {
 		int index = children.length;
 		boolean ifpassed = false;
 		// for (final Object item : children) {
@@ -133,7 +156,7 @@ public class Template {
 					out.write((String) item);
 				} else {
 					final Object[] data = (Object[]) item;
-					switch (((Number) data[0]).intValue()) {
+					switch ((Integer) data[0]) {
 					case EL_TYPE:// ":el":
 						processExpression(context, data, out, false);
 						break;
@@ -141,13 +164,22 @@ public class Template {
 						ifpassed = processIf(context, data, out);
 						break;
 					case ELSE_TYPE:// ":else-if":":else":
-						if(!ifpassed){
+						if (!ifpassed) {
 							ifpassed = processElse(context, data, out);
 						}
 						break;
 					case FOR_TYPE:// ":for":
-						ifpassed = processFor(context, data, out);
+						ifpassed = processFor(context, data, out, FOR_TYPE);
 						break;
+					case FOR_TYPE_FIRST_STATUS:
+						ifpassed = processFor(context, data, out,
+								FOR_TYPE_FIRST_STATUS);
+						break;
+					case FOR_TYPE_NO_STATUS:
+						ifpassed = processFor(context, data, out,
+								FOR_TYPE_NO_STATUS);
+						break;
+
 					case XML_TEXT_TYPE:// ":el":
 						processExpression(context, data, out, true);
 						break;
@@ -181,8 +213,8 @@ public class Template {
 
 	private void prossesPlugin(ValueStack context, Object[] data, Writer out)
 			throws Exception {
-		Plugin addon = (Plugin)data[3];
-		addon.execute(context,out);
+		Plugin addon = (Plugin) data[3];
+		addon.execute(context, out);
 	}
 
 	protected void processExpression(ValueStack context, Object[] data,
@@ -205,63 +237,92 @@ public class Template {
 	}
 
 	protected boolean processElse(ValueStack context, Object[] data, Writer out) {
-			if (data[2] == null
-					|| toBoolean(((Expression) data[2]).evaluate(context))) {// if
-				renderList(context, (Object[]) data[1], out);
-				return true;
-			} else {
-				return false;
-			}
+		if (data[2] == null
+				|| toBoolean(((Expression) data[2]).evaluate(context))) {// if
+			renderList(context, (Object[]) data[1], out);
+			return true;
+		} else {
+			return false;
+		}
 	}
 
+	/**
+	 * @param context
+	 * @param data
+	 * @param out
+	 * @param type
+	 *            FOR_TYPE_NO_STATUS 没有for status，不需要任何for状态操作
+	 *            FOR_TYPE_FIRST_STATUS 第一个需要for变量的，需要生成状态，但是不需要恢复原有for status
+	 *            FOR_TYPE 包含for变量，需要生成状态，唯一一个需要for status 恢复的条件
+	 * @return
+	 */
 	@SuppressWarnings("unchecked")
-	protected boolean processFor(ValueStack context, Object[] data, Writer out) {
+	protected boolean processFor(ValueStack context, Object[] data, Writer out,
+			final int type) {
 		final Object[] children = (Object[]) data[1];
 		final String varName = (String) data[3];
-		final ForStatus preiousStatus = (ForStatus) context.get(FOR_KEY);
-		int len = 0;
+		ForStatus preiousStatus;
+		if (type == FOR_TYPE) {
+			preiousStatus = (ForStatus) context.get(FOR_KEY);
+		} else {
+			preiousStatus = null;
+		}
+		boolean hasElement = false;
 		Object list = ((Expression) data[2]).evaluate(context);
 		try {// hack return 代替ifelse，减少一些判断
-			if (list instanceof Map<?,?>) {
-				list = ((Map<?,?>) list).keySet();
+			if (list instanceof Map<?, ?>) {
+				list = ((Map<?, ?>) list).keySet();
 			}
 			if (list instanceof Collection<?>) {
 				Collection<Object> items = (Collection<Object>) list;
-				len = items.size();
-				ForStatus forStatus = new ForStatus(len);
-				context.put(FOR_KEY, forStatus);
-				for (Object item : items) {
-					forStatus.index++;
-					context.put(varName, item);
-					renderList(context, children, out);
+				hasElement = items.size()>0;
+				if (type == FOR_TYPE_NO_STATUS) {
+					for (Object item : items) {
+						context.put(varName, item);
+						renderList(context, children, out);
+					}
+				} else {
+					ForStatus forStatus = new ForStatus(items.size());
+					context.put(FOR_KEY, forStatus);
+					for (Object item : items) {
+						forStatus.index++;
+						context.put(varName, item);
+						renderList(context, children, out);
+					}
 				}
 			} else {
+				int len;
 				if (list instanceof Number) {// 算是比较少见吧
 					len = Math.max(((Number) list).intValue(), 0);
 					list = new Object[len];
-					for(int i=0;i<len;){
-						((Object[])list)[i]=i++;
+					for (int i = 0; i < len;) {
+						((Object[]) list)[i] = i++;
+					}
+				}else{
+					len =  Array.getLength(list);
+				}
+				hasElement = len>0;
+				if (type == FOR_TYPE_NO_STATUS) {
+					for(int i=0;i<len;i++) {
+						context.put(varName, Array.get(list, i));
+						renderList(context, children, out);
 					}
 				} else {
-					if (list instanceof CharSequence) {
-						list = ((CharSequence) list).toString().toCharArray();
+					ForStatus forStatus = new ForStatus(len);
+					context.put(FOR_KEY, forStatus);
+					while (++forStatus.index < len) {
+						context.put(varName, Array.get(list, forStatus.index));
+						renderList(context, children, out);
 					}
-					if (list.getClass().isArray()) {// list!=null && 让他抛吧，外面有检查
-						len = Array.getLength(list);
-					}
-				}
-				ForStatus forStatus = new ForStatus(len);
-				context.put(FOR_KEY, forStatus);
-				while (++forStatus.index < len) {
-					context.put(varName, Array.get(list, forStatus.index));
-					renderList(context, children, out);
 				}
 			}
 		} finally {
 			// context.put("for", preiousStatus);
-			context.put(FOR_KEY, preiousStatus);// for key
+			if (type == FOR_TYPE) {
+				context.put(FOR_KEY, preiousStatus);// for key
+			}
 		}
-		return len > 0;// if key
+		return hasElement;// if key
 	}
 
 	protected void processVar(ValueStack context, Object[] data) {
@@ -274,14 +335,14 @@ public class Template {
 		context.put(data[2], buf.toString());
 	}
 
-	protected void processAttribute(ValueStack context, Object[] data, Writer out)
-			throws IOException {
+	protected void processAttribute(ValueStack context, Object[] data,
+			Writer out) throws IOException {
 		Object result = ((Expression) data[1]).evaluate(context);
 		if (data[2] == null) {
-			printXMLAttribute(ECMA262Impl.ToString(result), out, false);
+			printXMLAttribute(ECMA262Impl.ToString(result), out);
 		} else if (result != null) {
 			out.write((String) data[2]);// prefix
-			printXMLAttribute(ECMA262Impl.ToString(result), out, false);
+			printXMLAttribute(ECMA262Impl.ToString(result), out);
 			out.write('"');
 		}
 
@@ -291,20 +352,13 @@ public class Template {
 		throw new Break(((Number) data[1]).intValue());
 	}
 
-	protected Expression createExpression(Object elo) {
-		return expressionFactory.create(elo);
-	}
-
-	protected void printXMLAttribute(String text, Writer out,
-			boolean escapeSingleChar) throws IOException {
+	protected void printXMLAttribute(String text, Writer out)
+			throws IOException {
 		for (int i = 0; i < text.length(); i++) {
 			int c = text.charAt(i);
 			switch (c) {
 			case '<':
 				out.write("&lt;");
-				break;
-			case '>':
-				out.write("&gt;");
 				break;
 			case '&':
 				out.write("&amp;");
@@ -312,11 +366,6 @@ public class Template {
 			case '"':// 34
 				out.write("&#34;");
 				break;
-			case '\'':// 39
-				if (escapeSingleChar) {
-					out.write("&#39;");
-					break;
-				}
 			default:
 				out.write(c);
 			}
@@ -329,9 +378,6 @@ public class Template {
 			switch (c) {
 			case '<':
 				out.write("&lt;");
-				break;
-			case '>':
-				out.write("&gt;");
 				break;
 			case '&':
 				out.write("&amp;");
@@ -383,6 +429,5 @@ public class Template {
 		public int getLastIndex() {
 			return lastIndex;
 		}
-
 	}
 }

@@ -80,7 +80,7 @@ Translator.prototype = {
 	    	for(var n in e){
 	    		buf.push(n+':'+e[n]);
 	    	}
-	    	$log.error(e);
+	    	$log.error(code,e);
 	        code = "return ('生成js代码失败：'+"+encodeString(buf.join("\n"))+');';
 	    }
 	    var body = "(){"+code+"\n}";

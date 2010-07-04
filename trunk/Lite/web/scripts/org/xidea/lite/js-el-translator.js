@@ -23,6 +23,7 @@ ELTranslator.prototype = {
 	 * 将TOKEN转化为EL 表达式
 	 */
 	toString:function(){
+		print("\n"+stringifyJSON(this.tree)+this.tree+"%%%\n")
 		return this.stringify(this.tree);
 	},
 	/**
@@ -71,20 +72,17 @@ ELTranslator.prototype = {
 		var value1 = this.stringify(el[1]);
 		var value2 = this.stringify(el[2]);
 		var param = getTokenParam(el);
+		if(this.getPriority(el[1])<this.getPriority(el)){
+			value1 = '('+value1+')';
+		}
 		switch(type){
 		case OP_INVOKE_METHOD_WITH_ONE_PARAM:
 			value2="["+value2+']';
 		case OP_INVOKE_METHOD:
 			value2 = value2.slice(1,-1);
 			return value1+"("+value2+')';
-		case OP_GET_STATIC_PROP:
-			var memberName = param;
-			if(ID_PATTERN.test(memberName)){
-				return value1+'.'+memberName
-			}else{
-				return value1+'['+stringifyJSON(memberName)+']';
-			}
 		case OP_GET_PROP:
+			value1 = toOperatable(el[1][0],value1);
 			return value1+'['+value2+']';
 		case OP_PARAM_JOIN:
 			if("[]"==value1){
@@ -112,9 +110,6 @@ ELTranslator.prototype = {
         	var test = this.stringify(el1[1]);        	var value1 = this.stringify(el1[2]);
         	return test+'?'+value1+":"+value2;
 		}
-		if(this.getPriority(el[1])<this.getPriority(el)){
-			value1 = '('+value1+')';
-		}
 		if(this.getPriority(el)>=this.getPriority(el[2])){
 			value2 = '('+value2+')';
 		}
@@ -128,11 +123,24 @@ ELTranslator.prototype = {
 		var el1 = el[1];
 		var value = this.stringify(el1);
 		var param = getTokenParam(el);
+		if(this.getPriority(el)>=this.getPriority(el1)){
+    		value = '('+value+')';
+    	}
 		if(OP_INVOKE_METHOD_WITH_STATIC_PARAM == type){
 			var value2 = this.stringify(param).slice(1,-1);
 			return value+"("+value2+')';
+		}else if(OP_GET_STATIC_PROP== type){
+			var memberName = param;
+			
+			value = toOperatable(el1[0],value);
+			if(ID_PATTERN.test(memberName)){
+				return value+'.'+memberName
+			}else{
+				return value+'['+stringifyJSON(memberName)+']';
+			}
 		}else if(OP_GET_STATIC_PROP == type) {//已经是最高优先级了,
 			var key = param;
+			value = toOperatable(el1[0],value);
 			if(typeof key == 'number'){
 				return value+'['+key+']';
 			}else{
@@ -143,15 +151,23 @@ ELTranslator.prototype = {
 			}
 		}else{
 		    var opc = findTokenText(type);
-    		if(this.getPriority(el)>=this.getPriority(el1)){
-    			value = '('+value+')';
-    		}
     		return opc+value;
 		}
 	}
 }
-
-
+function toOperatable(type,value1){
+	if(type == VALUE_CONSTANTS){
+		switch(value1.charAt()){
+			case '"':
+			case "'":
+			case '/':
+			break;
+			default:
+			value1 = '('+value1+')';
+		}
+	}
+	return  value1;
+}
 function walkTree(thiz,el){
 	var op = el[0];
 	if(op<=0){

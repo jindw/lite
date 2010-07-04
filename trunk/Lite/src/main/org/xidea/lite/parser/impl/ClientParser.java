@@ -50,7 +50,7 @@ public class ClientParser extends ELParser implements NodeParser<Element>,
 			clientContext.addTextParser(ce);
 		}
 		clientContext.parse(text);
-		compileJS(context,id, clientContext, true);
+		parseClient(context,id, clientContext, true);
 	}
 
 	private class ClientEnd extends ELParser {
@@ -105,13 +105,13 @@ public class ClientParser extends ELParser implements NodeParser<Element>,
 				clientContext.parse(next);
 			} while ((next = next.getNextSibling()) != null);
 			//System.out.println(clientContext.toList());
-			compileJS(context,id, clientContext, needScript(el));
+			parseClient(context,id, clientContext, needScript(el));
 
 		}
 	}
 
 	RuntimeSupport proxy = (RuntimeSupport) RuntimeSupport.create();
-	private void compileJS(ParseContext context,String id, 
+	private void parseClient(ParseContext context,String id, 
 			ParseContext clientContext, boolean needScript) {
 
 		proxy.eval("$import('org.xidea.lite:Translator')");

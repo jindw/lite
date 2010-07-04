@@ -1,6 +1,8 @@
 package org.xidea.el.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.xidea.el.ExpressionFactory;
 import org.xidea.el.OperationStrategy;
@@ -10,12 +12,17 @@ import org.xidea.el.ValueStack;
 
 public class OptimizeExpressionImpl extends ExpressionImpl {
 
-	protected Object name;
+	protected String name;
 
 	public OptimizeExpressionImpl(ExpressionFactory factory,ExpressionToken expression,
-			OperationStrategy calculater, Object name) {
+			OperationStrategy calculater, String name) {
 		super(null, expression, calculater);
 		this.name = name;
+	}
+
+	@Override
+	public List<String> getVars() {
+		return Arrays.asList(name);
 	}
 
 	@Override
@@ -39,17 +46,17 @@ public class OptimizeExpressionImpl extends ExpressionImpl {
 			OperationStrategy calculater) {
 		if (el.getType() == ExpressionToken.VALUE_VAR) {
 			return new OptimizeExpressionImpl(factory,el, calculater, 
-					el.getParam());
+					(String)el.getParam());
 		}else if (el.getType() == ExpressionToken.OP_GET_STATIC_PROP) {
 					ArrayList<Object> props = new ArrayList<Object>();
 			ExpressionToken current = el;
-			Object baseName = null;
+			String baseName = null;
 			while(true) {
 				if(current.getType() == ExpressionToken.OP_GET_STATIC_PROP){
 					props.add(current.getParam());
 				}else{
 					if(current.getType() == ExpressionToken.VALUE_VAR){
-						baseName = current.getParam();
+						baseName = (String)current.getParam();
 						break;
 					}else{
 						return null;
@@ -75,7 +82,7 @@ public class OptimizeExpressionImpl extends ExpressionImpl {
 		private Object key;
 		public PropertyExpression(ExpressionFactory factory,ExpressionToken expression,
 				OperationStrategy calculater, 
-				Object name, Object key) {
+				String name, Object key) {
 			super(factory,expression, calculater, name);
 			this.key = key;
 		}
@@ -89,7 +96,7 @@ public class OptimizeExpressionImpl extends ExpressionImpl {
 		private Object[] keys;
 		public PropertiesExpression(ExpressionFactory factory,ExpressionToken expression,
 				OperationStrategy calculater, 
-				Object name, Object[] keys) {
+				String name, Object[] keys) {
 			super(factory,expression, calculater, name,null);
 			this.keys = keys;
 		}
