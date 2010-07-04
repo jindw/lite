@@ -14,15 +14,15 @@
 		<!-- testXMLText -->
 		<void method="put">
 			<string><![CDATA[<textarea>${xml}</textarea>]]></string>
-			<string><![CDATA[<textarea>&lt;"'&gt;</textarea>]]></string>
+			<string><![CDATA[<textarea>&lt;"'></textarea>]]></string>
 		</void>
 		<void method="put">
 			<string><![CDATA[<input value="${xml}"/>]]></string>
-			<string><![CDATA[<input value="&lt;&#34;'&gt;"/>]]></string>
+			<string><![CDATA[<input value="&lt;&#34;'>"/>]]></string>
 		</void>
 		<void method="put">
 			<string><![CDATA[<input value="a${xml}b"/>]]></string>
-			<string><![CDATA[<input value="a&lt;&#34;'&gt;b"/>]]></string>
+			<string><![CDATA[<input value="a&lt;&#34;'>b"/>]]></string>
 		</void>
 		<!-- testAttribute -->
 		<void method='put'>

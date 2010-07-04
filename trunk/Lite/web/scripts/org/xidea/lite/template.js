@@ -158,7 +158,7 @@ function renderList(context,data,out){
 function processExpression(context, data, out, encode){
     var value = String(evaluate(data[1],context));
     if(encode ){
-        value = value.replace(/[<>&"]/g,xmlReplacer)
+        value = value.replace(/[<&"]/g,xmlReplacer)
     }
     out.push(value);
 }
@@ -216,12 +216,12 @@ function processCaptrue(context, data) {
 function processAttribute(context, data, out){
 	var result = evaluate(data[1],context);
 	if(!data[2]){
-		out.push(String(result).replace(/[<>&"]/g,xmlReplacer));
+		out.push(String(result).replace(/[<&"]/g,xmlReplacer));
 	}else if (result != null) {
 		out.push(' ');
 		out.push(data[2]);// prefix
 		out.push('="');
-		out.push(String(result).replace(/[<>&"]/g,xmlReplacer));
+		out.push(String(result).replace(/[<&"]/g,xmlReplacer));
 		out.push('"');
 	}
 

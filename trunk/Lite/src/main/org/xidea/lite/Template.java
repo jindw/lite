@@ -62,7 +62,11 @@ public class Template {
 	}
 
 	protected Expression createExpression(Object elo) {
-		return expressionFactory.create(elo);
+		Expression e = expressionFactory.create(elo);
+		if(e.getVars().contains("for")){
+			forCount++;
+		}
+		return e;
 	}
 
 	/**
