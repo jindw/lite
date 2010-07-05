@@ -16,7 +16,7 @@ import org.xidea.el.impl.CommandParser;
 import org.xidea.el.impl.Convertor;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.Template;
-import org.xidea.lite.parser.NodeParser;
+import org.xidea.lite.parse.NodeParser;
 
 public class LiteCompiler {
 	private static final Log log = LogFactory.getLog(LiteCompiler.class);

@@ -13,8 +13,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.el.json.JSONDecoder;
 import org.xidea.lite.Template;
-import org.xidea.lite.parser.impl.ParseConfigImpl;
-import org.xidea.lite.parser.impl.HotTemplateEngine;
+import org.xidea.lite.impl.HotTemplateEngine;
+import org.xidea.lite.impl.ParseConfigImpl;
 
 public class ServletTemplateEngine extends HotTemplateEngine {
 	private static final Log log = LogFactory.getLog(ServletTemplateEngine.class);
