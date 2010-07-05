@@ -27,7 +27,7 @@ public class OptimizeExpressionImplTest {
 	private void doTest(String msg,Object expected,String el,String context) {
 		ELTest.testEL(context, el);
 		ExpressionFactory ef = ExpressionFactoryImpl.getInstance();
-		Expression exp = OptimizeExpressionImpl.create(ef,(ExpressionToken)ef.parse(el),  ExpressionFactoryImpl.DEFAULT_CALCULATER);
+		Expression exp = OptimizeExpressionImpl.create((ExpressionToken)ef.parse(el),  ExpressionFactoryImpl.DEFAULT_CALCULATER);
 		Assert.assertTrue("不需是有效的優化表達式/"+msg,exp instanceof OptimizeExpressionImpl);
 		Assert.assertEquals(msg,expected, exp.evaluate(JSONDecoder.decode(context)));
 	}

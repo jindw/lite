@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.el.Expression;
 import org.xidea.el.ExpressionFactory;
+import org.xidea.el.ExpressionInfo;
 import org.xidea.el.ValueStack;
 import org.xidea.el.fn.ECMA262Impl;
 import org.xidea.el.impl.ExpressionFactoryImpl;
@@ -63,8 +64,10 @@ public class Template {
 
 	protected Expression createExpression(Object elo) {
 		Expression e = expressionFactory.create(elo);
-		if(e.getVars().contains("for")){
-			forCount++;
+		if (e instanceof ExpressionInfo) {
+			if (((ExpressionInfo) e).getVars().contains("for")) {
+				forCount++;
+			}
 		}
 		return e;
 	}
@@ -91,19 +94,20 @@ public class Template {
 					compilePlugin(cmd, result);
 					break;// continue for
 				case FOR_TYPE:
-					//list表达式应该算外层循环的变量
+					// list表达式应该算外层循环的变量
 					cmd[2] = createExpression(cmd[2]);
 					int forCount0 = forCount;
 					cmd[1] = compile((List) cmd[1]);
 
-					log.info("\n"+forCount0+"/"+forCount+cmd[3]);
+					log.info("\n" + forCount0 + "/" + forCount + cmd[3]);
 					if (forCount == forCount0) {
 						log.info("no_status");
 						cmd[0] = FOR_TYPE_NO_STATUS;
 					} else if (forCount0 == 0) {
 						log.info("first_status");
-						cmd[0] = FOR_TYPE_FIRST_STATUS;//may not first(no for status after)
-					}else{
+						cmd[0] = FOR_TYPE_FIRST_STATUS;// may not first(no for
+														// status after)
+					} else {
 						log.info("full_status");
 					}
 					forCount = forCount0;
@@ -146,7 +150,7 @@ public class Template {
 			Plugin addon = addonType.newInstance();
 			ReflectUtil.setValues(addon, (Map) el.evaluate(null));
 			Object[] children = compile((List<Object>) cmd[1]);
-			if(addonType == DefinePlugin.class){//definePlugin no status care
+			if (addonType == DefinePlugin.class) {// definePlugin no status care
 				forCount = forCount0;
 			}
 			addon.initialize(this, children);
@@ -287,7 +291,7 @@ public class Template {
 			}
 			if (list instanceof Collection<?>) {
 				Collection<Object> items = (Collection<Object>) list;
-				hasElement = items.size()>0;
+				hasElement = items.size() > 0;
 				if (type == FOR_TYPE_NO_STATUS) {
 					for (Object item : items) {
 						context.put(varName, item);
@@ -310,12 +314,12 @@ public class Template {
 					for (int i = 0; i < len;) {
 						((Object[]) list)[i] = i++;
 					}
-				}else{
-					len =  Array.getLength(list);
+				} else {
+					len = Array.getLength(list);
 				}
-				hasElement = len>0;
+				hasElement = len > 0;
 				if (type == FOR_TYPE_NO_STATUS) {
-					for(int i=0;i<len;i++) {
+					for (int i = 0; i < len; i++) {
 						context.put(varName, Array.get(list, i));
 						renderList(context, children, out);
 					}

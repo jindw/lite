@@ -3,27 +3,32 @@ package org.xidea.el.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.xidea.el.ExpressionInfo;
 import org.xidea.el.OperationStrategy;
 import org.xidea.el.Expression;
 import org.xidea.el.ExpressionToken;
 import org.xidea.el.Reference;
 import org.xidea.el.ReferenceExpression;
 import org.xidea.el.ValueStack;
-import org.xidea.el.json.JSONEncoder;
 
-public class ExpressionImpl implements Expression, ReferenceExpression {
+public class ExpressionImpl implements Expression, ReferenceExpression, ExpressionInfo {
 	protected final OperationStrategy calculater;
 	protected final ExpressionToken expression;
-	protected final String source;
+	static ValueStack EMPTY_VS  =new ValueStack() {
+		public void put(Object key, Object value) {
+		}
+		public Object get(Object key) {
+			return null;
+		}
+	};
 
 	public ExpressionImpl(String el) {
-		this(el, (ExpressionToken) ExpressionFactoryImpl.getInstance()
+		this((ExpressionToken) ExpressionFactoryImpl.getInstance()
 				.parse(el), ExpressionFactoryImpl.DEFAULT_CALCULATER);
 	}
 
-	public ExpressionImpl(String source, ExpressionToken expression,
+	public ExpressionImpl(ExpressionToken expression,
 			OperationStrategy calculater) {
-		this.source = source;
 		this.calculater = calculater;
 		this.expression = expression;
 	}
@@ -33,7 +38,7 @@ public class ExpressionImpl implements Expression, ReferenceExpression {
 		if (context instanceof ValueStack) {
 			valueStack = (ValueStack) context;
 		} else if (context == null) {
-			valueStack = new ValueStackImpl();
+			valueStack = EMPTY_VS;
 		} else {
 			valueStack = new ValueStackImpl(context);
 		}
@@ -47,7 +52,7 @@ public class ExpressionImpl implements Expression, ReferenceExpression {
 	public Reference prepare(Object context) {
 		ValueStack valueStack;
 		if (context == null) {
-			valueStack = new ValueStackImpl();
+			valueStack = EMPTY_VS;
 		} else if (context instanceof ValueStack) {
 			valueStack = (ValueStack) context;
 		} else {
@@ -63,26 +68,21 @@ public class ExpressionImpl implements Expression, ReferenceExpression {
 
 	@Override
 	public String toString() {
-		if (source == null) {
-			// TODO:jsel stringify
-			return JSONEncoder.encode(expression);
-		} else {
-			return source;
-		}
+		return expression.toString();
 	}
 
 	public List<String> getVars() {
 		ArrayList<String> list = new ArrayList<String>();
-		append(list, expression);
+		appendVar(expression,list);
 		return list;
 	}
 
-	private void append(ArrayList<String> list, ExpressionToken el) {
+	static void appendVar(ExpressionToken el,List<String> list) {
 		if (el != null) {
 			int type = el.getType();
 			if (type > 0) {
-				append(list, el.getRight());
-				append(list, el.getLeft());
+				appendVar(el.getRight(),list);
+				appendVar(el.getLeft(),list);
 			} else if (type == ExpressionToken.VALUE_VAR) {
 				list.add((String) el.getParam());
 			}
