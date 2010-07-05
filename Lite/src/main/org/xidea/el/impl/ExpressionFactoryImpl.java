@@ -9,16 +9,11 @@ import org.xidea.el.ExpressionFactory;
 import org.xidea.el.ExpressionToken;
 import org.xidea.el.fn.ECMA262Impl;
 
-public class ExpressionFactoryImpl implements ExpressionFactory {
+public class ExpressionFactoryImpl extends ExpressionFactory {
 	public static final OperationStrategy DEFAULT_CALCULATER;
 	static {
 		DEFAULT_CALCULATER = new OperationStrategyImpl();
 		ECMA262Impl.setup((OperationStrategyImpl) DEFAULT_CALCULATER);
-	}
-	private static ExpressionFactoryImpl expressionFactory = new ExpressionFactoryImpl();
-
-	public static ExpressionFactory getInstance() {
-		return expressionFactory;
 	}
 
 	public OperationStrategy strategy = DEFAULT_CALCULATER;
@@ -35,8 +30,11 @@ public class ExpressionFactoryImpl implements ExpressionFactory {
 		@SuppressWarnings("unchecked")
 		ExpressionToken tokens = new ExpressionTokenizer(el, Collections.EMPTY_MAP)
 				.getResult();
+		tokens = ((TokenImpl)tokens).optimize(strategy);
 		return tokens;
 	}
+
+
 
 	@SuppressWarnings("unchecked")
 	public Expression create(Object elo) {
@@ -55,9 +53,9 @@ public class ExpressionFactoryImpl implements ExpressionFactory {
 	}
 
 	private Expression getOptimizedExpression(ExpressionToken el) {
-		Expression ressult = OptimizeExpressionImpl.create(this, el,
+		Expression ressult = OptimizeExpressionImpl.create(el,
 				DEFAULT_CALCULATER);
-		return ressult != null ? ressult : new ExpressionImpl(null, el,
+		return ressult != null ? ressult : new ExpressionImpl(el,
 				DEFAULT_CALCULATER);
 	}
 }

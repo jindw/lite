@@ -31,7 +31,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.xidea.el.ExpressionSyntaxException;
-import org.xidea.el.ExpressionToken;
 import org.xidea.el.json.JSONTokenizer;
 /**
  * 首次遍历的时候，不支持后缀运算，单参数表达式只能前缀。
@@ -114,10 +113,10 @@ public class ExpressionTokenizer extends JSONTokenizer {
 		return inc > 0 ? end : -1;
 	}
 
-	public ExpressionToken getResult() {
+	public TokenImpl getResult() {
+		expression.value = this.value;
 		return expression;
 	}
-
 	private void toTree(Iterator<TokenImpl> tokens, LinkedList<TokenImpl> stack) {
 		while (tokens.hasNext()) {
 			final TokenImpl item = tokens.next();
