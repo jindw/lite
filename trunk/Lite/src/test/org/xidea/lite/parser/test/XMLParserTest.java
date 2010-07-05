@@ -18,8 +18,8 @@ import org.junit.Test;
 import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Node;
 import org.xidea.lite.Template;
-import org.xidea.lite.parser.impl.ParseContextImpl;
-import org.xidea.lite.parser.impl.XMLContextImpl;
+import org.xidea.lite.impl.ParseContextImpl;
+import org.xidea.lite.impl.XMLContextImpl;
 import org.xidea.lite.test.TestUtil;
 
 

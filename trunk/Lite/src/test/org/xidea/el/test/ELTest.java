@@ -13,20 +13,23 @@ import org.xidea.el.impl.ExpressionFactoryImpl;
 import org.xidea.jsi.JSIRuntime;
 import org.xidea.jsi.impl.RuntimeSupport;
 import org.xidea.lite.Template;
-import org.xidea.lite.parser.impl.ClientParser;
-import org.xidea.lite.parser.impl.ParseConfigImpl;
-import org.xidea.lite.parser.impl.ParseContextImpl;
-import org.xidea.lite.parser.impl.ResourceContextImpl;
+import org.xidea.lite.impl.ClientParser;
+import org.xidea.lite.impl.ParseConfigImpl;
+import org.xidea.lite.impl.ParseContextImpl;
+import org.xidea.lite.impl.ResourceContextImpl;
 
 public class ELTest {
 	static JSIRuntime js = org.xidea.jsi.impl.RuntimeSupport.create();
 	static ExpressionFactory expressionFactory = ExpressionFactoryImpl.getInstance();
 	static{
-		js.eval("$import('org.xidea.lite:*');//parseEL,Expression");
+		js.eval("$import('org.xidea.el:evaluate');//parseEL,Expression");
+		js.eval("$import('org.xidea.lite.parse:*');//parseEL,Expression");
+		//js.eval("$import('org.xidea.lite.impl:*');//parseEL,Expression");
 		js.eval("$import('org.xidea.jsidoc.util:JSON');");
 	}
 	public static Object testEL(Object context,String source){
 				String contextJSON;
+		System.out.println("测试表达式："+source);
 		Object contextObject;
 		if(context == null || "".equals(context)){
 			contextObject = Collections.EMPTY_MAP;
@@ -60,7 +63,7 @@ public class ELTest {
 		ParseContextImpl pc = createParserContext();
 		List<Object> tps = pc.parseText("${JSON.stringify("+source+")}", Template.EL_TYPE);
 		pc.appendAll(tps);
-		js.eval("$import('org.xidea.lite:Translator')");
+		js.eval("$import('org.xidea.lite.impl:Translator')");
 		Object ts = js.eval("new Translator('')");
 		String code = (String)js.invoke(ts, "translate", pc);
 		String jsResult = (String)js.eval("("+code+")("+contextJSON+")");

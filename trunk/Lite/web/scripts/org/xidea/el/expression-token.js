@@ -118,7 +118,29 @@ function getTokenLength(type) {
 	return hasTokenParam(type)?size+1:size;
 
 }
+function optimizeEL(el){
+	var type = el[0];
+	var end = getTokenParamIndex(type) ;
+	if (end > 1) {//2,3
+	
+		el[1] = optimizeEL(el[1]);
+		var co = canOptimize(el[1][0]);
+		if(end>2){
+			el[2] = optimizeEL(el[2]);
+			co = co &&  canOptimize(el[2][0]);
+		}
+		if(co){
+			var o = evaluate(el, []);
+			print("\n\n@@@"+o)
+			return [VALUE_CONSTANTS,o]
+		}
+	}
+	return el;
+}
 
+function canOptimize(type) {
+	return type == VALUE_CONSTANTS;
+}
 function getTokenParamIndex(type) {
 	if(type<0){
 		return 1;

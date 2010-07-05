@@ -10,8 +10,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.xidea.jsi.JSIRuntime;
 import org.xidea.jsi.impl.RuntimeSupport;
-import org.xidea.lite.parser.NodeParser;
-import org.xidea.lite.parser.TextParser;
+import org.xidea.lite.parse.NodeParser;
+import org.xidea.lite.parse.TextParser;
 
 public class JSProxyTest {
 

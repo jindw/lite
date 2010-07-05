@@ -19,8 +19,8 @@ import org.xidea.el.impl.ExpressionFactoryImpl;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.Template;
 import org.xidea.lite.TemplateEngine;
-import org.xidea.lite.parser.impl.ParseContextImpl;
-import org.xidea.lite.parser.impl.dtd.DefaultEntityResolver;
+import org.xidea.lite.impl.ParseContextImpl;
+import org.xidea.lite.impl.dtd.DefaultEntityResolver;
 import org.xidea.lite.parser.test.XMLParser;
 
 public class XMLParserTest {

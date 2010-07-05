@@ -105,7 +105,7 @@ function selectNodes(currentNode,xpath){
 }
 
 if(!(window.DOMParser && window.XMLHttpRequest || window.ActiveXObject)){
-    var pu = Packages.org.xidea.lite.parser.impl.ParseUtil;
+    var pu = Packages.org.xidea.lite.impl.ParseUtil;
     parseXMLByURL = parseXMLByText = function(url){
     	//TODO:data for text
     	url = $JSI.loadText&&$JSI.loadText(url) || url;

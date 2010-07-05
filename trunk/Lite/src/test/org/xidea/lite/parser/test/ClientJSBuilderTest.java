@@ -25,10 +25,10 @@ import org.xidea.el.ExpressionFactory;
 import org.xidea.jsi.JSIRuntime;
 import org.xidea.jsi.impl.RuntimeSupport;
 import org.xidea.lite.TemplateEngine;
-import org.xidea.lite.parser.TextParser;
-import org.xidea.lite.parser.ParseContext;
-import org.xidea.lite.parser.impl.ELParser;
-import org.xidea.lite.parser.impl.ParseContextImpl;
+import org.xidea.lite.impl.ELParser;
+import org.xidea.lite.impl.ParseContextImpl;
+import org.xidea.lite.parse.ParseContext;
+import org.xidea.lite.parse.TextParser;
 import org.xidea.lite.test.TestUtil;
 import org.xml.sax.SAXException;
 
@@ -50,7 +50,7 @@ public class ClientJSBuilderTest {
 		context2.setCompress(true);
 		context2.parse(context2.loadXML(url));
 		JSIRuntime rt = RuntimeSupport.create();
-		proxy.eval("$import('org.xidea.lite:Translator')");
+		proxy.eval("$import('org.xidea.lite.impl:Translator')");
 		Object ts = proxy.eval("new Translator('t1')");
 		String result = (String)proxy.invoke(ts, "translate", context2);
 

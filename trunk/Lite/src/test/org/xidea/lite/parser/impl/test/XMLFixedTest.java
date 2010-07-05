@@ -7,8 +7,8 @@ import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
-import org.xidea.lite.parser.impl.XMLContextImpl;
-import org.xidea.lite.parser.impl.XMLFixerImpl;
+import org.xidea.lite.impl.XMLContextImpl;
+import org.xidea.lite.impl.XMLFixerImpl;
 
 public class XMLFixedTest extends XMLContextImpl {
 

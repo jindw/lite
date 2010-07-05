@@ -114,7 +114,7 @@ public class ClientParser extends ELParser implements NodeParser<Element>,
 	private void parseClient(ParseContext context,String id, 
 			ParseContext clientContext, boolean needScript) {
 
-		proxy.eval("$import('org.xidea.lite:Translator')");
+		proxy.eval("$import('org.xidea.lite.impl:Translator')");
 		Object ts = proxy.eval("new Translator('"+ id + "')");
 		String code = (String)proxy.invoke(ts, "translate", clientContext);
 		//

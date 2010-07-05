@@ -32,8 +32,8 @@ import org.xidea.el.json.JSONDecoder;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.Template;
 import org.xidea.lite.TemplateEngine;
-import org.xidea.lite.parser.impl.ParseContextImpl;
-import org.xidea.lite.parser.impl.ParseUtil;
+import org.xidea.lite.impl.ParseContextImpl;
+import org.xidea.lite.impl.ParseUtil;
 import org.xidea.lite.test.TestUtil;
 import org.xml.sax.SAXException;
 
@@ -91,10 +91,10 @@ public class JSCompileTest {
 
 		});
 		//engine.eval("evalFile.call(null,'print(this)',111)");
-		engine.eval("$import('org.xidea.lite:Template');");
-		engine.eval("$import('org.xidea.lite:Translator');");
-		engine.eval("$import('org.xidea.lite:XMLParser');");
-		engine.eval("$import('org.xidea.lite:findELEnd')");
+		engine.eval("$import('org.xidea.lite.impl:Template');");
+		engine.eval("$import('org.xidea.lite.impl:Translator');");
+		engine.eval("$import('org.xidea.lite.impl:XMLParser');");
+		engine.eval("$import('org.xidea.el:findELEnd')");
 	}
 
 	@Test
@@ -121,7 +121,7 @@ public class JSCompileTest {
 
 	@Test
 	public void testClasspath() throws Exception {
-		String obj = (String)engine.eval("$import('org.xidea.lite:Template');new Template('classpath:///org/xidea/lite/test/input.xml').render({})");
+		String obj = (String)engine.eval("$import('org.xidea.lite.impl:Template');new Template('classpath:///org/xidea/lite/test/input.xml').render({})");
 		Assert.assertTrue(obj.startsWith("<!DOCTYPE html PUBLIC"));
 		System.out.println(obj);
 	}
