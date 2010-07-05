@@ -10,7 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.xidea.el.impl.ReflectUtil;
 import org.xidea.lite.TemplateEngine;
-import org.xidea.lite.parser.impl.ResourceContextImpl;
+import org.xidea.lite.impl.ResourceContextImpl;
 
 
 public class URLURITest {

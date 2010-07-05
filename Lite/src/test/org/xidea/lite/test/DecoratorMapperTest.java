@@ -7,8 +7,8 @@ import java.io.File;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.xidea.lite.parser.ParseConfig;
-import org.xidea.lite.parser.impl.ParseConfigImpl;
+import org.xidea.lite.impl.ParseConfigImpl;
+import org.xidea.lite.parse.ParseConfig;
 
 public class DecoratorMapperTest {
 	ParseConfig mapper;

@@ -6,7 +6,7 @@ import java.net.URISyntaxException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.xidea.lite.Template;
-import org.xidea.lite.parser.impl.HotTemplateEngine;
+import org.xidea.lite.impl.HotTemplateEngine;
 
 public class HotTemplateTest {
 	@Test

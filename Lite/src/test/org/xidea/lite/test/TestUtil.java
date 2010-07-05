@@ -2,8 +2,8 @@ package org.xidea.lite.test;
 
 import java.net.URI;
 
-import org.xidea.lite.parser.impl.ParseContextImpl;
-import org.xidea.lite.parser.impl.ResourceContextImpl;
+import org.xidea.lite.impl.ParseContextImpl;
+import org.xidea.lite.impl.ResourceContextImpl;
 
 public class TestUtil {
 

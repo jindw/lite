@@ -15,7 +15,7 @@ var STATUS_EXPRESSION = -101;
 var STATUS_OPERATOR = -102;
 var fns = {
 	getResult :function() {
-		return this.expression;//.slice(0).reverse();// reversed
+		return optimizeEL(this.expression);//.slice(0).reverse();// reversed
 	},
 
 	parseEL :function() {

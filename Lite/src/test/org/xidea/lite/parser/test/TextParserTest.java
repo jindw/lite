@@ -14,8 +14,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.xidea.lite.Template;
 import org.xidea.lite.TemplateEngine;
-import org.xidea.lite.parser.impl.ParseContextImpl;
-import org.xidea.lite.parser.impl.TextNodeParser;
+import org.xidea.lite.impl.ParseContextImpl;
+import org.xidea.lite.impl.TextNodeParser;
 import org.xidea.lite.test.TestUtil;
 
 public class TextParserTest {

@@ -8,7 +8,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 import org.junit.Test;
-import org.xidea.lite.parser.impl.HotTemplateEngine;
+import org.xidea.lite.impl.HotTemplateEngine;
 
 public class TemplateEngineSerializeTest {
 	//@Test

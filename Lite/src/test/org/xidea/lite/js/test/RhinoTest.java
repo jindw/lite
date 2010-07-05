@@ -17,7 +17,7 @@ import org.mozilla.javascript.EvaluatorException;
 import org.mozilla.javascript.NativeObject;
 import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.Scriptable;
-import org.xidea.lite.parser.impl.CoreXMLNodeParser;
+import org.xidea.lite.impl.CoreXMLNodeParser;
 
 import com.sun.xml.internal.bind.v2.ContextFactory;
 
@@ -36,7 +36,7 @@ public class RhinoTest {
 			if (boot != null) {
 				try {
 					eval(new InputStreamReader(boot, "utf-8"));
-					eval("$import('org.xidea.lite:buildNativeJS')");
+					eval("$import('org.xidea.lite.impl:buildNativeJS')");
 				} catch (Exception e) {
 					log.debug("尝试JSI启动编译脚本失败", e);
 				}

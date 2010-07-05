@@ -20,7 +20,7 @@ import org.w3c.dom.Document;
 import org.xidea.el.impl.ReflectUtil;
 import org.xidea.lite.Template;
 import org.xidea.lite.TemplateEngine;
-import org.xidea.lite.parser.impl.ParseContextImpl;
+import org.xidea.lite.impl.ParseContextImpl;
 import org.xidea.lite.test.TestUtil;
 import org.xml.sax.SAXException;
 

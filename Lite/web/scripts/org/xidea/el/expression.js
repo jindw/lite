@@ -9,6 +9,9 @@
  * 表达式对象，可以单步解释表达式中间代码
  */
 function Expression(el){
+	if(typeof el == 'string'){
+		el = new ExpressionTokenizer(expression).getResult();
+	}
 	this.el = el;
 }
 Expression.prototype.evaluate = function(context){
