@@ -12,8 +12,8 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.el.json.JSONDecoder;
-import org.xidea.lite.parser.ResourceContext;
-import org.xidea.lite.parser.impl.ResourceContextImpl;
+import org.xidea.lite.impl.ResourceContextImpl;
+import org.xidea.lite.parse.ResourceContext;
 
 public class TemplateEngine {
 	@SuppressWarnings("unused")

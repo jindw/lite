@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.xidea.lite.parser.impl.HotTemplateEngine;
+import org.xidea.lite.impl.HotTemplateEngine;
 
 public class TemplateServlet extends GenericServlet {
 	private static final long serialVersionUID = 1L;
