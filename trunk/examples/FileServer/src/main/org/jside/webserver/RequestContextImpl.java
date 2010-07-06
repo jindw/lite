@@ -137,8 +137,8 @@ public class RequestContextImpl implements RequestContext {
 
 	private String findHeader(List<String> headers, String key) {
 		for (String h : headers) {
-			int p = h.indexOf(':')+1;
-			if (key.equalsIgnoreCase(h.substring(0, p))) {
+			int p = h.indexOf(':');
+			if (key.regionMatches(true,0,h,0,key.length())) {
 				return h.substring(p + 1).trim();
 			}
 		}
