@@ -105,7 +105,6 @@ public class XMLTest {
 				.getResource("/").toURI());
 		parseContext.getFeatrueMap().put(HTMLNodeParser.AUTO_FORM_FEATRUE_URI, HTMLNodeParser.AUTO_IN_FORM);
 		
-		parseContext.setCompress(true);
 		List<Object> insts = parser.parse(
 				"<div xmlns:c=\"http://www.xidea.org/ns/template/core\">"
 						+ text + "</div>", parseContext);
