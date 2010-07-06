@@ -55,7 +55,6 @@ public class XMLParserTest {
 	public void testFormat() throws Exception {
 		URI url = this.getClass().getResource("format-test.xhtml").toURI();
 		ParseContextImpl parseContext =TestUtil.buildParseContext(url); 
-		parseContext.setFormat(true);
 		HashMap context = new HashMap();
 		context.put("data", Arrays.asList("0", "1", "2", "3", "4", "5", "6",
 				"7", "8", "9", "A", "B", "C", "D", "E", "F"));

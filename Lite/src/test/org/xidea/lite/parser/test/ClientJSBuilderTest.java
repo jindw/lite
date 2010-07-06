@@ -47,7 +47,6 @@ public class ClientJSBuilderTest {
 		ParseContext context2 = TestUtil.buildParseContext(url);
 		// 前端直接压缩吧？反正保留那些空白也没有调试价值
 		// context2.setCompress(context.isCompress());
-		context2.setCompress(true);
 		context2.parse(context2.loadXML(url));
 		JSIRuntime rt = RuntimeSupport.create();
 		proxy.eval("$import('org.xidea.lite.impl:Translator')");
@@ -68,7 +67,6 @@ public class ClientJSBuilderTest {
 		ParseContext context2 = TestUtil.buildParseContext(url);
 		// 前端直接压缩吧？反正保留那些空白也没有调试价值
 		// context2.setCompress(context.isCompress());
-		context2.setCompress(true);
 		context2.parse(context2.loadXML(url));
 
 		List<Object> clientLiteCode = context2.toList();

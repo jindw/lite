@@ -39,7 +39,6 @@ public class XMLParserTest {
 				+ (trim.matcher("\r\n\r\n\r\n sdsdsd\r\n")
 						.replaceAll("$1$2$3$4")) + ">"));
 		ParseContextImpl context = TestUtil.buildParseContext(new URI("http://localhost/"));
-		context.setCompress(true);
 		Object s = new XMLParser().parse(
 				"<xml>\r\n\r\n\r\n\t\t\t\t\r\n\r\n</xml>",context).get(0);
 		Assert.assertEquals(JSONEncoder.encode("<xml>\n</xml>"), JSONEncoder.encode(s));

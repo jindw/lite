@@ -151,6 +151,10 @@ public class ParseContextProxy implements ParserHolder,ResourceContext,ResultCon
 		xmlContext.endIndent();
 	}
 
+	public boolean isReserveSpace() {
+		return xmlContext.isReserveSpace();
+	}
+
 	public boolean isCompress() {
 		return xmlContext.isCompress();
 	}
@@ -161,10 +165,6 @@ public class ParseContextProxy implements ParserHolder,ResourceContext,ResultCon
 
 	public void setFormat(boolean format) {
 		xmlContext.setFormat(format);
-	}
-
-	public boolean isReserveSpace() {
-		return xmlContext.isReserveSpace();
 	}
 
 	public void setCompress(boolean compress) {

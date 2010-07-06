@@ -112,4 +112,8 @@ public class ParseChainImpl implements ParseChain {
 		pre = chain;
 	}
 
+	public ParseChain getPreviousChain() {
+		return pre;
+	}
+
 }
