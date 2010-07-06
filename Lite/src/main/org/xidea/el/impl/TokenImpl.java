@@ -46,6 +46,19 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 				}
 				if(canOptimize){
 					Object o = os.evaluate(this, ExpressionImpl.EMPTY_VS);
+					if(o == null){
+						
+					}else if(o instanceof Number){
+						float f = ((Number)o).floatValue();
+						if(Float.isNaN(f) || Float.isInfinite(f)){//NaN +-Finite不能正确系列化
+							return this;
+						}
+					}else if(o instanceof CharSequence 
+							||o instanceof Boolean
+							){
+					}else{
+						return this;
+					}
 					return new TokenImpl(VALUE_CONSTANTS, o);
 				}
 			}
