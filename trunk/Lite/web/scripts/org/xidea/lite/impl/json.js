@@ -76,8 +76,8 @@ function stringifyJSON(value) {
         	return 'null';
         case 'number':
             if(isNaN(value)){
-            	value = 'NaN'
-            }else if(!isFinite(value)){
+            //	value = 'NaN'
+            //}else if(!isFinite(value)){
                 value = 'null';
             }
         default:

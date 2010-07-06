@@ -23,7 +23,7 @@ ELTranslator.prototype = {
 	 * 将TOKEN转化为EL 表达式
 	 */
 	toString:function(){
-		print("\n"+stringifyJSON(this.tree)+this.tree+"%%%\n")
+		//print("\n"+stringifyJSON(this.tree)+this.tree+"%%%\n")
 		return this.stringify(this.tree);
 	},
 	/**

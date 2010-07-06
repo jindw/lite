@@ -131,7 +131,20 @@ function optimizeEL(el){
 		}
 		if(co){
 			var o = evaluate(el, []);
-			print("\n\n@@@"+o)
+			var type = typeof o;
+			switch(type){
+				case 'string':
+				case 'boolean':
+					break;
+				case 'number':
+					if(isFinite(o)){
+						break;
+					}
+				default:
+					if(o != null){//object undefined
+						return el;
+					}
+			}
 			return [VALUE_CONSTANTS,o]
 		}
 	}
