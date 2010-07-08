@@ -167,7 +167,6 @@
 			<arg value="-outputExported" />
 			<arg value="${basedir}/build/dest/jslite/template.js" />
 		</java>
-
 	</target>
 
 	<target name="compress" depends="init">

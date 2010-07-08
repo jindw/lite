@@ -23,7 +23,7 @@ public class ExtensionParser implements NodeParser<Element> {
 
 		if (src != null && src.length() > 0) {
 			for (String s : src.split("[\\s*,\\s*]")) {
-				URI uri = context.createURI(s, null);
+				URI uri = context.createURI(s);
 				processResource(uri,context);
 			}
 		}

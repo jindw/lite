@@ -6,8 +6,6 @@ this.addScript('js-translator.js',["Translator"]
                 ,0
                 ,["org.xidea.el:ELTranslator",'VarStatus','org.xidea.jsi:$log']);
 
-this.addScript('json.js',["stringifyJSON","parseJSON"]);
-
 this.addScript('variable-finder.js','VarStatus'
                 ,0
                 ,["template.js","org.xidea.el:evaluate","org.xidea.el:ELTranslator",'org.xidea.jsi:$log']);

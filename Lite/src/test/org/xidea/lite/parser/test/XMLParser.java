@@ -66,7 +66,7 @@ class XMLParser extends TextNodeParser{
 						xpath = path.substring(pos + 1);
 						path = path.substring(0, pos);
 					}
-					node = context.loadXML(context.createURI(path, null));
+					node = context.loadXML(context.createURI(path));
 					if (xpath != null) {
 						node = context.selectNodes(node, xpath);
 					}

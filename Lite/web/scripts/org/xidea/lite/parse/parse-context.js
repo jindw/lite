@@ -12,9 +12,7 @@
 function ParseContext(){
 	this.initialize();
 }
-function URI(path){
-	this.path = path;
-}
+
 ParseContext.prototype = {
 	/**
 	 * 初始化上下文
@@ -28,7 +26,7 @@ ParseContext.prototype = {
 	    this.topChain = new ParseChain(this);
 	},
     createURI:function(path,parentURI) {
-    	path = (parentURI||this.parentURI || '')+(path||'')
+    	path = (parentURI||this.currentURI || '')+(path||'')
 		return new URI(path);
     },
     //nativeJS:false,

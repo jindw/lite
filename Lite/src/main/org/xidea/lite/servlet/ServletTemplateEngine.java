@@ -28,8 +28,8 @@ public class ServletTemplateEngine extends HotTemplateEngine {
 			if(configPath==null){
 				configPath = "/WEB-INF/lite.xml";
 			}
-			File file = new File(context.getRealPath(configPath));
-			super.config = new ParseConfigImpl(file.toURI());
+			File file = new File(context.getRealPath("/"));
+			super.config = new ParseConfigImpl(file.toURI(),new File(file,configPath).toURI());
 		} catch (Exception e) {
 			log.error("装载页面装饰配置信息失败", e);
 		}

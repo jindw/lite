@@ -39,7 +39,7 @@ import org.xidea.lite.parse.XMLContext;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
-public class XMLContextImpl implements XMLContext {
+public class XMLContextImpl {
 
 	private static Log log = LogFactory.getLog(XMLContextImpl.class);
 
@@ -301,7 +301,7 @@ public class XMLContextImpl implements XMLContext {
 		this.reserveSpace = keepSpace;
 	}
 
-	public int getDepth() {
+	private int getDepth() {
 		return depth;
 	}
 

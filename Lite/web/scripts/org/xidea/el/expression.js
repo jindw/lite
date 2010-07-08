@@ -10,7 +10,7 @@
  */
 function Expression(el){
 	if(typeof el == 'string'){
-		el = new ExpressionTokenizer(expression).getResult();
+		el = new ExpressionTokenizer(el).getResult();
 	}
 	this.el = el;
 }
