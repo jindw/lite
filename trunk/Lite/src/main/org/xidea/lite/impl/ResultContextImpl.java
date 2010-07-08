@@ -39,9 +39,12 @@ public class ResultContextImpl implements ResultContext {
 	//	private HashMap<Object, String> objectIdMap = new HashMap<Object, String>();
 	private int inc = 0;
 
+	private boolean preserveSpace;
 	private final ArrayList<Object> result = new ArrayList<Object>();
 
 	private ParseContext context;
+
+
 
 	public ResultContextImpl(ParseContext context) {
 		this.context = context;
@@ -434,6 +437,14 @@ public class ResultContextImpl implements ResultContext {
 
 	public void setTextType(int textType) {
 		this.textType = textType;
+	}
+
+	public boolean isReserveSpace() {
+		return preserveSpace;
+	}
+
+	public void setReserveSpace(boolean keepSpace) {
+		this.preserveSpace = keepSpace;
 	}
 
 }

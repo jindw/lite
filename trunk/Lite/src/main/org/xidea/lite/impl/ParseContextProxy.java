@@ -22,23 +22,20 @@ import org.xidea.lite.parse.ParseChain;
 import org.xidea.lite.parse.ParseConfig;
 import org.xidea.lite.parse.ParseContext;
 import org.xidea.lite.parse.ParserHolder;
-import org.xidea.lite.parse.ResourceContext;
 import org.xidea.lite.parse.ResultContext;
 import org.xidea.lite.parse.TextParser;
 import org.xidea.lite.parse.XMLContext;
 import org.xml.sax.SAXException;
 
-public class ParseContextProxy implements ParserHolder,ResourceContext,ResultContext,ParseConfig,XMLContext  {
-	protected ResourceContext resourceContext;
-	protected XMLContext xmlContext;
+public class ParseContextProxy implements ParserHolder,ResultContext,ParseConfig,XMLContext  {
 	protected ResultContext resultContext;
 	protected ParserHolder parserHolder;
 	protected ParseConfig config;
 
 	protected ParseContextProxy() {
 	}
+	
 	public ParseContextProxy(ParseContext parent) {
-		this.resourceContext = parent;
 		this.xmlContext = parent;
 		//需要重设 ParseChain 的context
 		this.parserHolder = parent;
@@ -49,14 +46,32 @@ public class ParseContextProxy implements ParserHolder,ResourceContext,ResultCon
 		return parserHolder.getTextParsers();
 	}
 
-	public URI createURI(String file, URI parentURI) {
-		return resourceContext.createURI(file, parentURI);
+	public URI createURI(String path) {
+		try {
+			//TODO
+			URI parent = this.getCurrentURI();
+			if(parent == null){
+				parent = config.getRoot();
+			}
+			if (path.startsWith("/")) {
+				if (parent == null
+						|| parent.toString().startsWith(config.getRoot().toString())) {
+					String prefix = config.getRoot().getRawPath();
+					int p = prefix.lastIndexOf('/');
+					if (p > 0) {
+						path = prefix.substring(0, p) + path;
+					}
+				}
+			}
+			return parent.resolve(path);
+
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
-
-
 	public InputStream openStream(URI uri) {
-		return resourceContext.openStream(uri);
+		return config.openStream(uri);
 	}
 
 	public String addGlobalObject(Class<? extends Object> impl, String key) {
@@ -127,14 +142,6 @@ public class ParseContextProxy implements ParserHolder,ResourceContext,ResultCon
 		return resultContext.reset(mark);
 	}
 
-	public int findBeginType() {
-		return resultContext.findBeginType();
-	}
-
-	public int findBegin() {
-		return resultContext.findBegin();
-	}
-
 	public int getDepth() {
 		return resultContext.getDepth();
 	}
@@ -143,36 +150,16 @@ public class ParseContextProxy implements ParserHolder,ResourceContext,ResultCon
 		return resultContext.getType(offset);
 	}
 
-	public void beginIndent() {
-		xmlContext.beginIndent();
-	}
 
-	public void endIndent() {
-		xmlContext.endIndent();
-	}
 
 	public boolean isReserveSpace() {
-		return xmlContext.isReserveSpace();
+		return resultContext.isReserveSpace();
 	}
 
-	public boolean isCompress() {
-		return xmlContext.isCompress();
-	}
 
-	public boolean isFormat() {
-		return xmlContext.isFormat();
-	}
-
-	public void setFormat(boolean format) {
-		xmlContext.setFormat(format);
-	}
-
-	public void setCompress(boolean compress) {
-		xmlContext.setCompress(compress);
-	}
 
 	public void setReserveSpace(boolean keepSpace) {
-		xmlContext.setReserveSpace(keepSpace);
+		resultContext.setReserveSpace(keepSpace);
 	}
 
 	public Document loadXML(URI uri) throws SAXException, IOException {
@@ -273,5 +260,9 @@ public class ParseContextProxy implements ParserHolder,ResourceContext,ResultCon
 	}
 	public TextParser[] getTextParsers(String path) {
 		return config.getTextParsers(path);
+	}
+
+	public URI getRoot() {
+		return config.getRoot();
 	}
 }

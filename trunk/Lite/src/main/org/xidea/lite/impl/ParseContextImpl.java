@@ -8,7 +8,6 @@ import java.util.Map;
 import org.xidea.lite.parse.NodeParser;
 import org.xidea.lite.parse.ParseConfig;
 import org.xidea.lite.parse.ParseContext;
-import org.xidea.lite.parse.ResourceContext;
 import org.xidea.lite.parse.TextParser;
 
 /**
@@ -23,14 +22,14 @@ public class ParseContextImpl extends ParseContextProxy implements ParseContext 
 	
 	protected ParseContextImpl() {
 	}
-	public ParseContextImpl(String path,ResourceContext base,ParseConfig config) {
+	public ParseContextImpl(String path,ParseConfig config) {
 		if(config !=null && path!=null){
 		Map<String, String> featrues = config.getFeatrueMap(path);
 		TextParser[] ips = config.getTextParsers(path);
 		NodeParser<? extends Object>[] parsers = config.getNodeParsers(path);
-		initialize(base, config,featrues, parsers, ips);
+		initialize( config,featrues, parsers, ips);
 		}else{
-			initialize(base, config,null, null, null);
+			initialize( config,null, null, null);
 		}
 	}
 
@@ -43,9 +42,8 @@ public class ParseContextImpl extends ParseContextProxy implements ParseContext 
 	}
 
 
-	protected void initialize(ResourceContext base,ParseConfig decoratorContext, Map<String, String> featrues,
+	protected void initialize(ParseConfig decoratorContext, Map<String, String> featrues,
 			NodeParser<? extends Object>[] parsers, TextParser[] ips) {
-		resourceContext = base;
 		this.config = decoratorContext;
 		xmlContext = new XMLContextImpl(this);
 		resultContext = new ResultContextImpl(this);
@@ -55,17 +53,10 @@ public class ParseContextImpl extends ParseContextProxy implements ParseContext 
 
 	protected void initializeFeatrues(Map<String, String> newFeatrues) {
 		if (newFeatrues != null) {
-			String v = newFeatrues.get("compress");
+
+			String v = newFeatrues.get("reserveSpace");
 			if (v != null) {
-				xmlContext.setCompress("true".equalsIgnoreCase(v));
-			}
-			v = newFeatrues.get("reserveSpace");
-			if (v != null) {
-				xmlContext.setReserveSpace("true".equalsIgnoreCase(v));
-			}
-			v = newFeatrues.get("format");
-			if (v != null) {
-				xmlContext.setFormat("true".equalsIgnoreCase(v));
+				resultContext.setReserveSpace("true".equalsIgnoreCase(v));
 			}
 			featrueMap.clear();
 			featrueMap.putAll(newFeatrues);

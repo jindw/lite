@@ -1,21 +1,27 @@
-<lite debug-model="true">
-    <featrue key=""></featrue>
-    <extension>
-    this.addNodeParser({
-    	namespace:null,
-    	localName:['body','html'],
-    	parse:function(){
-    		
-    	}
-    });
-    </extension>
-    <globals-exclude>/**-json.xhtml</globals-exclude>
-    <globals-exclude>/**-json.xhtml</globals-exclude>
-    <group layout="/example/layout.xhtml">
-        <include>/example/*.xhtml</include>
-        <exclude>/example/*.xhtml</exclude>
-    </group>
-    <group layout="/book/layout.xhtml">
-        <include>/book/*.xhtml</include>
-    </group>
+<lite encoding="utf-8" mime-type="text/html">
+	<featrue key="http://www.xidea.org/featrue/lite/javascript-compressor"
+		value="org.jside.jsi.tools.JSACompressor" />
+	<extension namespace="http://www.w3c.org/1999/xhtml" package="org.xidea.lite.xhtml" />
+	<group layout="/guide/layout.xhtml">
+		<extension namespace="http://www.xidea.org/ns/lite/core"
+			package="org.xidea.lite.xhtml" />
+		<group layout="/example/layout.xhtml">
+			<include>/example/*.xhtml</include>
+			<exclude>/example/*.xhtml</exclude>
+		</group>
+		<include>/book/*.xhtml</include>
+	</group>
+	<include>**.xhtml</include>
+<![CDATA[
+//等价的json配置
+[
+	{
+		"includes":["/example\\/*.xhtml"],
+		"excludes":[],
+		"featrueMap":{"http://www.xidea.org/featrue/lite/javascript-compressor","org.jside.jsi.tools.JSACompressor"},
+		"extensions":[{"key":"http://www.xidea.org/featrue/lite/core","value":}]
+	}
+]
+]]>
 </lite>
+

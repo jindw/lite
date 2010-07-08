@@ -14,7 +14,6 @@ import org.xidea.lite.Template;
 import org.xidea.lite.TemplateEngine;
 import org.xidea.lite.parse.ParseConfig;
 import org.xidea.lite.parse.ParseContext;
-import org.xidea.lite.parse.ResourceContext;
 
 public class HotTemplateEngine extends TemplateEngine {
 	//public static final String DEFAULT_DECORATOR_MAPPING = "/WEB-INF/decorators.xml";
@@ -26,18 +25,13 @@ public class HotTemplateEngine extends TemplateEngine {
 		super(webRoot);
 		if (config!=null) {
 			this.config = new ParseConfigImpl(
-					config);
-		}
-	}
-	public HotTemplateEngine(ResourceContext webRoot, ParseConfig context) {
-		super(webRoot);
-		if (context!=null) {
-			this.config = context;
+					webRoot,config);
 		}
 	}
 
+
 	protected ParseContext createParseContext(String path) {
-		return new ParseContextImpl(path,base, config);
+		return new ParseContextImpl(path, config);
 	}
 	@Override
 	protected Template createTemplate(String path) {
@@ -51,7 +45,7 @@ public class HotTemplateEngine extends TemplateEngine {
 
 	protected Template createTemplate(String path, ParseContext parseContext) {
 		try {
-			parseContext.parse(base.createURI(path, null));
+			parseContext.parse(parseContext.createURI(path));
 		} catch (Exception e) {
 			log.error("模板解析失败", e);
 			StringWriter out = new StringWriter();

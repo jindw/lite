@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
  */
 public abstract class URIMatcher implements Comparable<URIMatcher> {
 	public static final URIMatcher createMatcher(String pattern) {
-		pattern = pattern.trim();
+		pattern = pattern.trim().replaceAll("[\\\\\\/]+", "/");
 		int i = pattern.indexOf('*');
 		if (i < 0) {
 			return new StaticMatcher(pattern);
@@ -57,17 +57,11 @@ public abstract class URIMatcher implements Comparable<URIMatcher> {
 	}
 
 
-	static class AndMatcher extends URIMatcher {
-		final URIMatcher[] matchers;
+	static final class AndMatcher extends OrMatcher {
 
 		public AndMatcher(URIMatcher... matchers) {
-			for (int i = 0; i < matchers.length; i++) {
-				URIMatcher matcher = matchers[i];
-				length = Math.min(matcher.length(), length);
-			}
-			this.matchers = matchers;
+			super(matchers);
 		}
-
 		public boolean match(String url) {
 			for (int i = 0; i < matchers.length; i++) {
 				URIMatcher matcher = matchers[i];
@@ -79,9 +73,14 @@ public abstract class URIMatcher implements Comparable<URIMatcher> {
 		}
 	}
 
-	static final class OrMatcher extends AndMatcher {
+	static class OrMatcher extends  URIMatcher{
+		final URIMatcher[] matchers;
 		public OrMatcher(URIMatcher... matchers) {
-			super(matchers);
+			for (int i = 0; i < matchers.length; i++) {
+				URIMatcher matcher = matchers[i];
+				length = Math.min(matcher.length(), length);
+			}
+			this.matchers = matchers;
 		}
 		public boolean match(String url) {
 			for (int i = 0; i < matchers.length; i++) {

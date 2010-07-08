@@ -29,7 +29,7 @@ public class InputStreamNodeParser implements NodeParser<InputStream> {
 		String ext = getParam(text, IMPL_PATTERN);
 		text = text.replaceFirst("^#!.*\\r?\\n?", "");
 		if(ext != null){
-			URI uri = context.createURI(ext, null);
+			URI uri = context.createURI(ext);
 			extensionParser.processResource(uri,context);
 		}
 		context.parse(text);

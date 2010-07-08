@@ -35,8 +35,7 @@ public class ParseUtil {
 				||url != null &&  TEMPLATE_NAMESPACE_CORE.matcher(url).find();
 	}
 
-	private static final ParseContextImpl PC = new ParseContextImpl(null,
-			new ResourceContextImpl(null),null);
+	private static final ParseContextImpl PC = new ParseContextImpl(null,null);
 
 	public static Document loadXML(String path) throws SAXException,
 			IOException {

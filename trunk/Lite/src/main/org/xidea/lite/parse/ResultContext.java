@@ -53,16 +53,23 @@ public interface ResultContext {
 	 * @return
 	 */
 	public int getDepth();
+
 	/**
-	 * 获取结束当前状态的开始节点位置
+	 * 是否保留空白（默认为false）
 	 * @return
 	 */
-	public int findBegin();
-	/**
-	 * 获取结束当前状态的开始节点位置
-	 * @return
-	 */
-	public int findBeginType();
+	public boolean isReserveSpace();
+	public void setReserveSpace(boolean keepSpace);
+//	/**
+//	 * 获取结束当前状态的开始节点位置
+//	 * @return
+//	 */
+//	public int findBegin();
+//	/**
+//	 * 获取结束当前状态的开始节点位置
+//	 * @return
+//	 */
+//	public int findBeginType();
 	
 	/**
 	 * 获取指定位置的节点类别

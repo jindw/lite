@@ -82,7 +82,7 @@ public class CoreXMLNodeParser implements NodeParser<Node> {
 			if (isFirst) {
 				context.setAttribute(FIRST_NODE, true);
 				URI currentURI = context.getCurrentURI();
-				URI base = context.createURI("/", null);
+				URI base = context.createURI("/");
 				if (currentURI != null) {
 					URI relative = base.relativize(currentURI);
 					String path = null;
@@ -158,7 +158,7 @@ public class CoreXMLNodeParser implements NodeParser<Node> {
 					context.setAttribute("#page", root);
 					context.setAttribute("#content", root);
 					context.setAttribute("#main", root);
-					root = context.loadXML(context.createURI(decoratorPath, null));
+					root = context.loadXML(context.createURI(decoratorPath));
 				}
 			}
 			return root;
@@ -193,11 +193,10 @@ public class CoreXMLNodeParser implements NodeParser<Node> {
 				uri = doc.getOwnerDocument().getDocumentURI();
 			}
 			if (uri != null) {
-				context.setCurrentURI(context.createURI(uri, null));
+				context.setCurrentURI(context.createURI(uri));
 			}
 		} else {
-			doc = context.loadXML(context.createURI(path, context
-					.getCurrentURI()));
+			doc = context.loadXML(context.createURI(path));
 		}
 		return doc;
 	}
@@ -396,7 +395,7 @@ public class CoreXMLNodeParser implements NodeParser<Node> {
 		String content = ParseUtil.getAttributeOrNull(el, "content");
 		if (file != null) {
 			try {
-				URI uri = context.createURI(file, null);
+				URI uri = context.createURI(file);
 				InputStream in = context.openStream(uri);
 				InputStreamReader reader = new InputStreamReader(in,
 						encoding == null ? "utf-8" : encoding);

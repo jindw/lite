@@ -12,24 +12,18 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.el.json.JSONDecoder;
-import org.xidea.lite.impl.ResourceContextImpl;
-import org.xidea.lite.parse.ResourceContext;
 
 public class TemplateEngine {
 	@SuppressWarnings("unused")
 	private static final Log log = LogFactory.getLog(TemplateEngine.class);
 	private HashMap<String, Object> lock = new HashMap<String, Object>();
-	protected ResourceContext base;
+	protected URI base;
 	/**
 	 * WeakHashMap 回收的太快了?
 	 */
 	protected Map<String, Template> templateMap = new java.util.WeakHashMap<String, Template>();
 
 	public TemplateEngine(URI base) {
-		this.base = new ResourceContextImpl(base);
-	}
-
-	public TemplateEngine(ResourceContext base) {
 		this.base = base;
 	}
 
@@ -77,9 +71,9 @@ public class TemplateEngine {
 	}
 
 	protected String getLiteCode(String path) throws IOException {
-		URI uri =  base.createURI(path.replace('/', '.'),null);
-		InputStream in = base.openStream(uri);
+		InputStream in = null;
 		try {
+			in = base.resolve(path).toURL().openStream();
 			InputStreamReader reader = new InputStreamReader(in, "UTF-8");
 			StringBuilder buf = new StringBuilder();
 			char[] cbuf = new char[256];
