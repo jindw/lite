@@ -75,7 +75,7 @@ public class LiteCompiler {
 		if(root == null){
 			root = new File(".");
 		}
-		engine = new TemplateCompilerEngine(root, parsers, featrueMap);
+		engine = new TemplateCompilerEngine(root);
 
 		litecached = createIfNotExist(litecached, "WEB-INF/litecached/");
 		htmlcached = createIfNotExist(htmlcached, null);

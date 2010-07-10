@@ -76,4 +76,7 @@ public class ParseHolderImpl implements ParserHolder {
 		return topChain;
 	}
 
+	public void addExtension(String namespace, String packageName) {
+	}
+
 }

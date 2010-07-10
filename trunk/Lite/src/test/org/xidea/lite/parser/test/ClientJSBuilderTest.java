@@ -29,7 +29,7 @@ import org.xidea.lite.impl.ELParser;
 import org.xidea.lite.impl.ParseContextImpl;
 import org.xidea.lite.parse.ParseContext;
 import org.xidea.lite.parse.TextParser;
-import org.xidea.lite.test.TestUtil;
+import org.xidea.lite.test.LiteTestUtil;
 import org.xml.sax.SAXException;
 
 public class ClientJSBuilderTest {
@@ -44,7 +44,7 @@ public class ClientJSBuilderTest {
 	@Test
 	public void testBuildJS() throws SAXException, IOException, URISyntaxException {
 		URI url = this.getClass().getResource("format-test.xhtml").toURI();
-		ParseContext context2 = TestUtil.buildParseContext(url);
+		ParseContext context2 = LiteTestUtil.buildParseContext(url);
 		// 前端直接压缩吧？反正保留那些空白也没有调试价值
 		// context2.setCompress(context.isCompress());
 		context2.parse(context2.loadXML(url));
@@ -64,7 +64,7 @@ public class ClientJSBuilderTest {
 	@Test
 	public void testClient() throws SAXException, IOException, URISyntaxException {
 		URI url = this.getClass().getResource("asciitable-client.xhtml").toURI();
-		ParseContext context2 = TestUtil.buildParseContext(url);
+		ParseContext context2 = LiteTestUtil.buildParseContext(url);
 		// 前端直接压缩吧？反正保留那些空白也没有调试价值
 		// context2.setCompress(context.isCompress());
 		context2.parse(context2.loadXML(url));
@@ -83,14 +83,14 @@ public class ClientJSBuilderTest {
 		InputStreamReader source = new InputStreamReader(this.getClass()
 				.getResourceAsStream("ct-client.txt"), "utf-8");
 		
-		ParseContext context2 = new ParseContextImpl(null,TestUtil.buildParseContext(new URI("http://w/")),null){
-			@Override
-			public TextParser[] getTextParsers(){
-				return new TextParser[] { ELParser.EL, ELParser.IF,
-						ELParser.FOR, ELParser.ELSE, ELParser.CLIENT,
-						ELParser.END, ELParser.VAR };
-			}
-		};
+		ParseContext context2 = LiteTestUtil.buildParseContext(new URI("http://w/"));
+		context2.addTextParser(ELParser.EL);
+		context2.addTextParser(ELParser.IF);
+		context2.addTextParser(ELParser.FOR);
+		context2.addTextParser(ELParser.ELSE);
+		context2.addTextParser(ELParser.CLIENT);
+		context2.addTextParser(ELParser.END);
+		context2.addTextParser(ELParser.VAR);
 		// 前端直接压缩吧？反正保留那些空白也没有调试价值
 		// context2.setCompress(context.isCompress());
 		context2.parse(loadText(source));

@@ -10,7 +10,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.xidea.el.impl.ReflectUtil;
 import org.xidea.lite.TemplateEngine;
-import org.xidea.lite.impl.ResourceContextImpl;
+import org.xidea.lite.impl.ParseContextImpl;
+import org.xidea.lite.test.LiteTestUtil;
 
 
 public class URLURITest {
@@ -21,12 +22,12 @@ public class URLURITest {
 	@Test
 	public void testResourceContext() throws Exception{
 		String base = "http://lh:8080/test";
-		ResourceContextImpl rc = new ResourceContextImpl(new URI(base));
+		ParseContextImpl rc =LiteTestUtil.buildParseContext(new URI(base));
 		Assert.assertEquals(base+".xml", rc.createURI("test.xml").toString());
 		Assert.assertEquals(base+".xml", rc.createURI("./test.xml").toString());
 		
 		base = "http://lh:8080/test/aa/bb/";
-		rc = new ResourceContextImpl(new URI(base));
+		rc = LiteTestUtil.buildParseContext(new URI(base));
 		System.out.println(ReflectUtil.map(new URI("classpath:///aa/bb")));
 		Assert.assertEquals(base+"test.xml", rc.createURI("test.xml").toString());
 		Assert.assertEquals("http://lh:8080/test/test.xml", rc.createURI("../../test.xml").toString());

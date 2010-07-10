@@ -71,9 +71,8 @@ public class TemplateEngine {
 	}
 
 	protected String getLiteCode(String path) throws IOException {
-		InputStream in = null;
+		InputStream in = base.resolve(path).toURL().openStream();
 		try {
-			in = base.resolve(path).toURL().openStream();
 			InputStreamReader reader = new InputStreamReader(in, "UTF-8");
 			StringBuilder buf = new StringBuilder();
 			char[] cbuf = new char[256];

@@ -56,7 +56,7 @@ public abstract class AbstractHTMLNodeParser implements NodeParser<Element> {
 
 	protected void appendHTMLElement(Element node, ParseContext context,
 			List<Object> exts) {
-		context.beginIndent();//false);
+		XMLContext.get(context).beginIndent();//false);
 		String closeTag = null;
 		try {
 			Element el = (Element) node;
@@ -96,7 +96,7 @@ public abstract class AbstractHTMLNodeParser implements NodeParser<Element> {
 				closeTag = "</" + tagName + '>';
 			}
 		} finally {
-			context.endIndent();
+			XMLContext.get(context).endIndent();
 			context.append(closeTag);
 		}
 	}

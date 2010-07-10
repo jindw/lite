@@ -77,7 +77,7 @@ public class DefaultXMLNodeParser implements NodeParser<Node> {
 	private void parseCDATA(Node node, ParseContext context) {
 		boolean needFormat = needFormat(node);
 		if (needFormat) {
-			context.beginIndent();// false);
+			XMLContext.get(context).beginIndent();// false);
 		}
 		try {
 			context.append("<![CDATA[");
@@ -87,7 +87,7 @@ public class DefaultXMLNodeParser implements NodeParser<Node> {
 			context.append("]]>");
 		} finally {
 			if (needFormat) {
-				context.endIndent();
+				XMLContext.get(context).endIndent();
 			}
 		}
 	}
@@ -172,22 +172,22 @@ public class DefaultXMLNodeParser implements NodeParser<Node> {
 			// }
 			// }
 			// text = text2;
-			if (context.isCompress()) {
+			if (XMLContext.get(context).isCompress()) {
 				text = safeTrim(text);
-			} else if (context.isFormat()) {
+			} else if (XMLContext.get(context).isFormat()) {
 				text = text.trim();
 			}
 		}
 		if (text.length() > 0) {
 			boolean needFormat = needFormat(node);
 			if (needFormat) {
-				context.beginIndent();// false);
+				XMLContext.get(context).beginIndent();// false);
 			}
 			try {
 				context.appendAll(context.parseText(text, Template.XML_TEXT_TYPE));
 			} finally {
 				if (needFormat) {
-					context.endIndent();
+					XMLContext.get(context).endIndent();
 				}
 			}
 		}
@@ -255,7 +255,7 @@ public class DefaultXMLNodeParser implements NodeParser<Node> {
 	}
 
 	private void parseElement(Node node, ParseContext context) {
-		context.beginIndent();// false);
+		XMLContext.get(context).beginIndent();// false);
 		String closeTag = null;
 		try {
 			Element el = (Element) node;
@@ -283,7 +283,7 @@ public class DefaultXMLNodeParser implements NodeParser<Node> {
 				closeTag = "/>";
 			}
 		} finally {
-			context.endIndent();
+			XMLContext.get(context).endIndent();
 			context.append(closeTag);
 		}
 	}

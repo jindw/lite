@@ -21,7 +21,8 @@ import org.xidea.el.impl.ReflectUtil;
 import org.xidea.lite.Template;
 import org.xidea.lite.TemplateEngine;
 import org.xidea.lite.impl.ParseContextImpl;
-import org.xidea.lite.test.TestUtil;
+import org.xidea.lite.impl.ParseUtil;
+import org.xidea.lite.test.LiteTestUtil;
 import org.xml.sax.SAXException;
 
 public class AvoidErrorParserTest {
@@ -126,8 +127,7 @@ public class AvoidErrorParserTest {
 	private Document toDoc(ParseContextImpl context, String source)
 			throws SAXException, IOException, URISyntaxException,
 			UnsupportedEncodingException {
-		Document doc = context.loadXML(new URI("text:"
-				+ URLEncoder.encode(source, "utf-8")));
+		Document doc = LiteTestUtil.loadXML(source,null);
 		return doc;
 	}
 
@@ -139,19 +139,7 @@ public class AvoidErrorParserTest {
 	}
 
 	private ParseContextImpl createContext() {
-		ParseContextImpl context = new ParseContextImpl(null, new ParseContextImpl(TestUtil.buildParseContext(new File(".").toURI())) {
-
-			@Override
-			public InputStream openStream(URI uri) {
-				if (uri.getScheme().equals("text")) {
-					String data = uri.getSchemeSpecificPart().replace('+', ' ');
-					System.out.println(data);
-					return new ByteArrayInputStream(data.getBytes());
-				}
-				return super.openStream(uri);
-			}
-
-		},null);
+		ParseContextImpl context = LiteTestUtil.buildParseContext(new File(".").toURI());;
 		return context;
 	}
 

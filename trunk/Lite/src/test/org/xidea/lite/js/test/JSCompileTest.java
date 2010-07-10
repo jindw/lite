@@ -28,13 +28,14 @@ import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xidea.el.json.JSONDecoder;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.Template;
 import org.xidea.lite.TemplateEngine;
 import org.xidea.lite.impl.ParseContextImpl;
 import org.xidea.lite.impl.ParseUtil;
-import org.xidea.lite.test.TestUtil;
+import org.xidea.lite.test.LiteTestUtil;
 import org.xml.sax.SAXException;
 
 import sun.org.mozilla.javascript.internal.BaseFunction;
@@ -50,16 +51,16 @@ public class JSCompileTest {
 	ParseContextImpl context;
 
 	public JSCompileTest() throws MalformedURLException {
-		context = TestUtil.buildParseContext(webRoot.toURI());
+		context = LiteTestUtil.buildParseContext(webRoot.toURI());
 	}
 
 	public String getText(Node doc, String xpath)
 			throws XPathExpressionException {
-		Node node = context.selectNodes(doc, xpath).getFirstChild();
-		if(node == null){
+		NodeList node = context.selectNodes(doc, xpath);
+		if(node == null || node.getLength()<1){
 			return null;
 		}
-		return node.getTextContent();
+		return node.item(0).getTextContent();
 	}
 
 	@Before
@@ -131,20 +132,15 @@ public class JSCompileTest {
 		Document doc = context.loadXML(menuURL);
 		String defaultContext = getText(doc, "/root/context");
 
-		DocumentFragment node = context.selectNodes(doc, "/root/entry");
-		Element child = (Element) node.getFirstChild();
-		while (child != null) {
+		NodeList nodes = context.selectNodes(doc, "/root/entry");
+		for (int i = 0;i<nodes.getLength();i++) {
+			Element child = (Element) nodes.item(i);
 			String key = child.getAttribute("key");
 			String source = getText(child, "source");
 			String context = getText(child, "context");
 			context = context == null ? defaultContext : context;
-
-			System.out.println(context);
 			// engine.put(ScriptEngine.FILENAME, "<file>");
-
 			doTestItem(key, source,  context);
-
-			child = (Element) child.getNextSibling();
 		}
 	}
 
@@ -180,10 +176,10 @@ public class JSCompileTest {
 				+ ")");
 		Object jsJS = engine.eval("jsTemplate.render(" + contextJSON + ")");
 		Assert.assertEquals("JS编译后结果不一致"+source, jsJSON, jsJS);
-		ParseContextImpl pc = TestUtil.buildParseContext(menuURL);
+		ParseContextImpl pc = LiteTestUtil.buildParseContext(menuURL);
 		source = source.replace("=\"menu.xml\"", "=\""+menuURL+"\"");
 		System.out.println(source);
-		pc.parse(ParseUtil.loadXML(source));
+		pc.parse(ParseUtil.loadXML(source,null));
 		StringWriter out = new StringWriter();
 		new Template(pc.toList()).render(JSONDecoder.decode(contextJSON),
 				out);

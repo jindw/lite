@@ -21,6 +21,11 @@ public interface ParserHolder{
 	 */
 	public void addTextParser(TextParser textParser);
 	/**
+	 * 添加指令解析器
+	 * @param textParser
+	 */
+	public void addExtension(String namespace,String packageName);
+	/**
 	 * 添加节点解析器
 	 * @param nodeParser
 	 */

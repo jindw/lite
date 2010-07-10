@@ -3,7 +3,6 @@ package org.xidea.lite.parser.test;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URI;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -13,10 +12,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.xidea.lite.Template;
-import org.xidea.lite.TemplateEngine;
 import org.xidea.lite.impl.ParseContextImpl;
 import org.xidea.lite.impl.TextNodeParser;
-import org.xidea.lite.test.TestUtil;
+import org.xidea.lite.test.LiteTestUtil;
 
 public class TextParserTest {
 
@@ -52,7 +50,7 @@ public class TextParserTest {
 
 	public void test(String text, String result) throws Exception {
 		TextNodeParser p = new TextNodeParser();
-		ParseContextImpl context = TestUtil.buildParseContext(new URI("http://localhost:8080/"));
+		ParseContextImpl context = LiteTestUtil.buildParseContext(new URI("http://localhost:8080/"));
 		p.parse(text, context, null);
 		List<Object> insts = context.toList();
 		Template t = new Template(insts);

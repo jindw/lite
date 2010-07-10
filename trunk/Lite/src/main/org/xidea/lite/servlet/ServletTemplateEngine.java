@@ -17,19 +17,22 @@ import org.xidea.lite.impl.HotTemplateEngine;
 import org.xidea.lite.impl.ParseConfigImpl;
 
 public class ServletTemplateEngine extends HotTemplateEngine {
-	private static final Log log = LogFactory.getLog(ServletTemplateEngine.class);
+	private static final Log log = LogFactory
+			.getLog(ServletTemplateEngine.class);
 	private ServletContext context;
 
 	public ServletTemplateEngine(ServletConfig config) {
-		super(new File(config.getServletContext().getRealPath("/")).toURI(),null);
+		super(new File(config.getServletContext().getRealPath("/")).toURI(),
+				null);
 		this.context = config.getServletContext();
 		try {
 			String configPath = config.getInitParameter("config");
-			if(configPath==null){
+			if (configPath == null) {
 				configPath = "/WEB-INF/lite.xml";
 			}
 			File file = new File(context.getRealPath("/"));
-			super.config = new ParseConfigImpl(file.toURI(),new File(file,configPath).toURI());
+			super.config = new ParseConfigImpl(file.toURI(), new File(file,
+					configPath).toURI());
 		} catch (Exception e) {
 			log.error("装载页面装饰配置信息失败", e);
 		}
@@ -37,32 +40,29 @@ public class ServletTemplateEngine extends HotTemplateEngine {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	protected Template createTemplate(String path){
-		if(false){
-			return super.createTemplate(path);
-		}else{
-			try {
-				File file = new File(context.getRealPath("/WEB-INF/litecached/"+path.replace('/', '^').replace('\\', '^')));
-				List<Object> list = JSONDecoder.decode(loadText(file));
-				return new Template((List<Object>)list.get(1));
-			} catch (IOException e) {
-				log.error(e);
-				throw new RuntimeException(e);
-			}
+	protected Template createTemplate(String path) {
+		// return super.createTemplate(path);
+		try {
+			File file = new File(context.getRealPath("/WEB-INF/litecached/"
+					+ path.replace('/', '^').replace('\\', '^')));
+			List<Object> list = JSONDecoder.decode(loadText(file));
+			return new Template((List<Object>) list.get(1));
+		} catch (IOException e) {
+			log.error(e);
+			throw new RuntimeException(e);
 		}
 	}
 
 	private String loadText(File file) throws IOException {
-		InputStreamReader in = new InputStreamReader(new FileInputStream(file),"utf-8");
+		InputStreamReader in = new InputStreamReader(new FileInputStream(file),
+				"utf-8");
 		StringBuilder buf = new StringBuilder();
 		char[] cbuf = new char[1024];
 		int c;
-		while((c = in.read(cbuf))>=0){
+		while ((c = in.read(cbuf)) >= 0) {
 			buf.append(cbuf, 0, c);
 		}
 		return buf.toString();
 	}
 
-
-	
 }

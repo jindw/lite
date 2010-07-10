@@ -59,9 +59,9 @@ public class HTMLNodeParser extends AbstractHTMLNodeParser implements NodeParser
 		if (AUTO_ANYWAY.equals(status)) {
 			processAutoForm(context, el, localName);
 		} else if (AUTO_IN_FORM.equals(status) && FORM_TAG.equals(localName)) {
-			context.getFeatrueMap().put(AUTO_FORM_FEATRUE_URI, AUTO_ANYWAY);
+			context.setAttribute(AUTO_FORM_FEATRUE_URI, AUTO_ANYWAY);
 			appendHTMLElement(el, context, null);
-			context.getFeatrueMap().put(AUTO_FORM_FEATRUE_URI, AUTO_ANYWAY);
+			context.setAttribute(AUTO_FORM_FEATRUE_URI, AUTO_ANYWAY);
 		} else {
 			appendHTMLElement(el, context, null);
 		}

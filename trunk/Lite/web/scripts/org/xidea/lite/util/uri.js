@@ -1,4 +1,7 @@
-function URI(path){
+function URI(path,parentURI){
+	if(parentURI&& !/^\w+\:|^</.test(path)){
+		path = parentURI.replace(/\/[^\\\/]+$/,'/')+path;
+	}
 	this.path = path;
 }
 
