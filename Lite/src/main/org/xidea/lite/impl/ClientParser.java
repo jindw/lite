@@ -28,7 +28,7 @@ public class ClientParser extends ELParser implements NodeParser<Element>,
 		return expression;
 	}
 
-	public int parse(final String text, final int p$, ParseContext context) {
+	public int parseText(final String text, final int p$, ParseContext context) {
 		int p1 = text.indexOf('{', p$);
 		int p2 = text.indexOf('}', p1);
 		String id = text.substring(p1 + 1, p2).trim();
@@ -64,7 +64,7 @@ public class ClientParser extends ELParser implements NodeParser<Element>,
 			return super.findStart(text, start, other$start);
 		}
 
-		public int parse(String text, int p$, ParseContext context) {
+		public int parseText(String text, int p$, ParseContext context) {
 			int depth = context.getDepth();
 			if (depth == 0) {
 				end = p$ + 4;
@@ -89,7 +89,7 @@ public class ClientParser extends ELParser implements NodeParser<Element>,
 				&& ParseUtil.isCoreNS(el.getPrefix(), el.getNamespaceURI())) {
 			parse(el, context);
 		} else {
-			chain.process(el);
+			chain.next(el);
 		}
 	}
 

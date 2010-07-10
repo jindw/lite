@@ -46,7 +46,7 @@ public abstract class AbstractHTMLNodeParser implements NodeParser<Element> {
 		if (namespace == null && node.getPrefix()==null || XHTMLNS.equals(namespace)) {
 			parseHTMLElement(node, context,chain);
 		}else{
-			chain.process(node);
+			chain.next(node);
 		}
 	}
 

@@ -35,8 +35,6 @@ public class ResultContextImpl implements ResultContext {
 	private int textType = 0;
 	private URI currentURI;
 	private ExpressionFactory expressionFactory = ExpressionFactoryImpl.getInstance();
-	private HashMap<String, String> typeIdMap = new HashMap<String, String>();
-	//	private HashMap<Object, String> objectIdMap = new HashMap<Object, String>();
 	private int inc = 0;
 
 	private boolean preserveSpace;
@@ -56,7 +54,7 @@ public class ResultContextImpl implements ResultContext {
 
 	private Object requrieEL(Object expression){
 		if(expression instanceof String){
-			expression = this.context.parseEL((String)expression);
+			expression = parseEL((String)expression);
 		}
 		return expression;
 	}
@@ -222,7 +220,6 @@ public class ResultContextImpl implements ResultContext {
 
 	@SuppressWarnings("unchecked")
 	public List<Object> toList() {
-		appendVarPlugin();
 		List<Object> result2 = optimizeResult(this.result);
 		ArrayList<ArrayList<Object>> stack = new ArrayList<ArrayList<Object>>();
 		ArrayList<Object> current = new ArrayList<Object>();
@@ -277,28 +274,15 @@ public class ResultContextImpl implements ResultContext {
 		return current;
 	}
 
-	private void appendVarPlugin() {
-		if (typeIdMap != null && !typeIdMap.isEmpty()) {
-			HashMap<String, Object> attributeMap = new HashMap<String, Object>();
-			for (Object value : typeIdMap.keySet()) {
-				attributeMap.put("name", typeIdMap.get(value));
-				attributeMap.put("type", value);
-				Object valueEL = this.context.parseEL(JSONEncoder.encode(attributeMap));
-				this.appendPlugin(DefinePlugin.class, valueEL);
-				this.appendEnd();
-			}
-		}
-		this.typeIdMap = null;
-	}
-	public String addGlobalObject(Class<? extends Object> class1, String key) {
-		String name = class1.getName();
-		String id = (String) (key == null ? typeIdMap.get(name) : key);
-		if (id == null) {
-			id = allocateId();
-			typeIdMap.put(name, id);
-		}
-		return id;
-	}
+//	public String addGlobalObject(Class<? extends Object> class1, String key) {
+//		String name = class1.getName();
+//		String id = (String) (key == null ? typeIdMap.get(name) : key);
+//		if (id == null) {
+//			id = allocateId();
+//			typeIdMap.put(name, id);
+//		}
+//		return id;
+//	}
 
 
 
@@ -333,7 +317,8 @@ public class ResultContextImpl implements ResultContext {
 		return optimizeResult;
 	}
 
-	public int findBeginType() {
+	@SuppressWarnings("unused")
+	private int findBeginType() {
 		int begin = findBegin();
 		if (begin >= 0) {
 			return this.getType(begin);
@@ -341,7 +326,7 @@ public class ResultContextImpl implements ResultContext {
 		return -3;// no begin
 	}
 
-	public int findBegin() {
+	private int findBegin() {
 		int depth = 0;
 		int i = this.result.size();
 		while (i-- > 0) {

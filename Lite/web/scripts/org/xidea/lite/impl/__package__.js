@@ -8,11 +8,6 @@ this.addScript('js-translator.js',["Translator"]
 
 this.addScript('variable-finder.js','VarStatus'
                 ,0
-                ,["template.js","org.xidea.el:evaluate","org.xidea.el:ELTranslator",'org.xidea.jsi:$log']);
-                
-
-this.addScript('xml-parser.js','XMLParser'
-                ,'org.xidea.lite.parse:ParseContext'
-                ,['org.xidea.lite.parse:parseText','org.xidea.lite.core:parseCoreNode','org.xidea.lite.core:parseXMLNode']);
+                ,["org.xidea.el:evaluate","org.xidea.el:ELTranslator",'org.xidea.jsi:$log']);
                 
 this.addDependence("*",'*',true);

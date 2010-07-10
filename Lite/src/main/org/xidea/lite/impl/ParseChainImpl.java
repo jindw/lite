@@ -47,12 +47,12 @@ public class ParseChainImpl implements ParseChain {
 		}
 	}
 
-	public void process(Object node) {
+	public void next(Object node) {
 		if (nodeType.isInstance(node)) {
 			parser.parse(node, context, next);
 		} else {
 			if (next != null) {
-				next.process(node);
+				next.next(node);
 			} else {
 				if (node instanceof URL) {
 					try {
@@ -69,7 +69,7 @@ public class ParseChainImpl implements ParseChain {
 						if(doc == null){
 							InputStream in = context.openStream(uri);
 							try{
-								process(in);
+								next(in);
 							}finally{
 								try{
 									in.close();
@@ -77,7 +77,7 @@ public class ParseChainImpl implements ParseChain {
 								}
 							}
 						}else{
-							process(doc);
+							next(doc);
 						}
 					} catch (Exception e) {
 						throw new RuntimeException(e);
@@ -86,13 +86,13 @@ public class ParseChainImpl implements ParseChain {
 					NodeList list = (NodeList) node;
 					int len = list.getLength();
 					for (int i = 0; i < len; i++) {
-						process(list.item(i));
+						next(list.item(i));
 					}
 				} else if (node instanceof NamedNodeMap) {
 					NamedNodeMap list = (NamedNodeMap) node;
 					int len = list.getLength();
 					for (int i = 0; i < len; i++) {
-						process(list.item(i));
+						next(list.item(i));
 					}
 				}else {
 					throw new RuntimeException("找不到数据类型对应的解析器"+node);

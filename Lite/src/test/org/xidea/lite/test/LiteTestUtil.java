@@ -11,7 +11,7 @@ import org.xidea.lite.impl.ParseUtil;
 public class LiteTestUtil {
 
 	public static ParseContextImpl buildParseContext(URI base) {
-		ParseContextImpl context = new ParseContextImpl("/",new ParseConfigImpl(base));
+		ParseContextImpl context = new ParseContextImpl(new ParseConfigImpl(base),"/");
 		context.setCurrentURI(base);
 		return context;
 	}

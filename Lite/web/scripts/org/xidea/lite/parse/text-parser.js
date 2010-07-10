@@ -6,95 +6,81 @@
  * @version $Id: template.js,v 1.4 2008/02/28 14:39:06 jindw Exp $
  */
 
-//parse
-
-
-
-function parseText(text,context,parseChain){
-    if(text!=null && text.constructor == String){
-        switch(context.textType){        case XML_ATTRIBUTE_TYPE :
-            var escapeQute = '"';
-        case XML_TEXT_TYPE :
-            var encode = true;  
-            var textType = context.textType;
-            break;
-        default:
-            var textType = EL_TYPE;
-        }
-        var pattern = /(\\*)\$([a-zA-Z!]{0,5}\{)/  //允许$for{} $if{} $end ...  see CT????
-        //var pattern = /(\\*)\$\{/g
-        var match ;
-        //seach:
-        while(match = pattern && pattern.exec(text)){
-            var begin = match.index;
-            var expressionBegin = begin + match[0].length;
-            var expressionEnd = findELEnd(text,expressionBegin-1);
-            var fn = match[2];
-            
-            begin && context.append(text.substr(0,begin),encode,escapeQute);
-            
-            if(match[1].length & 1){//转义后，打印转义结果，跳过
-                context.append(match[1].substr(0,parseInt(match[1].length / 2)) + '$',encode,escapeQute)
-                text = text.substr(expressionBegin+1);
-            }else{
-                fn = fn.substr(0,fn.length-1);
-                //expression:
-                try{
-                    var expression = text.substring(expressionBegin ,expressionEnd );
-                    expression = context.parseEL(expression);
-                    if(textType == XML_TEXT_TYPE){
-                    	context.appendXmlText(expression);
-                    }else if(textType == XML_ATTRIBUTE_TYPE){
-                    	context.appendAttribute(null,expression);
-                    }else{
-                    	context.appendEL(expression);
-                    }
-                    
-                    text = text.substr(expressionEnd+1);
-                    //以前为了一些正则bug,不知道是否还需要:(
-                    //pattern = text && /(\\*)\$([a-zA-Z!]{0,5}\{)/;
-                    //continue seach;
-                }catch(e){
-                	$log.debug("尝试表达式解析失败",expression,text,expressionBegin ,expressionEnd,e);
-                	context.append(match[0],encode,escapeQute);
-                	text = text.substr(expressionBegin);
-                }
-            }
-        }
-        text && context.append(text,encode,escapeQute);
-    }else{
-        parseChain.process(text);
+function parseText(text,context,chain,textParsers){
+	switch(typeof text == 'string' && context.textType){
+    case XML_ATTRIBUTE_TYPE :
+        var escapeQute = '"';
+    case XML_TEXT_TYPE :
+        var encode = true;  
+        break;
+    case EL_TYPE :
+        var textType = EL_TYPE;
+    default:
+    	chain.next(text);
+    	return;
     }
+	var len = text.length;
+	var start = 0;
+	do {
+		var nip = null;
+		var p$ = len + 1;
+		{
+			var pri = 0;
+			var ti = textParsers.length;
+			while (ti--) {
+				var ip = textParsers[ti];
+				var p$2 = ip.findStart(text, start, p$);
+				var pri2 = ip.priority || 1;
+				if (p$2 >= start ){
+					if(p$2 < p$ || p$2 == p$ && pri2>pri){
+						p$ = p$2;
+						nip = ip;
+						pri = pri2;
+					}
+				}
+				
+			}
+		}
+		if (nip != null) {
+			var escapeCount = countEescape(text, p$);
+			context.append(text
+					.substring(start, p$ - (escapeCount + 1) / 2), encode,
+					qute);
+			if ((escapeCount & 1) == 1) {// escapsed
+				start = nextPosition(context, text, p$);
+			} else {
+				start = p$;
+				var mark = context.mark();
+				try {
+					start = nip.parseText(text, start, context);
+				} catch (e) {
+					$log.warn("尝试表达式解析失败:[fileName:"+context.currentURI+"]",text,e);
+				}
+				if (start <= p$) {
+					context.reset(mark);
+					start = nextPosition(context, text, p$);
+				}
+
+			}
+		} else {
+			break;
+		}
+	} while (start < len);
+	if (start < len) {
+		context.append(text.substring(start), encode, qute);
+	}
+}
+function nextPosition(context, text, p$) {
+	context.append(text.substring(p$, p$ + 1));
+	return p$ + 1;
 }
 
-function parseFN(fn,expression){
-    if(fn){
-        switch(fn){
-            case 'for':
-            //parseFor();
-        }
-        throw new Error("不支持指令："+fn);
-    }
-}
-function parseEL(expression){
-    try{
-        checkEL(expression.replace(/\bfor\b/g,"f"));
-        return new ExpressionTokenizer(expression).getResult();
-    }catch(e){
-        $log.warn("表达式解析失败",expression,e)
-        throw e;
-    }
-}
-
-function parseFor(el){
-    //与CT相差太远
-    try{
-        checkEL(el);
-        el = '{'+el+'}'
-    }catch(e){
-        checkEL(el = '['+el+']');
-    }
-}
-function checkEL(el){
-    new Function("return "+el)
+function countEescape(text, p$) {
+	if (p$ > 0 && text.charAt(p$ - 1) == '\\') {
+		var pre = p$ - 1;
+		while (pre-- > 0 && text.charAt(pre) == '\\')
+			;
+		return p$ - pre - 1;
+	}
+	return 0;
 }

@@ -199,7 +199,7 @@ class ConfigParser implements NodeParser<Element> {
 
 	public void parse(Element node, ParseContext context, ParseChain chain) {
 		parse(node);
-		chain.process(node);
+		chain.next(node);
 	}
 
 	public void parse(Element node) {

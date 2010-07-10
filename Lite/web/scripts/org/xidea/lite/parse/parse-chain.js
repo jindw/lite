@@ -20,7 +20,7 @@ ParseChain.prototype = {
 		this.nextChain = new ParseChain(this.context,index+1);
 	    this.initialize = Function.prototype;
     },
-	process:function(node){
+	next:function(node){
 		if(null == node){
 			return null;
 		}
@@ -43,14 +43,14 @@ ParseChain.prototype = {
 				if(!parser.accept || parser.accept(node)){
 					parser(node,this.context,nextChain)
 				}else if(nextChain != null){
-               		nextChain.process();
+               		nextChain.next();
             	}
 			}
 			return ;
 		if(!parser.accept || parser.accept(node)){
 			parser(node,this.context,nextChain)
 		}else if(nextChain != null){
-            nextChain.process();
+            nextChain.next();
 		}
 	}
 }

@@ -23,7 +23,7 @@ public class ELParser implements TextParser {
 		}
 	};
 	public static TextParser ELSE = new ELParser("else", false) {
-		public int parse(String text, int p$, ParseContext context) {
+		public int parseText(String text, int p$, ParseContext context) {
 			int begin = text.indexOf('{', p$);
 			if (begin > 0) {
 				int end = findELEnd(text, begin);
@@ -39,7 +39,7 @@ public class ELParser implements TextParser {
 	};
 	public static TextParser CLIENT = new ClientParser();
 	public static TextParser END = new ELParser("end", false) {
-		public int parse(String text, int p$, ParseContext context) {
+		public int parseText(String text, int p$, ParseContext context) {
 			context.appendEnd();
 			return p$ + 4;
 		}
@@ -92,7 +92,7 @@ public class ELParser implements TextParser {
 		return -1;
 	}
 
-	public int parse(String text, int p$, ParseContext context) {
+	public int parseText(String text, int p$, ParseContext context) {
 		int begin = text.indexOf('{', p$);
 		if (begin > 0) {
 			String fn2 = text.substring(p$ + 1, begin);

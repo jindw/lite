@@ -8,7 +8,6 @@ import java.util.Map;
 import org.xidea.lite.parse.NodeParser;
 import org.xidea.lite.parse.ParseConfig;
 import org.xidea.lite.parse.ParseContext;
-import org.xidea.lite.parse.TextParser;
 
 /**
  * 不要较差调用，交叉调用，用this代替，确保继承安全
@@ -20,21 +19,19 @@ public class ParseContextImpl extends ParseContextProxy implements ParseContext 
 
 	protected final Map<String, String> featrueMap;
 
-	public ParseContextImpl(String path,ParseConfig config) {
+	public ParseContextImpl(ParseConfig config,String path) {
 		featrueMap= new HashMap<String, String>();
-		TextParser[] ips = null;
 		NodeParser<? extends Object>[] parsers = null;
 		if(config !=null && path!=null){
 			Map<String, String> f = config.getFeatrueMap(path);
 			if(f != null){
 				this.featrueMap.putAll(f);
 			}
-			ips = config.getTextParsers(path);
 			parsers = config.getNodeParsers(path);
 		}
 		this.config = config;
 		this.resultContext = new ResultContextImpl(this);
-		this.parserHolder = new ParseHolderImpl(this, parsers, ips);
+		this.parserHolder = new ParseHolderImpl(this, parsers);
 	}
 
 	public ParseContextImpl(ParseContext parent) {
@@ -61,7 +58,7 @@ public class ParseContextImpl extends ParseContextProxy implements ParseContext 
 	}
 
 	public void parse(Object source) {
-		getTopChain().process(source);
+		getTopChain().next(source);
 	}
 
 	public List<Object> parseText(String text, int defaultType) {

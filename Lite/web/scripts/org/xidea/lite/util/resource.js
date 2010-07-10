@@ -1,6 +1,3 @@
-/**
- */
- 
 function loadXML(url){
 	try{
         if(/^[\s\ufeff]*</.test(url)){
@@ -22,6 +19,9 @@ function loadXML(url){
 	}
 	return doc;
 }
+/**
+ * @private
+ */
 function parseXMLByURL(url){
 	var xhr = new XMLHttpRequest();
     xhr.open("GET",url,false)
@@ -32,6 +32,9 @@ function parseXMLByURL(url){
         return parseXMLByText(xhr.responseText)
     }
 }
+/**
+ * @private
+ */
 function parseXMLByText(text){
 	try{
 		if(this.DOMParser){
@@ -54,6 +57,9 @@ function parseXMLByText(text){
     	throw e;
     }
 }
+/**
+ * @private
+ */
 function getNamespaceMap(node){
 	var attributes = node.attributes;
 	var map = {};
@@ -76,7 +82,7 @@ function selectNodes(currentNode,xpath){
 	var doc = currentNode.ownerDocument || currentNode;
     var docFragment = doc.createDocumentFragment();
     var nsMap = getNamespaceMap(doc.documentElement);
-    try{
+    try{//ie
     	var buf = [];
     	for(var n in nsMap){
     		buf.push("xmlns:"+n+'="'+nsMap[n]+'"')
@@ -125,5 +131,52 @@ if(!(window.DOMParser && window.XMLHttpRequest || window.ActiveXObject)){
     selectNodes = function(node,path){
         return pu.selectNodes(node,path);
     }
+}
+    
+function NodeList(list){
+	this.list = list;
+	this.length = list.length;
+	this.item = itemNodeList;
+	this.getLength = itemNodeList;
+}
+function itemNodeList(i){
+	return this.list[i];
+}
+function getNodeListLength(){
+	return this.length;
+}
+
+function URI(path,parentURI){
+	if(parentURI&& !/^\w+\:|^</.test(path)){
+		path = parentURI.replace(/\/[^\\\/]+$/,'/')+path;
+	}
+	this.path = path;
+}
+
+function buildURIMatcher(pattern){
+	var matcher = /\*+|[^\*\\\/]+?|[\\\/]/;
+	var buf = ["^"];
+	pattern.lastIndex = 0;
+	while (matcher.exec(pattern)) {
+		var item = matcher[0];
+		var len = item.length;
+		var c = item.charAt(0);
+		if (c == '*') {
+			if (length > 1) {
+				buf.push(".*");
+			} else {
+				buf.push("[^\\\\/]+");
+			}
+		} else if(length == 1 && c == '/' || c == '\\') {
+			buf.push("[\\\\/]");
+		}else{
+			buf.push(item.replace(/[^w]/g,quteReqExp));
+		}
+	}
+	buf.push("$");
+	return buf.join('');
+}
+function quteReqExp(x){
+	return '\\x'+(0x100 + x.charCodeAt()).toString(16).substring(1);
 }
     

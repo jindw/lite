@@ -6,139 +6,34 @@
  * @version $Id: template.js,v 1.4 2008/02/28 14:39:06 jindw Exp $
  */
 
-var TEMPLATE_NS_REG = /^http:\/\/www.xidea.org\/ns\/(?:template|lite)(?:\/core)?\/?$/;
-
-function isTemplateNS(tagName,namespaceURI){
-    return /^c\:|^xmlns\:c$/i.test(tagName) && (namespaceURI=="#" || namespaceURI=="#core" || namespaceURI ==null) || TEMPLATE_NS_REG.test(namespaceURI);
-}
+//var TEMPLATE_NS_REG = /^http:\/\/www.xidea.org\/ns\/(?:template|lite)(?:\/core)?\/?$/;
+//
+//function isTemplateNS(tagName,namespaceURI){
+//    return /^c\:|^xmlns\:c$/i.test(tagName) && (namespaceURI=="#" || namespaceURI=="#core" || namespaceURI ==null) || TEMPLATE_NS_REG.test(namespaceURI);
+//}
 
 //:core
-function parseCoreNode(node,context,chain){//for
-    switch(node.nodeType){
-    case 1:
-        var tagName = node.tagName.toLowerCase();
-        if(isTemplateNS(tagName,node.namespaceURI)){
-            switch(tagName.substr(2)){
-            case 'if':
-                parseIfTag(node,context,chain);
-                break;
-            case 'elseif':
-            case 'else-if':
-            case 'else':
-                parseElseIfTag(node,context,chain);
-                break;
-            case 'for':
-            case 'foreach':
-                parseForTag(node,context,chain);
-                break;
-            case 'set':
-            case 'var':
-                parseVarTag(node,context,chain);
-                break;
-            case 'out':
-                parseOutTag(node,context,chain);
-                break;
-            case 'choose':
-                parseChooseTag(node,context,chain);
-                break;
-            case 'when':
-            case 'otherwise':
-                break;
-            case 'def':
-            case 'macro':
-            	parseDefTag(node,context,chain);
-                break;
-            //for other
-            case 'include':
-                processIncludeTag(node,context,chain);
-                break;
-            default:
-                $log.error("未知标签：",tagName,node.ownerDocument.documentURI)
-            }
-        }else{
-        	chain.process(node);
-        }
-        break;
-    case 2: //NODE_ATTRIBUTE  
-	    if(!isTemplateNS(node.name,node.value)){
-			chain.process(node);
-		}
-		break;
-    default:
-        chain.process(node);
-    }
-    
+var Core = {};
+function addParsers(){
+	var fn = arguments[0];
+	var i = arguments.length;
+	while(i-->1){
+		Core[arguments[i]] = fn
+	}
 }
-/**
- * 
- */
-function parseDefTag(node,context,chain){
-    var next = node.firstChild;
-    var ns = getAttributeText(context,node,'name',true);
-    ns = (ns.replace(/^\s+/,'')+'{end').split(/[^\w]+/);
-    ns.pop();
-    var el = ['{"name":"',ns[0],'","params":['];
-    for(var i=1;i<ns.length;i++){
-    	if(i>1){
-    		el.push(",")
-    	}
-    	el.push('"',ns[i],'"');
-    }
-    el.push("]}")
-    //prompt('',el.join(''))
-    context.appendPlugin(PLUGIN_DEFINE,context.parseEL(el.join('')));
-    if(next){
-        do{
-            context.parse(next)
-        }while(next = next.nextSibling)
-    }
-    context.appendEnd();
-}
-function processIncludeTag(node,context,chain){
-    var var_ = getAttributeText(context,node,'var');
-    var path = getAttributeText(context,node,'path');
-    var xpath = getAttributeText(context,node,'xpath');
-    var name = getAttributeText(context,node,'name');
-    var doc = node.ownerDocument || node;
-    var parentURI = context.currentURI;
-	try{
-		if(name){
-			var docFragment = doc.createDocumentFragment();
-			var next = node.firstChild;
-            if(next){
-                do{
-                    docFragment.appendChild(next)
-                }while(next = next.nextSibling)
-            }
-            context['#'+name] = docFragment;
-		}
-	    if(var_){
-            var next = node.firstChild;
-            context.appendVar(var_);
-            if(next){
-                do{
-                    context.parse(next)
-                }while(next = next.nextSibling)
-            }
-            context.appendEnd();
-	    }
-	    if(path!=null){
-	    	if(path.charAt() == '#'){
-	    		doc = context['#'+name];
-	    		context.currentURI = doc.documentURI;
-	    	}else{
-		        var url = parentURI?parentURI.replace(/[^\/]*(?:[#\?].*)?$/,path):path;
-		        var doc = context.loadXML(url);
-	    	}
-	    }
-	    if(xpath!=null){
-	        doc = selectNodes(doc,xpath);
-	    }
-	    context.parse(doc)
-    }finally{
-        context.currentURI = parentURI;
-    }
-}
+addParsers(parseIfTag,"parseIf");
+addParsers(parseElseIfTag,"parseElse","parseElseIf","parseElseif","parseElif");
+
+addParsers(parseForTag,"parseFor","parseForeach","parseForEach");
+addParsers(parseVarTag,"parseVar","parseSet");
+addParsers(parseOutTag,"parseOut");
+addParsers(parseChooseTag,"parseChoose");
+addParsers(parseDefTag,"parseDef","parseMacro");
+addParsers(processIncludeTag,"parseInclude");
+addParsers(function(node){
+	$log.error("未知标签：",node.tagName,node.ownerDocument.documentURI)
+},"parse");
+
 function parseIfTag(node,context,chain){
     var next = node.firstChild;
     var test = getAttributeEL(context,node,'test',true);
@@ -239,6 +134,76 @@ function parseOutTag(node,context,chain){
 }
 
 
+/**
+ * 
+ */
+function parseDefTag(node,context,chain){
+    var next = node.firstChild;
+    var ns = getAttributeText(context,node,'name',true);
+    ns = (ns.replace(/^\s+/,'')+'{end').split(/[^\w]+/);
+    ns.pop();
+    var el = ['{"name":"',ns[0],'","params":['];
+    for(var i=1;i<ns.length;i++){
+    	if(i>1){
+    		el.push(",")
+    	}
+    	el.push('"',ns[i],'"');
+    }
+    el.push("]}")
+    //prompt('',el.join(''))
+    context.appendPlugin(PLUGIN_DEFINE,context.parseEL(el.join('')));
+    if(next){
+        do{
+            context.parse(next)
+        }while(next = next.nextSibling)
+    }
+    context.appendEnd();
+}
+function processIncludeTag(node,context,chain){
+    var var_ = getAttributeText(context,node,'var');
+    var path = getAttributeText(context,node,'path');
+    var xpath = getAttributeText(context,node,'xpath');
+    var name = getAttributeText(context,node,'name');
+    var doc = node.ownerDocument || node;
+    var parentURI = context.currentURI;
+	try{
+		if(name){
+			var docFragment = doc.createDocumentFragment();
+			var next = node.firstChild;
+            if(next){
+                do{
+                    docFragment.appendChild(next)
+                }while(next = next.nextSibling)
+            }
+            context['#'+name] = docFragment;
+		}
+	    if(var_){
+            var next = node.firstChild;
+            context.appendVar(var_);
+            if(next){
+                do{
+                    context.parse(next)
+                }while(next = next.nextSibling)
+            }
+            context.appendEnd();
+	    }
+	    if(path!=null){
+	    	if(path.charAt() == '#'){
+	    		doc = context['#'+name];
+	    		context.currentURI = doc.documentURI;
+	    	}else{
+		        var url = parentURI?parentURI.replace(/[^\/]*(?:[#\?].*)?$/,path):path;
+		        var doc = context.loadXML(url);
+	    	}
+	    }
+	    if(xpath!=null){
+	        doc = selectNodes(doc,xpath);
+	    }
+	    context.parse(doc)
+    }finally{
+        context.currentURI = parentURI;
+    }
+}
 
 /**
  * @internal

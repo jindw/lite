@@ -39,7 +39,7 @@ public class TextNodeParser implements NodeParser<String> {
 	 */
 	protected void parse(ParseContext context, final String text,
 			final boolean encode, final char qute) {
-		TextParser[] instructionParser = context.getTextParsers();
+		TextParser[] textParsers = context.getTextParsers();
 		final int length = text.length();
 		int start = 0;
 		do {
@@ -47,7 +47,7 @@ public class TextNodeParser implements NodeParser<String> {
 			int p$ = length + 1;
 			{
 				int pri = 0;
-				for (TextParser ip : instructionParser) {
+				for (TextParser ip : textParsers) {
 					int p$2 = ip.findStart(text, start, p$);
 					int pri2 = ip.getPriority();
 					if (p$2 >= start ){
@@ -71,7 +71,7 @@ public class TextNodeParser implements NodeParser<String> {
 					start = p$;
 					int mark = context.mark();
 					try {
-						start = nip.parse(text, start, context);
+						start = nip.parseText(text, start, context);
 					} catch (Exception e) {
 					}
 					if (start <= p$) {
