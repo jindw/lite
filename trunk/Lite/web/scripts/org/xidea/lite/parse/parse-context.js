@@ -9,8 +9,9 @@
 /**
  * 模板解析上下文对象实现
  */
-function ParseContext(){
-	this.initialize();
+function ParseContext(config,path){
+	this.initialize(config);
+	this.featrueMap = config.getFeatrueMap(path);
 }
 
 ParseContext.prototype = {
@@ -18,33 +19,18 @@ ParseContext.prototype = {
 	 * 初始化上下文
 	 * @arguments 链顶插入的解析器列表（第一个元素为初始化后的链顶解析器，以后类推）
 	 */
-	initialize:function(){
-	    var parserList = [];
-	    parserList.push.apply(parserList,arguments)
-	    this.parserList = parserList.concat(this.parserList);
-	    this.result = [];
+	initialize:function(config){
+    	this.config = config;
+    	this.parserList = [];
+	    this.result = new ResultContext();
 	    this.topChain = new ParseChain(this);
 	},
-    createURI:function(path,parentURI) {
-		return new URI(path||'',(parentURI||this.currentURI || ''));
-    },
-    //nativeJS:false,
-    parserList : [],
-    loadXML:function(path){
-    	if(/^[\s\ufeff]*</.test(path)){
-    		//this.currentURI = "data:text/xml,"+encodeURIComponent(path)
-    	}else{
-    		this.currentURI = path.replace(/#.*/,'');
-    	}
-    	return loadXML(path)
-    },
-    selectNodes:selectNodes,
+	textType:0,
 	parseText:function(source, textType) {
-		var type = this.textType;
 		var mark = this.mark();
-		this.textType = textType;
+		var oldType = this.textType;
 		this.parse(source);
-		this.textType = type;
+		this.textType = oldType;
 		var result = this.reset(mark);
 		return result;
 	},
@@ -58,204 +44,30 @@ ParseContext.prototype = {
 		if(source instanceof URI){
 			source = this.loadXML(source.path);
 		}
-		this.topChain.process(source);
+		this.topChain.next(source);
 	},
-	
-    /**
-     * 异常一定要抛出去，让parseText做回退处理
-     */
-    parseEL : function(el){
-        return parseEL(el)
+    createURI:function(path,parentURI) {
+		return new URI(path||'',(parentURI||this.currentURI || ''));
     },
-	
-	mark:function(){
-		return this.result.length;
-	},
-	reset:function(mark){
-		return optimizeResult(this.result.splice(mark,this.result.length));
-	},
-    /**
-	 * 添加静态文本（不编码）
-	 * @param <String>text
-	 * @param <boolean>encode
-	 * @param <char>escapeQute
-	 */
-	append:function( text,  encode,  escapeQute){
-		if(encode){
-			if(escapeQute == '"'){
-				var replaceExp = /[<>&"]/g;
-			}else if(escapeQute == '\''){
-				var replaceExp = /[<>&']/g;
-			}else{
-				var replaceExp = /[<>&]/g;
-			}
-			text = text.replace(replaceExp,xmlReplacer);
-		}
-		this.result.push(text);
-	},
-
-	/**
-	 * 添加模板指令
-	 * 
-	 * @param <Object[]> text
-	 */
-	appendAll:function(instruction){
-		this.result.push.apply(this.result,instruction)
-	},
-	/**
-	 * @param Object el
-	 */
-	appendEL:function( el){
-		this.result.push([EL_TYPE, el]);
-	},
-	/**
-	 * @param String name
-	 * @param Object el
-	 */
-	appendAttribute:function(attributeName, el){
-		this.result.push([XML_ATTRIBUTE_TYPE, el, attributeName ]);
-	},
-	/**
-	 * @param Object el
-	 */
-	appendXmlText:function(el){
-		this.result.push([XML_TEXT_TYPE, el]);
-	},
-
-	/**
-	 * @param Object testEL
-	 */
-	appendIf:function(testEL){
-		this.result.push([IF_TYPE, testEL ]);
-	},
-
-	/**
-	 * @param testEL
-	 */
-	appendElse:function(testEL){
-		clearPreviousText(this.result);
-		this.result.push([ELSE_TYPE, testEL ]);
-	},
-
-	appendFor:function(varName, itemsEL, statusName){
-		this.result.push([FOR_TYPE,itemsEL, varName ]);
-		if(statusName){
-			this.appendVar(statusName , this.parseEL('for'));
-		}
-	},
-
-	appendEnd:function(){
-		this.result.push([])
-	},
-
-	appendVar:function(varName, valueEL){
-		this.result.push([VAR_TYPE,valueEL,varName]);
-	},
-
-	appendCaptrue:function(varName){
-		this.result.push([CAPTRUE_TYPE,varName]);
-	},
-	appendPlugin:function(clazz, el){
-		this.result.push([PLUGIN_TYPE,el,clazz]);
-	},
-	toList:function(){
-		var result = optimizeResult(this.result);
-    	return buildTreeResult(result);
-	},
-    toCode:function(){
-        return stringifyJSON(this.toList())
-    }
+    loadXML:function(path){
+    	if(/^[\s\ufeff]*</.test(path)){
+    		//this.currentURI = "data:text/xml,"+encodeURIComponent(path)
+    	}else{
+    		this.currentURI = path.replace(/#.*/,'');
+    	}
+    	return loadXML(path)
+    },
+    selectNodes:selectNodes
 }
-/**
- * 移除结尾数据直到上一个end为止（不包括该end标记）
- * @public
- */
-function clearPreviousText(result){
-    var i = result.length;
-    while(i--){
-    	var item = result[i];
-        if(typeof item == 'string'){//end
-            result.pop();
-        }else{
-        	break;
-        }
-        
-    }
-}
-
-
-/**
- * 想当前栈顶添加数据
- * 解析和编译过程中使用
- * @public
- */
-function optimizeResult(source){
-    var result = [];
-    var previousText;
-    for(var i=0,j=0;i<source.length;i++){
-    	var item = source[i];
-		if (item.constructor == String) {
-			if(previousText==null){
-				j++;
-			}else{
-				item = previousText + item;
-			}
-			result[j-1] = previousText = item;
-		}else{
-			previousText = null;
-			result[j++] = item;
-		}
-    }
-    return result;
-}
-function buildTreeResult(result){
-	var stack = [];//new ArrayList<ArrayList<Object>>();
-	var current = [];// new ArrayList<Object>();
-	stack.push(current);
-	for (var i = 0;i<result.length;i++) {
-	    var item = result[i];
-		if (item.constructor == String) {
-			current.push(item);
-		} else {
-			if (item.length == 0) {
-				var children = stack.pop();
-				current = stack[stack.length-1];
-				current[current.length - 1][1]=children;
-			} else {
-				var type = item[0];
-				var cmd2 =[];
-				cmd2.push(item[0]);
-				current.push(cmd2);
-				switch (type) {
-				case CAPTRUE_TYPE:
-				case IF_TYPE:
-				case ELSE_TYPE:
-				case PLUGIN_TYPE:
-				case FOR_TYPE:
-					cmd2.push(null);
-					stack.push(current = []);
-				}
-				for (var j = 1; j < item.length; j++) {
-					cmd2.push(item[j]);
-				}
-
-			}
-		}
+var rm = ResultContext.prototype;
+for(var n in rm){
+	if(rm[n] instanceof Function){
+		ParseContext[n] = buildWrapper(n);
 	}
-	return current;
 }
-
-function xmlReplacer(c){
-    switch(c){
-        case '<':
-          return '&lt;';
-        case '>':
-          return '&gt;';
-        case '&':
-          return '&amp;';
-        case "'":
-          return '&#39;';
-        case '"':
-          return '&#34;';
-    }
+function buildWrapper(n){
+	return function(){
+		var result = this.result;
+		result[n].apply(result,arguments)
+	}
 }

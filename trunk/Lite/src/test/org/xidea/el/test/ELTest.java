@@ -74,7 +74,7 @@ public class ELTest {
 	}
 	private static ParseContextImpl createParserContext() {
 		URI uri = new File(".","unknow").toURI();
-		ParseContextImpl pc = new ParseContextImpl("/", new ParseConfigImpl(uri));
+		ParseContextImpl pc = new ParseContextImpl(new ParseConfigImpl(uri), "/");
 		return pc;
 	}
 }

@@ -46,7 +46,7 @@ function parseXMLNode(node,context,chain){
             parseNotation(node,context,chain);
             break;
         default://文本节点
-        	chain.process(node);
+        	chain.next(node);
             //this.println("<!-- ERROR： UNKNOW nodeType:"+node.nodeType+"-->")
     }
 }

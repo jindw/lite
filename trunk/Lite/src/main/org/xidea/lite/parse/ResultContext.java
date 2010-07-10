@@ -154,7 +154,7 @@ public interface ResultContext {
 
 	public void appendPlugin(Class<? extends Plugin> class1, Object propertiesEL);
 
-	public String addGlobalObject(Class<? extends Object> impl, String key);
+//	public String addGlobalObject(Class<? extends Object> impl, String key);
 
 	public String allocateId();
 	/**

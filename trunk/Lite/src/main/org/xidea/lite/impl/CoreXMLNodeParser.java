@@ -71,10 +71,10 @@ public class CoreXMLNodeParser implements NodeParser<Node> {
 					extensionParser.parse(el, context, chain);
 				} else {
 					log.error("未知核心标记" + name);
-					chain.process(el);
+					chain.next(el);
 				}
 			} else {
-				chain.process(el);
+				chain.next(el);
 			}
 		} else if (node instanceof Document) {
 			boolean isFirst = context.getAttribute(FIRST_NODE) == null;
@@ -90,13 +90,13 @@ public class CoreXMLNodeParser implements NodeParser<Node> {
 					}
 					parseExtends(path, node, context, chain);
 				} else {
-					chain.process(node);
+					chain.next(node);
 				}
 			} else {
-				chain.process(node);
+				chain.next(node);
 			}
 		} else {
-			chain.process(node);
+			chain.next(node);
 		}
 	}
 
@@ -112,7 +112,7 @@ public class CoreXMLNodeParser implements NodeParser<Node> {
 			context.setAttribute(key, n);
 			// System.out.println(key+"/"+n.getOwnerDocument().getBaseURI());
 		}
-		chain.process(node);
+		chain.next(node);
 		for (String key : blocks.keySet()) {
 			context.setAttribute(key, baks.get(key));
 		}

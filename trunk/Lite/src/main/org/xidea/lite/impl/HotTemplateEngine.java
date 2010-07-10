@@ -31,7 +31,7 @@ public class HotTemplateEngine extends TemplateEngine {
 
 
 	protected ParseContext createParseContext(String path) {
-		return new ParseContextImpl(path, config);
+		return new ParseContextImpl(config, path);
 	}
 	@Override
 	protected Template createTemplate(String path) {

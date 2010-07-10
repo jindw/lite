@@ -72,9 +72,6 @@ public class ParseContextProxy implements ParserHolder, ResultContext,
 		}
 	}
 
-	public String addGlobalObject(Class<? extends Object> impl, String key) {
-		return resultContext.addGlobalObject(impl, key);
-	}
 
 	public String allocateId() {
 		return resultContext.allocateId();
@@ -254,10 +251,6 @@ public class ParseContextProxy implements ParserHolder, ResultContext,
 
 	public NodeParser<? extends Object>[] getNodeParsers(String path) {
 		return config.getNodeParsers(path);
-	}
-
-	public TextParser[] getTextParsers(String path) {
-		return config.getTextParsers(path);
 	}
 
 	public URI getRoot() {

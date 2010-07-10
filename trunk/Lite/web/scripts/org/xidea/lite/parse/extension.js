@@ -7,8 +7,8 @@
  *            所有 parse<TagName> 为但前名称空间标记解释起
  *            所有 seek<Function Name> 为当前名称空间前缀的文本函数解释器
  */
-function Extension(namespace,loader){
-	this.namespace = namespace;
+function Extension(){
+	this.documentParser = null;
 	this.onMap = null;
 	this.parserMap = null;
 	this.seekMap = null;
@@ -31,8 +31,12 @@ Extension.prototype={
 	parse:function(node,context,chain){
 		if(this.parserMap){
 			var n = formatName(node.tagName) ;
-			if(n in this.parserMap){
+			for(n in this.parserMap){
 				var fn = this.parserMap[n];
+				break;
+			}
+			fn = fn || this.parserMap[''];
+			if(fn){
 				fn.call(chain,fn,node,context,chain);
 				return true;
 			}
@@ -50,26 +54,26 @@ Extension.prototype={
 		}
 		return false;
 	},
-	/**
-	 */
-	setup:function(packageObject){
-		for(var n in pkg.objectScriptMap){
-			var match = n.match(/^(?:on(.*)|parse(.+)|seek(.*))/);
-			if(match){
-				var o = $import(packageObject.name+':'+n,{});
-				if(o instanceof Function){
-					var dest = null,key;
-					if((key = match[1])!=null){//""?".."
-						dest = this.onMap ||(this.onMap={});
-					}else if((key = match[2])){//""?".."
-						dest = this.parserMap ||(this.parserMap={});
-					}else if((key = match[3])!=null){//""?".."
-						dest = this.seekMap ||(this.seekMap={});
-					}
-					if(dest){
-						dest[formatName(key)] = o;
-					}
-					return {parse:o};
+	initialize:function(objectMap){
+		for(var key in objectMap){
+			var o = objectMap[key];
+			if(o instanceof Function){
+				var dest = null;
+				var match = key.match(/^(document|on|parse|seek)(.*)/);
+				var prefix = match[1];
+				var fn = match[2];
+				if(prefix == "document"){//""?".."
+					documentParser = o;
+					continue;
+				}else if(prefix == "on"){
+					dest = this.onMap ||(this.onMap={});
+				}else if(prefix == "parse"){//""?".."
+					dest = this.parserMap ||(this.parserMap={});
+				}else if(prefix == "seek"){//""?".."
+					dest = this.seekMap ||(this.seekMap={});
+				}
+				if(dest){
+					dest[formatName(fn)] = o;
 				}
 			}
 		}

@@ -3,6 +3,7 @@ package org.xidea.lite.impl;
 import static org.xidea.lite.parse.ResultContext.END_INSTRUCTION;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -183,7 +184,17 @@ public class HTMLNodeParser extends AbstractHTMLNodeParser implements NodeParser
 
 	private String buildCSEL(ParseContext context, final String collectionEL,
 			final String valueEL) {
-		String id = context.addGlobalObject(TextContains.class, null);
+		String id = context.getAttribute(TextContains.class);
+		if(id == null){
+			id = context.allocateId();
+			HashMap<String, Object> attributeMap = new HashMap<String, Object>();
+			attributeMap.put("name", id);
+			attributeMap.put("type", TextContains.class.getName());
+			Object pluginValueEL = context.parseEL(JSONEncoder.encode(attributeMap));
+			context.appendPlugin(DefinePlugin.class, pluginValueEL);
+			context.appendEnd();
+			context.setAttribute(TextContains.class,id);
+		}
 		//__contains_text__
 		return id + "(" + collectionEL + "," + valueEL + ")";
 	}

@@ -20,8 +20,8 @@ public class ParseHolderImpl implements ParserHolder {
 	private ParseContext context;
 
 	public ParseHolderImpl(ParseContext context,
-			NodeParser<? extends Object>[] parsers, TextParser[] ips) {
-		initialize(context, parsers, ips);
+			NodeParser<? extends Object>[] parsers) {
+		initialize(context, parsers, null);
 	}
 
 	@SuppressWarnings("unchecked")
