@@ -80,7 +80,7 @@
 		</void>
 		<!-- Test include -->
 		<void method='put'>
-			<string><![CDATA[<c:include path='/org/xidea/lite/parser/test/include-test.xslt'></c:include>]]></string>
+			<string><![CDATA[<c:include path='classpath:///org/xidea/lite/parser/test/include-test.xslt'></c:include>]]></string>
 			<string><![CDATA[<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 			<xsl:template match="/">
 			<div>
@@ -137,7 +137,7 @@
 			 name='thisValue' 
 			 path='#thisValue'
 			 xpath='//meta' 
-			 xslt='/org/xidea/lite/parser/test/include-test.xslt'
+			 xslt='classpath:///org/xidea/lite/parser/test/include-test.xslt'
 			 >
 			 	<div>
 			 		<meta name='n1' value='v1'/>
@@ -150,7 +150,7 @@
 		<void method='put'>
 			<string><![CDATA[
 			<c:include name='thisValue'
-			   path='/org/xidea/lite/parser/test/include-test.xml'
+			   path='classpath:///org/xidea/lite/parser/test/include-test.xml'
 			   xpath='//xhtml:meta'
 			   xslt='#thisValue'>
 			<xsl:stylesheet version='1.0' 

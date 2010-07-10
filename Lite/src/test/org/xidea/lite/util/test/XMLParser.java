@@ -24,7 +24,7 @@ import org.xidea.lite.impl.TextNodeParser;
 import org.xidea.lite.impl.XMLFixerImpl;
 import org.xidea.lite.impl.dtd.DefaultEntityResolver;
 import org.xidea.lite.parse.ParseContext;
-import org.xidea.lite.test.TestUtil;
+import org.xidea.lite.test.LiteTestUtil;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 

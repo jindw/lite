@@ -110,12 +110,12 @@ if(!(window.DOMParser && window.XMLHttpRequest || window.ActiveXObject)){
     	//TODO:data for text
     	url = $JSI.loadText&&$JSI.loadText(url) || url;
         if(/^[\s\ufeff]*</.test(url)){
-        	return pu.loadXML(url);
+        	return pu.loadXML(url,null);
         }else{
         	var pos = url.indexOf('#')+1;
         	var xpath = pos && url.substr(pos);
         	var url = pos?url.substr(0,pos-1):url;
-        	var doc = pu.loadXML(url);
+        	var doc = pu.loadXML(url,null);
         	if(xpath){
 		        doc = selectNodes(doc,xpath);
 		    }

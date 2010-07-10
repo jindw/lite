@@ -18,19 +18,23 @@ import org.xidea.lite.parse.TextParser;
 public class ParseContextImpl extends ParseContextProxy implements ParseContext {
 	private static final long serialVersionUID = 1L;
 
-	protected final Map<String, String> featrueMap= new HashMap<String, String>();
-	
-	protected ParseContextImpl() {
-	}
+	protected final Map<String, String> featrueMap;
+
 	public ParseContextImpl(String path,ParseConfig config) {
+		featrueMap= new HashMap<String, String>();
+		TextParser[] ips = null;
+		NodeParser<? extends Object>[] parsers = null;
 		if(config !=null && path!=null){
-		Map<String, String> featrues = config.getFeatrueMap(path);
-		TextParser[] ips = config.getTextParsers(path);
-		NodeParser<? extends Object>[] parsers = config.getNodeParsers(path);
-		initialize( config,featrues, parsers, ips);
-		}else{
-			initialize( config,null, null, null);
+			Map<String, String> f = config.getFeatrueMap(path);
+			if(f != null){
+				this.featrueMap.putAll(f);
+			}
+			ips = config.getTextParsers(path);
+			parsers = config.getNodeParsers(path);
 		}
+		this.config = config;
+		this.resultContext = new ResultContextImpl(this);
+		this.parserHolder = new ParseHolderImpl(this, parsers, ips);
 	}
 
 	public ParseContextImpl(ParseContext parent) {
@@ -38,36 +42,21 @@ public class ParseContextImpl extends ParseContextProxy implements ParseContext 
 		//需要重设 ParseChain 的context
 		this.parserHolder = new ParseHolderImpl(this,parent);
 		this.resultContext = new ResultContextImpl(this);
-		this.featrueMap.putAll(parent.getFeatrueMap());
-	}
-
-
-	protected void initialize(ParseConfig decoratorContext, Map<String, String> featrues,
-			NodeParser<? extends Object>[] parsers, TextParser[] ips) {
-		this.config = decoratorContext;
-		xmlContext = new XMLContextImpl(this);
-		resultContext = new ResultContextImpl(this);
-		parserHolder = new ParseHolderImpl(this, parsers, ips);
-		initializeFeatrues(featrues);
-	}
-
-	protected void initializeFeatrues(Map<String, String> newFeatrues) {
-		if (newFeatrues != null) {
-
-			String v = newFeatrues.get("reserveSpace");
-			if (v != null) {
-				resultContext.setReserveSpace("true".equalsIgnoreCase(v));
-			}
-			featrueMap.clear();
-			featrueMap.putAll(newFeatrues);
+		if(parent instanceof ParseContextImpl){
+			this.featrueMap = ((ParseContextImpl)parent).getFeatrueMap();
+		}else{
+			this.featrueMap = new HashMap<String, String>();
 		}
 	}
 
 	public String getFeatrue(String key) {
 		return featrueMap.get(key);
 	}
-
-	public Map<String, String> getFeatrueMap() {
+	/**
+	 * 获得特征表的直接引用，外部的修改也将直接影响解析上下文的特征表
+	 * @return
+	 */
+	protected Map<String, String> getFeatrueMap() {
 		return featrueMap;
 	}
 

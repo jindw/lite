@@ -21,7 +21,6 @@ import org.xidea.lite.Template;
 import org.xidea.lite.TemplateEngine;
 import org.xidea.lite.impl.ParseContextImpl;
 import org.xidea.lite.impl.dtd.DefaultEntityResolver;
-import org.xidea.lite.parser.test.XMLParser;
 
 public class XMLParserTest {
 
@@ -38,9 +37,8 @@ public class XMLParserTest {
 		System.out.println(JSONEncoder.encode("<"
 				+ (trim.matcher("\r\n\r\n\r\n sdsdsd\r\n")
 						.replaceAll("$1$2$3$4")) + ">"));
-		ParseContextImpl context = TestUtil.buildParseContext(new URI("http://localhost/"));
-		Object s = new XMLParser().parse(
-				"<xml>\r\n\r\n\r\n\t\t\t\t\r\n\r\n</xml>",context).get(0);
+		Object s = LiteTestUtil.parse(
+				"<xml>\r\n\r\n\r\n\t\t\t\t\r\n\r\n</xml>").get(0);
 		Assert.assertEquals(JSONEncoder.encode("<xml>\n</xml>"), JSONEncoder.encode(s));
 		System.out.println(JSONEncoder.encode("<"
 				+ (trim.matcher("\r\n\r\n\r\n \t\t \t  \r\n")

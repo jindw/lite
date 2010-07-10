@@ -23,15 +23,15 @@ import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.Template;
 import org.xidea.lite.impl.HTMLNodeParser;
 import org.xidea.lite.impl.ParseContextImpl;
-import org.xidea.lite.test.TestUtil;
+import org.xidea.lite.test.LiteTestUtil;
+
+import com.sun.xml.internal.ws.wsdl.parser.ParserUtil;
 
 public class XMLTest {
 	protected Map<String, Object> context;
 	protected Map<String, String> templateResultMap;
-	XMLParser parser;
 	@Before
 	public void setUp() throws Exception {
-		parser = new XMLParser();
 		
 	}
 
@@ -92,6 +92,7 @@ public class XMLTest {
 		System.out.println(JSONEncoder.encode(this.context));
 		this.templateResultMap = (Map<String, String>) de.readObject();
 		int i=0;
+		System.out.println("共有测试："+templateResultMap.size()+" 个");
 		for (String key : templateResultMap.keySet()) {
 			String value = templateResultMap.get(key);
 			test(i++,key, value);
@@ -100,14 +101,14 @@ public class XMLTest {
 
 	public void test(int index,String text, String result) throws Exception {
 
+		System.out.println(text+result);
 		String info = "第"+index+"个测试错误：";
-		ParseContextImpl parseContext = TestUtil.buildParseContext(this.getClass()
-				.getResource("/").toURI());
-		parseContext.getFeatrueMap().put(HTMLNodeParser.AUTO_FORM_FEATRUE_URI, HTMLNodeParser.AUTO_IN_FORM);
-		
-		List<Object> insts = parser.parse(
-				"<div xmlns:c=\"http://www.xidea.org/ns/template/core\">"
-						+ text + "</div>", parseContext);
+//		parseContext.getFeatrueMap().put(HTMLNodeParser.AUTO_FORM_FEATRUE_URI, HTMLNodeParser.AUTO_IN_FORM);
+		String source =
+		"<div xmlns:c=\"http://www.xidea.org/ns/template/core\">"
+		+ text + "</div>";
+		System.out.println(source);
+		List<Object> insts = LiteTestUtil.parse(source);
 		checkElse(insts,info);
 		System.out.println(JSONEncoder.encode(insts));
 		Template t = new Template(insts);

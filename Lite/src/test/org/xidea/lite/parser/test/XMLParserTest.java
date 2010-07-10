@@ -1,26 +1,21 @@
 package org.xidea.lite.parser.test;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URI;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import javax.xml.xpath.XPathExpressionException;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.w3c.dom.DocumentFragment;
-import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xidea.lite.Template;
 import org.xidea.lite.impl.ParseContextImpl;
-import org.xidea.lite.impl.XMLContextImpl;
-import org.xidea.lite.test.TestUtil;
+import org.xidea.lite.impl.ParseUtil;
+import org.xidea.lite.test.LiteTestUtil;
 
 
 public class XMLParserTest {
@@ -37,35 +32,12 @@ public class XMLParserTest {
 	@Test
 	public void testSelect() throws Exception {
 		URI url = this.getClass().getResource("include-test.xml").toURI();
-		ParseContextImpl context =TestUtil.buildParseContext(url); 
-		org.w3c.dom.Document doc = new XMLParser().loadXML(url, context);
+		ParseContextImpl context =LiteTestUtil.buildParseContext(url); 
+		org.w3c.dom.Document doc = ParseUtil.parse(url, context);
 		
-		Node node = new XMLContextImpl(TestUtil.buildParseContext(null)){
-			@Override
-			public DocumentFragment selectNodes(Node currentNode,
-					String xpath) throws XPathExpressionException {
-				return super.selectNodes(currentNode, xpath);
-			}
-			
-		}.selectNodes(doc,"//xhtml:body");
-		Assert.assertTrue(node.getChildNodes().getLength()==1);
+		NodeList node = ParseUtil.selectNodes(doc,"//xhtml:body");
+		Assert.assertTrue(node.getLength()==1);
 	}
 
-	@Test
-	public void testFormat() throws Exception {
-		URI url = this.getClass().getResource("format-test.xhtml").toURI();
-		ParseContextImpl parseContext =TestUtil.buildParseContext(url); 
-		HashMap context = new HashMap();
-		context.put("data", Arrays.asList("0", "1", "2", "3", "4", "5", "6",
-				"7", "8", "9", "A", "B", "C", "D", "E", "F"));
-		context.put("name", "test");
-		context.put("border", "1px");
-		context.put("testString", "1");
-		
-		Template t = new Template(new XMLParser().parse(url, parseContext));
-		Writer out=new StringWriter();
-		t.render(context, out);
-		System.out.println(out);
-	}
 
 }

@@ -13,8 +13,8 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.w3c.dom.Document;
-import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xidea.el.ExpressionFactory;
 import org.xidea.lite.Plugin;
 import org.xidea.lite.parse.NodeParser;
@@ -24,20 +24,19 @@ import org.xidea.lite.parse.ParseContext;
 import org.xidea.lite.parse.ParserHolder;
 import org.xidea.lite.parse.ResultContext;
 import org.xidea.lite.parse.TextParser;
-import org.xidea.lite.parse.XMLContext;
 import org.xml.sax.SAXException;
 
-public class ParseContextProxy implements ParserHolder,ResultContext,ParseConfig,XMLContext  {
+public class ParseContextProxy implements ParserHolder, ResultContext,
+		ParseConfig {
 	protected ResultContext resultContext;
 	protected ParserHolder parserHolder;
 	protected ParseConfig config;
 
 	protected ParseContextProxy() {
 	}
-	
+
 	public ParseContextProxy(ParseContext parent) {
-		this.xmlContext = parent;
-		//需要重设 ParseChain 的context
+		// 需要重设 ParseChain 的context
 		this.parserHolder = parent;
 		this.resultContext = parent;
 	}
@@ -48,18 +47,21 @@ public class ParseContextProxy implements ParserHolder,ResultContext,ParseConfig
 
 	public URI createURI(String path) {
 		try {
-			//TODO
+			// TODO
 			URI parent = this.getCurrentURI();
-			if(parent == null){
+			if (parent == null) {
 				parent = config.getRoot();
 			}
 			if (path.startsWith("/")) {
 				if (parent == null
-						|| parent.toString().startsWith(config.getRoot().toString())) {
+						|| parent.toString().startsWith(
+								config.getRoot().toString())) {
 					String prefix = config.getRoot().getRawPath();
-					int p = prefix.lastIndexOf('/');
-					if (p > 0) {
-						path = prefix.substring(0, p) + path;
+					if (prefix != null) {
+						int p = prefix.lastIndexOf('/');
+						if (p > 0) {
+							path = prefix.substring(0, p) + path;
+						}
 					}
 				}
 			}
@@ -70,14 +72,11 @@ public class ParseContextProxy implements ParserHolder,ResultContext,ParseConfig
 		}
 	}
 
-	public InputStream openStream(URI uri) {
-		return config.openStream(uri);
-	}
-
 	public String addGlobalObject(Class<? extends Object> impl, String key) {
 		return resultContext.addGlobalObject(impl, key);
 	}
-	public String allocateId(){
+
+	public String allocateId() {
 		return resultContext.allocateId();
 	}
 
@@ -137,7 +136,6 @@ public class ParseContextProxy implements ParserHolder,ResultContext,ParseConfig
 		return resultContext.mark();
 	}
 
-
 	public List<Object> reset(int mark) {
 		return resultContext.reset(mark);
 	}
@@ -150,32 +148,28 @@ public class ParseContextProxy implements ParserHolder,ResultContext,ParseConfig
 		return resultContext.getType(offset);
 	}
 
-
-
 	public boolean isReserveSpace() {
 		return resultContext.isReserveSpace();
 	}
-
-
 
 	public void setReserveSpace(boolean keepSpace) {
 		resultContext.setReserveSpace(keepSpace);
 	}
 
 	public Document loadXML(URI uri) throws SAXException, IOException {
-		return xmlContext.loadXML(uri);
+		return ParseUtil.parse(uri, (ParseContext) this);
 	}
 
-	public DocumentFragment selectNodes(Node doc, String xpath)
+	public NodeList selectNodes(Node doc, String xpath)
 			throws XPathExpressionException {
-		return xmlContext.selectNodes(doc, xpath);
+		return ParseUtil.selectNodes(doc, xpath);
 	}
 
 	public Node transform(Node doc, Node xslt)
 			throws TransformerConfigurationException,
 			TransformerFactoryConfigurationError, TransformerException,
 			IOException {
-		return xmlContext.transform( doc, xslt);
+		return ParseUtil.transform(doc, xslt);
 	}
 
 	public void addTextParser(TextParser textParser) {
@@ -203,7 +197,7 @@ public class ParseContextProxy implements ParserHolder,ResultContext,ParseConfig
 	 * 
 	 * @param expressionFactory
 	 */
-	public void setExpressionFactory(ExpressionFactory expressionFactory){
+	public void setExpressionFactory(ExpressionFactory expressionFactory) {
 		resultContext.setExpressionFactory(expressionFactory);
 	}
 
@@ -213,7 +207,7 @@ public class ParseContextProxy implements ParserHolder,ResultContext,ParseConfig
 
 	public void addResource(URI resource) {
 		resultContext.addResource(resource);
-		
+
 	}
 
 	public URI getCurrentURI() {
@@ -243,26 +237,39 @@ public class ParseContextProxy implements ParserHolder,ResultContext,ParseConfig
 	public void setTextType(int textType) {
 		resultContext.setTextType(textType);
 	}
+
 	public String getDecotatorPage(String path) {
-		if(config != null){
+		if (config != null) {
 			return config.getDecotatorPage(path);
 		}
 		return null;
 	}
+
 	public Map<String, String> getFeatrueMap(String path) {
-		if(config != null){
+		if (config != null) {
 			return config.getFeatrueMap(path);
 		}
 		return null;
 	}
+
 	public NodeParser<? extends Object>[] getNodeParsers(String path) {
 		return config.getNodeParsers(path);
 	}
+
 	public TextParser[] getTextParsers(String path) {
 		return config.getTextParsers(path);
 	}
 
 	public URI getRoot() {
 		return config.getRoot();
+	}
+
+	public void addExtension(String namespace, String packageName) {
+		parserHolder.addExtension(namespace, packageName);
+
+	}
+
+	public InputStream openStream(URI uri) {
+		return ParseUtil.openStream(uri);
 	}
 }

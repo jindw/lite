@@ -20,19 +20,19 @@ public class DecoratorMapperTest {
 		mapper = new ParseConfigImpl(file.toURI());
 	}
 
-	@Test
-	public void testDecoratorExist() {
-		assertEquals("/test1/template.xhtml", mapper
-				.getDecotatorPage("/test1/xxx.action"));
-		assertEquals("/test1/template.xhtml", mapper
-				.getDecotatorPage("/test1/xxxd..d.action"));
-		assertEquals("/test1/template.xhtml", mapper
-				.getDecotatorPage("/test1/login2.action"));
-		assertEquals("/test2/template.xhtml", mapper
-				.getDecotatorPage("/test2/login2.action"));
-		assertEquals("/test3/template.xhtml", mapper
-				.getDecotatorPage("/test3/login2.action"));
-	}
+//	@Test
+//	public void testDecoratorExist() {
+//		assertEquals("/test1/template.xhtml", mapper
+//				.getDecotatorPage("/test1/xxx.action"));
+//		assertEquals("/test1/template.xhtml", mapper
+//				.getDecotatorPage("/test1/xxxd..d.action"));
+//		assertEquals("/test1/template.xhtml", mapper
+//				.getDecotatorPage("/test1/login2.action"));
+//		assertEquals("/test2/template.xhtml", mapper
+//				.getDecotatorPage("/test2/login2.action"));
+//		assertEquals("/test3/template.xhtml", mapper
+//				.getDecotatorPage("/test3/login2.action"));
+//	}
 
 	@Test
 	public void testGetDecotatorNotExist() {

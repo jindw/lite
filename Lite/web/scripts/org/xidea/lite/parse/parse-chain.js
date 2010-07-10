@@ -27,12 +27,30 @@ ParseChain.prototype = {
 	    this.initialize();
         var parser = this.parser;
         var nextChain = this.nextChain;
+        
+        if(!parser){
+        	$log.error("parser is not found:",this.context.parserList.length,this.index,node)
+        }
+           if ((typeof node != 'string')
+        	  && (node.nodeType ==null)
+        	  && (node instanceof Packages.org.w3c.dom.NodeList)
+        	  ) {
+				var len = node.length;
+				for (var i = 0; i < len; i++) {
+					parser(node.item(i),this.context,nextChain)
+				}
+			} else{
+				if(!parser.accept || parser.accept(node)){
+					parser(node,this.context,nextChain)
+				}else if(nextChain != null){
+               		nextChain.process();
+            	}
+			}
+			return ;
 		if(!parser.accept || parser.accept(node)){
 			parser(node,this.context,nextChain)
-		}else{
-			if(nextChain != null){
-				nextChain.process();
-			}
+		}else if(nextChain != null){
+            nextChain.process();
 		}
 	}
 }

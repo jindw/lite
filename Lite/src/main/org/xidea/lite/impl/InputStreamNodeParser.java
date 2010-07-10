@@ -22,7 +22,7 @@ public class InputStreamNodeParser implements NodeParser<InputStream> {
 	private static Pattern IMPL_PATTERN = Pattern
 			.compile("^.*(?:impl|parser|ext|extension|extention)=([\\w\\-\\_\\/\\.]+)");
 
-	private static ExtensionParser extensionParser = new ExtensionParser();
+	private static ExtensionParserImpl extensionParser = new ExtensionParserImpl();
 	public void parse(final InputStream in, ParseContext context,
 			ParseChain chain) {
 		String text = loadText(in);

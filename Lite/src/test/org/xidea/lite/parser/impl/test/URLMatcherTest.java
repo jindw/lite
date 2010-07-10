@@ -18,7 +18,7 @@ public class URLMatcherTest {
 		Assert.assertTrue(URIMatcher.createMatcher("**/aa").match("/bb/aa"));
 		Assert.assertTrue(URIMatcher.createMatcher("**b/aa").match("/bb/aa"));
 		Assert.assertTrue(URIMatcher.createMatcher("**/bb/aa").match("/bb/aa"));
-		Assert.assertTrue(!URIMatcher.createMatcher("**//bb/aa").match("/bb/aa"));
+		Assert.assertTrue(!URIMatcher.createMatcher("*/bb/aa").match("\\/bb/aa"));
 	}
 	@Test
 	public void testEndMatch(){

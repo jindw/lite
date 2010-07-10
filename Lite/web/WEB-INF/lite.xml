@@ -12,16 +12,5 @@
 		<include>/book/*.xhtml</include>
 	</group>
 	<include>**.xhtml</include>
-<![CDATA[
-//等价的json配置
-[
-	{
-		"includes":["/example\\/*.xhtml"],
-		"excludes":[],
-		"featrueMap":{"http://www.xidea.org/featrue/lite/javascript-compressor","org.jside.jsi.tools.JSACompressor"},
-		"extensions":[{"key":"http://www.xidea.org/featrue/lite/core","value":}]
-	}
-]
-]]>
 </lite>
 

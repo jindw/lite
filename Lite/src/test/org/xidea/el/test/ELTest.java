@@ -12,12 +12,9 @@ import org.xidea.el.ExpressionFactory;
 import org.xidea.el.fn.ECMA262Impl.JSON;
 import org.xidea.el.impl.ExpressionFactoryImpl;
 import org.xidea.jsi.JSIRuntime;
-import org.xidea.jsi.impl.RuntimeSupport;
 import org.xidea.lite.Template;
-import org.xidea.lite.impl.ClientParser;
 import org.xidea.lite.impl.ParseConfigImpl;
 import org.xidea.lite.impl.ParseContextImpl;
-import org.xidea.lite.impl.ResourceContextImpl;
 
 public class ELTest {
 	static JSIRuntime js = org.xidea.jsi.impl.RuntimeSupport.create();
@@ -26,7 +23,7 @@ public class ELTest {
 		js.eval("$import('org.xidea.el:evaluate');//parseEL,Expression");
 		js.eval("$import('org.xidea.lite.parse:*');//parseEL,Expression");
 		//js.eval("$import('org.xidea.lite.impl:*');//parseEL,Expression");
-		js.eval("$import('org.xidea.jsidoc.util:JSON');");
+		js.eval("$import('org.xidea.jsidoc.util:*');");
 	}
 	@Test
 	public void test(){
@@ -77,7 +74,7 @@ public class ELTest {
 	}
 	private static ParseContextImpl createParserContext() {
 		URI uri = new File(".","unknow").toURI();
-		ParseContextImpl pc = new ParseContextImpl("/", new ResourceContextImpl(uri), new ParseConfigImpl(uri));
+		ParseContextImpl pc = new ParseContextImpl("/", new ParseConfigImpl(uri));
 		return pc;
 	}
 }

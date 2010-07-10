@@ -50,6 +50,10 @@ public class ParseConfigImpl implements ParseConfig {
 		}
 	}
 
+	public ParseConfigImpl(URI root) {
+		this.root = root;
+	}
+
 	public InputStream openStream(URI uri) {
 		try {
 			if ("data".equalsIgnoreCase(uri.getScheme())) {

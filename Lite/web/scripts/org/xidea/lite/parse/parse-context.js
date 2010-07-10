@@ -26,8 +26,7 @@ ParseContext.prototype = {
 	    this.topChain = new ParseChain(this);
 	},
     createURI:function(path,parentURI) {
-    	path = (parentURI||this.currentURI || '')+(path||'')
-		return new URI(path);
+		return new URI(path||'',(parentURI||this.currentURI || ''));
     },
     //nativeJS:false,
     parserList : [],

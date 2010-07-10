@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.w3c.dom.Element;
 import org.xidea.jsi.JSIRuntime;
@@ -15,7 +14,7 @@ import org.xidea.lite.parse.ParseChain;
 import org.xidea.lite.parse.ParseContext;
 import org.xidea.lite.parse.TextParser;
 
-public class ExtensionParser implements NodeParser<Element> {
+public class ExtensionParserImpl implements NodeParser<Element> {
 	public void parse(Element el, ParseContext context, ParseChain chain) {
 		String script = el.getTextContent();
 		String src = ParseUtil.getAttributeOrNull(el, "src", "href", "uri",
@@ -112,10 +111,6 @@ public class ExtensionParser implements NodeParser<Element> {
 			return context.getFeatrue(key);
 		}
 
-		public Map<String, String> getFeatrueMap() {
-			return context.getFeatrueMap();
-		}
-
 		public void parse(Object source) {
 			context.parse(source);
 		}
@@ -123,6 +118,5 @@ public class ExtensionParser implements NodeParser<Element> {
 		public List<Object> parseText(String text, int textType) {
 			return context.parseText(text, textType);
 		}
-
 	}
 }

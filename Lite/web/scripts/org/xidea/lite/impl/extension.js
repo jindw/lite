@@ -1,15 +1,15 @@
 /**
  * Lite JS 扩展规范：
- * 一个js包中，所有 parse<TagName> 为但前名称空间标记解释起
- *            所有 on<NS Attribute> 为当前名称空间属性解析器
- *            所有 seek<Function Name> 为当前名称空间前缀的文本函数解释器
+ * 一个js包中：
+ *            函数 document 为通用文档解释器  
  *            函数 on 为当前名称空间属性解释器,未空则该属性不输出
- *            对象 parse 的所有on开头的属性，均为当前名称空间节点的普通属性解释器（无名称空间属性）
+ *            所有 on<Attribute> 为当前名称空间属性解析器和当前名称空间节点的普通属性解释器（无名称空间属性）
+ *            所有 parse<TagName> 为但前名称空间标记解释起
+ *            所有 seek<Function Name> 为当前名称空间前缀的文本函数解释器
  */
 function Extension(namespace,loader){
 	this.namespace = namespace;
 	this.onMap = null;
-	this.saMap = null;//parse:{onSelected:...,onChecked:...}
 	this.parserMap = null;
 	this.seekMap = null;
 }
@@ -21,40 +21,40 @@ function formatName(tagName){
 	return tagName;
 }
 Extension.prototype={
+	seek:function(text,fn,context){
+		if(fn in this.seekMap){
+			fn = this.seekMap[fn];
+			return fn.call(chain,text);
+		}
+		return -1;
+	},
 	parse:function(node,context,chain){
-		var type = node.nodeType;
-		if(type == 1){//element
+		if(this.parserMap){
 			var n = formatName(node.tagName) ;
 			if(n in this.parserMap){
 				var fn = this.parserMap[n];
-				return fn.call(this,fn,node,context,chain);
-			}
-		}else if(type == 2){//attr
-			if(node.namespaceURI){
-				if(this.onMap!=null){
-					var n = formatName(node.name) ;
-					if(n in this.onMap){
-						var fn = this.onMap[n];
-						return fn.call(this,fn,node,context,chain.previousChain);
-					}
-				}
-			}else{
-				if(this.saMap!=null){
-					var n = formatName(node.name) ;
-					if(n in this.saMap){
-						var fn = this.saMap[n];
-						return fn.call(this,fn,node,context,chain.previousChain);
-					}
-				}
+				fn.call(chain,fn,node,context,chain);
+				return true;
 			}
 		}
-		chain.process(node);
+		return false;
+	},
+	on:function(node,context,chain){
+		if(this.onMap){
+			var n = formatName(node.name) ;
+			if(n in this.onMap){
+				var fn = this.onMap[n];
+				fn.call(chain,fn,node,context,chain);
+				return true;
+			}
+		}
+		return false;
 	},
 	/**
 	 */
 	setup:function(packageObject){
 		for(var n in pkg.objectScriptMap){
-			var match = n.match(/^(?:on(.*)|sa(.+)|parse(.+)|seek(.*))/);
+			var match = n.match(/^(?:on(.*)|parse(.+)|seek(.*))/);
 			if(match){
 				var o = $import(packageObject.name+':'+n,{});
 				if(o instanceof Function){
@@ -62,10 +62,8 @@ Extension.prototype={
 					if((key = match[1])!=null){//""?".."
 						dest = this.onMap ||(this.onMap={});
 					}else if((key = match[2])){//""?".."
-						dest = this.saMap ||(this.saMap={});
-					}else if((key = match[3])){//""?".."
 						dest = this.parserMap ||(this.parserMap={});
-					}else if((key = match[4])!=null){//""?".."
+					}else if((key = match[3])!=null){//""?".."
 						dest = this.seekMap ||(this.seekMap={});
 					}
 					if(dest){

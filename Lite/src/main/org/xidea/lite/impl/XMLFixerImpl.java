@@ -175,7 +175,7 @@ public class XMLFixerImpl {
 	public static void main(String[] args) throws Exception {
 
 		Document doc = new XMLFixerImpl().parse(
-				new XMLContextImpl(null).documentBuilder,
+				ParseUtil.documentBuilder,
 				new ByteArrayInputStream("<br><br>".getBytes()), "/uri");
 		System.out.println(doc.toString());
 	}

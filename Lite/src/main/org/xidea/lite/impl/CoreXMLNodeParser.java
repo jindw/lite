@@ -9,13 +9,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
-import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.DefinePlugin;
 import org.xidea.lite.Template;
@@ -28,7 +27,7 @@ public class CoreXMLNodeParser implements NodeParser<Node> {
 	private static Log log = LogFactory.getLog(CoreXMLNodeParser.class);
 	private final static Object FIRST_NODE = new Object();
 	private static ClientParser clientParser = new ClientParser();
-	private static ExtensionParser extensionParser = new ExtensionParser();
+	private static ExtensionParserImpl extensionParser = new ExtensionParserImpl();
 
 	public void parse(Node node, ParseContext context, ParseChain chain) {
 		if (node instanceof Element) {
@@ -63,7 +62,7 @@ public class CoreXMLNodeParser implements NodeParser<Node> {
 						|| "context".equals(name)) {
 					parseBlockTag(el, context);
 				} else if ("extends".equals(name) || "extend".equals(name)) {
-					parseExtends(null,el, context,chain);
+					parseExtends(null, el, context, chain);
 				} else if ("json".equals(name)) {
 				} else if ("macro".equals(name) || "def".equals(name)) {
 					parseMacroTag(el, context);
@@ -90,35 +89,37 @@ public class CoreXMLNodeParser implements NodeParser<Node> {
 						path = '/' + relative.getPath();
 					}
 					parseExtends(path, node, context, chain);
-				}else{
+				} else {
 					chain.process(node);
 				}
-			}else{
+			} else {
 				chain.process(node);
 			}
-		}else{
+		} else {
 			chain.process(node);
 		}
 	}
 
-	private void parseExtends(String path,Node node, ParseContext context, ParseChain chain) {
+	private void parseExtends(String path, Node node, ParseContext context,
+			ParseChain chain) {
 		HashMap<String, Node> blocks = new HashMap<String, Node>();
-		node = findExtends(path,node, context,blocks);
+		node = findExtends(path, node, context, blocks);
 
 		HashMap<String, Object> baks = new HashMap<String, Object>();
-		for(String key : blocks.keySet()){
+		for (String key : blocks.keySet()) {
 			baks.put(key, context.getAttribute(key));
 			Node n = blocks.get(key);
-			context.setAttribute(key,n);
-			//System.out.println(key+"/"+n.getOwnerDocument().getBaseURI());
+			context.setAttribute(key, n);
+			// System.out.println(key+"/"+n.getOwnerDocument().getBaseURI());
 		}
 		chain.process(node);
-		for(String key : blocks.keySet()){
-			 context.setAttribute(key,baks.get(key));
+		for (String key : blocks.keySet()) {
+			context.setAttribute(key, baks.get(key));
 		}
 	}
 
-	private Node findExtends(String path,Node root, ParseContext context,Map<String, Node> blocks) {
+	private Node findExtends(String path, Node root, ParseContext context,
+			Map<String, Node> blocks) {
 		try {
 			LinkedList<Node> docs = new LinkedList<Node>();
 			URI base = context.getCurrentURI();
@@ -127,11 +128,11 @@ public class CoreXMLNodeParser implements NodeParser<Node> {
 				Element el = root instanceof Document ? ((Document) root)
 						.getDocumentElement() : (Element) root;
 				String parent = getExtends(el);
-				if (parent!= null && parent.length() > 0) {
+				if (parent != null && parent.length() > 0) {
 					Node root2 = loadXML(context, parent);
-					if(root2 == null){
+					if (root2 == null) {
 						break;
-					}else{
+					} else {
 						root = root2;
 					}
 				} else {
@@ -140,19 +141,18 @@ public class CoreXMLNodeParser implements NodeParser<Node> {
 			}
 			context.setCurrentURI(base);
 			for (Node doc : docs) {
-				DocumentFragment nodes = context.selectNodes(doc, "//c:block");
-				if (nodes.hasChildNodes()) {
-					Node child = nodes.getLastChild();
-					do {
-						String id = ParseUtil.getAttributeOrNull(
-								(Element) child, "name", "id");
+				NodeList nodes = ParseUtil.selectNodes(doc, "//c:block");
+				int len = nodes.getLength();
+				while (len > 0) {
+					Node child = nodes.item(--len);
+					String id = ParseUtil.getAttributeOrNull((Element) child,
+							"name", "id");
 
-						//log.info("@@@"+id+"/"+doc.getBaseURI());
-						blocks.put("#" + id, child);
-					} while ((child = child.getPreviousSibling()) != null);
+					// log.info("@@@"+id+"/"+doc.getBaseURI());
+					blocks.put("#" + id, child);
 				}
 			}
-			if (path!=null && docs.size() == 1) {
+			if (path != null && docs.size() == 1) {
 				String decoratorPath = context.getDecotatorPage(path);
 				if (decoratorPath != null && !decoratorPath.equals(path)) {
 					context.setAttribute("#page", root);
@@ -170,8 +170,10 @@ public class CoreXMLNodeParser implements NodeParser<Node> {
 
 	private String getExtends(Element el) {
 		String tagName = el.getLocalName();
-		if(tagName.equals("extends") || ParseUtil.isCoreNS(el.getPrefix(), el.getNamespaceURI())){
-			return ParseUtil.getAttributeOrNull(el, "path","value","url","extends");
+		if (tagName.equals("extends")
+				|| ParseUtil.isCoreNS(el.getPrefix(), el.getNamespaceURI())) {
+			return ParseUtil.getAttributeOrNull(el, "path", "value", "url",
+					"extends");
 		}
 		return null;
 	}
@@ -248,7 +250,7 @@ public class CoreXMLNodeParser implements NodeParser<Node> {
 		final URI parentURI = context.getCurrentURI();
 		try {
 			if (name != null) {
-				Node cachedNode = XMLContextImpl.toDocumentFragment(el, el
+				Node cachedNode = ParseUtil.toFragment(el, el
 						.getChildNodes());
 				context.setAttribute("#" + name, cachedNode);
 			}
@@ -262,16 +264,17 @@ public class CoreXMLNodeParser implements NodeParser<Node> {
 			}
 
 			if (xpath != null) {
-				doc = context.selectNodes(doc, xpath);
+				doc = ParseUtil.toFragment(doc,ParseUtil.selectNodes(doc, xpath));
 			}
 			if (xslt != null) {
 				URI currentURI = context.getCurrentURI();
 				Node xsltNode = loadXML(context, xslt);
-				doc = context.transform(doc, xsltNode);
+				doc = ParseUtil.transform(doc, xsltNode);
 				context.setCurrentURI(currentURI);
 			}
 			context.parse(doc);
 		} catch (Exception e) {
+			e.printStackTrace();
 			log.warn(e);
 		} finally {
 			context.setCurrentURI(parentURI);
@@ -383,7 +386,7 @@ public class CoreXMLNodeParser implements NodeParser<Node> {
 			}
 		}
 		String key = ParseUtil.getAttributeOrNull(el, "name", "id", "key");
-		Node n = key == null?null:(Node) context.getAttribute("#" + key);
+		Node n = key == null ? null : (Node) context.getAttribute("#" + key);
 		ParseUtil.parseChild((n == null ? el : n).getFirstChild(), context);
 	}
 

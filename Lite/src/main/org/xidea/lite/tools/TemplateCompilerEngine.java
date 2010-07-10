@@ -17,31 +17,17 @@ public class TemplateCompilerEngine extends HotTemplateEngine {
 
 	private Map<String, List<Object>> itemsMap = new HashMap<String, List<Object>>();
 	private Map<String, File[]> filesMap = new HashMap<String, File[]>();
-	@SuppressWarnings("unchecked")
-	private NodeParser[] parsers;
-	private Map<String, String> featrueMap;
 	private File webBase;
 
-	public TemplateCompilerEngine(File root, NodeParser<Object>[] parsers,
-			Map<String, String> featrueMap) throws IOException {
+	public TemplateCompilerEngine(File root) throws IOException {
 		super(root.toURI(),new File(root,"/WEB-INF/lite.xml").toURI());
 		this.webBase = root.getCanonicalFile();
-		this.featrueMap = featrueMap;
-		this.parsers = parsers;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	protected ParseContext createParseContext(String path) {
 		ParseContext context = super.createParseContext(path);
-		if (this.parsers != null) {
-			for (NodeParser parser : this.parsers) {
-				context.addNodeParser(parser);
-			}
-		}
-		if (this.featrueMap != null) {
-			context.getFeatrueMap().putAll(featrueMap);
-		}
+
 		return context;
 	}
 
