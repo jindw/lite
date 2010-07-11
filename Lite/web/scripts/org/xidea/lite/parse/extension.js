@@ -13,57 +13,21 @@ function Extension(){
 	this.parserMap = null;
 	this.seekMap = null;
 }
-function formatName(tagName){
-	tagName = tagName.replace(/([A-Z])/g,"-$1");
-	if(tagName.charAt(0) == '-'){
-		tagName = tagName.substr(1);
-	}
-	return tagName;
-}
 Extension.prototype={
-	seek:function(text,fn,context){
-		if(fn in this.seekMap){
-			fn = this.seekMap[fn];
-			return fn.call(chain,text);
-		}
-		return -1;
-	},
-	parse:function(node,context,chain){
-		if(this.parserMap){
-			var n = formatName(node.tagName) ;
-			for(n in this.parserMap){
-				var fn = this.parserMap[n];
-				break;
-			}
-			fn = fn || this.parserMap[''];
-			if(fn){
-				fn.call(chain,fn,node,context,chain);
-				return true;
-			}
-		}
-		return false;
-	},
-	on:function(node,context,chain){
-		if(this.onMap){
-			var n = formatName(node.name) ;
-			if(n in this.onMap){
-				var fn = this.onMap[n];
-				fn.call(chain,fn,node,context,chain);
-				return true;
-			}
-		}
-		return false;
-	},
+	
 	initialize:function(objectMap){
 		for(var key in objectMap){
 			var o = objectMap[key];
 			if(o instanceof Function){
 				var dest = null;
-				var match = key.match(/^(document|on|parse|seek)(.*)/);
+				var match = key.match(/^(document|on|parse|seek|xmlns)(.*)/);
 				var prefix = match[1];
 				var fn = match[2];
 				if(prefix == "document"){//""?".."
-					documentParser = o;
+					this.documentParser = o;
+					continue;
+				}else if(prefix == "xmlns"){
+					this.xmlns = o;
 					continue;
 				}else if(prefix == "on"){
 					dest = this.onMap ||(this.onMap={});
@@ -77,5 +41,105 @@ Extension.prototype={
 				}
 			}
 		}
+	},
+	document:function(node,context,chain){
+		if(this.documentParser){
+			this.documentParser.apply(chain,arguments);
+			return true;
+		}
+	},
+	seek:function(text,fn,context){
+		if(fn in this.seekMap){
+			fn = this.seekMap[fn];
+			return fn.call(context,text);
+		}else{
+			$log.warn("文本解析时,找不到相关的解析函数,请检查模板源码,是否手误：[function:"+fn+",document:"+context.currentURI+"]")
+			return -1;
+		}
+	},
+	parse:function(node,context,chain){
+		if(this.parserMap){
+			var n = formatName(node.localName||node.name) ;
+			if(n in this.parserMap){
+				var fn = this.parserMap[n];
+				fn.call(chain,node,context,chain);
+				return true;
+			}
+			fn = fn || this.parserMap[''];
+			if(fn){
+				fn.call(chain,node,context,chain);
+				return true;
+			}
+		}
+		return false;
+	},
+	on:function(attr,context,chain,parseLeaf){
+		if(this.onMap){
+			var n = formatName(attr.name) ;
+			if(n in this.onMap){
+				var fn = this.onMap[n];
+				return parseAttribute(attr,fn,context,chain,true)
+			}else{
+				n+='$';
+				if(n in this.onMap){
+					var fn = this.onMap[n];
+					return parseAttribute(attr,fn,context,chain,parseLeaf)
+				}
+			}
+		}
+		return false;
+	}
+	
+}
+
+function parseAttribute(attr,fn,context,chain,parse){
+	var needParse = canParseByDom(context,attr);
+	var needClean = needParse === null;
+	var rtv = false;
+	if(needParse || needClean && canParseByMap(context,attr)){
+		if(parse){
+			fn.call(chain,attr,context,chain);
+			rtv = true;
+		}else{
+			rtv = attr;
+		}
+	}
+	needClean && canParseByMap(context,attr,true);
+	return rtv;
+}
+
+function formatName(tagName){
+	tagName = tagName.replace(/[_\-]/g,"");
+	return tagName.toLowerCase();
+}
+function canParseByDom(context,attr){
+	if(attr.setUserData){
+		var parsed = attr.getUserData(ATTRIBUTE_PARSED)
+		if(parsed){
+			return false;
+		}else{
+			attr.setUserData(ATTRIBUTE_PARSED,true);
+			return true;
+		}
+	}
+	return null;
+}
+function canParseByMap(context,attr,clean){
+	var map = context.getAttribute(ATTRIBUTE_PARSED);
+	if(!map){
+		map = [[],[]];
+		context.setAttribute(ATTRIBUTE_PARSED,map)
+	}
+	if(clean){
+		removeByKey(map,attr);
+	}else{
+		var parsed = getByKey(map,attr);
+		if(parsed){
+			return false;
+		}else{
+			setByKey(map,attr,true);
+			return true;
+		}
 	}
 }
+var ATTRIBUTE_PARSED = "org.xidea.lite.parse#parsed"

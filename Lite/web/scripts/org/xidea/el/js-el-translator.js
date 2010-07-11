@@ -5,7 +5,7 @@
  * @author jindw
  * @version $Id: template.js,v 1.4 2008/02/28 14:39:06 jindw Exp $
  */
-var ID_PATTERN = /^[a-zA-Z_\$]\w*$/;
+var ID_PATTERN = /^[a-zA-Z_\$][_\$\w]*$/;
 /**
  * 将Lite的逆波兰式序列转化为php表达式
  */

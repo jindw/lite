@@ -15,7 +15,7 @@
  */
 function Template(data,parser){
     if(":debug"){
-        return new $import("org.xidea.lite.impl",{})(data,parser)
+        return new $import("org.xidea.lite.impl:TamplateImpl",{})(data,parser)
     }else{
 	    /**
 	     * 模板数据

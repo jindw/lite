@@ -26,12 +26,12 @@ var PLUGIN_DEFINE = "org.xidea.lite.DefinePlugin";
  * <a href="http://code.google.com/p/lite/wiki/Template"> 模版基础指令说明</a>
  * @public
  */
-function Template(data,parser){
+function TemplateImpl(data,parser){
     if(!(data instanceof Array || data instanceof Function)){
         if(parser == null|| parser == "xml"){
-        	parser = new XMLParser(true);
+        	parser = new ParseContext();
         }else if(typeof parser == "string"){
-            parser = new $import(parser)(true);
+            parser = new $import(parser)();
         }
         if(typeof data == 'string'){
         	data = parser.createURI(data);
@@ -84,7 +84,7 @@ function processDef(context, item){
  * 渲染模板
  * @public
  */
-Template.prototype.render = function(context){
+TemplateImpl.prototype.render = function(context){
     var data = this.data;
     if(data instanceof Function){
         return data(context);

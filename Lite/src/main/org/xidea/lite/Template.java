@@ -99,16 +99,16 @@ public class Template {
 					int forCount0 = forCount;
 					cmd[1] = compile((List) cmd[1]);
 
-					log.info("\n" + forCount0 + "/" + forCount + cmd[3]);
+					//log.info("\n" + forCount0 + "/" + forCount + cmd[3]);
 					if (forCount == forCount0) {
-						log.info("no_status");
+						//log.info("no_status");
 						cmd[0] = FOR_TYPE_NO_STATUS;
 					} else if (forCount0 == 0) {
-						log.info("first_status");
+						//log.info("first_status");
 						cmd[0] = FOR_TYPE_FIRST_STATUS;// may not first(no for
 														// status after)
 					} else {
-						log.info("full_status");
+						//log.info("full_status");
 					}
 					forCount = forCount0;
 					break;
