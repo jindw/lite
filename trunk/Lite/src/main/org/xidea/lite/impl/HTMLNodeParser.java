@@ -25,7 +25,7 @@ import org.xidea.lite.parse.ParseContext;
  * @author jindw
  */
 public class HTMLNodeParser extends AbstractHTMLNodeParser implements NodeParser<Element>{
-	public static final String AUTO_FORM_FEATRUE_URI = "http://www.xidea.org/ns/lite/autoform";
+	protected static final String AUTO_FORM_FEATRUE_URI = "http://www.xidea.org/featrues/lite/autoform";
 	public static final String NO_AUTO = "none";
 	public static final String AUTO_ANYWAY = "anyway";
 	public static final String AUTO_IN_FORM = "form";
@@ -56,7 +56,7 @@ public class HTMLNodeParser extends AbstractHTMLNodeParser implements NodeParser
 	@Override
 	protected void parseHTMLElement(Element el, ParseContext context,ParseChain chain) {
 		String localName = el.getLocalName();
-		Object status = context.getFeatrue(AUTO_FORM_FEATRUE_URI);
+		Object status = context.getAttribute(AUTO_FORM_FEATRUE_URI);
 		if (AUTO_ANYWAY.equals(status)) {
 			processAutoForm(context, el, localName);
 		} else if (AUTO_IN_FORM.equals(status) && FORM_TAG.equals(localName)) {

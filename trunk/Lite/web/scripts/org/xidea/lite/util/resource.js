@@ -1,5 +1,8 @@
 function loadXML(url){
 	try{
+		if(url instanceof URI){
+			url = url.path;
+		}
         if(/^[\s\ufeff]*</.test(url)){
     	    var doc =parseXMLByText(url.substring(url.indexOf('<')))
     	    //alert([data,doc.documentElement.tagName])
@@ -146,37 +149,21 @@ function getNodeListLength(){
 	return this.length;
 }
 
-function URI(path,parentURI){
-	if(parentURI&& !/^\w+\:|^</.test(path)){
-		path = parentURI.replace(/\/[^\\\/]+$/,'/')+path;
+function URI(path){
+	if(path.scheme){
+		path += '';
 	}
-	this.path = path;
+	this.path = path+'';
 }
-
-function buildURIMatcher(pattern){
-	var matcher = /\*+|[^\*\\\/]+?|[\\\/]/;
-	var buf = ["^"];
-	pattern.lastIndex = 0;
-	while (matcher.exec(pattern)) {
-		var item = matcher[0];
-		var len = item.length;
-		var c = item.charAt(0);
-		if (c == '*') {
-			if (length > 1) {
-				buf.push(".*");
-			} else {
-				buf.push("[^\\\\/]+");
-			}
-		} else if(length == 1 && c == '/' || c == '\\') {
-			buf.push("[\\\\/]");
-		}else{
-			buf.push(item.replace(/[^w]/g,quteReqExp));
-		}
+URI.create = function(path,currentURI,baseURI){
+	var parentPath = (currentURI || baseURI || {}).path
+	if(parentPath && !/^\w+\:|^</.test(path)){
+		path = parentPath.replace(/[^\/]*(?:[#\?].*)?$/,path)
 	}
-	buf.push("$");
-	return buf.join('');
+	return new URI(path);
 }
-function quteReqExp(x){
-	return '\\x'+(0x100 + x.charCodeAt()).toString(16).substring(1);
+URI.prototype = {
+	toString:function(){
+		return this.path;
+	}
 }
-    

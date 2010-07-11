@@ -12,7 +12,7 @@
 function ParseContext(config,path){
 	config = config || new ParseConfig();
 	this.path = path;
-	this.currentURI = path
+	this.currentURI = new URI(path)
 	this.featrueMap = config.getFeatrueMap(path);
 	this.initialize(config);
 }
@@ -54,11 +54,10 @@ ParseContext.prototype = {
      * @abstract
      */
 	parse:function(source) {
-		
-		if(typeof source != 'string'){
-			//xml
-			var type = source.nodeType;
-			if(!(type>0)){
+		var type = source.nodeType;
+		if(type>0){//xml
+		}else{//text
+			if(typeof source != 'string'){
 				//NodeList
 				if(source instanceof URI){
 					source = this.loadXML(source.path);
@@ -75,16 +74,19 @@ ParseContext.prototype = {
 		}
 		this.topChain.next(source);
 	},
-    createURI:function(path,parentURI) {
-		return new URI(path||'',(parentURI||this.currentURI || ''));
+    createURI:function(path) {
+    	return URI.create(path,this.currentURI,this.config.root)
     },
     loadXML:function(path){
     	if(/^[\s\ufeff]*</.test(path)){
     		//this.currentURI = "data:text/xml,"+encodeURIComponent(path)
+    		return loadXML(path)
     	}else{
-    		this.currentURI = path.replace(/#.*/,'');
+    		//$log.info("loadXML",path)
+    		this.currentURI = this.createURI(path);
+    		return loadXML(this.currentURI)
     	}
-    	return loadXML(path)
+    	
     },
     selectNodes:selectNodes
 }

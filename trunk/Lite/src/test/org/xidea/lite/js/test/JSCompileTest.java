@@ -2,13 +2,11 @@ package org.xidea.lite.js.test;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URI;
 
 import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import javax.xml.xpath.XPathExpressionException;
 
@@ -25,8 +23,8 @@ import org.xidea.jsi.JSIRuntime;
 import org.xidea.jsi.impl.JSIText;
 import org.xidea.jsi.impl.RuntimeSupport;
 import org.xidea.lite.Template;
-import org.xidea.lite.impl.ParseContextImpl;
 import org.xidea.lite.impl.ParseUtil;
+import org.xidea.lite.parse.ParseContext;
 import org.xidea.lite.test.LiteTestUtil;
 import org.xml.sax.SAXException;
 
@@ -42,7 +40,7 @@ public class JSCompileTest {
 	URI menuURL;
 	File webRoot = new File(new File(JSCompileTest.class.getResource("/")
 			.getFile()), "../../");
-	ParseContextImpl context;
+	ParseContext context;
 
 	public JSCompileTest() throws MalformedURLException {
 		context = LiteTestUtil.buildParseContext(webRoot.toURI());
@@ -112,6 +110,7 @@ public class JSCompileTest {
 		String defaultContext = getText(doc, "/root/context");
 
 		NodeList nodes = context.selectNodes(doc, "/root/entry");
+		System.out.println(nodes);
 		for (int i = 0;i<nodes.getLength();i++) {
 			Element child = (Element) nodes.item(i);
 			String key = child.getAttribute("key");
@@ -156,7 +155,7 @@ public class JSCompileTest {
 				+ ")");
 		Object jsJS = eval("jsTemplate.render(" + contextJSON + ")");
 		Assert.assertEquals("JS编译前后结果不一致"+source, jsJSON, jsJS);
-		ParseContextImpl pc = LiteTestUtil.buildParseContext(menuURL);
+		ParseContext pc = LiteTestUtil.buildParseContext(menuURL);
 		source = source.replace("=\"menu.xml\"", "=\""+menuURL+"\"");
 		System.out.println(source);
 		pc.parse(ParseUtil.loadXML(source,null));

@@ -13,40 +13,65 @@
  * 		"includes":["/example\\/*.xhtml"],
  * 		"excludes":[],
  * 		"featrueMap":{
- * 			"http://www.xidea.org/featrues/lite/output-encoding":"utf-8",
+ *          "http://www.xidea.org/featrues/lite/output-encoding":"utf-8",
  * 			"http://www.xidea.org/featrues/lite/output-mime-type":"text/html",
  * 			"http://www.xidea.org/featrue/lite/html-javascript-compressor":"org.jside.jsi.tools.JSACompressor"
  * 		},
  * 		"extensions":[
  * 			{
- * 				"key":"",
- * 				"value":"org.xidea.lite.impl"
- * 			},
- * 			{
- * 				"key":"http://www.w3.org/1999/xhtml",
- * 				"value":"org.xidea.lite.xhtml"
- * 			},
- * 			{
- * 				"key":"http://www.xidea.org/featrue/lite/core",
- * 				"value":"org.xidea.lite.core"
+ * 				"namespace":"http://www.w3.org/1999/xhtml",
+ * 				"package":"org.xidea.lite.xhtml"
  * 			}
  * 		]
  * 	}
  * ]
  */
-function ParseConfig(root,groups){
+function ParseConfig(root,json){
 	this.root = root;
-	this.groups = groups;
+	this.config = defaultConfig;
+	if(json){
+		var result = [];
+		var i = json.length
+		while(i--){
+			var item = {};
+			copy(json[i],item);
+			item.includes = new RegExp(item.includes.join('|')||"^$");
+			item.excludes = new RegExp(item.excludes.join('|')||"^$");
+			result[i] = item;
+		}
+		this.config = result;
+	}
 }
-
+function copy(source,dest){
+	for(var n in source){
+		dest[n] = source[n];
+	}
+}
+function findGroup(groups,path,require){
+	for(var i=0,len = groups.length;i<len;i++){
+		g = groups[i];
+		if(g.includes.test(path)){
+			if(!g.excludes.test(path)){
+				return g;
+			}
+		}
+	}
+	return require && groups[groups.length-1];
+}
 ParseConfig.prototype = {
 	/**
 	 */
 	getDecotatorPage:function(path){
-		return null;
+		var g = findGroup(this.config,path,null)
+		return g && g.featrueMap['http://www.xidea.org/featrues/lite/layout'];
 	},
 	getFeatrueMap:function(path){
-		return {};
+		var result = {}
+		var g = findGroup(this.config,path,null);
+		if(g){
+			copy(g.featrueMap,result);
+		}
+		return result;
 	},
 	getNodeParsers:function(path){
 		return buildParser(this,path)
@@ -59,6 +84,13 @@ function buildParser(config,path){
 		function(node,context,chain){//extension
 			if(!extension){
 				context.setAttribute(ExtensionParser,extension = new ExtensionParser());
+				var g = findGroup(config.config,path,null);
+				if(g){
+					for(var es = g.extensions,len = es.length,i=0;i<len;i++){
+						var ext = es[i];
+						extension.addExtensionPackage(ext.namespace,ext['package'])
+					}
+				}
 			}
 			return extension.parse(node,context,chain);
 		}
@@ -72,20 +104,19 @@ function buildParser(config,path){
 	]
 }
 var defaultConfig = {
-		"includes":[".*"],//"/example\\/*.xhtml"
-		"excludes":[],
+		"includes":/./,//"/example\\/*.xhtml"
+		"excludes":/^$/,
 		"featrueMap":{
+			//必要属性（控制xml编译）
 			"http://www.xidea.org/featrues/lite/output-encoding":"utf-8",
+			//必要属性（控制xml编译）
 			"http://www.xidea.org/featrues/lite/output-mime-type":"text/html"
 		},
 		"extensions":[
-			{
-				"key":"http://www.w3.org/1999/xhtml",
-				"value":"org.xidea.lite.xhtml"
-			},
-			{
-				"key":"http://www.xidea.org/featrue/lite/core",
-				"value":"org.xidea.lite.core"
+			//core 自行编译
+			{//xhtml 编译不是自带的，需要自己定义
+   				"namespace":"http://www.w3.org/1999/xhtml",
+   				"package":"org.xidea.lite.xhtml"
 			}
 		]
 	}

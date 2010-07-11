@@ -100,7 +100,7 @@ ResultContext.prototype = {
 	 */
 	appendElse:function(testEL){
 		clearPreviousText(this.result);
-		this.result.push([ELSE_TYPE, testEL && requireEL(this,testEL)  ]);
+		this.result.push([ELSE_TYPE, testEL && requireEL(this,testEL) || null ]);
 	},
 
 	appendFor:function(varName, itemsEL, statusName){

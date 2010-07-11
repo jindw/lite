@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.xidea.el.impl.ReflectUtil;
 import org.xidea.lite.TemplateEngine;
 import org.xidea.lite.impl.ParseContextImpl;
+import org.xidea.lite.parse.ParseContext;
 import org.xidea.lite.test.LiteTestUtil;
 
 
@@ -22,7 +23,7 @@ public class URLURITest {
 	@Test
 	public void testResourceContext() throws Exception{
 		String base = "http://lh:8080/test";
-		ParseContextImpl rc =LiteTestUtil.buildParseContext(new URI(base));
+		ParseContext rc =LiteTestUtil.buildParseContext(new URI(base));
 		Assert.assertEquals(base+".xml", rc.createURI("test.xml").toString());
 		Assert.assertEquals(base+".xml", rc.createURI("./test.xml").toString());
 		

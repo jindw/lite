@@ -11,6 +11,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -30,7 +31,20 @@ public class CoreXMLNodeParser implements NodeParser<Node> {
 	private static ExtensionParserImpl extensionParser = new ExtensionParserImpl();
 
 	public void parse(Node node, ParseContext context, ParseChain chain) {
-		if (node instanceof Element) {
+		if (node instanceof Attr) {
+			Attr el = (Attr) node;
+			String prefix = el.getPrefix();
+			String namespaceURI = el.getNamespaceURI();
+			if (namespaceURI != null
+					&& ParseUtil.isCoreNS(prefix, namespaceURI)) {
+				String name = el.getLocalName();
+				if("autoform".equals(name)){
+					
+				}
+			}else {
+				chain.next(node);
+			}
+		}else if (node instanceof Element) {
 			Element el = (Element) node;
 			String prefix = el.getPrefix();
 			String namespaceURI = el.getNamespaceURI();
