@@ -11,6 +11,10 @@ import java.util.regex.Pattern;
  * 
  */
 public class URLMatcher implements Comparable<URLMatcher> {
+	private static final Pattern MATCH_PARTY = Pattern.compile(
+			"\\*+|" +
+			"[^\\*\\\\/]+?|" +
+			"[\\\\/]");
 	private final Pattern pattern;
 	private int length;
 	public static final URLMatcher createMatcher(String pattern) {
@@ -19,7 +23,7 @@ public class URLMatcher implements Comparable<URLMatcher> {
 
 	private URLMatcher(String pattern) {
 		length = pattern.length();
-		Matcher matcher = Pattern.compile("/?\\*\\*+|\\*+|[^\\*\\\\/]+?|[\\\\/]").matcher(
+		Matcher matcher = MATCH_PARTY.matcher(
 				pattern);
 		StringBuilder buf = new StringBuilder("^");
 		while (matcher.find()) {
@@ -28,15 +32,9 @@ public class URLMatcher implements Comparable<URLMatcher> {
 			char firstChar = item.charAt(0);
 			if (firstChar == '*') {
 				if (length > 1) {
-					buf.append(".*");
+					buf.append(".*");//* 允许 0至多个非分割字符（\/）
 				} else {
-					buf.append("[^\\\\/]+");
-				}
-			} else if (length > 1 && item.charAt(1) == '*') {// *
-				if (length > 2) {
-					buf.append("/?.*");
-				} else {
-					buf.append("/?[^\\\\/]+");
+					buf.append("[^\\\\/]*");//* 允许 0至多个任意字符
 				}
 			} else if(length == 1 && firstChar == '/' || firstChar == '\\') {
 				buf.append("[\\\\/]");
