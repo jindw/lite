@@ -15,6 +15,7 @@ import org.w3c.dom.NodeList;
 import org.xidea.lite.Template;
 import org.xidea.lite.impl.ParseContextImpl;
 import org.xidea.lite.impl.ParseUtil;
+import org.xidea.lite.parse.ParseContext;
 import org.xidea.lite.test.LiteTestUtil;
 
 
@@ -32,7 +33,7 @@ public class XMLParserTest {
 	@Test
 	public void testSelect() throws Exception {
 		URI url = this.getClass().getResource("include-test.xml").toURI();
-		ParseContextImpl context =LiteTestUtil.buildParseContext(url); 
+		ParseContext context =LiteTestUtil.buildParseContext(url); 
 		org.w3c.dom.Document doc = ParseUtil.parse(url, context);
 		
 		NodeList node = ParseUtil.selectNodes(doc,"//xhtml:body");

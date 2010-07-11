@@ -14,6 +14,7 @@ import org.junit.Test;
 import org.xidea.lite.Template;
 import org.xidea.lite.impl.ParseContextImpl;
 import org.xidea.lite.impl.TextNodeParser;
+import org.xidea.lite.parse.ParseContext;
 import org.xidea.lite.test.LiteTestUtil;
 
 public class TextParserTest {
@@ -50,7 +51,7 @@ public class TextParserTest {
 
 	public void test(String text, String result) throws Exception {
 		TextNodeParser p = new TextNodeParser();
-		ParseContextImpl context = LiteTestUtil.buildParseContext(new URI("http://localhost:8080/"));
+		ParseContext context = LiteTestUtil.buildParseContext(new URI("http://localhost:8080/"));
 		p.parse(text, context, null);
 		List<Object> insts = context.toList();
 		Template t = new Template(insts);

@@ -1,7 +1,10 @@
+this.addScript('config-parser.js',['parseConfig','buildURIMatcher']
+				,0
+				,'org.xidea.lite.util:loadXML');
 this.addScript('config.js','ParseConfig'
 				,0
 				,["Core",'ExtensionParser','Extension','parseDefaultXMLNode','parseText']);
-					
+					"",
 this.addScript('extension-parser.js','ExtensionParser'
 				,0
 				,["org.xidea.el:findELEnd",
@@ -15,8 +18,8 @@ this.addScript('extension.js','Extension'
 
            
 this.addScript('parse-context.js','ParseContext'
-                ,['ResultContext','ParseConfig']
-                ,['buildTopChain','org.xidea.lite.util:URI','org.xidea.lite.util:loadXML','org.xidea.lite.util:selectNodes']);
+                ,['ResultContext','ParseConfig','org.xidea.lite.util:loadXML','org.xidea.lite.util:selectNodes']
+                ,['buildTopChain','org.xidea.lite.util:URI']);
 
 this.addScript('result-context.js','ResultContext'
                 ,0
@@ -29,7 +32,7 @@ this.addScript('xml-default-parser.js','parseDefaultXMLNode'
                 ,'org.xidea.lite.impl:*');
 this.addScript('xml-core-parser.js','Core'
                 ,0
-                ,['org.xidea.lite.impl:*','org.xidea.lite.util:selectNodes']);
+                ,['org.xidea.lite.impl:*','org.xidea.lite.util:selectNodes','org.xidea.lite.util:URI']);
 
 this.addScript('text-parser.js',['parseText']
                 ,0

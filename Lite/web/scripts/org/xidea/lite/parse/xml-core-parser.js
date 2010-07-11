@@ -196,9 +196,9 @@ function processIncludeTag(node,context,chain){
 	    if(path!=null){
 	    	if(path.charAt() == '#'){
 	    		doc = context['#'+name];
-	    		context.currentURI = doc.documentURI;
+	    		context.currentURI = new URI(doc.documentURI);
 	    	}else{
-		        var url = parentURI?parentURI.replace(/[^\/]*(?:[#\?].*)?$/,path):path;
+		        var url = context.createURI(path);
 		        var doc = context.loadXML(url);
 	    	}
 	    }

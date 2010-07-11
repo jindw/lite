@@ -13,8 +13,8 @@ import org.xidea.el.fn.ECMA262Impl.JSON;
 import org.xidea.el.impl.ExpressionFactoryImpl;
 import org.xidea.jsi.JSIRuntime;
 import org.xidea.lite.Template;
-import org.xidea.lite.impl.ParseConfigImpl;
-import org.xidea.lite.impl.ParseContextImpl;
+import org.xidea.lite.parse.ParseContext;
+import org.xidea.lite.test.LiteTestUtil;
 
 public class ELTest {
 	static JSIRuntime js = org.xidea.jsi.impl.RuntimeSupport.create();
@@ -64,7 +64,7 @@ public class ELTest {
 		
 	}
 	private static String runNativeJS(String source, String contextJSON) {
-		ParseContextImpl pc = createParserContext();
+		ParseContext pc = createParserContext();
 		List<Object> tps = pc.parseText("${JSON.stringify("+source+")}", Template.EL_TYPE);
 		pc.appendAll(tps);
 		js.eval("$import('org.xidea.lite.impl:Translator')");
@@ -73,9 +73,9 @@ public class ELTest {
 		String jsResult = (String)js.eval("("+code+")("+contextJSON+")");
 		return jsResult;
 	}
-	private static ParseContextImpl createParserContext() {
+	private static ParseContext createParserContext() {
 		URI uri = new File(".","unknow").toURI();
-		ParseContextImpl pc = new ParseContextImpl(new ParseConfigImpl(uri), "/");
+		ParseContext pc = LiteTestUtil.buildParseContext(uri);
 		return pc;
 	}
 }
