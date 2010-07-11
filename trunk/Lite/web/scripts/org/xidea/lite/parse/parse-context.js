@@ -10,8 +10,11 @@
  * 模板解析上下文对象实现
  */
 function ParseContext(config,path){
-	this.initialize(config);
+	config = config || new ParseConfig();
+	this.path = path;
+	this.currentURI = path
 	this.featrueMap = config.getFeatrueMap(path);
+	this.initialize(config);
 }
 
 ParseContext.prototype = {
@@ -21,16 +24,26 @@ ParseContext.prototype = {
 	 */
 	initialize:function(config){
     	this.config = config;
-    	this.parserList = [];
+    	this.parserList = config.getNodeParsers(this.path);
 	    this.result = new ResultContext();
-	    this.topChain = new ParseChain(this);
+	    this.topChain = buildTopChain(this);
 	},
-	textType:0,
 	parseText:function(source, textType) {
+		switch(textType){
+		case XML_ATTRIBUTE_TYPE :
+	    case XML_TEXT_TYPE :
+	    case EL_TYPE :
+	        break;
+	    default:
+			$log.error("未知编码模式："+textType)
+			throw new Error();
+		}
+		
 		var mark = this.mark();
-		var oldType = this.textType;
+		var oldType = this.getTextType();
+		this.setTextType(textType);
 		this.parse(source);
-		this.textType = oldType;
+		this.setTextType(oldType);
 		var result = this.reset(mark);
 		return result;
 	},
@@ -41,8 +54,24 @@ ParseContext.prototype = {
      * @abstract
      */
 	parse:function(source) {
-		if(source instanceof URI){
-			source = this.loadXML(source.path);
+		
+		if(typeof source != 'string'){
+			//xml
+			var type = source.nodeType;
+			if(!(type>0)){
+				//NodeList
+				if(source instanceof URI){
+					source = this.loadXML(source.path);
+				}else{
+					var len = source.length;
+					if(len >= 0 && source.item){//NodeList
+						for(var i = 0;i<len;i++){
+							this.topChain.next(source.item(i));
+						}
+						return;
+					}
+				}
+			}
 		}
 		this.topChain.next(source);
 	},
@@ -62,12 +91,12 @@ ParseContext.prototype = {
 var rm = ResultContext.prototype;
 for(var n in rm){
 	if(rm[n] instanceof Function){
-		ParseContext[n] = buildWrapper(n);
+		ParseContext.prototype[n] = buildWrapper(n);
 	}
 }
 function buildWrapper(n){
 	return function(){
 		var result = this.result;
-		result[n].apply(result,arguments)
+		return result[n].apply(result,arguments)
 	}
 }

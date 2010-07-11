@@ -7,7 +7,7 @@
  */
 
 
-function parseXMLNode(node,context,chain){
+function parseDefaultXMLNode(node,context,chain){
     switch(node.nodeType){
         case 1: //NODE_ELEMENT 
             parseElement(node,context,chain)

@@ -7,16 +7,18 @@
  */
 
 function parseText(text,context,chain,textParsers){
-	switch(typeof text == 'string' && context.textType){
+	if(typeof text != 'string'){
+		chain.next(text);
+	}
+	switch(context.getTextType()){
     case XML_ATTRIBUTE_TYPE :
-        var escapeQute = '"';
+        var qute = '"';
     case XML_TEXT_TYPE :
         var encode = true;  
+    case EL_TYPE:
         break;
-    case EL_TYPE :
-        var textType = EL_TYPE;
     default:
-    	chain.next(text);
+    	$log.error("未知编码模式："+context.getTextType()+text)
     	return;
     }
 	var len = text.length;
@@ -44,7 +46,7 @@ function parseText(text,context,chain,textParsers){
 		if (nip != null) {
 			var escapeCount = countEescape(text, p$);
 			context.append(text
-					.substring(start, p$ - (escapeCount + 1) / 2), encode,
+					.substring(start, p$ - ((escapeCount + 1) >>1)), encode,
 					qute);
 			if ((escapeCount & 1) == 1) {// escapsed
 				start = nextPosition(context, text, p$);

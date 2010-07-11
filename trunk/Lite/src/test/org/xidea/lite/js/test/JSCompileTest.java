@@ -3,36 +3,28 @@ package org.xidea.lite.js.test;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URL;
 
-import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
-import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xidea.el.json.JSONDecoder;
 import org.xidea.el.json.JSONEncoder;
+import org.xidea.jsi.JSIRuntime;
+import org.xidea.jsi.impl.JSIText;
+import org.xidea.jsi.impl.RuntimeSupport;
 import org.xidea.lite.Template;
-import org.xidea.lite.TemplateEngine;
 import org.xidea.lite.impl.ParseContextImpl;
 import org.xidea.lite.impl.ParseUtil;
 import org.xidea.lite.test.LiteTestUtil;
@@ -44,7 +36,9 @@ import sun.org.mozilla.javascript.internal.Context;
 import sun.org.mozilla.javascript.internal.Scriptable;
 
 public class JSCompileTest {
-	ScriptEngine engine = new ScriptEngineManager().getEngineByExtension("js");
+	ScriptEngine engine;
+	JSIRuntime rt = RuntimeSupport.create();
+	
 	URI menuURL;
 	File webRoot = new File(new File(JSCompileTest.class.getResource("/")
 			.getFile()), "../../");
@@ -62,67 +56,52 @@ public class JSCompileTest {
 		}
 		return node.item(0).getTextContent();
 	}
+	Object eval(String source) throws ScriptException{
+		if(engine!=null){
+			return engine.eval(source);
+		}else{
+			return rt.eval(source);
+		}
+	}
 
 	@Before
 	public void setup() throws Exception, ScriptException {
 
 		menuURL = new File(webRoot, "menu.xml").toURI();
-		engine.eval("this['javax.script.filename']='<boot.js>'");
-		engine.eval(new InputStreamReader(this.getClass().getResourceAsStream(
+		eval("this['javax.script.filename']='<boot.js>'");
+		eval(JSIText.loadText(this.getClass().getResourceAsStream(
 				"/boot.js"), "utf-8"));
-		engine.put("evalFile", new BaseFunction() {
-
-			@Override
-			public Object call(Context ct, Scriptable scope,
-					Scriptable thisArg, Object[] args) {
-				String sourceName = String.valueOf(args[1]);
-				String source = (String) args[0];
-				//thisArg = (Scriptable) args[2];
-				source = "function(){"+source+"\n}";
-				Callable call = (Callable) ct.compileFunction(scope,source, sourceName, 1, null);
-				try{
-					//ct.enter();
-					System.out.println(scope.getClass());
-					System.out.println(scope);
-					return call.call(ct, scope, thisArg, args);
-				}finally{
-					//ct.exit();
-				}
-			}
-
-		});
+		Context.enter().getWrapFactory().setJavaPrimitiveWrap(false);
+		//engine = new ScriptEngineManager().getEngineByExtension("js");
 		//engine.eval("evalFile.call(null,'print(this)',111)");
-		engine.eval("$import('org.xidea.lite.impl:Template');");
-		engine.eval("$import('org.xidea.lite.impl:Translator');");
-		engine.eval("$import('org.xidea.lite.impl:XMLParser');");
-		engine.eval("$import('org.xidea.el:findELEnd')");
+		eval("$import('org.xidea.lite.impl:TemplateImpl');");
+		eval("$import('org.xidea.lite.impl:Translator');");
+		eval("$import('org.xidea.lite.parse:ParseContext');");
+		eval("$import('org.xidea.el:findELEnd')");
 	}
 
 	@Test
 	public void testTextParser() throws Exception {
 		String test = "您好：${user}，您的的ip地址是：${ippart0}  .${ip.part1}.${ip.part2}.${ip.part3}。";
 
-		Assert.assertEquals(11, engine.eval("new XMLParser(true).parseText('"
-				+ test + "').length"));
+		Assert.assertEquals(11, eval("new ParseContext().parseText('"
+				+ test + "',0).length"));
 		System.out
 				.println("###"
-						+ engine
-								.eval("new XMLParser(true).parseText('2${..}2').join('/')"));
-		Assert.assertEquals("2${..}2", engine
-				.eval("new XMLParser(true).parseText('2${..}2').join('')"));
+						+ eval("new ParseContext().parseText('2${..}2',0).join('/')"));
+		Assert.assertEquals("3${...}2", eval("new ParseContext().parseText('3${...}2',0).join('')"));
 	}
 
 	@Test
 	public void testFindELEnd() throws Exception {
-		Assert.assertEquals(16, engine
-				.eval("findELEnd(\"${'jin '+'dawei'}\",1)"));
-		Assert.assertEquals(5, engine.eval("findELEnd('${123}xxx',1)"));
-		Assert.assertEquals(6, engine.eval("findELEnd('x${123}xxx',2)"));
+		Assert.assertEquals(16, eval("findELEnd(\"${'jin '+'dawei'}\",1)"));
+		Assert.assertEquals(5, eval("findELEnd('${123}xxx',1)"));
+		Assert.assertEquals(6, eval("findELEnd('x${123}xxx',2)"));
 	}
 
 	@Test
 	public void testClasspath() throws Exception {
-		String obj = (String)engine.eval("$import('org.xidea.lite.impl:Template');new Template('classpath:///org/xidea/lite/test/input.xml').render({})");
+		String obj = (String)eval("$import('org.xidea.lite.impl:TemplateImpl');new TemplateImpl('classpath:///org/xidea/lite/test/input.xml').render({})");
 		Assert.assertTrue(obj.startsWith("<!DOCTYPE html PUBLIC"));
 		System.out.println(obj);
 	}
@@ -160,31 +139,33 @@ public class JSCompileTest {
 	private void doTestItem(String key, String source,
 			String contextJSON) throws ScriptException,
 			SAXException, IOException {
-		System.out.println("\n======" + key + "======\n");
 		String sourceJSON = JSONEncoder.encode(source);
-		engine.eval("var jsTemplate = new Template(" + sourceJSON
-				+ ",new XMLParser(true,'"+menuURL+"'))");
+		System.out.println("\n======" + key + sourceJSON + "======\n");
+		String base = JSONEncoder.encode(menuURL.toString());
+		eval("var jsTemplate = new TemplateImpl(" + sourceJSON
+				+ ",new ParseContext(null,"+base+"))");
 
-		engine.eval("var liteTemplate = new Template(" + sourceJSON
-				+ ",new XMLParser(false,'"+menuURL+"'))");
+		eval("var liteTemplate = new TemplateImpl(" + sourceJSON
+				+ ",new ParseContext(null,"+base+"),true)");
 		// .buildResult()");
 
-		System.out.println(engine.eval("jsTemplate.data+''"));
+		System.out.println(eval("jsTemplate.data+''"));
 //			System.out.println(contextJSON);
 		// System.out.println(engine.eval("liteTemplate.data+''"));
-		Object jsJSON = engine.eval("liteTemplate.render(" + contextJSON
+		Object jsJSON = eval("liteTemplate.render(" + contextJSON
 				+ ")");
-		Object jsJS = engine.eval("jsTemplate.render(" + contextJSON + ")");
-		Assert.assertEquals("JS编译后结果不一致"+source, jsJSON, jsJS);
+		Object jsJS = eval("jsTemplate.render(" + contextJSON + ")");
+		Assert.assertEquals("JS编译前后结果不一致"+source, jsJSON, jsJS);
 		ParseContextImpl pc = LiteTestUtil.buildParseContext(menuURL);
 		source = source.replace("=\"menu.xml\"", "=\""+menuURL+"\"");
 		System.out.println(source);
 		pc.parse(ParseUtil.loadXML(source,null));
 		StringWriter out = new StringWriter();
+		System.out.println(JSONEncoder.encode(pc.toList()));
 		new Template(pc.toList()).render(JSONDecoder.decode(contextJSON),
 				out);
 		String java = out.toString();
-		Assert.assertEquals("JS结果与Java不一致", sumText((String) jsJSON),
+		Assert.assertEquals("JS结果与Java不一致:"+key, sumText((String) jsJSON),
 				sumText(java));
 	}
 

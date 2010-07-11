@@ -160,7 +160,6 @@
 			<arg value="-exports" />
 			<arg value="org.xidea.el:*" />
 			<arg value="org.xidea.lite:*" />
-			<arg value="org.xidea.lite.core:*" />
 			<arg value="org.xidea.lite.impl:*" />
 			<arg value="org.xidea.lite.parse:*" />
 

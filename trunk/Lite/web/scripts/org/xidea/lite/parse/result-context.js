@@ -15,22 +15,29 @@ function ResultContext(){
 }
 
 ResultContext.prototype = {
+	textType:0,
+	setTextType:function(textType){
+		this.textType = textType;
+	},
+	getTextType:function(){
+		return this.textType;
+	},
 	setAttribute:function(key,value){
-		setValueByKey(this.attributeMap,key,value)
+		setByKey(this.attributeMap,key,value)
 	},
 	getAttribute:function(key){
-		return getValueByKey(this.attributeMap,key)
+		return getByKey(this.attributeMap,key)
 	},
     /**
      * 异常一定要抛出去，让parseText做回退处理
      */
     parseEL : function(el){
 	    try{
-	        new Function("return "+expression.replace(/\bfor\b/g,"f"));
-	        return new ExpressionTokenizer(expression).getResult();
+	        new Function("return "+el.replace(/\bfor\b/g,"f"));
+	        return new ExpressionTokenizer(el).getResult();
 	    }catch(e){
-	        $log.warn("表达式解析失败[fileName:"+this.currentURI+"]",el,e)
-	        throw e;
+	        $log.debug("表达式解析失败2[fileName:"+this.currentURI+"]",el,e.message)
+	        throw new Error();
 	    }
     },
     /**

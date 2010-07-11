@@ -20,10 +20,11 @@ public class ELTest {
 	static JSIRuntime js = org.xidea.jsi.impl.RuntimeSupport.create();
 	static ExpressionFactory expressionFactory = ExpressionFactoryImpl.getInstance();
 	static{
-		js.eval("$import('org.xidea.el:evaluate');//parseEL,Expression");
+		js.eval("$import('org.xidea.el:*');//parseEL,Expression");
 		js.eval("$import('org.xidea.lite.parse:*');//parseEL,Expression");
 		//js.eval("$import('org.xidea.lite.impl:*');//parseEL,Expression");
 		js.eval("$import('org.xidea.jsidoc.util:*');");
+		js.eval("function parseEL(el){return new ExpressionTokenizer(el).getResult()}");
 	}
 	@Test
 	public void test(){

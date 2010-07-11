@@ -8,49 +8,31 @@
 /**
  * 解析链对象
  */
-function ParseChain(context,index){
-	this.context = context;
-	this.index = index>0?index:0;
-}
-ParseChain.prototype = {
-    initialize:function(){
-    	var parserList = this.context.parserList;
-    	var index = this.index;
-	    this.parser = parserList[index];
-		this.nextChain = new ParseChain(this.context,index+1);
-	    this.initialize = Function.prototype;
-    },
-	next:function(node){
-		if(null == node){
-			return null;
-		}
-	    this.initialize();
-        var parser = this.parser;
-        var nextChain = this.nextChain;
-        
-        if(!parser){
-        	$log.error("parser is not found:",this.context.parserList.length,this.index,node)
-        }
-           if ((typeof node != 'string')
-        	  && (node.nodeType ==null)
-        	  && (node instanceof Packages.org.w3c.dom.NodeList)
-        	  ) {
-				var len = node.length;
-				for (var i = 0; i < len; i++) {
-					parser(node.item(i),this.context,nextChain)
-				}
-			} else{
-				if(!parser.accept || parser.accept(node)){
-					parser(node,this.context,nextChain)
-				}else if(nextChain != null){
-               		nextChain.next();
-            	}
-			}
-			return ;
-		if(!parser.accept || parser.accept(node)){
-			parser(node,this.context,nextChain)
-		}else if(nextChain != null){
-            nextChain.next();
-		}
+function buildTopChain(context){
+	function TopChain(){
 	}
+	addChainAddon(TopChain,context);
+	return new TopChain();
+}
+function addChainAddon(TopChain,context){
+	TopChain.prototype = context;
+	var pt = TopChain.prototype = new TopChain();
+	pt.index = 0;
+	pt.next = doNext;
+	pt.buildNext = buildNext;
+	pt.constructor = TopChain;
+}
+function doNext(node){
+	var parser = this.parserList[this.index];
+	var n = this.nextChain||this.buildNext();
+	parser(node,this,n);
+}
+function buildNext(){
+	var index = (this.index||0) +1;
+	if(this.parserList.length>index){
+		var n = new this.constructor();
+		n.index = index
+		return this.nextChain = n;
+	}
+	return null;
 }

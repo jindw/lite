@@ -30,10 +30,13 @@ addParsers(parseOutTag,"parseOut");
 addParsers(parseChooseTag,"parseChoose");
 addParsers(parseDefTag,"parseDef","parseMacro");
 addParsers(processIncludeTag,"parseInclude");
+addParsers(processXMLNS,"xmlns");
 addParsers(function(node){
 	$log.error("未知标签：",node.tagName,node.ownerDocument.documentURI)
 },"parse");
-
+function processXMLNS(){
+	
+}
 function parseIfTag(node,context,chain){
     var next = node.firstChild;
     var test = getAttributeEL(context,node,'test',true);
@@ -88,7 +91,7 @@ function parseChooseTag(node,context,chain){
 
 function parseForTag(node,context,chain){
     var next = node.firstChild;
-    var items = getAttributeEL(context,node,['items','values','value'],true);
+    var items = getAttributeEL(context,node,['list','values','items','value'],true);
     var var_ = getAttributeText(context,node,['var','id','name','item'],true);
     var status_ = getAttributeText(context,node,'status');
     context.appendFor(var_,items,status_);
@@ -103,12 +106,15 @@ function parseVarTag(node,context,chain){
     var name = getAttributeText(context,node,['name','id'],true);
     var value = getAttributeText(context,node,'value');
     if(value){
-    	var value = context.parseText(value,false);
+			$log.error(uneval(value))
+    	var value = context.parseText(value,0);
+			$log.error(uneval(value))
     	if(value.length == 1){
     		value = value[0];
-    		if(value instanceof Array){
-    			value = value[1];
-    		}
+//    		if(value instanceof Array){
+//    			value = value[1];
+//    		}
+			$log.error(uneval(value))
     		context.appendVar(name,value);
     	}else{
     		context.appendCaptrue(name);

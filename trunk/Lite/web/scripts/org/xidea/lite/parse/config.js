@@ -46,7 +46,7 @@ ParseConfig.prototype = {
 		return null;
 	},
 	getFeatrueMap:function(path){
-		
+		return {};
 	},
 	getNodeParsers:function(path){
 		return buildParser(this,path)
@@ -60,14 +60,15 @@ function buildParser(config,path){
 			if(!extension){
 				context.setAttribute(ExtensionParser,extension = new ExtensionParser());
 			}
-			return text
-		},
-		function(node,context,chain){
-			if(!extension){
-				context.setAttribute(ExtensionParser,extension = new ExtensionParser());
-			}
-			return text
+			return extension.parse(node,context,chain);
 		}
+//		,
+//		function(node,context,chain){
+//			if(!extension){
+//				context.setAttribute(ExtensionParser,extension = new ExtensionParser());
+//			}
+//			return text
+//		}
 	]
 }
 var defaultConfig = {

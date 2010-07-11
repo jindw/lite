@@ -7,44 +7,56 @@ function ExtensionParser(node){
 	this._textParser = [this];
 	var coreURL = "http://www.xidea.org/ns/lite/core";
 	this.addExtensionObject(coreURL,Core);
+	this.addExtensionObject("",DEFAULT_EL);
 	
 }
+var DEFAULT_EL = {
+	seek:function(text2){
+		var end = findELEnd(text2,-1);
+		$log.info(text2,end)
+		if(end>0){
+			try{
+				var el = text2.substring(0,end);
+				el = this.parseEL(el);
+			}catch(e){
+				$log.error("表达式解析异常，请检查是否手误：[fileName:"+this.currentURI+",el:"+el+"]")
+				return -1;
+			}
+            switch(this.getTextType()){
+            case XML_TEXT_TYPE:
+            	this.appendXmlText(el);
+            	break;
+            case XML_ATTRIBUTE_TYPE:
+            	this.appendAttribute(null,el);
+            	break;
+            default:
+            	this.appendEL(el);
+            }
+            return end+1;
+		}else{
+			return -1;
+		}
+	}
+}
 var CURRENT_NODE_KEY = {}
-var ATTRIBUTE_PARSED = "org.xidea.lite.parse#parsed"
-function canParseByDom(context,attr){
-	if(attr.setUserData){
-		var parsed = attr.getUserData(ATTRIBUTE_PARSED)
-		if(parsed){
-			return false;
-		}else{
-			attr.setUserData(ATTRIBUTE_PARSED,true);
-			return true;
-		}
-	}
-	return null;
-}
-function canParseByMap(context,attr,clean){
-	var map = context.getAttribute(ATTRIBUTE_PARSED);
-	if(!map){
-		map = [[],[]];
-		context.setAttribute(CURRENT_NODE_KEY,map)
-	}
-	if(clean){
-		removeByKey(attr);
-	}else{
-		var parsed = getByKey(attr);
-		if(parsed){
-			return false;
-		}else{
-			setByKey(attr,true);
-			return true;
-		}
-	}
-}
+
 ExtensionParser.prototype = {
 	parse:function(node,context,chain){
 		var type = node.nodeType;
-		if(type === 1){
+		if(type == 9){
+			//documentParser return 
+		}else if(type == 2){
+			if(node.namespaceURI == 'http://www.w3.org/2000/xmlns/'){
+				if(/^xmlns(?:\:\w+)?/.test(node.name)){
+					var v = node.value;
+					var fp = this.packageMap[v];
+					if (fp != null && fp.xmlns) {
+						fp.xmlns(node);
+						return;
+					}
+				}
+			}
+		}else if(type === 1){
 			context.setAttribute(CURRENT_NODE_KEY,node)
 			var nns = node.namespaceURI;
 			var attrs = node.attributes;
@@ -55,21 +67,18 @@ ExtensionParser.prototype = {
 				var ans = attr.namespaceURI;
 				var fp = this.packageMap[ans || nns];
 				if (fp != null) {
-					var needParse = canParseByDom(context,attr);
-					var needClean = needParse !== null;
-					if(needParse || needClean && canParseByMap(context,attr)){
-						if(fp.isExclusive(attr)){
-							exclusives.push([fp,attr]);
-						}else if (fp.on(attr, context, chain.previousChain)) {
-							needClean && canParseByMap(context,attr,true);
+					var test = fp.on(attr, context, chain.previousChain,false);
+					if(test){
+						if(test == true){
 							return;
+						}else{
+							exclusives.push([fp,attr]);
 						}
 					}
 				}
 			}
 			if(attr = exclusives.pop()){
-				if (fp[0].on(attr[1], context, chain.previousChain)) {
-					needClean && canParseByMap(context,attr,true);
+				if(fp[0].on(attr[1], context, chain.previousChain,true)) {
 					return;
 				}
 			}
@@ -77,63 +86,50 @@ ExtensionParser.prototype = {
 			if(fp && fp.parse(node,context,chain)){
 				return;
 			}
-			parseDefaultXML(node,context,chain);
+			parseDefaultXMLNode(node,context,chain);
+			return;
 		}else if(type == null){//textParser
 			//String text,int start,ParseContext context
 			parseText(node,context,chain,this._textParser);
 			return;
-		}else{
-			parseDefaultXML(node,context,chain);
 		}
+		parseDefaultXMLNode(node,context,chain);
 	},
 	parseText:function(text,start,context){
 		var text2 = text.substring(start+1);
 		var match = text2.match(/^(?:(\w*)\:)?(\w*)[\$\{]/);
 		if(match){
 			var matchLength = match[0].length;
-			var node = context.getAttribute(CURRENT_NODE_KEY)
+			var currentNode = context.getAttribute(CURRENT_NODE_KEY)
 			var prefix = match[1];
 			var fn = match[2]
-			if(prefix === null){
-				var end = findELEnd(text2,matchLength);
-				if(end>0){
-					var el = context.parseEL(text2.substring(matchLength,end));
-                    switch(context.textType){
-                    case XML_TEXT_TYPE:
-                    	context.appendXmlText(el);
-                    	break;
-                    case XML_ATTRIBUTE_TYPE:
-                    	context.appendAttribute(null,el);
-                    	break;
-                    default:
-                    	context.appendEL(el);
-                    }
-				}else{
-					return -1;
-				}
+			if(prefix == null){
 				var ns = ""
 			}else{
-				var ns = node.lookupNamespaceURI(prefix);
-				if (ns == null) {
-					var doc = node.getOwnerDocument();
-					ns = doc && doc.documentElement.lookupNamespaceURI(prefix);
+				if(currentNode){
+					var ns = currentNode.lookupNamespaceURI(prefix);
+					if (ns == null) {
+						var doc = currentNode.getOwnerDocument();
+						ns = doc && doc.documentElement.lookupNamespaceURI(prefix);
+					}
+				}
+				if(!ns && prefix == 'c'){
+					ns = "http://www.xidea.org/ns/lite/core"
 				}
 			}
 			if(ns == null){
-				$log.warn("文本解析时,查找名称空间失败,请检查是否缺少XML名称空间申明：[code:$"+match[0]+",document:"+node.currentURI+"]")
+				$log.warn("文本解析时,查找名称空间失败,请检查是否缺少XML名称空间申明：[code:$"+match[0]+",prefix:"+prefix+",document:"+context.currentURI+"]")
 			}else{
-				var fp = this.packageMap[nns];
+				var fp = this.packageMap[ns];
 				if(fp){
 					//{之后的位置，el内容
 					var text3 = text2.substring(matchLength);
-					var p = fp.seek(text3,context);
+					var p = fp.seek(text3,fn,context);
 					if(p>=0){
 						return start+1+matchLength+p
-					}else{
-						$log.warn("文本解析时,找不到相关的解析函数,请检查模板源码,是否手误：[code:$"+match[0]+",namespace:"+ns+",document:"+node.currentURI+"]")
 					}
 				}else{
-					$log.warn("文本解析时,名称空间未注册实现程序,请检查lite.xml是否缺少语言扩展定义：[code:$"+match[0]+",namespace:"+ns+",document:"+node.currentURI+"]")
+					$log.warn("文本解析时,名称空间未注册实现程序,请检查lite.xml是否缺少语言扩展定义：[code:$"+match[0]+",namespace:"+ns+",document:"+context.currentURI+"]")
 				}
 			}
 		}
@@ -165,12 +161,12 @@ ExtensionParser.prototype = {
 	addExtensionPackage:function(namespace,packageName){
 		var target = {};
 		if(typeof packageName == 'string'){
-			var packageOject = $import(packageName+':');
+			var packageObject = $import(packageName+':');
 		}else{
-			packageOject = packageName;
+			packageObject = packageName;
 		}
-		for(var n in pkg.objectScriptMap){
-			var match = n.match(/^(?:document|on|parse|seek).*/);
+		for(var n in packageObject.objectScriptMap){
+			var match = n.match(/^(?:document|on|parse|seek|xmlns).*/);
 			if(match){
 				var o = $import(packageObject.name+':'+n,target);
 			}
