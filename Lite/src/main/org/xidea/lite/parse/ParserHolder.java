@@ -14,12 +14,12 @@ public interface ParserHolder{
 	 * 获得当前的指令解析器列表
 	 * @return
 	 */
-	public TextParser[] getTextParsers();
+//	public TextParser[] getTextParsers();
 	/**
 	 * 添加指令解析器
 	 * @param textParser
 	 */
-	public void addTextParser(TextParser textParser);
+//	public void addTextParser(TextParser textParser);
 	/**
 	 * 添加指令解析器
 	 * @param textParser

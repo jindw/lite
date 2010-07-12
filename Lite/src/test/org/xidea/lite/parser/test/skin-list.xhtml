@@ -1,0 +1,225 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://www.xidea.org/ns/template/core">
+	<head>
+		<meta http-equiv="Content-Type"
+			content="text/html; charset=UTF-8" />
+		<base href="http://my.baidu.com/widget/skin-list.action"/>
+		<title>我的个性化首页—主题分享库</title>
+		<link rel="stylesheet" type="text/css"
+			href="/styles/other/widget.css" />
+	</head>
+	<body>
+		<script src="/scripts/=baidu:renderPager"></script>
+		<form method="POST" action="/widget/skin-list.action"
+			name="data">
+			<input type="hidden" name="pageIndex" />
+			<input type="hidden" name="sortType" />
+			<div class="body">
+				<div class="top">
+					<a href="/">←返回个性化首页</a>
+					<div class="top-bg"></div>
+					<div class="top-tab-folder">
+						<div class="top-tab">
+							<a href="widget-list.action">模块分享</a>
+						</div>
+						<div class="top-tab top-tab-selected">主题分享</div>
+					</div>
+				</div>
+				<div class="head">
+					<div class="box">
+						<div class="search">
+							搜索主题&nbsp;&nbsp;
+							<input name="keyword" class="keyword" />
+							&nbsp;选择分类&nbsp;
+							<select name="group">
+								<option value="-1">全部</option>
+								<c:for var="item"
+									items="${groupList}">
+									<option value="${item.id}">
+										${item.name}
+									</option>
+								</c:for>
+							</select>
+							&nbsp;
+							<input type="submit"
+								onclick="this.sortType.value=1" value="立刻搜索" />
+						</div>
+						<div class="info">
+							<div class="linfo">
+								符合条件的共&nbsp;
+								<b>${resultCount}</b>
+								&nbsp;个结果
+							</div>
+							<div class="rinfo">
+								排序：&nbsp;
+								<input class="${sortType?'none':'now'}"
+									onmouseover="this.style.backgroundImage = 'url(../images/sort-hover.gif)'"
+									onmouseout="this.style.backgroundImage = ''"
+									onclick="this.form.sortType.value = 0" value="最新"
+									type="submit" />
+								&nbsp;
+								<input class="${sortType?'now':'none'}"
+									onmouseover="this.style.backgroundImage = 'url(../images/sort-hover.gif)'"
+									onmouseout="this.style.backgroundImage = ''"
+									onclick="this.form.sortType.value = 1" value="热门"
+									type="submit" />
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="left">
+					<div id="leftMenu">
+						<ul>
+							<li>
+								<b>主题分类</b>
+							</li>
+							<c:for var="item" items="${groupList}">
+								<li>
+									<a href="?group=${item.id}">
+										${item.name}
+									</a>
+									(${item.count})
+								</li>
+							</c:for>
+						</ul>
+					</div>
+				</div>
+				<div class="main" id="main">
+					<!-- 插入查询结果 -->
+					<ul id="skinList">
+						<c:for var="item" items="${skinList}">
+							<li
+								style="${for.index % 2==0?'background:#F6F9FF;':''}">
+								<table>
+									<tr>
+										<td width="410">
+											<img
+												src="/styles/skin${item.id}/banner.gif"
+												style="width:410px;height:70" />
+											<div
+												style="text-align:right">
+												<input type="button"
+													value="立即运用" style="cursor:pointer;" disabled="true"
+													onclick='setTheme("${item.id}","${item.title}",this)' />
+											</div>
+										</td>
+										<td width="150">
+											<h2>
+												<a>${item.name}</a>
+											</h2>
+											<div>
+												使用人数: ${item.refCount}
+											</div>
+											<div>
+												提供者：${item.author}
+											</div>
+											<div>
+												上传时间：${item.lastModified}
+											</div>
+										</td>
+									</tr>
+								</table>
+							</li>
+						</c:for>
+						<c:else>
+							<li>
+								没有
+								<c:if test="${keyword}">
+									找到与
+									<font>${keyword}</font>
+									相关的
+								</c:if>
+								模块
+							</li>
+						</c:else>
+					</ul>
+					<script
+						src="/scripts/=com.baidu.my.io.Communication">
+					</script>
+					<script type="text/javascript">
+//<![CDATA[
+function reset(){
+	var bts = document.getElementById("skinList").getElementsByTagName("input");
+	var i = bts.length;
+	while(i--){
+		bts[i].disabled=false;
+		bts[i].value = "立即运用"
+	}
+}
+setTimeout(reset,1000);
+function setTheme(id,title,me){
+	reset();
+	if(Communication.isIbaiduRun(800)){
+		me.disabled=true;
+		Communication.command({
+			name : "setTheme",
+			id : id,
+			title : title
+		});
+		confirm("您已更换新主题，请去原窗口查看！");
+	}else{
+		Communication.command({
+			name : "setTheme",
+			id : id,
+			title : title
+		})
+		location.replace("/")
+		me.disabled=true;
+	}
+}
+//]]>
+		</script>
+					<div class="foot">
+						<!-- 比较糟糕的设计 -->
+						<div>
+							<script>
+function gotoPage(page){
+	var f = document.forms['data'];
+	f.pageIndex.value = page;
+	f.submit();
+}
+document.write(renderPager({
+   resultCount:${resultCount},
+   pageSize:${pageSize},
+   pageIndex:${pageIndex}
+}))
+							</script>
+						</div>
+					</div>
+				</div>
+				<div style="clear:both;height:20px;" />
+				<div id="foot">
+					<a target="_blank"
+						href="http://jingjia.baidu.com">
+						企业推广
+					</a>
+					|
+					<a target="_blank" href="http://top.baidu.com">
+						搜索风云榜
+					</a>
+					|
+					<a href="http://www.baidu.com/home.html"
+						target="_blank">
+						关于百度
+					</a>
+					|
+					<a target="_blank" href="http://ir.baidu.com">
+						About Baidu
+					</a>
+					<div class="copyright">©2009 Baidu</div>
+				</div>
+			</div>
+		</form>
+		<c:pager>
+		
+		</c:pager>
+		<script>//<![CDATA[
+var leftHeight = document.getElementById("main").offsetHeight;
+var leftMenu = document.getElementById("leftMenu");
+if (leftMenu.offsetHeight < leftHeight) {
+	leftMenu.style.height = leftHeight + "px";
+}//]]>
+</script>
+	</body>
+</html>

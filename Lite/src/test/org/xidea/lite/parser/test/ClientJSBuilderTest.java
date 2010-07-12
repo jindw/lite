@@ -74,28 +74,29 @@ public class ClientJSBuilderTest {
 		System.out.println(clientLiteCode);
 		String result = (String) clientLiteCode.get(0);
 		boolean isError = Pattern.compile("[\r\n]alert", Pattern.MULTILINE)
-				.matcher(result).find();
+		.matcher(result).find() || !Pattern.compile("\\.push\\(", Pattern.MULTILINE)
+		.matcher(result).find();
 		Assert.assertTrue("生成失败" + result, !isError);
 	}
-
-	@Test
-	public void testCTClient() throws SAXException, IOException, URISyntaxException {
-		InputStreamReader source = new InputStreamReader(this.getClass()
-				.getResourceAsStream("ct-client.txt"), "utf-8");
-		
-		ParseContext context2 = LiteTestUtil.buildParseContext(new URI("http://w/"));
-		context2.addTextParser(ELParser.EL);
-		context2.addTextParser(ELParser.IF);
-		context2.addTextParser(ELParser.FOR);
-		context2.addTextParser(ELParser.ELSE);
-		context2.addTextParser(ELParser.CLIENT);
-		context2.addTextParser(ELParser.END);
-		context2.addTextParser(ELParser.VAR);
-		// 前端直接压缩吧？反正保留那些空白也没有调试价值
-		// context2.setCompress(context.isCompress());
-		context2.parse(loadText(source));
-		System.out.println(context2.toList());
-	}
+//
+//	@Test
+//	public void testCTClient() throws SAXException, IOException, URISyntaxException {
+//		InputStreamReader source = new InputStreamReader(this.getClass()
+//				.getResourceAsStream("ct-client.txt"), "utf-8");
+//		
+//		ParseContext context2 = LiteTestUtil.buildParseContext(new URI("http://w/"));
+//		context2.addTextParser(ELParser.EL);
+//		context2.addTextParser(ELParser.IF);
+//		context2.addTextParser(ELParser.FOR);
+//		context2.addTextParser(ELParser.ELSE);
+//		context2.addTextParser(ELParser.CLIENT);
+//		context2.addTextParser(ELParser.END);
+//		context2.addTextParser(ELParser.VAR);
+//		// 前端直接压缩吧？反正保留那些空白也没有调试价值
+//		// context2.setCompress(context.isCompress());
+//		context2.parse(loadText(source));
+//		System.out.println(context2.toList());
+//	}
 
 	public static String loadText(Reader in) {
 		// Reader in = new InputStreamReader(sin, "utf-8");

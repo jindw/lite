@@ -65,8 +65,10 @@ ResultContext.prototype = {
 	 * 
 	 * @param <Object[]> text
 	 */
-	appendAll:function(instruction){
-		this.result.push.apply(this.result,instruction)
+	appendAll:function(ins){
+		for(var len = ins.length,i=0;i<len;i++){
+			this.result.push(ins[i]);
+		}
 	},
 	/**
 	 * @param Object el
@@ -172,33 +174,46 @@ function optimizeResult(source){
     var previousText;
     for(var i=0,j=0;i<source.length;i++){
     	var item = source[i];
-		if (item.constructor == String) {
+		if ('string' == typeof item) {
 			if(previousText==null){
-				j++;
+				previousText = item;
 			}else{
-				item = previousText + item;
+				previousText += item;
 			}
-			result[j-1] = previousText = item;
 		}else{
+			if(previousText){
+				result[j++] = previousText;
+			}
 			previousText = null;
 			result[j++] = item;
 		}
+    }
+    if(previousText){
+    	result[j++] = previousText;
     }
     return result;
 }
 function buildTreeResult(result){
 	var stack = [];//new ArrayList<ArrayList<Object>>();
+	var defs = [];
 	var current = [];// new ArrayList<Object>();
 	stack.push(current);
 	for (var i = 0;i<result.length;i++) {
 	    var item = result[i];
-		if (item.constructor == String) {
+		if ('string' == typeof item) {
 			current.push(item);
 		} else {
-			if (item.length == 0) {
+			if (item.length == 0) {//end
 				var children = stack.pop();
-				current = stack[stack.length-1];
-				current[current.length - 1][1]=children;
+				current = stack[stack.length-1];//向上一级列表
+				var parentNode = current.pop();//最后一个是当前结束的标签
+				parentNode[1]=children;
+				if(parentNode[0] == PLUGIN_TYPE && parentNode[3]== 'org.xidea.lite.DefinePlugin'){
+					defs.push(parentNode);
+				}else{
+					current.push(parentNode);
+				}
+				
 			} else {
 				var type = item[0];
 				var cmd2 =[];
@@ -220,7 +235,7 @@ function buildTreeResult(result){
 			}
 		}
 	}
-	return current;
+	return defs.concat(current);
 }
 
 function xmlReplacer(c){

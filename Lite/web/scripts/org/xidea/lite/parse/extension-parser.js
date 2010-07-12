@@ -13,7 +13,6 @@ function ExtensionParser(node){
 var DEFAULT_EL = {
 	seek:function(text2){
 		var end = findELEnd(text2,-1);
-		$log.info(text2,end)
 		if(end>0){
 			try{
 				var el = text2.substring(0,end);

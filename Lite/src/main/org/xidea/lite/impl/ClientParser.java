@@ -47,7 +47,7 @@ public class ClientParser extends ELParser implements NodeParser<Element>,
 			ParseContext context,TextParser ce) {
 		ParseContext clientContext = new ParseContextImpl(context);
 		if(ce!=null){
-			clientContext.addTextParser(ce);
+			//clientContext.addTextParser(ce);
 		}
 		clientContext.parse(text);
 		parseClient(context,id, clientContext, true);

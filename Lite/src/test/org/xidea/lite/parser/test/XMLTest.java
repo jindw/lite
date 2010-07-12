@@ -105,7 +105,7 @@ public class XMLTest {
 		String info = "第"+index+"个测试错误：";
 //		parseContext.getFeatrueMap().put(HTMLNodeParser.AUTO_FORM_FEATRUE_URI, HTMLNodeParser.AUTO_IN_FORM);
 		String source =
-		"<div xmlns:c=\"http://www.xidea.org/ns/template/core\">"
+		"<div xmlns:c=\"http://www.xidea.org/ns/lite/core\">"
 		+ text + "</div>";
 		System.out.println(source);
 		List<Object> insts = LiteTestUtil.parse(source);

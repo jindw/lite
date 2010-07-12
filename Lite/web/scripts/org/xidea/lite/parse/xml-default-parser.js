@@ -51,8 +51,7 @@ function parseDefaultXMLNode(node,context,chain){
     }
 }
 
-
-var htmlLeaf = /^(?:meta|link|img|br|hr)$/i;
+var htmlLeaf = /^(?:meta|link|img|br|hr|input)$/i;
 var scriptTag = /^script$/i
 function parseElement(node,context,chain){
     var attributes = node.attributes;
@@ -128,7 +127,8 @@ function parseTextNode(node,context,chain){
     var data = String(node.data);
     //context.appendAll(context.parseText(data.replace(/^\s*([\r\n])\s*|\s*([\r\n])\s*$|^(\s)+|(\s)+$/g,"$1$2$3$4"),XML_TEXT_TYPE))
     //不用回车js序列化后更短
-    context.appendAll(context.parseText(data.replace(/^\s+|\s+$/g," "),XML_TEXT_TYPE))
+    data = data.replace(/^\s*([\r\n])\s*|\s*([\r\n])\s*$|^(\s)+|(\s)+$/g,"$1$2$3$4");
+    context.appendAll(context.parseText(data,XML_TEXT_TYPE))
 }
 
 function parseCDATA(node,context,chain){
@@ -169,26 +169,39 @@ function parseDocumentType(node,context,chain){
     if(node.xml){
         context.append(node.xml);
     }else{
-        if(node.publicId){
+    	var pubid = node.publicId;
+    	var nodeName = node.nodeName;
+		var sysid = node.systemId;
+        if(pubid){
+			if(pubid == "org.xidea.lite.html.DEFAULT"){
+				//跳过容错补充dtd申明
+				return;
+			}
             context.append('<!DOCTYPE ');
-            context.append(node.nodeName);
+            context.append(nodeName);
             context.append(' PUBLIC "');
-            context.append(node.publicId );
-            context.append( '" "');
-            context.append(node.systemId);
+            context.append(pubid);
+            if (sysid == null) {
+            	context.append( '" "');
+            	context.append(sysid);
+            }
             context.append('">');
-        }else if(node.systemId){
+        }else if(sysid){
             context.append('<!DOCTYPE ');
-            context.append(node.nodeName);
+            context.append();
             context.append(' SYSTEM "');
-            context.append(node.systemId);
+            context.append(sysid);
             context.append('">');
         }else{
-            context.append('<!DOCTYPE ');
-            context.append(node.nodeName);
-            context.append(' [');
-            context.append(node.internalSubset);
-            context.append(']>');
+        	context.append("<!DOCTYPE ");
+			context.append(node.getNodeName());
+			var sub = node.internalSubset;
+            if(sub){
+				context.append(" [");
+				context.append(sub);
+				context.append("]");
+			}
+			context.append(">");
         }
     }
 }

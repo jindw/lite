@@ -64,10 +64,9 @@ function Translator(id){
 Translator.prototype = {
 	translate:function(result){
 	    try{
-	    	
 	        var list = result.toList();
 	        var jf = list['class'];
-	        print([!(jf && jf.name),jf && jf.name,result.toCode()])
+	        //print([!(jf && jf.name),jf && jf.name,result.toCode()])
 	        if(jf && jf.name){
 	        	list = window.eval(result.toCode());
 	        }

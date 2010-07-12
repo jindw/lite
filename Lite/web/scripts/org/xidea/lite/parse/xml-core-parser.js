@@ -30,40 +30,34 @@ addParsers(parseOutTag,"parseOut");
 addParsers(parseChooseTag,"parseChoose");
 addParsers(parseDefTag,"parseDef","parseMacro");
 addParsers(processIncludeTag,"parseInclude");
+addParsers(parseClientTag,"parseClient");
+addParsers(parseBlockTag,"parseBlock","parseGroup");
 addParsers(processXMLNS,"xmlns");
 addParsers(function(node){
 	$log.error("未知标签：",node.tagName,node.ownerDocument.documentURI)
 },"parse");
 function processXMLNS(){
-	
+}
+function parseBlockTag(node,context,chain){
+	var ns = node.namespaceURI;
+	var value = getAttribute(node,"name","id");
+	var cached = value && context.getAttribute("#" + value);
+	var node = cached || node;
+	context.parse(node.childNodes);
 }
 function parseIfTag(node,context,chain){
-    var next = node.firstChild;
-    var test = getAttributeEL(context,node,'test',true);
+    var test = getAttributeEL(node,'*test','value');
     context.appendIf(test);
-    if(next){
-        do{
-            context.parse(next)
-        }while(next = next.nextSibling)
-    }
+    context.parse(node.childNodes)
     context.appendEnd();
 }
 
 function parseElseIfTag(node,context,chain,requireTest){
-    var next = node.firstChild;
     if(requireTest != false){
-        var test = getAttributeEL(context,node,'test',requireTest == true);
+        var test = getAttributeEL(node,'test','value');
     }
-    if(test){
-    	context.appendElse(test);
-    }else{
-    	context.appendElse();
-    }
-    if(next){
-        do{
-            context.parse(next)
-        }while(next = next.nextSibling)
-    }
+    context.appendElse(test || null);
+    context.parse(node.childNodes)
     context.appendEnd();
 }
 
@@ -91,9 +85,9 @@ function parseChooseTag(node,context,chain){
 
 function parseForTag(node,context,chain){
     var next = node.firstChild;
-    var items = getAttributeEL(context,node,['list','values','items','value'],true);
-    var var_ = getAttributeText(context,node,['var','id','name','item'],true);
-    var status_ = getAttributeText(context,node,'status');
+    var items = getAttributeEL(node,'*list','values','items','value');
+    var var_ = getAttribute(node,'*var','name','id','item');
+    var status_ = getAttribute(node,'status');
     context.appendFor(var_,items,status_);
     if(next){
         do{
@@ -103,19 +97,17 @@ function parseForTag(node,context,chain){
     context.appendEnd();
 }
 function parseVarTag(node,context,chain){
-    var name = getAttributeText(context,node,['name','id'],true);
-    var value = getAttributeText(context,node,'value');
+    var name = getAttribute(node,'*name','id');
+    var value = getAttribute(node,'value');
     if(value){
-			$log.error(uneval(value))
     	var value = context.parseText(value,0);
-			$log.error(uneval(value))
     	if(value.length == 1){
     		value = value[0];
-//    		if(value instanceof Array){
-//    			value = value[1];
-//    		}
-			$log.error(uneval(value))
-    		context.appendVar(name,value);
+    		if(value instanceof Array){
+    			context.appendVar(name,value[1]);
+    		}else{
+    			context.appendVar(name,stringifyJSON(value));
+    		}
     	}else{
     		context.appendCaptrue(name);
 	        context.appendAll(value)
@@ -134,7 +126,7 @@ function parseVarTag(node,context,chain){
 }
 
 function parseOutTag(node,context,chain){
-    var value = getAttributeText(context,node,"value");
+    var value = getAttribute(node,"value")||context.textContent;
     value = context.parseText(value,EL_TYPE);
     context.appendAll(value);
 }
@@ -145,7 +137,7 @@ function parseOutTag(node,context,chain){
  */
 function parseDefTag(node,context,chain){
     var next = node.firstChild;
-    var ns = getAttributeText(context,node,'name',true);
+    var ns = getAttribute(node,'*name');
     ns = (ns.replace(/^\s+/,'')+'{end').split(/[^\w]+/);
     ns.pop();
     var el = ['{"name":"',ns[0],'","params":['];
@@ -166,37 +158,15 @@ function parseDefTag(node,context,chain){
     context.appendEnd();
 }
 function processIncludeTag(node,context,chain){
-    var var_ = getAttributeText(context,node,'var');
-    var path = getAttributeText(context,node,'path');
-    var xpath = getAttributeText(context,node,'xpath');
-    var name = getAttributeText(context,node,'name');
+    var path = getAttribute(node,'path');
+    var xpath = getAttribute(node,'xpath');
     var doc = node.ownerDocument || node;
     var parentURI = context.currentURI;
 	try{
-		if(name){
-			var docFragment = doc.createDocumentFragment();
-			var next = node.firstChild;
-            if(next){
-                do{
-                    docFragment.appendChild(next)
-                }while(next = next.nextSibling)
-            }
-            context['#'+name] = docFragment;
-		}
-	    if(var_){
-            var next = node.firstChild;
-            context.appendVar(var_);
-            if(next){
-                do{
-                    context.parse(next)
-                }while(next = next.nextSibling)
-            }
-            context.appendEnd();
-	    }
 	    if(path!=null){
-	    	if(path.charAt() == '#'){
-	    		doc = context['#'+name];
-	    		context.currentURI = new URI(doc.documentURI);
+	    	if(path.charAt() == '$'){
+	    		doc = context['$'+name];
+	    		context.currentURI = new URI(String(doc.documentURI));
 	    	}else{
 		        var url = context.createURI(path);
 		        var doc = context.loadXML(url);
@@ -211,78 +181,41 @@ function processIncludeTag(node,context,chain){
     }
 }
 
-/**
- * @internal
- */
-var stringRegexp = /["\\\x00-\x1f\x7f-\x9f]/g;
-/**
- * 转义替换字符
- * @internal
- */
-var charMap = {
-    '\b': '\\b',
-    '\t': '\\t',
-    '\n': '\\n',
-    '\f': '\\f',
-    '\r': '\\r',
-    '"' : '\\"',
-    '\\': '\\\\'
-};
-
-/**
- * 转义替换函数
- * @internal
- */
-function charReplacer(item) {
-    var c = charMap[item];
-    if (c) {
-        return c;
-    }
-    c = item.charCodeAt().toString(16);
-    return '\\u00' + (c.length>1?c:'0'+c);
+function parseClientTag(node,context,chain){
+	var c2 = new ParseContext(context.config,context.currentURI);
+	var id = getAttribute(node,'*name','id');
+	var translator = new Translator(id);
+	c2.parse(node.childNodes);
+	var code = translator.translate(c2);
+	context.append("<!--//--><script>//<![CDATA[\n"
+				+code.replace(/<\/script>/ig,'<\\/script>')+"//]]></script>\n");
 }
-function getAttributeEL(context,node,key,required){
-    return getAttributeObject(context,node,key,true,required)
-}
-function getAttributeText(context,node,key,required){
-    return getAttributeObject(context,node,key,false,required)
-}
-
-function getAttributeObject(context,node,key,isEL,required){
-    if(key instanceof Array){
-        for(var i=0;i<key.length;i++){
-            var value = node.getAttribute(key[i]);
-            if(value){
-                if(i>0){
-                    $log.warn("元素："+node.tagName +"的属性：'" + key[i] +"' 不被推荐；请使用是:'"+key[0]+"'代替");
-                }
-                key = key[i];
-                break;
-            }
-        }
-    }else{
-        var value = node.getAttribute(key);
-    }
-	if(value){
-		value = String(value);
-		if(isEL){
-	         return findFirstEL(context,value);
-		}else{
-			return value.replace(/^\s+|\s+$/g,'');
-		}
-	}else if(required){
-	    var error = "属性"+key+"为必选属性";
-		$log.error(error);
-		throw new Error(error);
+function getAttribute(el,key){
+	var required = key.charAt() == '*';
+	if(required){
+		key = key.substr(1);
 	}
-}
-function findFirstEL(context,value){
-	var els = context.parseText(value,EL_TYPE);
-	var i = els.length;
-	while(i--) {
-		var el = els[i];
-		if(el instanceof Array){//el
-		    return el[1];
+	for(var i=1,len = arguments.length;i<len;i++){
+		var an = arguments[i];
+		if(an == '#text'){
+			return el.textContent;
+		}else if(el.hasAttribute(an)){
+			if(i>1 && key.charAt(0) != '#'){
+				$log.warn("标准属性名为：",key ,'您采用的是：',an);
+			}
+			return el.getAttribute(an);
 		}
 	}
+	if(required){
+		$log.error("属性：",key ,'为必要属性。');
+	}
+	return null;
 }
+function getAttributeEL(el){
+	var el = getAttribute.apply(null,arguments);
+	if(el !== null){
+		el = el.replace(/^\s*\$\{([\s\S]+)\}\s*$/,"$1")
+	}
+	return el;
+}
+
