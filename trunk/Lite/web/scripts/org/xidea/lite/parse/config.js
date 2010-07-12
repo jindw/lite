@@ -27,7 +27,7 @@
  * ]
  */
 function ParseConfig(root,json){
-	this.root = root;
+	this.root = new URI(root||'.');
 	this.config = defaultConfig;
 	if(json){
 		var result = [];

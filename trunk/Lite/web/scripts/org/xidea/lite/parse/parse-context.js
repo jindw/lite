@@ -12,7 +12,7 @@
 function ParseContext(config,path){
 	config = config || new ParseConfig();
 	this.path = path;
-	this.currentURI = new URI(path)
+	this.currentURI = path?new URI(path):config.root
 	this.featrueMap = config.getFeatrueMap(path);
 	this.initialize(config);
 }
@@ -75,7 +75,12 @@ ParseContext.prototype = {
 		this.topChain.next(source);
 	},
     createURI:function(path) {
+    	$log.error(path,this.currentURI,this.config.root)
     	return URI.create(path,this.currentURI,this.config.root)
+    },
+    openStream:function(uri){
+    	//only for java
+    	return Packages.org.xidea.lite.impl.ParseUtil.openStream(uri)
     },
     loadXML:function(path){
     	if(/^[\s\ufeff]*</.test(path)){
@@ -88,7 +93,10 @@ ParseContext.prototype = {
     	}
     	
     },
-    selectNodes:selectNodes
+    selectNodes:selectNodes,
+    toString:function(){
+    	return this.toCode();
+    }
 }
 var rm = ResultContext.prototype;
 for(var n in rm){

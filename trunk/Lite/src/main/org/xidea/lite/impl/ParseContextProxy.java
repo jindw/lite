@@ -41,9 +41,7 @@ public class ParseContextProxy implements ParserHolder, ResultContext,
 		this.resultContext = parent;
 	}
 
-	public TextParser[] getTextParsers() {
-		return parserHolder.getTextParsers();
-	}
+
 
 	public URI createURI(String path) {
 		try {
@@ -169,9 +167,6 @@ public class ParseContextProxy implements ParserHolder, ResultContext,
 		return ParseUtil.transform(doc, xslt);
 	}
 
-	public void addTextParser(TextParser textParser) {
-		parserHolder.addTextParser(textParser);
-	}
 
 	public void addNodeParser(NodeParser<? extends Object> nodeParser) {
 		parserHolder.addNodeParser(nodeParser);

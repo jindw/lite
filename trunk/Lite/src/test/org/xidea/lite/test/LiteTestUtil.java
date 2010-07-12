@@ -1,5 +1,6 @@
 package org.xidea.lite.test;
 
+import java.io.File;
 import java.net.URI;
 import java.util.List;
 
@@ -21,11 +22,14 @@ public class LiteTestUtil {
 
 	public static ParseContext buildParseContext(URI base) {
 		if (useJS) {
-			Object rb = rt.eval("new ParseContext(null,'/')");
+			Object rb = rt.eval("new ParseContext(new ParseConfig('"+base+"',null),null)");
 			ParseContext context = rt.wrapToJava(rb, ParseContext.class);
 			return context;
 
 		} else {
+			if(base == null){
+				base = new File("/").toURI();
+			}
 			ParseContextImpl context = new ParseContextImpl(
 					new ParseConfigImpl(base), "/");
 			context.setCurrentURI(base);

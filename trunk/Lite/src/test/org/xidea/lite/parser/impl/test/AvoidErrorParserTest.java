@@ -113,7 +113,7 @@ public class AvoidErrorParserTest {
 		Document doc = toDoc(context, source);
 		context.parse(doc);
 		String result = toString(context);
-		System.out.println(result);
+		System.out.println("result:"+result);
 		Assert.assertTrue("只能剩下最后一个外部script",findCount(result,"</script>") == 1);
 		Assert.assertTrue("确保所有的</script>都被编码了",findCount(result,"<\\/script>") == 2);
 	}

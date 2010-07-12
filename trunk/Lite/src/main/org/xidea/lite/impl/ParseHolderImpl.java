@@ -13,7 +13,6 @@ public class ParseHolderImpl implements ParserHolder {
 
 	protected static NodeParser<?>[] DEFAULT_PARSER_LIST = { new HTMLNodeParser(),
 			new CoreXMLNodeParser(), new DefaultXMLNodeParser(),new InputStreamNodeParser(), new TextNodeParser() };
-	protected static TextParser[] DEFAULT_TEXT_PARSER_LIST = { ELParser.EL };
 	protected ParseChainImpl topChain;
 	protected TextParser[] ips ;
 
@@ -21,7 +20,7 @@ public class ParseHolderImpl implements ParserHolder {
 
 	public ParseHolderImpl(ParseContext context,
 			NodeParser<? extends Object>[] parsers) {
-		initialize(context, parsers, null);
+		initialize(context, parsers);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -32,14 +31,13 @@ public class ParseHolderImpl implements ParserHolder {
 			cs.add(chain.parser);
 			chain = chain.next;
 		}while(chain!=null);
-		initialize(context, cs.toArray(new NodeParser[cs.size()]), parentHolder.getTextParsers());
+		initialize(context, cs.toArray(new NodeParser[cs.size()]));
 	}
 
 	protected void initialize(ParseContext context,
-			NodeParser<? extends Object>[] parsers, TextParser[] ips) {
+			NodeParser<? extends Object>[] parsers) {
 		this.context = context;
 		this.topChain = buildTopChain(parsers ==null? DEFAULT_PARSER_LIST:parsers);
-		this.ips = ips == null?DEFAULT_TEXT_PARSER_LIST:ips;
 	}
 
 	public void addTextParser(TextParser iparser) {

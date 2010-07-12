@@ -79,10 +79,10 @@ public class ExtensionParserImpl implements NodeParser<Element> {
 			context.addNodeParser(nodeParser);
 		}
 
-		public void addTextParser(Object function) {
-			TextParser nodeParser = createTextParser(function);
-			context.addTextParser(nodeParser);
-		}
+//		public void addTextParser(Object function) {
+//			TextParser nodeParser = createTextParser(function);
+//			context.addTextParser(nodeParser);
+//		}
 
 		public TextParser createTextParser(Object o) {
 			HashMap<String, Object> varMap = new HashMap<String, Object>();

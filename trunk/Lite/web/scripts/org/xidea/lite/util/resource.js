@@ -158,7 +158,9 @@ function URI(path){
 URI.create = function(path,currentURI,baseURI){
 	var parentPath = (currentURI || baseURI || {}).path
 	if(parentPath && !/^\w+\:|^</.test(path)){
-		path = parentPath.replace(/[^\/]*(?:[#\?].*)?$/,path)
+		path = parentPath.replace(/[^\\\/]*(?:[#\?].*)?$/,path);
+		path = path.replace(/[\\\/](?:\.[\\\/])?/g,'/');
+		while(path != (path = path.replace(/[^\/]+\/\.\.\//g,'')));
 	}
 	return new URI(path);
 }

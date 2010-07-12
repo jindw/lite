@@ -39,7 +39,7 @@ public class TextNodeParser implements NodeParser<String> {
 	 */
 	protected void parse(ParseContext context, final String text,
 			final boolean encode, final char qute) {
-		TextParser[] textParsers = context.getTextParsers();
+		TextParser[] textParsers = this.getTextParsers();
 		final int length = text.length();
 		int start = 0;
 		do {
@@ -87,6 +87,11 @@ public class TextNodeParser implements NodeParser<String> {
 		if (start < length) {
 			context.append(text.substring(start), encode, qute);
 		}
+	}
+	protected static TextParser[] DEFAULT_TEXT_PARSER_LIST = { ELParser.EL };
+	
+	private TextParser[] getTextParsers() {
+		return DEFAULT_TEXT_PARSER_LIST;
 	}
 
 	protected int nextPosition(ParseContext context, final String text, int p$) {
