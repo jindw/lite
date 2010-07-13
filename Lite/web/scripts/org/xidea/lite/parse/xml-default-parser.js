@@ -10,40 +10,40 @@
 function parseDefaultXMLNode(node,context,chain){
     switch(node.nodeType){
         case 1: //NODE_ELEMENT 
-            parseElement(node,context,chain)
+            processElement(node,context,chain)
             break;
         case 2: //NODE_ATTRIBUTE                             
-            parseAttribute(node,context,chain)
+            processAttribute(node,context,chain)
             break;
         case 3: //NODE_TEXT                                        
-            parseTextNode(node,context,chain)
+            processTextNode(node,context,chain)
             break;
         case 4: //NODE_CDATA_SECTION                     
-            parseCDATA(node,context,chain)
+            processCDATA(node,context,chain)
             break;
         case 5: //NODE_ENTITY_REFERENCE                
-            parseEntityReference(node,context,chain)
+            processEntityReference(node,context,chain)
             break;
         case 6: //NODE_ENTITY            
-            parseEntity(node,context,chain)
+            processEntity(node,context,chain)
             break;
         case 7: //NODE_PROCESSING_INSTRUCTION    
-            parseProcessingInstruction(node,context,chain)
+            processProcessingInstruction(node,context,chain)
             break;
         case 8: //NODE_COMMENT                                 
-            parseComment(node,context,chain)
+            processComment(node,context,chain)
             break;
         case 9: //NODE_DOCUMENT                                
         case 11://NODE_DOCUMENT_FRAGMENT             
-            parseDocument(node,context,chain)
+            processDocument(node,context,chain)
             break;
         case 10://NODE_DOCUMENT_TYPE                     
-            parseDocumentType(node,context,chain)
+            processDocumentType(node,context,chain)
 //        case 11://NODE_DOCUMENT_FRAGMENT             
-//            parseDocumentFragment(node,context,chain)
+//            processDocumentFragment(node,context,chain)
             break;
         case 12://NODE_NOTATION 
-            parseNotation(node,context,chain);
+            processNotation(node,context,chain);
             break;
         default://文本节点
         	chain.next(node);
@@ -53,7 +53,7 @@ function parseDefaultXMLNode(node,context,chain){
 
 var htmlLeaf = /^(?:meta|link|img|br|hr|input)$/i;
 var scriptTag = /^script$/i
-function parseElement(node,context,chain){
+function processElement(node,context,chain){
     var attributes = node.attributes;
     context.append('<'+node.tagName);
     for (var i=0; i<attributes.length; i++) {
@@ -80,7 +80,7 @@ function parseElement(node,context,chain){
 }
 
 //parser attribute
-function parseAttribute(node,context,chain){
+function processAttribute(node,context,chain){
     var name = String(node.name);
     var value = String(node.value);
     var buf = context.parseText(value,XML_ATTRIBUTE_TYPE);
@@ -123,7 +123,7 @@ function parseAttribute(node,context,chain){
     context.appendAll(buf);
     context.append('"');
 }
-function parseTextNode(node,context,chain){
+function processTextNode(node,context,chain){
     var data = String(node.data);
     //context.appendAll(context.parseText(data.replace(/^\s*([\r\n])\s*|\s*([\r\n])\s*$|^(\s)+|(\s)+$/g,"$1$2$3$4"),XML_TEXT_TYPE))
     //不用回车js序列化后更短
@@ -131,24 +131,24 @@ function parseTextNode(node,context,chain){
     context.appendAll(context.parseText(data,XML_TEXT_TYPE))
 }
 
-function parseCDATA(node,context,chain){
+function processCDATA(node,context,chain){
     context.append("<![CDATA[");
     context.appendAll(context.parseText(node.data,EL_TYPE));
     context.append("]]>");
 }
-function parseEntityReference(){
+function processEntityReference(){
     return null;//not support
 }
-function parseEntity(){
+function processEntity(){
     return null;//not support
 }
-function parseProcessingInstruction(node,context,chain){
+function processProcessingInstruction(node,context,chain){
     context.append("<?"+node.nodeName+" "+node.data+"?>");
 }
-function parseComment(){
+function processComment(){
     return null;//not support
 }
-function parseDocument(node,context,chain){
+function processDocument(node,context,chain){
     for(var n = node.firstChild;n!=null;n = n.nextSibling){
         context.parse(n);
     }
@@ -156,7 +156,7 @@ function parseDocument(node,context,chain){
 ///**
 // * @protected
 // */
-//function parseDocumentFragment(node,context,chain){
+//function processDocumentFragment(node,context,chain){
 //    var nl = node.childNodes;
 //    for (var i=0; i<nl.length; i++) {
 //        context.parse(nl.item(i));
@@ -165,7 +165,7 @@ function parseDocument(node,context,chain){
 /**
  * @protected
  */
-function parseDocumentType(node,context,chain){
+function processDocumentType(node,context,chain){
     if(node.xml){
         context.append(node.xml);
     }else{
@@ -208,7 +208,7 @@ function parseDocumentType(node,context,chain){
 
 /**
  */
-function parseNotation(node,context,chain){
+function processNotation(node,context,chain){
     return null;//not support
 }
 

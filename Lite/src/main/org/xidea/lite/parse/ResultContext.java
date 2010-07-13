@@ -13,7 +13,6 @@ import org.xidea.lite.Plugin;
  * @author jindw
  */
 public interface ResultContext {
-	public static final Object END_INSTRUCTION = new Object[0];
 
 	/**
 	 * 记录一下编译上下文状态
@@ -128,8 +127,6 @@ public interface ResultContext {
 	 */
 	public void appendAll(List<Object> instruction);
 
-//	public void clearPreviousText();
-
 	public void appendEL(Object el);
 
 	public void appendAttribute(String name, Object el);
@@ -153,8 +150,6 @@ public interface ResultContext {
 	public void appendCaptrue(String varName);
 
 	public void appendPlugin(Class<? extends Plugin> class1, Object propertiesEL);
-
-//	public String addGlobalObject(Class<? extends Object> impl, String key);
 
 	public String allocateId();
 	/**

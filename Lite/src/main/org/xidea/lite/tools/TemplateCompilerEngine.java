@@ -10,7 +10,6 @@ import java.util.Map;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.Template;
 import org.xidea.lite.impl.HotTemplateEngine;
-import org.xidea.lite.parse.NodeParser;
 import org.xidea.lite.parse.ParseContext;
 
 public class TemplateCompilerEngine extends HotTemplateEngine {
