@@ -8,7 +8,6 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -22,8 +21,6 @@ public class LiteCompiler {
 	private static final Log log = LogFactory.getLog(LiteCompiler.class);
 	private File root;
 	private String path;
-	private NodeParser<Object>[] parsers;
-	private Map<String,String> featrueMap = new HashMap<String, String>();
 	private File htmlcached;
 	private File litecached;
 	private String encoding = "utf-8";
@@ -32,7 +29,6 @@ public class LiteCompiler {
 
 	public LiteCompiler(String[] args) {
 		System.out.println(JSONEncoder.encode(args));
-		//args = new String[]{"-root","C:\\Users\\jindw\\workspace\\android-server/res","-featrueMap['http://www.xidea.org/ns/lite/autoform']","form","-litecached","C:\\Users\\jindw\\workspace\\android-server/src/org/jside/android/web/"};
 		CommandParser cp = new CommandParser(args);
 		cp.addConvertor(NodeParser.class,Convertor.Default.INSTANCE);
 		cp.setup(this);
@@ -174,16 +170,6 @@ public class LiteCompiler {
 		this.litecached = litecached;
 	}
 
-	public Map<String, String> getFeatrueMap() {
-		return this.featrueMap;
-	}
-	public void setFeatrueMap(Map<String, String>featrueMap) {
-		this.featrueMap = featrueMap;
-	}
-
-	public void setNodeParsers(NodeParser<Object>[] additional) {
-		this.parsers = additional;
-	}
 
 	public void setEncoding(String encoding) {
 		this.encoding = encoding;

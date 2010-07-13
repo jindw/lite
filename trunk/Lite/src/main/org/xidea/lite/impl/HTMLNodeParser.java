@@ -1,6 +1,6 @@
 package org.xidea.lite.impl;
 
-import static org.xidea.lite.parse.ResultContext.END_INSTRUCTION;
+import static org.xidea.lite.impl.ResultContextImpl.END_INSTRUCTION;
 
 import java.util.ArrayList;
 import java.util.HashMap;

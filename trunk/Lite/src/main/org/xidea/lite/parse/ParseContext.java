@@ -46,7 +46,6 @@ public interface ParseContext extends ResultContext, ParseConfig, ParserHolder {
 	 * @param file
 	 * @param parentURI
 	 * @see org.xidea.lite.impl.ParseContextImpl#createURI
-	 * @see org.xidea.lite.impl.ResourceContextImpl#createURI
 	 * @return
 	 */
 	public URI createURI(String file);

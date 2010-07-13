@@ -23,7 +23,6 @@ import org.xidea.lite.parse.ParseConfig;
 import org.xidea.lite.parse.ParseContext;
 import org.xidea.lite.parse.ParserHolder;
 import org.xidea.lite.parse.ResultContext;
-import org.xidea.lite.parse.TextParser;
 import org.xml.sax.SAXException;
 
 public class ParseContextProxy implements ParserHolder, ResultContext,

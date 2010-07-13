@@ -21,38 +21,38 @@ function addParsers(){
 		Core[arguments[i]] = fn
 	}
 }
-addParsers(parseIfTag,"parseIf");
-addParsers(parseElseIfTag,"parseElse","parseElseIf","parseElseif","parseElif");
+addParsers(processIfTag,"parseIf");
+addParsers(processElseTag,"parseElse","parseElseIf","parseElseif","parseElif");
 
-addParsers(parseForTag,"parseFor","parseForeach","parseForEach");
-addParsers(parseVarTag,"parseVar","parseSet");
-addParsers(parseOutTag,"parseOut");
-addParsers(parseChooseTag,"parseChoose");
-addParsers(parseDefTag,"parseDef","parseMacro");
+addParsers(processForTag,"parseFor","parseForeach","parseForEach");
+addParsers(processVarTag,"parseVar","parseSet");
+addParsers(processOutTag,"parseOut");
+addParsers(processChooseTag,"parseChoose");
+addParsers(processDefTag,"parseDef","parseMacro");
 addParsers(processIncludeTag,"parseInclude");
-addParsers(parseClientTag,"parseClient");
-addParsers(parseBlockTag,"parseBlock","parseGroup");
+addParsers(processClientTag,"parseClient");
+addParsers(processBlockTag,"parseBlock","parseGroup");
 addParsers(processXMLNS,"xmlns");
 addParsers(function(node){
-	$log.error("未知标签：",node.tagName,node.ownerDocument.documentURI)
+	$log.error("未支持标签：",node.tagName,node.ownerDocument.documentURI)
 },"parse");
 function processXMLNS(){
 }
-function parseBlockTag(node,context,chain){
+function processBlockTag(node,context,chain){
 	var ns = node.namespaceURI;
 	var value = getAttribute(node,"name","id");
 	var cached = value && context.getAttribute("#" + value);
 	var node = cached || node;
 	context.parse(node.childNodes);
 }
-function parseIfTag(node,context,chain){
+function processIfTag(node,context,chain){
     var test = getAttributeEL(node,'*test','value');
     context.appendIf(test);
     context.parse(node.childNodes)
     context.appendEnd();
 }
 
-function parseElseIfTag(node,context,chain,requireTest){
+function processElseTag(node,context,chain,requireTest){
     if(requireTest != false){
         var test = getAttributeEL(node,'test','value');
     }
@@ -61,7 +61,7 @@ function parseElseIfTag(node,context,chain,requireTest){
     context.appendEnd();
 }
 
-function parseChooseTag(node,context,chain){
+function processChooseTag(node,context,chain){
 	var next = node.firstChild;
 	var first = true;
 	var whenTag = node.tagName.split(':')[0];
@@ -72,18 +72,18 @@ function parseChooseTag(node,context,chain){
         	if(next.tagName == whenTag){
         		if(first){
         			first = false;
-        			parseIfTag(next,context,chain);
+        			processIfTag(next,context,chain);
         		}else{
-		            parseElseIfTag(next,context,chain,true);
+		            processElseTag(next,context,chain,true);
         		}
         	}else if(next.tagName == elseTag){
-        		parseElseIfTag(next,context,chain,false);
+        		processElseTag(next,context,chain,false);
         	}
 		}while(next = next.nextSibling)
     }
 }
 
-function parseForTag(node,context,chain){
+function processForTag(node,context,chain){
     var next = node.firstChild;
     var items = getAttributeEL(node,'*list','values','items','value');
     var var_ = getAttribute(node,'*var','name','id','item');
@@ -96,7 +96,7 @@ function parseForTag(node,context,chain){
     }
     context.appendEnd();
 }
-function parseVarTag(node,context,chain){
+function processVarTag(node,context,chain){
     var name = getAttribute(node,'*name','id');
     var value = getAttribute(node,'value');
     if(value){
@@ -125,7 +125,7 @@ function parseVarTag(node,context,chain){
     }
 }
 
-function parseOutTag(node,context,chain){
+function processOutTag(node,context,chain){
     var value = getAttribute(node,"value")||context.textContent;
     value = context.parseText(value,EL_TYPE);
     context.appendAll(value);
@@ -135,7 +135,7 @@ function parseOutTag(node,context,chain){
 /**
  * 
  */
-function parseDefTag(node,context,chain){
+function processDefTag(node,context,chain){
     var next = node.firstChild;
     var ns = getAttribute(node,'*name');
     ns = (ns.replace(/^\s+/,'')+'{end').split(/[^\w]+/);
@@ -181,7 +181,7 @@ function processIncludeTag(node,context,chain){
     }
 }
 
-function parseClientTag(node,context,chain){
+function processClientTag(node,context,chain){
 	var c2 = new ParseContext(context.config,context.currentURI);
 	var id = getAttribute(node,'*name','id');
 	var translator = new Translator(id);

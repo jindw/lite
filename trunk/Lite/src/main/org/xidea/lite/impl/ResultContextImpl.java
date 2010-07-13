@@ -26,6 +26,7 @@ import org.xidea.lite.parse.ResultContext;
  * @author jindw
  */
 public class ResultContextImpl implements ResultContext {
+	static final Object END_INSTRUCTION = new Object[0];
 	@SuppressWarnings("unused")
 	private static final Log log = LogFactory.getLog(ParseContextImpl.class);
 	
