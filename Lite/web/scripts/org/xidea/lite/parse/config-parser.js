@@ -20,15 +20,15 @@
  * ==>
  * [
  * 	{
- * 		"includes":["^[\\\\/]example[\\\\/][^\\\\/]*\.xhtml$"],
- * 		"excludes":[],
+ * 		"includes":"^[\\\\/]example[\\\\/][^\\\\/]*\.xhtml$",
+ * 		"excludes":"",
  * 		"featrueMap":{
  * 			"http://www.xidea.org/featrues/lite/layout":"/layout.xhtml",
  * 			"http://www.xidea.org/featrues/lite/output-encoding":"utf-8",
  * 			"http://www.xidea.org/featrues/lite/output-mime-type":"text/html",
  * 			"http://www.xidea.org/featrue/lite/html-javascript-compressor":"org.jside.jsi.tools.JSACompressor"
  * 		},
- * 		"extensions":[
+ * 		"extensionMap":[
  * 			{
  * 				"namespace":"http://www.w3.org/1999/xhtml",
  * 				"package":"org.xidea.lite.xhtml"
@@ -36,17 +36,14 @@
  * 		]
  * 	},
  * 	{
- * 		"includes":["^.*\.xhtml$"],
- * 		"excludes":[],
+ * 		"includes":"^.*\.xhtml$",
+ * 		"excludes":"",
  * 		"featrueMap":{
  * 			"http://www.xidea.org/featrues/lite/output-encoding":"utf-8",
  * 			"http://www.xidea.org/featrues/lite/output-mime-type":"text/html"
  * 		},
- * 		"extensions":[
- * 			{
- * 				"namespace":"http://www.w3.org/1999/xhtml",
- * 				"package":"org.xidea.lite.xhtml"
- * 			}
+ * 		"extensionMap":{
+ * 			"http://www.w3.org/1999/xhtml":["org.xidea.lite.xhtml"]
  * 		]
  * 	}
  * ]
@@ -60,20 +57,19 @@ function parseConfig(doc){
 	}else{
 		$log.error("配置文件只允许一个lite节点","您的文档中包含"+lite.length+"个节点");
 	}
-	
 }
-function LiteGroup(dom,parentConfig){
+function LiteGroup(node,parentConfig){
 	this.parentConfig = parentConfig || null
 	this.featrueMap = {}
 	this.encoding= getAttribute(node,'encoding','charset');
 	this.mimeType = getAttribute(node,'mimeType','mimiType','metaType');
 	this.layout = getAttribute(node,'layout');
 	this.contentType = getAttribute(node,'contentType','contextType');
-	this.extensions = [];
+	this.extensionMap = {};
 	this.children = [];
 	this.includes = [];
 	this.excludes = [];
-	var child = dom.firstChild;
+	var child = node.firstChild;
 	while(child){
 		if(child.nodeType == 1){
 			switch(child.localName){
@@ -82,10 +78,14 @@ function LiteGroup(dom,parentConfig){
 						getAttribute(node,'value','#text')
 				break;
 			case 'extension':
-				this.extensions.push({
-					"namespace":getAttribute(node,'namespace','name','key','uri','url'),
-					"package":getAttribute(node,'package','impl','value','#text')
-				});
+				var ns = getAttribute(node,'namespace','name','key','uri','url');
+				var p = getAttribute(node,'package','impl','value','#text');
+				var ps = this.extensionMap[ns];
+				if(ps && ps instanceof Array){
+					appendAfter(ps,p);
+				}else{
+					this.extensionMap[ns] = [p];
+				}
 				break;
 			case 'include':
 				this.includes.push(getAttribute(node,'value','#text','pattern'));
@@ -112,8 +112,8 @@ LiteGroup.prototype.toJSON = function(){
 	json.includes = this.includes;
 	json.excludes = this.excludes;
 	json.featrueMap = this.featrueMap;
-	json.extensions = this.extensions;
-	result.push(thiz);
+	json.extensionMap = this.extensionMap;
+	result.push(json);
 	return result;
 }
 
@@ -125,7 +125,7 @@ LiteGroup.prototype.initialize = function(){
 		copy(parentConfig.featrueMap,featrueMap);
 		copy(this.featrueMap,featrueMap);
 		this.featrueMap=featrueMap;
-		this.extensions = [].concat(parentConfig.extensions,this.extensions);
+		this.extensionMap = margeExtensionMap(parentConfig.extensionMap,this.extensionMap);
 	}
 	if(this.encoding == null){
 		this.encoding = parentConfig && parentConfig.encoding;
@@ -133,8 +133,8 @@ LiteGroup.prototype.initialize = function(){
 	if(this.mimeType == null){
 		this.mimeType = parentConfig && parentConfig.mimeType;
 	}
-	compilePatterns(this.includes)
-	compilePatterns(this.excludes)
+	this.includes = compilePatterns(this.includes)
+	this.excludes = compilePatterns(this.excludes)
 	var contentType = this.contentType;
 	if(contentType!=null){
 		$log.warn("ContentType属性不被推荐，请采用mimeType和encoding代替")
@@ -178,11 +178,39 @@ function copy(source,dest){
 		dest[n] = source[n];
 	}
 }
+function margeExtensionMap(parentExtMap,thisExtMap){
+	var result = {};
+	for(var n in thisExtMap){
+		result[n] = [].concat(thisExtMap[n]);
+	}
+	for(var n in parentExtMap){
+		var list = [].concat(parentExtMap[n]);
+		var thisExt = result[n] ;
+		if(thisExt){
+			var i = thisExt.length;
+			while(i--){
+				appendAfter(list,thisExt[i]);
+			}
+		}
+		result[n] = list;
+	}
+	return result;
+}
+function appendAfter(ps,p){
+	var i = ps.length;
+	while(i--){
+		if(ps[i] == p){
+			ps.splice(i,1)
+		}
+	}
+	ps.push(p);
+}
 function compilePatterns(ps){
 	var i = ps.length;
 	while(i--){
 		ps[i] = buildURIMatcher(ps[i]);
 	}
+	return ps.join('|');
 }
 
 function buildURIMatcher(pattern){

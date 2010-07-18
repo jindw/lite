@@ -5,11 +5,8 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.List;
 
-import javax.xml.xpath.XPathExpressionException;
 
 import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.xidea.lite.impl.ParseContextImpl;
 import org.xml.sax.SAXException;
 
@@ -28,6 +25,8 @@ public interface ParseContext extends ResultContext, ParseConfig, ParserHolder {
 	public String FEATRUE_ENCODING = "http://www.xidea.org/featrues/lite/output-encoding";
 	// 默认值为 text/html
 	public String FEATRUE_MIME_TYPE = "http://www.xidea.org/featrues/lite/output-mime-type";
+	// 默认值为 text/html
+	public String FEATRUE_CONFIG_LAYOUT = "http://www.xidea.org/featrues/lite/config-layout";
 
 	/**
 	 * 给出文件内容或url，解析模版源文件
@@ -63,14 +62,14 @@ public interface ParseContext extends ResultContext, ParseConfig, ParserHolder {
 	 */
 	public Document loadXML(URI parentURI) throws SAXException, IOException;
 
-	/**
-	 * @param doc
-	 * @param xpath
-	 * @return
-	 * @throws XPathExpressionException
-	 */
-	public NodeList selectNodes(Node doc, String xpath)
-			throws XPathExpressionException;
+//	/**
+//	 * @param doc
+//	 * @param xpath
+//	 * @return
+//	 * @throws XPathExpressionException
+//	 */
+//	public NodeList selectNodes(Node doc, String xpath)
+//			throws XPathExpressionException;
 
 	/**
 	 * 记录一下编译上下文特征变量，该对象不可被修改

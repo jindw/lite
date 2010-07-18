@@ -2,101 +2,158 @@
  * @see extension.js
  */
 
-function ExtensionParser(node){
+function ExtensionParser(){
 	this.packageMap = {};
-	this._textParser = [this];
-	var coreURL = "http://www.xidea.org/ns/lite/core";
-	this.addExtensionObject(coreURL,Core);
-	this.addExtensionObject("",DEFAULT_EL);
+	this.addExtensionObject("http://www.xidea.org/ns/lite/core",Core);
+	this.addExtensionObject("",defaultTextSeeker);
 	
 }
-var DEFAULT_EL = {
-	seek:function(text2){
-		var end = findELEnd(text2,-1);
-		if(end>0){
-			try{
-				var el = text2.substring(0,end);
-				el = this.parseEL(el);
-			}catch(e){
-				$log.error("表达式解析异常，请检查是否手误：[fileName:"+this.currentURI+",el:"+el+"]")
-				return -1;
-			}
-            switch(this.getTextType()){
-            case XML_TEXT_TYPE:
-            	this.appendXmlText(el);
-            	break;
-            case XML_ATTRIBUTE_TYPE:
-            	this.appendAttribute(null,el);
-            	break;
-            default:
-            	this.appendEL(el);
-            }
-            return end+1;
-		}else{
-			return -1;
+
+function formatName(tagName){
+	tagName = tagName.replace(/[\-]/g,"");
+	return tagName.toLowerCase();
+}
+
+function copyParserMap(mapClazz,p,p2,key){
+	var map = p[key];
+	if(map){
+		var result = mapClazz.newInstance();
+		p2[key] = result;
+		for(var n in map){
+			result[n]= map[n];
 		}
 	}
 }
 var CURRENT_NODE_KEY = {}
-
+/**
+ * 
+	public boolean parseElement(Element el, ParseContext context,
+			ParseChain chain, String name);
+	public boolean parseDocument(Document node, ParseContext context,ParseChain chain);
+	public boolean parseNamespace(Attr node, ParseContext context, ParseChain chain);
+	public boolean parseAttribute(Attr attr, ParseContext context, ParseChain chain);
+	public boolean parseBefore(Attr attr, ParseContext context,
+			ParseChain previousChain, String name);
+ */
 ExtensionParser.prototype = {
+	mapJava:function(mapClazz){
+		var result = mapClazz.newInstance();
+		for(var n in this.packageMap){
+			var p = this.packageMap[n];
+			var p2 = mapClazz.newInstance();
+			result[n]=p2;
+			p.documentParser && (p2.documentParser = p.documentParser);
+			p.namespaceParser && (p2.namespaceParser = p.namespaceParser);
+			copyParserMap(mapClazz,p,p2,"beforeMap")
+			copyParserMap(mapClazz,p,p2,"onMap")
+			copyParserMap(mapClazz,p,p2,"parserMap")
+			copyParserMap(mapClazz,p,p2,"seekMap")
+		}
+		return result
+	},
+	parseDocument:function(node,context,chain){
+		for(var p in this.packageMap){
+			p = this.packageMap[p];
+			if(p.documentParser){
+				p.documentParser.apply(chain,arguments);
+				return true;
+			}
+		}
+		return false;
+	},
+	parseNamespace:function(attr,context,chain){
+		if(/^xmlns(?:\:\w+)?/.test(attr.name)){
+			var v = attr.value;
+			var fp = this.packageMap[v||''];
+			if(fp && fp.namespaceParser){
+				fp.namespaceParser.call(chain,attr,context,chain);
+				return true;
+			}
+		}
+		return false;
+	},
+	parseElement:function(el, context,chain,ns, name){
+		context.setAttribute(CURRENT_NODE_KEY,el)
+		var nns = el.namespaceURI;
+		var attrs = el.attributes;
+		var len = attrs.length;
+		var exclusiveMap = {};
+		for (var i =  len- 1; i >= 0; i--) {
+			var attr = attrs.item(i);
+			var ans = attr.namespaceURI;
+			var ext = this.packageMap[ans || ''];
+			var an = formatName(attr.name);
+			if (ext && ext.beforeMap) {
+				var fn = ext.beforeMap[an];
+				if(fn && an in ext.beforeMap){
+					el.removeAttributeNode(attr);
+					if(fn.call(chain,attr,context,chain)){
+						return;
+					}else{
+						el.setAttributeNode(attr);
+					}
+				}else{
+					an+='$';
+					if(an in ext.beforeMap){
+						exclusiveMap[an] = attr;
+					}
+				}
+			}
+		}
+		for(an in exclusiveMap){
+			var attr = exclusiveMap[an];
+			var ans = attr.namespaceURI;
+			var ext = this.packageMap[ans || ''];
+			el.removeAttributeNode(attr);
+			if(ext.beforeMap[an].call(chain,attr,context,chain)){
+				return;
+			}else{
+				el.setAttributeNode(attr);
+			}
+		}
+		var ext = this.packageMap[nns||''];
+		var nn = formatName(el.localName||el.nodeName);
+		if(ext && ext.parserMap){
+			var fn = ext.parserMap[nn];
+			if(fn && (nn in ext.parserMap)
+				 || (fn = ext.parserMap[''])){
+				fn.call(chain,el,context,chain);
+				return true;
+			}
+		}
+	},
 	parse:function(node,context,chain){
 		var type = node.nodeType;
 		if(type == 9){
-			//documentParser return 
+			if(this.parseDocument(node,context,chain)){
+				return ;
+			}
 		}else if(type == 2){
 			if(node.namespaceURI == 'http://www.w3.org/2000/xmlns/'){
-				if(/^xmlns(?:\:\w+)?/.test(node.name)){
-					var v = node.value;
-					var fp = this.packageMap[v];
-					if (fp != null && fp.xmlns) {
-						fp.xmlns(node);
-						return;
-					}
-				}
-			}
-		}else if(type === 1){
-			context.setAttribute(CURRENT_NODE_KEY,node)
-			var nns = node.namespaceURI;
-			var attrs = node.attributes;
-			var len = attrs.getLength();
-			var exclusives = [];
-			for (var i =  - 1; i >= 0; i--) {
-				var attr = attrs.item(i);
-				var ans = attr.namespaceURI;
-				var fp = this.packageMap[ans || nns];
-				if (fp != null) {
-					var test = fp.on(attr, context, chain.previousChain,false);
-					if(test){
-						if(test == true){
-							return;
-						}else{
-							exclusives.push([fp,attr]);
-						}
-					}
-				}
-			}
-			if(attr = exclusives.pop()){
-				if(fp[0].on(attr[1], context, chain.previousChain,true)) {
+				if(this.parseNamespace(node,context,chain)){
 					return;
 				}
 			}
-			var fp = this.packageMap[nns];
-			if(fp && fp.parse(node,context,chain)){
-				return;
+			var el = node.ownerElement;
+			var ns = el.namespaceURI||'';
+			var ext = this.packageMap[ns];
+			if(ext && ext.onMap){
+				if(fn in ext.onMap){
+					var fn = ext.onMap[fn];
+					fn.call(chain,attr,context,chain);
+					return true;
+				}
 			}
-			parseDefaultXMLNode(node,context,chain);
-			return;
-		}else if(type == null){//textParser
-			//String text,int start,ParseContext context
-			parseText(node,context,chain,this._textParser);
-			return;
+		}else if(type === 1){
+			if(this.parseElement(node,context,chain)){
+				return ;
+			}
 		}
-		parseDefaultXMLNode(node,context,chain);
+		chain.next(node)
 	},
 	parseText:function(text,start,context){
 		var text2 = text.substring(start+1);
-		var match = text2.match(/^(?:(\w*)\:)?(\w*)[\$\{]/);
+		var match = text2.match(/^(?:(\w*)\:)?([\w!#]*)[\$\{]/);
 		if(match){
 			var matchLength = match[0].length;
 			var currentNode = context.getAttribute(CURRENT_NODE_KEY)
@@ -119,7 +176,7 @@ ExtensionParser.prototype = {
 			if(ns == null){
 				$log.warn("文本解析时,查找名称空间失败,请检查是否缺少XML名称空间申明：[code:$"+match[0]+",prefix:"+prefix+",document:"+context.currentURI+"]")
 			}else{
-				var fp = this.packageMap[ns];
+				var fp = this.packageMap[ns||''];
 				if(fp){
 					//{之后的位置，el内容
 					var text3 = text2.substring(matchLength);
@@ -165,7 +222,7 @@ ExtensionParser.prototype = {
 			packageObject = packageName;
 		}
 		for(var n in packageObject.objectScriptMap){
-			var match = n.match(/^(?:document|on|parse|seek|xmlns).*/);
+			var match = n.match(/^(?:document|xmlns|on|parse|before|seek).*/);
 			if(match){
 				var o = $import(packageObject.name+':'+n,target);
 			}
@@ -173,9 +230,9 @@ ExtensionParser.prototype = {
 		this.addExtensionObject(namespace,target);
 	},
 	addExtensionObject:function(namespace,objectMap){
-		var ext = this.packageMap[namespace];
+		var ext = this.packageMap[namespace||''];
 		if(ext == null){
-			ext = this.packageMap[namespace] = new Extension();
+			ext = this.packageMap[namespace||''] = new Extension();
 		}
 		ext.initialize(objectMap);
 	},

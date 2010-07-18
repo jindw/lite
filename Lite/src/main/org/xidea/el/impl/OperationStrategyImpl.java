@@ -66,7 +66,7 @@ public class OperationStrategyImpl implements OperationStrategy {
 	}
 
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Object evaluate(ExpressionToken item,ValueStack vs){
 		final int type = item.getType();
 		switch (type) {

@@ -4,6 +4,7 @@ import java.io.File;
 import java.net.URI;
 import java.util.List;
 
+import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xidea.jsi.JSIRuntime;
 import org.xidea.jsi.impl.RuntimeSupport;
@@ -13,11 +14,19 @@ import org.xidea.lite.impl.ParseUtil;
 import org.xidea.lite.parse.ParseContext;
 
 public class LiteTestUtil {
-	private static boolean useJS = true;
+	private static boolean useJS = false;
 	private static JSIRuntime rt = RuntimeSupport.create();
 	static{
+		try{
 		rt.eval("$import('org.xidea.lite.impl.*')");
 		rt.eval("$import('org.xidea.lite.parse.*')");
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	@Test
+	public void test(){
+		rt.eval("$import('org.xidea.lite.util.stringifyJSON')");
 	}
 
 	public static ParseContext buildParseContext(URI base) {
@@ -32,7 +41,7 @@ public class LiteTestUtil {
 			}
 			ParseContextImpl context = new ParseContextImpl(
 					new ParseConfigImpl(base), "/");
-			context.setCurrentURI(base);
+//			context.setCurrentURI(base);
 			return context;
 		}
 	}

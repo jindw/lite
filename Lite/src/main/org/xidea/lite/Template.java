@@ -77,7 +77,7 @@ public class Template {
 	 * 
 	 * @internal
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	protected Object[] compile(List<Object> datas) {
 		// Object[] result = datas.toArray();// ;
 		// reverse(result);
@@ -140,7 +140,7 @@ public class Template {
 		return result.toArray();
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	protected void compilePlugin(final Object[] cmd, List<Object> result) {
 		try {
 			int forCount0 = forCount;

@@ -5,6 +5,56 @@
  * @author jindw
  * @version $Id: template.js,v 1.4 2008/02/28 14:39:06 jindw Exp $
  */
+/**
+ * for extension text parser
+ */
+var defaultTextSeeker = {
+	seek:function(text){
+		var end = findELEnd(text,-1);
+		if(end>0){
+			try{
+				var el = text.substring(0,end);
+				el = this.parseEL(el);
+	            switch(this.getTextType()){
+	            case XML_TEXT_TYPE:
+	            	this.appendXmlText(el);
+	            	break;
+	            case XML_ATTRIBUTE_TYPE:
+	            	this.appendAttribute(null,el);
+	            	break;
+	            default:
+	            	this.appendEL(el);
+	            }
+	            return end+1;
+			}catch(e){
+				$log.error("表达式解析异常，请检查是否手误：[fileName:"+this.currentURI+",el:"+el+"]",e)
+				return -1;
+			}
+		}else{
+			$log.warn("表达式解析异常，请检查是否手误：[fileName:"+this.currentURI+",el:"+el+"]")
+			return -1;
+		}
+	},
+	"seek!":function(){
+		var end = findELEnd(text,-1);
+		if(end>0){
+			try{
+				var el = text.substring(0,end);
+				el = this.parseEL(el);
+	            this.appendEL(el);
+	            return end+1;
+			}catch(e){
+				$log.error("表达式解析异常，请检查是否手误：[fileName:"+this.currentURI+",el:"+el+"]",e)
+				return -1;
+			}
+		}else{
+			$log.warn("表达式解析异常，请检查是否手误：[fileName:"+this.currentURI+",el:"+el+"]")
+			return -1;
+		}
+		
+	}
+}
+
 
 function parseText(text,context,chain,textParsers){
 	if(typeof text != 'string'){

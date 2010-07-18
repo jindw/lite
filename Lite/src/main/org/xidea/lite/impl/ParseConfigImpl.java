@@ -1,49 +1,51 @@
 package org.xidea.lite.impl;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.xidea.lite.parse.NodeParser;
-import org.xidea.lite.parse.ParseChain;
+import org.xidea.el.json.JSONDecoder;
+import org.xidea.jsi.JSIRuntime;
 import org.xidea.lite.parse.ParseConfig;
 import org.xidea.lite.parse.ParseContext;
-import org.xidea.lite.parse.TextParser;
 import org.xml.sax.InputSource;
 
+/**
+ * "includes":"^[\\\\/]example[\\\\/][^\\\\/]*\.xhtml$", "excludes":"",
+ * "featrueMap":{ "http://www.xidea.org/featrues/lite/layout":"/layout.xhtml",
+ * "http://www.xidea.org/featrues/lite/output-encoding":"utf-8",
+ * "http://www.xidea.org/featrues/lite/output-mime-type":"text/html",
+ * "http://www.xidea.org/featrue/lite/html-javascript-compressor"
+ * :"org.jside.jsi.tools.JSACompressor" }, "extensionMap":[]
+ * 
+ * @author jindawei
+ * 
+ */
 public class ParseConfigImpl implements ParseConfig {
 	private static final Log log = LogFactory.getLog(ParseConfigImpl.class);
+	private static Group DEFAULT_GROUP = new Group();
+
 	// config data
-	protected Map<URIMatcher, String> includeMap;
-	protected Map<URIMatcher, String> excludeMap;
-	private Map<String, String> featrueMap;
-	private boolean debugModel;
-	private TextParser[] textParsers;
-	private NodeParser<? extends Object>[] nodeParsers;
-	// check data
 	protected long lastModified = -2;// not found or error :0
 	private URI root;
 	protected URI config;
 	protected File checkFile;
+	private List<Group> groups = new ArrayList<Group>();
 
 	public ParseConfigImpl(URI root, URI config) {
 		this.root = root;
 		this.config = config;
+		groups.add(DEFAULT_GROUP);
 		if (config.getScheme().equals("file")) {
 			File checkFile = new File(config.getPath());
 			this.checkFile = checkFile;
@@ -52,52 +54,32 @@ public class ParseConfigImpl implements ParseConfig {
 
 	public ParseConfigImpl(URI root) {
 		this.root = root;
+		groups.add(DEFAULT_GROUP);
 	}
 
-	public InputStream openStream(URI uri) {
-		try {
-			if ("data".equalsIgnoreCase(uri.getScheme())) {
-				String data = uri.getRawSchemeSpecificPart();
-				int p = data.indexOf(',') + 1;
-				String h = data.substring(0, p).toLowerCase();
-				String charset = "UTF-8";
-				data = data.substring(p);
-				p = h.indexOf("charset=");
-				if (p > 0) {
-					charset = h.substring(h.indexOf('=', p) + 1, h.indexOf(',',
-							p));
-				}
-				return new ByteArrayInputStream(URLDecoder
-						.decode(data, charset).getBytes(charset));
-				// charset=
-			} else if ("classpath".equalsIgnoreCase(uri.getScheme())) {
-				ClassLoader cl = this.getClass().getClassLoader();
-				uri = uri.normalize();
-				String path = uri.getPath();
-				path = path.substring(1);
-				InputStream in = cl.getResourceAsStream(path);
-				if (in == null) {
-					ClassLoader cl2 = Thread.currentThread()
-							.getContextClassLoader();
-					if (cl2 != null) {
-						in = cl2.getResourceAsStream(path);
-					}
-				}
-				return in;
-			} else {
-				return uri.toURL().openStream();
+	public URI getRoot() {
+		return root;
+	}
+
+	private Group find(String path, boolean defaultRoot) {
+		for (Group f : this.groups) {
+			if (f.match(path)) {
+				return f;
 			}
-		} catch (IOException e) {
-			throw new RuntimeException(e);
+		}
+		if (defaultRoot) {
+			return this.groups.get(this.groups.size() - 1);
+		} else {
+			return null;
 		}
 	}
 
-	public File getFile() {
-		return checkFile;
+	public Map<String, List<String>> getExtensions(String path) {
+		return find(path, true).extensionMap;
 	}
 
-	protected long lastModified() {
-		return checkFile == null ? 0 : checkFile.lastModified();
+	public Map<String, String> getFeatrueMap(String path) {
+		return find(path, true).featrueMap;
 	}
 
 	/*
@@ -107,34 +89,28 @@ public class ParseConfigImpl implements ParseConfig {
 	 * org.xidea.lite.parser.DecoratorMapperI#getDecotatorPage(java.lang.String)
 	 */
 	public String getDecotatorPage(String path) {
-		if (lastModified != this.lastModified()) {
-			this.reset();
-			this.lastModified = this.lastModified();
-		}
-		if (this.includeMap != null && excludeMap != null) {
-			find: for (Map.Entry<URIMatcher, String> include : includeMap
-					.entrySet()) {
-				if (include.getKey().match(path)) {
-					String match = include.getValue();
-					log.info("装饰器配置：" + path + "->" + match);
-					for (Map.Entry<URIMatcher, String> exclude : excludeMap
-							.entrySet()) {
-						if (exclude.getKey().match(path)) {
-							if (match.equals(exclude.getValue())) {
-								continue find;
-							}
-						}
-					}
-					return path.equals(match) ? null : match;
-				}
-			}
+		this.reset();
+		Group g = find(path, false);
+		if (g != null) {
+			return g.featrueMap.get(ParseContext.FEATRUE_CONFIG_LAYOUT);
 		}
 		return null;
 	}
 
+	File getFile() {
+		return checkFile;
+	}
+
+	protected long lastModified() {
+		return checkFile == null ? 0 : checkFile.lastModified();
+	}
+
 	protected void reset() {
-		if (config != null) {
-			reset(new InputSource(config.toString()));
+		if (lastModified != this.lastModified()) {
+			if (config != null) {
+				reset(new InputSource(config.toString()));
+			}
+			this.lastModified = this.lastModified();
 		}
 	}
 
@@ -149,130 +125,62 @@ public class ParseConfigImpl implements ParseConfig {
 		}
 	}
 
-	protected void reset(Document config) {
-		ConfigParser pc = new ConfigParser();
-		if (config != null) {
-			NodeList els = config.getElementsByTagName("*");
-			for (int i = 0; i < els.getLength(); i++) {
-				pc.parse((Element) els.item(i));
+	protected void reset(Document doc) {
+		JSIRuntime rt = ParseUtil.getJSIRuntime();
+		Object parse = rt
+				.eval("function(stringifyJSON,parseConfig,doc){return stringify((doc))}");
+		Object parseConfig = rt
+				.eval("$import('org.xidea.lite.parse:parseConfig',{})");
+		Object stringifyJSON = rt
+				.eval("$import('org.xidea.lite.util:stringifyJSON',{})");
+		String json = (String) rt.invoke(null, parse, stringifyJSON,
+				parseConfig, doc);
+		List<Map<String, Object>> groups = JSONDecoder.decode(json);
+		List<Group> groups2 = new ArrayList<Group>();
+		if (groups.size() > 0) {
+			for (Map<String, Object> item : groups) {
+				groups2.add(new Group(item));
 			}
+		} else {
+			groups2.add(DEFAULT_GROUP);
 		}
-		this.debugModel = pc.debugModel;
-		this.excludeMap = pc.getExcludeMap();
-		this.includeMap = pc.getIncludeMap();
-		this.featrueMap = pc.featrueMap;
-		this.nodeParsers = null;
-		this.textParsers = null;
+		this.groups = groups2;
 	}
 
-	public Map<String, String> getFeatrueMap(String path) {
-		return featrueMap;
-	}
+	private static class Group {
+		private Map<String, String> featrueMap = Collections.emptyMap();
+		private Map<String, List<String>> extensionMap = Collections.emptyMap();
+		private Pattern includes;
+		private Pattern excludes;
 
-	public NodeParser<? extends Object>[] getNodeParsers(String path) {
-		return nodeParsers;
-	}
+		boolean match(String path) {
+			return includes.matcher(path).find()
+					&& !excludes.matcher(path).find();
+		}
 
-	public TextParser[] getTextParsers(String path) {
-		return textParsers;
-	}
+		private Group() {
+			this.includes = Pattern.compile(".*");
+			this.excludes = Pattern.compile("^$");
+			this.featrueMap = new HashMap<String, String>();
+			this.featrueMap.put(ParseContext.FEATRUE_ENCODING, "UTF-8");
+		}
 
-	public boolean isDebugModel() {
-		return debugModel;
-	}
+		@SuppressWarnings("unchecked")
+		public Group(Map<String, Object> item) {
+			this.includes = buildMatch((String) item.get("includes"));
+			this.excludes = buildMatch((String) item.get("excludes"));
+			this.featrueMap = (Map<String, String>) item.get("featrueMap");
+			this.extensionMap = (Map<String, List<String>>) item
+					.get("extensionMap");
+		}
 
-	public URI getRoot() {
-		return root;
-	}
-
-
-}
-
-class ConfigParser implements NodeParser<Element> {
-	boolean debugModel;
-	ArrayList<String> layout = new ArrayList<String>();
-	Map<URIMatcher, Integer> includeMap = new HashMap<URIMatcher, Integer>();
-	Map<URIMatcher, Integer> excludeMap = new HashMap<URIMatcher, Integer>();
-
-	ArrayList<URIMatcher> defaultExclude = new ArrayList<URIMatcher>();
-	Map<String, String> featrueMap = new HashMap<String, String>();
-
-	public void parse(Element node, ParseContext context, ParseChain chain) {
-		parse(node);
-		chain.next(node);
-	}
-
-	public void parse(Element node) {
-		String localName = node.getNodeName();
-		if ("lite".equals(localName)) {
-			paseLite(node);
-		} else if ("group".equals(localName)) {
-			paseGroup(node);
-			for (URIMatcher match : defaultExclude) {
-				excludeMap.put(match, layout.size() - 1);
+		private Pattern buildMatch(String includes) {
+			if (includes == null || includes.length() == 0) {
+				includes = "^$";
 			}
-		} else if ("include".equals(localName)) {
-			paseInclude(node);
-		} else if ("exclude".equals(localName)) {
-			paseExclude(node);
-		} else if ("featrue".equals(localName)) {
-			paseFeatrue(node);
+			return Pattern.compile(includes);
 		}
 
-	}
-
-	public Map<URIMatcher, String> getExcludeMap() {
-		return buildMap(excludeMap);
-	}
-
-	public Map<URIMatcher, String> getIncludeMap() {
-		return buildMap(includeMap);
-	}
-
-	public Map<URIMatcher, String> buildMap(Map<URIMatcher, Integer> map) {
-		ArrayList<URIMatcher> list = new ArrayList<URIMatcher>(map.keySet());
-		Collections.sort(list);
-		LinkedHashMap<URIMatcher, String> result = new LinkedHashMap<URIMatcher, String>();
-		for (URIMatcher matcher : list) {
-			result.put(matcher, layout.get(map.get(matcher)));
-		}
-		return result;
-	}
-
-	private void paseFeatrue(Element el) {
-		String key = ParseUtil.getAttributeOrNull(el, "key", "name");
-		String value = ParseUtil.getAttributeOrNull(el, "value", "#text");
-		featrueMap.put(key, value);
-	}
-
-	private void paseGroup(Element el) {
-		layout.add(ParseUtil.getAttributeOrNull(el, "layout", "page"));
-	}
-
-	private void paseInclude(Element el) {
-		includeMap.put(URIMatcher.createMatcher(el.getTextContent()), layout
-				.size() - 1);
-	}
-
-	private void paseExclude(Element el) {
-		URIMatcher match = URIMatcher.createMatcher(el.getTextContent());
-		if (layout.isEmpty()) {
-			defaultExclude.add(match);
-		} else {
-			excludeMap.put(match, layout.size() - 1);
-		}
-	}
-
-	private void paseLite(Element el) {
-		String debug = ParseUtil.getAttributeOrNull(el, "debug-model",
-				"debugModel");
-		if ("true".equals(debug) || "on".equals(debug)) {
-			debugModel = true;
-		} else if (debug == null) {
-			debugModel = true;
-		} else {
-			debugModel = false;
-		}
 	}
 
 }

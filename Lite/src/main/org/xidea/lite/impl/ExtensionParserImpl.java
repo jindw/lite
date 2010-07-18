@@ -1,122 +1,214 @@
 package org.xidea.lite.impl;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
 import java.util.HashMap;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.regex.Pattern;
 
+import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
 import org.xidea.jsi.JSIRuntime;
-import org.xidea.jsi.impl.RuntimeSupport;
-import org.xidea.lite.parse.NodeParser;
+import org.xidea.lite.parse.ExtensionParser;
 import org.xidea.lite.parse.ParseChain;
 import org.xidea.lite.parse.ParseContext;
-import org.xidea.lite.parse.TextParser;
 
-public class ExtensionParserImpl implements NodeParser<Element> {
-	public void parse(Element el, ParseContext context, ParseChain chain) {
-		String script = el.getTextContent();
-		String src = ParseUtil.getAttributeOrNull(el, "src", "href", "uri",
-				"url");
+public class ExtensionParserImpl implements ExtensionParser {
 
-		if (src != null && src.length() > 0) {
-			for (String s : src.split("[\\s*,\\s*]")) {
-				URI uri = context.createURI(s);
-				processResource(uri,context);
+	private static Pattern pattern = Pattern.compile("[\\-]");
+	private static final Object CURRENT_NODE_KEY = new Object();
+	private static Pattern FN_SEEKER = Pattern
+			.compile("^(?:\\w*\\:)?\\w*[\\$\\{]");
+	private Object impl;
+	private final ExtensionParser proxy;
+	private JSIRuntime rt = ParseUtil.getJSIRuntime();
+	private Map<String, Map<String, Map<String, Object>>> packageMap;
+
+	@SuppressWarnings("unchecked")
+	public ExtensionParserImpl() {
+		this.impl = rt
+				.eval("new ($import('org.xidea.lite.parse:ExtensionParser',{}))()");
+		proxy = rt.wrapToJava(impl, ExtensionParser.class);
+		Object obj = rt.invoke(this.impl, "mapJava", HashMap.class);
+		packageMap = (Map<String, Map<String, Map<String, Object>>>) obj;
+	}
+
+	public int parseText(String text, int start, ParseContext context) {
+		return proxy.parseText(text, start, context);
+	}
+
+	public int getPriority() {
+		return 2;
+	}
+
+	public int findStart(String text, int start, int otherStart) {
+		int begin = start;
+		while (true) {
+			begin = text.indexOf('$', begin);
+			if (begin < 0 || otherStart <= begin) {
+				return -1;
 			}
-		}
-		if (script != null && script.trim().length() > 0) {
-			processText(script,context);
+
+			if (FN_SEEKER.matcher(text.substring(begin + 1)).find()) {
+				return begin;
+			}
+			begin++;
 		}
 	}
 
-	protected void processResource(URI uri, ParseContext context) {
-			context.addResource(uri);
-			JSIRuntime proxy = context.getAttribute(JSIRuntime.class);
-			if(proxy == null){
-				proxy =RuntimeSupport.create();
-				context.setAttribute(JSIRuntime.class,proxy);
+	public void parse(Node node, ParseContext context, ParseChain chain) {
+		int type = node.getNodeType();
+		if (type == 9) {
+			if (this.parseDocument(node, context, chain)) {
+				return;
 			}
-			InputStream in = context.openStream(uri);
-			if (in != null) {
-				try {
-					String script = ParseUtil.loadText(in, "utf-8");
-					proxy.eval(context, script, this.getClass().getName(),null);
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				} finally {
-					try {
-						in.close();
-					} catch (Exception e) {
+		} else if (type == 2) {
+			if (this.parseAttribute(node, context, chain)) {
+				return;
+			}
+		} else if (type == 1) {
+			if (this.parseElement((Element)node, context, chain)) {
+				return;
+			}
+		}
+		chain.next(node);
+	}
+
+
+	private boolean parseElement(Element el, ParseContext context,
+			ParseChain chain) {
+		context.setAttribute(CURRENT_NODE_KEY, el);
+		String nns = el.getNamespaceURI();
+		if (nns == null) {
+			nns = "";
+		}
+		NamedNodeMap attrs = el.getAttributes();
+		int len = attrs.getLength();
+		LinkedHashMap<String, Attr> exclusiveMap = null;
+		for (int i = len - 1; i >= 0; i--) {
+			Attr attr = (Attr) attrs.item(i);
+			String ans = attr.getNamespaceURI();
+			if (ans == null) {
+				ans = "";
+			}
+			Map<String, Map<String, Object>> packageInfo = this.packageMap
+					.get(ans);
+			if (packageInfo != null) {
+				Map<String, Object> beforeMap = packageInfo.get("beforeMap");
+				String name = formatName(attr.getName());
+				if (beforeMap != null) {
+					if (beforeMap.containsKey(name)) {
+						el.removeAttributeNode(attr);
+						if (parseBefore(beforeMap.get(name),attr,context, chain)) {
+							return true;
+						}else{
+							el.setAttributeNode(attr);
+						}
+					} else if (beforeMap.containsKey(name += '$')) {
+						if (exclusiveMap == null) {
+							exclusiveMap = new LinkedHashMap<String, Attr>();
+						}
+						exclusiveMap.put(name, attr);
 					}
 				}
 			}
+		}
+		if (exclusiveMap != null) {
+			for (String an : exclusiveMap.keySet()) {
+				Attr attr = exclusiveMap.get(an);
+				String ans = attr.getNamespaceURI();
+				if (ans == null) {
+					ans = "";
+				}
+				Map<String, Map<String, Object>> packageInfo = this.packageMap
+						.get(ans);
+				Map<String, Object> beforeMap = packageInfo.get("beforeMap");
+				if (parseBefore(beforeMap.get(an),attr,context, chain)) {
+					return true;
+				}else{
+					el.setAttributeNode(attr);
+				}
+			}
+		}
+		Map<String, Map<String, Object>> packageInfo = this.packageMap.get(nns);
+		if (packageInfo != null) {
+			Map<String, Object> parserMap = packageInfo.get("parserMap");
+
+			String name = el.getLocalName();
+			if (name == null) {
+				name = el.getNodeName();
+			}
+			name = formatName(name);
+			if (parserMap != null) {
+				if (parserMap.containsKey(name)) {
+					rt.invoke(null,parserMap.get(name), el, context, chain);
+					return true;
+				} else if (parserMap.containsKey("")) {
+					rt.invoke(null,parserMap.get(""), el, context, chain);
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
-	private void processText(String script,ParseContext context) {
-		JSIRuntime proxy = context.getAttribute(JSIRuntime.class);
-		if(proxy == null){
-			proxy =RuntimeSupport.create();
-			context.setAttribute(JSIRuntime.class,proxy);
-		}
-		proxy.eval(context, script, this.getClass().getName(), null);
+	private boolean parseBefore(Object fn,Attr attr,ParseContext context, ParseChain chain) {
+		rt.invoke(null, fn, attr, context, chain);
+		return true;
 	}
 
-	public static class JSContextProxy extends ParseContextProxy implements
-			ParseContext {
-		private ParseContext context;
-		private JSIRuntime proxy;
-
-		public JSContextProxy(ParseContext parent, JSIRuntime proxy) {
-			super(parent);
-			this.context = parent;
-			this.proxy = proxy;
-		}
-
-		public void addNodeParser(Object function) {
-			NodeParser<? extends Object> nodeParser = createNodeParser(function);
-			context.addNodeParser(nodeParser);
-		}
-
-//		public void addTextParser(Object function) {
-//			TextParser nodeParser = createTextParser(function);
-//			context.addTextParser(nodeParser);
-//		}
-
-		public TextParser createTextParser(Object o) {
-			HashMap<String, Object> varMap = new HashMap<String, Object>();
-			varMap.put("impl", o);
-			proxy
-					.eval(
-							null,
-							"if(impl instanceof Function){impl.parse=impl,impl.findStart=impl}"
-									+ "if(!impl.getPriority) {"
-									+ "impl.getPriority=function(){"
-									+ "return impl.priority == null? 1 : impl.priority;"
-									+ "}};", this.getClass().toString(), varMap);
-			return proxy.wrapToJava(o, TextParser.class);
-		}
-
-		@SuppressWarnings("unchecked")
-		public NodeParser<? extends Object> createNodeParser(Object o) {
-			HashMap<String, Object> varMap = new HashMap<String, Object>();
-			varMap.put("impl", o);
-			proxy.eval(null, "if(impl instanceof Function){impl.parse=impl};",
-					this.getClass().toString(), varMap);
-			return proxy.wrapToJava(o, NodeParser.class);
-		}
-
-		public String getFeatrue(String key) {
-			return context.getFeatrue(key);
-		}
-
-		public void parse(Object source) {
-			context.parse(source);
-		}
-
-		public List<Object> parseText(String text, int textType) {
-			return context.parseText(text, textType);
-		}
+	private boolean parseDocument(Node node, ParseContext context,
+			ParseChain chain) {
+		return (Boolean)rt.invoke(impl, "parseDocument", node, context, chain);
 	}
+
+	private boolean parseAttribute(Node node, ParseContext context,
+			ParseChain chain) {
+		Attr attr = (Attr) node;
+		String ans = attr.getNamespaceURI();
+		if ("http://www.w3.org/2000/xmlns/".equals(ans)) {
+			if ((Boolean)rt.invoke(impl, "parseNamespace", attr, context, chain)) {
+				return true;
+			}
+		}
+		String ns;
+		String name = formatName(attr.getName());
+		if (ans == null) {
+			ns = ans;
+		} else {
+			Element el = attr.getOwnerElement();
+			ns = el.getNamespaceURI();
+		}
+		if (ns == null) {
+			ns = "";
+		}
+		Map<String, Map<String, Object>> packageInfo = this.packageMap.get(ns);
+		if (packageInfo != null) {
+			Map<String, Object> onMap = packageInfo.get("onMap");
+			if (onMap != null) {
+				if (onMap.containsKey(name)) {
+					rt.invoke(null,onMap.get(name), attr, context, chain);
+					return true;
+				} else if (onMap.containsKey("")) {
+					rt.invoke(null,onMap.get(""), attr, context, chain);
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private String formatName(String name) {
+		return pattern.matcher(name).replaceAll("").toLowerCase();
+	}
+
+	public void addExtensionPackage(String namespace, String packageName) {
+		proxy.addExtensionPackage(namespace, packageName);
+	}
+
+	public void addExtensionObject(String namespace, Object parserMap) {
+		proxy.addExtensionObject(namespace, parserMap);
+	}
+
 }

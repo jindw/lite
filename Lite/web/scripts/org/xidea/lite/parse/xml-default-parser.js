@@ -173,8 +173,10 @@ function processDocumentType(node,context,chain){
     	var nodeName = node.nodeName;
 		var sysid = node.systemId;
         if(pubid){
-			if(pubid == "org.xidea.lite.html.DEFAULT"){
-				//跳过容错补充dtd申明
+			if(pubid == "org.xidea.lite.OUTPUT_DTD"){
+				if(sysid){
+					context.append(decodeURIComponent(sysid));
+				}
 				return;
 			}
             context.append('<!DOCTYPE ');

@@ -17,14 +17,13 @@ import org.mozilla.javascript.EvaluatorException;
 import org.mozilla.javascript.NativeObject;
 import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.Scriptable;
-import org.xidea.lite.impl.CoreXMLNodeParser;
 
 import com.sun.xml.internal.bind.v2.ContextFactory;
 
 
 
 public class RhinoTest {
-	private static Log log = LogFactory.getLog(CoreXMLNodeParser.class);
+	private static Log log = LogFactory.getLog(RhinoTest.class);
 	private static Context context = Context.enter();
 	private static Scriptable scope = ScriptRuntime.getGlobal(context);
 

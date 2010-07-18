@@ -21,8 +21,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.Template;
-import org.xidea.lite.impl.HTMLNodeParser;
+import org.xidea.lite.impl.old.HTMLNodeParser;
 import org.xidea.lite.impl.ParseContextImpl;
+import org.xidea.lite.impl.ParseUtil;
 import org.xidea.lite.test.LiteTestUtil;
 
 import com.sun.xml.internal.ws.wsdl.parser.ParserUtil;
@@ -50,6 +51,7 @@ public class XMLTest {
 
 	@Test
 	public void runMacroTest() throws Exception {
+		System.out.println(ParseUtil.createSourceURI("<xml a='1'/>"));
 		runTest("MacroTest");
 	}
 	@Test

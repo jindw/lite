@@ -8,6 +8,7 @@ import org.xidea.lite.parse.TextParser;
 
 public class TextNodeParser implements NodeParser<String> {
 
+
 	public TextNodeParser() {
 	}
 
@@ -39,7 +40,7 @@ public class TextNodeParser implements NodeParser<String> {
 	 */
 	protected void parse(ParseContext context, final String text,
 			final boolean encode, final char qute) {
-		TextParser[] textParsers = this.getTextParsers();
+		TextParser[] textParsers = context.getTextParsers();
 		final int length = text.length();
 		int start = 0;
 		do {
@@ -88,11 +89,7 @@ public class TextNodeParser implements NodeParser<String> {
 			context.append(text.substring(start), encode, qute);
 		}
 	}
-	protected static TextParser[] DEFAULT_TEXT_PARSER_LIST = { ELParser.EL };
 	
-	private TextParser[] getTextParsers() {
-		return DEFAULT_TEXT_PARSER_LIST;
-	}
 
 	protected int nextPosition(ParseContext context, final String text, int p$) {
 		context.append(text.substring(p$, p$ + 1));

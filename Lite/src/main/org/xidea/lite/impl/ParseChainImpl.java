@@ -1,30 +1,39 @@
 package org.xidea.lite.impl;
 
-import java.io.InputStream;
 import java.lang.reflect.Method;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.util.List;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.NodeList;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.xidea.lite.parse.NodeParser;
 import org.xidea.lite.parse.ParseChain;
 import org.xidea.lite.parse.ParseContext;
 
 @SuppressWarnings("unchecked")
-public class ParseChainImpl implements ParseChain {
-	// private static Log log = LogFactory.getLog(ParseChainImpl.class);
-	ParseChainImpl pre;
-	ParseChainImpl next;
-	ParseContext context;
-	NodeParser parser;
-	private Class<?> nodeType = Object.class;
+public class ParseChainImpl extends ParseContextProxy implements ParseChain {
+	private static Log log = LogFactory.getLog(ParseChainImpl.class);
+	private ParseContext context;
+	private ParseChainImpl pre;
+	private ParseChainImpl next;
+	@SuppressWarnings("rawtypes")
+	private NodeParser[] parsers;
+	@SuppressWarnings("rawtypes")
+	private NodeParser parser; 
+	private Class<? extends Object> nodeType = Object.class;
+	private int index = 0;
 
-	ParseChainImpl(ParseContext context, NodeParser<? extends Object> parser) {
+	ParseChain getNext(){
+		if(next == null && index+1<parsers.length){
+			next = new ParseChainImpl(context,parsers,index+1);
+		}
+		return next;
+	}
+	ParseChainImpl(ParseContext context, NodeParser<? extends Object>[] parsers,int index) {
+		super(context);
 		this.context = context;
-		this.parser = parser;
+		this.parsers = parsers;
+		this.index  = index;
+		this.parser = parsers[index];
 		try {
 			// System.out.println(java.util.Arrays.asList(parser.getClass().getTypeParameters()));
 			Method[] methods = parser.getClass().getMethods();
@@ -48,72 +57,36 @@ public class ParseChainImpl implements ParseChain {
 	}
 
 	public void next(Object node) {
+		ParseChain next = getNext();
 		if (nodeType.isInstance(node)) {
 			parser.parse(node, context, next);
 		} else {
 			if (next != null) {
 				next.next(node);
 			} else {
-				if (node instanceof URL) {
-					try {
-						node = ((URL)node).toURI();
-					} catch (URISyntaxException e) {
-						throw new RuntimeException(e);
-					}
-				}
-				if (node instanceof URI) {
-					try {
-						URI uri = (URI)node;
-						context.setCurrentURI(uri);
-						Document doc = context.loadXML(uri);
-						if(doc == null){
-							InputStream in = context.openStream(uri);
-							try{
-								next(in);
-							}finally{
-								try{
-									in.close();
-								}catch (Exception e) {
-								}
-							}
-						}else{
-							next(doc);
-						}
-					} catch (Exception e) {
-						throw new RuntimeException(e);
-					}
-				}else if (node instanceof NodeList) {
-					NodeList list = (NodeList) node;
-					int len = list.getLength();
-					for (int i = 0; i < len; i++) {
-						next(list.item(i));
-					}
-				} else if (node instanceof NamedNodeMap) {
-					NamedNodeMap list = (NamedNodeMap) node;
-					int len = list.getLength();
-					for (int i = 0; i < len; i++) {
-						next(list.item(i));
-					}
-				}else {
-					throw new RuntimeException("找不到数据类型对应的解析器"+node);
-				}
-				
+				log.warn("找不到相关解析器:"+node);
 			}
 		}
 
 	}
 
-	void insertBefore(ParseChainImpl chain) {
-		if (pre != null) {
-			pre.next = chain;
-		}
-		chain.pre = pre;
-		chain.next = this;
-		pre = chain;
-	}
-
 	public ParseChain getPreviousChain() {
 		return pre;
+	}
+
+	public void parse(Object source) {
+		context.parse(source);
+	}
+
+	public List<Object> parseText(String text, int textType) {
+		return context.parseText(text, textType);
+	}
+
+	public String getFeatrue(String key) {
+		return context.getFeatrue(key);
+	}
+	public NodeParser<? extends Object>[] getNodeParsers() {
+		return parsers;
 	}
 
 }
