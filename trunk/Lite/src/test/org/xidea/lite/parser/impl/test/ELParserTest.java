@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.xidea.lite.impl.ELParser;
+import org.xidea.lite.impl.old.ELParser;
 
 public class ELParserTest extends ELParser{
 

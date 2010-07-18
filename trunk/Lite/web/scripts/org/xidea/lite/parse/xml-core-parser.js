@@ -51,7 +51,6 @@ function processIfTag(node,context,chain){
     context.parse(node.childNodes)
     context.appendEnd();
 }
-
 function processElseTag(node,context,chain,requireTest){
     if(requireTest != false){
         var test = getAttributeEL(node,'test','value');
@@ -168,7 +167,9 @@ function processIncludeTag(node,context,chain){
 	    		doc = context['$'+name];
 	    		context.currentURI = new URI(String(doc.documentURI));
 	    	}else{
+	    		
 		        var url = context.createURI(path);
+	    		//$log.warn(path,context.currentURI+'',url+'')
 		        var doc = context.loadXML(url);
 	    	}
 	    }
@@ -189,33 +190,5 @@ function processClientTag(node,context,chain){
 	var code = translator.translate(c2);
 	context.append("<!--//--><script>//<![CDATA[\n"
 				+code.replace(/<\/script>/ig,'<\\/script>')+"//]]></script>\n");
-}
-function getAttribute(el,key){
-	var required = key.charAt() == '*';
-	if(required){
-		key = key.substr(1);
-	}
-	for(var i=1,len = arguments.length;i<len;i++){
-		var an = arguments[i];
-		if(an == '#text'){
-			return el.textContent;
-		}else if(el.hasAttribute(an)){
-			if(i>1 && key.charAt(0) != '#'){
-				$log.warn("标准属性名为：",key ,'您采用的是：',an);
-			}
-			return el.getAttribute(an);
-		}
-	}
-	if(required){
-		$log.error("属性：",key ,'为必要属性。');
-	}
-	return null;
-}
-function getAttributeEL(el){
-	var el = getAttribute.apply(null,arguments);
-	if(el !== null){
-		el = el.replace(/^\s*\$\{([\s\S]+)\}\s*$/,"$1")
-	}
-	return el;
 }
 

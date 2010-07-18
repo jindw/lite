@@ -5,26 +5,40 @@
  * @author jindw
  * @version $Id: template.js,v 1.4 2008/02/28 14:39:06 jindw Exp $
  */
+var defaultBase = new URI("lite:///");
 //add as default
 /**
  * 模板解析上下文对象实现
  */
 function ParseContext(config,path){
 	config = config || new ParseConfig();
+    this.config = config;
 	this.path = path;
-	this.currentURI = path?new URI(path):config.root
+//	this.currentURI = defaultBase;
 	this.featrueMap = config.getFeatrueMap(path);
 	this.initialize(config);
 }
-
+function parseExtension(node,context,chain){//extension
+	return context.extensionParser.parse(node,context,chain);
+}
+function parseText2(node,context,chain){
+	return parseText(node,context,chain,context.textParsers)
+}
 ParseContext.prototype = {
 	/**
 	 * 初始化上下文
 	 * @arguments 链顶插入的解析器列表（第一个元素为初始化后的链顶解析器，以后类推）
 	 */
 	initialize:function(config){
-    	this.config = config;
-    	this.parserList = config.getNodeParsers(this.path);
+		var extensions = config.getExtensions(this.path);
+		var extensionParser = new ExtensionParser();
+		for(var len = extensions.length,i=0;i<len;i++){
+			var ext = extensions[i];
+			extensionParser.addExtensionPackage(ext.namespace,ext['package'])
+		}
+    	this.nodeParsers = [parseExtension,parseDefaultXMLNode,parseText2];
+    	this.textParsers = [extensionParser];
+    	this.extensionParser = extensionParser;
 	    this.result = new ResultContext();
 	    this.topChain = buildTopChain(this);
 	},
@@ -60,7 +74,7 @@ ParseContext.prototype = {
 			if(typeof source != 'string'){
 				//NodeList
 				if(source instanceof URI){
-					source = this.loadXML(source.path);
+					source = this.loadXML(source);
 				}else{
 					var len = source.length;
 					if(len >= 0 && source.item){//NodeList
@@ -75,25 +89,40 @@ ParseContext.prototype = {
 		this.topChain.next(source);
 	},
     createURI:function(path) {
-    	$log.error(path,this.currentURI,this.config.root)
-    	return URI.create(path,this.currentURI,this.config.root)
+    	//$log.error(path,this.currentURI,this.config.root)
+    	var cu = this.currentURI;
+    	if(cu){
+    		if(cu.scheme != 'data'){
+    			return cu.resolve(path);
+    		}
+    	}
+    	path= path.replace(/^[\\\/]/,'./');
+    	//$log.warn(defaultBase+'',path,defaultBase.resolve(path)+'',defaultBase.authority)
+    	return defaultBase.resolve(path);
+    	
+    },
+    getCurrentURI:function(){
+    	return this.currentURI;
+    },
+    setCurrentURI:function(uri){
+    	this.currentURI = new URI(uri);
     },
     openStream:function(uri){
     	//only for java
+    	if(uri.scheme == 'lite'){
+    		var path = uri.path+(uri.query||'');
+    		path = path.replace(/^\//,'./')
+    		uri = this.config.root.resolve(path);
+    	}
     	return Packages.org.xidea.lite.impl.ParseUtil.openStream(uri)
     },
     loadXML:function(path){
-    	if(/^[\s\ufeff]*</.test(path)){
-    		//this.currentURI = "data:text/xml,"+encodeURIComponent(path)
-    		return loadXML(path)
-    	}else{
-    		//$log.info("loadXML",path)
-    		this.currentURI = this.createURI(path);
-    		return loadXML(this.currentURI)
+    	if(!(path instanceof URI)){
+    		path = new URI(path)
     	}
-    	
+    	this.currentURI = path;
+    	return loadXML(this.currentURI,this.config.root)
     },
-    selectNodes:selectNodes,
     toString:function(){
     	return this.toCode();
     }

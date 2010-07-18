@@ -27,7 +27,7 @@
  * ]
  */
 function ParseConfig(root,json){
-	this.root = new URI(root||'.');
+	this.root = new URI(root||'http://localhost/');
 	this.config = defaultConfig;
 	if(json){
 		var result = [];
@@ -35,8 +35,8 @@ function ParseConfig(root,json){
 		while(i--){
 			var item = {};
 			copy(json[i],item);
-			item.includes = new RegExp(item.includes.join('|')||"^$");
-			item.excludes = new RegExp(item.excludes.join('|')||"^$");
+			item.includes = new RegExp(item.includes||"^$");
+			item.excludes = new RegExp(item.excludes||"^$");
 			result[i] = item;
 		}
 		this.config = result;
@@ -49,7 +49,7 @@ function copy(source,dest){
 }
 function findGroup(groups,path,require){
 	for(var i=0,len = groups.length;i<len;i++){
-		g = groups[i];
+		var g = groups[i];
 		if(g.includes.test(path)){
 			if(!g.excludes.test(path)){
 				return g;
@@ -73,36 +73,16 @@ ParseConfig.prototype = {
 		}
 		return result;
 	},
-	getNodeParsers:function(path){
-		return buildParser(this,path)
+	getExtensions:function(path){
+		var g = findGroup(this.config,path,null);
+		if(g){
+			return g.extensions;
+		}
+		return [];
+		
 	}
 }
 
-function buildParser(config,path){
-	var extension
-	return [
-		function(node,context,chain){//extension
-			if(!extension){
-				context.setAttribute(ExtensionParser,extension = new ExtensionParser());
-				var g = findGroup(config.config,path,null);
-				if(g){
-					for(var es = g.extensions,len = es.length,i=0;i<len;i++){
-						var ext = es[i];
-						extension.addExtensionPackage(ext.namespace,ext['package'])
-					}
-				}
-			}
-			return extension.parse(node,context,chain);
-		}
-//		,
-//		function(node,context,chain){
-//			if(!extension){
-//				context.setAttribute(ExtensionParser,extension = new ExtensionParser());
-//			}
-//			return text
-//		}
-	]
-}
 var defaultConfig = {
 		"includes":/./,//"/example\\/*.xhtml"
 		"excludes":/^$/,

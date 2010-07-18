@@ -20,9 +20,12 @@ import org.xidea.lite.parse.ParseChain;
 import org.xidea.lite.parse.ParseContext;
 
 public class DefaultXMLNodeParser implements NodeParser<Node> {
-
-	public static final Pattern SCRIPT_TAG = Pattern.compile("^script$",
-			Pattern.CASE_INSENSITIVE);
+	protected static final Pattern HTML_LEAF = Pattern.compile(
+			"^(?:link|input|meta|img|br|hr)$", Pattern.CASE_INSENSITIVE);
+	protected static final Pattern PRE_LEAF = Pattern.compile(
+			"^(?:script|style|pre|textarea)$", Pattern.CASE_INSENSITIVE);
+	// public static final Pattern SCRIPT_TAG = Pattern.compile("^script$",
+	// Pattern.CASE_INSENSITIVE);
 	final static Pattern PRIM_PATTERN = Pattern
 			.compile("^\\s*([\\r\\n])\\s*|\\s*([\\r\\n])\\s*$|^(\\s)+|(\\s)+$");
 
@@ -75,21 +78,10 @@ public class DefaultXMLNodeParser implements NodeParser<Node> {
 	}
 
 	private void parseCDATA(Node node, ParseContext context) {
-		boolean needFormat = needFormat(node);
-		if (needFormat) {
-			XMLContext.get(context).beginIndent();// false);
-		}
-		try {
-			context.append("<![CDATA[");
-			context.appendAll(context
-					.parseText(((CDATASection) node).getData(),
-							Template.EL_TYPE));
-			context.append("]]>");
-		} finally {
-			if (needFormat) {
-				XMLContext.get(context).endIndent();
-			}
-		}
+		context.append("<![CDATA[");
+		context.appendAll(context.parseText(((CDATASection) node).getData(),
+				Template.EL_TYPE));
+		context.append("]]>");
 	}
 
 	private void parseNotation(Node node, ParseContext context) {
@@ -100,15 +92,13 @@ public class DefaultXMLNodeParser implements NodeParser<Node> {
 		DocumentType node = (DocumentType) node0;
 		String pubid = node.getPublicId();
 		String sysid = node.getSystemId();
-		
+
 		if (pubid != null) {
-			if(pubid.equals(DefaultEntityResolver.DEFAULT__HTML_DTD)){
-				//跳过容错补充dtd申明
-				if(sysid!=null && sysid.startsWith("%3")){
-					try {
-						context.append(URLDecoder.decode(sysid, "UTF-8"));
-					} catch (UnsupportedEncodingException e) {
-					}
+			if (pubid.equals(DefaultEntityResolver.OUTPUT_DTD)) {
+				// 跳过容错补充dtd申明
+				try {
+					context.append(URLDecoder.decode(sysid, "UTF-8"));
+				} catch (UnsupportedEncodingException e) {
 				}
 				return;
 			}
@@ -131,15 +121,14 @@ public class DefaultXMLNodeParser implements NodeParser<Node> {
 			context.append("<!DOCTYPE ");
 			context.append(node.getNodeName());
 			String sub = node.getInternalSubset();
-			if(sub!=null && sub.trim().length()>0){
+			if (sub != null && sub.trim().length() > 0) {
 				context.append("[");
 				context.append(sub);
 				context.append("]");
 			}
 			context.append(">");
-			
+
 		}
-		// context.appendFormatEnd();
 	}
 
 	private void parseDocument(Node node, ParseContext context) {
@@ -147,6 +136,7 @@ public class DefaultXMLNodeParser implements NodeParser<Node> {
 			context.parse(n);
 		}
 	}
+
 	private void parseComment(Node node, ParseContext context) {
 		return;
 	}
@@ -164,34 +154,11 @@ public class DefaultXMLNodeParser implements NodeParser<Node> {
 	private void parseTextNode(Node node, ParseContext context) {
 		String text = ((Text) node).getData();
 		if (!context.isReserveSpace()) {
-			// String text2 = text.trim();
-			// if(text2.length()==0){
-			// 比较复杂，算了
-			// if(node.getPreviousSibling()!=null ||
-			// node.getNextSibling()!=null){
-			// }
-			// }
-			// text = text2;
-			if (XMLContext.get(context).isCompress()) {
-				text = safeTrim(text);
-			} else if (XMLContext.get(context).isFormat()) {
-				text = text.trim();
-			}
+			text = safeTrim(text);
 		}
 		if (text.length() > 0) {
-			boolean needFormat = needFormat(node);
-			if (needFormat) {
-				XMLContext.get(context).beginIndent();// false);
-			}
-			try {
-				context.appendAll(context.parseText(text, Template.XML_TEXT_TYPE));
-			} finally {
-				if (needFormat) {
-					XMLContext.get(context).endIndent();
-				}
-			}
+			context.appendAll(context.parseText(text, Template.XML_TEXT_TYPE));
 		}
-		return;
 	}
 
 	protected String safeTrim(String text) {
@@ -203,10 +170,6 @@ public class DefaultXMLNodeParser implements NodeParser<Node> {
 		Attr attr = (Attr) node;
 		String name = attr.getName();
 		String value = attr.getValue();
-		if (ParseUtil.isCoreNS("xmlns:c".equals(name) ? "c" : attr
-				.getPrefix(), value)) {
-			return;
-		}
 		List<Object> buf = parseAttributeValue(context, value);
 		boolean isStatic = false;
 		boolean isDynamic = false;
@@ -228,13 +191,13 @@ public class DefaultXMLNodeParser implements NodeParser<Node> {
 		if (isDynamic && !isStatic && buf.size() == 1) {
 			// remove attribute;
 			// context.append(" "+name+'=""');
-//			if (buf.size() > 1) {
-//				// TODO:....
-//				throw new RuntimeException("只能有单个EL表达式");
-//			} else {// 只考虑单一EL表达式的情况
-				Object[] el = (Object[]) buf.get(0);
-				context.appendAttribute(name, el[1]);
-//			}
+			// if (buf.size() > 1) {
+			// // TODO:....
+			// throw new RuntimeException("只能有单个EL表达式");
+			// } else {// 只考虑单一EL表达式的情况
+			Object[] el = (Object[]) buf.get(0);
+			context.appendAttribute(name, el[1]);
+			// }
 		} else {
 			context.append(" " + name + "=\"");
 			if (name.startsWith("xmlns")) {
@@ -255,7 +218,6 @@ public class DefaultXMLNodeParser implements NodeParser<Node> {
 	}
 
 	private void parseElement(Node node, ParseContext context) {
-		XMLContext.get(context).beginIndent();// false);
 		String closeTag = null;
 		try {
 			Element el = (Element) node;
@@ -267,37 +229,36 @@ public class DefaultXMLNodeParser implements NodeParser<Node> {
 			}
 			Node child = node.getFirstChild();
 			if (child != null) {
+
 				context.append(">");
-				while (true) {
-					context.parse(child);
-					Node next = child.getNextSibling();
-					if (next == null) {
-						break;
-					} else {
-						child = next;
+				boolean reserveSpace = PRE_LEAF.matcher(tagName).find();
+				boolean oldReserveSpace = context.isReserveSpace();
+				context.setReserveSpace(oldReserveSpace || reserveSpace);
+				try {
+					while (true) {
+						context.parse(child);
+						Node next = child.getNextSibling();
+						if (next == null) {
+							break;
+						} else {
+							child = next;
+						}
 					}
+				} finally {
+					context.setReserveSpace(oldReserveSpace);
 				}
 
 				closeTag = "</" + tagName + '>';
 			} else {
-				closeTag = "/>";
+
+				if (HTML_LEAF.matcher(tagName).find()) {
+					closeTag = "/>";
+				}else{
+					closeTag = "></" + tagName + '>';
+				}
 			}
 		} finally {
-			XMLContext.get(context).endIndent();
 			context.append(closeTag);
 		}
 	}
-
-	/**
-	 * 有兄弟节点需要格式化，非文本节点需要格式化
-	 * 
-	 * @param next
-	 * @return
-	 */
-	static boolean needFormat(Node node) {
-		return node.getNodeType() != Node.TEXT_NODE
-				|| node.getPreviousSibling() != null
-				|| node.getNextSibling() != null;
-	}
-
 }

@@ -23,13 +23,13 @@ function addChainAddon(TopChain,context){
 	pt.constructor = TopChain;
 }
 function doNext(node){
-	var parser = this.parserList[this.index];
+	var parser = this.nodeParsers[this.index];
 	var n = this.nextChain||this.buildNext();
 	parser(node,this,n);
 }
 function buildNext(){
 	var index = (this.index||0) +1;
-	if(this.parserList.length>index){
+	if(this.nodeParsers.length>index){
 		var n = new this.constructor();
 		n.index = index
 		return this.nextChain = n;

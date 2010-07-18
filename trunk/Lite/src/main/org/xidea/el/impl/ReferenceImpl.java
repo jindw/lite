@@ -85,7 +85,7 @@ class ReferenceImpl implements Reference {
 		return invocable;
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	static Invocable createInvocable(
 			Map<String, Map<String, Invocable>> methodMap,
 			final Object thisObject, final String name, Object[] args) {

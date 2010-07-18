@@ -113,7 +113,7 @@ public abstract class ReflectUtil {
 				.parseInt(String.valueOf(key));
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static Class<? extends Object> getValueType(Type type) {
 		Type result = null;
 		Class<? extends Object>  clazz = null;
@@ -132,7 +132,7 @@ public abstract class ReflectUtil {
 		}
 		return Object.class;
 	}
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"rawtypes" })
 	public static Class getKeyType(Type type) {
 		Class clazz = null;
 		if (type instanceof ParameterizedType) {
@@ -149,7 +149,7 @@ public abstract class ReflectUtil {
 		return Integer.TYPE;
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private static Type getParameterizedType(Type type, Class destClass,
 			int paramIndex) {
 		Class clazz = null;
@@ -190,7 +190,7 @@ public abstract class ReflectUtil {
 		throw new IllegalArgumentException("必须是Collection 子类");
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	private static Type getTureType(Type type, TypeVariable[] typeVariables,
 			Type[] actualTypes) {
 		if (type instanceof Class) {

@@ -34,7 +34,7 @@ public class ResultContextImpl implements ResultContext {
 	private HashMap<Object, Object> attributeMap = new HashMap<Object, Object>();
 	private HashSet<URI> resources = new HashSet<URI>();
 	private int textType = 0;
-	private URI currentURI;
+	private URI currentURI = URI.create("lite:///");
 	private ExpressionFactory expressionFactory = ExpressionFactoryImpl.getInstance();
 	private int inc = 0;
 
@@ -219,7 +219,7 @@ public class ResultContextImpl implements ResultContext {
 		return optimizeResult(pops);
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public List<Object> toList() {
 		List<Object> result2 = optimizeResult(this.result);
 		ArrayList<ArrayList<Object>> stack = new ArrayList<ArrayList<Object>>();

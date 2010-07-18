@@ -9,10 +9,12 @@ import org.xml.sax.ext.EntityResolver2;
 
 public class DefaultEntityResolver implements EntityResolver2 {
 
-	public static final String DEFAULT__HTML_DTD = "org.xidea.lite.html.DEFAULT";
+	// 默认值：link|input|meta|img|br|hr
+	public String DTD_OUTPUT = "http://www.xidea.org/dtd/lite/dtd-output";
+	public static final String OUTPUT_DTD = "org.xidea.lite.OUTPUT_DTD";
 	private static HashMap<String, String> DEFAULT_DTD_MAP = new HashMap<String, String>();
 	static {
-		DEFAULT_DTD_MAP.put(DEFAULT__HTML_DTD,"xhtml1.dtd");
+		DEFAULT_DTD_MAP.put(OUTPUT_DTD,"xhtml1.dtd");
 		DEFAULT_DTD_MAP.put("-//W3C//DTD XHTML 1.0 Transitional//EN",
 				"xhtml1.dtd");
 		DEFAULT_DTD_MAP.put("-//W3C//DTD XHTML 1.0 Strict//EN",
@@ -55,7 +57,7 @@ public class DefaultEntityResolver implements EntityResolver2 {
 			throws SAXException, IOException {
 		//<!doctype html>
 		if("HTML".equals(name)){
-			return resolveEntity(DEFAULT__HTML_DTD,".");
+			return resolveEntity(OUTPUT_DTD,".");
 		}else{
 			return null;
 		}

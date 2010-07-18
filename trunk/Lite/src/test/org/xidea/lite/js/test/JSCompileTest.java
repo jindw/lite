@@ -48,7 +48,7 @@ public class JSCompileTest {
 
 	public String getText(Node doc, String xpath)
 			throws XPathExpressionException {
-		NodeList node = context.selectNodes(doc, xpath);
+		NodeList node = ParseUtil.selectNodes(doc, xpath);
 		if(node == null || node.getLength()<1){
 			return null;
 		}
@@ -75,6 +75,7 @@ public class JSCompileTest {
 		eval("$import('org.xidea.lite.impl:TemplateImpl');");
 		eval("$import('org.xidea.lite.impl:Translator');");
 		eval("$import('org.xidea.lite.parse:ParseContext');");
+		eval("$import('org.xidea.lite.parse:ParseConfig');");
 		eval("$import('org.xidea.el:findELEnd')");
 	}
 
@@ -109,7 +110,7 @@ public class JSCompileTest {
 		Document doc = context.loadXML(menuURL);
 		String defaultContext = getText(doc, "/root/context");
 
-		NodeList nodes = context.selectNodes(doc, "/root/entry");
+		NodeList nodes = ParseUtil.selectNodes(doc, "/root/entry");
 		System.out.println(nodes);
 		for (int i = 0;i<nodes.getLength();i++) {
 			Element child = (Element) nodes.item(i);
@@ -124,6 +125,7 @@ public class JSCompileTest {
 
 	@Test
 	public void test3op() throws Exception{
+		System.out.println(JSONEncoder.encode(new URI("data:sdsd/dfdf;base64,23434")));
 		testEL("1?1:3 + 0?5:7");
 		testEL("1?0?5:7:3 ");
 		testEL("0?0?5:7:3 ");
@@ -142,10 +144,10 @@ public class JSCompileTest {
 		System.out.println("\n======" + key + sourceJSON + "======\n");
 		String base = JSONEncoder.encode(menuURL.toString());
 		eval("var jsTemplate = new TemplateImpl(" + sourceJSON
-				+ ",new ParseContext(null,"+base+"))");
+				+ ",new ParseContext(new ParseConfig("+base+"),"+base+"))");
 
 		eval("var liteTemplate = new TemplateImpl(" + sourceJSON
-				+ ",new ParseContext(null,"+base+"),true)");
+				+ ",new ParseContext(new ParseConfig("+base+"),"+base+"),true)");
 		// .buildResult()");
 
 		System.out.println(eval("jsTemplate.data+''"));

@@ -11,7 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xidea.lite.impl.ParseUtil;
-import org.xidea.lite.impl.XMLFixerImpl;
+import org.xidea.lite.impl.old.XMLFixerImpl;
 
 public class XMLFixedTest  {
 
