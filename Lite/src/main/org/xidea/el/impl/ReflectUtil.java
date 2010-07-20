@@ -34,7 +34,16 @@ public abstract class ReflectUtil {
 			try {
 				propertyMap = new HashMap<String, AccessDescriptor>();
 				if (!clazz.equals(Object.class)) {
-					propertyMap.putAll(getPropertyMap(clazz.getSuperclass()));
+
+					Map<String, AccessDescriptor> pm = getPropertyMap(clazz.getSuperclass());
+					for(String p : pm.keySet()){
+						AccessDescriptor ad = pm.get(p);
+						AccessDescriptor ad2 = new AccessDescriptor();
+						ad2.type = ad.type;
+						ad2.reader = ad.reader;
+						ad2.writer = ad.writer;
+						propertyMap.put(p,ad2);
+					}
 				}
 				Method[] methods = clazz.getDeclaredMethods();
 				for (Method m : methods) {
