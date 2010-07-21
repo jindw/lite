@@ -173,24 +173,15 @@
 		<java failonerror="true" classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
 			<arg value="-scriptBase" />
 			<arg value="${basedir}/web/scripts" />
-			<!--
-			<arg value="-sourceBases" />
-			<arg value="${basedir}/../JSI2/web/scripts" />
--->
-			<arg value="-config.ascii" />
-			<arg value="false" />
-			<arg value="-config.features" />
-			<arg value="org.xidea.lite:Compile" />
-			<arg value="org.xidea.jsi.boot:$log" />
-
 			<arg value="-exports" />
 			<arg value="org.xidea.lite:Template" />
-			<arg value="org.xidea.lite:ParseContext" />
-			<arg value="org.xidea.lite:XMLParser" />
-			<arg value="org.xidea.lite:ParseContext" />
-			<arg value="org.xidea.lite:ELTranslator" />
-			<arg value="org.xidea.lite:Translator" />
+			<arg value="org.xidea.el:*" />
+			<arg value="org.xidea.lite.impl:*" />
+			<arg value="org.xidea.lite.parse:*" />
+			<arg value="org.xidea.lite.util:*" />
 
+			<arg value="-outputJar" />
+			<arg value="${basedir}/build/dest/jslite/template.zip" />
 			<arg value="-outputExported" />
 			<arg value="${basedir}/build/dest/jslite/template.js" />
 		</java>
@@ -198,19 +189,10 @@
 		<java classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
 			<arg value="-scriptBase" />
 			<arg value="${basedir}/web/scripts" />
-			<!--
-			<arg value="-sourceBases" />
-			<arg value="${basedir}/../JSI2/web/scripts" />
--->
-			<arg value="-config.ascii" />
-			<arg value="false" />
 			<arg value="-config.features" />
-			<arg value="org.xidea.lite:Compile" />
 			<arg value=":Debug" />
-
 			<arg value="-exports" />
-			<arg value="org.xidea.lite:Template" />
-			<arg value="org.xidea.lite:XMLParser" />
+			<arg value="org.xidea.lite.impl:Template" />
 			<arg value="org.xidea.lite.demo:TestCase" />
 
 			<arg value="-outputExported" />

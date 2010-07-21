@@ -26,31 +26,31 @@ var PLUGIN_DEFINE = "org.xidea.lite.DefinePlugin";
  * <a href="http://code.google.com/p/lite/wiki/Template"> 模版基础指令说明</a>
  * @public
  */
-function TemplateImpl(data,parser){
+function TemplateImpl(data,parseContext,runAsLiteCode){
     if(!(data instanceof Array || data instanceof Function)){
-        if(parser == null|| parser == "xml"){
-        	parser = new ParseContext();
+        if(parseContext == null|| parseContext == "xml"){
+        	parseContext = new ParseContext();
         }else if(typeof parser == "string"){
-            parser = new $import(parser)();
+            parseContext = new $import(parseContext)();
         }
         if(typeof data == 'string'){
-        	data = parser.createURI(data);
+        	data = parseContext.createURI(data);
         }
-        parser.parse(data);
-        try{
-        	//print(">>>"+code+"<<<\n")
-        	
-	    	var translator = new Translator("");
-	    	var code = translator.translate(parser);
-            data =  window.eval("["+(code||null)+"][0]");
-            data.toString=function(){//_$1 encodeXML
-                return code;
-            }
-        }catch(e){
-        	$log.error("翻译结果错误：",e,code)
-            throw e;
+        parseContext.parse(data);
+        if(!runAsLiteCode){
+	        try{
+		    	var translator = new Translator("");
+		    	var code = translator.translate(parseContext);
+	            data =  window.eval("["+(code||null)+"][0]");
+	            data.toString=function(){//_$1 encodeXML
+	                return code;
+	            }
+	        }catch(e){
+	        	$log.error("翻译结果错误：",e,code)
+	            throw e;
+	        }
+	        this.compileData = data;
         }
-        this.compileData = data;
     }
     //alert(data.join("\n"));;
     /**
@@ -69,7 +69,7 @@ TemplateImpl.prototype.render = function(context){
 	try{
 	    var data = this.data;
 	    if(data instanceof Function){
-	        return data(context);
+	        return this.data(context);
 	    }else{
 	        var i=data.length;
 	        var context2 = {};
