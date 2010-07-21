@@ -38,11 +38,9 @@ function parseXMLByURL(url){
 	var xhr = new XMLHttpRequest();
     xhr.open("GET",url,false)
     xhr.send('');
-    if(/\/xml/.test(xhr.getResponseHeader("Content-Type"))){//text/xml,application/xml...
-        return xhr.responseXML;
-    }else{
-        return parseXMLByText(xhr.responseText)
-    }
+    ////text/xml,application/xml...
+    var xml = /\/xml/.test(xhr.getResponseHeader("Content-Type")) && xhr.responseXML;//chrome 在content-type 为apllication/xml+xhtml时，responseXML为空
+    return xml || parseXMLByText(xhr.responseText)
 }
 /**
  * @private
