@@ -61,6 +61,38 @@ function TemplateImpl(data,parser){
     this.data = data;
     //alert(this.data)
 }
+/**
+ * 渲染模板
+ * @public
+ */
+TemplateImpl.prototype.render = function(context){
+	try{
+	    var data = this.data;
+	    if(data instanceof Function){
+	        return data(context);
+	    }else{
+	        var i=data.length;
+	        var context2 = {};
+	        while(i--){//本来是编译期处理的,偷懒,性能优化在toNative中处理吧:(
+	            var item = data[i];
+	            if(item instanceof Array && item[0] == PLUGIN_TYPE){
+	                if(item[3] == PLUGIN_DEFINE){
+	                    processDef(context2, item);
+	                }
+	            }
+	        }
+	        for(var i in context){
+	            context2[i] = context[i];
+	        }
+	        var buf = [];
+	        renderList(context2,data,buf);
+	        return buf.join("");
+	    }
+	}catch(e){
+		$log.warn("模板渲染异常：",e,this.data+'');
+	}
+}
+
 
 function processDef(context, item){
     var fn = evaluate(item[2],context);
@@ -80,34 +112,6 @@ function processDef(context, item){
         return buf.join('');
     }
 }
-/**
- * 渲染模板
- * @public
- */
-TemplateImpl.prototype.render = function(context){
-    var data = this.data;
-    if(data instanceof Function){
-        return data(context);
-    }else{
-        var i=data.length;
-        var context2 = {};
-        while(i--){//本来是编译期处理的,偷懒,性能优化在toNative中处理吧:(
-            var item = data[i];
-            if(item instanceof Array && item[0] == PLUGIN_TYPE){
-                if(item[3] == PLUGIN_DEFINE){
-                    processDef(context2, item);
-                }
-            }
-        }
-        for(var i in context){
-            context2[i] = context[i];
-        }
-        var buf = [];
-        renderList(context2,data,buf);
-        return buf.join("");
-    }
-}
-
 /**
  * 模版渲染函数
  * @internal
