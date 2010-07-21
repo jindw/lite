@@ -30,7 +30,7 @@ function TemplateImpl(data,parseContext,runAsLiteCode){
     if(!(data instanceof Array || data instanceof Function)){
         if(parseContext == null|| parseContext == "xml"){
         	parseContext = new ParseContext();
-        }else if(typeof parser == "string"){
+        }else if(typeof parseContext == "string"){
             parseContext = new $import(parseContext)();
         }
         if(typeof data == 'string'){

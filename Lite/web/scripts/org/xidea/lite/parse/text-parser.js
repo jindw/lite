@@ -35,7 +35,7 @@ var defaultTextSeeker = {
 			return -1;
 		}
 	},
-	"seek!":function(){
+	"seek!":function(text){
 		var end = findELEnd(text,-1);
 		if(end>0){
 			try{

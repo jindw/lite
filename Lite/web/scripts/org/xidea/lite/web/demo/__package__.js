@@ -1,6 +1,8 @@
 this.addScript('lite-demo-util.js',["TestCase"]
                ,[
                    "org.xidea.lite.impl.*",
+                   "org.xidea.lite.parse.*",
+                   "org.xidea.lite.util.*",
                    "liteFormat",
                    "org.xidea.jsi:$log"
                ]
