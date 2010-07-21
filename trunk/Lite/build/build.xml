@@ -6,9 +6,13 @@
 	<available file="../JSA/build/dest/JSide.jar" property="JSAPath" value="web/WEB-INF/classes;../JSA/build/dest/JSide.jar;" />
 
 	<target name="init">
-		<delete dir="build/temp">
-		</delete>
+		<delete dir="build/dest/jslite"/>
 		<mkdir dir="build/dest/jslite" />
+		<mkdir dir="build/dest/jslite/el" />
+		<mkdir dir="build/dest/jslite/lite" />
+		<mkdir dir="build/dest/jslite/lite/impl" />
+		<mkdir dir="build/dest/jslite/lite/parse" />
+		<mkdir dir="build/dest/jslite/lite/util" />
 		<mkdir dir="build/dest" />
 	</target>
 	<target name="compilelite">
@@ -78,20 +82,22 @@
 			<replacefilter token="&#10;?&gt;&lt;?php" value="&#10;//?&gt;&lt;?php" />
 		</replace>
 	</target>
-	<target name="jar" depends="init,join-php">
+	<target name="jar" depends="init,compress,join-php">
 		<delete>
 			<fileset dir="build/dest/">
 				<include name="Example-*.zip" />
 				<include name="Template-*.jar" />
 			</fileset>
 		</delete>
-		<echo file="build/dest/jslite/__package__.js">this.addScript("template.js",["Template","ParseContext","XMLParser","ELTranslator","Translator"])</echo>
+		<echo file="build/dest/jslite/el/__package__.js">this.setImplementation("org.xidea.lite.impl")</echo>
+		<echo file="build/dest/jslite/lite/parse/__package__.js">this.setImplementation("org.xidea.lite.impl")</echo>
 		<jar destfile="build/dest/Template.jar" compress="true">
 			<manifest>
 				<attribute name="Main-Class" value="org.xidea.lite.tools.LiteCompiler" />
 			</manifest>
 			<fileset dir="web/WEB-INF/classes">
 				<include name="org/xidea/el/**/*.class" />
+				<include name="org/xidea/lite/*.js" />
 				<include name="org/xidea/lite/**/*.class" />
 				<include name="org/xidea/lite/parser/impl/dtd/**/*.ent" />
 				<include name="org/xidea/lite/parser/impl/dtd/**/xhtml1.dtd" />
@@ -103,8 +109,7 @@
 				<include name="org/xidea/**/*.java" />
 			</fileset>
 			<zipfileset prefix="org/xidea/lite/" dir="build/dest/jslite/">
-				<include name="template.js" />
-				<include name="__package__.js" />
+				<include name="**.js" />
 			</zipfileset>
 			<zipfileset src="web/WEB-INF/lib/commons-logging-1.0.4.jar">
 				<include name="**/*.*" />
@@ -170,21 +175,44 @@
 
 	<target name="compress" depends="init">
 		<echo>压缩JSLite实现</echo>
+
+		<!-- export lite -->
+		<!-- empty -->
+		<!-- export lite impl,parse,el -->
 		<java failonerror="true" classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
 			<arg value="-scriptBase" />
 			<arg value="${basedir}/web/scripts" />
 			<arg value="-exports" />
-			<arg value="org.xidea.lite:Template" />
 			<arg value="org.xidea.el:*" />
 			<arg value="org.xidea.lite.impl:*" />
 			<arg value="org.xidea.lite.parse:*" />
+			<!--
+			<arg value="-bootCached"/>
 			<arg value="org.xidea.lite.util:*" />
-
-			<arg value="-outputJar" />
-			<arg value="${basedir}/build/dest/jslite/template.zip" />
+			<arg value="org.xidea.jsi:*" />
+			-->
+			<arg value="-outputPackage" />
+			<arg value="${basedir}/build/dest/jslite/lite/impl/__package__.js" />
 			<arg value="-outputExported" />
-			<arg value="${basedir}/build/dest/jslite/template.js" />
+			<arg value="${basedir}/build/dest/jslite/lite/impl/impl.js" />
 		</java>
+
+		<!-- export lite uril -->
+		<java failonerror="true" classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
+			<arg value="-scriptBase" />
+			<arg value="${basedir}/web/scripts" />
+			<arg value="-exports" />
+			<arg value="org.xidea.lite.util:*" />
+			<!--
+			<arg value="-bootCached"/>
+			<arg value="org.xidea.lite.util:*" />
+			-->
+			<arg value="-outputPackage" />
+			<arg value="${basedir}/build/dest/jslite/lite/util/__package__.js" />
+			<arg value="-outputExported" />
+			<arg value="${basedir}/build/dest/jslite/lite/util/impl.js" />
+		</java>
+		
 		<echo>压缩JS在线演示实现</echo>
 		<java classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
 			<arg value="-scriptBase" />
@@ -192,8 +220,7 @@
 			<arg value="-config.features" />
 			<arg value=":Debug" />
 			<arg value="-exports" />
-			<arg value="org.xidea.lite.impl:Template" />
-			<arg value="org.xidea.lite.demo:TestCase" />
+			<arg value="org.xidea.lite.web.demo:TestCase" />
 
 			<arg value="-outputExported" />
 			<arg value="${basedir}/build/dest/jslite/demo.js" />

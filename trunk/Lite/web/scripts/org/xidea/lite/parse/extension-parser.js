@@ -140,7 +140,7 @@ ExtensionParser.prototype = {
 			if(ext && ext.onMap){
 				if(fn in ext.onMap){
 					var fn = ext.onMap[fn];
-					fn.call(chain,attr,context,chain);
+					fn.call(chain,node,context,chain);
 					return true;
 				}
 			}

@@ -9,21 +9,18 @@ var TestCase = {
 	        return false;
 	    }
 	    try{
-	    	var parser = new XMLParser(false);
-	    	parser.parse(loadXML(templateSource));
+	    	var parser = new ParseContext();
+	    	parser.parse(templateSource);
 	    	var jsonCode = parser.toList();
-	        var jsonTemplate = new Template(jsonCode);
+	        var jsonTemplate = new TemplateImpl(jsonCode);
 	    }catch(e){
 	        $log.error("模板解析失败（JSON）",e);
 	        return false;
 	    }
 	    E("templateCode").value = liteFormat(jsonCode,false);
 	    try{
-	    	var parser = new XMLParser(true);
-	    	parser.parse(loadXML(templateSource));
-	    	var jsCode = parser.toCode();
-	        var fn = window.eval("["+(jsCode || null)+"][0]");
-	    	var jsTemplate = new Template(fn);
+	    	var jsTemplate = new TemplateImpl(templateSource);
+	    	var jsCode = jsTemplate.data+'';
 	    }catch(e){
 	        $log.error("模板解析失败（JS）",e);
 	        return false;
