@@ -1,8 +1,9 @@
 === JSEL ===
 
-* [JSEL JSEL 简介]
-* [JSON解析]
-* [命令行解析]
+ * [JSEL JSEL 简介]
+ * [JSON解析]
+ * [命令行解析]
 
 ===Lite===
-* [XMLLiteSyntax Lite基本语法]
+
+ * [XMLLiteSyntax Lite基本语法]
