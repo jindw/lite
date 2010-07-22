@@ -108,8 +108,8 @@
 				<exclude name="org/xidea/**/*Test*.java" />
 				<include name="org/xidea/**/*.java" />
 			</fileset>
-			<zipfileset prefix="org/xidea/lite/" dir="build/dest/jslite/">
-				<include name="**.js" />
+			<zipfileset prefix="org/xidea/" dir="build/dest/jslite/">
+				<include name="*/**/*.js" />
 			</zipfileset>
 			<zipfileset src="web/WEB-INF/lib/commons-logging-1.0.4.jar">
 				<include name="**/*.*" />
