@@ -45,8 +45,8 @@ abstract public class ParseContextProxy implements ParseContext {
 		this.config = parent;
 		this.resultContext = parent;
 		this.textParsers = parent.getTextParsers();
-		nodeParsers = nodeParsers.clone();
-		nodeParsers[0] = new ExtensionParserImpl();
+		this.nodeParsers = parent.getTopChain().getNodeParsers().clone();
+		this.nodeParsers[0] = new ExtensionParserImpl();
 	}
 
 
