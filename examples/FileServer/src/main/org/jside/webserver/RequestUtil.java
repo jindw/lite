@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-@SuppressWarnings("unchecked")
 public abstract class RequestUtil {
 	private static final String DEFAULT_CONTENT_TYPE = "application/octet-stream";
 	public static final String PLAIN_TEXT = "text/plain";
@@ -50,12 +49,15 @@ public abstract class RequestUtil {
 					.getResourceAsStream("mime.types");
 			if (in != null) {
 				props.load(in);
+				in.close();
 			}
 			in = RequestUtil.class.getResourceAsStream("/mime.types");
 			if (in != null) {
 				props.load(in);
+				in.close();
 			}
-			for (Map.Entry entry : props.entrySet()) {
+			
+			for (Map.Entry<?,?> entry : props.entrySet()) {
 				String contentType = (String) entry.getKey();
 				String exts = (String) entry.getValue();
 				for (String ext : exts.trim().split("[,\\s]+")) {
