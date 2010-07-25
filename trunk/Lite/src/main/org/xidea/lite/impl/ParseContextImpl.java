@@ -4,17 +4,18 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xidea.lite.parse.ExtensionParser;
+import org.xidea.lite.parse.NodeParser;
 import org.xidea.lite.parse.ParseChain;
 import org.xidea.lite.parse.ParseConfig;
 import org.xidea.lite.parse.ParseContext;
+import org.xidea.lite.parse.TextParser;
 
 /**
  * 不要较差调用，交叉调用，用this代替，确保继承安全 取消final 之后，容易引发一个短路bug，等到发现之后再修复吧。
@@ -23,44 +24,72 @@ import org.xidea.lite.parse.ParseContext;
  */
 public class ParseContextImpl extends ParseContextProxy implements ParseContext {
 	private static final long serialVersionUID = 1L;
-
-	protected final Map<String, String> featrueMap;
-
+	private static NodeParser<?>[] DEFAULT_PARSER_LIST = {null, new DefaultXMLNodeParser(), new TextNodeParser() };
+	
+	private ParseChain topChain;
+	private final ExtensionParser  extensionParser;
+	private NodeParser<? extends Object>[] nodeParsers;
+	private TextParser[] textParsers;
+	
 	public ParseContextImpl(ParseConfig config, String path) {
-		super(config);
-		featrueMap = new HashMap<String, String>();
-		if (config != null && path != null) {
-			Map<String, String> f = config.getFeatrueMap(path);
-			if (f != null) {
-				this.featrueMap.putAll(f);
-			}
-			// super.nodeParsers = config.getNodeParsers(path);
-		}
-		this.resultContext = new ResultContextImpl(this);
+		super(config,config.getFeatrueMap(path));
+		this.extensionParser = new ExtensionParserImpl();
+		this.nodeParsers = DEFAULT_PARSER_LIST.clone();
+		nodeParsers[0] = extensionParser;
+		textParsers = new TextParser[]{extensionParser};
 	}
 
-	public ParseContextImpl(ParseContext parent) {
+	public ParseContext createNew() {
+		return new ParseContextImpl(this);
+	}
+	private ParseContextImpl(ParseContext parent) {
 		super(parent);
-		// 需要重设 ParseChain 的context
 		this.resultContext = new ResultContextImpl(this);
-		if (parent instanceof ParseContextImpl) {
-			this.featrueMap = ((ParseContextImpl) parent).getFeatrueMap();
-		} else {
-			this.featrueMap = new HashMap<String, String>();
+		// 需要重设 ParseChain 的context
+		this.textParsers = parent.getTextParsers();
+		this.nodeParsers = parent.getTopChain().getNodeParsers();
+		ExtensionParser ep = null;
+		for(NodeParser<?> n :nodeParsers){
+			if(n instanceof ExtensionParser){
+				ep = (ExtensionParser)n;
+			}
 		}
+		this.extensionParser = ep;
+	}
+	public ParseContext create(ParseContext parent){
+		return new ParseContextImpl(parent);
+	}
+	public final ParseChain getTopChain() {
+		if(topChain == null){//nodeParsers != topChain.getNodeParsers()
+			topChain = new ParseChainImpl(this, nodeParsers, 0);
+		}
+		return topChain;
 	}
 
-	public String getFeatrue(String key) {
-		return featrueMap.get(key);
+	public final void addExtension(String namespace, String packageName) {
+		extensionParser.addExtensionPackage(namespace, packageName);
+	}
+	
+	public ExtensionParser getExtensionParser() {
+		return extensionParser;
 	}
 
-	/**
-	 * 获得特征表的直接引用，外部的修改也将直接影响解析上下文的特征表
-	 * 
-	 * @return
-	 */
-	protected Map<String, String> getFeatrueMap() {
-		return featrueMap;
+	public void addNodeParser(NodeParser<? extends Object> nodeParser) {
+		int length = this.nodeParsers.length;
+		NodeParser<?>[] ips2 = new NodeParser<?>[length + 1];
+		System.arraycopy(this.nodeParsers, 0, ips2, 1, length);
+		ips2[length] = nodeParser;
+		this.nodeParsers = ips2;
+	}
+	public final TextParser[] getTextParsers() {
+		return textParsers;
+	}
+	public void addTextParser(TextParser iparser) {
+		int length = textParsers.length;
+		TextParser[] ips2 = new TextParser[length + 1];
+		System.arraycopy(this.textParsers, 0, ips2, 0, length);
+		ips2[length] = iparser;
+		this.textParsers = ips2;
 	}
 
 	public void parse(Object node) {
@@ -128,4 +157,5 @@ public class ParseContextImpl extends ParseContextProxy implements ParseContext 
 		}
 		return result;
 	}
+
 }

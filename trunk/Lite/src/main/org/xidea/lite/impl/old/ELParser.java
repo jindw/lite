@@ -115,10 +115,10 @@ public class ELParser implements TextParser {
 			context.appendEL(el);
 			break;
 		case Template.XML_TEXT_TYPE:
-			context.appendXmlText(el);
+			context.appendXT(el);
 			break;
 		case Template.XML_ATTRIBUTE_TYPE:
-			context.appendAttribute(null, el);
+			context.appendXA(null, el);
 			break;
 		}
 	}

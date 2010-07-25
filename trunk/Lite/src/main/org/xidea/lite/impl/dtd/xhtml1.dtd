@@ -14,13 +14,14 @@
 %HTMLspecial;
 <!-- html -->
 <!ELEMENT html ANY>
+
 <!ATTLIST html
   id          ID             #IMPLIED
-  xmlns       %URI;          #FIXED 'http://www.w3.org/1999/xhtml'
-  xmlns:c     %URI;          #FIXED 'http://www.xidea.org/ns/lite/core'
+  xmlns       CDATA          #FIXED 'http://www.w3.org/1999/xhtml'
+  xmlns:c     CDATA          #FIXED 'http://www.xidea.org/ns/lite/core'
   >
 <!-- wml -->
 <!ELEMENT wml ANY>
 <!ATTLIST wml
-  xmlns:c     %URI;          #FIXED 'http://www.xidea.org/ns/lite/core'
+  xmlns:c     CDATA          #FIXED 'http://www.xidea.org/ns/lite/core'
   >

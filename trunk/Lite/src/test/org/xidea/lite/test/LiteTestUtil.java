@@ -40,7 +40,7 @@ public class LiteTestUtil {
 				base = new File("/").toURI();
 			}
 			ParseContextImpl context = new ParseContextImpl(
-					new ParseConfigImpl(base), "/");
+					new ParseConfigImpl(base,null), "/");
 //			context.setCurrentURI(base);
 			return context;
 		}

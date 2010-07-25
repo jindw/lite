@@ -50,13 +50,19 @@
  */
 function parseConfig(doc){
 	var doc = loadXML(doc);
-	var lite = doc.getElementsByTagName("lite");
-	if(lite == 1){
-		lite = new LiteGroup(lite[0])
-		return lite.toJSON();
-	}else{
-		$log.error("配置文件只允许一个lite节点","您的文档中包含"+lite.length+"个节点");
+	var lites = doc.getElementsByTagName("lite");
+	var len = lites.length;
+	if(len >= 1){
+		var root = new LiteGroup(lites[0])
+		if(len>1){
+			$log.error("配置文件只允许一个lite节点","您的文档中包含"+len+"个节点，后续节点将作为第一个节点子节点解析。");
+			for(var i=1;i<len;i++){
+				root.children.push(new LiteGroup(lites[i],this));
+			}
+		}
+		return root.toJSON();
 	}
+	return "[]"
 }
 function LiteGroup(node,parentConfig){
 	this.parentConfig = parentConfig || null

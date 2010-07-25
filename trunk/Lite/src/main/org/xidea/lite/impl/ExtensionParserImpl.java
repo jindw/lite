@@ -16,7 +16,7 @@ import org.xidea.lite.parse.ParseContext;
 
 public class ExtensionParserImpl implements ExtensionParser {
 
-	private static Pattern pattern = Pattern.compile("[\\-]");
+	private static Pattern pattern = Pattern.compile("^[\\w\\-]\\:|[\\-]");
 	private static final Object CURRENT_NODE_KEY = new Object();
 	private static Pattern FN_SEEKER = Pattern
 			.compile("^(?:\\w*\\:)?\\w*[\\$\\{]");
@@ -25,11 +25,25 @@ public class ExtensionParserImpl implements ExtensionParser {
 	private JSIRuntime rt = ParseUtil.getJSIRuntime();
 	private Map<String, Map<String, Map<String, Object>>> packageMap;
 
-	@SuppressWarnings("unchecked")
 	public ExtensionParserImpl() {
 		this.impl = rt
 				.eval("new ($import('org.xidea.lite.parse:ExtensionParser',{}))()");
 		proxy = rt.wrapToJava(impl, ExtensionParser.class);
+		reset();
+	}
+
+	public void addExtensionPackage(String namespace, String packageName) {
+		proxy.addExtensionPackage(namespace, packageName);
+		reset();
+	}
+
+	public void addExtensionObject(String namespace, Object parserMap) {
+		proxy.addExtensionObject(namespace, parserMap);
+		reset();
+	}
+
+	@SuppressWarnings("unchecked")
+	private void reset() {
 		Object obj = rt.invoke(this.impl, "mapJava", HashMap.class);
 		packageMap = (Map<String, Map<String, Map<String, Object>>>) obj;
 	}
@@ -68,41 +82,58 @@ public class ExtensionParserImpl implements ExtensionParser {
 				return;
 			}
 		} else if (type == 1) {
-			if (this.parseElement((Element)node, context, chain)) {
+			if (this.parseElement((Element) node, context, chain)) {
 				return;
 			}
 		}
 		chain.next(node);
 	}
 
-
 	private boolean parseElement(Element el, ParseContext context,
 			ParseChain chain) {
 		context.setAttribute(CURRENT_NODE_KEY, el);
-		String nns = el.getNamespaceURI();
-		if (nns == null) {
-			nns = "";
+		String nns = getNS(el);
+		if (parseBefore(el, context, chain)) {
+			return true;
 		}
+		Map<String, Map<String, Object>> packageInfo = this.packageMap.get(nns);
+		if (packageInfo != null) {
+			Map<String, Object> parserMap = packageInfo.get("parserMap");
+			if (parserMap != null) {
+				String name = el.getNodeName();
+				name = formatName(name);
+				if (parserMap.containsKey(name)) {
+					rt.invoke(null, parserMap.get(name), el, context, chain);
+					return true;
+				} else if (parserMap.containsKey("")) {
+					rt.invoke(null, parserMap.get(""), el, context, chain);
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private boolean parseBefore(Element el, ParseContext context,
+			ParseChain chain) {
 		NamedNodeMap attrs = el.getAttributes();
 		int len = attrs.getLength();
 		LinkedHashMap<String, Attr> exclusiveMap = null;
 		for (int i = len - 1; i >= 0; i--) {
 			Attr attr = (Attr) attrs.item(i);
-			String ans = attr.getNamespaceURI();
-			if (ans == null) {
-				ans = "";
-			}
+			String ans = getNS(attr);
 			Map<String, Map<String, Object>> packageInfo = this.packageMap
 					.get(ans);
 			if (packageInfo != null) {
 				Map<String, Object> beforeMap = packageInfo.get("beforeMap");
-				String name = formatName(attr.getName());
 				if (beforeMap != null) {
+					String name = formatName(attr.getName());
 					if (beforeMap.containsKey(name)) {
 						el.removeAttributeNode(attr);
-						if (parseBefore(beforeMap.get(name),attr,context, chain)) {
+						if (parseBefore(beforeMap.get(name), attr, context,
+								chain)) {
 							return true;
-						}else{
+						} else {
 							el.setAttributeNode(attr);
 						}
 					} else if (beforeMap.containsKey(name += '$')) {
@@ -117,81 +148,58 @@ public class ExtensionParserImpl implements ExtensionParser {
 		if (exclusiveMap != null) {
 			for (String an : exclusiveMap.keySet()) {
 				Attr attr = exclusiveMap.get(an);
-				String ans = attr.getNamespaceURI();
-				if (ans == null) {
-					ans = "";
-				}
+				String ans = getNS(attr);
 				Map<String, Map<String, Object>> packageInfo = this.packageMap
 						.get(ans);
 				Map<String, Object> beforeMap = packageInfo.get("beforeMap");
-				if (parseBefore(beforeMap.get(an),attr,context, chain)) {
+				if (parseBefore(beforeMap.get(an), attr, context, chain)) {
 					return true;
-				}else{
+				} else {
 					el.setAttributeNode(attr);
-				}
-			}
-		}
-		Map<String, Map<String, Object>> packageInfo = this.packageMap.get(nns);
-		if (packageInfo != null) {
-			Map<String, Object> parserMap = packageInfo.get("parserMap");
-
-			String name = el.getLocalName();
-			if (name == null) {
-				name = el.getNodeName();
-			}
-			name = formatName(name);
-			if (parserMap != null) {
-				if (parserMap.containsKey(name)) {
-					rt.invoke(null,parserMap.get(name), el, context, chain);
-					return true;
-				} else if (parserMap.containsKey("")) {
-					rt.invoke(null,parserMap.get(""), el, context, chain);
-					return true;
 				}
 			}
 		}
 		return false;
 	}
 
-	private boolean parseBefore(Object fn,Attr attr,ParseContext context, ParseChain chain) {
+	private String getNS(Node attr) {
+		String ans = attr.getNamespaceURI();
+		return ans == null ? "" : ans;
+	}
+
+	private boolean parseBefore(Object fn, Attr attr, ParseContext context,
+			ParseChain chain) {
 		rt.invoke(null, fn, attr, context, chain);
 		return true;
 	}
 
 	private boolean parseDocument(Node node, ParseContext context,
 			ParseChain chain) {
-		return (Boolean)rt.invoke(impl, "parseDocument", node, context, chain);
+		return (Boolean) rt.invoke(impl, "parseDocument", node, context, chain);
 	}
 
 	private boolean parseAttribute(Node node, ParseContext context,
 			ParseChain chain) {
 		Attr attr = (Attr) node;
-		String ans = attr.getNamespaceURI();
-		if ("http://www.w3.org/2000/xmlns/".equals(ans)) {
-			if ((Boolean)rt.invoke(impl, "parseNamespace", attr, context, chain)) {
+		String ns = attr.getNamespaceURI();
+		if ("http://www.w3.org/2000/xmlns/".equals(ns)) {
+			if ((Boolean) rt.invoke(impl, "parseNamespace", attr, context,
+					chain)) {
 				return true;
 			}
-		}
-		String ns;
-		String name = formatName(attr.getName());
-		if (ans == null) {
-			ns = ans;
-		} else {
-			Element el = attr.getOwnerElement();
-			ns = el.getNamespaceURI();
-		}
-		if (ns == null) {
-			ns = "";
+		} else if (ns == null) {
+			ns = getNS(attr.getOwnerElement());
 		}
 		Map<String, Map<String, Object>> packageInfo = this.packageMap.get(ns);
 		if (packageInfo != null) {
 			Map<String, Object> onMap = packageInfo.get("onMap");
 			if (onMap != null) {
+				String name = formatName(attr.getName());
 				if (onMap.containsKey(name)) {
-					rt.invoke(null,onMap.get(name), attr, context, chain);
+					rt.invoke(null, onMap.get(name), attr, context, chain);
 					return true;
 				} else if (onMap.containsKey("")) {
-					rt.invoke(null,onMap.get(""), attr, context, chain);
+					rt.invoke(null, onMap.get(""), attr, context, chain);
 					return true;
 				}
 			}
@@ -201,14 +209,6 @@ public class ExtensionParserImpl implements ExtensionParser {
 
 	private String formatName(String name) {
 		return pattern.matcher(name).replaceAll("").toLowerCase();
-	}
-
-	public void addExtensionPackage(String namespace, String packageName) {
-		proxy.addExtensionPackage(namespace, packageName);
-	}
-
-	public void addExtensionObject(String namespace, Object parserMap) {
-		proxy.addExtensionObject(namespace, parserMap);
 	}
 
 }

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
 
 import org.w3c.dom.Document;
@@ -62,15 +63,8 @@ public interface ParseContext extends ResultContext, ParseConfig, ParserHolder {
 	 */
 	public Document loadXML(URI parentURI) throws SAXException, IOException;
 
-//	/**
-//	 * @param doc
-//	 * @param xpath
-//	 * @return
-//	 * @throws XPathExpressionException
-//	 */
-//	public NodeList selectNodes(Node doc, String xpath)
-//			throws XPathExpressionException;
-
+	
+	public ParseContext createNew();
 	/**
 	 * 记录一下编译上下文特征变量，该对象不可被修改
 	 * 
@@ -78,4 +72,9 @@ public interface ParseContext extends ResultContext, ParseConfig, ParserHolder {
 	 *            {url,value}
 	 */
 	public String getFeatrue(String key);
+
+	/**
+	 * 只读，外部不允许修改
+	 */
+	public Map<String, String> getFeatrueMap();
 }

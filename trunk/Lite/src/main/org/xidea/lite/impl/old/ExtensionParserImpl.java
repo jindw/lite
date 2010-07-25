@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.w3c.dom.Element;
 import org.xidea.jsi.JSIRuntime;
@@ -118,5 +119,14 @@ public class ExtensionParserImpl implements NodeParser<Element> {
 		public List<Object> parseText(String text, int textType) {
 			return context.parseText(text, textType);
 		}
+
+		public Map<String, String> getFeatrueMap() {
+			return context.getFeatrueMap();
+		}
+
+		public ParseContext createNew() {
+			return context.createNew();
+		}
+
 	}
 }

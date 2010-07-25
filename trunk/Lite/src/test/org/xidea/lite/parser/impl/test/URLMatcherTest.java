@@ -5,7 +5,7 @@ import junit.framework.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.xidea.lite.impl.PathMatcher;
+import org.xidea.lite.impl.old.PathMatcher;
 
 public class URLMatcherTest {
 

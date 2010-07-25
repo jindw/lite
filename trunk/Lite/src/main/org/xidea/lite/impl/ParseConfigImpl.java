@@ -46,16 +46,16 @@ public class ParseConfigImpl implements ParseConfig {
 		this.root = root;
 		this.config = config;
 		groups.add(DEFAULT_GROUP);
-		if (config.getScheme().equals("file")) {
+		if (config != null && config.getScheme().equals("file")) {
 			File checkFile = new File(config.getPath());
 			this.checkFile = checkFile;
 		}
 	}
 
-	public ParseConfigImpl(URI root) {
-		this.root = root;
-		groups.add(DEFAULT_GROUP);
-	}
+//	protected ParseConfigImpl(URI root) {
+//		this.root = root;
+//		groups.add(DEFAULT_GROUP);
+//	}
 
 	public URI getRoot() {
 		return root;
@@ -159,19 +159,23 @@ public class ParseConfigImpl implements ParseConfig {
 		}
 
 		private Group() {
-			this.includes = Pattern.compile(".*");
-			this.excludes = Pattern.compile("^$");
+			this.includes = Pattern.compile("\\.xhtml$");
+			this.excludes = Pattern.compile("^[\\.^]");
 			this.featrueMap = new HashMap<String, String>();
 			this.featrueMap.put(ParseContext.FEATRUE_ENCODING, "UTF-8");
+			this.featrueMap = Collections.unmodifiableMap(this.featrueMap);
 		}
 
 		@SuppressWarnings("unchecked")
 		public Group(Map<String, Object> item) {
 			this.includes = buildMatch((String) item.get("includes"));
 			this.excludes = buildMatch((String) item.get("excludes"));
-			this.featrueMap = (Map<String, String>) item.get("featrueMap");
-			this.extensionMap = (Map<String, List<String>>) item
-					.get("extensionMap");
+			this.featrueMap = Collections
+					.unmodifiableMap((Map<String, String>) item
+							.get("featrueMap"));
+			this.extensionMap = Collections
+					.unmodifiableMap((Map<String, List<String>>) item
+							.get("extensionMap"));
 		}
 
 		private Pattern buildMatch(String includes) {

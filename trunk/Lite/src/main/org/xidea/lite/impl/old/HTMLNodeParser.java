@@ -191,7 +191,7 @@ public class HTMLNodeParser extends AbstractHTMLNodeParser implements NodeParser
 			attributeMap.put("name", id);
 			attributeMap.put("type", TextContains.class.getName());
 			Object pluginValueEL = context.parseEL(JSONEncoder.encode(attributeMap));
-			context.appendPlugin(DefinePlugin.class, pluginValueEL);
+			context.appendPlugin(DefinePlugin.class.getName(), pluginValueEL);
 			context.appendEnd();
 			context.setAttribute(TextContains.class,id);
 		}
@@ -205,9 +205,9 @@ public class HTMLNodeParser extends AbstractHTMLNodeParser implements NodeParser
 			id = context.allocateId();
 			context.setAttribute(NULL_EMPTY_FN_KEY, id);
 			String exp = CoreXMLNodeParser.createMacro(id+"(param)");
-			context.appendPlugin(DefinePlugin.class, context.parseEL(exp));
+			context.appendPlugin(DefinePlugin.class.getName(), context.parseEL(exp));
 			context.appendIf("param != null");
-			context.appendXmlText("param");
+			context.appendXT("param");
 			context.appendEnd();
 			context.appendEnd();
 		}

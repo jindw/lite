@@ -59,7 +59,6 @@ public class HotTemplateEngine extends TemplateEngine {
 	}
 
 
-	@Override
 	public boolean isModified(String path) {
 		Info templateEntry = (Info) infoMap.get(path);
 		return templateEntry == null || templateEntry.isModified();
