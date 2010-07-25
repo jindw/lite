@@ -8,6 +8,7 @@ import org.apache.commons.logging.LogFactory;
 import org.xidea.lite.parse.NodeParser;
 import org.xidea.lite.parse.ParseChain;
 import org.xidea.lite.parse.ParseContext;
+import org.xidea.lite.parse.TextParser;
 
 @SuppressWarnings("unchecked")
 public class ParseChainImpl extends ParseContextProxy implements ParseChain {
@@ -82,11 +83,29 @@ public class ParseChainImpl extends ParseContextProxy implements ParseChain {
 		return context.parseText(text, textType);
 	}
 
-	public String getFeatrue(String key) {
-		return context.getFeatrue(key);
-	}
 	public NodeParser<? extends Object>[] getNodeParsers() {
 		return parsers;
+	}
+	public TextParser[] getTextParsers() {
+		return context.getTextParsers();
+	}
+	public void addTextParser(TextParser textParser) {
+		context.addTextParser(textParser);
+		
+	}
+	public void addExtension(String namespace, String packageName) {
+		context.addExtension(namespace, packageName);
+		
+	}
+	public void addNodeParser(NodeParser<? extends Object> nodeParser) {
+		context.addNodeParser(nodeParser);
+		
+	}
+	public ParseChain getTopChain() {
+		return context.getTopChain();
+	}
+	public ParseContext createNew() {
+		return context.createNew();
 	}
 
 }

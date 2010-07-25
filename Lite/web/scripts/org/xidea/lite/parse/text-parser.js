@@ -17,10 +17,10 @@ var defaultTextSeeker = {
 				el = this.parseEL(el);
 	            switch(this.getTextType()){
 	            case XML_TEXT_TYPE:
-	            	this.appendXmlText(el);
+	            	this.appendXT(el);
 	            	break;
 	            case XML_ATTRIBUTE_TYPE:
-	            	this.appendAttribute(null,el);
+	            	this.appendXA(null,el);
 	            	break;
 	            default:
 	            	this.appendEL(el);

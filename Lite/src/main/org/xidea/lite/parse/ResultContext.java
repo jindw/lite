@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.List;
 
 import org.xidea.el.ExpressionFactory;
-import org.xidea.lite.Plugin;
 
 /**
  * 要设计为继承安全，这个接口不能滥用
@@ -59,17 +58,6 @@ public interface ResultContext {
 	 */
 	public boolean isReserveSpace();
 	public void setReserveSpace(boolean keepSpace);
-//	/**
-//	 * 获取结束当前状态的开始节点位置
-//	 * @return
-//	 */
-//	public int findBegin();
-//	/**
-//	 * 获取结束当前状态的开始节点位置
-//	 * @return
-//	 */
-//	public int findBeginType();
-	
 	/**
 	 * 获取指定位置的节点类别
 	 * @return
@@ -129,9 +117,9 @@ public interface ResultContext {
 
 	public void appendEL(Object el);
 
-	public void appendAttribute(String name, Object el);
+	public void appendXA(String name, Object el);
 
-	public void appendXmlText(Object el);
+	public void appendXT(Object el);
 
 	public void appendIf(Object testEL);
 
@@ -149,17 +137,12 @@ public interface ResultContext {
 
 	public void appendCaptrue(String varName);
 
-	public void appendPlugin(Class<? extends Plugin> class1, Object propertiesEL);
+	public void appendPlugin(String pluginClass, Object propertiesEL);
 
 	public String allocateId();
 	/**
 	 * @return 经过优化后的树形结果集
 	 */
 	public List<Object> toList();
-
-	/**
-	 * @return 经过结果转换后的代码
-	 */
-	public String toCode();
 	
 }

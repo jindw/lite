@@ -141,7 +141,7 @@ public class ResultContextImpl implements ResultContext {
 		}
 	}
 
-	public final void appendAttribute(String name, Object el) {
+	public final void appendXA(String name, Object el) {
 		el = requrieEL(el);
 		this.append(new Object[] { Template.XML_ATTRIBUTE_TYPE, el, name });
 
@@ -194,14 +194,14 @@ public class ResultContextImpl implements ResultContext {
 
 	}
 
-	public final void appendXmlText(Object el) {
+	public final void appendXT(Object el) {
 		el = requrieEL(el);
 		this.append(new Object[] { Template.XML_TEXT_TYPE, el });
 	}
 
-	public final void appendPlugin(Class<? extends Plugin> clazz, Object el) {
+	public final void appendPlugin(String clazz, Object el) {
 		el = requrieEL(el);
-		this.append(new Object[] { Template.PLUGIN_TYPE, el, clazz.getName() });
+		this.append(new Object[] { Template.PLUGIN_TYPE, el, clazz });
 	}
 
 	public final int mark() {
@@ -385,7 +385,7 @@ public class ResultContextImpl implements ResultContext {
 		this.expressionFactory = expressionFactory;
 	}
 
-	public String toCode() {
+	public String toResult() {
 		return JSONEncoder.encode(context.toList());
 	}
 

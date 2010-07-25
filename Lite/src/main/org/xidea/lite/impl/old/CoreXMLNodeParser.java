@@ -226,7 +226,7 @@ public class CoreXMLNodeParser implements NodeParser<Node> {
 	protected void parseMacroTag(Element el, ParseContext context) {
 		String name = el.getAttribute("name");
 		String exp = createMacro(name);
-		context.appendPlugin(DefinePlugin.class, context.parseEL(exp));
+		context.appendPlugin(DefinePlugin.class.getName(), context.parseEL(exp));
 
 		if (el.hasChildNodes()) {
 			ParseUtil.parseChild(el.getFirstChild(), context);

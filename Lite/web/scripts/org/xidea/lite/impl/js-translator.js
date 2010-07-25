@@ -62,14 +62,10 @@ function Translator(id){
 }
 
 Translator.prototype = {
-	translate:function(result){
+	translate:function(context){
 	    try{
-	        var list = result.toList();
-	        var jf = list['class'];
-	        //print([!(jf && jf.name),jf && jf.name,result.toCode()])
-	        if(jf && jf.name){
-	        	list = window.eval(result.toCode());
-	        }
+	    	//var result =  stringifyJSON(context.toList())
+	        var list = context.toList();
 		    var context = new Context(list);
 		    context.parse();
 		    var code = context.toString();

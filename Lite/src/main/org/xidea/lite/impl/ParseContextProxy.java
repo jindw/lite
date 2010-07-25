@@ -12,64 +12,52 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
 import org.xidea.el.ExpressionFactory;
-import org.xidea.lite.Plugin;
-import org.xidea.lite.parse.NodeParser;
-import org.xidea.lite.parse.ParseChain;
 import org.xidea.lite.parse.ParseConfig;
 import org.xidea.lite.parse.ParseContext;
 import org.xidea.lite.parse.ResultContext;
-import org.xidea.lite.parse.TextParser;
 import org.xml.sax.SAXException;
 
 abstract public class ParseContextProxy implements ParseContext {
+	@SuppressWarnings("unused")
 	private static Log log = LogFactory.getLog(ParseContextProxy.class);
-	protected static NodeParser<?>[] DEFAULT_PARSER_LIST = {new ExtensionParserImpl(), new DefaultXMLNodeParser(), new TextNodeParser() };
+	
+
+	/**
+	 * 外部不允许修改
+	 */
+	private final Map<String, String> featrueMap;
+
 	
 	protected ResultContext resultContext;
 	protected ParseConfig config;
 
-	protected ParseChain topChain;
-	protected NodeParser<? extends Object>[] nodeParsers = DEFAULT_PARSER_LIST;
-	private TextParser[] textParsers;
 	
-	protected ParseContextProxy(ParseConfig config) {
+	protected ParseContextProxy(ParseConfig config,Map<String, String> featrueMap) {
 		this.config = config;
-		nodeParsers = nodeParsers.clone();
-		ExtensionParserImpl ext = new ExtensionParserImpl();
-		nodeParsers[0] = ext;
-		textParsers = new TextParser[]{ext};
+		this.featrueMap = featrueMap;
+		this.resultContext = new ResultContextImpl(this);
 	}
 
 	public ParseContextProxy(ParseContext parent) {
 		// 需要重设 ParseChain 的context
 		this.config = parent;
+		this.featrueMap =  parent.getFeatrueMap();
 		this.resultContext = parent;
-		this.textParsers = parent.getTextParsers();
-		this.nodeParsers = parent.getTopChain().getNodeParsers().clone();
-		this.nodeParsers[0] = new ExtensionParserImpl();
 	}
 
+
+	public String getFeatrue(String key) {
+		return featrueMap.get(key);
+	}
+
+	public Map<String, String> getFeatrueMap() {
+		return featrueMap;
+	}
 
 	public final URI createURI(String path) {
 		try {
 			// TODO
 			URI parent = this.getCurrentURI();
-			if (parent == null) {
-				parent = config.getRoot();
-			}
-			if (path.startsWith("/")) {
-				if (parent == null
-						|| parent.toString().startsWith(
-								config.getRoot().toString())) {
-					String prefix = config.getRoot().getRawPath();
-					if (prefix != null) {
-						int p = prefix.lastIndexOf('/');
-						if (p > 0) {
-							path = prefix.substring(0, p) + path;
-						}
-					}
-				}
-			}
 			return parent.resolve(path);
 
 		} catch (Exception e) {
@@ -78,6 +66,13 @@ abstract public class ParseContextProxy implements ParseContext {
 	}
 
 	public final InputStream openStream(URI uri) {
+		if("lite".equals(uri.getScheme())){
+			String path = uri.getPath();
+			if(path.startsWith("/")){
+				path = path.substring(1);
+			}
+			uri = config.getRoot().resolve(path);
+		}
 		return ParseUtil.openStream(uri);
 	}
 
@@ -87,17 +82,11 @@ abstract public class ParseContextProxy implements ParseContext {
 	}
 
 	public final String getDecotatorPage(String path) {
-		if (config != null) {
-			return config.getDecotatorPage(path);
-		}
-		return null;
+		return config.getDecotatorPage(path);
 	}
 
 	public final Map<String, String> getFeatrueMap(String path) {
-		if (config != null) {
-			return config.getFeatrueMap(path);
-		}
-		return null;
+		return config.getFeatrueMap(path);
 	}
 
 
@@ -107,31 +96,6 @@ abstract public class ParseContextProxy implements ParseContext {
 
 	public Map<String, List<String>> getExtensions(String path) {
 		return config.getExtensions(path);
-	}
-
-	public final ParseChain getTopChain() {
-		if(topChain == null || nodeParsers != topChain.getNodeParsers()){
-			topChain = new ParseChainImpl(this, nodeParsers, 0);
-		}
-		return topChain;
-	}
-
-	public void addNodeParser(NodeParser<? extends Object> nodeParser) {
-		
-	}
-	public final TextParser[] getTextParsers() {
-		return textParsers;
-	}
-	public void addTextParser(TextParser iparser) {
-		int length = textParsers.length;
-		TextParser[] ips2 = new TextParser[length + 1];
-		System.arraycopy(this.textParsers, 0, ips2, 0, length);
-		ips2[length] = iparser;
-		this.textParsers = ips2;
-	}
-
-	public final void addExtension(String namespace, String packageName) {
-		//parserHolder.addExtension(namespace, packageName);
 	}
 
 
@@ -151,8 +115,12 @@ abstract public class ParseContextProxy implements ParseContext {
 		resultContext.appendAll(instruction);
 	}
 
-	public final void appendAttribute(String name, Object el) {
-		resultContext.appendAttribute(name, el);
+	public final void appendXA(String name, Object el) {
+		resultContext.appendXA(name, el);
+	}
+
+	public final void appendXT(Object el) {
+		resultContext.appendXT(el);
 	}
 
 	public final void appendCaptrue(String varName) {
@@ -183,21 +151,9 @@ abstract public class ParseContextProxy implements ParseContext {
 		resultContext.appendVar(name, valueEL);
 	}
 
-	public final void appendXmlText(Object el) {
-		resultContext.appendXmlText(el);
-	}
 
-	public final void appendPlugin(Class<? extends Plugin> clazz, Object el) {
-		resultContext.appendPlugin(clazz, el);
-	}
-
-	@SuppressWarnings("unchecked")
-	public final void appendPlugin(String clazz, Object el) {
-		try {
-			resultContext.appendPlugin((Class<? extends Plugin>) Class.forName(clazz), el);
-		} catch (ClassNotFoundException e) {
-			log.error(e);
-		}
+	public final void appendPlugin(String pluginClazz, Object el) {
+		resultContext.appendPlugin(pluginClazz, el);
 	}
 
 	public final int mark() {
@@ -228,9 +184,9 @@ abstract public class ParseContextProxy implements ParseContext {
 		return resultContext.toList();
 	}
 
-	public final String toCode() {
-		return resultContext.toCode();
-	}
+//	public final String toResult() {
+//		return resultContext.toResult();
+//	}
 
 	/**
 	 * 自定义表达式解析器

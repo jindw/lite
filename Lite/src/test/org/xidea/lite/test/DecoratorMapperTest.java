@@ -17,7 +17,7 @@ public class DecoratorMapperTest {
 	public void setUp() throws Exception {
 		File file = new File(this.getClass().getResource(
 		"decorators.xml").getFile());
-		mapper = new ParseConfigImpl(file.toURI());
+		mapper = new ParseConfigImpl(file.toURI(),null);
 	}
 
 //	@Test

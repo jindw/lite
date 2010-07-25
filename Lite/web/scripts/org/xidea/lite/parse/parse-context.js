@@ -34,7 +34,11 @@ ParseContext.prototype = {
 		var extensionParser = new ExtensionParser();
 		for(var len = extensions.length,i=0;i<len;i++){
 			var ext = extensions[i];
-			extensionParser.addExtensionPackage(ext.namespace,ext['package'])
+			var impl = ext['package'];
+			if(/[\\\/]/.test(impl)){
+				
+			}
+			extensionParser.addExtensionPackage(ext.namespace,impl)
 		}
     	this.nodeParsers = [parseExtension,parseDefaultXMLNode,parseText2];
     	this.textParsers = [extensionParser];
@@ -116,15 +120,15 @@ ParseContext.prototype = {
     	}
     	return Packages.org.xidea.lite.impl.ParseUtil.openStream(uri)
     },
+    createNew:function(){
+    	return new ParseContext(this.config,this.currentURI);
+    },
     loadXML:function(path){
     	if(!(path instanceof URI)){
     		path = new URI(path)
     	}
     	this.currentURI = path;
     	return loadXML(this.currentURI,this.config.root)
-    },
-    toString:function(){
-    	return this.toCode();
     }
 }
 var rm = ResultContext.prototype;

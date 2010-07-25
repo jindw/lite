@@ -5,7 +5,6 @@ import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.HashMap;
 
@@ -14,18 +13,21 @@ import org.apache.commons.logging.LogFactory;
 import org.xidea.el.impl.CommandParser;
 import org.xidea.el.impl.Convertor;
 import org.xidea.el.json.JSONEncoder;
-import org.xidea.lite.Template;
+import org.xidea.lite.impl.HotTemplateEngine;
+import org.xidea.lite.impl.old.ParseConfigImpl;
 import org.xidea.lite.parse.NodeParser;
+import org.xidea.lite.parse.ParseConfig;
+import org.xidea.lite.parse.ParseContext;
 
 public class LiteCompiler {
 	private static final Log log = LogFactory.getLog(LiteCompiler.class);
 	private File root;
+	private File config;
 	private String path;
 	private File htmlcached;
 	private File litecached;
-	private String encoding = "utf-8";
-	private boolean writeError = true;
-	private TemplateCompilerEngine engine;
+	private HotTemplateEngine engine;
+	private ParseConfig parseConfig;
 
 	public LiteCompiler(String[] args) {
 		System.out.println(JSONEncoder.encode(args));
@@ -50,20 +52,7 @@ public class LiteCompiler {
 				this.processFile(path);
 			}
 		} catch (Exception e) {
-			log.error(e);
-			File file = new File(root, "log.txt");
-			try {
-				if (!file.exists()) {
-					file.createNewFile();
-				}
-				PrintWriter out = new PrintWriter(new FileOutputStream(file));
-				e.printStackTrace(out);
-				out.flush();
-				out.close();
-			} catch (IOException ex) {
-				log.error(ex);
-			}
-
+			log.error("编译失败",e);
 		}
 	}
 
@@ -71,7 +60,11 @@ public class LiteCompiler {
 		if(root == null){
 			root = new File(".");
 		}
-		engine = new TemplateCompilerEngine(root);
+		if(config == null){
+			config = new File(root,"/WEB-INF/lite.xml");
+		}
+		this.parseConfig = new ParseConfigImpl(root.toURI(),config.toURI());
+		engine = new HotTemplateEngine(parseConfig);
 
 		litecached = createIfNotExist(litecached, "WEB-INF/litecached/");
 		htmlcached = createIfNotExist(htmlcached, null);
@@ -93,17 +86,15 @@ public class LiteCompiler {
 	public boolean processFile(final String path) {
 		log.info("处理文件："+path);
 		try {
+			String encoding =  parseConfig.getFeatrueMap(path).get(ParseContext.FEATRUE_ENCODING);
 			{
 				File cachedFile = new File(litecached, path.replace('/', '^'));
 				Writer out = new OutputStreamWriter(new FileOutputStream(
-						cachedFile), encoding);
+						cachedFile),encoding);
 				try {
 					out.write(engine.getLiteCode(path));
 					log.info("Lite文件写入成功:"+cachedFile);
 				} catch (Throwable e) {
-					if(writeError){
-						out.write(engine.buildLiteCode(path,e.getMessage()));
-					}
 					log.error("编译Lite中间代码出错：" + path, e);
 				} finally {
 					out.close();
@@ -115,12 +106,8 @@ public class LiteCompiler {
 				Writer out = new OutputStreamWriter(new FileOutputStream(
 						cachedFile), encoding);
 				try {
-					Template template = engine.getTemplate(path);
-					template.render(new HashMap<String, String>(), out);
+					engine.render(path, new HashMap<String, String>(), out);
 				} catch (Exception e) {
-					if(writeError){
-						out.write(engine.buildLiteCode(path,e));
-					}
 					log.error("生成HTML 静态数据出错：" + path, e);
 				} finally {
 					out.close();
@@ -145,7 +132,7 @@ public class LiteCompiler {
 						}else{
 							processDir(file, path + file.getName() + '/');
 						}
-					} else if (isTemplateFile(file)) {
+					} else if (isXhtmlFile(file)) {
 						processFile(path + file.getName());
 					}
 				}
@@ -154,12 +141,16 @@ public class LiteCompiler {
 		});
 	}
 
-	public boolean isTemplateFile(File file) {
+	public boolean isXhtmlFile(File file) {
 		return file.getName().endsWith(".xhtml");
 	}
 
 	public void setRoot(File webRoot) {
 		this.root = webRoot;
+	}
+
+	public void setConfig(File config) {
+		this.config = config;
 	}
 
 	public void setHtmlcached(File htmlcached) {
@@ -168,15 +159,6 @@ public class LiteCompiler {
 
 	public void setLitecached(File litecached) {
 		this.litecached = litecached;
-	}
-
-
-	public void setEncoding(String encoding) {
-		this.encoding = encoding;
-	}
-
-	public void setWriteError(boolean writeError) {
-		this.writeError = writeError;
 	}
 
 	public void setPath(String path) {

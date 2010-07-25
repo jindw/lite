@@ -85,8 +85,8 @@ public class ParseContextProxy implements ParserHolder, ResultContext,
 		resultContext.appendAll(instruction);
 	}
 
-	public void appendAttribute(String name, Object el) {
-		resultContext.appendAttribute(name, el);
+	public void appendXA(String name, Object el) {
+		resultContext.appendXA(name, el);
 	}
 
 	public void appendCaptrue(String varName) {
@@ -117,11 +117,11 @@ public class ParseContextProxy implements ParserHolder, ResultContext,
 		resultContext.appendVar(name, valueEL);
 	}
 
-	public void appendXmlText(Object el) {
-		resultContext.appendXmlText(el);
+	public void appendXT(Object el) {
+		resultContext.appendXT(el);
 	}
 
-	public void appendPlugin(Class<? extends Plugin> clazz, Object el) {
+	public void appendPlugin(String clazz, Object el) {
 		resultContext.appendPlugin(clazz, el);
 	}
 
@@ -173,9 +173,9 @@ public class ParseContextProxy implements ParserHolder, ResultContext,
 		return resultContext.toList();
 	}
 
-	public String toCode() {
-		return resultContext.toCode();
-	}
+//	public String toResult() {
+//		return resultContext.toResult();
+//	}
 
 	/**
 	 * 自定义表达式解析器

@@ -33,6 +33,9 @@ public class ParseContextImpl extends ParseContextProxy implements ParseContext 
 		this.resultContext = new ResultContextImpl(this);
 		this.parserHolder = new ParseHolderImpl(this, parsers);
 	}
+	public ParseContext createNew(){
+		return new ParseContextImpl(this);
+	}
 
 	public ParseContextImpl(ParseContext parent) {
 		super(parent);
@@ -53,7 +56,7 @@ public class ParseContextImpl extends ParseContextProxy implements ParseContext 
 	 * 获得特征表的直接引用，外部的修改也将直接影响解析上下文的特征表
 	 * @return
 	 */
-	protected Map<String, String> getFeatrueMap() {
+	public Map<String, String> getFeatrueMap() {
 		return featrueMap;
 	}
 

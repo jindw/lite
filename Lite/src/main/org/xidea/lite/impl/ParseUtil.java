@@ -16,14 +16,6 @@ import javax.xml.namespace.NamespaceContext;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Source;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.TransformerFactoryConfigurationError;
-import javax.xml.transform.dom.DOMResult;
-import javax.xml.transform.dom.DOMSource;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
@@ -39,6 +31,7 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xidea.jsi.JSIRuntime;
+import org.xidea.jsi.impl.JSIText;
 import org.xidea.jsi.impl.RuntimeSupport;
 import org.xidea.lite.impl.dtd.DefaultEntityResolver;
 import org.xidea.lite.parse.ParseContext;
@@ -49,11 +42,9 @@ public class ParseUtil {
 
 	private static Log log = LogFactory.getLog(ParseUtil.class);
 	static final ThreadLocal<JSIRuntime> jsi = new ThreadLocal<JSIRuntime>();
-	static final String CORE_URI = "http://www.xidea.org/ns/lite/core";
-
+//	static final String CORE_URI = "http://www.xidea.org/ns/lite/core";
 
 	static XPathFactory xpathFactory;
-	static TransformerFactory transformerFactory;
 
 	static DocumentBuilder documentBuilder;
 	static {
@@ -71,16 +62,18 @@ public class ParseUtil {
 			throw new RuntimeException(e);
 		}
 	}
-	static JSIRuntime getJSIRuntime(){
+
+	static JSIRuntime getJSIRuntime() {
 		JSIRuntime rt = jsi.get();
-		if(rt == null){
+		if (rt == null) {
 			jsi.set(rt = RuntimeSupport.create());
 		}
 		return rt;
 	}
-//	static Object eval(String source){
-//		return getJSIRuntime().eval(source);
-//	}
+
+	// static Object eval(String source){
+	// return getJSIRuntime().eval(source);
+	// }
 
 	public static InputStream openStream(URI uri) {
 		try {
@@ -92,13 +85,13 @@ public class ParseUtil {
 				data = data.substring(p);
 				p = h.indexOf("charset=");
 				if (p > 0) {
-					charset = h.substring(h.indexOf('=', p) + 1, h.indexOf(',',
-							p));
+					charset = h.substring(h.indexOf('=', p) + 1,
+							h.indexOf(',', p));
 				}
 				return new ByteArrayInputStream(URLDecoder
 						.decode(data, charset).getBytes(charset));
 				// charset=
-			} else if ("classpath".equalsIgnoreCase(uri.getScheme())) {//classpath:///
+			} else if ("classpath".equalsIgnoreCase(uri.getScheme())) {// classpath:///
 				ClassLoader cl = ParseUtil.class.getClassLoader();
 				uri = uri.normalize();
 				String path = uri.getPath();
@@ -120,8 +113,8 @@ public class ParseUtil {
 		}
 	}
 
-	public static Document parse(URI uri, ParseContext context) throws IOException,
-			SAXException {
+	public static Document parse(URI uri, ParseContext context)
+			throws IOException, SAXException {
 		InputStream in1 = ParseUtil.trimBOM(openStream(uri, context));
 		in1.mark(1);
 		if (in1.read() != '<') {
@@ -137,7 +130,8 @@ public class ParseUtil {
 				// 做一次容错处理
 				log.warn("Invalid xml source:" + e.toString()
 						+ ",try to fix it：");
-				//return new XMLFixerImpl().parse(documentBuilder, in2, id);
+				System.out.println(JSIText.loadText(in2, "utf-8"));
+				// return new XMLFixerImpl().parse(documentBuilder, in2, id);
 				// in2 = new SequenceInputStream(new
 				// ByteArrayInputStream(DEFAULT_STARTS),in2);
 				// return documentBuilder.parse(in2, uri.toString());
@@ -154,8 +148,9 @@ public class ParseUtil {
 		}
 	}
 
-	private static InputStream openStream(URI uri, ParseContext context) throws MalformedURLException, IOException {
-		return context == null?openStream(uri):context.openStream(uri);
+	private static InputStream openStream(URI uri, ParseContext context)
+			throws MalformedURLException, IOException {
+		return context == null ? openStream(uri) : context.openStream(uri);
 	}
 
 	public static Document loadXML(String path, ParseContext context)
@@ -171,7 +166,7 @@ public class ParseUtil {
 		return parse(uri, context);
 	}
 
-	public static URI createSourceURI(String path){
+	public static URI createSourceURI(String path) {
 		try {
 			return URI.create("data:text/xml;charset=utf-8,"
 					+ URLEncoder.encode(path, "UTF-8").replace("+", "%20"));
@@ -196,41 +191,6 @@ public class ParseUtil {
 		return nodes;
 	}
 
-	static Node transform(Node doc, Node xslt)
-			throws TransformerConfigurationException,
-			TransformerFactoryConfigurationError, TransformerException,
-			IOException {
-		Source xsltSource; // create an instance of TransformerFactory
-
-		if (xslt.getNodeType() == Node.DOCUMENT_FRAGMENT_NODE) {
-			xslt = xslt.getFirstChild();
-			while (xslt.getNodeType() != Node.ELEMENT_NODE) {
-				xslt = xslt.getNextSibling();
-			}
-			DOMResult result = new DOMResult();
-			Transformer transformer = createTransformer(null, null);
-			transformer.transform(new DOMSource(xslt), result);
-			xsltSource = new javax.xml.transform.dom.DOMSource(result.getNode());
-
-		} else {
-			xsltSource = new javax.xml.transform.dom.DOMSource(xslt);
-
-		}
-		Transformer transformer = createTransformer(xsltSource, null);
-		Source xmlSource;
-		if (doc.getNodeType() == Node.DOCUMENT_FRAGMENT_NODE) {
-			Element root = doc.getOwnerDocument().createElement("root");
-			root.appendChild(doc);
-			xmlSource = new DOMSource(root);
-		} else {
-			xmlSource = new DOMSource(doc);
-		}
-		DOMResult result = new DOMResult();
-
-		transformer.transform(xmlSource, result);
-		return result.getNode();
-	}
-
 	static DocumentFragment toFragment(Node node, NodeList nodes) {
 		Document doc;
 		if (node instanceof Document) {
@@ -252,8 +212,8 @@ public class ParseUtil {
 					try {
 						xpathFactory = XPathFactory.newInstance(
 								XPathFactory.DEFAULT_OBJECT_MODEL_URI,
-								xpathFactoryClass, ParseUtil.class
-										.getClassLoader());
+								xpathFactoryClass,
+								ParseUtil.class.getClassLoader());
 					} catch (NoSuchMethodError e) {
 						log.info("不好意思，我忘记了，我们JDK5没这个方法：<" + xpathFactoryClass
 								+ ">");
@@ -273,34 +233,6 @@ public class ParseUtil {
 		}
 		return xpathFactory.newXPath();
 	}
-
-	static Transformer createTransformer(Source source,
-			String transformerFactoryClass)
-			throws TransformerConfigurationException,
-			TransformerFactoryConfigurationError {
-		if (transformerFactory == null) {
-			if (transformerFactoryClass != null) {
-				try {
-					transformerFactory = TransformerFactory.newInstance(
-							transformerFactoryClass, ParseUtil.class
-									.getClassLoader());
-				} catch (Exception e) {
-					log
-							.error("创建xslt转换器失败<" + transformerFactoryClass
-									+ ">", e);
-				}
-			}
-			if (transformerFactory == null) {
-				transformerFactory = TransformerFactory.newInstance();
-			}
-		}
-		if (source == null) {
-			return transformerFactory.newTransformer();
-		} else {
-			return transformerFactory.newTransformer(source);
-		}
-	}
-
 
 	static InputStream trimBOM(InputStream in) throws IOException {
 		in = new BufferedInputStream(in, 3);
@@ -352,7 +284,6 @@ public class ParseUtil {
 		}
 		return in;
 	}
-
 }
 
 class NamespaceContextImpl implements NamespaceContext {

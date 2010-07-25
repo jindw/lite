@@ -69,6 +69,7 @@ ExtensionParser.prototype = {
 				fp.namespaceParser.call(chain,attr,context,chain);
 				return true;
 			}
+			//$log.error(v,fp.namespaceParser);
 		}
 		return false;
 	},
@@ -82,20 +83,19 @@ ExtensionParser.prototype = {
 			var attr = attrs.item(i);
 			var ans = attr.namespaceURI;
 			var ext = this.packageMap[ans || ''];
-			var an = formatName(attr.name);
+			var an = formatName(attr.localName);
 			if (ext && ext.beforeMap) {
 				var fn = ext.beforeMap[an];
 				if(fn && an in ext.beforeMap){
 					el.removeAttributeNode(attr);
-					if(fn.call(chain,attr,context,chain)){
-						return;
-					}else{
-						el.setAttributeNode(attr);
-					}
+					fn.call(chain,attr,context,chain);
+					return;
 				}else{
 					an+='$';
 					if(an in ext.beforeMap){
 						exclusiveMap[an] = attr;
+					}else{
+						$log.error("未支持属性：",el.name,context.currentURI)
 					}
 				}
 			}
@@ -105,11 +105,8 @@ ExtensionParser.prototype = {
 			var ans = attr.namespaceURI;
 			var ext = this.packageMap[ans || ''];
 			el.removeAttributeNode(attr);
-			if(ext.beforeMap[an].call(chain,attr,context,chain)){
-				return;
-			}else{
-				el.setAttributeNode(attr);
-			}
+			ext.beforeMap[an].call(chain,attr,context,chain);
+			return;
 		}
 		var ext = this.packageMap[nns||''];
 		var nn = formatName(el.localName||el.nodeName);
@@ -119,6 +116,8 @@ ExtensionParser.prototype = {
 				 || (fn = ext.parserMap[''])){
 				fn.call(chain,el,context,chain);
 				return true;
+			}else{
+				$log.error("未支持标签：",el.tagName,context.currentURI)
 			}
 		}
 	},

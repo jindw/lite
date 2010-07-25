@@ -80,13 +80,13 @@ ResultContext.prototype = {
 	 * @param String name
 	 * @param Object el
 	 */
-	appendAttribute:function(attributeName, el){
+	appendXA:function(attributeName, el){
 		this.result.push([XML_ATTRIBUTE_TYPE, requireEL(this,el), attributeName ]);
 	},
 	/**
 	 * @param Object el
 	 */
-	appendXmlText:function(el){
+	appendXT:function(el){
 		this.result.push([XML_TEXT_TYPE, requireEL(this,el)]);
 	},
 
@@ -135,10 +135,7 @@ ResultContext.prototype = {
 	toList:function(){
 		var result = optimizeResult(this.result);
     	return buildTreeResult(result);
-	},
-    toCode:function(){
-        return stringifyJSON(this.toList())
-    }
+	}
 }
 function requireEL(context,el){
 	if(typeof el == 'string'){

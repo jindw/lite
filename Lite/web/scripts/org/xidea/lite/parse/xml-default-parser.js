@@ -110,7 +110,7 @@ function processAttribute(node,context,chain){
         }else{//只考虑单一EL表达式的情况
             buf = buf[0];
             //buf[1] 是一个表达式对象
-	        context.appendAttribute(name,buf[1]);
+	        context.appendXA(name,buf[1]);
 	        return null;
         }
     }

@@ -37,7 +37,9 @@ function TemplateImpl(data,parseContext,runAsLiteCode){
         	data = parseContext.createURI(data);
         }
         parseContext.parse(data);
-        if(!runAsLiteCode){
+        if(runAsLiteCode){
+        	data = parseContext.toList();
+        }else{
 	        try{
 		    	var translator = new Translator("");
 		    	var code = translator.translate(parseContext);
@@ -49,8 +51,8 @@ function TemplateImpl(data,parseContext,runAsLiteCode){
 	        	$log.error("翻译结果错误：",e,code)
 	            throw e;
 	        }
-	        this.compileData = data;
         }
+        this.compileData = data;
     }
     //alert(data.join("\n"));;
     /**

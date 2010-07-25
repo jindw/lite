@@ -13,7 +13,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.el.ExpressionFactory;
 import org.xidea.el.impl.ExpressionFactoryImpl;
-import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.DefinePlugin;
 import org.xidea.lite.Plugin;
 import org.xidea.lite.Template;
@@ -27,7 +26,7 @@ import org.xidea.lite.parse.ResultContext;
  */
 public class ResultContextImpl implements ResultContext {
 	static final Object END_INSTRUCTION = new Object[0];
-	@SuppressWarnings("unused")
+	
 	private static final Log log = LogFactory.getLog(ParseContextImpl.class);
 	
 
@@ -141,7 +140,7 @@ public class ResultContextImpl implements ResultContext {
 		}
 	}
 
-	public final void appendAttribute(String name, Object el) {
+	public final void appendXA(String name, Object el) {
 		el = requrieEL(el);
 		this.append(new Object[] { Template.XML_ATTRIBUTE_TYPE, el, name });
 
@@ -194,14 +193,23 @@ public class ResultContextImpl implements ResultContext {
 
 	}
 
-	public final void appendXmlText(Object el) {
+	public final void appendXT(Object el) {
 		el = requrieEL(el);
 		this.append(new Object[] { Template.XML_TEXT_TYPE, el });
 	}
 
-	public final void appendPlugin(Class<? extends Plugin> clazz, Object el) {
-		el = requrieEL(el);
-		this.append(new Object[] { Template.PLUGIN_TYPE, el, clazz.getName() });
+	public final void appendPlugin(String pluginClazz, Object el) {
+		try {
+			Class<?> clazz =  Class.forName(pluginClazz);
+			if(Plugin.class.isAssignableFrom(clazz)){
+				el = requrieEL(el);
+				this.append(new Object[] { Template.PLUGIN_TYPE, el, pluginClazz });
+			}else{
+				log.error("Plugin class not found(plugin ignored):"+pluginClazz);
+			}
+		} catch (ClassNotFoundException e) {
+			log.error(e);
+		}
 	}
 
 	public final int mark() {
@@ -385,9 +393,6 @@ public class ResultContextImpl implements ResultContext {
 		this.expressionFactory = expressionFactory;
 	}
 
-	public String toCode() {
-		return JSONEncoder.encode(context.toList());
-	}
 
 	public URI getCurrentURI() {
 		return currentURI;
@@ -404,8 +409,8 @@ public class ResultContextImpl implements ResultContext {
 	public void setCurrentURI(URI currentURI) {
 		if (currentURI != null) {
 			context.addResource(currentURI);
+			this.currentURI = currentURI;
 		}
-		this.currentURI = currentURI;
 	}
 
 	public void setAttribute(Object key, Object value) {

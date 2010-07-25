@@ -142,6 +142,10 @@ if(!(window.DOMParser && window.XMLHttpRequest || window.ActiveXObject)){
     }
 }
 function getAttribute(el,key){
+	if(el.nodeType == 2){
+		return el.value;
+	}
+	//el
 	var required = key.charAt() == '*';
 	if(required){
 		key = key.substr(1);
@@ -163,9 +167,13 @@ function getAttribute(el,key){
 	return null;
 }
 function getAttributeEL(el){
-	var el = getAttribute.apply(null,arguments);
+	el = getAttribute.apply(null,arguments);
 	if(el !== null){
-		el = el.replace(/^\s*\$\{([\s\S]+)\}\s*$/,"$1")
+		var el2 = el.replace(/^\s*\$\{([\s\S]+)\}\s*$/,"$1")
+		if(el == el2){
+			$log.warn("缺少表达式括弧,文本将直接按表达式返回");
+		}
+		el = el2;
 	}
 	return el;
 }
