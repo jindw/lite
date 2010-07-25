@@ -1,12 +1,16 @@
-===JSEL ===
+===JSEL 表达式引擎===
 
  * [JSEL JSEL 简介]
 
- * [JSON解析]
+ * [JSON JSON解析]
 
- * [命令行解析]
+ * [CP 命令行工具]
 
-===Lite===
+=== Lite 模板平台 ===
 
- * [XMLLiteSyntax Lite基本语法]
- * 
+==== 模板语法 ====
+ * [LiteXML LiteXML 基本语法]
+ * [LiteXHTML LiteXHTML 语法扩展]
+ * [LiteUI LiteUI语法扩展]
+==== 扩展机制 ====
+ * [EP 自定义名称空间]
