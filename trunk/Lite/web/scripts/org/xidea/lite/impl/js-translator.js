@@ -277,7 +277,11 @@ function _$items(source,result,type) {
     processXMLAttribute:function(item){
         //[7,[[0,"value"]],"attribute"]
         var value = getEL(item[1]);
-        var attributeName = item[2];
+        try{
+        var attributeName = item.length>2?item[2]:null;
+        }catch(e){
+        	$log.info("@@@@@"+item.get(2),e)
+        }
         if(attributeName){
             var testId = this.getVarId();
             this.append("var ",testId,"=",value);

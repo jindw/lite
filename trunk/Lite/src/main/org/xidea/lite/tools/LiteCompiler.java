@@ -7,15 +7,14 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.el.impl.CommandParser;
-import org.xidea.el.impl.Convertor;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.impl.HotTemplateEngine;
-import org.xidea.lite.impl.old.ParseConfigImpl;
-import org.xidea.lite.parse.NodeParser;
+import org.xidea.lite.impl.ParseConfigImpl;
 import org.xidea.lite.parse.ParseConfig;
 import org.xidea.lite.parse.ParseContext;
 
@@ -24,21 +23,23 @@ public class LiteCompiler {
 	private File root;
 	private File config;
 	private String path;
-	private File htmlcached;
-	private File litecached;
+	private File result;
+	private File litecode;
 	private HotTemplateEngine engine;
 	private ParseConfig parseConfig;
 
 	public LiteCompiler(String[] args) {
-		System.out.println(JSONEncoder.encode(args));
+		log.info("Args:"+JSONEncoder.encode(args));
 		CommandParser cp = new CommandParser(args);
-		cp.addConvertor(NodeParser.class,Convertor.Default.INSTANCE);
 		cp.setup(this);
 	}
 
 	public static void main(String[] args) {
 		if(args == null || args .length == 0){
-			args = new String[]{"-root","D:\\workspace\\FileServer/src/main/org/jside/filemanager/","-litecached","D:\\workspace\\FileServer/build/dest/lite","-nodeParsers","org.xidea.lite.parser.impl.HTMLNodeParser"};
+			args = new String[]{
+					//"-root","D:\\workspace\\FileServer/src/main/org/jside/filemanager/","-litecached","D:\\workspace\\FileServer/build/dest/lite","-nodeParsers","org.xidea.lite.parser.impl.HTMLNodeParser"
+					"-root","D:\\workspace\\FileServer/src/main/org/jside/filemanager/","-litecached","D:\\workspace\\FileServer/build/dest/lite"
+			};
 		}
 		new LiteCompiler(args).execute();
 	}
@@ -66,8 +67,8 @@ public class LiteCompiler {
 		this.parseConfig = new ParseConfigImpl(root.toURI(),config.toURI());
 		engine = new HotTemplateEngine(parseConfig);
 
-		litecached = createIfNotExist(litecached, "WEB-INF/litecached/");
-		htmlcached = createIfNotExist(htmlcached, null);
+		litecode = createIfNotExist(litecode, "WEB-INF/litecode/");
+		result = createIfNotExist(result, null);
 	}
 
 	protected File createIfNotExist(File cached, String defaultPath) {
@@ -86,9 +87,10 @@ public class LiteCompiler {
 	public boolean processFile(final String path) {
 		log.info("处理文件："+path);
 		try {
-			String encoding =  parseConfig.getFeatrueMap(path).get(ParseContext.FEATRUE_ENCODING);
+			Map<String, String> fm = parseConfig.getFeatrueMap(path);
+			String encoding =  fm.get(ParseContext.FEATRUE_ENCODING);
 			{
-				File cachedFile = new File(litecached, path.replace('/', '^'));
+				File cachedFile = new File(litecode, path);
 				Writer out = new OutputStreamWriter(new FileOutputStream(
 						cachedFile),encoding);
 				try {
@@ -100,8 +102,8 @@ public class LiteCompiler {
 					out.close();
 				}
 			}
-			if (htmlcached != null) {
-				File cachedFile = new File(htmlcached, path);
+			if (result != null) {
+				File cachedFile = new File(result, path);
 				cachedFile.getParentFile().mkdirs();
 				Writer out = new OutputStreamWriter(new FileOutputStream(
 						cachedFile), encoding);
@@ -125,7 +127,7 @@ public class LiteCompiler {
 		log.info("处理目录："+dir+","+path);
 		dir.listFiles(new FileFilter() {
 			public boolean accept(File file) {
-				if (!file.equals(htmlcached) && !file.equals(litecached)) {
+				if (!file.equals(result) && !file.equals(litecode)) {
 					if (file.isDirectory()) {
 						if(file.getName().startsWith(".")){
 						   log.warn("跳过目录："+file);
@@ -141,7 +143,7 @@ public class LiteCompiler {
 		});
 	}
 
-	public boolean isXhtmlFile(File file) {
+	protected boolean isXhtmlFile(File file) {
 		return file.getName().endsWith(".xhtml");
 	}
 
@@ -153,12 +155,12 @@ public class LiteCompiler {
 		this.config = config;
 	}
 
-	public void setHtmlcached(File htmlcached) {
-		this.htmlcached = htmlcached;
+	public void setResult(File htmlresult) {
+		this.result = htmlresult;
 	}
 
-	public void setLitecached(File litecached) {
-		this.litecached = litecached;
+	public void setLitecode(File litecode) {
+		this.litecode = litecode;
 	}
 
 	public void setPath(String path) {
