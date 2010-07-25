@@ -1,0 +1,65 @@
+#labels Featured
+=== JSEL 命令行解释器(CPEL)简介 ===
+如果你希望做一个命令行程序，要把复杂的命令行输入转化为某个JavaBean的属性，那么JSEL引入一个简单的命令分析器是个不错的选择。
+
+
+=== 运用方法 ===
+命令行解析时，需要使用一个命令解析对象：[http://lite.googlecode.com/svn/trunk/Lite/src/main/org/xidea/el/impl/CommandParser.java org.xidea.el.impl.CommandParser]
+
+示例1（JSA 导出程序）
+*实现代码*
+{{{
+....
+	public ExportAction(String[] args) {
+		CommandParser.setup(this, args);//将命令行信息设置为当前对象的属性
+...
+
+	public static void main(String[] args) throws Exception {
+		log.info("Args:" + JSONEncoder.encode(args));
+		ExportAction action = new ExportAction(args);
+		action.execute();
+	}
+}}}
+*ant 调用*
+{{{
+	<java jar="JSA-20100724.jar">
+		<arg value="-scriptBase" />
+		<arg value="${basedir}/web/scripts" />
+		<arg value="-exports" />
+		<arg value="org.xidea.el:*" />
+		<arg value="org.xidea.lite.impl:*" />
+		<arg value="org.xidea.lite.parse:*" />
+
+		<arg value="-outputPackage" />
+		<arg value="${basedir}/build/dest/jslite/lite/impl/__package__.js" />
+		<arg value="-outputExported" />
+		<arg value="${basedir}/build/dest/jslite/lite/impl/impl.js" />
+	</java>
+}}}
+示例2（Lite 编译命令）
+*实现代码*
+{{{
+....
+	public LiteCompiler(String[] args) {
+		log.info("Args:"+JSONEncoder.encode(args));
+		CommandParser cp = new CommandParser(args);
+		cp.setup(this);
+	}
+
+	public static void main(String[] args) {
+		new LiteCompiler(args).execute();
+	}
+
+...
+}}}
+*命令行调用*
+{{{
+java -jar WEB-INF/lib/JSA20100725.jar -root web -litecode web/WEB-INF/litecode
+}}}
+
+=== 具体实现 ===
+
+简单的命令行解析器的实现主要由两个部分：
+  * 类型转换程序
+  * 表达式写入映射
+    
