@@ -8,7 +8,7 @@
 		
 	</head>
 	<body>
-		<c:client id="renderDelete">
+		<c:client name="renderDelete">
 			<form method="POST" action="${name}?action=delete">
 				<lable for="fileName">文件名:</lable>
 				<input type="text" size="${name.length}"
@@ -17,7 +17,7 @@
 				<input type="reset" value="取消" onclick="closeDialog()" />
 			</form>
 		</c:client>
-		<c:client id="renderRename">
+		<c:client name="renderRename">
 			<form method="POST" action="${name}?action=rename">
 				<lable for="newName">新名字:</lable>
 				<input id="newName" size="${name.length+5}" type="text"
@@ -26,7 +26,7 @@
 				<input type="reset" value="取消" onclick="closeDialog()" />
 			</form>
 		</c:client>
-		<c:client id="renderMove">
+		<c:client name="renderMove">
 			<form method="POST" action="${name}?action=move">
 				<lable for="fileName">移动文件:</lable>
 				<input type="text" size="${name.length}"
@@ -39,7 +39,7 @@
 				<input type="reset" value="取消" onclick="closeDialog()" />
 			</form>
 		</c:client>
-		<c:client id="renderMkdir">
+		<c:client name="renderMkdir">
 			<form method="POST" action="?action=mkdir">
 				<lable for="fileName">创建目录:</lable>
 				<input type="text" size="40" id="fileName" name="name"
@@ -48,7 +48,7 @@
 				<input type="reset" value="取消" onclick="closeDialog()" />
 			</form>
 		</c:client>
-		<c:client id="renderCreateText">
+		<c:client name="renderCreateText">
 			<form method="POST" action="?action=text">
 				<div>
 					<lable for="fileName">创建文本文件:</lable>
@@ -94,7 +94,7 @@
 	//]]>
 		</script>
 		<h2>
-			<c:for var="item" items="${path.split('/')}">
+			<c:for var="item" list="${path.split('/')}">
 				<c:if test="${for.index==0}">
 					<c:if test="${item}">
 						<c:var name="href"
@@ -118,7 +118,7 @@
 			<div id="dialogContent"></div>
 		</div>
 		<table width="98%">
-			<c:for var="file" items="${fileList}">
+			<c:for var="file" list="${fileList}">
 				<tr>
 					<td>
 						<c:var name="name" value="${file.name}" />

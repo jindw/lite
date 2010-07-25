@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="GBK"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <project name="fileserver" default="build" basedir="../">
 	<tstamp>
 		<format property="version" pattern="yyyyMMdd" />
@@ -35,25 +35,15 @@
 			<zipfileset prefix="org/jside/filemanager/" dir="${basedir}/build/dest/lite">
 				<include name="^*.xhtml" />
 			</zipfileset>
-			<zipfileset src="${basedir}/web/WEB-INF/lib/Template.jar">
-				<include name="**/*.class" />
-				<exclude name="org/xidea/lite/parser/**/*.*" />
-				<exclude name="org/xidea/lite/servlet/**/*.*" />
-				<exclude name="org/xidea/lite/tools/**/*.*" />
-			</zipfileset>
-			<zipfileset src="${basedir}/web/WEB-INF/lib/Template.jar">
-				<include name="org/xidea/lite/parser/ResourceContext.class" />
-				<include name="org/xidea/lite/parser/impl/ResourceContextImpl.class" />
-			</zipfileset>
 		</jar>
 	</target>
 	<target name="compileLite">
 		<delete dir="${basedir}/build/dest/lite" />
 		<mkdir dir="${basedir}/build/dest/lite" />
-		<java fork="true" classname="org.xidea.lite.tools.LiteCompiler" classpath="web/WEB-INF/lib/Template.jar">
+		<java fork="true" jar="web/WEB-INF/lib/Template.jar">
 			<arg value="-root" />
 			<arg value="${basedir}/src/main/org/jside/filemanager/" />
-			<arg value="-litecached" />
+			<arg value="-litecode" />
 			<arg value="${basedir}/build/dest/lite" />
 		</java>
 	</target>
