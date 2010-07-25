@@ -1,16 +1,38 @@
-=== JSONEncoder 是什么 ===
+=== JSON ===
+JSON 语法介绍见：http://www.json.org/
+Lite 的默认表达式实现JSEL，支持JavaScript 表达式语法，本身就是一个JSON 的父集。他除了能解释普通JSON 数据之外，也可以在JSON语法中增加注释，甚至表达式，变量等支持。
+
+=== 使用JSEL 解析JSON++ ===
+{{{
+    .....
+    Expression el = ExpressionFactory.getInstance().create("{aa:1+1}");
+    Object result1 = el.evaluate(this);
+    .....
+    HashMap context = new HashMap();
+    context.put("x",2);
+    Object result2 = ExpressionFactory.getInstance().create("{aa:1+x}");.evaluate(context);
+}}}
+
+=== JSONDecoder 介绍 ====
+{{{
+    Map result = (Map)JSONDecoder.decode("{\"aa\":2}");
+}}}
+
+
+=== JSONEncoder 介绍 ===
+
 [http://code.google.com/p/lite/wiki/JSEL JSEL] 下的一个JSON编码工具类，改造自stringtree的JSONWriter；将其改造为一个简单的线程安全的工具类。
 
-=== 为什么需要 JSONEncoder  ===
+==== 为什么需要 JSONEncoder  ====
 [http://code.google.com/p/lite/wiki/JSEL JSEL] 提供了JSON解析的一个有效方法。既然有了解析的功能，编码的功能也就顺带实现一下。于是，编写了这个JSON系列化函数
 
-=== 编码规则 ===
+==== 编码规则 ====
  * 简单类型：String、Number、null、Boolean 编码为对应的JSON简单类型字面量。
  * 数组类型：java.util.Iterator、java.util.Collection（List，Set...）、Object[] 编码为JSON 数组字面量。
  * 对象类型：java.util.Map、JavaBean 编码为JSON 对象字面量。
 
 
-=== 如何使用 ===
+==== 如何使用 ====
 JSONEncoder 没有任何依赖，只时一个简单的JSONEncoder.java文件。
 它提供一个简单的静态方法，完成对象的JSON化。如果你需要将JSON输出至字符输出流。
 那么，你可以创建一个JSONEncoder对象来完成你的工作（*处理过程都是线程安全的*，就是说，你可以多个线程共享单一的编码对象）。
