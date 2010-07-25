@@ -1,0 +1,20 @@
+=== 客户端模板块标签 ===
+  * 示例：
+  {{{
+<!-- 这里的内容会编译成JS函数 -->
+<ui:client name="userView">
+	<!-- 偷懒有道，xpath直接包含前面那段模板片断 -->
+	<c:include xpath="//*[@id='content']/*" />
+</ui:client>
+<ui:client name="userListView">
+	<!-- 没的偷懒，那就直接写模板吧 -->
+	<c:for list="${userList}" var="user">
+		<div>${user.name}/${user.company}/${user.city}</div>
+	</c:for>
+</ui:client>
+  }}}
+  * 属性表：
+    * _ name _ ：生成的JavaScript函数的函数名字。
+
+  * 功能：
+    划出一段前端模板块，这段内容将直接翻译成JavaScript函数（静态数据，编译之后再不需要动态数据插入），以备前端脚本随时调用。
