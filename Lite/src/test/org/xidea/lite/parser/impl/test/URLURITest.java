@@ -3,7 +3,9 @@ package org.xidea.lite.parser.impl.test;
 
 import java.io.File;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLEncoder;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -56,4 +58,22 @@ public class URLURITest {
 		System.out.println(ReflectUtil.map(new File(".").toURI()));
 	}
 
+	@Test
+	public void test1() throws Exception {
+		URI u = new URI("lite:///");
+		System.out.println(new File("c:/x/^.x").toURI());
+		System.out.println(new URI("c",null,"/x/^.x",null));
+		System.out.println(u.resolve("/111.xx"));
+		System.out.println(u.resolve(".111.xx#23"));
+		System.out.println(u.resolve(URLEncoder.encode("^111.xx#23","UTF-8")));
+		System.out.println(u.resolve("%5E111.xx"));
+		test("lite:///xxx/s","lite:/xxx/s/222");
+		test("lite:///xxx/s3/4","lite:/xxx/s2/222");
+	}
+	void test(String uri1,String uri2) throws URISyntaxException{
+		URI u = new URI(uri1).relativize(new URI(uri2));
+		System.out.println(uri1+"---"+uri2);
+		System.out.println(u);
+		System.out.println(u.getPath());
+	}
 }

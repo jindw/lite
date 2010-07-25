@@ -20,11 +20,16 @@ public class ELTest {
 	static JSIRuntime js = org.xidea.jsi.impl.RuntimeSupport.create();
 	static ExpressionFactory expressionFactory = ExpressionFactoryImpl.getInstance();
 	static{
+		try{
 		js.eval("$import('org.xidea.el:*');//parseEL,Expression");
 		js.eval("$import('org.xidea.lite.parse:*');//parseEL,Expression");
 		//js.eval("$import('org.xidea.lite.impl:*');//parseEL,Expression");
 		js.eval("$import('org.xidea.jsidoc.util:*');");
 		js.eval("function parseEL(el){return new ExpressionTokenizer(el).getResult()}");
+		}catch(RuntimeException e){
+			e.printStackTrace();
+			throw e;
+		}
 	}
 	@Test
 	public void test(){
@@ -32,7 +37,7 @@ public class ELTest {
 	}
 	public static Object testEL(Object context,String source){
 				String contextJSON;
-		System.out.println("测试表达式："+source);
+		System.out.println("测试表达式："+source+",context:"+context);
 		Object contextObject;
 		if(context == null || "".equals(context)){
 			contextObject = Collections.EMPTY_MAP;

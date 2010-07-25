@@ -69,7 +69,6 @@ function processFor(node,context,chain){
 		var status_ =match[2];
 		var value =match[3];
 	}
-	$log.info(value)
     startFor(context,var_,value,status_ || null);
     processChild(context,node);
     context.appendEnd();

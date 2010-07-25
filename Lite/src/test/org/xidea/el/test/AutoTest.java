@@ -15,7 +15,7 @@ import org.w3c.dom.NodeList;
 import org.xidea.el.ExpressionFactory;
 import org.xidea.el.impl.ExpressionFactoryImpl;
 import org.xidea.el.json.JSONEncoder;
-import org.xidea.lite.util.test.XMLParser;
+import org.xidea.lite.parser.impl.test.XMLParser;
 
 
 public class AutoTest {

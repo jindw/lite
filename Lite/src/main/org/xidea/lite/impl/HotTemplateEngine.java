@@ -26,6 +26,11 @@ public class HotTemplateEngine extends TemplateEngine {
 		super(base);
 	}
 
+	public HotTemplateEngine(URI root, URI config) {
+		super(root);
+		this.config = new ParseConfigImpl(root, config);
+	}
+
 	public HotTemplateEngine(ParseConfig config) {
 		this.config = config;
 	}
@@ -68,15 +73,21 @@ public class HotTemplateEngine extends TemplateEngine {
 	protected Template createTemplate(String path) throws IOException {
 		ArrayList<File> files = new ArrayList<File>();
 		if (config == null) {
-			URI uri = this.base.resolve(path.replace('/', '^'));
+			URI uri = this.base.resolve(path.substring(1));
 			String litecode = loadText(ParseUtil.openStream(uri));
-			List<Object> list = JSONDecoder.decode(litecode);
-			if ("file".equals(uri.getScheme())) {
-				files.add(new File(uri));
+			try {
+				List<Object> list = JSONDecoder.decode(litecode);
+				if ("file".equals(uri.getScheme())) {
+					files.add(new File(uri));
+				}
+				Info entry = new Info(files);
+				infoMap.put(path, entry);
+				return new Template((List<Object>) list.get(1));
+			} catch (RuntimeException e) {
+				log.error("装载模板中间代码失败", e);
+				throw e;
 			}
-			Info entry = new Info(files);
-			infoMap.put(path, entry);
-			return new Template((List<Object>) list.get(1));
+
 		} else {
 			ParseContext context = createParseContext(path);
 			List<Object> items = parse(path, context);
@@ -152,13 +163,16 @@ public class HotTemplateEngine extends TemplateEngine {
 	static class Info {
 		File[] files;
 		long lastModified;
+
 		Info(List<File> files) {
 			this.files = files.toArray(new File[files.size()]);
 			this.lastModified = getLastModified(this.files);
 		}
+
 		boolean isModified() {
 			return this.lastModified != getLastModified(files);
 		}
+
 		long getLastModified(File[] files) {
 			long i = 0;
 			long j = 0;
@@ -173,6 +187,5 @@ public class HotTemplateEngine extends TemplateEngine {
 			return i + j;
 		}
 	}
-
 
 }

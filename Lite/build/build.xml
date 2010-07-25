@@ -114,6 +114,9 @@
 			<zipfileset src="web/WEB-INF/lib/commons-logging-1.0.4.jar">
 				<include name="**/*.*" />
 			</zipfileset>
+			<zipfileset src="web/WEB-INF/lib/JSI.jar">
+				<include name="**/*.*" />
+			</zipfileset>
 		</jar>
 		<jar destfile="build/dest/TemplateRuntime.jar" compress="true">
 			<zipfileset src="build/dest/Template.jar">

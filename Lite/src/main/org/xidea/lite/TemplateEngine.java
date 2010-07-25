@@ -25,7 +25,7 @@ public class TemplateEngine {
 	}
 
 	public TemplateEngine(URI base) {
-		this.base = base;
+		this.base = base.normalize();
 	}
 
 	public void render(String path, Object context, Writer out)
@@ -54,8 +54,14 @@ public class TemplateEngine {
 	}
 
 	protected String getLiteCode(String path) throws IOException {
-		URI uri = base.resolve(path.replace('/', '^'));
-		InputStream in = uri.toURL().openStream();
+		URI uri = base.resolve(path.substring(1));
+		InputStream in ;
+		if("classpath".equals(base.getScheme())){
+			String bp= base.normalize().getPath();
+			in = TemplateEngine.class.getResourceAsStream(bp);
+		}else{
+			in = uri.toURL().openStream();
+		}
 		return loadText(in);
 
 	}
