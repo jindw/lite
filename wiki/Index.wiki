@@ -4,7 +4,7 @@
 
  * [JSON JSON解析]
 
- * [ELCP 命令行工具]
+ * [CPEL 命令行工具]
 
 === Lite 模板平台 ===
 
