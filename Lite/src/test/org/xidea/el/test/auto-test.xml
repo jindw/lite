@@ -14,6 +14,7 @@
 		</model>
 		<!-- 比较运算 -->
 		<case>'0' == 0</case>
+		<case>0 == null</case>
 		<case>'123' == 123</case>
 		<case>'0' != 0</case>
 		<case>object == object</case>

@@ -21,7 +21,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.Template;
-import org.xidea.lite.impl.old.HTMLNodeParser;
 import org.xidea.lite.impl.ParseContextImpl;
 import org.xidea.lite.impl.ParseUtil;
 import org.xidea.lite.test.LiteTestUtil;

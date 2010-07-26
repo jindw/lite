@@ -22,15 +22,15 @@
 			<fileset dir="web">
 				<include name="**/*.xhtml" />
 				<include name="WEB-INF/decorators.xml" />
-				<exclude name="WEB-INF/litecached/*.*" />
-				<exclude name="WEB-INF/htmlcached/**/*.*" />
+				<exclude name="WEB-INF/litecode/*.*" />
+				<exclude name="WEB-INF/htmlcode/**/*.*" />
 			</fileset>
 		</copy>
 		<java classname="org.xidea.lite.tools.LiteCompiler" classpath="web/WEB-INF/lib/js.jar;web/WEB-INF/lib/JSI.jar;web/WEB-INF/lib/commons-logging-1.0.4.jar;web/WEB-INF/classes">
 			<arg value="-webRoot" />
 			<arg value="${basedir}/build/dest/temp" />
 			<arg value="-litecached" />
-			<arg value="${basedir}/web/WEB-INF/litecached" />
+			<arg value="${basedir}/web/WEB-INF/litecode" />
 		</java>
 		<delete dir="build/dest/temp" />
 	</target>
