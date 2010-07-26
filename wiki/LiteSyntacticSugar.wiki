@@ -52,7 +52,7 @@ ondblclick="${html.encode(action.dblclick)}"
 
   * 可以轻松实现装饰模版。
     XMLLiteSiteMesh 功能，编译期的SiteMesh。轻松实现高校的页面装饰功能（布局管理）。
-    细节见：http://code.google.com/p/lite/wiki/XMLLiteSiteMesh
+    细节见：http://code.google.com/p/lite/wiki/LiteSiteMesh
 
   * 通过XSD文件，可以很好的利用通用XML编辑器。
     引入XML语法描述文件后，标准的通用编辑器可以轻松的支持XML_Lite自己的*语法提示* ，*语法检查* ，*代码高亮* 、*格式化* 。
