@@ -20,8 +20,7 @@ import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xidea.lite.impl.ParseContextImpl;
-import org.xidea.lite.impl.old.TextNodeParser;
-import org.xidea.lite.impl.old.XMLFixerImpl;
+import org.xidea.lite.impl.TextNodeParser;
 import org.xidea.lite.impl.dtd.DefaultEntityResolver;
 import org.xidea.lite.parse.ParseContext;
 import org.xidea.lite.test.LiteTestUtil;
@@ -61,8 +60,7 @@ public class XMLParser extends TextNodeParser {
 		} catch (Exception ex) {
 			InputStream in = url.openStream();
 			try {
-				return new XMLFixerImpl().parse(documentBuilder, in, url
-						.toString());
+				return null;//new XMLFixerImpl().parse(documentBuilder, in, url.toString());
 			} catch (Exception ex2) {
 				throw new RuntimeException(ex2);
 			}finally {

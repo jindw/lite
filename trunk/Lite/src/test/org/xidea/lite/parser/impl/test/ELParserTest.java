@@ -2,14 +2,13 @@ package org.xidea.lite.parser.impl.test;
 
 import static org.junit.Assert.*;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.xidea.lite.impl.old.ELParser;
 
-public class ELParserTest extends ELParser{
+public class ELParserTest{
 
 	public ELParserTest() {
-		super("", true);
 	}
 
 	@Before
@@ -31,8 +30,10 @@ public class ELParserTest extends ELParser{
 
 	private void test(String text,int elBegin,int expextEnd) {
 		expextEnd = text.length()+expextEnd;
-		int end = this.findELEnd(text,elBegin);
-		assertEquals(expextEnd, end);
+
+		Assert.fail();
+//		int end = this.findELEnd(text,elBegin);
+//		assertEquals(expextEnd, end);
 	}
 
 }
