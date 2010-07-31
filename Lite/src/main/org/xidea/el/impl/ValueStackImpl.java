@@ -2,6 +2,7 @@ package org.xidea.el.impl;
 
 import java.util.Map;
 
+import org.xidea.el.Invocable;
 import org.xidea.el.ValueStack;
 
 public class ValueStackImpl implements ValueStack {
@@ -21,8 +22,18 @@ public class ValueStackImpl implements ValueStack {
 				}
 			}else if(context!=null) {
 				Object result = ReflectUtil.getValue(context, key);
-				if(result != null || ReflectUtil.getPropertyType(context.getClass(), key) != null){
+				Class<?> clazz = context.getClass();
+				if(result != null || ReflectUtil.getPropertyType(clazz, key) != null){
 					return result;
+				}
+				if(key instanceof String){
+					final Object thiz = context;
+					final Invocable inc = ReferenceImpl.getInvocable(clazz,(String)key,-1);
+					return new Invocable() {
+						public Object invoke(Object thiz2, Object... args) throws Exception {
+							return inc.invoke(thiz, args);
+						}
+					};
 				}
 			}
 		}

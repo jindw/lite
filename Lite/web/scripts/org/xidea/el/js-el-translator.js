@@ -76,13 +76,21 @@ ELTranslator.prototype = {
 			value1 = '('+value1+')';
 		}
 		switch(type){
-		case OP_INVOKE_METHOD_WITH_ONE_PARAM:
-			value2="["+value2+']';
+//		case OP_INVOKE_METHOD_WITH_ONE_PARAM:
+//			value2="["+value2+']';
 		case OP_INVOKE_METHOD:
 			value2 = value2.slice(1,-1);
 			return value1+"("+value2+')';
 		case OP_GET_PROP:
 			value1 = toOperatable(el[1][0],value1);
+			if(el[2][0] == VALUE_CONSTANTS){
+				var p = getTokenParam(el[2])
+				if(typeof p == 'string'){
+					if(ID_PATTERN.test(p)){
+						return value1+'.'+p;
+					}
+				}
+			}
 			return value1+'['+value2+']';
 		case OP_PARAM_JOIN:
 			if("[]"==value1){
@@ -121,48 +129,24 @@ ELTranslator.prototype = {
 	stringifyPrefix:function(el){
 		var type = el[0];
 		var el1 = el[1];
+		$log.warn(JSON.stringify(el))
 		var value = this.stringify(el1);
 		var param = getTokenParam(el);
 		if(this.getPriority(el)>=this.getPriority(el1)){
     		value = '('+value+')';
     	}
-		if(OP_INVOKE_METHOD_WITH_STATIC_PARAM == type){
-			var value2 = this.stringify(param).slice(1,-1);
-			return value+"("+value2+')';
-		}else if(OP_GET_STATIC_PROP== type){
-			var memberName = param;
-			
-			value = toOperatable(el1[0],value);
-			if(ID_PATTERN.test(memberName)){
-				return value+'.'+memberName
-			}else{
-				return value+'['+stringifyJSON(memberName)+']';
-			}
-		}else if(OP_GET_STATIC_PROP == type) {//已经是最高优先级了,
-			var key = param;
-			value = toOperatable(el1[0],value);
-			if(typeof key == 'number'){
-				return value+'['+key+']';
-			}else{
-				if(ID_PATTERN.test(key)){
-					return value+'.'+key;
-				}
-				return value+'['+stringifyJSON(''+key)+']';
-			}
-		}else{
-		    var opc = findTokenText(type);
-    		return opc+value;
-		}
+	    var opc = findTokenText(type);
+		return opc+value;
 	}
 }
 function toOperatable(type,value1){
 	if(type == VALUE_CONSTANTS){
 		switch(value1.charAt()){
-			case '"':
-			case "'":
-			case '/':
+			case '"'://string
+			case "'"://string
+			case '/'://regexp
 			break;
-			default:
+			default://number,boolean..
 			value1 = '('+value1+')';
 		}
 	}
@@ -181,10 +165,10 @@ function walkTree(thiz,el){
 		return;
 	}else{
 		var arg1 = el[1];
-		var arg2 = el[2];
-		if(op == OP_GET_STATIC_PROP){
-			if(arg1[0] == VALUE_VAR && arg1[1] == 'for'){
-				var param = arg2;
+		if(op == OP_GET_PROP){
+			var arg2 = el[2];
+			if(arg1[0] == VALUE_VAR && arg1[1] == 'for' && arg2[0] == VALUE_CONSTANTS){
+				var param = arg2[1];
 				if(param == 'index'){
 					thiz.forIndex = true;
 				}else if(param == 'lastIndex'){
@@ -196,6 +180,10 @@ function walkTree(thiz,el){
 			}
 		}
 		arg1 && walkTree(thiz,arg1);
-		arg2 && walkTree(thiz,arg2);
+		
+		var pos = getTokenParamIndex(el[0]);
+		if(pos>2){
+			walkTree(thiz, el[2]);
+		}
 	}
 }

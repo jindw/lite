@@ -124,7 +124,7 @@ public class ExampleTest {
 			String contextJSON) throws ScriptException,
 			SAXException, IOException {
 		String sourceJSON = JSONEncoder.encode(source);
-		System.out.println("\n======" + key + sourceJSON + "======\n");
+		System.out.println("\n======" + key +"/"+ sourceJSON +"/"+contextJSON+ "======\n");
 		String base = JSONEncoder.encode(menuURL.toString());
 		eval("var jsTemplate = new TemplateImpl(" + sourceJSON
 				+ ",new ParseContext(new ParseConfig("+base+"),"+base+"))");

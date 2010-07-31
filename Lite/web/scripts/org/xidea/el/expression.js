@@ -73,8 +73,8 @@ function _evaluate(item,context){
     arg1 = realValue(arg1);
     switch(type){
     //op
-    case OP_GET_STATIC_PROP:
-        arg2 =getTokenParam(item);
+//    case OP_GET_STATIC_PROP:
+//        arg2 =getTokenParam(item);
     case OP_GET_PROP:
         return new PropertyValue(arg1,arg2);
     case OP_NOT:

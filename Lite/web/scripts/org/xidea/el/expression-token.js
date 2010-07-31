@@ -13,10 +13,10 @@ var VALUE_VAR= -2;
 var VALUE_NEW_LIST= -3;
 var VALUE_NEW_MAP= -4;
 var OP_GET_PROP= 96;
-var OP_GET_STATIC_PROP= 33;
-var OP_INVOKE_METHOD= 98;
-var OP_INVOKE_METHOD_WITH_STATIC_PARAM= 35;
-var OP_INVOKE_METHOD_WITH_ONE_PARAM= 352;
+var OP_INVOKE_METHOD= 97;
+//var OP_GET_STATIC_PROP= 33;
+//var OP_INVOKE_METHOD_WITH_STATIC_PARAM= 35;
+//var OP_INVOKE_METHOD_WITH_ONE_PARAM= 352;
 var OP_NOT= 28;
 var OP_BIT_NOT= 29;
 var OP_POS= 30;
@@ -100,8 +100,9 @@ function hasTokenParam(type) {
 	switch (type) {
 	case VALUE_VAR:
 	case VALUE_CONSTANTS:
-	case OP_GET_STATIC_PROP:
-	case OP_INVOKE_METHOD_WITH_STATIC_PARAM:
+//	case OP_GET_STATIC_PROP:
+//	case OP_INVOKE_METHOD_WITH_STATIC_PARAM:
+//	case OP_INVOKE_METHOD_WITH_ONE_PARAM:
 	case OP_MAP_PUSH:
 		return true;
 	default:
@@ -113,7 +114,6 @@ function getTokenParam(el) {
 }
 
 function getTokenLength(type) {
-	
 	var size = getTokenParamIndex(type);
 	return hasTokenParam(type)?size+1:size;
 

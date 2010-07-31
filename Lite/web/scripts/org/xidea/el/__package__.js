@@ -12,7 +12,7 @@ this.addScript('expression-token.js',
 
 this.addScript('js-el-translator.js','ELTranslator'
                 ,0
-                ,['getTokenParam','getPriority',"findTokenText","org.xidea.lite.util:stringifyJSON",'ExpressionTokenizer','org.xidea.jsi:$log']);
+                ,['getTokenParamIndex','getTokenParam','getPriority',"findTokenText","org.xidea.lite.util:stringifyJSON",'ExpressionTokenizer','org.xidea.jsi:$log']);
 
 
 this.addScript('expression.js',['evaluate','Expression']

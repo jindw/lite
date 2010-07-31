@@ -456,16 +456,16 @@ function trimToken(tokens){
 function addRightToken(rightStack,
 		token) {
 	var list = rightStack[rightStack.length-1];
-	if (token[0] == OP_GET_PROP) {
-	    var last = list.length-1;
-	    if(last>=0){
-	        var previous = list[last];
-	        if(previous[0] == VALUE_CONSTANTS){
-	            list.length--;
-	            token = [OP_GET_STATIC_PROP,previous[1]]; 
-	        }
-	    }
-	}
+//	if (token[0] == OP_GET_PROP) {
+//	    var last = list.length-1;
+//	    if(last>=0){
+//	        var previous = list[last];
+//	        if(previous[0] == VALUE_CONSTANTS){
+//	            list.length--;
+//	            token = [OP_GET_STATIC_PROP,previous[1]]; 
+//	        }
+//	    }
+//	}
 	list.push(token);
 }
 

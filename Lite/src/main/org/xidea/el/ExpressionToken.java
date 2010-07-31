@@ -31,17 +31,13 @@ public abstract interface ExpressionToken {
 	
 	//九：（最高级别的运算符号）
 	public static final int OP_GET_PROP        = 0<<12 | 0<<8 | 1<<6 | 8<<2 | 0;
-	public static final int OP_GET_STATIC_PROP = 0<<12 | 0<<8 | 0<<6 | 8<<2 | 1;
-	public static final int OP_INVOKE_METHOD                  = 0<<12 | 0<<8 | 1<<6 | 8<<2 | 2;
-	public static final int OP_INVOKE_METHOD_WITH_STATIC_PARAM= 0<<12 | 0<<8 | 0<<6 | 8<<2 | 3;
-	public static final int OP_INVOKE_METHOD_WITH_ONE_PARAM   = 0<<12 | 1<<8 | 1<<6 | 8<<2 | 0;
+	public static final int OP_INVOKE_METHOD   = 0<<12 | 0<<8 | 1<<6 | 8<<2 | 1;
 	
-
 	//八
-	public static final int OP_NOT = 0<<12 | 0<<8 | 0<<6 | 7<<2 | 0;
+	public static final int OP_NOT     = 0<<12 | 0<<8 | 0<<6 | 7<<2 | 0;
 	public static final int OP_BIT_NOT = 0<<12 | 0<<8 | 0<<6 | 7<<2 | 1;
-	public static final int OP_POS = 0<<12 | 0<<8 | 0<<6 | 7<<2 | 2;
-	public static final int OP_NEG = 0<<12 | 0<<8 | 0<<6 | 7<<2 | 3;
+	public static final int OP_POS     = 0<<12 | 0<<8 | 0<<6 | 7<<2 | 2;
+	public static final int OP_NEG     = 0<<12 | 0<<8 | 0<<6 | 7<<2 | 3;
 	
 	//七：
 	public static final int OP_MUL = 0<<12 | 0<<8 | 1<<6 | 6<<2 | 0;

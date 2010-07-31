@@ -11,7 +11,7 @@ public class ELParseTest {
 	public void testMethod(){
 		Object el = ef.parse("object.test(123)");
 		el = JSONEncoder.encode(el);
-		Assert.assertEquals("[98,[33,[-2,\"object\"],\"test\"],[64,[-3],[-1,123]]]", el);
+		Assert.assertEquals("[97,[96,[-2,\"object\"],[-1,\"test\"]],[64,[-3],[-1,123]]]", el);
 	}
 
 	@Test

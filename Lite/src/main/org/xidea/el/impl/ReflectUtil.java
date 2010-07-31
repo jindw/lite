@@ -141,7 +141,7 @@ public abstract class ReflectUtil {
 		}
 		return Object.class;
 	}
-	@SuppressWarnings({"rawtypes" })
+	@SuppressWarnings("rawtypes")
 	public static Class getKeyType(Type type) {
 		Class clazz = null;
 		if (type instanceof ParameterizedType) {
@@ -236,7 +236,7 @@ public abstract class ReflectUtil {
 			if (clazz.isArray()) {
 				if (LENGTH.equals(key)) {
 					return Integer.TYPE;
-				} else {
+				} else if(Number.class.isInstance(key)){
 					return clazz.getComponentType();
 				}
 			} else if (Collection.class.isAssignableFrom(clazz)) {

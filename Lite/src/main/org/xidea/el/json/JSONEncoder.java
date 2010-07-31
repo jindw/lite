@@ -5,8 +5,6 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.io.IOException;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -25,17 +23,20 @@ public class JSONEncoder {
 	private final boolean printClassName ;
 	private final int depth;
 
-	public JSONEncoder(boolean emitClassName,int depth) {
-		this.printClassName = emitClassName;
+	public JSONEncoder(boolean printClassName) {
+		this.printClassName = printClassName;
+		this.depth = 64;
+	}
+	public JSONEncoder(boolean printClassName,int depth) {
+		this.printClassName = printClassName;
 		this.depth = depth;
 	}
-
-	public JSONEncoder() {
+	private JSONEncoder() {
 		this(false,64);
 	}
 
 	public static String encode(Object value) {
-		StringWriter buf = new StringWriter();
+		StringBuilder buf = new StringBuilder();
 		try {
 			encoder.encode(value, buf,new HashSet<Object>());
 		} catch (IOException e) {
@@ -44,7 +45,7 @@ public class JSONEncoder {
 		return buf.toString();
 	}
 
-	public void encode(Object value, Writer out, Collection<Object> cached)
+	public void encode(Object value, Appendable out, Collection<Object> cached)
 			throws IOException {
 		print(value, out, cached);
 		if (cached != null) {
@@ -52,14 +53,14 @@ public class JSONEncoder {
 		}
 	}
 
-	protected void print(Object object, Writer out, Collection<Object> cached)
+	protected void print(Object object, Appendable out, Collection<Object> cached)
 			throws IOException {
 		if (object == null) {
-			out.write("null");
+			out.append("null");
 		} else if (object instanceof Boolean) {
-			out.write(String.valueOf(object));
+			out.append(String.valueOf(object));
 		} else if (object instanceof Number) {
-			out.write(String.valueOf(object));
+			out.append(String.valueOf(object));
 		} else if (object instanceof Class<?>) {
 			//Class 系列化容易导致死循环
 			print(((Class<?>) object).getName(), out);
@@ -96,8 +97,8 @@ public class JSONEncoder {
 		}
 	}
 
-	protected void print(String text, Writer out) throws IOException {
-		out.write('"');
+	protected void print(String text, Appendable out) throws IOException {
+		out.append('"');
 		for (int i = 0; i < text.length(); i++) {
 			char c = text.charAt(i);
 			switch (c) {
@@ -105,43 +106,43 @@ public class JSONEncoder {
 				// case '\'':
 				// case '/':
 			case '\\':
-				out.write('\\');
-				out.write(c);
+				out.append('\\');
+				out.append(c);
 				break;
 			case '\b':// \u0008
-				out.write("\\b");
+				out.append("\\b");
 				break;
 			case '\n'://
 
 				// case '\v'://\u000b
-				out.write("\\n");
+				out.append("\\n");
 				break;
 			// case '\f'://\u000c
-			// out.write("\\f");
+			// out.append("\\f");
 			// break;
 			case '\r'://
 
-				out.write("\\r");
+				out.append("\\r");
 				break;
 			case '\t':// \u0009
-				out.write("\\t");
+				out.append("\\t");
 				break;
 			default:
 				if (Character.isISOControl(c)) {
 					// if ((c >= 0x0000 && c <= 0x001F)|| (c >= 0x007F && c <=
 					// 0x009F)) {
-					out.write("\\u");
-					out.write(Integer.toHexString(0x10000 + c), 1, 5);
+					out.append("\\u");
+					out.append(Integer.toHexString(0x10000 + c), 1, 5);
 				} else {
-					out.write(c);
+					out.append(c);
 				}
 			}
 		}
-		out.write('"');
+		out.append('"');
 	}
 
-	protected void printBean(Object object, Writer out,Collection<Object> cached) throws IOException {
-		out.write('{');
+	protected void printBean(Object object, Appendable out,Collection<Object> cached) throws IOException {
+		out.append('{');
 		BeanInfo info;
 		boolean addedSomething = false;
 		try {
@@ -159,10 +160,10 @@ public class JSONEncoder {
 					}
 					Object value = accessor.invoke(object);
 					if (addedSomething) {
-						out.write(',');
+						out.append(',');
 					}
 					print(name, out);
-					out.write(':');
+					out.append(':');
 					print(value, out, cached);
 					addedSomething = true;
 				}
@@ -175,46 +176,46 @@ public class JSONEncoder {
 		} catch (IntrospectionException ie) {
 			ie.printStackTrace();
 		}
-		out.write('}');
+		out.append('}');
 	}
 
-	protected void print(Map<?, ?> map, Writer out,Collection<Object> cached)
+	protected void print(Map<?, ?> map, Appendable out,Collection<Object> cached)
 			throws IOException {
-		out.write('{');
+		out.append('{');
 		Iterator<?> it = map.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry<?, ?> e = (Map.Entry<?, ?>) it.next();
 			print(String.valueOf(e.getKey()), out);
-			out.write(':');
+			out.append(':');
 			print(e.getValue(), out, cached);
 			if (it.hasNext()) {
-				out.write(',');
+				out.append(',');
 			}
 		}
-		out.write('}');
+		out.append('}');
 	}
 
-	protected void print(Object[] object, Writer out,Collection<Object> cached)
+	protected void print(Object[] object, Appendable out,Collection<Object> cached)
 			throws IOException {
-		out.write('[');
+		out.append('[');
 		for (int i = 0; i < object.length; ++i) {
 			if (i > 0) {
-				out.write(',');
+				out.append(',');
 			}
 			print(object[i], out, cached);
 		}
-		out.write(']');
+		out.append(']');
 	}
 
-	protected void print(Iterator<?> it, Writer out,Collection<Object> cached)
+	protected void print(Iterator<?> it, Appendable out,Collection<Object> cached)
 			throws IOException {
-		out.write('[');
+		out.append('[');
 		while (it.hasNext()) {
 			print(it.next(), out, cached);
 			if (it.hasNext()) {
-				out.write(',');
+				out.append(',');
 			}
 		}
-		out.write(']');
+		out.append(']');
 	}
 }

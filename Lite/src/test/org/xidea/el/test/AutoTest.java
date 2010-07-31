@@ -102,6 +102,7 @@ public class AutoTest {
 	}
 	@Test
 	public void test(){
+		ELTest.testEL(null,"JSON.stringify([1,2])");
 		ELTest.testEL(null, "\"\\u91D1\\u5927\\u4E3A\"+'aa'");
 	}
 	@Test
