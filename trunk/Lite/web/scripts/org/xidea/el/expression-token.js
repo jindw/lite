@@ -10,8 +10,8 @@ var BIT_PRIORITY_SUB= 61440;
 var BIT_ARGS= 192;
 var VALUE_CONSTANTS= -1;
 var VALUE_VAR= -2;
-var VALUE_NEW_LIST= -3;
-var VALUE_NEW_MAP= -4;
+var VALUE_LIST= -3;
+var VALUE_MAP= -4;
 var OP_GET= 96;
 var OP_INVOKE= 97;
 //var OP_GET_STATIC_PROP= 33;
@@ -39,8 +39,8 @@ var OP_AND= 4168;
 var OP_OR= 73;
 var OP_QUESTION= 68;
 var OP_QUESTION_SELECT= 69;
-var OP_PARAM_JOIN= 64;
-var OP_MAP_PUSH= 65;
+var OP_JOIN= 64;
+var OP_PUSH= 65;
 
 
 
@@ -86,7 +86,7 @@ addToken(OP_OR,"||");
 addToken(OP_QUESTION,"?");
 addToken(OP_QUESTION_SELECT,":");//map 中的：被直接skip了
 //1
-addToken(OP_PARAM_JOIN,",");
+addToken(OP_JOIN,",");
 
 
 function findTokenType(token) {
@@ -103,7 +103,7 @@ function hasTokenParam(type) {
 //	case OP_GET_STATIC_PROP:
 //	case OP_INVOKE_WITH_STATIC_PARAM:
 //	case OP_INVOKE_WITH_ONE_PARAM:
-	case OP_MAP_PUSH:
+	case OP_PUSH:
 		return true;
 	default:
 		return  false;

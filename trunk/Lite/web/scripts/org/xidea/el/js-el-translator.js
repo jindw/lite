@@ -57,9 +57,9 @@ ELTranslator.prototype = {
         	}else{
         		return param;
         	}
-        case VALUE_NEW_LIST:
+        case VALUE_LIST:
         	return "[]";
-        case VALUE_NEW_MAP:
+        case VALUE_MAP:
         	return "{}";
 		}
 	},
@@ -92,14 +92,14 @@ ELTranslator.prototype = {
 				}
 			}
 			return value1+'['+value2+']';
-		case OP_PARAM_JOIN:
+		case OP_JOIN:
 			if("[]"==value1){
 				return "["+value2+"]"
 			}else{
 				return value1.slice(0,-1)+','+value2+"]"
 			}
 			//return value1.replace(/(,?)\)$/,'$1')+value2+")"
-		case OP_MAP_PUSH:
+		case OP_PUSH:
 			value2 = stringifyJSON(param)+":"+value2+"}";
 			if("{}"==value1){
 				return "{"+value2

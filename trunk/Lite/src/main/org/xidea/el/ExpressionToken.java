@@ -25,8 +25,8 @@ public abstract interface ExpressionToken {
 //	public static final int VALUE_LAZY = -0x00;
 	public static final int VALUE_CONSTANTS = -0x01;//c;
 	public static final int VALUE_VAR = -0x02;//n;
-	public static final int VALUE_NEW_LIST = -0x03;//[;
-	public static final int VALUE_NEW_MAP = -0x04;//{;
+	public static final int VALUE_LIST = -0x03;//[;
+	public static final int VALUE_MAP = -0x04;//{;
 	
 	
 	//九：（最高级别的运算符号）
@@ -77,9 +77,9 @@ public abstract interface ExpressionToken {
 	
 	//一：
 	//与Map Join 共享字面量（map join 会忽略）
-	public static final int OP_PARAM_JOIN = 0<<12 | 0<<8 | 1<<6 | 0<<2 | 0;
+	public static final int OP_JOIN = 0<<12 | 0<<8 | 1<<6 | 0<<2 | 0;
 	//与三元运算符共享字面值
-	public static final int OP_MAP_PUSH   = 0<<12 | 0<<8 | 1<<6 | 0<<2 | 1;
+	public static final int OP_PUSH   = 0<<12 | 0<<8 | 1<<6 | 0<<2 | 1;
 	
 
 	
