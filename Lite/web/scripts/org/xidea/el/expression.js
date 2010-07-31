@@ -61,7 +61,7 @@ function _evaluate(item,context){
     if(getTokenParamIndex(type) ==3){
         var arg2=realValue(_evaluate(item[2],context));
     }
-    if(type == OP_INVOKE_METHOD){
+    if(type == OP_INVOKE){
     	if(arg1 instanceof Function){
             return arg1.apply(context,arg2);
     	}else if(arg1 instanceof PropertyValue){
@@ -75,7 +75,7 @@ function _evaluate(item,context){
     //op
 //    case OP_GET_STATIC_PROP:
 //        arg2 =getTokenParam(item);
-    case OP_GET_PROP:
+    case OP_GET:
         return new PropertyValue(arg1,arg2);
     case OP_NOT:
         return !arg1;

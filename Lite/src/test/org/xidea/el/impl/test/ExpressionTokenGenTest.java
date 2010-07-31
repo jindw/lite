@@ -22,7 +22,7 @@ public class ExpressionTokenGenTest {
 				values.put(name,value);
 			}
 			//System.out.println("var "+name + "= "+value+";");
-			System.out.println("define('"+name + "',"+value+");");
+			System.out.println("define('LITE_"+name + "',"+value+");");
 		}
 	}
 

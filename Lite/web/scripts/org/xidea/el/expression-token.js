@@ -12,11 +12,11 @@ var VALUE_CONSTANTS= -1;
 var VALUE_VAR= -2;
 var VALUE_NEW_LIST= -3;
 var VALUE_NEW_MAP= -4;
-var OP_GET_PROP= 96;
-var OP_INVOKE_METHOD= 97;
+var OP_GET= 96;
+var OP_INVOKE= 97;
 //var OP_GET_STATIC_PROP= 33;
-//var OP_INVOKE_METHOD_WITH_STATIC_PARAM= 35;
-//var OP_INVOKE_METHOD_WITH_ONE_PARAM= 352;
+//var OP_INVOKE_WITH_STATIC_PARAM= 35;
+//var OP_INVOKE_WITH_ONE_PARAM= 352;
 var OP_NOT= 28;
 var OP_BIT_NOT= 29;
 var OP_POS= 30;
@@ -53,7 +53,7 @@ function addToken(type,token){
 	TOKEN_TYPE_MAP[token] = type;
 }
 //9
-addToken(OP_GET_PROP,".");
+addToken(OP_GET,".");
 //addToken(OP_GET_STATIC_PROP,".");
 //8
 addToken(OP_NOT,"!");
@@ -101,8 +101,8 @@ function hasTokenParam(type) {
 	case VALUE_VAR:
 	case VALUE_CONSTANTS:
 //	case OP_GET_STATIC_PROP:
-//	case OP_INVOKE_METHOD_WITH_STATIC_PARAM:
-//	case OP_INVOKE_METHOD_WITH_ONE_PARAM:
+//	case OP_INVOKE_WITH_STATIC_PARAM:
+//	case OP_INVOKE_WITH_ONE_PARAM:
 	case OP_MAP_PUSH:
 		return true;
 	default:

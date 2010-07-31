@@ -6,9 +6,9 @@ import static org.xidea.el.ExpressionToken.OP_ADD;
 import static org.xidea.el.ExpressionToken.BIT_ARGS;
 import static org.xidea.el.ExpressionToken.BIT_PRIORITY;
 import static org.xidea.el.ExpressionToken.BIT_PRIORITY_SUB;
-import static org.xidea.el.ExpressionToken.OP_GET_PROP;
+import static org.xidea.el.ExpressionToken.OP_GET;
 
-import static org.xidea.el.ExpressionToken.OP_INVOKE_METHOD;
+import static org.xidea.el.ExpressionToken.OP_INVOKE;
 import static org.xidea.el.ExpressionToken.OP_MAP_PUSH;
 import static org.xidea.el.ExpressionToken.OP_NEG;
 import static org.xidea.el.ExpressionToken.OP_PARAM_JOIN;
@@ -313,7 +313,7 @@ public class ExpressionTokenizer extends JSONTokenizer {
 			addToken(TOKEN_NULL);
 		} else {
 			skipSpace(0);
-			if (previousType == OP_GET_PROP) {
+			if (previousType == OP_GET) {
 				addToken(new TokenImpl(VALUE_CONSTANTS, id));
 			} else {
 				addKeyOrObject(id, true);
@@ -348,20 +348,15 @@ public class ExpressionTokenizer extends JSONTokenizer {
 		case '%':
 			break;
 		case '=':// ==
-			if (next == '=') {
-				end++;
-				if (value.length() > end && value.charAt(end) == '=') {
-					this.fail("不支持=== 和!==操作符，请使用==,!=");
-				}
-			} else {
+			if (next != '=') {
 				this.fail("不支持赋值操作:");
 			}
-			break;
 		case '!':// !,!=
 			if (next == '=') {
 				end++;
 				if (value.length() > end && value.charAt(end) == '=') {
-					this.fail("不支持=== 和!==操作符，请使用==,!=");
+					end++;
+					//this.fail("不支持=== 和!==操作符，请使用==,!=");
 				}
 			}
 			break;
@@ -441,7 +436,7 @@ public class ExpressionTokenizer extends JSONTokenizer {
 			case '(':
 				replacePrevious();
 				if (status == Status.EXPRESSION) {
-					addToken(new TokenImpl(OP_INVOKE_METHOD, null));
+					addToken(new TokenImpl(OP_INVOKE, null));
 					if (skipSpace(')')) {
 						addToken(new TokenImpl(VALUE_CONSTANTS,
 								Collections.EMPTY_LIST));
@@ -456,7 +451,7 @@ public class ExpressionTokenizer extends JSONTokenizer {
 				break;
 			case '[':
 				if (status == Status.EXPRESSION) {// getProperty
-					addToken(new TokenImpl(OP_GET_PROP, null));
+					addToken(new TokenImpl(OP_GET, null));
 					addToken(new TokenImpl(BRACKET_BEGIN, null));
 				} else {// list
 					addList();

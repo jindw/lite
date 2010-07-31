@@ -1,15 +1,11 @@
 <?php
-
 define('LITE_BIT_ARGS',192);
 define('LITE_VALUE_CONSTANTS',-1);
 define('LITE_VALUE_VAR',-2);
 define('LITE_VALUE_NEW_LIST',-3);
 define('LITE_VALUE_NEW_MAP',-4);
-define('LITE_OP_GET_PROP',96);
-define('LITE_OP_GET_STATIC_PROP',33);
-define('LITE_OP_INVOKE_METHOD',98);
-define('LITE_OP_INVOKE_METHOD_WITH_STATIC_PARAM',35);
-define('LITE_OP_INVOKE_METHOD_WITH_ONE_PARAM',352);
+define('LITE_OP_GET',96);
+define('LITE_OP_INVOKE',97);
 define('LITE_OP_NOT',28);
 define('LITE_OP_BIT_NOT',29);
 define('LITE_OP_POS',30);
@@ -19,21 +15,23 @@ define('LITE_OP_DIV',89);
 define('LITE_OP_MOD',90);
 define('LITE_OP_ADD',84);
 define('LITE_OP_SUB',85);
-define('LITE_OP_LT',4176);
-define('LITE_OP_GT',4177);
-define('LITE_OP_LTEQ',4178);
-define('LITE_OP_GTEQ',4179);
+define('LITE_OP_LT',336);
+define('LITE_OP_GT',337);
+define('LITE_OP_LTEQ',338);
+define('LITE_OP_GTEQ',339);
 define('LITE_OP_EQ',80);
 define('LITE_OP_NOTEQ',81);
-define('LITE_OP_BIT_AND',8268);
-define('LITE_OP_BIT_XOR',4172);
+define('LITE_OP_BIT_AND',588);
+define('LITE_OP_BIT_XOR',332);
 define('LITE_OP_BIT_OR',76);
-define('LITE_OP_AND',4168);
-define('LITE_OP_OR',73);
+define('LITE_OP_AND',328);
+define('LITE_OP_OR',72);
 define('LITE_OP_QUESTION',68);
 define('LITE_OP_QUESTION_SELECT',69);
 define('LITE_OP_PARAM_JOIN',64);
 define('LITE_OP_MAP_PUSH',65);
+
+
 
 
 $LITE_QUESTION_NEXT = new stdClass();
@@ -111,7 +109,7 @@ function _lite_evaluate(&$context, &$item) {
     if((($type & LITE_BIT_ARGS) >> 6) == 1){//if(getArgCount(type) ==2){//
         $arg2=lite_evaluate($context,$item[2]);
     }
-	if ($type == LITE_OP_INVOKE_METHOD) {
+	if ($type == LITE_OP_INVOKE) {
 		if($arg1 instanceof _LitePropertyValue) {
 			return $arg1->call($arg2);
 		} else {
@@ -123,9 +121,7 @@ function _lite_evaluate(&$context, &$item) {
 		$arg1 = $arg1->get();
 	}
 	switch($type) {
-		case LITE_OP_GET_STATIC_PROP:
-			return new _LitePropertyValue($arg1, $item[3]);
-		case LITE_OP_GET_PROP:
+		case LITE_OP_GET:
 			return new _LitePropertyValue($arg1, $arg2);
 		case LITE_OP_PARAM_JOIN:
 			$arg1[]=$arg2;return $arg1;

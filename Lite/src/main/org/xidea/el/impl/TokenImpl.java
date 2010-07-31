@@ -18,8 +18,8 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 	static final int BRACKET_END = 0xFFFF;// )]};
 	// 解释优化
 	static final int OP_GET_STATIC_PROP = 0<<12 | 0<<8 | 0<<6 | 8<<2 | 0;
-	static final int OP_INVOKE_METHOD_WITH_STATIC_PARAM= 0<<12 | 0<<8 | 0<<6 | 8<<2 | 1;
-//	static final int OP_INVOKE_METHOD_WITH_ONE_PARAM   = 0<<12 | 1<<8 | 1<<6 | 8<<2 | 2;
+	static final int OP_INVOKE_WITH_STATIC_PARAM= 0<<12 | 0<<8 | 0<<6 | 8<<2 | 1;
+//	static final int OP_INVOKE_WITH_ONE_PARAM   = 0<<12 | 1<<8 | 1<<6 | 8<<2 | 2;
 
 	private static final Object[] EMPTY_ARGS = new Object[0];
 	
@@ -70,14 +70,14 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 				}
 			}
 		}
-		if (type == OP_GET_PROP) {
+		if (type == OP_GET) {
 			if (right.getType() == VALUE_CONSTANTS) {
 				this.type = OP_GET_STATIC_PROP;
 				this.setParam(right.getParam());
 			}
-		}else if(type == OP_INVOKE_METHOD){
+		}else if(type == OP_INVOKE){
 			if(right.getType() == VALUE_NEW_LIST){
-				this.type = OP_INVOKE_METHOD_WITH_STATIC_PARAM;
+				this.type = OP_INVOKE_WITH_STATIC_PARAM;
 				this.setParam(EMPTY_ARGS);
 			}else{
 				TokenImpl token = this.right;//op_join
@@ -94,7 +94,7 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 					}
 				}
 				if(token.type == VALUE_NEW_LIST){
-					this.type = OP_INVOKE_METHOD_WITH_STATIC_PARAM;
+					this.type = OP_INVOKE_WITH_STATIC_PARAM;
 					this.setParam(params.toArray());
 				}
 				
@@ -175,16 +175,16 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 	public Object get(int index) {
 		if(type == OP_GET_STATIC_PROP){
 			if(index == 0){
-				return OP_GET_PROP;
+				return OP_GET;
 			}else if(index == 1){
 				return left;
 			}else if(index == 2){
 				return right;
 			}
 			return null;
-		}else if(type == OP_INVOKE_METHOD_WITH_STATIC_PARAM){
+		}else if(type == OP_INVOKE_WITH_STATIC_PARAM){
 			if(index == 0){
-				return OP_INVOKE_METHOD;
+				return OP_INVOKE;
 			}else if(index == 1){
 				return left;
 			}else if(index == 2){
@@ -215,9 +215,9 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 	@Override
 	public int size() {
 		if(OP_GET_STATIC_PROP == type){
-			return 3;//as OP_GET_PROP
-		}else if(OP_INVOKE_METHOD_WITH_STATIC_PARAM == type){
-			return 3;//as OP_INVOKE_METHOD
+			return 3;//as OP_GET
+		}else if(OP_INVOKE_WITH_STATIC_PARAM == type){
+			return 3;//as OP_INVOKE
 		}
 		int size = getArgCount(type) + 1;
 		return hasParam() ? size + 1 : size;
@@ -229,8 +229,8 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 		case ExpressionToken.VALUE_VAR:// 0
 		case ExpressionToken.VALUE_CONSTANTS:// 0
 		case OP_GET_STATIC_PROP:// 1
-		case OP_INVOKE_METHOD_WITH_STATIC_PARAM:// 1
-//			 case OP_INVOKE_METHOD_WITH_ONE_PARAM:// 2
+		case OP_INVOKE_WITH_STATIC_PARAM:// 1
+//			 case OP_INVOKE_WITH_ONE_PARAM:// 2
 		case ExpressionToken.OP_MAP_PUSH:// 1
 			return true;
 		default:
@@ -262,7 +262,7 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 			}
 		}
 		// 9
-		TOKEN_MAP.put(".", OP_GET_PROP);
+		TOKEN_MAP.put(".", OP_GET);
 		// 8
 		TOKEN_MAP.put("!", OP_NOT);
 		TOKEN_MAP.put("^", OP_BIT_NOT);
@@ -302,7 +302,7 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 		LABEL_MAP.put(BRACKET_END, ")");
 
 		// OP_MAP_PUSH
-		// OP_INVOKE_METHOD
+		// OP_INVOKE
 	}
 
 	public static boolean isPrefix(int type) {

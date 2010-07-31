@@ -83,11 +83,11 @@ public class OperationStrategyImpl implements OperationStrategy {
 		case ExpressionToken.VALUE_NEW_MAP:
 			return new LinkedHashMap<Object, Object>();
 
-		case TokenImpl.OP_INVOKE_METHOD_WITH_STATIC_PARAM:
+		case TokenImpl.OP_INVOKE_WITH_STATIC_PARAM:
 			
-		case ExpressionToken.OP_INVOKE_METHOD:
+		case ExpressionToken.OP_INVOKE:
 			Object[] arguments;
-			if(type == ExpressionToken.OP_INVOKE_METHOD){
+			if(type == ExpressionToken.OP_INVOKE){
 				arguments =((List<?>)  evaluate(item.getRight(), vs)).toArray();
 			}else{
 				arguments = (Object[])item.getParam();
@@ -96,7 +96,7 @@ public class OperationStrategyImpl implements OperationStrategy {
 			int type2 = left.getType();
 			Object thiz;
 			
-			if(type2 == ExpressionToken.OP_GET_PROP){
+			if(type2 == ExpressionToken.OP_GET){
 				thiz = evaluate(left.getLeft(),vs);
 				key = evaluate(left.getRight(),vs);
 			}else if(type2 == TokenImpl.OP_GET_STATIC_PROP){
@@ -113,7 +113,7 @@ public class OperationStrategyImpl implements OperationStrategy {
 		case TokenImpl.OP_GET_STATIC_PROP:
 		    arg2 = item.getParam();
 		    return ReflectUtil.getValue(arg1, arg2);
-		case ExpressionToken.OP_GET_PROP:
+		case ExpressionToken.OP_GET:
 			arg2 = evaluate(item.getRight(), vs);
 		    return ReflectUtil.getValue(arg1, arg2);
 
