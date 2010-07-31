@@ -13,7 +13,7 @@ import org.xidea.el.ValueStack;
 
 public class ExpressionImpl implements Expression, ReferenceExpression,
 		ExpressionInfo {
-	protected final OperationStrategy calculater;
+	protected final OperationStrategy strategy;
 	protected final ExpressionToken expression;
 	static ValueStack EMPTY_VS = new ValueStack() {
 		public void put(Object key, Object value) {
@@ -25,13 +25,14 @@ public class ExpressionImpl implements Expression, ReferenceExpression,
 	};
 
 	public ExpressionImpl(String el) {
-		this((ExpressionToken) ExpressionFactoryImpl.getInstance().parse(el),
-				ExpressionFactoryImpl.DEFAULT_CALCULATER);
+		ExpressionFactoryImpl efi = ExpressionFactoryImpl.getInstance();
+		this.expression = (ExpressionToken) efi.parse(el);
+		this.strategy = efi.strategy;
 	}
 
 	public ExpressionImpl(ExpressionToken expression,
-			OperationStrategy calculater) {
-		this.calculater = calculater;
+			OperationStrategy strategy) {
+		this.strategy = strategy;
 		this.expression = expression;
 	}
 
@@ -44,7 +45,7 @@ public class ExpressionImpl implements Expression, ReferenceExpression,
 		} else {
 			valueStack = new ValueStackImpl(context);
 		}
-		Object result = calculater.evaluate(expression, valueStack);
+		Object result = strategy.evaluate(expression, valueStack);
 		return result;
 	}
 
@@ -70,10 +71,10 @@ public class ExpressionImpl implements Expression, ReferenceExpression,
 		Object arg2 ;
 		if (type == TokenImpl.OP_GET_STATIC_PROP) {
 			arg2 = item.getParam();
-		} else if (type == ExpressionToken.OP_GET_PROP) {
-			arg2 = calculater.evaluate(item.getRight(), vs);
+		} else if (type == ExpressionToken.OP_GET) {
+			arg2 = strategy.evaluate(item.getRight(), vs);
 		}else{
-			return calculater.evaluate(item, vs);
+			return strategy.evaluate(item, vs);
 		}
 		Object arg1 = prepare(item.getLeft(), vs);
 		if (arg1 instanceof Reference) {

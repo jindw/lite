@@ -37,7 +37,7 @@ public class OptimizeExpressionImpl extends ExpressionImpl {
 	}
 
 	protected Object compute(ValueStack valueStack) {
-		return calculater.getVar(valueStack,name);
+		return strategy.getVar(valueStack,name);
 	}
 	public static Expression create(final ExpressionToken el,
 			OperationStrategy calculater) {
@@ -84,7 +84,7 @@ public class OptimizeExpressionImpl extends ExpressionImpl {
 			this.key = key;
 		}
 		protected Object compute(ValueStack valueStack) {
-			Object base = calculater.getVar(valueStack,name);
+			Object base = strategy.getVar(valueStack,name);
 			return ReflectUtil.getValue(base, key);
 		}
 	}
@@ -98,7 +98,7 @@ public class OptimizeExpressionImpl extends ExpressionImpl {
 			this.keys = keys;
 		}
 		protected Object compute(ValueStack valueStack) {
-			Object base = calculater.getVar(valueStack,name);
+			Object base = strategy.getVar(valueStack,name);
 			int i = keys.length;
 			while(i-->0){
 				base = ReflectUtil.getValue(base, keys[i]);

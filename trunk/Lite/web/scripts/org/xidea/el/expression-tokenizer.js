@@ -42,7 +42,7 @@ var fns = {
 				        break;
 				    default:
     				    this.skipSpace(0);
-    					if (this.previousType == OP_GET_PROP) {
+    					if (this.previousType == OP_GET) {
     						this.addToken([VALUE_CONSTANTS,
     								id]);
     					} else {
@@ -162,7 +162,7 @@ var fns = {
 			switch (op.charAt(0)) {
 			case '(':
 				if (this.status == STATUS_EXPRESSION) {
-					this.addToken([OP_INVOKE_METHOD]);
+					this.addToken([OP_INVOKE]);
 					if (this.skipSpace(')')) {
 						this.addToken([VALUE_CONSTANTS,
 								[]]);
@@ -177,7 +177,7 @@ var fns = {
 				break;
 			case '[':
 				if (this.status == STATUS_EXPRESSION) {// getProperty
-					this.addToken([OP_GET_PROP]);
+					this.addToken([OP_GET]);
 					this.addToken([BRACKET_BEGIN]);
 				}else {// list
 					this.addList();
@@ -456,7 +456,7 @@ function trimToken(tokens){
 function addRightToken(rightStack,
 		token) {
 	var list = rightStack[rightStack.length-1];
-//	if (token[0] == OP_GET_PROP) {
+//	if (token[0] == OP_GET) {
 //	    var last = list.length-1;
 //	    if(last>=0){
 //	        var previous = list[last];

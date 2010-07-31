@@ -6,9 +6,8 @@ import org.xidea.el.impl.ExpressionFactoryImpl;
  * @see ExpressionFactoryImpl
  */
 public abstract class ExpressionFactory {
-	private static ExpressionFactoryImpl expressionFactory = new ExpressionFactoryImpl();
 	public static ExpressionFactory getInstance() {
-		return expressionFactory;
+		return ExpressionFactoryImpl.getInstance();
 	}
 	/**
 	 * 从中间代码或者直接的表达式文本解析成表达式对象

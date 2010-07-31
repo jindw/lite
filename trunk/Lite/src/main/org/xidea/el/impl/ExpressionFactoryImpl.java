@@ -3,6 +3,7 @@ package org.xidea.el.impl;
 import java.util.Collections;
 import java.util.List;
 
+import org.xidea.el.Invocable;
 import org.xidea.el.OperationStrategy;
 import org.xidea.el.Expression;
 import org.xidea.el.ExpressionFactory;
@@ -10,22 +11,37 @@ import org.xidea.el.ExpressionToken;
 import org.xidea.el.fn.ECMA262Impl;
 
 public class ExpressionFactoryImpl extends ExpressionFactory {
-	public static final OperationStrategy DEFAULT_CALCULATER;
-	static {
-		DEFAULT_CALCULATER = new OperationStrategyImpl();
-		ECMA262Impl.setup((OperationStrategyImpl) DEFAULT_CALCULATER);
-	}
 
-	public OperationStrategy strategy = DEFAULT_CALCULATER;
-	
+	final OperationStrategy strategy;
+	static ExpressionFactoryImpl expressionFactory;
+	public static ExpressionFactoryImpl getInstance() {
+		if(expressionFactory == null){
+			expressionFactory = new ExpressionFactoryImpl();
+		}
+		return expressionFactory;
+	}
 	public ExpressionFactoryImpl(OperationStrategy strategy) {
 		this.strategy = strategy;
 	}
 
 	public ExpressionFactoryImpl() {
+		OperationStrategyImpl strategy = new OperationStrategyImpl();
+		ECMA262Impl.setup(strategy);
+		this.strategy = strategy;
 	}
 
-
+	public void addVar(String var, Object value) {
+		((OperationStrategyImpl)this.strategy).addVar(var, value);
+	}
+	public void addMethod(Class<? extends Object> clazz, String name, Invocable invocable) {
+		((OperationStrategyImpl)this.strategy).addMethod(clazz, name, invocable);
+	}
+	public void addOperator(int type,Invocable impl){
+		
+	}
+	public void addOperator(int type,int higher,Invocable impl){
+		
+	}
 	public Object parse(String el) {
 		@SuppressWarnings("unchecked")
 		ExpressionToken tokens = new ExpressionTokenizer(el, Collections.EMPTY_MAP)
@@ -55,8 +71,8 @@ public class ExpressionFactoryImpl extends ExpressionFactory {
 
 	private Expression getOptimizedExpression(ExpressionToken el) {
 		Expression ressult = OptimizeExpressionImpl.create(el,
-				DEFAULT_CALCULATER);
+				strategy);
 		return ressult != null ? ressult : new ExpressionImpl(el,
-				DEFAULT_CALCULATER);
+				strategy);
 	}
 }

@@ -6,13 +6,19 @@ import org.junit.Test;
 import org.xidea.el.Expression;
 import org.xidea.el.ExpressionFactory;
 import org.xidea.el.ExpressionToken;
+import org.xidea.el.fn.ECMA262Impl;
 import org.xidea.el.impl.ExpressionFactoryImpl;
+import org.xidea.el.impl.OperationStrategyImpl;
 import org.xidea.el.impl.OptimizeExpressionImpl;
 import org.xidea.el.json.JSONDecoder;
 import org.xidea.el.test.ELTest;
 
 public class OptimizeExpressionImplTest {
 
+	OperationStrategyImpl strategy = new OperationStrategyImpl();
+	{
+		ECMA262Impl.setup(strategy);
+	}
 	@Before
 	public void setUp() throws Exception {
 	}
@@ -27,7 +33,7 @@ public class OptimizeExpressionImplTest {
 	private void doTest(String msg,Object expected,String el,String context) {
 		ELTest.testEL(context, el);
 		ExpressionFactory ef = ExpressionFactoryImpl.getInstance();
-		Expression exp = OptimizeExpressionImpl.create((ExpressionToken)ef.parse(el),  ExpressionFactoryImpl.DEFAULT_CALCULATER);
+		Expression exp = OptimizeExpressionImpl.create((ExpressionToken)ef.parse(el),  strategy);
 		Assert.assertTrue("不需是有效的優化表達式/"+msg,exp instanceof OptimizeExpressionImpl);
 		Assert.assertEquals(msg,expected, exp.evaluate(JSONDecoder.decode(context)));
 	}

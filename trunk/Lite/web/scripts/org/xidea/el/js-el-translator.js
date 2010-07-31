@@ -76,12 +76,12 @@ ELTranslator.prototype = {
 			value1 = '('+value1+')';
 		}
 		switch(type){
-//		case OP_INVOKE_METHOD_WITH_ONE_PARAM:
+//		case OP_INVOKE_WITH_ONE_PARAM:
 //			value2="["+value2+']';
-		case OP_INVOKE_METHOD:
+		case OP_INVOKE:
 			value2 = value2.slice(1,-1);
 			return value1+"("+value2+')';
-		case OP_GET_PROP:
+		case OP_GET:
 			value1 = toOperatable(el[1][0],value1);
 			if(el[2][0] == VALUE_CONSTANTS){
 				var p = getTokenParam(el[2])
@@ -165,7 +165,7 @@ function walkTree(thiz,el){
 		return;
 	}else{
 		var arg1 = el[1];
-		if(op == OP_GET_PROP){
+		if(op == OP_GET){
 			var arg2 = el[2];
 			if(arg1[0] == VALUE_VAR && arg1[1] == 'for' && arg2[0] == VALUE_CONSTANTS){
 				var param = arg2[1];
