@@ -6,20 +6,11 @@
     * [JSON JSON 解析]
       * [JSON#SYNTAX 语法容错]
       * [JSON#MAPPER 对象映射]
-
     * [CPEL 命令行工具]
       * [CPEL#KV 属性与值]
       * [CPEL#TP 类型支持]
-
-    * Issue Tracker Data API ([IssueTrackerAPITerms Terms])
-      * [IssueTrackerAPI Issue Tracker API]
-      * [IssueTrackerAPIJava Issue Tracker API Java]
-      * [IssueTrackerAPIPython Issue Tracker API Python]
-
-
-
   * Lite 模板平台
-
+      * 模板中间代码设计
   * 模板语法
     * [LiteXML LiteXML 基本语法]
     * [LiteXHTML LiteXHTML 语法扩展]
