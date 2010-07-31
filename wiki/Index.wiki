@@ -1,35 +1,21 @@
-  * [WhatsNew Whats New?]
-  * [GettingStarted Getting Started]
-  * [HowToJoinAProject Join a project]
-  * [FAQ Project Hosting FAQ]
-  * [MakingHostingBetter Making hosting better]
-  * Wiki
-    * [WikiFAQ Wiki FAQ]
-    * [WikiSyntax Wiki Syntax]
-    * [WorkingWithGoogleGadgets Google Gadgets]
-      * [InterestingDeveloperGadgets Interesting Gadgets]
-  * Issues 
-    * [IssueTrackerFAQ Issue Tracker FAQ]
-    * [IssueTracker Issue Tracker]
-    * Issue Tracker Data API ([IssueTrackerAPITerms Terms])
-      * [IssueTrackerAPI Issue Tracker API]
-      * [IssueTrackerAPIJava Issue Tracker API Java]
-      * [IssueTrackerAPIPython Issue Tracker API Python]
-      * [IssueTrackerAPIReference Issue Tracker API Reference]
-
-* JSEL 表达式引擎
-
-    * [ JSEL 表达式支持]
+  * [WhatsNew 新功能推广]
+  * JSEL 表达式引擎
+    * [JSEL 表达式支持]
       * [JSEL#OP 操作符支持]
       * [JSEL#FN 函数支持]
-
     * [JSON JSON 解析]
       * [JSON#SYNTAX 语法容错]
       * [JSON#MAPPER 对象映射]
 
-    * [CPEL 命令行工具]
+   * [CPEL 命令行工具]
       * [CPEL#KV 属性与值]
       * [CPEL#TP 类型支持]
+    * Issue Tracker Data API ([IssueTrackerAPITerms Terms])
+      * [IssueTrackerAPI Issue Tracker API]
+      * [IssueTrackerAPIJava Issue Tracker API Java]
+      * [IssueTrackerAPIPython Issue Tracker API Python]
+
+
 
   * Lite 模板平台
 
