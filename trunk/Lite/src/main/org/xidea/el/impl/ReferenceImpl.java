@@ -70,7 +70,7 @@ class ReferenceImpl implements Reference {
 		return null;
 	}
 
-	static Invocable getInvocable(Reference ref,
+	static Invocable createInvocable(Reference ref,
 			Map<String, Map<String, Invocable>> methodMap, Object[] args) {
 		Invocable invocable = createInvocable(methodMap, ref.getBase(), ref
 				.getName().toString(), args);
@@ -95,18 +95,18 @@ class ReferenceImpl implements Reference {
 			invocable = findInvocable(invocableMap, thisObject.getClass());
 		}
 		if (invocable == null) {
-			invocable = getCachedInvocable(thisObject.getClass(), name,
+			invocable = getInvocable(thisObject.getClass(), name,
 					args.length);
 
 			if (invocable == null && thisObject instanceof Class) {
-				invocable = getCachedInvocable((Class) thisObject, name,
+				invocable = getInvocable((Class) thisObject, name,
 						args.length);
 			}
 		}
 		return invocable;
 	}
 
-	static Invocable getCachedInvocable(final Class<? extends Object> clazz, final String name,
+	static Invocable getInvocable(final Class<? extends Object> clazz, final String name,
 			int length) {
 		String key = clazz.getName() + '.' + length + name;
 		Invocable result = cachedInvocableMap.get(key);
@@ -114,14 +114,14 @@ class ReferenceImpl implements Reference {
 			ArrayList<Method> methods = new ArrayList<Method>();
 			for (Method method : clazz.getMethods()) {
 				if (method.getName().equals(name)
-						&& method.getParameterTypes().length == length) {
+						&& (length <0 || method.getParameterTypes().length == length)) {
 					methods.add(method);
 				}
 			}
 			if(methods.size()>0){
 				result = createProxy(methods.toArray(new Method[methods.size()]));
+				cachedInvocableMap.put(key, result);
 			}
-			cachedInvocableMap.put(key, result);
 		}
 		return result;
 	}
@@ -161,7 +161,7 @@ class ReferenceImpl implements Reference {
 							.getParameterTypes();
 					if (clazzs.length == args.length) {
 						for (int i = 0; i < clazzs.length; i++) {
-							Class<? extends Object> type = clazzs[i];
+							Class<? extends Object> type = ReflectUtil.toWrapper(clazzs[i]);
 							Object value = args[i];
 							value = ECMA262Impl.ToValue(value, type);
 							args[i] = value;

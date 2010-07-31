@@ -18,7 +18,6 @@ import org.xidea.el.fn.ECMA262Impl;
 public class OperationStrategyImpl implements OperationStrategy {
 	private static final Log log = LogFactory.getLog(OperationStrategyImpl.class);
 	protected static final Object SKIP_QUESTION = new Object();
-	private static final Object[] EMPTY_ARGS = new Object[0];
 	private final Map<String, Map<String, Invocable>> methodMap = new HashMap<String, Map<String,Invocable>>();
 	private final Map<String, Object> globalMap = new HashMap<String, Object>();
 	private static final NumberArithmetic na = new NumberArithmetic();
@@ -66,7 +65,7 @@ public class OperationStrategyImpl implements OperationStrategy {
 	}
 
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({ "unchecked" })
 	public Object evaluate(ExpressionToken item,ValueStack vs){
 		final int type = item.getType();
 		switch (type) {
@@ -83,55 +82,44 @@ public class OperationStrategyImpl implements OperationStrategy {
 			return new ArrayList<Object>();
 		case ExpressionToken.VALUE_NEW_MAP:
 			return new LinkedHashMap<Object, Object>();
+
+		case TokenImpl.OP_INVOKE_METHOD_WITH_STATIC_PARAM:
+			
+		case ExpressionToken.OP_INVOKE_METHOD:
+			Object[] arguments;
+			if(type == ExpressionToken.OP_INVOKE_METHOD){
+				arguments =((List<?>)  evaluate(item.getRight(), vs)).toArray();
+			}else{
+				arguments = (Object[])item.getParam();
+			}
+			ExpressionToken left = item.getLeft();
+			int type2 = left.getType();
+			Object thiz;
+			
+			if(type2 == ExpressionToken.OP_GET_PROP){
+				thiz = evaluate(left.getLeft(),vs);
+				key = evaluate(left.getRight(),vs);
+			}else if(type2 == TokenImpl.OP_GET_STATIC_PROP){
+				thiz = evaluate(left.getLeft(),vs);
+				key = left.getRight().getParam();
+			}else{
+				return invoke(vs, evaluate(left, vs), arguments);
+			}
+			return invoke(vs, new ReferenceImpl(thiz,key), arguments);
 		}
 		Object arg1 = evaluate(item.getLeft(), vs);
 		Object arg2 =  null;
 		switch (type) {
-		case ExpressionToken.OP_GET_STATIC_PROP:
+		case TokenImpl.OP_GET_STATIC_PROP:
 		    arg2 = item.getParam();
-		    if (arg1 instanceof Reference) {
-				return ((Reference) arg1).next(arg2);
-			} else {
-				return new ReferenceImpl(arg1, arg2);
-			}
+		    return ReflectUtil.getValue(arg1, arg2);
 		case ExpressionToken.OP_GET_PROP:
-			arg2 = realValue(evaluate(item.getRight(), vs));
-			if (arg1 instanceof Reference) {
-				return ((Reference) arg1).next(arg2);
-			} else {
-				return new ReferenceImpl(arg1, arg2);
-			}
-		case ExpressionToken.OP_INVOKE_METHOD:
-			try {
-				Object thiz;
-				arg2 = realValue(evaluate(item.getRight(), vs));
-				Object[] arguments = (arg2 instanceof List) ? ((List<?>) arg2)
-						.toArray() : EMPTY_ARGS;
-				Invocable invocable = null;
-				if (arg1 instanceof Reference) {
-					Reference pv = (Reference) arg1;
-					invocable = ReferenceImpl.getInvocable(pv,methodMap, arguments);
-					thiz = pv.getBase();
-				} else {
-					thiz = vs;
-					if (arg1 instanceof Invocable) {
-						invocable = (Invocable) arg1;
-					} else if ((arg1 instanceof java.lang.reflect.Method)) {
-						invocable = ReferenceImpl
-								.createProxy((java.lang.reflect.Method) arg1);
-					}
-				}
-				return invocable.invoke(thiz, arguments);
-			} catch (Exception e) {
-				if (log.isDebugEnabled()) {
-					log.debug("方法调用失败:" + arg1, e);
-				}
-				return null;
-			}
+			arg2 = evaluate(item.getRight(), vs);
+		    return ReflectUtil.getValue(arg1, arg2);
+
 		/* lazy computer elements*/
 		/* and or */
 		case ExpressionToken.OP_AND:
-			arg1 = realValue(arg1);
 			if (ECMA262Impl.ToBoolean(arg1)) {
 				return evaluate(item.getRight(), vs);// 进一步判断
 			} else {// false
@@ -139,14 +127,12 @@ public class OperationStrategyImpl implements OperationStrategy {
 			}
 
 		case ExpressionToken.OP_OR:
-			arg1 = realValue(arg1);
 			if (ECMA262Impl.ToBoolean(arg1)) {
 				return arg1;
 			} else {
 				return evaluate(item.getRight(), vs);
 			}
 		case ExpressionToken.OP_QUESTION:// a?b:c -> a?:bc -- >a?b:c
-			arg1 = realValue(arg1);
 			if (ECMA262Impl.ToBoolean(arg1)) {// 取值1
 				return evaluate(item.getRight(), vs);
 			} else {// 跳过 取值2
@@ -160,10 +146,8 @@ public class OperationStrategyImpl implements OperationStrategy {
 				return arg1;
 			}
 		}
-		arg1 = realValue(arg1);
 		if((type & ExpressionToken.BIT_ARGS) >0){
 			arg2 = evaluate(item.getRight(), vs);
-			arg2 = realValue(arg2);
 		}
 		switch (type) {
 		case ExpressionToken.OP_NOT:
@@ -198,8 +182,14 @@ public class OperationStrategyImpl implements OperationStrategy {
 			/* boolean */
 			
 		case ExpressionToken.OP_EQ:
+			if(arg1 == null || arg2 == null){
+				return arg1 == arg2;
+			}
 			return compare(arg1, arg2, -1) == 0;// -1 == 0 //false
 		case ExpressionToken.OP_NOTEQ:
+			if(arg1 == null || arg2 == null){
+				return arg1 != arg2;
+			}
 			return compare(arg1, arg2, -1) != 0;// -1 != 0 //true
 		case ExpressionToken.OP_GT:
 			return compare(arg1, arg2, -1) > 0;// -1 > 0 //false
@@ -220,11 +210,31 @@ public class OperationStrategyImpl implements OperationStrategy {
 		throw new RuntimeException("不支持的操作符" + item.getType());
 
 	}
-	private static final Object realValue(Object arg1){
-		if(arg1 instanceof Reference){
-			return  ((Reference)arg1).getValue();
+
+	private Object invoke(ValueStack vs, Object arg1, Object[] arguments) {
+		try {
+			Object thiz;
+			Invocable invocable = null;
+			if (arg1 instanceof Reference) {
+				Reference pv = (Reference) arg1;
+				invocable = ReferenceImpl.createInvocable(pv,methodMap, arguments);
+				thiz = pv.getBase();
+			} else {
+				thiz = vs;
+				if (arg1 instanceof Invocable) {
+					invocable = (Invocable) arg1;
+				} else if ((arg1 instanceof java.lang.reflect.Method)) {
+					invocable = ReferenceImpl
+							.createProxy((java.lang.reflect.Method) arg1);
+				}
+			}
+			return invocable.invoke(thiz, arguments);
+		} catch (Exception e) {
+			if (log.isDebugEnabled()) {
+				log.debug("方法调用失败:" + arg1, e);
+			}
+			return null;
 		}
-		return arg1;
 	}
 
 	public Object getVar(ValueStack vs,Object key) {

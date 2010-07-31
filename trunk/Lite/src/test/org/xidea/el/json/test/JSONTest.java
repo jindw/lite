@@ -53,7 +53,7 @@ public class JSONTest {
 
 	@Test
 	public void testTime() throws Exception {
-		Object object = new JSONTokenizer("{\"a\":[],\"d\":[1,23,\"123\",[1,\"dddd\"],[]]}").parse();
+		Object object = new JSONTokenizer("{\"a\":[],\"d\":[1,23,\"123\",[1,\"dddd\"],[]]}",false).parse();
 		System.out.println(JSONEncoder.encode(object));		
 		String[] tests = new String[]{"test-number.json","test-array.json","test.json"};
 		for(int i=0;i<tests.length;i++){
@@ -69,7 +69,7 @@ public class JSONTest {
 			for (int j = 0; j < 10; j++) {
 				long t1 = System.currentTimeMillis();
 
-				JSONTokenizer reader = new JSONTokenizer(json);
+				JSONTokenizer reader = new JSONTokenizer(json,false);
 				//JSONReader reader = new JSONReader();
 				//JSONTokener reader = new JSONTokener(json);
 				long t2 = System.currentTimeMillis();

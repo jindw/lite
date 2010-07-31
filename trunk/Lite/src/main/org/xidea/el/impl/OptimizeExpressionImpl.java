@@ -10,7 +10,6 @@ import org.xidea.el.ExpressionToken;
 import org.xidea.el.ValueStack;
 
 public class OptimizeExpressionImpl extends ExpressionImpl {
-
 	protected String name;
 
 	public OptimizeExpressionImpl(ExpressionToken expression,
@@ -40,18 +39,17 @@ public class OptimizeExpressionImpl extends ExpressionImpl {
 	protected Object compute(ValueStack valueStack) {
 		return calculater.getVar(valueStack,name);
 	}
-
 	public static Expression create(final ExpressionToken el,
 			OperationStrategy calculater) {
 		if (el.getType() == ExpressionToken.VALUE_VAR) {
 			return new OptimizeExpressionImpl(el, calculater, 
 					(String)el.getParam());
-		}else if (el.getType() == ExpressionToken.OP_GET_STATIC_PROP) {
+		}else if (el.getType() == TokenImpl.OP_GET_STATIC_PROP) {
 					ArrayList<Object> props = new ArrayList<Object>();
 			ExpressionToken current = el;
 			String baseName = null;
 			while(true) {
-				if(current.getType() == ExpressionToken.OP_GET_STATIC_PROP){
+				if(current.getType() == TokenImpl.OP_GET_STATIC_PROP){
 					props.add(current.getParam());
 				}else{
 					if(current.getType() == ExpressionToken.VALUE_VAR){

@@ -15,7 +15,7 @@ public class JSArray extends JSObject implements Invocable {
 		return method.invoke(this, toList(thiz), args);
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"unchecked" , "rawtypes"})
 	private static Object toList(Object thiz) {
 		if (thiz instanceof Object[]) {
 			thiz = Arrays.asList(thiz);

@@ -2,6 +2,7 @@ package org.xidea.el.impl;
 
 import java.lang.reflect.Field;
 import java.util.AbstractList;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +16,13 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 	// 编译期间标记，compile time object
 	static final int BRACKET_BEGIN = 0xFFFE;// ([{;
 	static final int BRACKET_END = 0xFFFF;// )]};
+	// 解释优化
+	static final int OP_GET_STATIC_PROP = 0<<12 | 0<<8 | 0<<6 | 8<<2 | 0;
+	static final int OP_INVOKE_METHOD_WITH_STATIC_PARAM= 0<<12 | 0<<8 | 0<<6 | 8<<2 | 1;
+//	static final int OP_INVOKE_METHOD_WITH_ONE_PARAM   = 0<<12 | 1<<8 | 1<<6 | 8<<2 | 2;
 
+	private static final Object[] EMPTY_ARGS = new Object[0];
+	
 	private int type;
 	private TokenImpl left;
 	private TokenImpl right;
@@ -37,30 +44,60 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 
 	protected TokenImpl optimize(OperationStrategy os) {
 		if (type > 0) {
-			if (left !=null) {
+			if (left != null) {
 				left = left.optimize(os);
 				boolean canOptimize = canOptimize(left.getType());
-				if (right !=null) {
+				if (right != null) {
 					right = right.optimize(os);
-					canOptimize = canOptimize &&  canOptimize(right.getType());
+					canOptimize = canOptimize && canOptimize(right.getType());
 				}
-				if(canOptimize){
+				if (canOptimize) {
 					Object o = os.evaluate(this, ExpressionImpl.EMPTY_VS);
-					if(o == null){
-						
-					}else if(o instanceof Number){
-						float f = ((Number)o).floatValue();
-						if(Float.isNaN(f) || Float.isInfinite(f)){//NaN +-Finite不能正确系列化
+					if (o == null) {
+
+					} else if (o instanceof Number) {
+						float f = ((Number) o).floatValue();
+						if (Float.isNaN(f) || Float.isInfinite(f)) {// NaN
+							// +-Finite不能正确系列化
 							return this;
 						}
-					}else if(o instanceof CharSequence 
-							||o instanceof Boolean
-							){
-					}else{
+					} else if (o instanceof CharSequence
+							|| o instanceof Boolean) {
+					} else {
 						return this;
 					}
 					return new TokenImpl(VALUE_CONSTANTS, o);
 				}
+			}
+		}
+		if (type == OP_GET_PROP) {
+			if (right.getType() == VALUE_CONSTANTS) {
+				this.type = OP_GET_STATIC_PROP;
+				this.setParam(right.getParam());
+			}
+		}else if(type == OP_INVOKE_METHOD){
+			if(right.getType() == VALUE_NEW_LIST){
+				this.type = OP_INVOKE_METHOD_WITH_STATIC_PARAM;
+				this.setParam(EMPTY_ARGS);
+			}else{
+				TokenImpl token = this.right;//op_join
+				ArrayList<Object> params = null;
+				while(token.type == OP_PARAM_JOIN){
+					if(token.right.type == VALUE_CONSTANTS){
+						if(params == null){
+							params = new ArrayList<Object>();
+						}
+						params.add(0,token.right.getParam());
+						token = token.left;
+					}else{
+						return this;//fail
+					}
+				}
+				if(token.type == VALUE_NEW_LIST){
+					this.type = OP_INVOKE_METHOD_WITH_STATIC_PARAM;
+					this.setParam(params.toArray());
+				}
+				
 			}
 		}
 		return this;
@@ -68,7 +105,7 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 
 	private boolean canOptimize(int type) {
 		return type == VALUE_CONSTANTS;
-		//lt!=VALUE_VAR && lt!= VALUE_NEW_LIST && lt!=VALUE_NEW_MAP;
+		// lt!=VALUE_VAR && lt!= VALUE_NEW_LIST && lt!=VALUE_NEW_MAP;
 	}
 
 	public int getType() {
@@ -100,9 +137,9 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 	}
 
 	public String toString() {
-		if(value != null){
+		if (value != null) {
 			return this.value;
-		}else{
+		} else {
 			return LABEL_MAP.get(type) + ":" + JSONEncoder.encode(this);
 		}
 	}
@@ -136,6 +173,25 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 
 	@Override
 	public Object get(int index) {
+		if(type == OP_GET_STATIC_PROP){
+			if(index == 0){
+				return OP_GET_PROP;
+			}else if(index == 1){
+				return left;
+			}else if(index == 2){
+				return right;
+			}
+			return null;
+		}else if(type == OP_INVOKE_METHOD_WITH_STATIC_PARAM){
+			if(index == 0){
+				return OP_INVOKE_METHOD;
+			}else if(index == 1){
+				return left;
+			}else if(index == 2){
+				return right;
+			}
+			return null;
+		}
 		if (index == 0) {
 			return type;
 		}
@@ -158,6 +214,11 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 
 	@Override
 	public int size() {
+		if(OP_GET_STATIC_PROP == type){
+			return 3;//as OP_GET_PROP
+		}else if(OP_INVOKE_METHOD_WITH_STATIC_PARAM == type){
+			return 3;//as OP_INVOKE_METHOD
+		}
 		int size = getArgCount(type) + 1;
 		return hasParam() ? size + 1 : size;
 
@@ -167,9 +228,9 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 		switch (type) {
 		case ExpressionToken.VALUE_VAR:// 0
 		case ExpressionToken.VALUE_CONSTANTS:// 0
-		case ExpressionToken.OP_GET_STATIC_PROP:// 1
-		case ExpressionToken.OP_INVOKE_METHOD_WITH_STATIC_PARAM:// 1
-		case ExpressionToken.OP_INVOKE_METHOD_WITH_ONE_PARAM:// 2
+		case OP_GET_STATIC_PROP:// 1
+		case OP_INVOKE_METHOD_WITH_STATIC_PARAM:// 1
+//			 case OP_INVOKE_METHOD_WITH_ONE_PARAM:// 2
 		case ExpressionToken.OP_MAP_PUSH:// 1
 			return true;
 		default:

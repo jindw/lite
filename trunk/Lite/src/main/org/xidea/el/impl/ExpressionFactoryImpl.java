@@ -30,6 +30,7 @@ public class ExpressionFactoryImpl extends ExpressionFactory {
 		@SuppressWarnings("unchecked")
 		ExpressionToken tokens = new ExpressionTokenizer(el, Collections.EMPTY_MAP)
 				.getResult();
+
 		tokens = ((TokenImpl)tokens).optimize(strategy);
 		return tokens;
 	}

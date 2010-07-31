@@ -11,20 +11,22 @@ import org.xidea.el.Reference;
 import org.xidea.el.ReferenceExpression;
 import org.xidea.el.ValueStack;
 
-public class ExpressionImpl implements Expression, ReferenceExpression, ExpressionInfo {
+public class ExpressionImpl implements Expression, ReferenceExpression,
+		ExpressionInfo {
 	protected final OperationStrategy calculater;
 	protected final ExpressionToken expression;
-	static ValueStack EMPTY_VS  =new ValueStack() {
+	static ValueStack EMPTY_VS = new ValueStack() {
 		public void put(Object key, Object value) {
 		}
+
 		public Object get(Object key) {
 			return null;
 		}
 	};
 
 	public ExpressionImpl(String el) {
-		this((ExpressionToken) ExpressionFactoryImpl.getInstance()
-				.parse(el), ExpressionFactoryImpl.DEFAULT_CALCULATER);
+		this((ExpressionToken) ExpressionFactoryImpl.getInstance().parse(el),
+				ExpressionFactoryImpl.DEFAULT_CALCULATER);
 	}
 
 	public ExpressionImpl(ExpressionToken expression,
@@ -43,9 +45,6 @@ public class ExpressionImpl implements Expression, ReferenceExpression, Expressi
 			valueStack = new ValueStackImpl(context);
 		}
 		Object result = calculater.evaluate(expression, valueStack);
-		if (result instanceof Reference) {
-			return ((Reference) result).getValue();
-		}
 		return result;
 	}
 
@@ -58,11 +57,29 @@ public class ExpressionImpl implements Expression, ReferenceExpression, Expressi
 		} else {
 			valueStack = new RefrenceStackImpl(context);
 		}
-		Object result = calculater.evaluate(expression, valueStack);
+		Object result = this.prepare(expression, valueStack);
 		if (result instanceof Reference) {
 			return (Reference) result;
 		} else {
 			return RefrenceStackImpl.wrapResult(result);
+		}
+	}
+
+	protected Object prepare(ExpressionToken item, ValueStack vs) {
+		int type = item.getType();
+		Object arg2 ;
+		if (type == TokenImpl.OP_GET_STATIC_PROP) {
+			arg2 = item.getParam();
+		} else if (type == ExpressionToken.OP_GET_PROP) {
+			arg2 = calculater.evaluate(item.getRight(), vs);
+		}else{
+			return calculater.evaluate(item, vs);
+		}
+		Object arg1 = prepare(item.getLeft(), vs);
+		if (arg1 instanceof Reference) {
+			return ((Reference) arg1).next(arg2);
+		} else {
+			return new ReferenceImpl(arg1, arg2);
 		}
 	}
 
@@ -73,16 +90,16 @@ public class ExpressionImpl implements Expression, ReferenceExpression, Expressi
 
 	public List<String> getVars() {
 		ArrayList<String> list = new ArrayList<String>();
-		appendVar(expression,list);
+		appendVar(expression, list);
 		return list;
 	}
 
-	static void appendVar(ExpressionToken el,List<String> list) {
+	static void appendVar(ExpressionToken el, List<String> list) {
 		if (el != null) {
 			int type = el.getType();
 			if (type > 0) {
-				appendVar(el.getRight(),list);
-				appendVar(el.getLeft(),list);
+				appendVar(el.getRight(), list);
+				appendVar(el.getLeft(), list);
 			} else if (type == ExpressionToken.VALUE_VAR) {
 				list.add((String) el.getParam());
 			}

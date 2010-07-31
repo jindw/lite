@@ -12,27 +12,32 @@ public class JSONTokenizer {
 	protected String value;
 	protected int start;
 	protected final int end;
+	private boolean strict = false;
 
-	public JSONTokenizer(String value) {
-		this.value = value.trim();
+	public JSONTokenizer(String source,boolean strict) {
+		this.value = source.trim();
 		if (value.startsWith("\uFEFF")) {
 			value = value.substring(1);
 		}
 		this.end = this.value.length();
+		this.strict = strict;
 	}
 
 	public Object parse() {
 		skipComment();
 		char c = value.charAt(start);
-		if (c == '"') {
+		switch(c){
+		case '"' :
+		case '\'':
 			return findString();
-		} else if (c == '-' || c >= '0' && c <= '9') {
-			return findNumber();
-		} else if (c == '[') {
+		case '[':
 			return findList();
-		} else if (c == '{') {
+		case '{':
 			return findMap();
-		} else {
+		default:
+			if (c == '-' || c >= '0' && c <= '9') {
+				return findNumber();
+			}
 			String key = findId();
 			if ("true".equals(key)) {
 				return Boolean.TRUE;
@@ -41,11 +46,16 @@ public class JSONTokenizer {
 			} else if ("null".equals(key)) {
 				return null;
 			}
-			throw new ExpressionSyntaxException("语法错误:" + value + "@" + start);
+			throw buildError("");
 		}
 	}
 
-	private Map<String, Object> findMap() {
+	protected ExpressionSyntaxException buildError(String msg)  {
+		return new ExpressionSyntaxException("语法错误:"+msg +"\n"+ value + "@" + start);
+	}
+		
+
+	protected Map<String, Object> findMap() {
 		start++;
 		skipComment();
 		LinkedHashMap<String, Object> result = new LinkedHashMap<String, Object>();
@@ -55,12 +65,17 @@ public class JSONTokenizer {
 		}
 		while (true) {
 			// result.add(parse());
-			String key = (String) parse();
+			char c = value.charAt(start);
+			String key;
+			if(c == '"'){
+				key = findString();
+			}else{
+				key = findId();
+			}
 			skipComment();
-			char c = value.charAt(start++);
+			c = value.charAt(start++);
 			if (c != ':') {
-				throw new ExpressionSyntaxException("错误对象语法:" + value + "@"
-						+ start);
+				throw buildError("无效对象语法");
 			}
 			Object valueObject = parse();
 			skipComment();
@@ -69,16 +84,14 @@ public class JSONTokenizer {
 				result.put(key, valueObject);
 				return result;
 			} else if (c != ',') {
-				throw new ExpressionSyntaxException("错误对象语法:" + value + "@"
-						+ start);
+				throw buildError("无效对象语法");
 			} else {
 				result.put(key, valueObject);
-
 			}
 		}
 	}
 
-	private List<Object> findList() {
+	protected List<Object> findList() {
 		ArrayList<Object> result = new ArrayList<Object>();
 		// start--;
 		start++;
@@ -98,8 +111,7 @@ public class JSONTokenizer {
 				skipComment();
 				result.add(parse());
 			} else {
-				throw new ExpressionSyntaxException("错误数组语法:" + value + "@"
-						+ start);
+				throw buildError("无效数组语法:");
 			}
 		}
 	}
@@ -156,12 +168,18 @@ public class JSONTokenizer {
 		if (start < end) {
 			char c = value.charAt(start++);
 			if (c == 'x' || c == 'X') {
+				if(strict){
+					throw buildError("JSON未定义16进制数字");
+				}
 				long value = parseHex();
 				if(neg){
 					value = -value;
 				}
 				return value;
 			} else if(c > '0' && c<='7'){
+				if(strict){
+					throw buildError("JSON未定义8进制数字");
+				}
 				start--;
 				int value = parseOctal();
 				if(neg){
@@ -266,7 +284,7 @@ public class JSONTokenizer {
 			}
 			return (value.substring(start, start = p));
 		}
-		throw new ExpressionSyntaxException("无效id"+value);
+		throw buildError("无效id");
 
 	}
 
@@ -275,6 +293,9 @@ public class JSONTokenizer {
 	 */
 	protected String findString() {
 		char quoteChar = value.charAt(start++);
+		if(strict && quoteChar=='\''){
+			throw buildError("JSON标准 字符串应该是双引号\"...\")");
+		}
 		StringBuilder buf = new StringBuilder();
 		while (start < end) {
 			char c = value.charAt(start++);
@@ -325,6 +346,10 @@ public class JSONTokenizer {
 							start, start + 2), 16));
 					start += 2;
 					break;
+				default:
+					if(strict){
+						buildError("发现JSON 标准未定义转义字符");
+					}
 				}
 				break;
 			case '"':
@@ -332,12 +357,17 @@ public class JSONTokenizer {
 				if (c == quoteChar) {
 					return (buf.toString());
 				}
+			case '\r':
+			case '\n':
+				if(strict){
+					buildError("JSON 标准字符串不能换行");
+				}
 			default:
 				buf.append(c);
 
 			}
 		}
-		throw new ExpressionSyntaxException("未结束字符串:" + value + "@" + start);
+		throw buildError("未结束字符串");
 	}
 
 	protected void skipComment() {
@@ -349,6 +379,9 @@ public class JSONTokenizer {
 				start++;
 			}
 			if (start < end && value.charAt(start) == '/') {
+				if(strict){
+					throw buildError("JSON 标准未定义注释");
+				}
 				start++;
 				char next = value.charAt(start++);
 				if (next == '/') {
@@ -375,8 +408,7 @@ public class JSONTokenizer {
 								cend++;
 							}
 						} else {
-							throw new ExpressionSyntaxException("未結束注釋:"
-									+ value + "@" + start);
+							throw buildError("未結束注釋");
 						}
 					}
 				}

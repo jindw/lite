@@ -15,7 +15,6 @@ import static org.xidea.el.ExpressionToken.OP_PARAM_JOIN;
 import static org.xidea.el.ExpressionToken.OP_POS;
 import static org.xidea.el.ExpressionToken.OP_QUESTION;
 import static org.xidea.el.ExpressionToken.OP_QUESTION_SELECT;
-import static org.xidea.el.ExpressionToken.OP_GET_STATIC_PROP;
 import static org.xidea.el.ExpressionToken.OP_SUB;
 import static org.xidea.el.ExpressionToken.VALUE_CONSTANTS;
 import static org.xidea.el.ExpressionToken.VALUE_NEW_LIST;
@@ -26,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -56,7 +54,7 @@ public class ExpressionTokenizer extends JSONTokenizer {
 	private int depth;
 
 	public ExpressionTokenizer(String value,Map<String, Integer> aliasMap) {
-		super(value);
+		super(value,false);
 		this.aliasMap = aliasMap;
 		parseEL();
 		if(depth!=0){
@@ -65,7 +63,7 @@ public class ExpressionTokenizer extends JSONTokenizer {
 		prepareSelect();
 		LinkedList<TokenImpl> stack = new LinkedList<TokenImpl>();
 		try {
-			toTree(right(this.tokens.iterator()), stack);
+			toTree(right(this.tokens), stack);
 		} catch (Exception e) {
 			throw new ExpressionSyntaxException("逆波兰式树型化异常",e);
 		}
@@ -117,9 +115,8 @@ public class ExpressionTokenizer extends JSONTokenizer {
 		expression.value = this.value;
 		return expression;
 	}
-	private void toTree(Iterator<TokenImpl> tokens, LinkedList<TokenImpl> stack) {
-		while (tokens.hasNext()) {
-			final TokenImpl item = tokens.next();
+	private void toTree(List<TokenImpl> tokens, LinkedList<TokenImpl> stack) {
+		for (final TokenImpl item : tokens) {
 			int type = item.getType();
 			switch (type) {
 			case VALUE_CONSTANTS:
@@ -145,14 +142,13 @@ public class ExpressionTokenizer extends JSONTokenizer {
 	}
 
 	// 将中序表达式转换为右序表达式
-	private Iterator<TokenImpl> right(Iterator<TokenImpl> tokens) {
+	private List<TokenImpl> right(List<TokenImpl> tokens) {
 		LinkedList<List<TokenImpl>> rightStack = new LinkedList<List<TokenImpl>>();
 		rightStack.addFirst(new ArrayList<TokenImpl>()); // 存储右序表达式
 
 		LinkedList<TokenImpl> buffer = new LinkedList<TokenImpl>();
 
-		while (tokens.hasNext()) {
-			final TokenImpl item = tokens.next();
+		for (final TokenImpl item:tokens) {
 			if (item.getType() > 0) {
 				if (buffer.isEmpty()) {
 					buffer.addFirst(item);
@@ -184,23 +180,12 @@ public class ExpressionTokenizer extends JSONTokenizer {
 			TokenImpl operator = buffer.removeFirst();
 			addRightToken(rightStack, operator);
 		}
-		return rightStack.getFirst().iterator();
+		return rightStack.getFirst();
 	}
 
 	private void addRightToken(LinkedList<List<TokenImpl>> rightStack,
 			TokenImpl token) {
 		List<TokenImpl> list = rightStack.getFirst();
-		if (token.getType() == OP_GET_PROP) {
-			int last = list.size() - 1;
-			if (last >= 0) {
-				TokenImpl previous = list.get(last);
-				if (previous.getType() == VALUE_CONSTANTS) {
-					list.remove(last);
-					token = new TokenImpl(OP_GET_STATIC_PROP, previous
-							.getParam());
-				}
-			}
-		}
 		list.add(token);
 	}
 

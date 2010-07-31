@@ -292,7 +292,7 @@ public abstract class ECMA262Impl {
 
 		public static final Object decode(Object value) {
 			return new JSONTokenizer(ToPrimitive(value, String.class)
-					.toString()).parse();
+					.toString(),false).parse();
 		}
 
 	}

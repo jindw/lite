@@ -77,7 +77,7 @@ public class Template {
 	 * 
 	 * @internal
 	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "unchecked" ,"rawtypes"})
 	protected Object[] compile(List<Object> datas) {
 		// Object[] result = datas.toArray();// ;
 		// reverse(result);

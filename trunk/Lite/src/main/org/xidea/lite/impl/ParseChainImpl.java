@@ -10,15 +10,13 @@ import org.xidea.lite.parse.ParseChain;
 import org.xidea.lite.parse.ParseContext;
 import org.xidea.lite.parse.TextParser;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked","rawtypes"})
 public class ParseChainImpl extends ParseContextProxy implements ParseChain {
 	private static Log log = LogFactory.getLog(ParseChainImpl.class);
 	private ParseContext context;
 	private ParseChainImpl pre;
 	private ParseChainImpl next;
-	@SuppressWarnings("rawtypes")
 	private NodeParser[] parsers;
-	@SuppressWarnings("rawtypes")
 	private NodeParser parser; 
 	private Class<? extends Object> nodeType = Object.class;
 	private int index = 0;

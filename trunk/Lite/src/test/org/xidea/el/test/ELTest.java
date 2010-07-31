@@ -57,11 +57,12 @@ public class ELTest {
 		String javaResultString =(String)js.eval("JSON.stringify("+JSON.encode(javaResult)+")");
 		String jsResultString = (String)js.eval("JSON.stringify(evaluate("+jscode+","+contextJSON+"))");
 		String nativeResultString = runNativeJS(source, contextJSON);
+
+		System.out.println(JSON.encode(jscode));
 		Assert.assertEquals("Java 运行结果有误：#"+source, expect, javaResultString);
 		Assert.assertEquals("JS 运行结果有误(单步)：#"+source, expect, jsResultString);
 		Assert.assertEquals("JS 运行结果有误(编译)：#"+source, expect, nativeResultString);
 		
-		System.out.println(JSON.encode(javacode));
 		Assert.assertEquals("Java 和 JS EL编译中间结果不一致：", JSON.encode(javacode), jscode);
 		
 		System.out.println("表达式测试成功："+source+"\t\t#"+contextJSON);
