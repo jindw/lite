@@ -1,31 +1,41 @@
 #labels Featured
 ===JSEL简介===
-JSEL是一个基于逆波兰式结构，采用JS运算规则的简单的表达式解释引擎。
-同时他还是一个JSON解析引擎。
-
+JSEL是一个兼容 JavaScript 运算规则的简单的表达式解释引擎。
 
 ==== 基本特征 ====
   * 运算规则基于JavaScript。
-  * 基于逆波兰式计算模型，单栈运算，简单高效。
-  * 支持短路优化（与或、三元算符）。 
-  * 支持JSON编码解码。
-  * 函数即变量，可扩内置变量(函数)集合。
-  * 引擎实现的简单，程序体积非常小（JAR文件只有22k，同类工具OGNL 168k）。
+  * 支持变量，常量(基础类型/数字/对象字面量)，ECMA全局函数/对象，基本运算符。
+  * 不支持对上下文有影响的赋值性质的操作符号
+    如：=,+=,*=,++,--
+  * 不支持类型相关操作符号
+    如：new instanceof type
+  * 不支持全等，全部等操作
+    不支持 !== === 操作符。
+  * 不支持正则表达式
+    引擎设计考虑不同平台下的兼容性，所以暂时不考虑正则支持。
+  * 引擎实现的简单高效
+    程序体积非常小（JAR文件只有22k，同类工具OGNL 168k）。
+  * 可扩展
+    支持函数扩展，操作符别名定义，操作符定义。
 
 ==== 适用场合 ====
   * 模板引擎的表达式实现。
-  * 适合于嵌入其他对文件大小要求苛刻环境，如需要下载的webstart小程序。
-  * 语法类似数学表达式，可用于最终用户定义简单运算规则。
+    如[LITE]采用的默认表达式引擎就是JSEL。
+  * 嵌入其他对文件大小要求苛刻环境。
+    如手机软件，webstart小程序。
+  * 数学表达式计算
+    可用于最终用户定义简单运算规则。
+  * 规则引擎的表达式需求
+    您可以在JSEL基础上扩展业务相关的操作符。或者函数调用。
 
 ==== 基本用法 ====
 {{{
 import org.xidea.el.Expression;
-import org.xidea.el.ExpressionImpl;
+import org.xidea.el.ExpressionFactory;
 import java.util.HashMap;
 public class Test{
     public static void main(String[] args){
-        Expression el = new ExpressionImpl("var1 +2 * var2");
-        //Expression el = new ExpressionImpl("var1 +2 * var2",new CalculaterImpl());//你也可以定义你自己的运算规则
+        Expression el = ExpressionFactory.getInstance().create("var1 +2 * var2");
         HashMap context = new HashMap();
         context.put("var1",111);
         context.put("var2",222);
