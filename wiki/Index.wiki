@@ -1,23 +1,23 @@
-===JSEL 表达式引擎===
+  *JSEL 表达式引擎
 
-  * 表达式支持
-    * 操作符支持
-    * 函数支持
-    * 函数支持
+    * 表达式支持
+      * 操作符支持
+      * 函数支持
+      * 函数支持
 
-  * JSON解析
-    * 语法容错
-    * 对象映射
+    * JSON解析
+      * 语法容错
+      * 对象映射
 
-  * 命令行工具
-    * 属性与值
-    * 类型支持
+    * 命令行工具
+      * 属性与值
+      * 类型支持
 
-=== Lite 模板平台 ===
+  * Lite 模板平台
 
-==== 模板语法 ====
-  * [LiteXML LiteXML 基本语法]
-  * [LiteXHTML LiteXHTML 语法扩展]
-  * [LiteUI LiteUI语法扩展]
-==== 扩展机制 ====
-  * [LiteExtension 自定义名称空间]
+  * 模板语法
+    * [LiteXML LiteXML 基本语法]
+    * [LiteXHTML LiteXHTML 语法扩展]
+    * [LiteUI LiteUI语法扩展]
+  * 扩展机制
+    * [LiteExtension 自定义名称空间]
