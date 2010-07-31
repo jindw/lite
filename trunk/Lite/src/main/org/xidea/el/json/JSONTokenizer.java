@@ -87,6 +87,7 @@ public class JSONTokenizer {
 				throw buildError("无效对象语法");
 			} else {
 				result.put(key, valueObject);
+				skipComment();
 			}
 		}
 	}

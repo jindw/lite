@@ -42,12 +42,12 @@ public class ExpressionFactoryImpl extends ExpressionFactory {
 	public void addOperator(int type,int higher,Invocable impl){
 		
 	}
+	@SuppressWarnings("unchecked")
 	public Object parse(String el) {
-		@SuppressWarnings("unchecked")
 		ExpressionToken tokens = new ExpressionTokenizer(el, Collections.EMPTY_MAP)
 				.getResult();
 
-		tokens = ((TokenImpl)tokens).optimize(strategy);
+		tokens = ((TokenImpl)tokens).optimize(strategy,Collections.EMPTY_MAP);
 		return tokens;
 	}
 

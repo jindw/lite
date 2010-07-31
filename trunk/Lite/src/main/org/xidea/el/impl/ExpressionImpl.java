@@ -15,7 +15,7 @@ public class ExpressionImpl implements Expression, ReferenceExpression,
 		ExpressionInfo {
 	protected final OperationStrategy strategy;
 	protected final ExpressionToken expression;
-	static ValueStack EMPTY_VS = new ValueStack() {
+	private static ValueStack EMPTY_VS = new ValueStack() {
 		public void put(Object key, Object value) {
 		}
 
