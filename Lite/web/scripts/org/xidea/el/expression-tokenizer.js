@@ -137,12 +137,12 @@ var fns = {
 			var token = this.tokens[i];
 			var type = token[0];
 			if (depth == 0) {
-				if (type == OP_MAP_PUSH
-						|| type == VALUE_NEW_MAP) {// (
+				if (type == OP_PUSH
+						|| type == VALUE_MAP) {// (
 					// <#newMap>
 					// <#push>
 					return true;
-				} else if (type == OP_PARAM_JOIN) {// (
+				} else if (type == OP_JOIN) {// (
 					// <#newList>
 					// <#param_join>
 					return false;
@@ -203,7 +203,7 @@ var fns = {
 			case ',':// :(object_setter is skiped,',' should
 				// be skip)
 				if (!this.isMapMethod()) {
-					this.addToken([OP_PARAM_JOIN]);
+					this.addToken([OP_JOIN]);
 
 				}
 				break;
@@ -270,7 +270,7 @@ var fns = {
 
 	addKeyOrObject :function(object, isVar) {
 		if (this.skipSpace(':') && this.isMapMethod()) {// object key
-			this.addToken([OP_MAP_PUSH, object]);
+			this.addToken([OP_PUSH, object]);
 			this.start++;// skip :
 		} else if (isVar) {
 			this.addToken([VALUE_VAR, object]);
@@ -281,15 +281,15 @@ var fns = {
 
 	addList :function() {
 		this.addToken([BRACKET_BEGIN]);
-		this.addToken([VALUE_NEW_LIST]);
+		this.addToken([VALUE_LIST]);
 		if (!this.skipSpace(']')) {
-			this.addToken([OP_PARAM_JOIN]);
+			this.addToken([OP_JOIN]);
 		}
 	},
 
 	addMap :function() {
 		this.addToken([BRACKET_BEGIN]);
-		this.addToken([VALUE_NEW_MAP]);
+		this.addToken([VALUE_MAP]);
 	}
 };
 var pt = new JSONTokenizer('');
@@ -380,8 +380,8 @@ function buildTree(tokens){
         switch(type){
             case VALUE_CONSTANTS:
             case VALUE_VAR:
-            case VALUE_NEW_LIST:
-            case VALUE_NEW_MAP:
+            case VALUE_LIST:
+            case VALUE_MAP:
                 stack.push(item);
                 break;
             default://OP

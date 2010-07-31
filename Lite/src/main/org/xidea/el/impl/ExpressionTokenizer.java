@@ -9,16 +9,16 @@ import static org.xidea.el.ExpressionToken.BIT_PRIORITY_SUB;
 import static org.xidea.el.ExpressionToken.OP_GET;
 
 import static org.xidea.el.ExpressionToken.OP_INVOKE;
-import static org.xidea.el.ExpressionToken.OP_MAP_PUSH;
+import static org.xidea.el.ExpressionToken.OP_PUSH;
 import static org.xidea.el.ExpressionToken.OP_NEG;
-import static org.xidea.el.ExpressionToken.OP_PARAM_JOIN;
+import static org.xidea.el.ExpressionToken.OP_JOIN;
 import static org.xidea.el.ExpressionToken.OP_POS;
 import static org.xidea.el.ExpressionToken.OP_QUESTION;
 import static org.xidea.el.ExpressionToken.OP_QUESTION_SELECT;
 import static org.xidea.el.ExpressionToken.OP_SUB;
 import static org.xidea.el.ExpressionToken.VALUE_CONSTANTS;
-import static org.xidea.el.ExpressionToken.VALUE_NEW_LIST;
-import static org.xidea.el.ExpressionToken.VALUE_NEW_MAP;
+import static org.xidea.el.ExpressionToken.VALUE_LIST;
+import static org.xidea.el.ExpressionToken.VALUE_MAP;
 import static org.xidea.el.ExpressionToken.VALUE_VAR;
 
 import java.util.ArrayList;
@@ -121,8 +121,8 @@ public class ExpressionTokenizer extends JSONTokenizer {
 			switch (type) {
 			case VALUE_CONSTANTS:
 			case VALUE_VAR:
-			case VALUE_NEW_LIST:
-			case VALUE_NEW_MAP:
+			case VALUE_LIST:
+			case VALUE_MAP:
 				stack.addFirst(item);
 				break;
 			default:// OP
@@ -279,8 +279,8 @@ public class ExpressionTokenizer extends JSONTokenizer {
 			}
 		case VALUE_CONSTANTS:
 		case VALUE_VAR:
-		case VALUE_NEW_LIST:
-		case VALUE_NEW_MAP:
+		case VALUE_LIST:
+		case VALUE_MAP:
 			status = Status.EXPRESSION;
 			break;
 		default:
@@ -408,11 +408,11 @@ public class ExpressionTokenizer extends JSONTokenizer {
 			TokenImpl token = tokens.get(i);
 			int type = token.getType();
 			if (depth == 0) {
-				if (type == OP_MAP_PUSH || type == VALUE_NEW_MAP) {// (
+				if (type == OP_PUSH || type == VALUE_MAP) {// (
 					// <#newMap>
 					// <#push>
 					return true;
-				} else if (type == OP_PARAM_JOIN) {// (
+				} else if (type == OP_JOIN) {// (
 					// <#newList>
 					// <#param_join>
 					return false;
@@ -478,7 +478,7 @@ public class ExpressionTokenizer extends JSONTokenizer {
 			case ',':// :(object_setter is skiped,',' should
 				// be skip)
 				if (!isMapMethod()) {
-					addToken(new TokenImpl(OP_PARAM_JOIN, null));
+					addToken(new TokenImpl(OP_JOIN, null));
 				}else{
 					status = Status.OPERATOR;
 				}
@@ -515,7 +515,7 @@ public class ExpressionTokenizer extends JSONTokenizer {
 
 	private void addKeyOrObject(Object object, boolean isVar) {
 		if (skipSpace(':') && isMapMethod()) {// object key
-			addToken(new TokenImpl(OP_MAP_PUSH, object));
+			addToken(new TokenImpl(OP_PUSH, object));
 			this.start++;// skip :
 		} else if (isVar) {
 			addToken(new TokenImpl(VALUE_VAR, object));
@@ -526,15 +526,15 @@ public class ExpressionTokenizer extends JSONTokenizer {
 
 	private void addList() {
 		addToken(new TokenImpl(BRACKET_BEGIN, null));
-		addToken(new TokenImpl(VALUE_NEW_LIST, null));
+		addToken(new TokenImpl(VALUE_LIST, null));
 		if (!skipSpace(']')) {
-			addToken(new TokenImpl(OP_PARAM_JOIN, null));
+			addToken(new TokenImpl(OP_JOIN, null));
 		}
 	}
 
 	private void addMap() {
 		addToken(new TokenImpl(BRACKET_BEGIN, null));
-		addToken(new TokenImpl(VALUE_NEW_MAP, null));
+		addToken(new TokenImpl(VALUE_MAP, null));
 	}
 
 	int findRegExp(String text, int start) {

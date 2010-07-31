@@ -29,9 +29,9 @@ function evaluate(el,context){
 function _evaluate(item,context){
     var type = item[0];
     switch(type){
-    case VALUE_NEW_LIST:
+    case VALUE_LIST:
         return [];
-    case VALUE_NEW_MAP:
+    case VALUE_MAP:
         return {};
     case VALUE_VAR:
         arg1 = item[1]
@@ -109,10 +109,10 @@ function _evaluate(item,context){
         return arg1 <= arg2;
 
 
-    case OP_PARAM_JOIN:
+    case OP_JOIN:
         arg1.push(arg2)
         return arg1;
-    case OP_MAP_PUSH:
+    case OP_PUSH:
         arg1[getTokenParam(item)]= arg2;
         return arg1;
     }

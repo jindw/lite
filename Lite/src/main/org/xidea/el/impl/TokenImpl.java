@@ -76,13 +76,13 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 				this.setParam(right.getParam());
 			}
 		}else if(type == OP_INVOKE){
-			if(right.getType() == VALUE_NEW_LIST){
+			if(right.getType() == VALUE_LIST){
 				this.type = OP_INVOKE_WITH_STATIC_PARAM;
 				this.setParam(EMPTY_ARGS);
 			}else{
 				TokenImpl token = this.right;//op_join
 				ArrayList<Object> params = null;
-				while(token.type == OP_PARAM_JOIN){
+				while(token.type == OP_JOIN){
 					if(token.right.type == VALUE_CONSTANTS){
 						if(params == null){
 							params = new ArrayList<Object>();
@@ -93,7 +93,7 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 						return this;//fail
 					}
 				}
-				if(token.type == VALUE_NEW_LIST){
+				if(token.type == VALUE_LIST){
 					this.type = OP_INVOKE_WITH_STATIC_PARAM;
 					this.setParam(params.toArray());
 				}
@@ -105,7 +105,7 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 
 	private boolean canOptimize(int type) {
 		return type == VALUE_CONSTANTS;
-		// lt!=VALUE_VAR && lt!= VALUE_NEW_LIST && lt!=VALUE_NEW_MAP;
+		// lt!=VALUE_VAR && lt!= VALUE_LIST && lt!=VALUE_MAP;
 	}
 
 	public int getType() {
@@ -231,7 +231,7 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 		case OP_GET_STATIC_PROP:// 1
 		case OP_INVOKE_WITH_STATIC_PARAM:// 1
 //			 case OP_INVOKE_WITH_ONE_PARAM:// 2
-		case ExpressionToken.OP_MAP_PUSH:// 1
+		case ExpressionToken.OP_PUSH:// 1
 			return true;
 		default:
 			return false;
@@ -294,14 +294,14 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 		TOKEN_MAP.put("?", OP_QUESTION);
 		TOKEN_MAP.put(":", OP_QUESTION_SELECT);// map 中的：被直接skip了
 		// 1
-		TOKEN_MAP.put(",", OP_PARAM_JOIN);
+		TOKEN_MAP.put(",", OP_JOIN);
 		for (String key : TOKEN_MAP.keySet()) {
 			LABEL_MAP.put(TOKEN_MAP.get(key), key);
 		}
 		LABEL_MAP.put(BRACKET_BEGIN, "(");
 		LABEL_MAP.put(BRACKET_END, ")");
 
-		// OP_MAP_PUSH
+		// OP_PUSH
 		// OP_INVOKE
 	}
 

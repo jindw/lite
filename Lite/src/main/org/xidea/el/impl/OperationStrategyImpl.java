@@ -78,9 +78,9 @@ public class OperationStrategyImpl implements OperationStrategy {
 			return v;
 		case ExpressionToken.VALUE_CONSTANTS:
 			return item.getParam();
-		case ExpressionToken.VALUE_NEW_LIST:
+		case ExpressionToken.VALUE_LIST:
 			return new ArrayList<Object>();
-		case ExpressionToken.VALUE_NEW_MAP:
+		case ExpressionToken.VALUE_MAP:
 			return new LinkedHashMap<Object, Object>();
 
 		case TokenImpl.OP_INVOKE_WITH_STATIC_PARAM:
@@ -200,10 +200,10 @@ public class OperationStrategyImpl implements OperationStrategy {
 		case ExpressionToken.OP_LTEQ:
 			return compare(arg1, arg2, 1) <= 0;// 1 <= 0 //false
 
-		case ExpressionToken.OP_PARAM_JOIN:
+		case ExpressionToken.OP_JOIN:
 			((List) arg1).add(arg2);
 			return arg1;
-		case ExpressionToken.OP_MAP_PUSH:
+		case ExpressionToken.OP_PUSH:
 			((Map) arg1).put(item.getParam(), arg2);
 			return arg1;
 		}

@@ -2,8 +2,8 @@
 define('LITE_BIT_ARGS',192);
 define('LITE_VALUE_CONSTANTS',-1);
 define('LITE_VALUE_VAR',-2);
-define('LITE_VALUE_NEW_LIST',-3);
-define('LITE_VALUE_NEW_MAP',-4);
+define('LITE_VALUE_LIST',-3);
+define('LITE_VALUE_MAP',-4);
 define('LITE_OP_GET',96);
 define('LITE_OP_INVOKE',97);
 define('LITE_OP_NOT',28);
@@ -28,8 +28,8 @@ define('LITE_OP_AND',328);
 define('LITE_OP_OR',72);
 define('LITE_OP_QUESTION',68);
 define('LITE_OP_QUESTION_SELECT',69);
-define('LITE_OP_PARAM_JOIN',64);
-define('LITE_OP_MAP_PUSH',65);
+define('LITE_OP_JOIN',64);
+define('LITE_OP_PUSH',65);
 
 
 
@@ -61,8 +61,8 @@ function lite_evaluate(&$context,&$item) {
 function _lite_evaluate(&$context, &$item) {
     $type = $item[0];
     switch($type){
-    case LITE_VALUE_NEW_LIST:
-    case LITE_VALUE_NEW_MAP:
+    case LITE_VALUE_LIST:
+    case LITE_VALUE_MAP:
         return array();
     case LITE_VALUE_VAR:
         $arg1 = $item[1];
@@ -123,9 +123,9 @@ function _lite_evaluate(&$context, &$item) {
 	switch($type) {
 		case LITE_OP_GET:
 			return new _LitePropertyValue($arg1, $arg2);
-		case LITE_OP_PARAM_JOIN:
+		case LITE_OP_JOIN:
 			$arg1[]=$arg2;return $arg1;
-		case LITE_OP_MAP_PUSH:
+		case LITE_OP_PUSH:
 			if(is_array($arg1)){
 				$arg1[$item[3]] = $arg2;
 			}else{
