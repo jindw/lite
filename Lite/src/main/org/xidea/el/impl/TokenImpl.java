@@ -10,6 +10,7 @@ import java.util.Map;
 import org.xidea.el.ExpressionSyntaxException;
 import org.xidea.el.ExpressionToken;
 import org.xidea.el.OperationStrategy;
+import org.xidea.el.ValueStack;
 import org.xidea.el.json.JSONEncoder;
 
 public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
@@ -28,6 +29,7 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 	private TokenImpl right;
 	private Object param;
 	String value;
+	
 
 	public TokenImpl(int type, Object param) {
 		this.type = type;
@@ -42,17 +44,31 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 		}
 	}
 
-	protected TokenImpl optimize(OperationStrategy os) {
+	protected TokenImpl optimize(OperationStrategy os,Map<String, Object> context) {
+		return optimize(os,context,new ValueStackImpl(context));
+	}
+	private TokenImpl optimize(OperationStrategy os,Map<String, Object> context,ValueStack vs) {
 		if (type > 0) {
 			if (left != null) {
-				left = left.optimize(os);
-				boolean canOptimize = canOptimize(left.getType());
+				TokenImpl optimizedLeft = left.optimize(os, context);
+				if(type == OP_INVOKE){
+					if (left.getType() == OP_GET) {
+						if(optimizedLeft.type != VALUE_CONSTANTS || optimizedLeft.getParam() != null){
+							left = optimizedLeft;
+						}
+					}else{
+						left = optimizedLeft;
+					}
+				}else{
+					left = optimizedLeft;
+				}
+				boolean canOptimize = left.canOptimize(context);
 				if (right != null) {
-					right = right.optimize(os);
-					canOptimize = canOptimize && canOptimize(right.getType());
+					right = right.optimize(os,context,vs);
+					canOptimize = canOptimize && right.canOptimize(context);
 				}
 				if (canOptimize) {
-					Object o = os.evaluate(this, ExpressionImpl.EMPTY_VS);
+					Object o = os.evaluate(this, vs);
 					if (o == null) {
 
 					} else if (o instanceof Number) {
@@ -103,8 +119,13 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 		return this;
 	}
 
-	private boolean canOptimize(int type) {
-		return type == VALUE_CONSTANTS;
+	private boolean canOptimize(Map<String, Object> context) {
+		if(type == VALUE_CONSTANTS){
+			return true;
+		}else if(type == VALUE_VAR){
+			return context.containsKey(this.getParam());
+		}
+		return false;
 		// lt!=VALUE_VAR && lt!= VALUE_LIST && lt!=VALUE_MAP;
 	}
 
