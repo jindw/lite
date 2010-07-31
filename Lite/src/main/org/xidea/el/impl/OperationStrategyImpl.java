@@ -44,26 +44,49 @@ public class OperationStrategyImpl implements OperationStrategy {
 	 *      href="http://www.ecma-international.org/publications/standards/Ecma-262.htm">Ecma262</a>
 	 * @return
 	 */
-	protected int compare(Object arg1, Object arg2, int validReturn) {
+	protected boolean compare(Object arg1, Object arg2, int type) {
 		if (arg1 == null) {
 			if (arg2 == null) {
-				return 0;
+				return type == ExpressionToken.OP_GTEQ || type == ExpressionToken.OP_LTEQ;
 			}
 		} else if (arg1 instanceof Number && arg2 instanceof Number) {
-			return na.compare((Number)arg1, (Number)arg2, validReturn);
+			return na.compare((Number)arg1, (Number)arg2, type);
 		}else if (arg1.equals(arg2)) {
-			return 0;
+			return type == ExpressionToken.OP_GTEQ || type == ExpressionToken.OP_LTEQ;
 		}
 		arg1 = ECMA262Impl.ToPrimitive(arg1, Number.class);
 		arg2 = ECMA262Impl.ToPrimitive(arg2, Number.class);
 		if (arg1 instanceof String && arg2 instanceof String) {
-			return ((String) arg1).compareTo((String) arg2);
+			return na.compare(((String) arg1).compareTo((String) arg2),0,type);
 		}
 		Number n1 = ECMA262Impl.ToNumber(arg1);
 		Number n2 = ECMA262Impl.ToNumber(arg2);
-		return na.compare(n1, n2, validReturn);
+		return na.compare(n1, n2, type);
 	}
 
+	protected boolean isEquals(Object arg1, Object arg2, boolean strict) {
+		if(arg1 == null || arg2 == null){
+			return arg1 == arg2;
+		}
+		if (arg1.equals(arg2)) {
+			return true;
+		}else if (arg1 instanceof Number && arg2 instanceof Number) {
+			return na.compare((Number)arg1, (Number)arg2, ExpressionToken.OP_EQ);
+		}
+		if(strict){
+			return false;
+		}else if (arg1 instanceof String && arg2 instanceof String) {
+			return false;
+		}
+		arg1 = ECMA262Impl.ToPrimitive(arg1, Number.class);
+		arg2 = ECMA262Impl.ToPrimitive(arg2, Number.class);
+		if (arg1 instanceof String && arg2 instanceof String) {
+			return arg1.equals(arg2);
+		}
+		Number n1 = ECMA262Impl.ToNumber(arg1);
+		Number n2 = ECMA262Impl.ToNumber(arg2);
+		return na.compare(n1, n2,  ExpressionToken.OP_EQ);
+	}
 
 	@SuppressWarnings({ "unchecked" })
 	public Object evaluate(ExpressionToken item,ValueStack vs){
@@ -180,25 +203,22 @@ public class OperationStrategyImpl implements OperationStrategy {
 					.ToNumber(arg2));
 
 			/* boolean */
-			
+
+		case ExpressionToken.OP_EQ_STRICT:
+			return isEquals(arg1,arg2,true);
 		case ExpressionToken.OP_EQ:
-			if(arg1 == null || arg2 == null){
-				return arg1 == arg2;
-			}
-			return compare(arg1, arg2, -1) == 0;// -1 == 0 //false
-		case ExpressionToken.OP_NOTEQ:
-			if(arg1 == null || arg2 == null){
-				return arg1 != arg2;
-			}
-			return compare(arg1, arg2, -1) != 0;// -1 != 0 //true
+			return isEquals(arg1,arg2,false);
+
+		case ExpressionToken.OP_NE:
+			return !isEquals(arg1,arg2,false);
+
+		case ExpressionToken.OP_NE_STRICT:
+			return !isEquals(arg1,arg2,true);
 		case ExpressionToken.OP_GT:
-			return compare(arg1, arg2, -1) > 0;// -1 > 0 //false
 		case ExpressionToken.OP_GTEQ:
-			return compare(arg1, arg2, -1) >= 0;// -1 >= 0 //false
 		case ExpressionToken.OP_LT:
-			return compare(arg1, arg2, 1) < 0;// 1 < 0 //false
 		case ExpressionToken.OP_LTEQ:
-			return compare(arg1, arg2, 1) <= 0;// 1 <= 0 //false
+			return compare(arg1, arg2, type);// 1 <= 0 //false
 
 		case ExpressionToken.OP_JOIN:
 			((List) arg1).add(arg2);

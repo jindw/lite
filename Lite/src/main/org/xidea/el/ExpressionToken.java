@@ -57,7 +57,9 @@ public abstract interface ExpressionToken {
 	public static final int OP_GTEQ =  0<<12 | 1<<8 | 1<<6 | 4<<2 | 3;
 	
 	public static final int OP_EQ =    0<<12 | 0<<8 | 1<<6 | 4<<2 | 0;
-	public static final int OP_NOTEQ = 0<<12 | 0<<8 | 1<<6 | 4<<2 | 1;
+	public static final int OP_NE = 0<<12 | 0<<8 | 1<<6 | 4<<2 | 1;
+	public static final int OP_EQ_STRICT =    0<<12 | 0<<8 | 1<<6 | 4<<2 | 2;
+	public static final int OP_NE_STRICT = 0<<12 | 0<<8 | 1<<6 | 4<<2 | 3;
 	
 	//四:
 	public static final int OP_BIT_AND = 0<<12 | 2<<8 | 1<<6 | 3<<2 | 0;
