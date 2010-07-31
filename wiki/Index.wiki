@@ -1,17 +1,16 @@
   * JSEL 表达式引擎
 
-    * EL 表达式支持
-      * a1 操作符支持
-      * a2 函数支持
-      * a3 函数支持
+    * [ JSEL 表达式支持]
+      * [JSEL#OP 操作符支持]
+      * [JSEL#FN 函数支持]
 
-    * JSON 解析
-      * sq 语法容错
-      * s2 对象映射
+    * [JSON JSON 解析]
+      * [JSON#SYNTAX 语法容错]
+      * [JSON#MAPPER 对象映射]
 
-    * CP 命令行工具
-      * sw 属性与值
-      * sw 类型支持
+    * [CPEL 命令行工具]
+      * [CPEL#KV 属性与值]
+      * [CPEL#TP 类型支持]
 
   * Lite 模板平台
 
