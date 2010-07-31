@@ -302,7 +302,10 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 		TOKEN_MAP.put("<=", OP_LTEQ);
 		TOKEN_MAP.put(">=", OP_GTEQ);
 		TOKEN_MAP.put("==", OP_EQ);
-		TOKEN_MAP.put("!=", OP_NOTEQ);
+		TOKEN_MAP.put("!=", OP_NE);
+		TOKEN_MAP.put("===", OP_EQ_STRICT);
+		TOKEN_MAP.put("!==", OP_NE_STRICT);
+		
 
 		// 4
 		TOKEN_MAP.put("&", OP_BIT_AND);
