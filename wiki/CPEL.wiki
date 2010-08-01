@@ -9,14 +9,13 @@
 示例1（JSA 导出程序）
 *实现代码*
 {{{
-....
-	public ExportAction(String[] args) {
-		CommandParser.setup(this, args);//将命令行信息设置为当前对象的属性
 ...
 
 	public static void main(String[] args) throws Exception {
 		log.info("Args:" + JSONEncoder.encode(args));
-		ExportAction action = new ExportAction(args);
+		ExportAction action = new ExportAction();
+		//将命令行信息设置为当前对象的属性
+		CommandParser.setup(action, args);
 		action.execute();
 	}
 }}}
@@ -46,13 +45,13 @@ java -jar WEB-INF/lib/JSA-20100725.jar -scriptBase ./web/scripts -exports "org.x
 {{{
 ....
 	public LiteCompiler(String[] args) {
-		log.info("Args:"+JSONEncoder.encode(args));
-		CommandParser cp = new CommandParser(args);
-		cp.setup(this);
 	}
 
 	public static void main(String[] args) {
-		new LiteCompiler(args).execute();
+		log.info("Args:"+JSONEncoder.encode(args));
+		LiteCompiler compiler = new LiteCompiler(args)
+		CommandParser.setup(compiler,args);
+		compiler.execute();
 	}
 
 ...
@@ -65,7 +64,18 @@ java -jar WEB-INF/lib/Template-20100725.jar -root web -litecode web/WEB-INF/lite
 
 === 具体实现 ===
 
-简单的命令行解析器的实现主要由两个部分：
-  * 类型转换程序
-  * 表达式写入映射
+  # 生成属性集合
+    # 顺序遍历参数数组
+    # 遇到"-"开头的的参数，记录为当前属性名称。
+    # 否则，将参数添加为该属性的系列（每个属性有一个值列表）
+    # 最终得到一个属性（String）->值数组（String[]）的map对象。类似 servlet 中 request.getParameterMap()的数据模型。
+  # 依次写入属性
+    # 通过JSEL 的PrepareExpression 实现查找表达式的写入实现和属性类型
+      如：Map 的put 方法,javabean 的setter,或数组的写入实现
+    # 取值
+      如果当前属性类型为java.util.Collection或者数组。取全部值数组，否则取值数组的最后一个字符串。
+    # 类型转换
+      根据当前CommandParser对应的转换器（默认会注册一批常见装换器）,作类型转换，如果是数组或者确定范型参数的Collection，依次转换类型值(如果是确定范型参数的Map，属性也要转换)。
+    # 设值
+      通过PrepareExpression 接口，完成值写入。
     
