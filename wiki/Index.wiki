@@ -1,7 +1,7 @@
   * [WhatsNew 新功能推广]
   * JSEL 表达式引擎
     * [JSEL 表达式支持]
-      * [JSELOperator 操作符支持]
+      * [JSELOperator 运算符支持]
       * [JSELFunction 函数支持]
       * [JSELExtension 功能扩展]
     * [JSON JSON 解析]
