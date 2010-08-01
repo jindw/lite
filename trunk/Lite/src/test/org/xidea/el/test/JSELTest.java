@@ -15,7 +15,7 @@ public class JSELTest {
     @Test
     public void testExpression(){
         Expression el = factory.create("12 * 60 + 100");
-        Object result1 = el.evaluate(null);
+        Object result1 = el.evaluate();
         System.out.println("result1");
         System.out.println(result1);
     }

@@ -13,11 +13,11 @@ public class MemberMethodTest {
 
 	@Test
 	public void testEncodeURLComponentEL() throws Exception{
-		System.out.println( factory.create("(123.4.intValue()+11)").evaluate(null));
+		System.out.println( factory.create("(123.4.intValue()+11)").evaluate());
 		Expression el = factory.create("(1234).intValue() == 1234");
 		Expression el2 = factory.create("(1234.intValue()) == 1234");
-		assertEquals(true, el.evaluate(null));
-		assertEquals(true, el2.evaluate(null));
+		assertEquals(true, el.evaluate());
+		assertEquals(true, el2.evaluate());
 	}
 	
 }

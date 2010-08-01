@@ -10,7 +10,7 @@ public class CompareTest {
 	@Test
 	public void test(){
 		String el = "NaN==NaN";
-		System.out.println(ef.create(el).evaluate(null));
+		System.out.println(ef.create(el).evaluate());
 	}
 	
 	@Test
@@ -47,7 +47,7 @@ public class CompareTest {
 	}
 
 	private void test(String el, boolean expected) {
-		boolean actual = (Boolean)ef.create(el).evaluate(null);
+		boolean actual = (Boolean)ef.create(el).evaluate();
 		Assert.assertEquals(el,expected, actual);
 	}
 

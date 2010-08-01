@@ -34,7 +34,7 @@ public class JSONNumberParserTest {
 	}
 
 	public void doTestNumber(Object expected,String json){
-		Assert.assertEquals(expected, ((ExpressionImpl)(ExpressionFactoryImpl.getInstance().create(json))).evaluate(null));
-		Assert.assertEquals(expected, ((ExpressionImpl)ExpressionFactoryImpl.getInstance().create(json+" ")).evaluate(null));
+		Assert.assertEquals(expected, ((ExpressionImpl)(ExpressionFactoryImpl.getInstance().create(json))).evaluate());
+		Assert.assertEquals(expected, ((ExpressionImpl)ExpressionFactoryImpl.getInstance().create(json+" ")).evaluate());
 	}
 }

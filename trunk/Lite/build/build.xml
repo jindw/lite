@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="GBK"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <project name="Lite" default="build" basedir="../">
 	<tstamp>
 		<format property="version" pattern="yyyyMMdd" />
@@ -72,7 +72,7 @@
 			<path path="src/php/lite/Template.php" />
 			<path path="src/php/lite/Expression.php" />
 		</concat>
-		<!-- 合并之后替换掉多余的require_once  -->
+		<!-- 鍚堝苟涔嬪悗鏇挎崲鎺夊浣欑殑require_once  -->
 		<!--
 		<replaceregexp file="web/WEB-INF/template.php"
 			match="^require_once|^\?&gt;&lt;\?php" replace="//\0" byline="true" encoding="utf-8"/>
@@ -91,6 +91,14 @@
 		</delete>
 		<echo file="build/dest/jslite/el/__package__.js">this.setImplementation("org.xidea.lite.impl")</echo>
 		<echo file="build/dest/jslite/lite/parse/__package__.js">this.setImplementation("org.xidea.lite.impl")</echo>
+
+		<jar destfile="build/dest/JSEL.jar" compress="true">
+			<fileset dir="web/WEB-INF/classes">
+				<include name="org/xidea/el/**/*.class" />
+				<exclude name="**/*.js" />
+				<exclude name="**/test/**/*.*" />
+			</fileset>
+		</jar>
 		<jar destfile="build/dest/Template.jar" compress="true">
 			<manifest>
 				<attribute name="Main-Class" value="org.xidea.lite.tools.LiteCompiler" />
@@ -119,18 +127,18 @@
 			</zipfileset>
 		</jar>
 		<jar destfile="build/dest/TemplateRuntime.jar" compress="true">
-			<zipfileset src="build/dest/Template.jar">
+
+			<fileset dir="web/WEB-INF/classes">
+				<include name="org/xidea/lite/*.class" />
+			</fileset>
+			<zipfileset src="build/dest/JSEL.jar">
 				<include name="org/xidea/**/*.*" />
 				<exclude name="org/xidea/el/parser/ExpressionTokenizer.*" />
 				<exclude name="org/xidea/el/parser/ExpressionTokenizer$*" />
-				<exclude name="**/*.java" />
-				<exclude name="**/*.js" />
-				<exclude name="org/xidea/lite/servlet/*.*" />
-				<exclude name="org/xidea/lite/tools/*.*" />
-				<exclude name="org/xidea/lite/parser/**/*.*" />
 			</zipfileset>
 		</jar>
 		<delete file="build/dest/jslite/__package__.js" />
+		<copy tofile="build/dest/JSEL-${version}.jar" file="build/dest/JSEL.jar" />
 		<copy tofile="build/dest/Template-${version}.jar" file="build/dest/Template.jar" />
 		<copy tofile="build/dest/TemplateRuntime-${version}.jar" file="build/dest/TemplateRuntime.jar" />
 
@@ -177,12 +185,12 @@
 	</target>
 
 	<target name="compress" depends="init">
-		<echo>压缩JSLite实现</echo>
+		<echo>鍘嬬缉JSLite瀹炵幇</echo>
 
 		<!-- export lite -->
 		<!-- empty -->
 		<!-- export lite impl,parse,el -->
-		<java failonerror="true" classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
+		<java fork="true" failonerror="true" classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
 			<arg value="-scriptBase" />
 			<arg value="${basedir}/web/scripts" />
 			<arg value="-exports" />
@@ -216,7 +224,7 @@
 			<arg value="${basedir}/build/dest/jslite/lite/util/impl.js" />
 		</java>
 		
-		<echo>压缩JS在线演示实现</echo>
+		<echo>鍘嬬缉JS鍦ㄧ嚎婕旂ず瀹炵幇</echo>
 		<java classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
 			<arg value="-scriptBase" />
 			<arg value="${basedir}/web/scripts" />
@@ -234,7 +242,7 @@
 	</target>
 
 	<target name="php-example">
-		<zip comment="批量编译:java -jar ./WEB-INF/lib/Template.jar -root ." file="build/dest/php-example.zip" encoding="GBK">
+		<zip comment="鎵归噺缂栬瘧:java -jar ./WEB-INF/lib/Template.jar -root ." file="build/dest/php-example.zip" encoding="GBK">
 			<fileset dir="web">
 				<include name="example/test.php" />
 				<include name="example/test.xhtml" />

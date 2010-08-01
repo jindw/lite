@@ -110,7 +110,7 @@ public class JSONDecoderTest {
 
 	@Test
 	public void testJSEL() throws IOException {
-		Object o = new ExpressionImpl("{key:'value',n:-1}").evaluate(null);
+		Object o = new ExpressionImpl("{key:'value',n:-1}").evaluate();
 		System.out.println(o);
 		assertEquals(JSONDecoder.decode("{\"key\":\"value\",\"n\":-1}"), o);
 	}

@@ -15,7 +15,7 @@ public class JSArray extends JSObject implements Invocable {
 		return method.invoke(this, toList(thiz), args);
 	}
 
-	@SuppressWarnings({"unchecked" , "rawtypes"})
+	@SuppressWarnings({"unchecked"})
 	private static Object toList(Object thiz) {
 		if (thiz instanceof Object[]) {
 			thiz = Arrays.asList(thiz);
@@ -45,8 +45,8 @@ public class JSArray extends JSObject implements Invocable {
 
 	public Object slice(List<Object> thiz, Object... args) throws Exception {
 		int size = thiz.size();
-		int begin = toSliceRange(ECMA262Impl.getIntArg(args, 0, 0), size);
-		int end = toSliceRange(ECMA262Impl.getIntArg(args, 1, size), size);
+		int begin = toSliceRange(JSObject.getIntArg(args, 0, 0), size);
+		int end = toSliceRange(JSObject.getIntArg(args, 1, size), size);
 		if (begin < end) {
 			return thiz.subList(begin, end);
 		} else {
@@ -59,7 +59,7 @@ public class JSArray extends JSObject implements Invocable {
 		String joiner = null;
 		for (Object o : thiz) {
 			if (joiner == null) {
-				joiner = ECMA262Impl.getStringArg(args, 0, ",");
+				joiner = JSObject.getStringArg(args, 0, ",");
 			} else {
 				buf.append(joiner);
 			}
@@ -104,7 +104,7 @@ public class JSArray extends JSObject implements Invocable {
 		return thiz.size();
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({ "unchecked" })
 	public Object concat(List<Object> thiz, Object... args) {
 		List<Object> result = new ArrayList<Object>(thiz);
 		for (Object o : args) {
@@ -125,7 +125,7 @@ public class JSArray extends JSObject implements Invocable {
 
 	@SuppressWarnings("unchecked")
 	public Object sort(List<Object> thiz, Object... args) {
-		Object o = ECMA262Impl.getArg(args, 0, null);
+		Object o = JSObject.getArg(args, 0, null);
 		Comparator<Object> c = null;
 		if (o instanceof Comparator) {
 			c = (Comparator<Object>) o;

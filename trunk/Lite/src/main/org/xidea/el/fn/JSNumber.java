@@ -6,7 +6,7 @@ import org.xidea.el.Invocable;
 
 public class JSNumber extends JSObject implements Invocable {
 	public Object toFixed(Number thiz, Object[] args) throws Exception {
-		int p = ECMA262Impl.getIntArg(args, 0, 0);
+		int p = JSObject.getIntArg(args, 0, 0);
 		DecimalFormat df = new DecimalFormat();
 		df.setMinimumFractionDigits(p);
 		df.setMaximumFractionDigits(p);
@@ -24,7 +24,7 @@ public class JSNumber extends JSObject implements Invocable {
 		return null;
 	}
 	public Object toString(Number thiz, Object[] args) {
-		int radix = ECMA262Impl.getIntArg(args, 0, 10);
+		int radix = JSObject.getIntArg(args, 0, 10);
 		return ECMA262Impl.toString(thiz,radix);
 	}
 }
