@@ -20,6 +20,11 @@
 		action.execute();
 	}
 }}}
+
+*命令行调用*
+{{{
+java -jar WEB-INF/lib/JSA-20100725.jar -scriptBase ./web/scripts -exports "org.xidea.el:*" "org.xidea.lite.impl:*" "org.xidea.lite.parse:*" -outputPackage ./build/dest/jslite/lite/impl/__package__.js -outputExported ./build/dest/jslite/lite/impl/impl.js
+}}}
 *ant 调用*
 {{{
 	<java jar="JSA-20100724.jar">
@@ -52,9 +57,10 @@
 
 ...
 }}}
+
 *命令行调用*
 {{{
-java -jar WEB-INF/lib/JSA20100725.jar -root web -litecode web/WEB-INF/litecode
+java -jar WEB-INF/lib/Template-20100725.jar -root web -litecode web/WEB-INF/litecode
 }}}
 
 === 具体实现 ===
