@@ -27,4 +27,37 @@ abstract class JSObject implements Invocable {
 	public String toString() {
 		return method.getName();
 	}
+
+
+	protected static Object getArg(Object[] args, int index, Object defaultValue) {
+		if (index >= 0 && index < args.length) {
+			return args[index];
+		} else {
+			return defaultValue;
+		}
+	}
+
+
+	static int getIntArg(Object[] args, int index,
+			Integer defaultValue) {
+		Number value = getNumberArg(args, index, defaultValue);
+		return value.intValue();
+	}
+
+
+	static Number getNumberArg(Object[] args, int index,
+			Number defaultValue) {
+		Object value = getArg(args, index, defaultValue);
+		return ECMA262Impl.ToNumber(value);
+	}
+
+
+	static String getStringArg(Object[] args, int index,
+			String defaultValue) {
+		Object value = getArg(args, index, null);
+		if(value == null){
+			return null;
+		}
+		return ECMA262Impl.ToString(value);
+	}
 }

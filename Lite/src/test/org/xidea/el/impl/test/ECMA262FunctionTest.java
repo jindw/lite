@@ -22,12 +22,12 @@ public class ECMA262FunctionTest {
 	@Test
 	public void testEncodeURLComponentEL() throws Exception {
 		Expression el = factory.create("encodeURIComponent('金大为')");
-		String encoded = (String) el.evaluate(null);
+		String encoded = (String) el.evaluate();
 		assertEquals("%E9%87%91%E5%A4%A7%E4%B8%BA", encoded);
 
 		el = factory
 				.create("decodeURIComponent('a%E9%87%91%E5%A4%A7%E4%B8%BA')");
-		assertEquals("a金大为", el.evaluate(null));
+		assertEquals("a金大为", el.evaluate());
 	}
 
 	@Test
@@ -67,23 +67,23 @@ public class ECMA262FunctionTest {
 	public void testNumber() throws Exception {
 		// Expression el = factory.createEL("'金大为'.substring(1,2)");
 		Expression el = factory.create("parseInt(1.23)");
-		assertEquals(1, el.evaluate(null));
+		assertEquals(1, el.evaluate());
 	}
 
 	@Test
 	public void testIsNaN() throws Exception {
 		// Expression el = factory.createEL("'金大为'.substring(1,2)");
 		Expression el = factory.create("isNaN(0/0)");
-		assertEquals(true, el.evaluate(null));
+		assertEquals(true, el.evaluate());
 	}
 
 	@Test
 	public void testFP() throws Exception {
 		// Expression el = factory.createEL("'金大为'.substring(1,2)");
 		Expression el = factory.create("(true?isNaN:isFinite)(0/0)");
-		assertEquals(true, el.evaluate(null));
+		assertEquals(true, el.evaluate());
 		el = factory.create("(false?isNaN:isFinite)(0/0)");
-		assertEquals(false, el.evaluate(null));
+		assertEquals(false, el.evaluate());
 	}
 
 }

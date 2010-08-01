@@ -129,7 +129,6 @@ ELTranslator.prototype = {
 	stringifyPrefix:function(el){
 		var type = el[0];
 		var el1 = el[1];
-		$log.warn(JSON.stringify(el))
 		var value = this.stringify(el1);
 		var param = getTokenParam(el);
 		if(this.getPriority(el)>=this.getPriority(el1)){

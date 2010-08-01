@@ -31,16 +31,6 @@ public class ExpressionImpl implements Expression, ReferenceExpression,
 		this.expression = expression;
 	}
 
-	public Object evaluate(Object... context) {
-		if((context.length &1) ==1){
-			throw new IllegalArgumentException("参数必须是偶数个数");
-		}
-		HashMap<Object, Object> map = new HashMap<Object, Object>();
-		for(int i = 0;i<context.length;i++){
-			map.put(context[i], context[i++]);
-		}
-		return evaluate(map);
-	}
 	public Object evaluate(Object context) {
 		ValueStack valueStack;
 		if (context instanceof ValueStack) {
@@ -52,6 +42,20 @@ public class ExpressionImpl implements Expression, ReferenceExpression,
 		}
 		Object result = strategy.evaluate(expression, valueStack);
 		return result;
+	}
+	public Object evaluate(Object... context) {
+		if(context == null || context.length == 0){
+			return evaluate((Object)null);
+		}else if(context.length == 1){
+			return evaluate(context[0]);
+		}else if((context.length &1) ==1){
+			throw new IllegalArgumentException("参数必须是偶数个数");
+		}
+		HashMap<Object, Object> map = new HashMap<Object, Object>();
+		for(int i = 0;i<context.length;i++){
+			map.put(context[i], context[i++]);
+		}
+		return evaluate(map);
 	}
 
 	public Reference prepare(Object context) {

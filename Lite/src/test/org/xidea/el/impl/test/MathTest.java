@@ -90,7 +90,7 @@ public class MathTest {
 	private void testLike(String exp, double max) throws ScriptException {
 		Expression el = factory.create(exp);
 		Number jsv = (Number) se.eval(exp);
-		Number elv = (Number) el.evaluate(null); 
+		Number elv = (Number) el.evaluate(); 
 		
 		if(Double.isNaN(jsv.doubleValue()) != Double.isNaN(elv.doubleValue())){
 			Assert.fail("误差太大："+exp+"\n"+jsv+"\n"+elv);
@@ -105,7 +105,7 @@ public class MathTest {
 	private void test(String exp) throws ScriptException {
 		Expression el = factory.create(exp);
 		Object jsv = se.eval(exp);
-		Object elv = el.evaluate(null); 
+		Object elv = el.evaluate(); 
 		//System.out.println(exp +":"+jsv);
 		//System.out.println(":"+elv);
 		// System.out.println(jsv.getClass());

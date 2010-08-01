@@ -148,7 +148,7 @@ public class Template {
 			Class<? extends Plugin> addonType = (Class<? extends Plugin>) Class
 					.forName((String) cmd[3]);
 			Plugin addon = addonType.newInstance();
-			ReflectUtil.setValues(addon, (Map) el.evaluate(null));
+			ReflectUtil.setValues(addon, (Map) el.evaluate());
 			Object[] children = compile((List<Object>) cmd[1]);
 			if (addonType == DefinePlugin.class) {// definePlugin no status care
 				forCount = forCount0;

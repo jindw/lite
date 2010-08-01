@@ -39,7 +39,7 @@ public class QuestionTest {
 
 	private void test(String el) {
 		System.out.println("test:" + el);
-		Number actual = (Number) ef.create(el).evaluate(null);
+		Number actual = (Number) ef.create(el).evaluate();
 		Number expected = (Number) rt.eval(el);
 		Assert.assertEquals(el, expected.intValue(), actual.intValue());
 	}

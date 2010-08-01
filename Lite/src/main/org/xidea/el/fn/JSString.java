@@ -71,7 +71,7 @@ public class JSString extends JSObject implements Invocable {
 	// 15.5.4.11 String.prototype.replace(searchValue, replaceValue)
 	public String replace(String thiz, Object[] args) {
 		if(args !=null &&  args.length>0){
-			String replaceValue = String.valueOf(ECMA262Impl.getStringArg(args, 1, "undefined"));
+			String replaceValue = String.valueOf(JSObject.getStringArg(args, 1, "undefined"));
 			if (args[0] instanceof Pattern) {
 				Pattern searchPattern = (Pattern) args[0];
 				//int f = searchPattern.flags();
@@ -88,9 +88,9 @@ public class JSString extends JSObject implements Invocable {
 	// 15.5.4.13 String.prototype.slice(start, end)
 	public String slice(String thiz, Object[] args) {
 		int size = thiz.length();
-		int begin = JSArray.toSliceRange(ECMA262Impl.getIntArg(args, 0, 0),
+		int begin = JSArray.toSliceRange(JSObject.getIntArg(args, 0, 0),
 				size);
-		int end = JSArray.toSliceRange(ECMA262Impl.getIntArg(args, 1, size),
+		int end = JSArray.toSliceRange(JSObject.getIntArg(args, 1, size),
 				size);
 		if (begin < end) {
 			return thiz.substring(begin, end);
@@ -101,11 +101,11 @@ public class JSString extends JSObject implements Invocable {
 
 	// 15.5.4.14 String.prototype.split(separator, limit)
 	public String[] split(String thiz, Object[] args) {
-		String separator = ECMA262Impl.getStringArg(args, 0, null);
+		String separator = JSObject.getStringArg(args, 0, null);
 		if (separator == null) {
 			return new String[] { thiz };
 		}
-		int limit = ECMA262Impl.getIntArg(args, 0, -1);
+		int limit = JSObject.getIntArg(args, 0, -1);
 		return thiz.split(Pattern.quote(separator), limit);
 	}
 
@@ -116,16 +116,16 @@ public class JSString extends JSObject implements Invocable {
 	// 15.5.4.15 String.prototype.substring(start, end)
 	public String substring(String thiz, Object[] args) {
 		int size = thiz.length();
-		int begin = toSubstringRange(ECMA262Impl.getIntArg(args, 0, 0), size);
-		int end = toSubstringRange(ECMA262Impl.getIntArg(args, 1, size), size);
+		int begin = toSubstringRange(JSObject.getIntArg(args, 0, 0), size);
+		int end = toSubstringRange(JSObject.getIntArg(args, 1, size), size);
 		return thiz.substring(Math.min(begin, end), Math.max(begin, end));
 	}
 
 	// 非标准
 	public String substr(String thiz, Object[] args) {
 		int size = thiz.length();
-		int begin = toSubstringRange(ECMA262Impl.getIntArg(args, 0, 0), size);
-		int len = ECMA262Impl.getIntArg(args, 1, size - begin);
+		int begin = toSubstringRange(JSObject.getIntArg(args, 0, 0), size);
+		int len = JSObject.getIntArg(args, 1, size - begin);
 		if (len > 0) {
 			return thiz.substring(begin, Math.min(size, begin + len));
 		}

@@ -33,7 +33,7 @@ public class JSArrayTest {
 	}
 	public void testELValue(String exp,Object value) throws Exception{
 		Expression el = factory.create(exp);
-		assertEquals(value, el.evaluate(null));
+		assertEquals(value, el.evaluate());
 	}
 	
 }
