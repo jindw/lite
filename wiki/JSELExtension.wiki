@@ -24,8 +24,9 @@ String json = (String)el.evaluate("path","test.json");
 //测试内置函数
 Expression　el = factory.create("md5(username+':'+password)");
 String md5pass= (String)el.evaluate("username","jindw","password","123456");
-}}}　
-
+}}}
+  * 基本原理
+　　内置对象是在标准JavaScript 语法基础上。通过扩充标准函数库或者添加内置对象的方式来实现自定义需求，内置对象在表达式工厂内共享。
 
 ==== 添加自定义操作符 ====
   * 代码示例
@@ -43,4 +44,6 @@ factory.addOperator(ExpressionToken.OP_LT,"lt",null);
 
 Expression　el = factory.create("contains(['a','b','c'],key')? 1: key gt 'b'");
 System.out.println(el.evaluate("key","a"));
-}}}　
+}}}
+　* 基本原理
+    自定义操作符是超越标准JavaScript 语法，通过参照表达式的方式，自定义运算符行为，优先级等语法层面的内容。
