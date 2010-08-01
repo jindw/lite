@@ -241,10 +241,10 @@ function _$items(source,result,type) {
                 case EL_TYPE:
                     this.processEL(item);
                     break;
-                case XML_TEXT_TYPE:
+                case XT_TYPE:
                     this.processXMLText(item);
     			    break;
-                case XML_ATTRIBUTE_TYPE:
+                case XA_TYPE:
                     this.processXMLAttribute(item);
                     break;
                 case VAR_TYPE:

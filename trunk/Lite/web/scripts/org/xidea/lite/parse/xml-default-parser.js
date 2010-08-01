@@ -83,7 +83,7 @@ function processElement(node,context,chain){
 function processAttribute(node,context,chain){
     var name = String(node.name);
     var value = String(node.value);
-    var buf = context.parseText(value,XML_ATTRIBUTE_TYPE);
+    var buf = context.parseText(value,XA_TYPE);
     var isStatic;
     var isDynamic;
     //hack context.parseText is void 
@@ -125,10 +125,10 @@ function processAttribute(node,context,chain){
 }
 function processTextNode(node,context,chain){
     var data = String(node.data);
-    //context.appendAll(context.parseText(data.replace(/^\s*([\r\n])\s*|\s*([\r\n])\s*$|^(\s)+|(\s)+$/g,"$1$2$3$4"),XML_TEXT_TYPE))
+    //context.appendAll(context.parseText(data.replace(/^\s*([\r\n])\s*|\s*([\r\n])\s*$|^(\s)+|(\s)+$/g,"$1$2$3$4"),XT_TYPE))
     //不用回车js序列化后更短
     data = data.replace(/^\s*([\r\n])\s*|\s*([\r\n])\s*$|^(\s)+|(\s)+$/g,"$1$2$3$4");
-    context.appendAll(context.parseText(data,XML_TEXT_TYPE))
+    context.appendAll(context.parseText(data,XT_TYPE))
 }
 
 function processCDATA(node,context,chain){

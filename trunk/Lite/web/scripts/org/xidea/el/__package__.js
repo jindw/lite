@@ -1,7 +1,7 @@
 this.addScript('expression-token.js',
 				[
 					//函数
-					"optimizeEL","getTokenParam","hasTokenParam","getTokenParamIndex",'getTokenLength','findTokenType','findTokenText'
+					"getTokenParam","hasTokenParam","getTokenParamIndex",'getTokenLength','findTokenType','findTokenText'
 					,"BIT_*"
 					,"VALUE_*"
 					,"OP_*"
@@ -23,7 +23,7 @@ this.addScript('json-tokenizer.js','JSONTokenizer');
 
 this.addScript('expression-tokenizer.js',['getPriority','ExpressionTokenizer']
                 ,'JSONTokenizer'
-                ,["optimizeEL","hasTokenParam",'org.xidea.jsi:$log']);
+                ,["hasTokenParam",'org.xidea.jsi:$log']);
 
 this.addScript('el-util.js','findELEnd'
                 ,0

@@ -3,6 +3,7 @@ package org.xidea.el.test;
 import java.io.File;
 import java.net.URI;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import org.junit.Assert;
@@ -11,6 +12,7 @@ import org.xidea.el.Expression;
 import org.xidea.el.ExpressionFactory;
 import org.xidea.el.fn.ECMA262Impl.JSON;
 import org.xidea.el.impl.ExpressionFactoryImpl;
+import org.xidea.el.impl.TokenImpl;
 import org.xidea.jsi.JSIRuntime;
 import org.xidea.lite.Template;
 import org.xidea.lite.parse.ParseContext;
@@ -33,6 +35,8 @@ public class ELTest {
 	}
 	@Test
 	public void test(){
+		System.out.println(Double.NaN);
+		System.out.println(Double.NEGATIVE_INFINITY);
 		testEL(null,"'abc'*123");
 	}
 	public static Object testEL(Object context,String source){
@@ -62,8 +66,9 @@ public class ELTest {
 		Assert.assertEquals("Java 运行结果有误：#"+source, expect, javaResultString);
 		Assert.assertEquals("JS 运行结果有误(单步)：#"+source, expect, jsResultString);
 		Assert.assertEquals("JS 运行结果有误(编译)：#"+source, expect, nativeResultString);
-		
-		Assert.assertEquals("Java 和 JS EL编译中间结果不一致：", JSON.encode(javacode), jscode);
+		TokenImpl jsc = TokenImpl.toToken((List<Object>)JSON.decode(jscode));
+		jsc = jsc.optimize(ExpressionFactoryImpl.getInstance().getStrategy(),new HashMap<String, Object>());
+		Assert.assertEquals("Java 和 JS EL编译中间结果不一致：", JSON.encode(javacode), JSON.encode(jsc));
 		
 		System.out.println("表达式测试成功："+source+"\t\t#"+contextJSON);
 		return javaResult;

@@ -17,7 +17,7 @@ public class OptimizeExpressionImplTest {
 
 	OperationStrategyImpl strategy = new OperationStrategyImpl();
 	{
-		ECMA262Impl.setup(strategy);
+		ECMA262Impl.setup(new ExpressionFactoryImpl(strategy));
 	}
 	@Before
 	public void setUp() throws Exception {

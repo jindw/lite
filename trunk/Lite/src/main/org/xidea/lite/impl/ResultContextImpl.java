@@ -142,7 +142,7 @@ public class ResultContextImpl implements ResultContext {
 
 	public final void appendXA(String name, Object el) {
 		el = requrieEL(el);
-		this.append(new Object[] { Template.XML_ATTRIBUTE_TYPE, el, name });
+		this.append(new Object[] { Template.XA_TYPE, el, name });
 
 	}
 
@@ -195,7 +195,7 @@ public class ResultContextImpl implements ResultContext {
 
 	public final void appendXT(Object el) {
 		el = requrieEL(el);
-		this.append(new Object[] { Template.XML_TEXT_TYPE, el });
+		this.append(new Object[] { Template.XT_TYPE, el });
 	}
 
 	public final void appendPlugin(String pluginClazz, Object el) {

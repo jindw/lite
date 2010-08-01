@@ -126,8 +126,8 @@ function doFind(code,vs){
 				doFind(item[1],vs);
 				vs.exitFor();
 				break;
-			case XML_ATTRIBUTE_TYPE:
-			case XML_TEXT_TYPE:
+			case XA_TYPE:
+			case XT_TYPE:
 				vs.setNeedReplacer();
 			case VAR_TYPE:
 			case EL_TYPE:

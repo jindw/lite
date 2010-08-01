@@ -18,6 +18,7 @@ public abstract interface ExpressionToken {
 	public static final int BIT_PRIORITY     = 15<<2;
 	public static final int BIT_PRIORITY_SUB = 15<<8;
 	public static final int BIT_ARGS         = 3<<6;
+	public static final int POS_INC = 12;
 
 	//值类型（<=0）
 	//常量标记（String,Number,Boolean,Null）
@@ -55,6 +56,7 @@ public abstract interface ExpressionToken {
 	public static final int OP_GT   =  0<<12 | 1<<8 | 1<<6 | 4<<2 | 1;
 	public static final int OP_LTEQ =  0<<12 | 1<<8 | 1<<6 | 4<<2 | 2;
 	public static final int OP_GTEQ =  0<<12 | 1<<8 | 1<<6 | 4<<2 | 3;
+	public static final int OP_IN   =  1<<12 | 1<<8 | 1<<6 | 4<<2 | 0;
 	
 	public static final int OP_EQ        =  0<<12 | 0<<8 | 1<<6 | 4<<2 | 0;
 	public static final int OP_NE        =  0<<12 | 0<<8 | 1<<6 | 4<<2 | 1;

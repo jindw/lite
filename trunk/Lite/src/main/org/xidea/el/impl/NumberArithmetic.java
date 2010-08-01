@@ -40,18 +40,26 @@ class NumberArithmetic {
 
 		double d1 = n1.doubleValue(), d2 = n2.doubleValue();
 		if (Double.isNaN(d1) || Double.isNaN(d2)) {
-			return false;
+			return type ==  ExpressionToken.OP_NE || type == ExpressionToken.OP_NE_STRICT;
 		}
 		long i = Double.compare(d1, d2);
-
-		if (i == 0) {
-			return type == ExpressionToken.OP_EQ
-					|| type == ExpressionToken.OP_GTEQ
-					|| type == ExpressionToken.OP_LTEQ;
-		} else {
-			return (i > 0)
-					^ (ExpressionToken.OP_GT == type || type == ExpressionToken.OP_GTEQ);
+		switch(type){
+		case ExpressionToken.OP_GT:
+			return i>0;
+		case ExpressionToken.OP_GTEQ:
+			return i>=0;
+		case ExpressionToken.OP_LT:
+			return i<0;
+		case ExpressionToken.OP_LTEQ:
+			return i<=0;
+		case ExpressionToken.OP_EQ:
+		case ExpressionToken.OP_EQ_STRICT:
+			return i ==0;
+		case ExpressionToken.OP_NE:
+		case ExpressionToken.OP_NE_STRICT:
+			return i!=0;
 		}
+		throw new IllegalStateException("无效比较类型:"+type);
 	}
 
 	/**

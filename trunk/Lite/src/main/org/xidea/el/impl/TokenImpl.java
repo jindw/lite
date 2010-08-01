@@ -18,18 +18,19 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 	static final int BRACKET_BEGIN = 0xFFFE;// ([{;
 	static final int BRACKET_END = 0xFFFF;// )]};
 	// 解释优化
-	static final int OP_GET_STATIC_PROP = 0<<12 | 0<<8 | 0<<6 | 8<<2 | 0;
-	static final int OP_INVOKE_WITH_STATIC_PARAM= 0<<12 | 0<<8 | 0<<6 | 8<<2 | 1;
-//	static final int OP_INVOKE_WITH_ONE_PARAM   = 0<<12 | 1<<8 | 1<<6 | 8<<2 | 2;
+	static final int OP_GET_STATIC = 0 << 12 | 0 << 8 | 0 << 6 | 8 << 2 | 0;
+	static final int OP_INVOKE_WITH_STATIC_PARAM = 0 << 12 | 0 << 8 | 0 << 6
+			| 8 << 2 | 1;
+	// static final int OP_INVOKE_WITH_ONE_PARAM = 0<<12 | 1<<8 | 1<<6 | 8<<2 |
+	// 2;
 
 	private static final Object[] EMPTY_ARGS = new Object[0];
-	
+
 	private int type;
 	private TokenImpl left;
 	private TokenImpl right;
 	private Object param;
 	String value;
-	
 
 	public TokenImpl(int type, Object param) {
 		this.type = type;
@@ -44,90 +45,98 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 		}
 	}
 
-	protected TokenImpl optimize(OperationStrategy os,Map<String, Object> context) {
-		return optimize(os,context,new ValueStackImpl(context));
+	public TokenImpl optimize(OperationStrategy os,
+			Map<String, Object> context) {
+		return optimize(os, context, new ValueStackImpl(context) {
+			@Override
+			protected Object fallback(Object key) {
+				throw new RuntimeException();
+			}
+		});
 	}
-	private TokenImpl optimize(OperationStrategy os,Map<String, Object> context,ValueStack vs) {
-		if (type > 0) {
-			if (left != null) {
-				TokenImpl optimizedLeft = left.optimize(os, context);
-				if(type == OP_INVOKE){
-					if (left.getType() == OP_GET) {
-						if(optimizedLeft.type != VALUE_CONSTANTS || optimizedLeft.getParam() != null){
-							left = optimizedLeft;
-						}
-					}else{
-						left = optimizedLeft;
-					}
-				}else{
-					left = optimizedLeft;
-				}
-				boolean canOptimize = left.canOptimize(context);
-				if (right != null) {
-					right = right.optimize(os,context,vs);
-					canOptimize = canOptimize && right.canOptimize(context);
-				}
-				if (canOptimize) {
-					Object o = os.evaluate(this, vs);
-					if (o == null) {
 
-					} else if (o instanceof Number) {
-						float f = ((Number) o).floatValue();
-						if (Float.isNaN(f) || Float.isInfinite(f)) {// NaN
-							// +-Finite不能正确系列化
-							return this;
-						}
-					} else if (o instanceof CharSequence
-							|| o instanceof Boolean) {
-					} else {
-						return this;
+	private TokenImpl optimize(OperationStrategy os,
+			Map<String, Object> context, ValueStack vs) {
+		if (type > 0) {
+			boolean childOptimized = false;
+			if (type == OP_INVOKE
+					|| type == TokenImpl.OP_INVOKE_WITH_STATIC_PARAM) {
+				int leftType = left.getType();
+				if (leftType == OP_GET || leftType == TokenImpl.OP_GET_STATIC) {
+					left.left = left.left.optimize(os, context, vs);
+					left.right = left.right.optimize(os, context, vs);
+					if (right != null) {
+						right = right.optimize(os, context, vs);
+						//this.optimize();// OP_INVOKE_WITH_STATIC_PARAM
+						// reoptimize
 					}
+					childOptimized = true;
+				}
+			}
+			try {
+				Object o = os.evaluate(this, vs);
+				if (o == null || o instanceof Number
+						|| o instanceof CharSequence || o instanceof Boolean) {
 					return new TokenImpl(VALUE_CONSTANTS, o);
 				}
+			} catch (Exception e) {
 			}
-		}
-		if (type == OP_GET) {
-			if (right.getType() == VALUE_CONSTANTS) {
-				this.type = OP_GET_STATIC_PROP;
-				this.setParam(right.getParam());
-			}
-		}else if(type == OP_INVOKE){
-			if(right.getType() == VALUE_LIST){
-				this.type = OP_INVOKE_WITH_STATIC_PARAM;
-				this.setParam(EMPTY_ARGS);
-			}else{
-				TokenImpl token = this.right;//op_join
-				ArrayList<Object> params = null;
-				while(token.type == OP_JOIN){
-					if(token.right.type == VALUE_CONSTANTS){
-						if(params == null){
-							params = new ArrayList<Object>();
-						}
-						params.add(0,token.right.getParam());
-						token = token.left;
-					}else{
-						return this;//fail
+			if (!childOptimized) {
+				if (left != null) {
+					left = left.optimize(os, context, vs);
+					if (right != null) {
+						right = right.optimize(os, context, vs);
 					}
 				}
-				if(token.type == VALUE_LIST){
-					this.type = OP_INVOKE_WITH_STATIC_PARAM;
-					this.setParam(params.toArray());
-				}
-				
 			}
+			this.optimize();
 		}
 		return this;
 	}
 
-	private boolean canOptimize(Map<String, Object> context) {
-		if(type == VALUE_CONSTANTS){
-			return true;
-		}else if(type == VALUE_VAR){
-			return context.containsKey(this.getParam());
+	private void optimize() {
+		if (type == OP_GET) {
+			if (right.getType() == VALUE_CONSTANTS) {
+				this.type = OP_GET_STATIC;
+				this.setParam(right.getParam());
+			}
+		} else if (type == OP_INVOKE) {
+			if (right.getType() == VALUE_LIST) {
+				this.type = OP_INVOKE_WITH_STATIC_PARAM;
+				this.setParam(EMPTY_ARGS);
+			} else {
+				TokenImpl token = this.right;// op_join
+				ArrayList<Object> params = null;
+				while (token.type == OP_JOIN) {
+					if (token.right.type == VALUE_CONSTANTS) {
+						if (params == null) {
+							params = new ArrayList<Object>();
+						}
+						params.add(0, token.right.getParam());
+						token = token.left;
+					} else {
+						return;// fail
+					}
+				}
+				if (token.type == VALUE_LIST) {
+					this.type = OP_INVOKE_WITH_STATIC_PARAM;
+					this.setParam(params.toArray());
+				}
+
+			}
 		}
-		return false;
-		// lt!=VALUE_VAR && lt!= VALUE_LIST && lt!=VALUE_MAP;
 	}
+
+	//
+	// private boolean canOptimize(Map<String, Object> context) {
+	// if (type == VALUE_CONSTANTS) {
+	// return true;
+	// } else if (type == VALUE_VAR) {
+	// return context.containsKey(this.getParam());
+	// }
+	// return false;
+	// // lt!=VALUE_VAR && lt!= VALUE_LIST && lt!=VALUE_MAP;
+	// }
 
 	public int getType() {
 		return type;
@@ -194,21 +203,21 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 
 	@Override
 	public Object get(int index) {
-		if(type == OP_GET_STATIC_PROP){
-			if(index == 0){
+		if (type == OP_GET_STATIC) {
+			if (index == 0) {
 				return OP_GET;
-			}else if(index == 1){
+			} else if (index == 1) {
 				return left;
-			}else if(index == 2){
+			} else if (index == 2) {
 				return right;
 			}
 			return null;
-		}else if(type == OP_INVOKE_WITH_STATIC_PARAM){
-			if(index == 0){
+		} else if (type == OP_INVOKE_WITH_STATIC_PARAM) {
+			if (index == 0) {
 				return OP_INVOKE;
-			}else if(index == 1){
+			} else if (index == 1) {
 				return left;
-			}else if(index == 2){
+			} else if (index == 2) {
 				return right;
 			}
 			return null;
@@ -235,10 +244,10 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 
 	@Override
 	public int size() {
-		if(OP_GET_STATIC_PROP == type){
-			return 3;//as OP_GET
-		}else if(OP_INVOKE_WITH_STATIC_PARAM == type){
-			return 3;//as OP_INVOKE
+		if (OP_GET_STATIC == type) {
+			return 3;// as OP_GET
+		} else if (OP_INVOKE_WITH_STATIC_PARAM == type) {
+			return 3;// as OP_INVOKE
 		}
 		int size = getArgCount(type) + 1;
 		return hasParam() ? size + 1 : size;
@@ -249,9 +258,9 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 		switch (type) {
 		case ExpressionToken.VALUE_VAR:// 0
 		case ExpressionToken.VALUE_CONSTANTS:// 0
-		case OP_GET_STATIC_PROP:// 1
+		case OP_GET_STATIC:// 1
 		case OP_INVOKE_WITH_STATIC_PARAM:// 1
-//			 case OP_INVOKE_WITH_ONE_PARAM:// 2
+			// case OP_INVOKE_WITH_ONE_PARAM:// 2
 		case ExpressionToken.OP_PUSH:// 1
 			return true;
 		default:
@@ -305,7 +314,6 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 		TOKEN_MAP.put("!=", OP_NE);
 		TOKEN_MAP.put("===", OP_EQ_STRICT);
 		TOKEN_MAP.put("!==", OP_NE_STRICT);
-		
 
 		// 4
 		TOKEN_MAP.put("&", OP_BIT_AND);

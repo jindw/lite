@@ -81,13 +81,13 @@ ResultContext.prototype = {
 	 * @param Object el
 	 */
 	appendXA:function(attributeName, el){
-		this.result.push([XML_ATTRIBUTE_TYPE, requireEL(this,el), attributeName ]);
+		this.result.push([XA_TYPE, requireEL(this,el), attributeName ]);
 	},
 	/**
 	 * @param Object el
 	 */
 	appendXT:function(el){
-		this.result.push([XML_TEXT_TYPE, requireEL(this,el)]);
+		this.result.push([XT_TYPE, requireEL(this,el)]);
 	},
 
 	/**
