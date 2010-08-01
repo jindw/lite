@@ -1,0 +1,154 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://www.xidea.org/ns/lite/core"
+	xmlns:ex="http://www.xidea.org/ns/lite/example">
+	<head>
+		<title>语法预览</title>
+	</head>
+	<body>
+		<h3>从实例开始</h3>
+		<p>看下面的例子吧,包括了LiteXML大部分常用语法</p>
+		<div>
+			<ex:code style="width:100%;height:600px">
+				<![CDATA[
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://www.xidea.org/ns/lite/core">
+	<body>
+		<!-- 逻辑控制 -->
+		<c:if test="${test}">
+			当
+			<var>test</var>
+			变量为真时，渲染该节点内容
+		</c:if>
+		<c:else>当前面的if节点不成立时，渲染该节点内容</c:else>
+		<!-- if else 也可以换一种写法 -->
+		<c:choose>
+			<c:when test="${day==1}">周一</c:when>
+			<c:when test="${day==2}">周二</c:when>
+			<c:when test="${day==3}">周三</c:when>
+			<c:when test="${day==4}">周四</c:when>
+			<c:when test="${day==5}">周五</c:when>
+			<c:when test="${day==6}">周末</c:when>
+			<c:otherwise>周日</c:otherwise>
+		</c:choose>
+		
+		<!-- 上面的分支特例，还可以更简单！！ 
+		     - - 短路表达式的模式-->
+		周${day==1 &amp;&amp; '一'
+			 || day==2 &amp;&amp; '二'
+			 || day==3 &amp;&amp; '三'
+			 || day==4 &amp;&amp; '四'
+			 || day==5 &amp;&amp; '五'
+			 || day==6 &amp;&amp; '末'
+			 || '日'}
+
+		<!-- for 循环就这么回事： -->
+
+		<c:for var="item" items="${[1,2,3,4]}">
+			当前迭代元素为：${item} 、当前循环索引值为：${for.index}
+			<c:for var="item2" items="${['a','b','c']}"
+				status="status">
+				子循环的当前迭代元素为${item2} 、子自循环当前索引值为：${status.index}
+			</c:for>
+			<c:else>子循环没有任何内容（else是可以直接接for的，for没有执行任何循环时，执行else）</c:else>
+		</c:for>
+		<!-- 变量输出 和 xml 自动编码 -->
+		<div>
+			<input value="${unescapedText}" />
+			<textarea>${unescapedText}</textarea>
+		</div>
+		
+		<!-- XML 可选属性我们书写起来很方便 -->
+		<div>
+			<div onclick="${clickEvent}" disabled="${disabledOrNull}">
+				这些动态属性只有值不为null的时候才有输出</div>
+		</div>
+		<!-- 表单自动填充(可选功能) -->
+		<form>
+			<input name="user.name" />
+			等价于
+			<input name="user.name" value="${user.name}" />
+			-----------------
+			<select name="user.age">
+				<option value="1">一周岁</option>
+				<option value="2">两周岁</option>
+				....
+			</select>
+			等價于
+			<strong>很复杂很复杂.....</strong>
+		</form>
+		<!-- 前后端模板结合示例 -->
+		<div id="serverSide">
+			<!-- 模板內部变量申明 -->
+			<c:var name="中文名">${user.姓氏}${user.大名}</c:var>
+			<c:var name="englishName"
+				value="${user.firstName}.${user.lastName}" />
+			<p>我的中文名字是：${中文名}</p>
+			<p>我的英文名字是：${englishName}</p>
+		</div>
+		<c:client id="test">
+			<!-- 偷懒有理，直接把前面的服务端模板包含进来 -->
+			<c:include xpath="//*[@id='serverSide']/*"/>
+		</c:client>
+		<script>
+		/*<![CDATA[*/
+		document.write(test({user:{姓氏:'张','大名':'三',firstName:'zhang':lastName:'san'}}));
+		/*]]]><![CDATA[]>*/
+		</script>
+	</body>
+</html>
+]]>
+			</ex:code>
+		</div>
+		<h3>特点解说</h3>
+		<p>本书介绍的Lite语法以Lite XML为主，这里也就先解释一下Lite XML的基本特点和优点，下面将一一列出：</p>
+		<ul>
+			<li>
+				基于XML的语法风格。
+				<ul>
+					<li>严谨的代码风格
+					<p>
+					严谨的代码风格带来更高的代码质量，基于XML语法的优化，让我们的输出更漂亮；但是同时XML也带来了一些苛刻的约束。
+					比如:大于(&gt;)小于(&lt;)必须写成的：&amp;gt; &amp;lt;还有的&amp;必须写成：&amp;，如果是bool 与操作(&amp;&amp;)必须写成：&amp;amp;&amp;amp;</p>
+					</li>
+					<li>充分利用了XML上下文
+					<p>基于XML上下文的自动编码功能，让我们杜绝了XSS的困扰；根据XML自身语法约定，我们可以设计更加漂亮的XML模板语法；
+					比如：我们可以设计这样简单的语法规则，当一个属性为空时，整个属性就不必输出了，这对输出disabled,checked等特殊输出特别有用，普通模板必须通过条件语法实现，XML就更简单了；
+					我们也可以根据模板上下文对html表单自动填充。。。</p>
+					</li>
+					<li>XML节点级别的包含
+					<p>基于xpath的包含我们可以把资源管理做的更强大，文档碎片的包含，SiteMesh（模板继承），等等。。。一切都变得很简单。</p>
+					</li>
+				</ul>
+			</li>
+			<li>
+				基于JavaScript的表达式语法
+				<ul>
+					<li>利用已有标准
+					<p>
+					用大家熟悉的语法，降低前端工程师的学习成本，并让前后端跨平台实现成为可能。
+					虽然我们很多人都可能可以制造一个理论上更合理的标准。但是却没有多大可能将其推广开来。
+					我们利用已有标准，可以让大家少学习一点所谓的新东西。</p>
+					</li>
+					<li>清晰统一的概念
+					<p>相比其他模板系统Lite XML 有非常清晰的表达式元素，他是一个取值的语法，而不仅是一个输出语法（输出语法中直接使用表达式）；
+					而且是其他控制语法的基础元素。其他语法中，只要涉及到取值，都是使用表达式，都是一个统一的概念。</p>
+					</li>
+					<li>支持大部分ECMA标准函数
+					<p>这给前端工程师的工作经验由一个发挥的空间</p>
+					</li>
+				</ul>
+			</li>
+			<li>
+				基于XML的控制语法
+				<ul>
+					<li>结构简单，阅读方便。
+					<p>因为有强大的表达式功能，我们的控制语法可以设计的更加简单</p>
+					</li>
+					<li>预编译的前端模板
+					<p>自动预编译的前端模板，为前端模板的运用提供平台的支持。</p>
+					</li>
+				</ul>
+			</li>
+		</ul>
+	</body>
+</html>

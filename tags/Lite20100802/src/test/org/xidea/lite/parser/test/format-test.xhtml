@@ -1,0 +1,21 @@
+<c:group xmlns:c="http://www.xidea.org/ns/lite/core">
+	<h1>${name}</h1>
+	<table border="${border}">
+		<tr>
+			<th>&#160;</th>
+			<c:for var="cell" items="${data}">
+				<th>${cell}<span>...</span></th>
+			</c:for>
+		</tr>
+		<c:for var="row" items="${data}">
+			<tr>
+				<th>${row}</th>
+				<c:for var="cell" items="${data}">
+					<td>
+						<c:out value="&amp;#x${row}${cell};"/>
+					</td>
+				</c:for>
+			</tr>
+		</c:for>
+	</table>
+</c:group>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<java version="1.6.0_02" class="java.beans.XMLDecoder">
+	<object class="java.util.LinkedHashMap">
+		<void method="put">
+			<string>text1</string>
+			<string>t1</string>
+		</void>
+		<void method="put">
+			<string>boolean0</string>
+			<boolean>false</boolean>
+		</void>
+		<void method="put">
+			<string>boolean1</string>
+			<boolean>true</boolean>
+		</void>
+		<void method="put">
+			<string>texts1</string>
+			<array class="java.lang.String" length="2">
+				<void index="0">
+					<string>t1</string>
+				</void>
+				<void index="1">
+					<string>t2</string>
+				</void>
+			</array>
+		</void>
+	</object>
+	<object class="java.util.LinkedHashMap">
+		<!-- var -->
+		<void method="put">
+			<string><![CDATA[<c:var name="var1" value="${123}"/>${var1+1}]]></string>
+			<string><![CDATA[124]]></string>
+		</void>
+		<void method="put">
+			<string><![CDATA[<c:var name="var1" value="${123}4"/>${var1+1}]]></string>
+			<string><![CDATA[12341]]></string>
+		</void>
+		<void method="put">
+			<string><![CDATA[<c:var name="var1" value="${1234"/>${var1+1}]]></string>
+			<string><![CDATA[${12341]]></string>
+		</void>
+		<void method="put">
+			<string><![CDATA[<c:var name="var1" value="$1234"/>${var1+1}]]></string>
+			<string><![CDATA[$12341]]></string>
+		</void>
+		<void method="put">
+			<string><![CDATA[<c:var name="var1" value="1234"/>${var1+1}]]></string>
+			<string><![CDATA[12341]]></string>
+		</void>
+		<void method="put">
+			<string><![CDATA[<c:var name="var1" value="${'123'}-${123}"/><xml v="${var1}"/>]]></string>
+			<string><![CDATA[<xml v="123-123"></xml>]]></string>
+		</void>
+		<!-- captrue -->
+		<void method="put">
+			<string><![CDATA[<c:var name="var1">${300}&lt;<b>${200}</b></c:var>${var1}/<div><c:out value="${var1}"/></div>]]></string>
+			<string><![CDATA[300&amp;lt;&lt;b>200&lt;/b>/<div>300&lt;<b>200</b></div>]]></string>
+		</void>
+	</object>
+</java>

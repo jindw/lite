@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="http://www.xidea.org/ns/lite/core"
+	xmlns="http://www.xidea.org/ns/lite/core"
+	elementFormDefault="unqualified">
+	<xs:annotation>
+		<xs:documentation>Lite 模板引擎核心标记库xml语法描述文档</xs:documentation>
+	</xs:annotation>
+	<xs:simpleType name="EL" id="EL">
+		<xs:annotation>
+			<xs:documentation>
+				表达式，${合法JS表达式},如:${user.name},${age&gt;25}
+			</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:pattern value="$\{[\s\S]+\}" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	
+	
+	<xs:simpleType name="VAR" id="VAR">
+		<xs:annotation>
+			<xs:documentation>
+				变量名，可以$、字母、数字、汉字的组合（不能数字开头）
+			</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:pattern value="($|_|\p{L})(\p{L}|\p{Nd}|_|$)*" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:element name="out">
+		<xs:annotation>
+			<xs:documentation>
+				输出标签，用于输出无需经过转义的xml内容（${}输出的内容将被转义处理）
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType mixed="false">
+			<xs:attribute name="value" type="xs:string" use="required" />
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="if">
+		<xs:annotation>
+			<xs:documentation>
+				条件输出，当test属性中指定的表达式计算为真时，渲染子节点。
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType mixed="true">
+			<xs:sequence>
+				<xs:any minOccurs="0" maxOccurs="unbounded"
+					processContents="lax">
+				</xs:any>
+			</xs:sequence>
+			<xs:attribute name="test" type="EL" use="required">
+				<xs:annotation>
+					<xs:documentation>指定判断语句</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="for">
+		<xs:annotation>
+			<xs:documentation>
+				循环标签，循环中变量和状态变量都是全局变量，循环结束后不要求回归（隐含变量for[循环状态，可通过status指定别名]除外，循环结束后无效）
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType mixed="true">
+			<xs:sequence>
+				<xs:any minOccurs="0" maxOccurs="unbounded"
+					processContents="lax" />
+
+					<!-- 
+				<xs:element name="break" form="qualified">
+					<xs:annotation>
+						<xs:documentation>
+							跳出循环（具体策略尚未明确，Lite XML 1.0Alpha尚未实现对其的解析功能）
+						</xs:documentation>
+					</xs:annotation>
+					<xs:complexType mixed="false">
+						<xs:attribute name="for" type="VAR"
+							use="optional">
+							<xs:annotation>
+								<xs:documentation>
+									通过与外层for循环
+									var属性的对比，查找具体需要跳出的外层for循环(默认跳出最近的for循环)。
+								</xs:documentation>
+							</xs:annotation>
+						</xs:attribute>
+					</xs:complexType>
+				</xs:element>
+					 -->
+			</xs:sequence>
+			<xs:attribute name="var" type="VAR" use="required">
+				<xs:annotation>
+					<xs:documentation>指定循环元素映射的变量名</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="list" type="EL" use="required">
+				<xs:annotation>
+					<xs:documentation>用于指定循环的数据</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="status" type="VAR" use="optional">
+				<xs:annotation>
+					<xs:documentation>
+						循环状态（for）别名。该对象可由有如下几个属性：depth,index,lastIndex;
+						与隐含变量for不同的是，该变量循环结束后不要求回归
+					</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="else">
+		<xs:annotation>
+			<xs:documentation>
+				后接if节点或者for节点。当if不为真，或者for无循环时，结合本身test节点表达式值，确定是否输出
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType mixed="true">
+			<xs:sequence>
+				<xs:any minOccurs="0" maxOccurs="unbounded"
+					processContents="lax">
+				</xs:any>
+			</xs:sequence>
+			<xs:attribute name="test" type="EL" use="optional">
+				<xs:annotation>
+					<xs:documentation>指定判断语句</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="choose">
+
+		<xs:annotation>
+			<xs:documentation>一组分支选择</xs:documentation>
+		</xs:annotation>
+
+		<xs:complexType mixed="false">
+			<xs:sequence>
+				<xs:element name="when" form="qualified" minOccurs="1"
+					maxOccurs="unbounded">
+					<xs:annotation>
+						<xs:documentation>
+							分支选择中的分支之一（必须是choose的直接子节点）
+						</xs:documentation>
+					</xs:annotation>
+					<xs:complexType mixed="true">
+						<xs:sequence>
+							<xs:any minOccurs="0" maxOccurs="unbounded"
+								processContents="lax">
+							</xs:any>
+						</xs:sequence>
+						<xs:attribute name="test" type="EL"
+							use="required">
+							<xs:annotation>
+								<xs:documentation>
+									指定判断语句
+								</xs:documentation>
+							</xs:annotation>
+						</xs:attribute>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="otherwise" form="qualified"
+					minOccurs="0" maxOccurs="1">
+					<xs:annotation>
+						<xs:documentation>
+							分支选择中五命中分支（当所有when未命中之后执行，必须是choose的直接子节点）
+						</xs:documentation>
+					</xs:annotation>
+					<xs:complexType mixed="true">
+						<xs:sequence>
+							<xs:any minOccurs="0" maxOccurs="unbounded"
+								processContents="lax">
+							</xs:any>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="var">
+		<xs:annotation>
+			<xs:documentation>
+				变量申明，可以通过value属性，也可以通过捕捉子节点内容
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType mixed="true">
+			<xs:sequence>
+				<xs:any minOccurs="0" maxOccurs="unbounded"
+					processContents="lax" />
+			</xs:sequence>
+			<xs:attribute name="name" type="VAR" use="required" />
+			<xs:attribute name="value" type="xs:string" use="optional" />
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="include">
+		<xs:annotation>
+			<xs:documentation>
+				包含，可以包含指定路径的文档，平且可以通过xpath选择子节点，做碎片包含
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType mixed="true">
+			<xs:sequence>
+				<xs:any minOccurs="0" maxOccurs="unbounded"
+					processContents="lax">
+				</xs:any>
+			</xs:sequence>
+			<xs:attribute name="path" type="xs:NMTOKEN" use="optional" />
+			<xs:attribute name="xpath" type="xs:NMTOKEN" use="optional" />
+			<xs:attribute name="var" type="VAR" use="optional">
+				<xs:annotation>
+					<xs:documentation>
+						将该元素的子元素执行后作为一个字符串变量，以供以后使用
+					</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="name" type="VAR" use="optional">
+				<xs:annotation>
+					<xs:documentation>
+						在编译期间记录该节点，以供以后 include 时候指定path="#{name}
+						方式引用该节点"
+					</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="client">
+		<xs:annotation>
+			<xs:documentation>
+				插入客户端模板片段
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType mixed="true">
+			<xs:sequence>
+				<xs:any minOccurs="0" maxOccurs="unbounded"
+					processContents="lax">
+				</xs:any>
+			</xs:sequence>
+			<xs:attribute name="id" type="xs:ID" use="required">
+				<xs:annotation>
+					<xs:documentation>
+						输出的模板函数名
+					</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+			<!-- 
+			<xs:attribute name="language" type="LANGUAGE" use="optional">
+				<xs:annotation>
+					<xs:documentation>
+						客户端编程语言
+					</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+			 -->
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="extension">
+		<xs:annotation>
+			<xs:documentation>
+				通过嵌入脚本或者外联脚本扩展当前解析器集合。
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType mixed="true">
+			<xs:attribute name="src" type="xs:string" use="optional" />
+		</xs:complexType>
+	</xs:element>
+	
+	<xs:element name="extends">
+		<xs:annotation>
+			<xs:documentation>
+				继承
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType mixed="true">
+			<xs:sequence>
+				<xs:any minOccurs="0" maxOccurs="unbounded"
+					processContents="lax">
+				</xs:any>
+			</xs:sequence>
+			<xs:attribute name="path" type="xs:NMTOKEN" use="optional" >
+				<xs:annotation>
+					<xs:documentation>
+						继承父模板路径（相对当前文件路径）
+					</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="block">
+		<xs:annotation>
+			<xs:documentation>
+				区块，可用于模板继承成员的覆盖。
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType mixed="true">
+			<xs:sequence>
+				<xs:any minOccurs="0" maxOccurs="unbounded"
+					processContents="lax">
+				</xs:any>
+			</xs:sequence>
+			<xs:attribute name="name" type="xs:NMTOKEN" use="optional" >
+				<xs:annotation>
+					<xs:documentation>
+						表示块名，用于继承覆盖
+					</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

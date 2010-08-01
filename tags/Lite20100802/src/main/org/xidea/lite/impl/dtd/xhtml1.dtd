@@ -1,0 +1,27 @@
+<!ENTITY % HTMLlat1 PUBLIC
+   "-//W3C//ENTITIES Latin 1 for XHTML//EN"
+   "xhtml-lat1.ent">
+%HTMLlat1;
+
+<!ENTITY % HTMLsymbol PUBLIC
+   "-//W3C//ENTITIES Symbols for XHTML//EN"
+   "xhtml-symbol.ent">
+%HTMLsymbol;
+
+<!ENTITY % HTMLspecial PUBLIC
+   "-//W3C//ENTITIES Special for XHTML//EN"
+   "xhtml-special.ent">
+%HTMLspecial;
+<!-- html -->
+<!ELEMENT html ANY>
+
+<!ATTLIST html
+  id          ID             #IMPLIED
+  xmlns       CDATA          #FIXED 'http://www.w3.org/1999/xhtml'
+  xmlns:c     CDATA          #FIXED 'http://www.xidea.org/ns/lite/core'
+  >
+<!-- wml -->
+<!ELEMENT wml ANY>
+<!ATTLIST wml
+  xmlns:c     CDATA          #FIXED 'http://www.xidea.org/ns/lite/core'
+  >
