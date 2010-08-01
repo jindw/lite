@@ -1,0 +1,83 @@
+==== 内置函数支持 ====
+  * 全局函数/对象
+{{{
+//全局函数
+isFinite, parseInt, decodeURI, encodeURI, isNaN, parseFloat, encodeURIComponent, decodeURIComponent
+//全局变量
+NaN, Infinity
+//全局对象（工具函数聚）
+/**
+ * 成员函数有：abs, acos, asin, atan, ceil, asin, cos,
+ *             exp, floor, log, round,sin, sqrt, tan
+ *             random, min, max, pow ,atan2
+ * 成员属性有：E,PI,LN10,LN2，LOG2E,LOG10E,SQRT1_2, SQRT2,
+ */
+Math
+/**
+ * 成员函数有:
+ *  JSON.stringify(object),
+ *   JSON.parse(json)
+ */
+JSON
+}}}
+  * 成员函数
+{{{
+//List 可运用于java.util.List 和 数组
+//Number 可运用于所有整型数或浮点数
+splice
+类型：List,
+sort
+类型：List,
+pop
+类型：List,
+indexOf
+类型：String,
+push
+类型：List,
+toUpperCase
+类型：String,
+toFixed
+类型：Number,
+substring
+类型：String,
+unshift
+类型：List,
+toLocaleUpperCase
+类型：String,
+substr
+类型：String,
+charAt
+类型：String,
+fromCharCode
+类型：String,
+reverse
+类型：List,
+lastIndexOf
+类型：String,
+join
+类型：List,
+toLocaleLowerCase
+类型：String,
+concat
+类型：List,String,
+toPrecision
+类型：Number,
+replace
+类型：String,
+charCodeAt
+类型：String,
+toLowerCase
+类型：String,
+invoke
+类型：List,
+slice
+类型：List,String,
+toString
+类型：Number,List,
+split
+类型：String,
+toExponential
+类型：Number,
+shift
+类型：List,
+}}}
