@@ -77,16 +77,16 @@
 		<replaceregexp file="web/WEB-INF/template.php"
 			match="^require_once|^\?&gt;&lt;\?php" replace="//\0" byline="true" encoding="utf-8"/>
 		-->
-		<replace file="build/dest/TemplateEngine.php" encoding="utf-8">
+		<replace file="build/dest/LiteEngine.php" encoding="utf-8">
 			<replacefilter token="&#10;require_once" value="&#10;//require_once" />
 			<replacefilter token="&#10;?&gt;&lt;?php" value="&#10;//?&gt;&lt;?php" />
 		</replace>
 	</target>
-	<target name="jar" depends="init,compress,join-php">
+	<target name="package" depends="init,compress,join-php">
 		<delete>
 			<fileset dir="build/dest/">
 				<include name="Example-*.zip" />
-				<include name="Template-*.jar" />
+				<include name="Lite-*.jar" />
 			</fileset>
 		</delete>
 		<echo file="build/dest/jslite/el/__package__.js">this.setImplementation("org.xidea.lite.impl")</echo>
@@ -99,7 +99,7 @@
 				<exclude name="**/test/**/*.*" />
 			</fileset>
 		</jar>
-		<jar destfile="build/dest/Template.jar" compress="true">
+		<jar destfile="build/dest/Lite.jar" compress="true">
 			<manifest>
 				<attribute name="Main-Class" value="org.xidea.lite.tools.LiteCompiler" />
 			</manifest>
@@ -126,7 +126,7 @@
 				<include name="**/*.*" />
 			</zipfileset>
 		</jar>
-		<jar destfile="build/dest/TemplateRuntime.jar" compress="true">
+		<jar destfile="build/dest/LiteRuntime.jar" compress="true">
 
 			<fileset dir="web/WEB-INF/classes">
 				<include name="org/xidea/lite/*.class" />
@@ -139,20 +139,19 @@
 		</jar>
 		<delete file="build/dest/jslite/__package__.js" />
 		<copy tofile="build/dest/JSEL-${version}.jar" file="build/dest/JSEL.jar" />
-		<copy tofile="build/dest/Template-${version}.jar" file="build/dest/Template.jar" />
-		<copy tofile="build/dest/TemplateRuntime-${version}.jar" file="build/dest/TemplateRuntime.jar" />
+		<copy tofile="build/dest/Lite-${version}.jar" file="build/dest/Lite.jar" />
+		<copy tofile="build/dest/LiteRuntime-${version}.jar" file="build/dest/LiteRuntime.jar" />
 
 		<zip destfile="build/dest/Example.zip">
 			<zipfileset dir="build/dest/" prefix="WEB-INF/lib/">
-				<include name="Template.jar" />
+				<include name="Lite.jar" />
 			</zipfileset>
 			<zipfileset dir="build/dest/" prefix="WEB-INF/classes/lite/">
 				<include name="TemplateEngine.php" />
 			</zipfileset>
 			<zipfileset dir="web/">
 				<include name="WEB-INF/classes/lite/*.py" />
-				<include name="WEB-INF/lib/commons-logging-1.0.4.jar" />
-				<include name="WEB-INF/decorators.xml" />
+				<include name="WEB-INF/lite.xml" />
 				<include name="WEB-INF/web.xml" />
 				<include name="example/*.xhtml" />
 				<include name="example/test.php" />
@@ -237,12 +236,12 @@
 			<arg value="${basedir}/build/dest/jslite/demo.js" />
 		</java>
 	</target>
-	<target name="build" depends="compress,jar,php-example">
+	<target name="build" depends="compress,package,php-example">
 
 	</target>
 
 	<target name="php-example">
-		<zip comment="批量编译:java -jar ./WEB-INF/lib/Template.jar -root ." file="build/dest/php-example.zip" encoding="GBK">
+		<zip comment="批量编译:java -jar ./WEB-INF/lib/Lite.jar -root ." file="build/dest/php-example.zip" encoding="GBK">
 			<fileset dir="web">
 				<include name="example/test.php" />
 				<include name="example/test.xhtml" />
@@ -250,10 +249,10 @@
 				<include name="WEB-INF/decorators.xml" />
 			</fileset>
 			<zipfileset dir="build/dest/" prefix="WEB-INF/classes/lite/">
-				<include name="TemplateEngine.php" />
+				<include name="LiteEngine.php" />
 			</zipfileset>
 			<zipfileset dir="build/dest/" prefix="WEB-INF/lib">
-				<include name="Template.jar" />
+				<include name="Lite.jar" />
 			</zipfileset>
 		</zip>
 	</target>
