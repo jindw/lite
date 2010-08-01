@@ -11,26 +11,26 @@ package org.xidea.el;
  * 00 一位操作符
  * 01 两位操作符
  * 10 保留标志(三位操作符?)
- * 11 保留标志(零位/四位操作符?)
+ * 11 保留标志(四位操作符?)
  * @author jindw
  */
 public abstract interface ExpressionToken {
-	public static final int BIT_PRIORITY = 15<<2;
+	public static final int BIT_PRIORITY     = 15<<2;
 	public static final int BIT_PRIORITY_SUB = 15<<8;
-	public static final int BIT_ARGS = 3<<6;
+	public static final int BIT_ARGS         = 3<<6;
 
 	//值类型（<=0）
 	//常量标记（String,Number,Boolean,Null）
 //	@Deprecated
 //	public static final int VALUE_LAZY = -0x00;
 	public static final int VALUE_CONSTANTS = -0x01;//c;
-	public static final int VALUE_VAR = -0x02;//n;
-	public static final int VALUE_LIST = -0x03;//[;
-	public static final int VALUE_MAP = -0x04;//{;
+	public static final int VALUE_VAR       = -0x02;//n;
+	public static final int VALUE_LIST      = -0x03;//[;
+	public static final int VALUE_MAP       = -0x04;//{;
 	
 	
 	//九：（最高级别的运算符号）
-	public static final int OP_GET        = 0<<12 | 0<<8 | 1<<6 | 8<<2 | 0;
+	public static final int OP_GET      = 0<<12 | 0<<8 | 1<<6 | 8<<2 | 0;
 	public static final int OP_INVOKE   = 0<<12 | 0<<8 | 1<<6 | 8<<2 | 1;
 	
 	//八
@@ -51,15 +51,15 @@ public abstract interface ExpressionToken {
 	
 
 	//五
-	public static final int OP_LT =    0<<12 | 1<<8 | 1<<6 | 4<<2 | 0;
-	public static final int OP_GT =    0<<12 | 1<<8 | 1<<6 | 4<<2 | 1;
+	public static final int OP_LT   =  0<<12 | 1<<8 | 1<<6 | 4<<2 | 0;
+	public static final int OP_GT   =  0<<12 | 1<<8 | 1<<6 | 4<<2 | 1;
 	public static final int OP_LTEQ =  0<<12 | 1<<8 | 1<<6 | 4<<2 | 2;
 	public static final int OP_GTEQ =  0<<12 | 1<<8 | 1<<6 | 4<<2 | 3;
 	
-	public static final int OP_EQ =    0<<12 | 0<<8 | 1<<6 | 4<<2 | 0;
-	public static final int OP_NE = 0<<12 | 0<<8 | 1<<6 | 4<<2 | 1;
-	public static final int OP_EQ_STRICT =    0<<12 | 0<<8 | 1<<6 | 4<<2 | 2;
-	public static final int OP_NE_STRICT = 0<<12 | 0<<8 | 1<<6 | 4<<2 | 3;
+	public static final int OP_EQ        =  0<<12 | 0<<8 | 1<<6 | 4<<2 | 0;
+	public static final int OP_NE        =  0<<12 | 0<<8 | 1<<6 | 4<<2 | 1;
+	public static final int OP_EQ_STRICT =  0<<12 | 0<<8 | 1<<6 | 4<<2 | 2;
+	public static final int OP_NE_STRICT =  0<<12 | 0<<8 | 1<<6 | 4<<2 | 3;
 	
 	//四:
 	public static final int OP_BIT_AND = 0<<12 | 2<<8 | 1<<6 | 3<<2 | 0;
@@ -69,17 +69,17 @@ public abstract interface ExpressionToken {
 	
 	//三：
 	public static final int OP_AND = 0<<12 | 1<<8 | 1<<6 | 2<<2 | 0;
-	public static final int OP_OR =  0<<12 | 0<<8 | 1<<6 | 2<<2 | 0;
+	public static final int OP_OR  = 0<<12 | 0<<8 | 1<<6 | 2<<2 | 0;
 
 	//二：
 	//?;
-	public static final int OP_QUESTION =        0<<12 | 0<<8 | 1<<6 | 1<<2 | 0;
+	public static final int OP_QUESTION        = 0<<12 | 0<<8 | 1<<6 | 1<<2 | 0;
 	//:;
 	public static final int OP_QUESTION_SELECT = 0<<12 | 0<<8 | 1<<6 | 1<<2 | 1;
 	
 	//一：
 	//与Map Join 共享字面量（map join 会忽略）
-	public static final int OP_JOIN = 0<<12 | 0<<8 | 1<<6 | 0<<2 | 0;
+	public static final int OP_JOIN   = 0<<12 | 0<<8 | 1<<6 | 0<<2 | 0;
 	//与三元运算符共享字面值
 	public static final int OP_PUSH   = 0<<12 | 0<<8 | 1<<6 | 0<<2 | 1;
 	
