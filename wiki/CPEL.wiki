@@ -67,6 +67,13 @@ java -jar WEB-INF/lib/Template-20100725.jar -root web -litecode web/WEB-INF/lite
   # 生成属性集合
     # 顺序遍历参数数组
     # 遇到"-"开头的的参数，记录为当前属性名称。
+      属性名称可以多层，可以通过简单EL定位，如：
+{{{
+simpleAttributeName
+attribute.subAttribute
+array[2]
+array[0]["map-key"]
+}}}
     # 否则，将参数添加为该属性的系列（每个属性有一个值列表）
     # 最终得到一个属性（String）->值数组（String[]）的map对象。类似 servlet 中 request.getParameterMap()的数据模型。
   # 依次写入属性
