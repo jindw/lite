@@ -1,4 +1,4 @@
-==== 操作符支持 ====
+==== 运算符支持 ====
 JSEL 运算符优先级，运算行为均与JavaScript完全保持一致。
 JavaScript 运算符号优先级参考[https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Operators/Operator_Precedence]
  * 属性获取
