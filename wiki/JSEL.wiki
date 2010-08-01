@@ -80,157 +80,24 @@ public class JSELTest {
 
 }}}
 
-==== 操作符支持 ====
-JSEL 运算符优先级，运算行为均与JavaScript完全保持一致。
-JavaScript 运算符号优先级参考[https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Operators/Operator_Precedence]
-
- * 属性获取
-{{{
-. , []  　　　//两种取属性模式功能相同，［］可以用来获取动态属性。
-}}}
- * 四则运算：
-{{{
-+，-，*，/　　
-}}}
- * 取模运算：
-{{{
-%　　　　　　　
-}}}
- * 正负运算：
-{{{
-+，-　　　　　　
-}}}
- * 比较运算
-{{{
-<，>,>=,<=,==，!=,===,!===　　　//=== !=== 与　== != 的基本区别是，不会做类型转换
-}}}
- * 布尔运算
-{{{
-!，&&，||
-}}}
- * 按位运算
-{{{
-&,^,|,~
-}}}
- * 三目运算
-{{{
-xxx?yy:zz
-}}}
- * in 操作符
-{{{
-a in map ? true:false
-}}}
-
- * 函数调用
-{{{
-()
------
-parseInt("234");//全局函数语法：
-"abc".indexOf("bc")//成员函数调用语法：
-}}}
- * 优先级控制括弧
-{{{
-（）
-}}}
-
- * List构造器
-{{{
-[1,3,var1,'234']//(生成ArrayList)
-}}}
-
- * Map构造器
-{{{
-{"key1":1,"key2":[item1,item2]}//生成HashMap
-}}}
-
-==== 内置函数支持 ====
-  * 全局函数/对象
-{{{
-//全局函数
-isFinite, parseInt, decodeURI, encodeURI, isNaN, parseFloat, encodeURIComponent, decodeURIComponent
-//全局变量
-NaN, Infinity
-//全局对象（工具函数聚）
-/**
- * 成员函数有：abs, acos, asin, atan, ceil, asin, cos,
- *             exp, floor, log, round,sin, sqrt, tan
- *             random, min, max, pow ,atan2
- * 成员属性有：E,PI,LN10,LN2，LOG2E,LOG10E,SQRT1_2, SQRT2,
- */
-Math
-/**
- * 成员函数有:
- *  JSON.stringify(object),
- *   JSON.parse(json)
- */
-JSON
-}}}
-  * 成员函数
-{{{
-//List 可运用于java.util.List 和 数组
-//Number 可运用于所有整型数或浮点数
-splice
-类型：List,
-sort
-类型：List,
-pop
-类型：List,
-indexOf
-类型：String,
-push
-类型：List,
-toUpperCase
-类型：String,
-toFixed
-类型：Number,
-substring
-类型：String,
-unshift
-类型：List,
-toLocaleUpperCase
-类型：String,
-substr
-类型：String,
-charAt
-类型：String,
-fromCharCode
-类型：String,
-reverse
-类型：List,
-lastIndexOf
-类型：String,
-join
-类型：List,
-toLocaleLowerCase
-类型：String,
-concat
-类型：List,String,
-toPrecision
-类型：Number,
-replace
-类型：String,
-charCodeAt
-类型：String,
-toLowerCase
-类型：String,
-invoke
-类型：List,
-slice
-类型：List,String,
-toString
-类型：Number,List,
-split
-类型：String,
-toExponential
-类型：Number,
-shift
-类型：List,
-}}}
 
 ==== 表达式计算性能 ====
-
-  * 对于常见表达式计算，暂时还没有做相关性能测试。但是鉴于其基于逆波兰式这种简单的运算模型，他的性能应该会比较理想。
-
+  * 中间代码优化
+　　JSEL 中间代码结构，运算模型简单，便于优化；我们没有做任何字节码级别的运行优化，只是做了一些运算模型上的优化，比如布尔运算，三目运算的短路优化。
+  * 编译优化
+    JSEL 编译期间针对静态运算单元做了预处理，比如　。
+{{{
+a > (true?1:123+b+c)
+//将被优化为：
+a > 1
+}}}
+==== 其他参考　====
+  * [JSELOperator 操作符支持]
+　　JSEL 支持大部分　标准ECMA262 操作符
+  * [JSELFunction 函数支持]
+　　JSEL 支持大部分　标准ECMA262 标准函数
+  * [JSELExtension 功能扩展]
+　　JSEL 允许用户自定义函数，自定于运算符
 
 == 下载 ==
  * JSEL：[http://code.google.com/p/lite/downloads/list]
