@@ -27,6 +27,27 @@ JSEL是一个兼容 JavaScript 运算规则的简单的表达式解释引擎。
     您可以在JSEL基础上扩展业务相关的操作符。或者函数调用。
 
 ==== 基本用法 ====
+  * 基本接口
+{{{
+package org.xidea.el;
+
+public interface Expression{
+	/**
+	 * 根据传入的变量上下文（map 或者javabean），执行表达式
+	 * @param context 变量表
+	 * @return
+	 * @see ExpressionImpl#evaluate(varMap)
+	 */
+	public Object evaluate(Object context);
+	/**
+	 * 根据传入的变量上下文（键值数组），执行表达式
+	 * @param keyValue 键值对（两个参数代表一个键值对）
+	 * @return
+	 */
+	public Object evaluate(Object... keyValue);
+}
+}}}
+  * 代码示例
 {{{
 import java.util.HashMap;
 import org.xidea.el.Expression;
@@ -49,18 +70,20 @@ public class JSELTest {
     }
     public void testMapContext(){
         Expression el = factory.create("var1 +2 * var2 + obj.testAdd(1,2)");
-        HashMap<String, Object> context = new HashMap<String, Object>();
-        context.put("var1",111);
-        context.put("var2",222);
-        //设置对象
-        context.put("obj",this);
-        Object result21 = el.evaluate(context);//555
+
+        Object result21 = el.evaluate("var1",123,
+                                      "var2",456,
+                                      "obj",this);
         System.out.println("result21:");
         System.out.println(result21);
         
-        //修改一下 变量
-        context.put("var2",333);
-        Object result22 = el.evaluate(context);//777
+        //通过方式传递变量
+        HashMap<String, Object> context = new HashMap<String, Object>();
+        context.put("var1",111);
+        context.put("var2",222);
+        context.put("obj",this); //设置对象
+
+        Object result22 = el.evaluate(context);
         System.out.println("result22:");
         System.out.println(result22);
     }
