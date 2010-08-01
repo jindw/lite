@@ -5,6 +5,7 @@ import static org.junit.Assert.fail;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeSet;
 
 import org.junit.Test;
 import org.xidea.el.ExpressionToken;
@@ -18,15 +19,15 @@ public class TokenGen {
 	public void genFunctionsSupport()throws Exception {
 		ExpressionFactoryImpl exp = new ExpressionFactoryImpl();
 		OperationStrategyImpl osi = (OperationStrategyImpl) exp.getStrategy();
-		System.out.println(osi.getGlobalMap().keySet());
+		System.out.println(new TreeSet<Object>(osi.getGlobalMap().keySet()));
 		Field field = OperationStrategyImpl.class.getDeclaredField("methodMap");
 		field.setAccessible(true);
 		Map<String, Map<String, Invocable>> methodMap = (Map<String, Map<String, Invocable>>) field.get(osi);
-		for(String key : methodMap.keySet()){
+		for(String key : new TreeSet<String>(methodMap.keySet())){
 			Map<String, Invocable> map = methodMap.get(key);
 			System.out.println(key);
 			System.out.print("类型：");
-			for (String c : map.keySet()) {
+			for (String c : new TreeSet<String>(map.keySet())) {
 				if(!c.startsWith("[")){
 					System.out.print(c.substring(c.lastIndexOf('.')+1)+",");
 				}
