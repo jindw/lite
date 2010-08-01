@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="welcome">AndServer(FTP,HTTP,and Web Based App)</string>
-    <string name="open">Open</string>
-    <string name="exit">Exit!</string>
-    <string name="app_name">AndServer</string>
-</resources>
