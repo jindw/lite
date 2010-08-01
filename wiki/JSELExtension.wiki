@@ -1,0 +1,48 @@
+==== 如何自定义 ====
+默认的表达式工厂不允许自定义，如果需要自定义表达式，您首先需要创建自己的表达式工厂。
+{{{
+//默认表达式，不允许自定义
+ExpressionFactory defaultFactory = ExpressionFactory.getInstance();
+//自创建表达式，可以自定义
+ExpressionFactoryImpl userFactory= new ExpressionFactoryImpl();
+}}}
+==== 添加内置对象 ====
+  * 代码示例
+{{{
+ExpressionFactoryImpl factory= new ExpressionFactoryImpl();
+//内置一个字符串
+factory.addVar("domain","www.xidea.org");
+//内置一个helper对象
+factory.addVar("helper",new MyHelper());
+//内置一个静态函数
+factory.addVar("md5",MyHelper.class.getMethod("md5",String.class));
+
+//测试内置对象
+Expression　el = factory.create("helper.loadByURL('http://'+domain+'/'+path)");
+String json = (String)el.evaluate("path","test.json");
+
+//测试内置函数
+Expression　el = factory.create("md5(username+':'+password)");
+String md5pass= (String)el.evaluate("username","jindw","password","123456");
+
+}}}　
+
+
+==== 添加自定义操作符 ====
+  * 代码示例
+{{{
+ExpressionFactoryImpl factory= new ExpressionFactoryImpl();
+
+//以大于操作符为参照，静态函数：MyHelper.contains 为实现，创建一个新操作符：contains
+factory.addOperator(ExpressionToken.OP_GT,//操作符信息样本（参数个数，优先级）
+           "contains",
+            MyHelper.class.getMethod("contains",List.class, Object.class))
+
+//创建大于小于操作符的别名　gt,lt. (没有实现的方式即为给样本操作符添加别名)
+factory.addOperator(ExpressionToken.OP_GT, "gt",null);
+factory.addOperator(ExpressionToken.OP_LT,"lt",null);
+
+Expression　el = factory.create("contains(['a','b','c'],key')? 1: key gt 'b'");
+System.out.println(el.evaluate("key","a"));
+
+}}}　
