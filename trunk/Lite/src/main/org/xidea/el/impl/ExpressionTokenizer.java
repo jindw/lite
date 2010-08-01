@@ -232,7 +232,7 @@ public class ExpressionTokenizer extends JSONTokenizer {
 	protected void parseEL() {
 		skipSpace(0);
 		while (start < end) {
-			char c = value.charAt(start);
+			char c = toLower(value.charAt(start));
 			if (c == '"' || c == '\'') {
 				String text = findString();
 				addKeyOrObject(text, false);
@@ -354,7 +354,7 @@ public class ExpressionTokenizer extends JSONTokenizer {
 		case '!':// !,!=
 			if (next == '=') {
 				end++;
-				if (value.length() > end && value.charAt(end) == '=') {
+				if (value.length() > end && toLower(value.charAt(end)) == '=') {
 					end++;
 					//this.fail("不支持=== 和!==操作符，请使用==,!=");
 				}
@@ -381,50 +381,22 @@ public class ExpressionTokenizer extends JSONTokenizer {
 			return null;
 		}
 
-		return value.substring(start, start = end);
+		return toLower(value.substring(start, start = end));
 	}
 
-	private char toLower(char c) {
-		if(c >0xfee0){
-			c-=0xfee0;
+
+	private String toLower(String c) {
+		char[] cs = c.toCharArray();
+		for (int i = 0; i < cs.length; i++) {
+			cs[i] = toLower(cs[i]);
 		}
-		return c;
+		return new String(cs);
+		
 	}
 
 	private void fail(String msg) {
 		throw new ExpressionSyntaxException(msg + "\n@" + start + "\n"
 				+ value.substring(start) + "\n----\n" + value);
-	}
-
-	/**
-	 * 碰見:和,的時候，就需要檢查是否事map的間隔符號了
-	 * 
-	 * @return
-	 */
-	private boolean isMapMethod() {
-		int i = tokens.size() - 1;
-		int depth = 0;
-		for (; i >= 0; i--) {
-			TokenImpl token = tokens.get(i);
-			int type = token.getType();
-			if (depth == 0) {
-				if (type == OP_PUSH || type == VALUE_MAP) {// (
-					// <#newMap>
-					// <#push>
-					return true;
-				} else if (type == OP_JOIN) {// (
-					// <#newList>
-					// <#param_join>
-					return false;
-				}
-			}
-			if (type == BRACKET_BEGIN) {
-				depth--;
-			} else if (type == BRACKET_END) {
-				depth++;
-			}
-		}
-		return false;
 	}
 
 	private void addOperator(String op) {
@@ -512,6 +484,37 @@ public class ExpressionTokenizer extends JSONTokenizer {
 		}
 	}
 
+
+	/**
+	 * 碰見:和,的時候，就需要檢查是否事map的間隔符號了
+	 * 
+	 * @return
+	 */
+	private boolean isMapMethod() {
+		int i = tokens.size() - 1;
+		int depth = 0;
+		for (; i >= 0; i--) {
+			TokenImpl token = tokens.get(i);
+			int type = token.getType();
+			if (depth == 0) {
+				if (type == OP_PUSH || type == VALUE_MAP) {// (
+					// <#newMap>
+					// <#push>
+					return true;
+				} else if (type == OP_JOIN) {// (
+					// <#newList>
+					// <#param_join>
+					return false;
+				}
+			}
+			if (type == BRACKET_BEGIN) {
+				depth--;
+			} else if (type == BRACKET_END) {
+				depth++;
+			}
+		}
+		return false;
+	}
 
 	private void addKeyOrObject(Object object, boolean isVar) {
 		if (skipSpace(':') && isMapMethod()) {// object key

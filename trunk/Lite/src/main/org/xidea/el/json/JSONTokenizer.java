@@ -25,7 +25,7 @@ public class JSONTokenizer {
 
 	public Object parse() {
 		skipComment();
-		char c = value.charAt(start);
+		char c = toLower(value.charAt(start));
 		switch(c){
 		case '"' :
 		case '\'':
@@ -53,7 +53,19 @@ public class JSONTokenizer {
 	protected ExpressionSyntaxException buildError(String msg)  {
 		return new ExpressionSyntaxException("语法错误:"+msg +"\n"+ value + "@" + start);
 	}
-		
+	/*
+	 * 0xfee0+0x21-0xfee0+0x7e
+	 * \uff01-\uff5e
+	 * ！ - ～
+	 * ! - ~
+	 */
+	protected char toLower(char c) {
+		if(c >=0xff01 && c<=0xff5e){
+			c-=0xfee0;
+		}
+		return c;
+	}
+
 
 	protected Map<String, Object> findMap() {
 		start++;
