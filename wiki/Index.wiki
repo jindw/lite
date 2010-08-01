@@ -17,4 +17,4 @@
     * [LiteXHTML LiteXHTML 语法扩展]
     * [LiteUI LiteUI语法扩展]
   * 扩展机制
-    * [LiteExtension 自定义名称空间]
+    * [自定义名称空间]
