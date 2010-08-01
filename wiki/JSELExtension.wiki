@@ -24,7 +24,6 @@ String json = (String)el.evaluate("path","test.json");
 //测试内置函数
 Expression　el = factory.create("md5(username+':'+password)");
 String md5pass= (String)el.evaluate("username","jindw","password","123456");
-
 }}}　
 
 
@@ -44,5 +43,4 @@ factory.addOperator(ExpressionToken.OP_LT,"lt",null);
 
 Expression　el = factory.create("contains(['a','b','c'],key')? 1: key gt 'b'");
 System.out.println(el.evaluate("key","a"));
-
 }}}　
