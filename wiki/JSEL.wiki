@@ -1,7 +1,7 @@
 #labels Featured
 ===JSEL简介===
 JSEL是一个兼容 JavaScript 运算规则的简单的表达式解释引擎。
-====hhh#ddd====
+
 ==== 基本特征 ====
   * 运算规则基于JavaScript。
   * 支持变量，常量(基础类型/数字/对象字面量)，ECMA全局函数/对象，基本运算符。
@@ -81,26 +81,28 @@ public class JSELTest {
 }}}
 
 ==== 操作符支持 ====
+JSEL 运算符优先级，运算行为均与JavaScript完全保持一致。
+JavaScript 运算符号优先级参考[https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Operators/Operator_Precedence]
 
  * 属性获取
 {{{
-. , []
+. , []  　　　//两种取属性模式功能相同，［］可以用来获取动态属性。
 }}}
  * 四则运算：
 {{{
-+，-，*，/
++，-，*，/　　
 }}}
  * 取模运算：
 {{{
-%
+%　　　　　　　
 }}}
  * 正负运算：
 {{{
-+，-
++，-　　　　　　
 }}}
  * 比较运算
 {{{
-<，>,>=,<=,==，!=,===,!===
+<，>,>=,<=,==，!=,===,!===　　　//=== !=== 与　== != 的基本区别是，不会做类型转换
 }}}
  * 布尔运算
 {{{
@@ -114,6 +116,11 @@ public class JSELTest {
 {{{
 xxx?yy:zz
 }}}
+ * in 操作符
+{{{
+a in map ? true:false
+}}}
+
  * 函数调用
 {{{
 ()
@@ -137,7 +144,28 @@ parseInt("234");//全局函数语法：
 }}}
 
 ==== 内置函数支持 ====
-<a name="FunctionSupport "></a>
+  * 全局函数/对象
+{{{
+//全局函数
+isFinite, parseInt, decodeURI, encodeURI, isNaN, parseFloat, encodeURIComponent, decodeURIComponent
+//全局变量
+NaN, Infinity
+//全局对象（工具函数聚）
+/**
+ * 成员函数有：abs, acos, asin, atan, ceil, asin, cos,
+ *             exp, floor, log, round,sin, sqrt, tan
+ *             random, min, max, pow ,atan2
+ * 成员属性有：E,PI,LN10,LN2，LOG2E,LOG10E,SQRT1_2, SQRT2,
+ */
+Math
+/**
+ * 成员函数有:
+ *  JSON.stringify(object),
+ *   JSON.parse(json)
+ */
+JSON
+}}}
+
 
 ==== 表达式计算性能 ====
 
