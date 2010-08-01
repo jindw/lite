@@ -44,6 +44,10 @@ public class ValueStackImpl implements ValueStack {
 				}
 			}
 		}
+		return fallback(key);
+	}
+
+	protected Object fallback(Object key) {
 		return null;
 	}
 

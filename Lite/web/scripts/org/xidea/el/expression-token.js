@@ -6,7 +6,7 @@
  * @version $Id: template.js,v 1.4 2008/02/28 14:39:06 jindw Exp $
  */
 var BIT_PRIORITY= 60;
-var BIT_PRIORITY_SUB= 61440;
+var BIT_PRIORITY_SUB= 3840;
 var BIT_ARGS= 192;
 var VALUE_CONSTANTS= -1;
 var VALUE_VAR= -2;
@@ -14,9 +14,6 @@ var VALUE_LIST= -3;
 var VALUE_MAP= -4;
 var OP_GET= 96;
 var OP_INVOKE= 97;
-//var OP_GET_STATIC_PROP= 33;
-//var OP_INVOKE_WITH_STATIC_PARAM= 35;
-//var OP_INVOKE_WITH_ONE_PARAM= 352;
 var OP_NOT= 28;
 var OP_BIT_NOT= 29;
 var OP_POS= 30;
@@ -26,21 +23,24 @@ var OP_DIV= 89;
 var OP_MOD= 90;
 var OP_ADD= 84;
 var OP_SUB= 85;
-var OP_LT= 4176;
-var OP_GT= 4177;
-var OP_LTEQ= 4178;
-var OP_GTEQ= 4179;
+var OP_LT= 336;
+var OP_GT= 337;
+var OP_LTEQ= 338;
+var OP_GTEQ= 339;
 var OP_EQ= 80;
-var OP_NOTEQ= 81;
-var OP_BIT_AND= 8268;
-var OP_BIT_XOR= 4172;
+var OP_NE= 81;
+var OP_EQ_STRICT= 82;
+var OP_NE_STRICT= 83;
+var OP_BIT_AND= 588;
+var OP_BIT_XOR= 332;
 var OP_BIT_OR= 76;
-var OP_AND= 4168;
-var OP_OR= 73;
+var OP_AND= 328;
+var OP_OR= 72;
 var OP_QUESTION= 68;
 var OP_QUESTION_SELECT= 69;
 var OP_JOIN= 64;
 var OP_PUSH= 65;
+
 
 
 
@@ -54,7 +54,6 @@ function addToken(type,token){
 }
 //9
 addToken(OP_GET,".");
-//addToken(OP_GET_STATIC_PROP,".");
 //8
 addToken(OP_NOT,"!");
 addToken(OP_BIT_NOT,"~");
@@ -73,7 +72,9 @@ addToken(OP_GT,">");
 addToken(OP_LTEQ,"<=");
 addToken(OP_GTEQ,">=");
 addToken(OP_EQ,"==");
-addToken(OP_NOTEQ,"!=");
+addToken(OP_EQ_STRICT,"===");
+addToken(OP_NE,"!=");
+addToken(OP_NE_STRICT,"!==");
 //4
 addToken(OP_BIT_AND,"&");
 addToken(OP_BIT_XOR,"^");
@@ -118,42 +119,42 @@ function getTokenLength(type) {
 	return hasTokenParam(type)?size+1:size;
 
 }
-function optimizeEL(el){
-	var type = el[0];
-	var end = getTokenParamIndex(type) ;
-	if (end > 1) {//2,3
-	
-		el[1] = optimizeEL(el[1]);
-		var co = canOptimize(el[1][0]);
-		if(end>2){
-			el[2] = optimizeEL(el[2]);
-			co = co &&  canOptimize(el[2][0]);
-		}
-		if(co){
-			var o = evaluate(el, []);
-			var type = typeof o;
-			switch(type){
-				case 'string':
-				case 'boolean':
-					break;
-				case 'number':
-					if(isFinite(o)){
-						break;
-					}
-				default:
-					if(o != null){//object undefined
-						return el;
-					}
-			}
-			return [VALUE_CONSTANTS,o]
-		}
-	}
-	return el;
-}
-
-function canOptimize(type) {
-	return type == VALUE_CONSTANTS;
-}
+//function optimizeEL(el){
+//	var type = el[0];
+//	var end = getTokenParamIndex(type) ;
+//	if (end > 1) {//2,3
+//	
+//		el[1] = optimizeEL(el[1]);
+//		var co = canOptimize(el[1][0]);
+//		if(end>2){
+//			el[2] = optimizeEL(el[2]);
+//			co = co &&  canOptimize(el[2][0]);
+//		}
+//		if(co){
+//			var o = evaluate(el, []);
+//			var type = typeof o;
+//			switch(type){
+//				case 'string':
+//				case 'boolean':
+//					break;
+//				case 'number':
+//					if(isFinite(o)){
+//						break;
+//					}
+//				default:
+//					if(o != null){//object undefined
+//						return el;
+//					}
+//			}
+//			return [VALUE_CONSTANTS,o]
+//		}
+//	}
+//	return el;
+//}
+//
+//function canOptimize(type) {
+//	return type == VALUE_CONSTANTS;
+//}
 function getTokenParamIndex(type) {
 	if(type<0){
 		return 1;

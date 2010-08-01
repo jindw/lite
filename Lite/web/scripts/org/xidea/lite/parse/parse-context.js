@@ -48,8 +48,8 @@ ParseContext.prototype = {
 	},
 	parseText:function(source, textType) {
 		switch(textType){
-		case XML_ATTRIBUTE_TYPE :
-	    case XML_TEXT_TYPE :
+		case XA_TYPE :
+	    case XT_TYPE :
 	    case EL_TYPE :
 	        break;
 	    default:

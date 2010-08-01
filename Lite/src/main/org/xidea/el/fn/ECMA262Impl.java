@@ -13,8 +13,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.xidea.el.Invocable;
-import org.xidea.el.impl.OperationStrategyImpl;
+import org.xidea.el.impl.ExpressionFactoryImpl;
 import org.xidea.el.impl.ReflectUtil;
+import org.xidea.el.json.JSONDecoder;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.el.json.JSONTokenizer;
 
@@ -29,13 +30,13 @@ public abstract class ECMA262Impl {
 			Object[].class, int[].class, float[].class, double[].class,
 			long[].class, short[].class, byte[].class, char[].class };
 
-	public static void setup(OperationStrategyImpl calculater) {
+	public static void setup(ExpressionFactoryImpl calculater) {
 		setup(calculater, JSArray.class, ARRAY_CLASSES);
 		setup(calculater, JSNumber.class, Number.class);
 		setup(calculater, JSString.class, String.class);
 		setupVar(calculater);
 	}
-	private static void setupVar(OperationStrategyImpl calculater) {
+	private static void setupVar(ExpressionFactoryImpl calculater) {
 		calculater.addVar("encodeURI", new URI(true));
 		calculater.addVar("decodeURI", new URI(false));
 
@@ -52,7 +53,7 @@ public abstract class ECMA262Impl {
 		calculater.addVar("NaN", Double.NaN);
 		calculater.addVar("JSON", new JSON());
 	}
-	private static void setup(OperationStrategyImpl calculater,
+	private static void setup(ExpressionFactoryImpl calculater,
 			Class<? extends JSObject> impl, Class<?>... forClass) {
 		try {
 			Method[] dms = impl.getMethods();
@@ -291,8 +292,8 @@ public abstract class ECMA262Impl {
 		}
 
 		public static final Object decode(Object value) {
-			return new JSONTokenizer(ToPrimitive(value, String.class)
-					.toString(),false).parse();
+			return JSONDecoder.decode(ToPrimitive(value, String.class)
+					.toString());
 		}
 
 	}

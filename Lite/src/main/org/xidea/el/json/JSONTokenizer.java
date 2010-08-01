@@ -23,7 +23,7 @@ public class JSONTokenizer {
 		this.strict = strict;
 	}
 
-	public Object parse() {
+	protected Object parse() {
 		skipComment();
 		char c = toLower(value.charAt(start));
 		switch(c){

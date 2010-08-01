@@ -8,8 +8,8 @@
 var EL_TYPE = 0;// [0,'el']
 var IF_TYPE = 1;// [1,[...],'test']
 var BREAK_TYPE = 2;// [2,depth]
-var XML_ATTRIBUTE_TYPE = 3;// [3,'value','name']
-var XML_TEXT_TYPE = 4;// [4,'el']
+var XA_TYPE = 3;// [3,'value','name']
+var XT_TYPE = 4;// [4,'el']
 var FOR_TYPE = 5;// [5,[...],'items','var']
 var ELSE_TYPE = 6;// [6,[...],'test']//test opt?
 var PLUGIN_TYPE =7;// [7,[...],'el','clazz']
@@ -129,7 +129,7 @@ function renderList(context,data,out){
 	            case EL_TYPE:
 	                processExpression(context, item, out, false);
 	                break;
-	            case XML_TEXT_TYPE:
+	            case XT_TYPE:
 	                processExpression(context, item, out, true);
 	                break;
 	            case VAR_TYPE:
@@ -147,7 +147,7 @@ function renderList(context,data,out){
 	            case FOR_TYPE:
 	                processFor(context, item, out);
 	                break;
-	            case XML_ATTRIBUTE_TYPE:
+	            case XA_TYPE:
 	                processAttribute(context, item, out);
 	                break;
 	            }

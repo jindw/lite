@@ -1,6 +1,8 @@
 package org.xidea.el.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import org.xidea.el.ExpressionInfo;
@@ -15,19 +17,12 @@ public class ExpressionImpl implements Expression, ReferenceExpression,
 		ExpressionInfo {
 	protected final OperationStrategy strategy;
 	protected final ExpressionToken expression;
-	private static ValueStack EMPTY_VS = new ValueStack() {
-		public void put(Object key, Object value) {
-		}
-
-		public Object get(Object key) {
-			return null;
-		}
-	};
+	private static ValueStack EMPTY_VS = new ValueStackImpl(Collections.emptyMap());
 
 	public ExpressionImpl(String el) {
 		ExpressionFactoryImpl efi = ExpressionFactoryImpl.getInstance();
 		this.expression = (ExpressionToken) efi.parse(el);
-		this.strategy = efi.strategy;
+		this.strategy = efi.getStrategy();
 	}
 
 	public ExpressionImpl(ExpressionToken expression,
@@ -36,6 +31,16 @@ public class ExpressionImpl implements Expression, ReferenceExpression,
 		this.expression = expression;
 	}
 
+	public Object evaluate(Object... context) {
+		if((context.length &1) ==1){
+			throw new IllegalArgumentException("参数必须是偶数个数");
+		}
+		HashMap<Object, Object> map = new HashMap<Object, Object>();
+		for(int i = 0;i<context.length;i++){
+			map.put(context[i], context[i++]);
+		}
+		return evaluate(map);
+	}
 	public Object evaluate(Object context) {
 		ValueStack valueStack;
 		if (context instanceof ValueStack) {
@@ -69,7 +74,7 @@ public class ExpressionImpl implements Expression, ReferenceExpression,
 	protected Object prepare(ExpressionToken item, ValueStack vs) {
 		int type = item.getType();
 		Object arg2 ;
-		if (type == TokenImpl.OP_GET_STATIC_PROP) {
+		if (type == TokenImpl.OP_GET_STATIC) {
 			arg2 = item.getParam();
 		} else if (type == ExpressionToken.OP_GET) {
 			arg2 = strategy.evaluate(item.getRight(), vs);
@@ -106,5 +111,6 @@ public class ExpressionImpl implements Expression, ReferenceExpression,
 			}
 		}
 	}
+
 
 }

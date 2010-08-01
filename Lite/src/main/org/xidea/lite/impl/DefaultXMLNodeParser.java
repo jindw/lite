@@ -157,7 +157,7 @@ public class DefaultXMLNodeParser implements NodeParser<Node> {
 			text = safeTrim(text);
 		}
 		if (text.length() > 0) {
-			context.appendAll(context.parseText(text, Template.XML_TEXT_TYPE));
+			context.appendAll(context.parseText(text, Template.XT_TYPE));
 		}
 	}
 
@@ -214,7 +214,7 @@ public class DefaultXMLNodeParser implements NodeParser<Node> {
 	}
 
 	private List<Object> parseAttributeValue(ParseContext context, String value) {
-		return context.parseText(value, Template.XML_ATTRIBUTE_TYPE);
+		return context.parseText(value, Template.XA_TYPE);
 	}
 
 	private void parseElement(Node node, ParseContext context) {

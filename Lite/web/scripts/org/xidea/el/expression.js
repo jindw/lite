@@ -99,10 +99,15 @@ function _evaluate(item,context){
         return arg1 > arg2;
     case OP_GTEQ:
         return arg1 >= arg2;
-    case OP_NOTEQ:
+    case OP_NE:
         return arg1 != arg2;
+    case OP_NE_STRICT:
+        return arg1 !== arg2;
     case OP_EQ:
         return arg1 == arg2;
+    case OP_EQ_STRICT:
+        return arg1 === arg2;
+        
     case OP_LT:
         return arg1 < arg2;
     case OP_LTEQ:

@@ -44,12 +44,12 @@ public class OptimizeExpressionImpl extends ExpressionImpl {
 		if (el.getType() == ExpressionToken.VALUE_VAR) {
 			return new OptimizeExpressionImpl(el, calculater, 
 					(String)el.getParam());
-		}else if (el.getType() == TokenImpl.OP_GET_STATIC_PROP) {
+		}else if (el.getType() == TokenImpl.OP_GET_STATIC) {
 					ArrayList<Object> props = new ArrayList<Object>();
 			ExpressionToken current = el;
 			String baseName = null;
 			while(true) {
-				if(current.getType() == TokenImpl.OP_GET_STATIC_PROP){
+				if(current.getType() == TokenImpl.OP_GET_STATIC){
 					props.add(current.getParam());
 				}else{
 					if(current.getType() == ExpressionToken.VALUE_VAR){

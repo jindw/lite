@@ -16,11 +16,11 @@ public class TextNodeParser implements NodeParser<String> {
 		final boolean encode;
 		final char qute;
 		switch (context.getTextType()) {
-		case Template.XML_ATTRIBUTE_TYPE:
+		case Template.XA_TYPE:
 			encode = true;
 			qute = '"';
 			break;
-		case Template.XML_TEXT_TYPE:
+		case Template.XT_TYPE:
 			encode = true;
 			qute = 0;
 			break;

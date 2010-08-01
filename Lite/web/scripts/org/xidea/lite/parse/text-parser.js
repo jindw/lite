@@ -16,10 +16,10 @@ var defaultTextSeeker = {
 				var el = text.substring(0,end);
 				el = this.parseEL(el);
 	            switch(this.getTextType()){
-	            case XML_TEXT_TYPE:
+	            case XT_TYPE:
 	            	this.appendXT(el);
 	            	break;
-	            case XML_ATTRIBUTE_TYPE:
+	            case XA_TYPE:
 	            	this.appendXA(null,el);
 	            	break;
 	            default:
@@ -61,9 +61,9 @@ function parseText(text,context,chain,textParsers){
 		chain.next(text);
 	}
 	switch(context.getTextType()){
-    case XML_ATTRIBUTE_TYPE :
+    case XA_TYPE :
         var qute = '"';
-    case XML_TEXT_TYPE :
+    case XT_TYPE :
         var encode = true;  
     case EL_TYPE:
         break;

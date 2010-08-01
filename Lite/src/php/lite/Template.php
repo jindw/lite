@@ -25,10 +25,10 @@ function lite_render_list(&$context, &$children){
 	                case 1://LITE_IF_TYPE:
 	                    lite_process_if($context, $item);
                     	break;
-	                case 3://LITE_XML_ATTRIBUTE_TYPE:
+	                case 3://LITE_XA_TYPE:
 	                    lite_process_attribute($context, $item);
                     	break;
-	                case 4://LITE_XML_TEXT_TYPE:
+	                case 4://LITE_XT_TYPE:
 	                    lite_process_el($context, $item, 1);
                     	break;
 	                case 5://LITE_FOR_TYPE:

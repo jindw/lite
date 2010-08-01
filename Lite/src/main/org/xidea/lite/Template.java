@@ -24,8 +24,8 @@ public class Template {
 	public static final int EL_TYPE = 0; // [0,<el>]
 	public static final int IF_TYPE = 1; // [1,[...],<test el>]
 	public static final int BREAK_TYPE = 2; // [2,depth]
-	public static final int XML_ATTRIBUTE_TYPE = 3; // [3,<value el>,'name']
-	public static final int XML_TEXT_TYPE = 4; // [4,<el>]
+	public static final int XA_TYPE = 3; // [3,<value el>,'name']
+	public static final int XT_TYPE = 4; // [4,<el>]
 	public static final int FOR_TYPE = 5; // [5,[...],<items el>,'varName']/
 	private static final int FOR_TYPE_NO_STATUS = FOR_TYPE | 0x100;
 	private static final int FOR_TYPE_FIRST_STATUS = FOR_TYPE | 0x200;
@@ -112,12 +112,12 @@ public class Template {
 					}
 					forCount = forCount0;
 					break;
-				case XML_ATTRIBUTE_TYPE:
+				case XA_TYPE:
 					if (cmd[2] != null) {
 						cmd[2] = " " + cmd[2] + "=\"";
 					}
 				case VAR_TYPE:
-				case XML_TEXT_TYPE:
+				case XT_TYPE:
 				case EL_TYPE:
 					cmd[1] = createExpression(cmd[1]);
 					break;
@@ -196,10 +196,10 @@ public class Template {
 								FOR_TYPE_NO_STATUS);
 						break;
 
-					case XML_TEXT_TYPE:// ":el":
+					case XT_TYPE:// ":el":
 						processExpression(context, data, out, true);
 						break;
-					case XML_ATTRIBUTE_TYPE:// ":attribute":
+					case XA_TYPE:// ":attribute":
 						processAttribute(context, data, out);
 						break;
 					case BREAK_TYPE://

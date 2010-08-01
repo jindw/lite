@@ -3,6 +3,7 @@ package org.xidea.el.impl;
 import static org.xidea.el.impl.TokenImpl.BRACKET_BEGIN;
 import static org.xidea.el.impl.TokenImpl.BRACKET_END;
 import static org.xidea.el.ExpressionToken.OP_ADD;
+import static org.xidea.el.ExpressionToken.OP_IN;
 import static org.xidea.el.ExpressionToken.BIT_ARGS;
 import static org.xidea.el.ExpressionToken.BIT_PRIORITY;
 import static org.xidea.el.ExpressionToken.BIT_PRIORITY_SUB;
@@ -13,9 +14,9 @@ import static org.xidea.el.ExpressionToken.OP_PUSH;
 import static org.xidea.el.ExpressionToken.OP_NEG;
 import static org.xidea.el.ExpressionToken.OP_JOIN;
 import static org.xidea.el.ExpressionToken.OP_POS;
+import static org.xidea.el.ExpressionToken.OP_SUB;
 import static org.xidea.el.ExpressionToken.OP_QUESTION;
 import static org.xidea.el.ExpressionToken.OP_QUESTION_SELECT;
-import static org.xidea.el.ExpressionToken.OP_SUB;
 import static org.xidea.el.ExpressionToken.VALUE_CONSTANTS;
 import static org.xidea.el.ExpressionToken.VALUE_LIST;
 import static org.xidea.el.ExpressionToken.VALUE_MAP;
@@ -33,7 +34,7 @@ import org.xidea.el.json.JSONTokenizer;
 /**
  * 首次遍历的时候，不支持后缀运算，单参数表达式只能前缀。
  */
-public class ExpressionTokenizer extends JSONTokenizer {
+public class ExpressionParser extends JSONTokenizer {
 	private final static TokenImpl TOKEN_TRUE = new TokenImpl(VALUE_CONSTANTS,
 			Boolean.TRUE);
 	private final static TokenImpl TOKEN_FALSE = new TokenImpl(VALUE_CONSTANTS,
@@ -47,16 +48,42 @@ public class ExpressionTokenizer extends JSONTokenizer {
 
 	private Status status = Status.BEGIN;
 	private int previousType = Integer.MIN_VALUE;
-	private Map<String, Integer> aliasMap;
+	private Map<String, Integer> aliasMap = Collections.emptyMap();
 
 	protected ArrayList<TokenImpl> tokens = new ArrayList<TokenImpl>();
 	protected TokenImpl expression;
 	private int depth;
 
-	public ExpressionTokenizer(String value,Map<String, Integer> aliasMap) {
+	public ExpressionParser(String value) {
 		super(value,false);
+	}
+
+
+	public void setAliasMap(Map<String, Integer> aliasMap) {
 		this.aliasMap = aliasMap;
-		parseEL();
+	}
+//	this.aliasMap = aliasMap;
+	public TokenImpl parseEL() {
+		skipSpace(0);
+		while (start < end) {
+			char c = toLower(value.charAt(start));
+			if (c == '"' || c == '\'') {
+				String text = findString();
+				addKeyOrObject(text, false);
+			} else if (c >= '0' && c <= '9') {
+				Number number = findNumber();
+				addKeyOrObject(number, false);
+			} else if (Character.isJavaIdentifierStart(c)) {
+				String id = findId();
+				addId(id);
+			} else {
+				String op = findOperator();
+				addOperator(op);
+			}
+			skipSpace(0);
+		}
+		
+
 		if(depth!=0){
 			this.fail("表达式括弧不匹配");
 		}
@@ -71,8 +98,9 @@ public class ExpressionTokenizer extends JSONTokenizer {
 			this.fail("表达式语法错误");
 		}
 		this.expression = stack.getFirst();
+		expression.value = this.value;
+		return expression;
 	}
-
 	private void prepareSelect() {
 		int p1 = tokens.size();
 		while (p1-- > 0) {
@@ -111,10 +139,6 @@ public class ExpressionTokenizer extends JSONTokenizer {
 		return inc > 0 ? end : -1;
 	}
 
-	public TokenImpl getResult() {
-		expression.value = this.value;
-		return expression;
-	}
 	private void toTree(List<TokenImpl> tokens, LinkedList<TokenImpl> stack) {
 		for (final TokenImpl item : tokens) {
 			int type = item.getType();
@@ -209,7 +233,7 @@ public class ExpressionTokenizer extends JSONTokenizer {
 		// (a?b:ca:cb:cc) => (a?b):((ca?cb):cc)
 		// 1?1:3 + 0?5:7 ==>1 //1?1:(3 + 0?5:7 )
 		// 1?0?5:7:3 ==>7 //1?(0?5:7):3
-		// 1?0?5:0?11:13:3 ==>13 //1?((0?5:0)?11:13):3
+		// 1    ?     0?5:0 ? 11 : 13    :    3 ==>13 //1?((0?5:0)?11:13):3
 		if(p1 == p2){
 			if(TokenImpl.isPrefix(t2)){
 				return false;
@@ -229,27 +253,6 @@ public class ExpressionTokenizer extends JSONTokenizer {
 		}
 	}
 
-	protected void parseEL() {
-		skipSpace(0);
-		while (start < end) {
-			char c = toLower(value.charAt(start));
-			if (c == '"' || c == '\'') {
-				String text = findString();
-				addKeyOrObject(text, false);
-			} else if (c >= '0' && c <= '9') {
-				Number number = findNumber();
-				addKeyOrObject(number, false);
-			} else if (Character.isJavaIdentifierStart(c)) {
-				String id = findId();
-				addId(id);
-			} else {
-				String op = findOperator();
-				addOperator(op);
-			}
-			skipSpace(0);
-		}
-	}
-
 	private void addToken(TokenImpl token) {
 		int type = token.getType();
 		//invoke 处歧异在invoke解析时处理
@@ -257,7 +260,13 @@ public class ExpressionTokenizer extends JSONTokenizer {
 			replacePrevious();
 		}
 		if(type == VALUE_VAR){
-			Integer op = aliasMap.get(token.getParam());
+			Object id = token.getParam();
+			Integer op ;
+			if("in".equals(id)){
+				op = OP_IN;
+			}else{
+				op = aliasMap.get(id);
+			}
 			if(op!=null){
 				int c = TokenImpl.getArgCount(op);
 				if(c == 2 && status == Status.EXPRESSION
@@ -569,5 +578,7 @@ public class ExpressionTokenizer extends JSONTokenizer {
 		}
 		return -1;
 	}
+
+
 
 }
