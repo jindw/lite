@@ -28,17 +28,17 @@ String md5pass= (String)el.evaluate("username","jindw","password","123456");
   * 基本原理
 　　内置对象是在标准JavaScript 语法基础上。通过扩充标准函数库或者添加内置对象的方式来实现自定义需求，内置对象在表达式工厂内共享。
 
-==== 添加自定义操作符 ====
+==== 添加自定义运算符 ====
   * 代码示例
 {{{
 ExpressionFactoryImpl factory= new ExpressionFactoryImpl();
 
-//以大于操作符为参照，静态函数：MyHelper.contains 为实现，创建一个新操作符：contains
-factory.addOperator(ExpressionToken.OP_GT,//操作符信息样本（参数个数，优先级）
+//以大于运算符为参照，静态函数：MyHelper.contains 为实现，创建一个新运算符：contains
+factory.addOperator(ExpressionToken.OP_GT,       //运算符信息样本（参数个数，优先级）
            "contains",
             MyHelper.class.getMethod("contains",List.class, Object.class))
 
-//创建大于小于操作符的别名　gt,lt. (没有实现的方式即为给样本操作符添加别名)
+//创建大于小于运算符的别名　gt,lt. (没有实现的方式即为给样本运算符添加别名)
 factory.addOperator(ExpressionToken.OP_GT, "gt",null);
 factory.addOperator(ExpressionToken.OP_LT,"lt",null);
 
@@ -46,4 +46,4 @@ Expression　el = factory.create("contains(['a','b','c'],key')? 1: key gt 'b'");
 System.out.println(el.evaluate("key","a"));
 }}}
   * 基本原理
-    自定义操作符是超越标准JavaScript 语法，通过参照表达式的方式，自定义运算符行为，优先级等语法层面的内容。
+    自定义运算符是超越标准JavaScript 语法，通过参照表达式的方式，自定义运算符行为，优先级等语法层面的内容。
