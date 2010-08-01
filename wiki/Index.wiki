@@ -1,14 +1,14 @@
   * [WhatsNew 新功能推广]
   * JSEL 表达式引擎
     * [JSEL 表达式支持]
-      * [JSEL#Operation　操作符支持]
+      * [JSEL#OperationSupport 操作符支持]
       * [JSEL#FunctionSupport 函数支持]
     * [JSON JSON 解析]
       * [JSON#SyntaxCompatible 语法容错]
       * [JSON#ObjectMapper 对象映射]
     * [CPEL 命令行工具]
-      * [CPEL#"KV" 属性与值]
-      * [CPEL#'TP哈' 类型支持]
+      * [CPEL#KV\u0055 属性与值]
+      * [CPEL#TP哈 类型支持]
   * Lite 模板平台
       * 模板中间代码设计
   * 模板语法
