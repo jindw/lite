@@ -92,7 +92,7 @@ a > (true?1:123+b+c)
 a > 1
 }}}
 ==== 其他参考　====
-  * [JSELOperator 操作符支持]
+  * [JSELOperator 运算符支持]
 　　JSEL 支持大部分　标准ECMA262 操作符
   * [JSELFunction 函数支持]
 　　JSEL 支持大部分　标准ECMA262 标准函数
