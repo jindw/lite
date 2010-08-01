@@ -3,6 +3,7 @@
     * [JSEL 表达式支持]
       * [JSELOperator 操作符支持]
       * [JSELFunction 函数支持]
+      * [JSELExtension 功能扩展]
     * [JSON JSON 解析]
       * [JSONCompatible 语法容错]
       * [JSONObjectMapper 对象映射]
