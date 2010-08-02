@@ -42,7 +42,7 @@ factory.addOperator(ExpressionToken.OP_GT,       //运算符信息样本（参�
 factory.addOperator(ExpressionToken.OP_GT, "gt",null);
 factory.addOperator(ExpressionToken.OP_LT,"lt",null);
 
-Expression　el = factory.create("['a','b','c'] contains key ? 1: key gt 'b'");
+Expression　el = factory.create("(['a','b','c'] contains key)  ?  1  :  key gt 'b'");
 System.out.println(el.evaluate("key","a"));
 }}}
   * 基本原理
