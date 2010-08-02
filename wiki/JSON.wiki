@@ -3,18 +3,20 @@ JSON 语法介绍见：http://www.json.org/
 Lite 的默认表达式实现JSEL，支持JavaScript 表达式语法，本身就是一个JSON 的父集。他除了能解释普通JSON 数据之外，也可以在JSON语法中增加注释，甚至表达式，变量等支持。
 
 === 使用JSEL 解析JSON++ ===
+JSEL 可以直接执行JavaScript表达式，解析JSON这个JavaScript表达式子集当能也就不在话下了。通过JSEL解释JSON不仅可以按照宽松的语法模式，还可以在解析的过程中完成一些基本的表达式计算。
 {{{
     .....
     Expression el = ExpressionFactory.getInstance().create("{aa:1+1}");
     Object result1 = el.evaluate(this);
     .....
     Expression el = ExpressionFactory.getInstance().create("{aa:1+x,bb:2+y}");
-　　Object result2 = el.evaluate("x":1,"y",2);
+　　Object result2 = el.evaluate("x",1,"y",2);
 }}}
 
 === 使用JSONDecoder 解析JSON  ====
   * 静态方法调用
-    最简单的JSON解码方法。使用一个简单的静态函数：
+    最简单的JSON解码方法。使用一个简单的静态函数，这种模式将采用宽松的语法模式解析JSON。
+    _对象键可省略引号，字符串允许多行也可以用小引号，支持JS定义的全部其他数字字面量格式_
 {{{
     Map<String,Number> result = JSONDecoder.decode("{aa:2}");
 }}}
@@ -23,6 +25,7 @@ Lite 的默认表达式实现JSEL，支持JavaScript 表达式语法，本身就
 {{{
     //设置为严谨模式（不容错）
     JSONDecoder decoder = new JSONDecoder(true);
+    //自动将JSON数据转化为制定类型的对象
     MyClass result = decoder.decode("{\"name\":\"jindw\"}",MyClass.class);
 }}}
 
@@ -33,6 +36,7 @@ Lite 的默认表达式实现JSEL，支持JavaScript 表达式语法，本身就
 
   * 静态方法调用
     最简单的JSON化方法。使用一个简单的静态函数：
+    _不输出class属性，最大深度为64，采用HashSet作递归检测_
 
 {{{
     String json= JSONEncoder.encode(object);
@@ -45,7 +49,7 @@ Lite 的默认表达式实现JSEL，支持JavaScript 表达式语法，本身就
 JSONEncoder encoder= new JSONEncoder(true,32);
 //第一个参数指需要编码的对象
 //第二个参数指定输出流,
-//第三个参数设置判重集合（为空时不判断，快速编码）。
+//第三个参数设置递归检测集合实现（为空时不判断，快速编码）。
 encode.encode(object,out,null);
 }}}
 
