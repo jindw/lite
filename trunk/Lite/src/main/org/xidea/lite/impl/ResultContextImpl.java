@@ -227,7 +227,7 @@ public class ResultContextImpl implements ResultContext {
 		return optimizeResult(pops);
 	}
 
-	@SuppressWarnings({"rawtypes", "unchecked" })
+	@SuppressWarnings({"unchecked" })
 	public List<Object> toList() {
 		List<Object> result2 = optimizeResult(this.result);
 		ArrayList<ArrayList<Object>> stack = new ArrayList<ArrayList<Object>>();

@@ -72,15 +72,12 @@ public class JSONDecoder {
 			if (value instanceof String) {
 				return type.getConstructor(String.class).newInstance(value);
 			} else if (value instanceof Map) {
-				@SuppressWarnings("rawtypes")
 				Map map = (Map) value;
 				String className = (String) map.get("class");
-				@SuppressWarnings("rawtypes")
 				Class clazz = className != null ? Class.forName(className)
 						: type;
 				Object result = clazz.newInstance();
 				for (Object key : map.keySet()) {
-					@SuppressWarnings("rawtypes")
 					Class atype = ReflectUtil.getPropertyType(clazz, key);
 					ReflectUtil.setValue(result, key,
 							toValue(map.get(key), atype));

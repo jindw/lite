@@ -325,8 +325,7 @@ class NamespaceContextImpl implements NamespaceContext {
 		throw new UnsupportedOperationException("xpath not use");
 	}
 
-	@SuppressWarnings("rawtypes")
-	public Iterator getPrefixes(String namespaceURI) {
+	public Iterator<?> getPrefixes(String namespaceURI) {
 		throw new UnsupportedOperationException("xpath not use");
 	}
 }

@@ -122,14 +122,13 @@ public abstract class ReflectUtil {
 				.parseInt(String.valueOf(key));
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static Class<? extends Object> getValueType(Type type) {
 		Type result = null;
 		Class<? extends Object>  clazz = null;
 		if (type instanceof ParameterizedType) {
-			clazz = (Class) ((ParameterizedType) type).getRawType();
+			clazz = (Class<?>) ((ParameterizedType) type).getRawType();
 		} else {
-			clazz = (Class) type;
+			clazz = (Class<?>) type;
 		}
 		if (Collection.class.isAssignableFrom(clazz)) {
 			result = getParameterizedType(type, Collection.class, 0);
@@ -141,13 +140,12 @@ public abstract class ReflectUtil {
 		}
 		return Object.class;
 	}
-	@SuppressWarnings("rawtypes")
-	public static Class getKeyType(Type type) {
-		Class clazz = null;
+	public static Class<?> getKeyType(Type type) {
+		Class<?> clazz = null;
 		if (type instanceof ParameterizedType) {
-			clazz = (Class) ((ParameterizedType) type).getRawType();
+			clazz = (Class<?>) ((ParameterizedType) type).getRawType();
 		} else {
-			clazz = (Class) type;
+			clazz = (Class<?>) type;
 		}
 		if (Map.class.isAssignableFrom(clazz)) {
 			Type result = getParameterizedType(type, Map.class, 0);
@@ -158,20 +156,19 @@ public abstract class ReflectUtil {
 		return Integer.TYPE;
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private static Type getParameterizedType(Type type, Class destClass,
+	private static Type getParameterizedType(Type type, Class<?> destClass,
 			int paramIndex) {
-		Class clazz = null;
+		Class<?> clazz = null;
 		ParameterizedType pt = null;
 		Type[] ats = null;
-		TypeVariable[] tps = null;
+		TypeVariable<?>[] tps = null;
 		if (type instanceof ParameterizedType) {
 			pt = (ParameterizedType) type;
-			clazz = (Class) pt.getRawType();
+			clazz = (Class<?>) pt.getRawType();
 			ats = pt.getActualTypeArguments();
 			tps = clazz.getTypeParameters();
 		} else {
-			clazz = (Class) type;
+			clazz = (Class<?>) type;
 		}
 		if (destClass.equals(clazz)) {
 			if (pt != null) {
@@ -199,13 +196,12 @@ public abstract class ReflectUtil {
 		throw new IllegalArgumentException("必须是Collection 子类");
 	}
 
-	@SuppressWarnings("rawtypes")
-	private static Type getTureType(Type type, TypeVariable[] typeVariables,
+	private static Type getTureType(Type type, TypeVariable<?>[] typeVariables,
 			Type[] actualTypes) {
-		if (type instanceof Class) {
+		if (type instanceof Class<?>) {
 			return type;
-		} else if (type instanceof TypeVariable) {
-			TypeVariable tv = (TypeVariable) type;
+		} else if (type instanceof TypeVariable<?>) {
+			TypeVariable<?> tv = (TypeVariable<?>) type;
 			String name = tv.getName();
 			if (actualTypes != null) {
 				for (int i = 0; i < typeVariables.length; i++) {

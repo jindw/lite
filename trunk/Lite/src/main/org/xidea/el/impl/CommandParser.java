@@ -87,7 +87,7 @@ public class CommandParser {
 		return el;
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "unchecked" })
 	protected Map<String, String[]> parseArgs(String[] args) {
 		Map result = new HashMap();
 		String name = null;
@@ -112,7 +112,7 @@ public class CommandParser {
 		return (Map<String, String[]>) result;
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({ "unchecked" })
 	public <T> T getValue(String[] values, Class<? extends T> expectedType,
 			Object context, String key) {
 		if (expectedType.isArray()) {

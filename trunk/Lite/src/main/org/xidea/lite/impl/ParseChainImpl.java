@@ -10,15 +10,16 @@ import org.xidea.lite.parse.ParseChain;
 import org.xidea.lite.parse.ParseContext;
 import org.xidea.lite.parse.TextParser;
 
-@SuppressWarnings({"unchecked","rawtypes"})
 public class ParseChainImpl extends ParseContextProxy implements ParseChain {
 	private static Log log = LogFactory.getLog(ParseChainImpl.class);
 	private ParseContext context;
 	private ParseChainImpl pre;
 	private ParseChainImpl next;
-	private NodeParser[] parsers;
+	private NodeParser<?>[] parsers;
+
+	@SuppressWarnings("unchecked")
 	private NodeParser parser; 
-	private Class<? extends Object> nodeType = Object.class;
+	private Class<?> nodeType = Object.class;
 	private int index = 0;
 
 	ParseChain getNext(){
@@ -55,6 +56,7 @@ public class ParseChainImpl extends ParseContextProxy implements ParseChain {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public void next(Object node) {
 		ParseChain next = getNext();
 		if (nodeType.isInstance(node)) {

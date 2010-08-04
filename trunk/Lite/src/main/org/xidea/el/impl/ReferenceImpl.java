@@ -85,7 +85,6 @@ class ReferenceImpl implements Reference {
 		return invocable;
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	static Invocable createInvocable(
 			Map<String, Map<String, Invocable>> methodMap,
 			final Object thisObject, final String name, Object[] args) {
@@ -98,8 +97,8 @@ class ReferenceImpl implements Reference {
 			invocable = getInvocable(thisObject.getClass(), name,
 					args.length);
 
-			if (invocable == null && thisObject instanceof Class) {
-				invocable = getInvocable((Class) thisObject, name,
+			if (invocable == null && thisObject instanceof Class<?>) {
+				invocable = getInvocable((Class<?>) thisObject, name,
 						args.length);
 			}
 		}

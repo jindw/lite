@@ -59,8 +59,7 @@ public interface Convertor<T> {
 				return constructor.newInstance(value);
 			}catch(NoSuchMethodException e){
 				try {
-					@SuppressWarnings("rawtypes")
-					Class clazz2 = Class.forName(value);
+					Class<?> clazz2 = Class.forName(value);
 					if(expectedType.isAssignableFrom(clazz2)){
 						return clazz2.newInstance();
 					}
