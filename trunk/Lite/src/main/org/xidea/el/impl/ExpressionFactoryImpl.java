@@ -16,16 +16,15 @@ import org.xidea.el.fn.ECMA262Impl;
 
 public class ExpressionFactoryImpl extends ExpressionFactory {
 	private static ExpressionFactoryImpl expressionFactory;
-	
 	private final OperationStrategy strategy;
-	private boolean customizable = true;
 	private Map<String, Integer> aliseMap = new HashMap<String, Integer>();
 	private int inc = 1;
 
 	public static ExpressionFactoryImpl getInstance() {
 		if (expressionFactory == null) {
 			expressionFactory = new ExpressionFactoryImpl();
-			expressionFactory.customizable = false;
+			expressionFactory.aliseMap = Collections.emptyMap();
+			expressionFactory.getImpl().customizable = false;
 		}
 		return expressionFactory;
 	}
@@ -35,20 +34,19 @@ public class ExpressionFactoryImpl extends ExpressionFactory {
 	}
 
 	public OperationStrategy getStrategy() {
-		return strategy;
+		return getImpl();
 	}
 
 	public ExpressionFactoryImpl() {
-		OperationStrategyImpl strategy = new OperationStrategyImpl();
+		OperationStrategyImpl strategy = new OperationStrategyImpl(true);
 		this.strategy = strategy;
 		ECMA262Impl.setup(this);
 	}
 	private OperationStrategyImpl getImpl(){
-		if (customizable && strategy instanceof OperationStrategyImpl) {
+		if (strategy instanceof OperationStrategyImpl) {
 			return (OperationStrategyImpl)strategy;
-		}else {
-			throw new UnsupportedOperationException();
 		}
+		throw new UnsupportedOperationException();
 	}
 	public void addVar(String var, Object value) {
 		getImpl().addVar(var, value);

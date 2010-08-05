@@ -6,6 +6,10 @@ import org.xidea.el.impl.ExpressionFactoryImpl;
  * @see ExpressionFactoryImpl
  */
 public abstract class ExpressionFactory {
+	/**
+	 * 获得系统默认的表达式工厂(包含ECMA262 标准扩展的表达式工厂,状态(内置对象,运算符扩展)不允许修改)
+	 * @return
+	 */
 	public static ExpressionFactory getInstance() {
 		return ExpressionFactoryImpl.getInstance();
 	}
@@ -21,6 +25,4 @@ public abstract class ExpressionFactory {
 	 * @return
 	 */
 	public abstract Object parse(String expression);
-	
-//	public String stringify(Object el);
 }

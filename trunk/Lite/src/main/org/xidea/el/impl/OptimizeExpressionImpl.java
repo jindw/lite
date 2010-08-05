@@ -39,6 +39,12 @@ public class OptimizeExpressionImpl extends ExpressionImpl {
 	protected Object compute(ValueStack valueStack) {
 		return strategy.getVar(valueStack,name);
 	}
+	/**
+	 * 生成内部优化的表达式
+	 * @param el
+	 * @param calculater
+	 * @return
+	 */
 	public static Expression create(final ExpressionToken el,
 			OperationStrategy calculater) {
 		if (el.getType() == ExpressionToken.VALUE_VAR) {

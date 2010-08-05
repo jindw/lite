@@ -21,11 +21,12 @@ public class OperationStrategyImpl implements OperationStrategy {
 	private static final NumberArithmetic na = new NumberArithmetic();
 	private static final Log log = LogFactory
 			.getLog(OperationStrategyImpl.class);
-	// protected static final Object SKIP_QUESTION = new Object();
 	private final Map<String, Map<String, Invocable>> methodMap = new HashMap<String, Map<String, Invocable>>();
 	private final Map<Object, Object> globalMap = new HashMap<Object, Object>();
+	boolean customizable;
 
-	public OperationStrategyImpl() {
+	public OperationStrategyImpl(boolean customizable) {
+		this.customizable = customizable;
 	}
 
 	public Map<Object, Object> getGlobalMap() {
