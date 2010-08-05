@@ -6,7 +6,7 @@
       * [JSELExtension 功能扩展]
     * [JSON JSON 解析]
       * [JSONCompatible 语法容错]
-      * [JSONObjectMapper 对象映射]
+      * [JSONType 对象映射]
     * [CPEL 命令行工具]
       * [CPELKeyValue 属性与值]
       * [CPELType 类型支持]
