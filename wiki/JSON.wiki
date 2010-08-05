@@ -50,8 +50,12 @@ JSEL 可以直接执行JavaScript表达式，解析JSON这个JavaScript表达式
   * 自定义编码器：
     构造函数的参数意义，当一个JavaBean被当作object序列化时，是否处理class属性，设置最大处理深度。
 {{{
-//设置为输出JavaBean class属性，并控制最大深度为32 
-JSONEncoder encoder= new JSONEncoder(true,32);
+//第一个参数（printClassName）设置为输出JavaBean class属性，
+//第二个参数（depth）并控制最大深度为32 
+//第三个参数（addressEqual）设置是否通过引用地址相等来确定是否递归引用，默认为真（避免俄quals方法异常）
+//第三个参数（throwError   ）是指当发生循环引用时，是否抛出异常。
+JSONEncoder encoder= new JSONEncoder(true,32,true,true);
+
 //第一个参数指需要编码的对象
 //第二个参数指定输出流,
 encode.encode(object,out);
