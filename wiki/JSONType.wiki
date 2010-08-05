@@ -12,7 +12,7 @@ JSONDecoder 解码的过程中，允许指定转化类型，解码后，将自�
 ===== 原始类型支持 =====
 
   * Number 类型
-    为原始类型时（原始类型的Wrapper类型除外），null将被初始化为0
+    为原始类型时（原始类型的Wrapper类型除外），null将被初始化为0，Number子类型会更具目标类型自动转换。
   * String类型（非原始类型）
   * Boolean类型
     null 将被初始化为false
@@ -23,12 +23,10 @@ JSONDecoder 解码的过程中，允许指定转化类型，解码后，将自�
   * JSON源必须为Object（Map）类型
   * 必须有默认构造器
   * 属性必须有公开的Setter方法
-  * 如果
+  * 如果JSON源包含class属性，将以其值为类名构造JavaBean实例
    
 ===== Java集合支持 =====
   * Map，Collection类型默认按照JSON解码后得到的ArrayList，LinkedHashMap直接赋值。
 
-===
-
-
-JSON 默认的类型有限，所以需要做一些自动类型转换，主要是Number子类型的转换，如long可以自动转换成int
+===== 其他特殊支持 =====
+  * JSON值为String时，目标类型包含 一个String参数的构造器，将自动创建该对象。
