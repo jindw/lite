@@ -57,7 +57,7 @@ JSEL 可以直接执行JavaScript表达式，解析JSON这个JavaScript表达式
 JSONEncoder encoder= new JSONEncoder(true,32,true,true);
 
 //第一个参数指需要编码的对象
-//第二个参数指定输出流,
+//第二个参数指定输出流（StringBuilder，StringBuffer，Writer）
 encode.encode(object,out);
 }}}
 
