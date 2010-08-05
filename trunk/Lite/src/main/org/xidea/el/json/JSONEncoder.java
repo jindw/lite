@@ -89,15 +89,19 @@ public class JSONEncoder {
 				int i = index;
 				while (i-- > 0) {
 					if (parent[i] == object || valueCheck && object.equals(parent[i])) {
-						log.error(new RuntimeException("JSON 数据源中发现递归行为，递归数据将当null处理"));
+						log.error("JSON 数据源中发现递归行为，递归数据将当null处理");
 						out.append("null");
+						return;
 					}
 				}
 				if (index >= parent.length) {
-					throw new RuntimeException("深度超出许可范围："
+					log.error("深度超出许可范围："
 							+ Arrays.asList(parent));
+					out.append("null");
+					return ;
 				}
 				parent[index++] = object;
+				
 			}
 			if (object instanceof Map<?, ?>) {
 				print((Map<?, ?>) object, out);

@@ -361,8 +361,10 @@ public class JSONTokenizer {
 					break;
 				default:
 					if(strict){
-						buildError("发现JSON 标准未定义转义字符");
+						throw buildError("发现JSON 标准未定义转义字符");
 					}
+					buf.append(c);
+					buf.append(c2);
 				}
 				break;
 			case '"':
@@ -373,7 +375,7 @@ public class JSONTokenizer {
 			case '\r':
 			case '\n':
 				if(strict){
-					buildError("JSON 标准字符串不能换行");
+					throw buildError("JSON 标准字符串不能换行");
 				}
 			default:
 				buf.append(c);
