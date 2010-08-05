@@ -1,5 +1,34 @@
-=== 功能简介 ===
+=== 编码时类型支持 ===
+
+    * 简单类型：String、Number、null、Boolean 编码为对应的JSON简单类型字面量。
+    * 数组类型：java.util.Iterator、java.util.Collection（List，Set...）、Object 编码为JSON 数组字面量。
+    * 对象类型：java.util.Map、JavaBean? 编码为JSON 对象字面量。 
+
+
+=== 解码时类型转换支持 ===
+
 JSONDecoder 解码的过程中，允许指定转化类型，解码后，将自动转化为制定类型的对象。
 
-=== 自动转换 ===
+===== 原始类型支持 =====
+
+  * Number 类型
+    为原始类型时（原始类型的Wrapper类型除外），null将被初始化为0
+  * String类型（非原始类型）
+  * Boolean类型
+    null 将被初始化为false
+  * Charater类型
+    null 将被初始化为'\0'
+
+===== JavaBean 支持 =====
+  * JSON源必须为Object（Map）类型
+  * 必须有默认构造器
+  * 属性必须有公开的Setter方法
+  * 如果
+   
+===== Java集合支持 =====
+  * Map，Collection类型默认按照JSON解码后得到的ArrayList，LinkedHashMap直接赋值。
+
+===
+
+
 JSON 默认的类型有限，所以需要做一些自动类型转换，主要是Number子类型的转换，如long可以自动转换成int
