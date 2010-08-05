@@ -28,15 +28,18 @@ public class JSONEncoder {
 	private final Object[] parent;
 	private int index = 0;
 	private boolean valueCheck;
+	private boolean throwError;
 
 	public JSONEncoder(boolean printClassName) {
-		this(printClassName, 64, false);
+		this(printClassName, 64, false, true);
 
 	}
 
-	public JSONEncoder(boolean printClassName, int depth, boolean checkEquals) {
+	public JSONEncoder(boolean printClassName, int depth, boolean checkEquals,
+			boolean throwError) {
 		this.printClassName = printClassName;
 		this.parent = new Object[depth];
+		this.throwError = throwError;
 	}
 
 	private JSONEncoder() {
@@ -88,24 +91,32 @@ public class JSONEncoder {
 		} else {
 			if (parent != null) {
 				int i = index;
+				String error = null;
 				if (i >= parent.length) {
-					log.error("深度超出许可范围：" + out);
+					error = "深度超出许可范围：" + out;
 					out.append("null");
-					return;
-				}
-				while (i-- > 0) {
-					if (parent[i] == object || valueCheck
-							&& object.equals(parent[i])) {
-						System.out.println(i + "@@@@" + object + "/"
-								+ parent[i]);
-						log.error("JSON 数据源中发现递归行为:" + out + "，递归数据将当null处理");
-						
-						out.append("null");
-						throw new RuntimeException();
-						//return;
+				} else {
+					while (i-- > 0) {
+						if (parent[i] == object || valueCheck
+								&& object.equals(parent[i])) {
+							System.out.println(i + "@@@@" + object + "/"
+									+ parent[i]);
+							error = "JSON 数据源中发现递归行为:" + out + "，递归数据将当null处理";
+
+							out.append("null");
+							throw new RuntimeException();
+							// return;
+						}
 					}
 				}
-				parent[index++] = object;
+				if (error == null) {
+					parent[index++] = object;
+				} else {
+					log.error(error);
+					if (throwError) {
+						throw new IllegalStateException(error);
+					}
+				}
 
 			}
 			if (object instanceof Map<?, ?>) {
@@ -125,7 +136,8 @@ public class JSONEncoder {
 		}
 	}
 
-	protected void printString(String text, StringBuilder out) throws IOException {
+	protected void printString(String text, StringBuilder out)
+			throws IOException {
 		out.append('"');
 		for (int i = 0; i < text.length(); i++) {
 			char c = text.charAt(i);
@@ -207,7 +219,8 @@ public class JSONEncoder {
 		out.append('}');
 	}
 
-	protected void printMap(Map<?, ?> map, StringBuilder out) throws IOException {
+	protected void printMap(Map<?, ?> map, StringBuilder out)
+			throws IOException {
 		out.append('{');
 		Iterator<?> it = map.entrySet().iterator();
 		while (it.hasNext()) {
@@ -222,7 +235,8 @@ public class JSONEncoder {
 		out.append('}');
 	}
 
-	protected void printList(Object[] object, StringBuilder out) throws IOException {
+	protected void printList(Object[] object, StringBuilder out)
+			throws IOException {
 		out.append('[');
 		for (int i = 0; i < object.length; ++i) {
 			if (i > 0) {
@@ -233,7 +247,8 @@ public class JSONEncoder {
 		out.append(']');
 	}
 
-	protected void printList(Iterator<?> it, StringBuilder out) throws IOException {
+	protected void printList(Iterator<?> it, StringBuilder out)
+			throws IOException {
 		out.append('[');
 		while (it.hasNext()) {
 			print(it.next(), out);
