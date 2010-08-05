@@ -15,7 +15,7 @@ import org.xidea.el.test.ELTest;
 
 public class OptimizeExpressionImplTest {
 
-	OperationStrategyImpl strategy = new OperationStrategyImpl();
+	OperationStrategyImpl strategy = new OperationStrategyImpl(false);
 	{
 		ECMA262Impl.setup(new ExpressionFactoryImpl(strategy));
 	}

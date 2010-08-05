@@ -5,56 +5,72 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.io.IOException;
+import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
- * 改造自stringtree，将类改成线程安全的方式。 并提供简单的静态编码方法{@see JSONEncoder#encode(Object)}
+ * 改造自stringtree
  * 
  * @author stringtree.org
  * @author jindw
  */
 public class JSONEncoder {
+	private static Log log = LogFactory.getLog(JSONEncoder.class);
 	private static JSONEncoder encoder = new JSONEncoder();
-	private final boolean printClassName ;
-	private final int depth;
+	private final boolean printClassName;
+	private final Object[] parent;
+	private int index = 0;
+	private boolean valueCheck;
 
 	public JSONEncoder(boolean printClassName) {
-		this.printClassName = printClassName;
-		this.depth = 64;
+		this(printClassName, 64,false);
+
 	}
-	public JSONEncoder(boolean printClassName,int depth) {
+
+	public JSONEncoder(boolean printClassName, int depth, boolean checkEquals) {
 		this.printClassName = printClassName;
-		this.depth = depth;
+		this.parent = new Object[depth];
 	}
+
 	private JSONEncoder() {
-		this(false,64);
+		this(false);
 	}
 
 	public static String encode(Object value) {
 		StringBuilder buf = new StringBuilder();
 		try {
-			encoder.encode(value, buf,new HashSet<Object>());
+			encoder.encode(value, buf);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 		return buf.toString();
 	}
 
-	public void encode(Object value, Appendable out, Collection<Object> cached)
-			throws IOException {
-		print(value, out, cached);
-		if (cached != null) {
-			cached.clear();
+	public void encode(Object value, StringBuilder out) throws IOException {
+		if(this.parent == null){
+			print(value, out);
+		}else{
+			synchronized (parent) {
+				print(value, out);
+			}
 		}
+		
 	}
 
-	protected void print(Object object, Appendable out, Collection<Object> cached)
-			throws IOException {
+	public void encode(Object value, Writer out) throws IOException {
+		StringBuilder buf = new StringBuilder();
+		print(value, buf);
+		out.write(buf.toString());
+	}
+	protected void print(Object object, StringBuilder out) throws IOException {
 		if (object == null) {
 			out.append("null");
 		} else if (object instanceof Boolean) {
@@ -62,42 +78,45 @@ public class JSONEncoder {
 		} else if (object instanceof Number) {
 			out.append(String.valueOf(object));
 		} else if (object instanceof Class<?>) {
-			//Class 系列化容易导致死循环
+			// Class 系列化容易导致死循环
 			print(((Class<?>) object).getName(), out);
 		} else if (object instanceof String) {
 			print((String) object, out);
 		} else if (object instanceof Character) {
 			print(String.valueOf(object), out);
 		} else {
-			if (cached != null) {
-				if (cached.contains(object)) {
-					print(object.toString(), out);
-					return;
-				}else{
-					if(cached.size()>depth){
-						throw new RuntimeException("深度超出许可范围："+cached);
+			if (parent != null) {
+				int i = index;
+				while (i-- > 0) {
+					if (parent[i] == object || valueCheck && object.equals(parent[i])) {
+						log.error(new RuntimeException("JSON 数据源中发现递归行为，递归数据将当null处理"));
+						out.append("null");
 					}
-					cached.add(object);
 				}
+				if (index >= parent.length) {
+					throw new RuntimeException("深度超出许可范围："
+							+ Arrays.asList(parent));
+				}
+				parent[index++] = object;
 			}
 			if (object instanceof Map<?, ?>) {
-				print((Map<?, ?>) object, out, cached);
+				print((Map<?, ?>) object, out);
 			} else if (object instanceof Object[]) {
-				print((Object[]) object, out, cached);
+				print((Object[]) object, out);
 			} else if (object instanceof Iterator<?>) {
-				print((Iterator<?>) object, out, cached);
+				print((Iterator<?>) object, out);
 			} else if (object instanceof Collection<?>) {
-				print(((Collection<?>) object).iterator(), out, cached);
+				print(((Collection<?>) object).iterator(), out);
 			} else {
-				printBean(object, out, cached);
+				printBean(object, out);
 			}
-			if (cached != null) {
-				cached.remove(object);
+			if (parent != null) {
+				parent[--index] = null;
 			}
 		}
 	}
 
-	protected void print(String text, Appendable out) throws IOException {
+	protected void print(String text, StringBuilder out) throws IOException {
 		out.append('"');
 		for (int i = 0; i < text.length(); i++) {
 			char c = text.charAt(i);
@@ -117,7 +136,7 @@ public class JSONEncoder {
 				// case '\v'://\u000b
 				out.append("\\n");
 				break;
-			// case '\f'://\u000c
+			// case '\f'://
 			// out.append("\\f");
 			// break;
 			case '\r'://
@@ -141,7 +160,7 @@ public class JSONEncoder {
 		out.append('"');
 	}
 
-	protected void printBean(Object object, Appendable out,Collection<Object> cached) throws IOException {
+	protected void printBean(Object object, StringBuilder out) throws IOException {
 		out.append('{');
 		BeanInfo info;
 		boolean addedSomething = false;
@@ -152,9 +171,8 @@ public class JSONEncoder {
 				PropertyDescriptor prop = props[i];
 				String name = prop.getName();
 				Method accessor = prop.getReadMethod();
-				if (accessor != null &&
-						(!"class".equals(name) || printClassName)
-						 ) {
+				if (accessor != null
+						&& (!"class".equals(name) || printClassName)) {
 					if (!accessor.isAccessible()) {
 						accessor.setAccessible(true);
 					}
@@ -164,7 +182,7 @@ public class JSONEncoder {
 					}
 					print(name, out);
 					out.append(':');
-					print(value, out, cached);
+					print(value, out);
 					addedSomething = true;
 				}
 			}
@@ -179,15 +197,15 @@ public class JSONEncoder {
 		out.append('}');
 	}
 
-	protected void print(Map<?, ?> map, Appendable out,Collection<Object> cached)
-			throws IOException {
+	protected void print(Map<?, ?> map, StringBuilder out,
+			Collection<Object> cached) throws IOException {
 		out.append('{');
 		Iterator<?> it = map.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry<?, ?> e = (Map.Entry<?, ?>) it.next();
 			print(String.valueOf(e.getKey()), out);
 			out.append(':');
-			print(e.getValue(), out, cached);
+			print(e.getValue(), out);
 			if (it.hasNext()) {
 				out.append(',');
 			}
@@ -195,23 +213,23 @@ public class JSONEncoder {
 		out.append('}');
 	}
 
-	protected void print(Object[] object, Appendable out,Collection<Object> cached)
-			throws IOException {
+	protected void print(Object[] object, StringBuilder out,
+			Collection<Object> cached) throws IOException {
 		out.append('[');
 		for (int i = 0; i < object.length; ++i) {
 			if (i > 0) {
 				out.append(',');
 			}
-			print(object[i], out, cached);
+			print(object[i], out);
 		}
 		out.append(']');
 	}
 
-	protected void print(Iterator<?> it, Appendable out,Collection<Object> cached)
-			throws IOException {
+	protected void print(Iterator<?> it, StringBuilder out,
+			Collection<Object> cached) throws IOException {
 		out.append('[');
 		while (it.hasNext()) {
-			print(it.next(), out, cached);
+			print(it.next(), out);
 			if (it.hasNext()) {
 				out.append(',');
 			}
