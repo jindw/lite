@@ -21,7 +21,7 @@ JSEL 可以直接执行JavaScript表达式，解析JSON这个JavaScript表达式
     Map<String,Number> result = JSONDecoder.decode("{aa:2}");
 }}}
   * 自定义解码器
-    自定义解码器不仅可以控制是否采用严谨的语法模式，也可以解码的同时；指定输出类，完成特定的类型转换。
+    自定义解码器不仅可以控制是否采用严谨的语法模式，也可以解码的同时；指定输出类，完成特定的类型转换（JavaBean需要有默认构造器，详细转换规则见[JSONType]）。
 {{{
     //设置为严谨模式（不容错）
     JSONDecoder decoder = new JSONDecoder(true);
@@ -35,8 +35,8 @@ JSEL 可以直接执行JavaScript表达式，解析JSON这个JavaScript表达式
 这是一个简单的线程安全的工具类，允许安全的将普通JavaBean对象或者Java集合编码成JSON输出。
   * 防止递归
     不能表示数据引用的递归形式是JSON的一大软肋，所以我们需要一个用来处理递归问题的机制。
-    # 最大深度控制
-    # 父节点不重复检测
+      # 最大深度控制
+      # 父节点不重复检测
       通过记录当前遍历的父节点，如果发现重复，说明存在递归数据，立即停止或者抛出异常
       Java标准集合的equals 方法调用时，如果出现自身引用，会引发递归判断最终导致程序溢出，所以，默认的静态方法采用的是引用地址判断的方式检测父节点重复。
   * 静态方法调用
@@ -62,9 +62,10 @@ encode.encode(object,out);
 }}}
 
 ==== 支持类型 ====
- * 简单类型：String、Number、null、Boolean 编码为对应的JSON简单类型字面量。
- * 数组类型：java.util.Iterator、java.util.Collection（List，Set...）、Object[] 编码为JSON 数组字面量。
- * 对象类型：java.util.Map、JavaBean 编码为JSON 对象字面量。
+  * 简单类型：String、Number、null、Boolean 编码为对应的JSON简单类型字面量。
+  * 数组类型：java.util.Iterator、java.util.Collection（List，Set...）、Object[] 编码为JSON 数组字面量。
+  * 对象类型：java.util.Map、JavaBean 编码为JSON 对象字面量。
+  *
 
 
 
