@@ -47,7 +47,11 @@ public class JSONDecoder {
 	@SuppressWarnings("unchecked")
 	protected <T> T toValue(Object value, Class<T> type) {
 		try {
-			if (type.isArray()) {
+			type = (Class<T>) ReflectUtil.toWrapper(type);
+			if (String.class == type || Boolean.class == type
+					||  type == null || value == null) {
+				return (T) value;
+			} else if (type.isArray()) {
 				List<Object> list = (List<Object>) value;
 				Object result = Array.newInstance(type.getComponentType(),
 						list.size());
@@ -56,12 +60,7 @@ public class JSONDecoder {
 							toValue(list.get(i), type.getComponentType()));
 				}
 				return (T) result;
-			}
-			type = (Class<T>) ReflectUtil.toWrapper(type);
-			if (String.class == type || Boolean.class == type
-					||  type == null || value == null) {
-				return (T) value;
-			} else if (Map.class.isAssignableFrom(type)
+			}else if (Map.class.isAssignableFrom(type)
 					|| Collection.class.isAssignableFrom(type)) {
 				return (T) value;
 			} else if (Number.class.isAssignableFrom(type)) {
