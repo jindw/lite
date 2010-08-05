@@ -28,5 +28,9 @@ JSONDecoder 解码的过程中，允许指定转化类型，解码后，将自�
 ===== Java集合支持 =====
   * Map，Collection类型默认按照JSON解码后得到的ArrayList，LinkedHashMap直接赋值。
 
+===== Java数组支持 =====
+  * JSON源必须是数组(List)
+  * Java数组会自动创建，数组元素将从JSON源自动转换。
+
 ===== 其他特殊支持 =====
   * JSON值为String时，目标类型包含 一个String参数的构造器，将自动创建该对象。
