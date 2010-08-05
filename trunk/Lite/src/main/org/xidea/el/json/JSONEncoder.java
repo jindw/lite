@@ -5,7 +5,6 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.io.IOException;
-import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -25,20 +24,21 @@ public class JSONEncoder {
 	private static Log log = LogFactory.getLog(JSONEncoder.class);
 	private static JSONEncoder encoder = new JSONEncoder();
 	private final boolean printClassName;
+	private final boolean contextEquals;
+	private final boolean throwError;
 	private final Object[] parent;
 	private int index = 0;
-	private boolean valueCheck;
-	private boolean throwError;
 
 	public JSONEncoder(boolean printClassName) {
-		this(printClassName, 64, false, true);
+		this(printClassName, 64, true, true);
 
 	}
 
-	public JSONEncoder(boolean printClassName, int depth, boolean checkEquals,
+	public JSONEncoder(boolean printClassName, int depth, boolean addressEqual,
 			boolean throwError) {
 		this.printClassName = printClassName;
 		this.parent = new Object[depth];
+		this.contextEquals = !!addressEqual;
 		this.throwError = throwError;
 	}
 
@@ -55,8 +55,7 @@ public class JSONEncoder {
 		}
 		return buf.toString();
 	}
-
-	public void encode(Object value, StringBuilder out) throws IOException {
+	public void encode(Object value, Appendable out) throws IOException {
 		index = 0;
 		if (this.parent == null) {
 			print(value, out);
@@ -68,13 +67,7 @@ public class JSONEncoder {
 
 	}
 
-	public void encode(Object value, Writer out) throws IOException {
-		StringBuilder buf = new StringBuilder();
-		encode(value, buf);
-		out.write(buf.toString());
-	}
-
-	protected void print(Object object, StringBuilder out) throws IOException {
+	protected void print(Object object, Appendable out) throws IOException {
 		if (object == null) {
 			out.append("null");
 		} else if (object instanceof Boolean) {
@@ -97,7 +90,7 @@ public class JSONEncoder {
 					out.append("null");
 				} else {
 					while (i-- > 0) {
-						if (parent[i] == object || valueCheck
+						if (parent[i] == object || contextEquals
 								&& object.equals(parent[i])) {
 							System.out.println(i + "@@@@" + object + "/"
 									+ parent[i]);
@@ -136,7 +129,7 @@ public class JSONEncoder {
 		}
 	}
 
-	protected void printString(String text, StringBuilder out)
+	protected void printString(String text, Appendable out)
 			throws IOException {
 		out.append('"');
 		for (int i = 0; i < text.length(); i++) {
@@ -181,7 +174,7 @@ public class JSONEncoder {
 		out.append('"');
 	}
 
-	protected void printMap(Object object, StringBuilder out)
+	protected void printMap(Object object, Appendable out)
 			throws IOException {
 		out.append('{');
 		BeanInfo info;
@@ -219,7 +212,7 @@ public class JSONEncoder {
 		out.append('}');
 	}
 
-	protected void printMap(Map<?, ?> map, StringBuilder out)
+	protected void printMap(Map<?, ?> map, Appendable out)
 			throws IOException {
 		out.append('{');
 		Iterator<?> it = map.entrySet().iterator();
@@ -235,7 +228,7 @@ public class JSONEncoder {
 		out.append('}');
 	}
 
-	protected void printList(Object[] object, StringBuilder out)
+	protected void printList(Object[] object, Appendable out)
 			throws IOException {
 		out.append('[');
 		for (int i = 0; i < object.length; ++i) {
@@ -247,7 +240,7 @@ public class JSONEncoder {
 		out.append(']');
 	}
 
-	protected void printList(Iterator<?> it, StringBuilder out)
+	protected void printList(Iterator<?> it, Appendable out)
 			throws IOException {
 		out.append('[');
 		while (it.hasNext()) {
