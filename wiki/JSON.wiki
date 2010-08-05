@@ -21,7 +21,7 @@ JSEL 可以直接执行JavaScript表达式，解析JSON这个JavaScript表达式
     Map<String,Number> result = JSONDecoder.decode("{aa:2}");
 }}}
   * 自定义解码器
-    自定义解码器不经可以控制是否语法严谨模式，也可以解码的同时；制定输出类，完成特定类创建。
+    自定义解码器不仅可以控制是否采用严谨的语法模式，也可以解码的同时；指定输出类，完成特定的类型转换。
 {{{
     //设置为严谨模式（不容错）
     JSONDecoder decoder = new JSONDecoder(true);
@@ -32,8 +32,13 @@ JSEL 可以直接执行JavaScript表达式，解析JSON这个JavaScript表达式
 
 === 使用JSONEncoder 编码JSON ===
 
-[http://code.google.com/p/lite/wiki/JSEL JSEL] 下的一个JSON编码工具类，改造自stringtree的JSONWriter；将其改造为一个简单的线程安全的工具类。
-
+这是一个简单的线程安全的工具类，允许安全的将普通JavaBean对象或者Java集合编码成JSON输出。
+  * 防止递归
+    不能表示数据引用的递归形式是JSON的一大软肋，所以我们需要一个用来处理递归问题的机制。
+    # 最大深度控制
+    # 父节点不重复检测
+      通过记录当前遍历的父节点，如果发现重复，说明存在递归数据，立即退出
+      有一个问题，Java标准集合的equals 方法调用时，如果出现自身引用，会引发递归判断最终导致程序溢出，所以，默认的静态方法采用的是引用地址判断的方式检测父节点。
   * 静态方法调用
     最简单的JSON化方法。使用一个简单的静态函数：
     _不输出class属性，最大深度为64，采用HashSet作递归检测_
@@ -49,8 +54,7 @@ JSEL 可以直接执行JavaScript表达式，解析JSON这个JavaScript表达式
 JSONEncoder encoder= new JSONEncoder(true,32);
 //第一个参数指需要编码的对象
 //第二个参数指定输出流,
-//第三个参数设置递归检测集合实现（为空时不判断，快速编码）。
-encode.encode(object,out,null);
+encode.encode(object,out);
 }}}
 
 ==== 支持类型 ====
