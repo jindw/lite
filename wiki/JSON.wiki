@@ -63,9 +63,9 @@ encode.encode(object,out);
 
 ==== 支持类型 ====
   * 简单类型：String、Number、null、Boolean 编码为对应的JSON简单类型字面量。
-  * 数组类型：java.util.Iterator、java.util.Collection（List，Set...）、Object[] 编码为JSON 数组字面量。
+  * 数组类型：java.util.Collection（List，Set...）、Object[] 、java.util.Iterator 编码为JSON 数组字面量。
   * 对象类型：java.util.Map、JavaBean 编码为JSON 对象字面量。
-  *
+  * 对象 不能出现递归引用
 
 
 
