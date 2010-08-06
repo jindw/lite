@@ -87,6 +87,8 @@
 			<fileset dir="build/dest/">
 				<include name="Example-*.zip" />
 				<include name="Lite-*.jar" />
+				<include name="JSEL-*.jar" />
+				<include name="LiteR*.jar" />
 			</fileset>
 		</delete>
 		<echo file="build/dest/jslite/el/__package__.js">this.setImplementation("org.xidea.lite.impl")</echo>
@@ -126,7 +128,7 @@
 				<include name="**/*.*" />
 			</zipfileset>
 		</jar>
-		<jar destfile="build/dest/LiteRuntime.jar" compress="true">
+		<jar destfile="build/dest/LiteRT.jar" compress="true">
 
 			<fileset dir="web/WEB-INF/classes">
 				<include name="org/xidea/lite/*.class" />
@@ -140,7 +142,7 @@
 		<delete file="build/dest/jslite/__package__.js" />
 		<copy tofile="build/dest/JSEL-${version}.jar" file="build/dest/JSEL.jar" />
 		<copy tofile="build/dest/Lite-${version}.jar" file="build/dest/Lite.jar" />
-		<copy tofile="build/dest/LiteRuntime-${version}.jar" file="build/dest/LiteRuntime.jar" />
+		<copy tofile="build/dest/LiteRT-${version}.jar" file="build/dest/LiteRT.jar" />
 
 		<zip destfile="build/dest/Example.zip">
 			<zipfileset dir="build/dest/" prefix="WEB-INF/lib/">

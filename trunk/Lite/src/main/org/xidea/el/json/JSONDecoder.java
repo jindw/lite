@@ -47,14 +47,15 @@ public class JSONDecoder {
 	@SuppressWarnings("unchecked")
 	protected <T> T toValue(Object value, Class<T> type) {
 		try {
+			boolean isPrimitive = type.isPrimitive();
 			type = (Class<T>) ReflectUtil.toWrapper(type);
 			if (Number.class.isAssignableFrom(type)) {
-				if(value == null){
+				if(isPrimitive && value == null){
 					value = 0;
 				}
 				return (T) ReflectUtil.toValue((Number) value, type);
 			} else if (Boolean.class == type) {
-				if(value == null){
+				if(isPrimitive && value == null){
 					value = false;
 				}
 				return (T) value;
@@ -68,7 +69,7 @@ public class JSONDecoder {
 					value = ((String) value).charAt(0);
 				}else if(value instanceof Number){//异常数据
 					value = (char)((Number)value).intValue();
-				}else if(value == null){//异常数据
+				}else if(isPrimitive && value == null){//异常数据
 					value = '\0';
 				}
 				return (T)value;
