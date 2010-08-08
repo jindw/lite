@@ -1,13 +1,8 @@
 === 默认类型转换支持 ===
-命令行解析过程中，输入永远只能是字符串，可能是空字符串，但不能为null，类型转换的功能就是吧这些输入字符串转化为需要的特定类型。
-
-  * 空字符串处理
-    # 对于原始类型的wrapper类型，如果是空字符串，直接返回null。
-    # 否则按下列规则转化。
+命令行解析过程中，输入永远只能是字符串，而且不能是空字符串，也不能为null，类型转换的功能就是吧这些输入字符串转化为需要的特定类型。
 
   * 类型转换
     # 数值类型(Long,Integer,Double,Short,Byte,long,int,double,short,byte)
-      # 如果字符串为空，当"0"处理
       # 调用相关的解析函数（如：Double.parseDouble(value)）
     # 布尔类型(Boolean，boolean)
       # 对于"true"，"false"，返回相关boolean 值true,false
@@ -16,11 +11,11 @@
     # 字符串（String）
       不需要转换
     # 字符（char,Character）
-      取第一个字符（如果为空字符串，返回'\u0000'）
+      取第一个字符
     # Object
       当String返回，不转换
     # 资源对象(File, URL, URI)
-      如果是空字符串，返回null，否则，调用他的字符串参数构造器:
+      调用他的字符串参数构造器:
 {{{
 ...
 new File(String path);
