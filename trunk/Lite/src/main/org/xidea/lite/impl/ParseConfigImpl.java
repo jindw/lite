@@ -21,12 +21,19 @@ import org.xidea.lite.parse.ParseContext;
 import org.xml.sax.InputSource;
 
 /**
- * "includes":"^[\\\\/]example[\\\\/][^\\\\/]*\.xhtml$", "excludes":"",
- * "featrueMap":{ "http://www.xidea.org/featrues/lite/layout":"/layout.xhtml",
- * "http://www.xidea.org/featrues/lite/output-encoding":"utf-8",
- * "http://www.xidea.org/featrues/lite/output-mime-type":"text/html",
- * "http://www.xidea.org/featrue/lite/html-javascript-compressor"
- * :"org.jside.jsi.tools.JSACompressor" }, "extensionMap":[]
+ * <pre>
+ * {
+ *   "includes":"^[\\\\/]example[\\\\/][^\\\\/]*\.xhtml$", 
+ *   "excludes":"^$",//不匹配
+ *   "featrueMap":{ "http://www.xidea.org/featrues/lite/layout":"/layout.xhtml",
+ *     "http://www.xidea.org/featrues/lite/output-encoding":"utf-8",
+ *     "http://www.xidea.org/featrues/lite/output-mime-type":"text/html",
+ *     "http://www.xidea.org/featrue/lite/html-javascript-compressor":"org.jside.jsi.tools.JSACompressor" 
+ *   }, 
+ *   "extensionMap":[]
+ * }
+ * </pre>
+ * 
  * 
  * @author jindawei
  * 
@@ -52,10 +59,10 @@ public class ParseConfigImpl implements ParseConfig {
 		}
 	}
 
-//	protected ParseConfigImpl(URI root) {
-//		this.root = root;
-//		groups.add(DEFAULT_GROUP);
-//	}
+	// protected ParseConfigImpl(URI root) {
+	// this.root = root;
+	// groups.add(DEFAULT_GROUP);
+	// }
 
 	public URI getRoot() {
 		return root;
@@ -179,10 +186,7 @@ public class ParseConfigImpl implements ParseConfig {
 		}
 
 		private Pattern buildMatch(String includes) {
-			if (includes == null || includes.length() == 0) {
-				includes = "^$";
-			}
-			return Pattern.compile(includes);
+			return Pattern.compile(includes == null?"^$":includes);
 		}
 
 	}

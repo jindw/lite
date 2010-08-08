@@ -216,7 +216,7 @@ function compilePatterns(ps){
 	while(i--){
 		ps[i] = buildURIMatcher(ps[i]);
 	}
-	return ps.join('|');
+	return ps.join('|')||null;
 }
 
 function buildURIMatcher(pattern){
