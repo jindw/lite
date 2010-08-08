@@ -20,7 +20,7 @@
     # Object
       当String返回，不转换
     # 资源对象(File, URL, URI)
-      调用他的字符串参数构造器:
+      如果是空字符串，返回null，否则，调用他的字符串参数构造器:
 {{{
 ...
 new File(String path);
