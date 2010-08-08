@@ -2,7 +2,7 @@
 ===JSEL简介===
 JSEL是一个兼容 JavaScript 运算规则的简单的表达式解释引擎，你可以通过Map接口，或者JavaBean给出一个变量集合，能后通过表达式从这个集合中抽取变量，再通过表达式逻辑生成你需要的数据。
 
-JSEL采用LGPL协议发布，你可以从本站下载它[http://code.google.com/p/lite/downloads/list LiteRT-yyMMdd.jar]（与Lite模板运行环境打包发布），将其功能集成到你的系统中。
+JSEL采用LGPL协议发布，你可以从本站下载它[http://code.google.com/p/lite/downloads/list LiteRT-yyMMdd.jar]（与Lite模板运行环境一起打包发布，不足100k），将其功能集成到你的系统中。
 
 表达式实例：
 {{{
