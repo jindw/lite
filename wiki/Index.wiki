@@ -8,7 +8,7 @@
       * [JSONCompatible 语法容错]
       * [JSONType 对象映射]
     * [CPEL 命令行工具]
-      * [CPELKeyValue 属性与值]
+      * [CPELP2A 参数属性映射]
       * [CPELType 类型支持]
   * Lite 模板平台
       * 模板中间代码设计
