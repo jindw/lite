@@ -1,4 +1,13 @@
 #labels Featured,Phase-Design
+== 基本信息 ==
+Lite基本语法，命名为LiteXML，是一个给予XML的基本模板语法聚合，包含最基本的模板功能。
+==== 名称空间 ====
+LiteXML所属名称空间为：http://www.xidea.org/ns/lite/core
+推荐前缀是c。支持的标签有 if,else,choose,for,include,def,out
+
+==== 支持模式 ====
+LiteXML支持标记，属性和文本三种模式，这里为了简单起见，只列出标记模式。
+
 == 输出语法 ==
  ==== 自动编码输出 ====
   * 示例:
