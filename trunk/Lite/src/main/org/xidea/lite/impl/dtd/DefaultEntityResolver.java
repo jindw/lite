@@ -33,6 +33,10 @@ public class DefaultEntityResolver implements EntityResolver2 {
 		DEFAULT_DTD_MAP.put("-//W3C//ENTITIES Special for XHTML//EN",
 				"xhtml-special.ent");
 		//无线
+
+		DEFAULT_DTD_MAP.put("-//WAPFORUM//DTD WML 1.0//EN" , "xhtml1.dtd");
+		DEFAULT_DTD_MAP.put("-//WAPFORUM//DTD WML 1.1//EN" , "xhtml1.dtd");
+		DEFAULT_DTD_MAP.put("-//WAPFORUM//DTD WML 1.2//EN" , "xhtml1.dtd");
 		DEFAULT_DTD_MAP.put("-//WAPFORUM//DTD WML 1.3//EN" , "xhtml1.dtd");
 		DEFAULT_DTD_MAP.put("-//WAPFORUM//DTD XHTML Mobile 1.0//EN", "xhtml1.dtd");
 	}
