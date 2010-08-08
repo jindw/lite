@@ -41,7 +41,7 @@ JSEL 可以直接执行JavaScript表达式，解析JSON这个JavaScript表达式
       Java标准集合的equals 方法调用时，如果出现自身引用，会引发递归判断最终导致程序溢出，所以，默认的静态方法采用的是引用地址判断的方式检测父节点重复。
   * 静态方法调用
     最简单的JSON化方法。使用一个简单的静态函数：
-    _不输出class属性，最大深度为64，采用HashSet作递归检测_
+    _不输出class属性，最大深度为64，递归检测（发现递归后抛出异常）_
 
 {{{
     String json= JSONEncoder.encode(object);
@@ -53,7 +53,7 @@ JSEL 可以直接执行JavaScript表达式，解析JSON这个JavaScript表达式
 //第一个参数（printClassName）设置为输出JavaBean class属性，
 //第二个参数（depth）并控制最大深度为32 
 //第三个参数（addressEqual）设置是否通过引用地址重复来确定是否递归引用，默认为真（避免equals方法异常）
-//第四个参数（throwError   ）是指当发生循环引用时，是否抛出异常。
+//第四个参数（throwError   ）是指当发生循环引用时，是否抛出异常(如果不抛异常，打印错误日志后，循环部分当null输出)。
 JSONEncoder encoder= new JSONEncoder(true,32,true,true);
 
 //第一个参数指需要编码的对象
