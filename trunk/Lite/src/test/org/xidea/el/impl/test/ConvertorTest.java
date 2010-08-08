@@ -42,7 +42,7 @@ public class ConvertorTest {
 		doTest("false",this.getClass(),null);
 	}
 	private void doTest(String value, Class<?> type, Object expected) {
-		Convertor c = new Convertor.Default();
+		Convertor c = Convertor.DEFAULT;
 		Object result = c.getValue(value, type, context, "key");
 		Assert.assertEquals(expected, result);
 		if(result != null){
