@@ -13,10 +13,10 @@
   * Lite 模板平台
     * 模板中间代码设计
   * 模板语法
-    * [LiteStyle Lite官方标准语法风格]
-    * [LiteXML LiteXML 基本语法]
-    * [LiteXHTML LiteXHTML 语法扩展]
-    * [LiteUI LiteUI语法扩展]
+    * [LiteStyle 标准语法风格]
+    * [LiteXML 基本语法]
+    * [LiteXHTML XHTML语法扩展]
+    * [LiteUI UI语法扩展]
 
   * 扩展机制
     * [自定义名称空间]
