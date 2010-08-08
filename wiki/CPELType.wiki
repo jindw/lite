@@ -1,15 +1,10 @@
 === 默认类型转换支持 ===
-  # 资源对象(File, URL, URI)
-    调用他的字符串参数构造器:
-{{{
-...
-new File(String path);
-...
-new URL(String path);
-...
-new URI(String path);
-}}}
-    
+命令行解析过程中，输入永远只能是字符串，可能是空字符串，但不能为null，类型转换的功能就是吧这些输入字符串转化为需要的特定类型。
+
+  # 空字符串处理
+    # 对于原始类型的wrapper类型，如果是空字符串，直接返回null。
+    # 否则按如下规则转化。
+
   # 数值类型(Long,Integer,Double,Short,Byte,long,int,double,short,byte)
     # 如果字符串为空，当"0"处理
     # 调用相关的解析函数（如：Double.parseDouble(value)）
@@ -27,3 +22,15 @@ new URI(String path);
 
   # Object
     当String返回，不转换
+
+
+  # 资源对象(File, URL, URI)
+    调用他的字符串参数构造器:
+{{{
+...
+new File(String path);
+...
+new URL(String path);
+...
+new URI(String path);
+}}}
