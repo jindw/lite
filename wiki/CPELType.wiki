@@ -5,7 +5,7 @@
     # 对于原始类型的wrapper类型，如果是空字符串，直接返回null。
     # 否则按下列规则转化。
 
-  *类型转换
+  * 类型转换
     # 数值类型(Long,Integer,Double,Short,Byte,long,int,double,short,byte)
       # 如果字符串为空，当"0"处理
       # 调用相关的解析函数（如：Double.parseDouble(value)）
