@@ -5,15 +5,15 @@
 在转化为命令对象属性之前，我们先将命令行数组转化为参数数组的键值对模型。
 比如 
 {{{
-<CMD> -key1 value1 value2 -key2 value3 -key3 true -key4 1,2
+<CMD> -key1 value1 value2 -key2 value3 -key3 true -key4 1,2 -key4 3
 }}}
 将转化为如下模型：
 {{{
 {
-  "key1":["value1","value2"],
+  "key1":["value1","value2"],//同一个key下面可以有多个参数
   "key2":["value3"],
   "key3":["true"],
-  "key4":["1","2"]
+  "key4":["1","2","3"]//重复的key设置会自动连接参数数组
 }
 }}} 
 === 属性集映射为JavaBean属性 ===
@@ -28,6 +28,6 @@ public void setKey4(int key4);
   # key1 对应的JavaBean setter 并没有定义，打印一个警告日志（未知属性），跳过
   # key2 属性为字符串数组，通过setKey2方法将key2对应的字符串数组：["value3"]设置为JavaBean的key2属性。
   # key3 属性为boolean型，将key3对应的值数组的最后一个元素"true" 转化为boolean，设置JavaBean属性
-  # key4 属性为int型，将key3对应的值数组的*最后*一个元素"2" 转化为int，设置JavaBean属性
+  # key4 属性为int型，将key3对应的值数组的*最后*一个元素"3" 转化为int，设置JavaBean属性
     这里有一个简单的容错策略，当我们需要的值只是一个，而参数设置了多个的时候，以最后一个为准。
   
