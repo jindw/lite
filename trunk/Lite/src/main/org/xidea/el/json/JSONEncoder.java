@@ -183,6 +183,7 @@ public class JSONEncoder {
 			info = Introspector.getBeanInfo(object.getClass());
 			PropertyDescriptor[] props = info.getPropertyDescriptors();
 			for (int i = 0; i < props.length; ++i) {
+				try {
 				PropertyDescriptor prop = props[i];
 				String name = prop.getName();
 				Method accessor = prop.getReadMethod();
@@ -200,14 +201,13 @@ public class JSONEncoder {
 					print(value, out);
 					addedSomething = true;
 				}
+
+				} catch (Exception e) {
+					log.warn("属性获取失败",e);
+				}
 			}
-		} catch (IllegalAccessException iae) {
-			iae.printStackTrace();
-		} catch (InvocationTargetException ite) {
-			ite.getCause().printStackTrace();
-			ite.printStackTrace();
-		} catch (IntrospectionException ie) {
-			ie.printStackTrace();
+		} catch (Exception e) {
+			log.warn("JavaBean信息获取失败",e);
 		}
 		out.append('}');
 	}
