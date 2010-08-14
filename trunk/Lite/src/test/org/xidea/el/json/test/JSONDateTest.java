@@ -9,11 +9,14 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
 import org.xidea.el.impl.ExpressionImpl;
 import org.xidea.el.json.JSONDecoder;
@@ -22,6 +25,11 @@ import org.xidea.el.json.JSONTokenizer;
 
 @SuppressWarnings( { "unused", "unchecked" })
 public class JSONDateTest {
+	private final static String PATTERN= "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
+	private final static String SAMPLE = "1900-01-01T00:00:00.000";//"+08:00"
+	private final static int DATE_LENGTH = 10;
+	private final static int DATE_TIME_LENGTH = SAMPLE.length();
+
 	private Date utilDate = new Date(System.currentTimeMillis());
 	public Date getUtilDate() {
 		return utilDate;
@@ -32,25 +40,83 @@ public class JSONDateTest {
 	//com.sun.syndication.io.impl
 	@Test
 	public void test() throws ParseException{
-		//YYYY-MM-DDThh:mm:ss.sTZD 
-		DateFormat f =  new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-		System.out.println(f.format(f.parse("2010-08-09T19:27:25.350+0900")));
-		DateFormat f2 =  new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-		System.out.println(f2.format(f.parse("2010-08-09T19:27:25.350+0900")));
-		
-		for(int i=0;i<0;i++){
-		Date d = new Date();
-		String str =f.format(d);
-		System.out.println(str);
-		System.out.println(f.parse(str));
-		System.out.println(d);
-		System.out.println(d.getTime() == f.parse(str).getTime());
+		String t = JSONDecoder.decode(JSONEncoder.encode(new Date()));
+		JSONDecoder de = new JSONDecoder(true);
+		System.out.println(t);
+		{
+			long n1 = System.nanoTime();
+			for (int i = 0; i < 100; i++) {
+				de.parseW3Date(t);
+			}
+			System.out.println((System.nanoTime()-n1)/1000000d);
+			System.out.println(JSONEncoder.encode(de.parseW3Date(t)));
 		}
-//		JSONDecoder decoder = new JSONDecoder(true);
-//		String result = JSONEncoder.encode(this);
-//		System.out.println(result);
-//		JSONDateTest object = decoder.decode(result, this.getClass());
-//		System.out.println(JSONEncoder.encode(object));
+		{
+			long n1 = System.nanoTime();
+			for (int i = 0; i < 100; i++) {
+				parse(t);
+			}
+			System.out.println((System.nanoTime()-n1)/1000000d);
+			System.out.println(JSONEncoder.encode(parse(t)));
+		}
 	}
-
+	/**
+	 * <pre>
+     * Year:YYYY (eg 1997)
+     * Year and month:YYYY-MM (eg 1997-07)
+     * Complete date:YYYY-MM-DD (eg 1997-07-16)
+     * Complete date plus hours and minutes:
+     *    YYYY-MM-DDThh:mmTZD (eg 1997-07-16T19:20+01:00)
+     * Complete date plus hours, minutes and seconds:
+     *    YYYY-MM-DDThh:mm:ssTZD (eg 1997-07-16T19:20:30+01:00)
+     * Complete date plus hours, minutes, seconds and a decimal fraction of a second
+     *    YYYY-MM-DDThh:mm:ss.sTZD (eg 1997-07-16T19:20:30.45+01:00)
+     * </pre>
+	 * @param source
+	 * @return
+	 * @throws ParseException 
+	 */
+	protected Date parse(String source) throws ParseException{
+	    // if sDate has time on it, it injects 'GTM' before de TZ displacement to
+        // allow the SimpleDateFormat parser to parse it properly
+		final int len = source.length();
+		boolean noZone =false;
+		if(len <= DATE_LENGTH){
+			source = source+SAMPLE.substring(len);//+"+0000";
+			noZone = true;
+			//return new SimpleDateFormat(PATTERN.substring(0,DATE_TIME_LENGTH)).parse(source);
+		}else{
+			//标准化TimeZone
+            if ('Z' == source.charAt(len-1)) {
+            	source = source.substring(0,len-1)+"+0000";
+            }else{
+            	if(source.charAt(len-3) == ':'){
+            		source = new StringBuilder(source).delete(len-3,len-2).toString();
+            	}
+            }
+            //标准化时间信息
+            if(source.length() != DATE_TIME_LENGTH+5){
+            	final int len2 = source.length();
+            	final int t = source.indexOf('T');
+            	final int offset = DATE_LENGTH - t;
+            	final int zp = len2 - 5;
+            	//add timezone
+            	final char c = source.charAt(zp);
+            	if(c == '+' || c == '-'){
+            		source = source.substring(0,zp) + SAMPLE.substring(zp + offset)+source.substring(zp);
+            	}else{
+            		noZone = true;
+            		source = source+ SAMPLE.substring(len2 + offset);
+            	}
+                
+            }
+        }
+//        ParsePosition p = new ParsePosition(0);
+        return new SimpleDateFormat(noZone?PATTERN.substring(0,DATE_TIME_LENGTH):PATTERN).parse(source);
+//        if(p.getIndex()!=source.length()){
+//        	throws new Runtime
+//        }
+//        	
+//        return result;
+	}
 }

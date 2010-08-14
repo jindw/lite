@@ -4,11 +4,13 @@ import java.io.IOException;
 import java.io.Reader;
 import java.lang.reflect.Array;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
@@ -16,18 +18,83 @@ import org.apache.commons.logging.LogFactory;
 import org.xidea.el.impl.ReflectUtil;
 
 public class JSONDecoder {
-	private final static String PATTERN= "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
 	private static Log log = LogFactory.getLog(JSONDecoder.class);
 	private static JSONDecoder decoder = new JSONDecoder(false);
 	private boolean strict = false;
-	private final static String SAMPLE = "1900-01-01T00:00:00.000";//"+08:00"
-	private final static int DATE_LENGTH = 10;
-	private final static int DATE_TIME_LENGTH = SAMPLE.length();
+	private static final Pattern W3CDATE = Pattern.compile(
+			//data
+			"^(\\d{4})" +//YYYY1
+				"(?:" +
+					"\\-(\\d{1,2})" +//MM2
+					"(?:" +
+						"\\-(\\d{1,2})" +//DD3
+						//time
+						"(?:" +
+							"T(\\d{2})\\:(\\d{2})" +//hour:4,minutes:5
+							"(?:\\:(\\d{2}(\\.\\d+)?))?"+//seconds//6
+							"(Z|[+\\-]\\d{2}\\:?\\d{2})?" +//timeZone:7
+						")?" +
+					")?"+
+			
+				")?$");
 
 	public JSONDecoder(boolean strict) {
 		this.strict = strict;
 	}
-
+	/**
+	 * <pre>
+     * Year:YYYY (eg 1997)
+     * Year and month:YYYY-MM (eg 1997-07)
+     * Complete date:YYYY-MM-DD (eg 1997-07-16)
+     * Complete date plus hours and minutes:
+     *    YYYY-MM-DDThh:mmTZD (eg 1997-07-16T19:20+01:00)
+     * Complete date plus hours, minutes and seconds:
+     *    YYYY-MM-DDThh:mm:ssTZD (eg 1997-07-16T19:20:30+01:00)
+     * Complete date plus hours, minutes, seconds and a decimal fraction of a second
+     *    YYYY-MM-DDThh:mm:ss.sTZD (eg 1997-07-16T19:20:30.45+01:00)
+     * </pre>
+	 * @param source
+	 * @return
+	 * @throws ParseException 
+	 */
+	public Date parseW3Date(String source) throws ParseException{
+		Matcher m = W3CDATE.matcher(source);
+		if(m.find()){
+			Calendar ca = Calendar.getInstance();
+			ca.clear();
+			String timeZone = m.group(7);
+			if(timeZone!=null){
+				ca.setTimeZone(TimeZone.getTimeZone("GMT"+timeZone));
+			}
+			ca.set(Calendar.YEAR, Integer.parseInt(m.group(1)));// year
+			String month = m.group(2);
+			if (month != null) {
+				ca.set(Calendar.MONTH, Integer.parseInt(month) - 1);
+				String date = m.group(3);
+				if (date != null) {
+					ca.set(Calendar.DATE, Integer.parseInt(date));
+					String hour = m.group(4);
+					if (hour != null) {
+						String minutes = m.group(5);
+						ca.set(Calendar.HOUR, Integer.parseInt(hour));
+						ca.set(Calendar.MINUTE, Integer.parseInt(minutes));
+						String seconds = m.group(6);
+						if(seconds == null){
+						}else if (seconds.length() > 2) {
+							float f = Float.parseFloat(seconds);
+							ca.set(Calendar.SECOND, (int) f);
+							ca.set(Calendar.MILLISECOND,
+									((int) f * 1000) % 1000);
+						} else {
+							ca.set(Calendar.SECOND, Integer.parseInt(seconds));
+						}
+					}
+				}
+			}
+			return ca.getTime();
+		}
+		return null;
+	}
 	public static <T> T decode(Reader value) throws IOException {
 		StringBuilder buf = new StringBuilder();
 		char[] cbuf = new char[32];
@@ -51,85 +118,8 @@ public class JSONDecoder {
 		}
 		return (T) result;
 	}
-	Pattern w3cdate = Pattern.compile(
-			//data
-			"\\d{4}" +//YYYY1
-				"(?:" +
-					"\\-(\\d{1,2})" +//MM2
-					"(?:" +
-						"\\-(\\d{1,2})" +//DD3
-						//time
-						"(?:" +
-							"T(\\d{2})\\:(\\d{2})" +//hour:4,minutes:5
-							"(?:\\:(\\d{2}(\\.\\d+)?))?"+//seconds//5
-							"(Z|[+\\-](\\d{2})\\:?(\\d{2}))?" +//timeZone:6
-						")?" +
-					")?"+
-			
-				")?");
-	/**
-	 * <pre>
-     * Year:YYYY (eg 1997)
-     * Year and month:YYYY-MM (eg 1997-07)
-     * Complete date:YYYY-MM-DD (eg 1997-07-16)
-     * Complete date plus hours and minutes:
-     *    YYYY-MM-DDThh:mmTZD (eg 1997-07-16T19:20+01:00)
-     * Complete date plus hours, minutes and seconds:
-     *    YYYY-MM-DDThh:mm:ssTZD (eg 1997-07-16T19:20:30+01:00)
-     * Complete date plus hours, minutes, seconds and a decimal fraction of a second
-     *    YYYY-MM-DDThh:mm:ss.sTZD (eg 1997-07-16T19:20:30.45+01:00)
-     * </pre>
-	 * @param source
-	 * @return
-	 * @throws ParseException 
-	 */
-	protected Date parse(String source) throws ParseException{
-	    // if sDate has time on it, it injects 'GTM' before de TZ displacement to
-        // allow the SimpleDateFormat parser to parse it properly
-		final int len = source.length();
-		boolean noZone =false;
-		if(len <= DATE_LENGTH){
-			source = source+SAMPLE.substring(len);//+"+0000";
-			noZone = true;
-			//return new SimpleDateFormat(PATTERN.substring(0,DATE_TIME_LENGTH)).parse(source);
-		}else{
-			//标准化日期信息
-			final int t = source.indexOf('T'); 
-			if(t != DATE_LENGTH){
-				
-			}
-            //标准化时间信息
-            if(len != DATE_TIME_LENGTH+5){
-				// 标准化TimeZone
-				if ('Z' == source.charAt(len - 1)) {
-					return parse(source.substring(0, len - 1) + "+0000");
-				}
-				if (source.charAt(len - 3) == ':') {
-					source = new StringBuilder(source).delete(len - 3, 1).toString();
-				}
-            	final int len2 = source.length();
-            	final int t = source.indexOf('T');
-            	final int offset = DATE_LENGTH - t;
-            	final int zp = len2 - 5;
-            	//add timezone
-            	final char c = source.charAt(zp);
-            	if(c == '+' || c == '-'){
-            		source = source.substring(0,zp) + SAMPLE.substring(zp + offset)+source.substring(zp);
-            	}else{
-            		noZone = true;
-            		source = source+ SAMPLE.substring(len2 + offset);
-            	}
-                
-            }
-        }
-//        ParsePosition p = new ParsePosition(0);
-        return new SimpleDateFormat(noZone?PATTERN.substring(0,DATE_TIME_LENGTH):PATTERN).parse(source);
-//        if(p.getIndex()!=source.length()){
-//        	throws new Runtime
-//        }
-//        	
-//        return result;
-	}
+
+	
 	@SuppressWarnings("unchecked")
 	protected <T> T toValue(Object value, Class<T> type) {
 		try {
@@ -170,7 +160,7 @@ public class JSONDecoder {
 				return (T) result;
 			} else if (Date.class.isAssignableFrom(type)) {
 				if(value instanceof String) {
-					return (T)parse((String)value);
+					return (T)parseW3Date((String)value);
 				}else{
 					return type.getConstructor(Long.class).newInstance(((Number)value).longValue());
 				}

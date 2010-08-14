@@ -476,7 +476,7 @@ function getPriority(type) {
 	case BRACKET_END:
 		return Math.MIN_VALUE;
 	default:
-		return (type & BIT_PRIORITY)<<4 | (type & BIT_PRIORITY_SUB)>>12;
+		return (type & BIT_PRIORITY)<<4 | (type & BIT_PRIORITY_SUB)>>8;
 	}
 }
 /**

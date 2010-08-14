@@ -216,7 +216,7 @@ public class ExpressionParser extends JSONTokenizer {
 		case BRACKET_END:
 			return Integer.MIN_VALUE;
 		default:
-			return (type & BIT_PRIORITY) << 4 | (type & BIT_PRIORITY_SUB) >> 12;
+			return (type & BIT_PRIORITY) << 4 | (type & BIT_PRIORITY_SUB) >> 8;
 		}
 	}
 

@@ -21,30 +21,32 @@ import org.apache.commons.logging.LogFactory;
  * @author jindw
  */
 public class JSONEncoder {
-	private final static String PATTERN= "yyyy-MM-dd'T'HH:mm:ssZ";
+	public final static String W3C_DATE_TIME_SECOND_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";
+	public final static String W3C_DATE_FORMAT = "yyyy-MM-dd";
+	public final static String W3C_DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mmZ";
+	public final static String W3C_DATE_TIME_MILLISECOND_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
+	
 	private static Log log = LogFactory.getLog(JSONEncoder.class);
 	private static JSONEncoder encoder = new JSONEncoder();
-	private final boolean printClassName;
-	private final boolean contextEquals;
+	private final boolean ignoreClassName;
+	private final boolean addressEqual;
 	private final boolean throwError;
+	private final String dateFormat;
 	private final Object[] parent;
 	private int index = 0;
 
-	public JSONEncoder(boolean printClassName) {
-		this(printClassName, 64, true, true);
 
-	}
-
-	public JSONEncoder(boolean printClassName, int depth, boolean addressEqual,
-			boolean throwError) {
-		this.printClassName = printClassName;
+	public JSONEncoder(String dateFormat,boolean ignoreClassName, 
+			int depth, boolean addressEqual,boolean throwError) {
+		this.dateFormat =  dateFormat;
+		this.ignoreClassName = ignoreClassName;
 		this.parent = new Object[depth];
-		this.contextEquals = !!addressEqual;
+		this.addressEqual = addressEqual;
 		this.throwError = throwError;
 	}
 
 	private JSONEncoder() {
-		this(false);
+		this(W3C_DATE_TIME_FORMAT,true, 64, true, true);
 	}
 
 	public static String encode(Object value) {
@@ -82,9 +84,9 @@ public class JSONEncoder {
 			printString((String) object, out);
 		} else if (object instanceof Character) {
 			printString(String.valueOf(object), out);
-		}else if(object instanceof Date){
+		}else if(object instanceof Date && dateFormat !=null){
 			//see http://www.w3.org/TR/NOTE-datetime
-			String date = new SimpleDateFormat(PATTERN).format((Date)object);
+			String date = new SimpleDateFormat(dateFormat).format((Date)object);
 			date = new StringBuilder(date).insert(date.length()-2, ':').toString();
 			printString(date,out);
 		} else {//PATTERN
@@ -96,7 +98,7 @@ public class JSONEncoder {
 					out.append("null");
 				} else {
 					while (i-- > 0) {
-						if (parent[i] == object || contextEquals
+						if (parent[i] == object || addressEqual
 								&& object.equals(parent[i])) {
 							System.out.println(i + "@@@@" + object + "/"
 									+ parent[i]);
@@ -190,11 +192,13 @@ public class JSONEncoder {
 			PropertyDescriptor[] props = info.getPropertyDescriptors();
 			for (int i = 0; i < props.length; ++i) {
 				try {
-				PropertyDescriptor prop = props[i];
-				String name = prop.getName();
-				Method accessor = prop.getReadMethod();
-				if (accessor != null
-						&& (!"class".equals(name) || printClassName)) {
+					PropertyDescriptor prop = props[i];
+					String name = prop.getName();
+					Method accessor = prop.getReadMethod();
+					if (accessor == null
+						|| (ignoreClassName && "class".equals(name))) {
+						continue;
+					}
 					if (!accessor.isAccessible()) {
 						accessor.setAccessible(true);
 					}
@@ -206,8 +210,6 @@ public class JSONEncoder {
 					out.append(':');
 					print(value, out);
 					addedSomething = true;
-				}
-
 				} catch (Exception e) {
 					log.warn("属性获取失败",e);
 				}

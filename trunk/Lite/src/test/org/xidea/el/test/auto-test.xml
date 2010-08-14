@@ -13,6 +13,8 @@
 	<unit>
 		<model>{"var1":1,"object":{}}
 		</model>
+		<!-- 与或运算 -->
+		<case><![CDATA[1 || false && true && false]]></case>
 		<!-- 比较运算 -->
 		<case>'0' == 0</case>
 		<case>0 == null</case>
