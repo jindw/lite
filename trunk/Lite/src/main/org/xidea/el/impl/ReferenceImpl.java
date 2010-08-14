@@ -153,33 +153,36 @@ class ReferenceImpl implements Reference {
 			}catch (Exception e) {
 			}
 		}
-		return new Invocable() {
-			public Object invoke(Object thiz, Object... args) throws Exception {
-				nextMethod: for (Method method : methods) {
-					Class<? extends Object> clazzs[] = method
-							.getParameterTypes();
-					if (clazzs.length == args.length) {
-						for (int i = 0; i < clazzs.length; i++) {
-							Class<? extends Object> type = ReflectUtil.toWrapper(clazzs[i]);
-							Object value = args[i];
-							value = ECMA262Impl.ToValue(value, type);
-							args[i] = value;
-							if (value != null) {
-								if (!type.isInstance(value)) {
-									continue nextMethod;
-								}
-							}
-						}
-					}
-					return method.invoke(thiz, args);
-				}
-				return null;
-			}
-		};
+		MethodInvocable inv = new MethodInvocable();
+		inv.methods = methods;
+		return inv;
 	}
 
 	public Object getName() {
 		return name;
 	}
-
 }
+class MethodInvocable implements Invocable {
+	Method[] methods;
+	public Object invoke(Object thiz, Object... args) throws Exception {
+		nextMethod: for (Method method : methods) {
+			Class<? extends Object> clazzs[] = method
+					.getParameterTypes();
+			if (clazzs.length == args.length) {
+				for (int i = 0; i < clazzs.length; i++) {
+					Class<? extends Object> type = ReflectUtil.toWrapper(clazzs[i]);
+					Object value = args[i];
+					value = ECMA262Impl.ToValue(value, type);
+					args[i] = value;
+					if (value != null) {
+						if (!type.isInstance(value)) {
+							continue nextMethod;
+						}
+					}
+				}
+			}
+			return method.invoke(thiz, args);
+		}
+		return null;
+	}
+};

@@ -19,7 +19,7 @@ public class TextContains implements Invocable {
 		return containsText(args[0], args[1]);
 	}
 
-	public Boolean containsText(Object value, Object key) {
+	protected Boolean containsText(Object value, Object key) {
 		key = String.valueOf(key);
 		if (value instanceof Object[]) {
 			for (Object item : (Object[]) value) {

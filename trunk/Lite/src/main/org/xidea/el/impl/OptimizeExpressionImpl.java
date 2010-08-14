@@ -70,10 +70,10 @@ public class OptimizeExpressionImpl extends ExpressionImpl {
 			final Object[] properties = props.toArray();
 			switch (properties.length) {
 			case 1:
-				return new PropertyExpression(el, calculater, 
+				return new PropertyImpl(el, calculater, 
 						baseName,properties[0]);
 			default:
-				return new PropertiesExpression(el, calculater, 
+				return new PropertiesImpl(el, calculater, 
 						baseName,properties);
 			}
 
@@ -81,36 +81,39 @@ public class OptimizeExpressionImpl extends ExpressionImpl {
 		return null;
 	}
 
-	static class PropertyExpression extends OptimizeExpressionImpl {
-		private Object key;
-		public PropertyExpression(ExpressionToken expression,
-				OperationStrategy calculater, 
-				String name, Object key) {
-			super(expression, calculater, name);
-			this.key = key;
-		}
-		protected Object compute(ValueStack valueStack) {
-			Object base = strategy.getVar(valueStack,name);
-			return ReflectUtil.getValue(base, key);
-		}
+
+}
+
+class PropertyImpl extends OptimizeExpressionImpl {
+	private Object key;
+
+	public PropertyImpl(ExpressionToken expression,
+			OperationStrategy calculater, String name, Object key) {
+		super(expression, calculater, name);
+		this.key = key;
 	}
 
-	static class PropertiesExpression extends PropertyExpression {
-		private Object[] keys;
-		public PropertiesExpression(ExpressionToken expression,
-				OperationStrategy calculater, 
-				String name, Object[] keys) {
-			super(expression, calculater, name,null);
-			this.keys = keys;
-		}
-		protected Object compute(ValueStack valueStack) {
-			Object base = strategy.getVar(valueStack,name);
-			int i = keys.length;
-			while(i-->0){
-				base = ReflectUtil.getValue(base, keys[i]);
-			}
-			return base;
-		}
+	protected Object compute(ValueStack valueStack) {
+		Object base = strategy.getVar(valueStack, name);
+		return ReflectUtil.getValue(base, key);
+	}
+}
+
+class PropertiesImpl extends PropertyImpl {
+	private Object[] keys;
+
+	public PropertiesImpl(ExpressionToken expression,
+			OperationStrategy calculater, String name, Object[] keys) {
+		super(expression, calculater, name, null);
+		this.keys = keys;
 	}
 
+	protected Object compute(ValueStack valueStack) {
+		Object base = strategy.getVar(valueStack, name);
+		int i = keys.length;
+		while (i-- > 0) {
+			base = ReflectUtil.getValue(base, keys[i]);
+		}
+		return base;
+	}
 }

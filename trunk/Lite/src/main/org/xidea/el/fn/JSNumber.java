@@ -4,7 +4,7 @@ import java.text.DecimalFormat;
 
 import org.xidea.el.Invocable;
 
-public class JSNumber extends JSObject implements Invocable {
+class JSNumber extends JSObject implements Invocable {
 	public Object toFixed(Number thiz, Object[] args) throws Exception {
 		int p = JSObject.getIntArg(args, 0, 0);
 		DecimalFormat df = new DecimalFormat();

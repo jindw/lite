@@ -22,24 +22,7 @@ public abstract class ECMA262Impl {
 		setup(calculater, JSArray.class, ARRAY_CLASSES);
 		setup(calculater, JSNumber.class, Number.class);
 		setup(calculater, JSString.class, String.class);
-		setupVar(calculater);
-	}
-	private static void setupVar(ExpressionFactoryImpl calculater) {
-		calculater.addVar("encodeURI", new URIEncoder(true,true));
-		calculater.addVar("decodeURI", new URIEncoder(false,true));
-
-		calculater.addVar("encodeURIComponent", new URIEncoder(true,false));
-		calculater.addVar("decodeURIComponent", new URIEncoder(false,false));
-
-		calculater.addVar("isFinite", ECMA262Invocable.isFinite);
-		calculater.addVar("isNaN", ECMA262Invocable.isNaN);
-
-		calculater.addVar("parseFloat", new NumberParser(true));
-		calculater.addVar("parseInt", new NumberParser(false));
-		calculater.addVar("Math", ECMA262Invocable.MATH);
-		calculater.addVar("Infinity", Double.POSITIVE_INFINITY);
-		calculater.addVar("NaN", Double.NaN);
-		calculater.addVar("JSON", ECMA262Invocable.JSON);
+		JSGlobal.setupVar(calculater);
 	}
 	private static void setup(ExpressionFactoryImpl calculater,
 			Class<? extends JSObject> impl, Class<?>... forClass) {
@@ -50,8 +33,9 @@ public abstract class ECMA262Impl {
 					JSObject inv = impl.newInstance();
 					Class<?>[] params = method.getParameterTypes();
 					inv.method = method;
-					inv.params = params;
-					inv.directly = params.length ==2 && params[1] == Object[].class;
+					if(params.length !=2 || params[1] != Object[].class){
+						inv.params = params;
+					}
 					try {
 						method.setAccessible(true);
 					} catch (Exception e) {

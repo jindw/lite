@@ -78,7 +78,7 @@ function findForStart(list){
 	var dd=0;
 	while(true){
 		try{
-			new Function("return "+value);
+			new Function("return "+value.replace(/\.\./g,'./.'));
 			return dd;
 		}catch(e){
 			dd = list.indexOf('..',dd+1);
@@ -104,7 +104,7 @@ function startFor(context,key,list,status_){
 		}
 		list = "Math.abs("+begin+'-'+end+")+1";
 		context.appendFor(key,list,status_||null);
-		context.appendVar(key,key+'+'+(begin-1));
+		context.appendVar(key,key+'+'+begin+"-1");
 	}else if(dd ==0){
 		context.appendFor(key,list,status_);
 	}else{

@@ -216,7 +216,7 @@ public class Template {
 					}
 				}
 			} catch (Break e) {
-				if (e.isValid()) {
+				if (--e.depth > 0) {
 					throw e;
 				}
 			} catch (Exception e) {// 每一个指令都拒绝异常
@@ -416,34 +416,27 @@ public class Template {
 		}
 		return true;
 	}
+}
+class Break extends RuntimeException {
+	private static final long serialVersionUID = 1L;
+	int depth;
+	protected Break(int depth) {
+		this.depth = depth;
+	}
+}
+class ForStatus {
+	int index = -1;
+	int lastIndex;
 
-	@SuppressWarnings("serial")
-	protected static class Break extends RuntimeException {
-		private int depth;
-
-		protected Break(int depth) {
-			this.depth = depth;
-		}
-
-		protected boolean isValid() {
-			return --depth > 0;
-		}
+	ForStatus(int end) {
+		this.lastIndex = end - 1;
 	}
 
-	public static class ForStatus {
-		private int index = -1;
-		private int lastIndex;
+	public int getIndex() {
+		return index;
+	}
 
-		private ForStatus(int end) {
-			this.lastIndex = end - 1;
-		}
-
-		public int getIndex() {
-			return index;
-		}
-
-		public int getLastIndex() {
-			return lastIndex;
-		}
+	public int getLastIndex() {
+		return lastIndex;
 	}
 }

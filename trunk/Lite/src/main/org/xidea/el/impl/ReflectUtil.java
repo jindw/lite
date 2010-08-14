@@ -16,17 +16,10 @@ import java.util.WeakHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 public abstract class ReflectUtil {
 	private static final Log log = LogFactory.getLog(ReflectUtil.class);
 	private static final String LENGTH = "length";
 	private static final Map<Class<?>, Map<String, AccessDescriptor>> classPropertyMap = new WeakHashMap<Class<?>, Map<String, AccessDescriptor>>();
-
-	private static class AccessDescriptor {
-		private Method reader;
-		private Method writer;
-		private Class<? extends Object> type;
-	}
 
 	private static Map<String, AccessDescriptor> getPropertyMap(Class<?> clazz) {
 		Map<String, AccessDescriptor> propertyMap = classPropertyMap.get(clazz);
@@ -403,3 +396,9 @@ public abstract class ReflectUtil {
 		return type;
 	}
 }
+class AccessDescriptor {
+	Method reader;
+	Method writer;
+	Class<? extends Object> type;
+}
+

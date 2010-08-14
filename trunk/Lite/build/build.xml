@@ -135,8 +135,6 @@
 			</fileset>
 			<zipfileset src="build/dest/JSEL.jar">
 				<include name="org/xidea/**/*.*" />
-				<exclude name="org/xidea/el/parser/ExpressionTokenizer.*" />
-				<exclude name="org/xidea/el/parser/ExpressionTokenizer$*" />
 			</zipfileset>
 		</jar>
 		<delete file="build/dest/jslite/__package__.js" />

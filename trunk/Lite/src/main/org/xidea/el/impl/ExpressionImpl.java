@@ -12,6 +12,7 @@ import org.xidea.el.ExpressionToken;
 import org.xidea.el.Reference;
 import org.xidea.el.ReferenceExpression;
 import org.xidea.el.ValueStack;
+import org.xidea.el.json.JSONEncoder;
 
 public class ExpressionImpl implements Expression, ReferenceExpression,
 		ExpressionInfo {
@@ -53,8 +54,9 @@ public class ExpressionImpl implements Expression, ReferenceExpression,
 		}
 		HashMap<Object, Object> map = new HashMap<Object, Object>();
 		for(int i = 0;i<context.length;i++){
-			map.put(context[i], context[i++]);
+			map.put(context[i], context[++i]);
 		}
+		System.out.println(JSONEncoder.encode(map));
 		return evaluate(map);
 	}
 
@@ -71,7 +73,7 @@ public class ExpressionImpl implements Expression, ReferenceExpression,
 		if (result instanceof Reference) {
 			return (Reference) result;
 		} else {
-			return RefrenceStackImpl.wrapResult(result);
+			return new ReferenceImpl(new Object[]{result},0);
 		}
 	}
 

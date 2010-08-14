@@ -2,7 +2,6 @@ package org.xidea.el.impl;
 
 import java.util.Map;
 
-import org.xidea.el.Invocable;
 import org.xidea.el.ValueStack;
 
 public class ValueStackImpl implements ValueStack {
@@ -30,17 +29,8 @@ public class ValueStackImpl implements ValueStack {
 					return result;
 				}
 				if (key instanceof String) {
-					final Object thiz = context;
-					final Invocable inc = ReferenceImpl.getInvocable(clazz,
+					return ReferenceImpl.getInvocable(clazz,
 							(String) key, -1);
-					if (inc != null) {
-						return new Invocable() {
-							public Object invoke(Object thiz2, Object... args)
-									throws Exception {
-								return inc.invoke(thiz, args);
-							}
-						};
-					}
 				}
 			}
 		}
@@ -62,4 +52,30 @@ public class ValueStackImpl implements ValueStack {
 		ReflectUtil.setValue(stack[level], key, value);
 	}
 
+}
+//class ThisWrapper implements Invocable {
+//	Invocable base;
+//	Object thiz;
+//	public Object invoke(Object thiz2, Object... args)
+//			throws Exception {
+//		return base.invoke(thiz, args);
+//	}
+//};
+class RefrenceStackImpl extends ValueStackImpl {
+	public RefrenceStackImpl(Object... context) {
+		super(context);
+	}
+
+	public Object get(Object key) {
+		int i = stack.length;
+		while (i-- > 0) {
+			Object context = stack[i];
+			if (context instanceof Map<?,?>) {
+				return new ReferenceImpl(context, key);
+			} else if (ReflectUtil.getPropertyType(context.getClass(), key) != null) {
+				return new ReferenceImpl(context, key);
+			}
+		}
+		return null;
+	}
 }

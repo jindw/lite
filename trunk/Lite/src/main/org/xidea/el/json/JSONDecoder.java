@@ -3,7 +3,10 @@ package org.xidea.el.json;
 import java.io.IOException;
 import java.io.Reader;
 import java.lang.reflect.Array;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -12,9 +15,13 @@ import org.apache.commons.logging.LogFactory;
 import org.xidea.el.impl.ReflectUtil;
 
 public class JSONDecoder {
+	private final static String PATTERN= "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
 	private static Log log = LogFactory.getLog(JSONDecoder.class);
 	private static JSONDecoder decoder = new JSONDecoder(false);
 	private boolean strict = false;
+	private final static String SAMPLE = "1900-01-01T00:00:00.000";
+	private final static int DATE_LENGTH = 10;
+	private final static int DATE_TIME_LENGTH = SAMPLE.length();
 
 	public JSONDecoder(boolean strict) {
 		this.strict = strict;
@@ -43,7 +50,65 @@ public class JSONDecoder {
 		}
 		return (T) result;
 	}
-
+	/**
+	 * <pre>
+     * Year:YYYY (eg 1997)
+     * Year and month:YYYY-MM (eg 1997-07)
+     * Complete date:YYYY-MM-DD (eg 1997-07-16)
+     * Complete date plus hours and minutes:
+     *    YYYY-MM-DDThh:mmTZD (eg 1997-07-16T19:20+01:00)
+     * Complete date plus hours, minutes and seconds:
+     *    YYYY-MM-DDThh:mm:ssTZD (eg 1997-07-16T19:20:30+01:00)
+     * Complete date plus hours, minutes, seconds and a decimal fraction of a second
+     *    YYYY-MM-DDThh:mm:ss.sTZD (eg 1997-07-16T19:20:30.45+01:00)
+     * </pre>
+	 * @param source
+	 * @return
+	 * @throws ParseException 
+	 */
+	protected Date parse(String source) throws ParseException{
+	    // if sDate has time on it, it injects 'GTM' before de TZ displacement to
+        // allow the SimpleDateFormat parser to parse it properly
+		final int len = source.length();
+		boolean noZone =false;
+		if(len <= DATE_LENGTH){
+			source = source+SAMPLE.substring(len);//+"+0000";
+			noZone = true;
+			//return new SimpleDateFormat(PATTERN.substring(0,DATE_TIME_LENGTH)).parse(source);
+		}else{
+			//标准化TimeZone
+            if ('Z' == source.charAt(len-1)) {
+            	source = source.substring(0,source.length()-1)+"+0000";
+            }else{
+            	if(source.charAt(len-3) == ':'){
+            		source = source.substring(0,len-3)+source.substring(len-2);
+            	}
+            }
+            //标准化时间信息
+            if(source.length() != DATE_TIME_LENGTH+5){
+            	final int len2 = source.length();
+            	final int t = source.indexOf('T');
+            	final int offset = DATE_LENGTH - t;
+            	final int zp = len2 - 5;
+            	//add timezone
+            	final char c = source.charAt(zp);
+            	if(c == '+' || c == '-'){
+            		source = source.substring(0,zp) + SAMPLE.substring(zp + offset)+source.substring(zp);
+            	}else{
+            		noZone = true;
+            		source = source+ SAMPLE.substring(len2 + offset);
+            	}
+                
+            }
+        }
+//        ParsePosition p = new ParsePosition(0);
+        return new SimpleDateFormat(noZone?PATTERN.substring(0,DATE_TIME_LENGTH):PATTERN).parse(source);
+//        if(p.getIndex()!=source.length()){
+//        	throws new Runtime
+//        }
+//        	
+//        return result;
+	}
 	@SuppressWarnings("unchecked")
 	protected <T> T toValue(Object value, Class<T> type) {
 		try {
@@ -82,6 +147,12 @@ public class JSONDecoder {
 							toValue(list.get(i), type.getComponentType()));
 				}
 				return (T) result;
+			} else if (Date.class.isAssignableFrom(type)) {
+				if(value instanceof String) {
+					return (T)parse((String)value);
+				}else{
+					return type.getConstructor(Long.class).newInstance(((Number)value).longValue());
+				}
 			} else if (value instanceof String) {
 				if(type == Class.class){
 					return (T) Class.forName((String)value);

@@ -10,13 +10,13 @@ import java.util.List;
 
 import org.xidea.el.Invocable;
 
-public class JSArray extends JSObject implements Invocable {
+class JSArray extends JSObject implements Invocable {
 	public Object invoke(Object thiz, Object... args) throws Exception {
 		return method.invoke(this, toList(thiz), args);
 	}
 
 	@SuppressWarnings({"unchecked"})
-	private static Object toList(Object thiz) {
+	private final static Object toList(Object thiz) {
 		if (thiz instanceof Object[]) {
 			thiz = Arrays.asList(thiz);
 		} else if (thiz.getClass().isArray()) {

@@ -1,13 +1,13 @@
 package org.xidea.el.json;
 
 import java.beans.BeanInfo;
-import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -21,6 +21,7 @@ import org.apache.commons.logging.LogFactory;
  * @author jindw
  */
 public class JSONEncoder {
+	final static String PATTERN= "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
 	private static Log log = LogFactory.getLog(JSONEncoder.class);
 	private static JSONEncoder encoder = new JSONEncoder();
 	private final boolean printClassName;
@@ -81,7 +82,10 @@ public class JSONEncoder {
 			printString((String) object, out);
 		} else if (object instanceof Character) {
 			printString(String.valueOf(object), out);
-		} else {
+		}else if(object instanceof Date){
+			//see http://www.w3.org/TR/NOTE-datetime
+			printString(new SimpleDateFormat(PATTERN).format((Date)object),out);
+		} else {//PATTERN
 			if (parent != null) {
 				int i = index;
 				String error = null;

@@ -47,12 +47,7 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 
 	public TokenImpl optimize(OperationStrategy os,
 			Map<String, Object> context) {
-		return optimize(os, context, new ValueStackImpl(context) {
-			@Override
-			protected Object fallback(Object key) {
-				throw new RuntimeException();
-			}
-		});
+		return optimize(os, context, new OptimizeStack(context));
 	}
 
 	private TokenImpl optimize(OperationStrategy os,
@@ -340,5 +335,14 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 	public static boolean isPrefix(int type) {
 		// TODO:
 		return getArgCount(type) == 1;
+	}
+}
+class OptimizeStack extends ValueStackImpl{
+	OptimizeStack(Map<String,Object>context) {
+		super(context);
+	}
+	@Override
+	protected Object fallback(Object key) {
+		throw new RuntimeException();
 	}
 }

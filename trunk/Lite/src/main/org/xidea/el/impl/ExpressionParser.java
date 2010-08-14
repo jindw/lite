@@ -42,11 +42,8 @@ public class ExpressionParser extends JSONTokenizer {
 	private final static TokenImpl TOKEN_NULL = new TokenImpl(VALUE_CONSTANTS,
 			null);
 
-	private static enum Status {
-		BEGIN, EXPRESSION, OPERATOR
-	}
 
-	private Status status = Status.BEGIN;
+	private ParseStatus status = ParseStatus.BEGIN;
 	private int previousType = Integer.MIN_VALUE;
 	private Map<String, Integer> aliasMap = Collections.emptyMap();
 
@@ -269,8 +266,8 @@ public class ExpressionParser extends JSONTokenizer {
 			}
 			if(op!=null){
 				int c = TokenImpl.getArgCount(op);
-				if(c == 2 && status == Status.EXPRESSION
-						||c == 1 &&status != Status.EXPRESSION){
+				if(c == 2 && status == ParseStatus.EXPRESSION
+						||c == 1 &&status != ParseStatus.EXPRESSION){
 					token = new TokenImpl(op,null);
 				}
 			}
@@ -279,7 +276,7 @@ public class ExpressionParser extends JSONTokenizer {
 		switch (token.getType()) {
 		case BRACKET_BEGIN:
 			depth++;
-			status = Status.BEGIN;
+			status = ParseStatus.BEGIN;
 			break;
 		case BRACKET_END:
 			depth--;
@@ -290,10 +287,10 @@ public class ExpressionParser extends JSONTokenizer {
 		case VALUE_VAR:
 		case VALUE_LIST:
 		case VALUE_MAP:
-			status = Status.EXPRESSION;
+			status = ParseStatus.EXPRESSION;
 			break;
 		default:
-			status = Status.OPERATOR;
+			status = ParseStatus.OPERATOR;
 			break;
 		}
 		// previousType2 = previousType;
@@ -308,7 +305,7 @@ public class ExpressionParser extends JSONTokenizer {
 			Integer op = aliasMap.get(lt.getParam());
 			if(op!=null){
 				tokens.set(last, new TokenImpl(op,null));
-				status = Status.OPERATOR;
+				status = ParseStatus.OPERATOR;
 				previousType = op;
 			}
 		}
@@ -416,7 +413,7 @@ public class ExpressionParser extends JSONTokenizer {
 			switch (op.charAt(0)) {
 			case '(':
 				replacePrevious();
-				if (status == Status.EXPRESSION) {
+				if (status == ParseStatus.EXPRESSION) {
 					addToken(new TokenImpl(OP_INVOKE, null));
 					if (skipSpace(')')) {
 						addToken(new TokenImpl(VALUE_CONSTANTS,
@@ -431,7 +428,7 @@ public class ExpressionParser extends JSONTokenizer {
 				}
 				break;
 			case '[':
-				if (status == Status.EXPRESSION) {// getProperty
+				if (status == ParseStatus.EXPRESSION) {// getProperty
 					addToken(new TokenImpl(OP_GET, null));
 					addToken(new TokenImpl(BRACKET_BEGIN, null));
 				} else {// list
@@ -448,12 +445,12 @@ public class ExpressionParser extends JSONTokenizer {
 				break;
 			case '+'://
 				addToken(new TokenImpl(
-						status == Status.EXPRESSION ? OP_ADD : OP_POS,
+						status == ParseStatus.EXPRESSION ? OP_ADD : OP_POS,
 						null));
 				break;
 			case '-':
 				addToken(new TokenImpl(
-						status == Status.EXPRESSION ? OP_SUB : OP_NEG,
+						status == ParseStatus.EXPRESSION ? OP_SUB : OP_NEG,
 						null));
 				break;
 			case ',':// :(object_setter is skiped,',' should
@@ -461,7 +458,7 @@ public class ExpressionParser extends JSONTokenizer {
 				if (!isMapMethod()) {
 					addToken(new TokenImpl(OP_JOIN, null));
 				}else{
-					status = Status.OPERATOR;
+					status = ParseStatus.OPERATOR;
 				}
 				break;
 			case '/':
@@ -470,7 +467,7 @@ public class ExpressionParser extends JSONTokenizer {
 					start--;
 					skipComment();
 					break;
-				} else if (this.status != Status.EXPRESSION) {
+				} else if (this.status != ParseStatus.EXPRESSION) {
 					int end = findRegExp(this.value, this.start);
 					if (end > 0) {
 						String regexp = this.value.substring(this.start - 1,
@@ -578,7 +575,8 @@ public class ExpressionParser extends JSONTokenizer {
 		}
 		return -1;
 	}
-
-
-
 }
+enum ParseStatus {
+	BEGIN, EXPRESSION, OPERATOR
+}
+

@@ -25,7 +25,7 @@ import org.xidea.el.Invocable;
  * 15.5.4.9 String.prototype.localeCompare(that) 15.5.4.10
  * String.prototype.match(regexp) 15.5.4.12 String.prototype.search(regexp)
  */
-public class JSString extends JSObject implements Invocable {
+class JSString extends JSObject implements Invocable {
 	// 15.5.4.1 String.fromCharCode([ char0[, char1 [,...]]])
 	public String fromCharCode(String thiz, Object[] args) {
 		char[] codes = new char[args.length];
