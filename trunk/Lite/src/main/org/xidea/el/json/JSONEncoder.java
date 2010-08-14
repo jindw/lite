@@ -21,7 +21,7 @@ import org.apache.commons.logging.LogFactory;
  * @author jindw
  */
 public class JSONEncoder {
-	final static String PATTERN= "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
+	private final static String PATTERN= "yyyy-MM-dd'T'HH:mm:ssZ";
 	private static Log log = LogFactory.getLog(JSONEncoder.class);
 	private static JSONEncoder encoder = new JSONEncoder();
 	private final boolean printClassName;
@@ -84,7 +84,9 @@ public class JSONEncoder {
 			printString(String.valueOf(object), out);
 		}else if(object instanceof Date){
 			//see http://www.w3.org/TR/NOTE-datetime
-			printString(new SimpleDateFormat(PATTERN).format((Date)object),out);
+			String date = new SimpleDateFormat(PATTERN).format((Date)object);
+			date = new StringBuilder(date).insert(date.length()-2, ':').toString();
+			printString(date,out);
 		} else {//PATTERN
 			if (parent != null) {
 				int i = index;

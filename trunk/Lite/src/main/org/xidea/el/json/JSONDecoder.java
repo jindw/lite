@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -19,7 +20,7 @@ public class JSONDecoder {
 	private static Log log = LogFactory.getLog(JSONDecoder.class);
 	private static JSONDecoder decoder = new JSONDecoder(false);
 	private boolean strict = false;
-	private final static String SAMPLE = "1900-01-01T00:00:00.000";
+	private final static String SAMPLE = "1900-01-01T00:00:00.000";//"+08:00"
 	private final static int DATE_LENGTH = 10;
 	private final static int DATE_TIME_LENGTH = SAMPLE.length();
 
@@ -50,6 +51,22 @@ public class JSONDecoder {
 		}
 		return (T) result;
 	}
+	Pattern w3cdate = Pattern.compile(
+			//data
+			"\\d{4}" +//YYYY1
+				"(?:" +
+					"\\-(\\d{1,2})" +//MM2
+					"(?:" +
+						"\\-(\\d{1,2})" +//DD3
+						//time
+						"(?:" +
+							"T(\\d{2})\\:(\\d{2})" +//hour:4,minutes:5
+							"(?:\\:(\\d{2}(\\.\\d+)?))?"+//seconds//5
+							"(Z|[+\\-](\\d{2})\\:?(\\d{2}))?" +//timeZone:6
+						")?" +
+					")?"+
+			
+				")?");
 	/**
 	 * <pre>
      * Year:YYYY (eg 1997)
@@ -76,16 +93,20 @@ public class JSONDecoder {
 			noZone = true;
 			//return new SimpleDateFormat(PATTERN.substring(0,DATE_TIME_LENGTH)).parse(source);
 		}else{
-			//标准化TimeZone
-            if ('Z' == source.charAt(len-1)) {
-            	source = source.substring(0,source.length()-1)+"+0000";
-            }else{
-            	if(source.charAt(len-3) == ':'){
-            		source = source.substring(0,len-3)+source.substring(len-2);
-            	}
-            }
+			//标准化日期信息
+			final int t = source.indexOf('T'); 
+			if(t != DATE_LENGTH){
+				
+			}
             //标准化时间信息
-            if(source.length() != DATE_TIME_LENGTH+5){
+            if(len != DATE_TIME_LENGTH+5){
+				// 标准化TimeZone
+				if ('Z' == source.charAt(len - 1)) {
+					return parse(source.substring(0, len - 1) + "+0000");
+				}
+				if (source.charAt(len - 3) == ':') {
+					source = new StringBuilder(source).delete(len - 3, 1).toString();
+				}
             	final int len2 = source.length();
             	final int t = source.indexOf('T');
             	final int offset = DATE_LENGTH - t;
