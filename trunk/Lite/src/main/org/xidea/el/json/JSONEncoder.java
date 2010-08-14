@@ -21,9 +21,9 @@ import org.apache.commons.logging.LogFactory;
  * @author jindw
  */
 public class JSONEncoder {
-	public final static String W3C_DATE_TIME_SECOND_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";
 	public final static String W3C_DATE_FORMAT = "yyyy-MM-dd";
 	public final static String W3C_DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mmZ";
+	public final static String W3C_DATE_TIME_SECOND_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";
 	public final static String W3C_DATE_TIME_MILLISECOND_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
 	
 	private static Log log = LogFactory.getLog(JSONEncoder.class);
@@ -46,7 +46,7 @@ public class JSONEncoder {
 	}
 
 	private JSONEncoder() {
-		this(W3C_DATE_TIME_FORMAT,true, 64, true, true);
+		this(W3C_DATE_TIME_MILLISECOND_FORMAT,true, 64, true, true);
 	}
 
 	public static String encode(Object value) {
