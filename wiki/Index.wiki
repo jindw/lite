@@ -14,9 +14,9 @@
     * 模板中间代码设计
   * 模板语法
     * [LiteStyle 标准语法风格]
-    * [LiteXML 基本语法]
-    * [LiteXHTML XHTML语法扩展]
+    * [LiteXML 基本语法(LiteXML)]
     * [LiteUI UI语法扩展]
+    * [LiteXHTML HTML语法扩展]
 
   * 扩展机制
     * [自定义名称空间]
