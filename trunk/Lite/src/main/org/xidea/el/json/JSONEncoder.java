@@ -26,7 +26,7 @@ public class JSONEncoder {
 	public final static String W3C_DATE_TIME_MILLISECOND_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
 
 	private static Log log = LogFactory.getLog(JSONEncoder.class);
-	private static JSONEncoder encoder = new JSONEncoder();
+	private static JSONEncoder encoder = new JSONEncoder(W3C_DATE_TIME_MILLISECOND_FORMAT, true, 64, true, true);
 	private final boolean ignoreClassName;
 	private final boolean checkByAddress;
 	private final boolean throwError;
@@ -43,9 +43,6 @@ public class JSONEncoder {
 		this.throwError = throwError;
 	}
 
-	private JSONEncoder() {
-		this(W3C_DATE_TIME_MILLISECOND_FORMAT, true, 64, true, true);
-	}
 
 	public static String encode(Object value) {
 		StringBuilder buf = new StringBuilder();
