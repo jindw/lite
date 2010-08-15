@@ -2,7 +2,7 @@
 该文档记录Lite自2.0开始的全部更新日志
 
 === 2.0 ===
-  目前2.0尚在开发阶段，当前最新版本[http://code.google.com/p/lite/downloads/list 2.0A4]
+  目前2.0尚在开发阶段，当前最新版本[http://code.google.com/p/lite/downloads/list 2.0A5]
   * 2.0A5
     # JSEL(BugFix): [http://code.google.com/p/lite/issues/detail?id=18 JSON 编码工具多线程环境下调用失败]
   * 2.0A4
