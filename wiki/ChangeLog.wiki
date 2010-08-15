@@ -6,13 +6,13 @@
   * 2.0A5
     # JSEL(BugFix): [http://code.google.com/p/lite/issues/detail?id=18 JSON 编码工具多线程环境下调用失败]
   * 2.0A4
-    # JSEL: [http://code.google.com/p/lite/issues/detail?id=16 支持日期的编码解码，采用W3C日期标准]
+    # JSEL(NewFeatrue): [http://code.google.com/p/lite/issues/detail?id=16 支持日期的编码解码，采用W3C日期标准]
     # JSEL(BugFix): [http://code.google.com/p/lite/issues/detail?id=17 运算符二级优先级判断错误]  
     # JSEL(BugFix): [http://code.google.com/p/lite/issues/detail?id=15 表达式数组参数低级错误]
   * 2.0A3
-    # JSEL: [http://code.google.com/p/lite/wiki/JSON JSON编码/解析实现优化]
-    # JSEL: [http://code.google.com/p/lite/wiki/CPEL 命令行工具优化]
+    # JSEL(NewFeatrue): [http://code.google.com/p/lite/wiki/JSON JSON编码/解析实现优化]
+    # JSE(NewFeatrue)L: [http://code.google.com/p/lite/wiki/CPEL 命令行工具优化]
   * 2.0A2
-    # JSEL: [http://code.google.com/p/lite/wiki/JSELExtension 表达式扩展支持]
+    # JSEL(NewFeatrue): [http://code.google.com/p/lite/wiki/JSELExtension 表达式扩展支持]
   * 2.0A1
-    # Lite: 优化插件模型, 用javascript重构核心逻辑，方便前端工程师对语法设计的控制。
+    # Lite(NewFeatrue): 优化插件模型, 用javascript重构核心逻辑，方便前端工程师对语法设计的控制。
