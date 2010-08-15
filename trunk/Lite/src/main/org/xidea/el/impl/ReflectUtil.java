@@ -25,7 +25,7 @@ public abstract class ReflectUtil {
 	private static final Map<Class<?>, Map<String, Class<?>>> typeMap = new WeakHashMap<Class<?>, Map<String, Class<?>>>();
 	private static Object initLock = new Object();;
 
-	public static Map<String, Method> getReaderMap(final Class<?> clazz) {
+	public static Map<String, Method> getGetterMap(final Class<?> clazz) {
 		Map<String, Method> propertyMap = readerMap.get(clazz);
 		if (propertyMap == null) {
 			initProperties(clazz);
@@ -34,7 +34,7 @@ public abstract class ReflectUtil {
 		return propertyMap;
 	}
 
-	public static Map<String, Method> getWriterMap(final Class<?> clazz) {
+	public static Map<String, Method> getSetterMap(final Class<?> clazz) {
 		Map<String, Method> propertyMap = writerMap.get(clazz);
 		if (propertyMap == null) {
 			initProperties(clazz);
@@ -59,8 +59,8 @@ public abstract class ReflectUtil {
 			HashMap<String, Class<?>> propertyMap = new HashMap<String, Class<?>>();
 			try {
 				if (!clazz.equals(Object.class)) {
-					getterMap.putAll(getReaderMap(clazz.getSuperclass()));
-					setterMap.putAll(getWriterMap(clazz.getSuperclass()));
+					getterMap.putAll(getGetterMap(clazz.getSuperclass()));
+					setterMap.putAll(getSetterMap(clazz.getSuperclass()));
 					propertyMap.putAll(getTypeMap(clazz.getSuperclass()));
 				}
 				Method[] methods = clazz.getDeclaredMethods();
@@ -292,7 +292,7 @@ public abstract class ReflectUtil {
 				if (context instanceof Map<?, ?>) {
 					return ((Map<?, ?>) context).get(key);
 				}
-				Method method = getReaderMap(context.getClass()).get(
+				Method method = getGetterMap(context.getClass()).get(
 						String.valueOf(key));
 				if (method != null) {
 					return method.invoke(context);
@@ -341,7 +341,7 @@ public abstract class ReflectUtil {
 				if (base instanceof Map) {
 					((Map<Object, Object>) base).put(key, value);
 				}
-				Method method = getWriterMap(base.getClass()).get(
+				Method method = getSetterMap(base.getClass()).get(
 						String.valueOf(key));
 				if (method != null) {
 					if (value != null) {

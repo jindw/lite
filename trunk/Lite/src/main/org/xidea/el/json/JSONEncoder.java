@@ -1,6 +1,7 @@
 package org.xidea.el.json;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
@@ -75,13 +76,13 @@ public class JSONEncoder {
 		}
 		Class<?> type = object.getClass();
 		if (type == Boolean.class) {
-			out.append(String.valueOf(object));
+			out.append(object.toString());
 		} else if (type == String.class) {
 			printString((String) object, out);
 		} else if (type == Character.class) {
-			printString(String.valueOf(object), out);
+			printString(object.toString(), out);
 		} else if (Number.class.isAssignableFrom(type)) {
-			out.append(String.valueOf(object));
+			out.append(object.toString());
 		} else if (type == Class.class) {
 			// Class 系列化容易导致死循环
 			printString(((Class<?>) object).getName(), out);
@@ -126,8 +127,8 @@ public class JSONEncoder {
 			try {
 				if (object instanceof Map<?, ?>) {
 					printMap((Map<?, ?>) object, out);
-				} else if (object instanceof Object[]) {
-					printList((Object[]) object, out);
+				} else if (type.isArray()) {
+					printList(object, out);
 				} else if (object instanceof Iterator<?>) {
 					printList((Iterator<?>) object, out);
 				} else if (object instanceof Collection<?>) {
@@ -190,7 +191,7 @@ public class JSONEncoder {
 	protected void printMap(Object object, Appendable out) throws IOException {
 		out.append('{');
 		try {
-			Map<String, Method> props = ReflectUtil.getReaderMap(object.getClass());
+			Map<String, Method> props = ReflectUtil.getGetterMap(object.getClass());
 			boolean first = true;
 			for (String name : props.keySet()) {
 				try {
@@ -241,14 +242,15 @@ public class JSONEncoder {
 		}
 	}
 
-	protected void printList(Object[] object, Appendable out)
+	protected void printList(Object array, Appendable out)
 			throws IOException {
 		out.append('[');
-		for (int i = 0; i < object.length; ++i) {
+		int len = Array.getLength(array);
+		for (int i = 0; i < len; ++i) {
 			if (i > 0) {
 				out.append(',');
 			}
-			print(object[i], out);
+			print( Array.get(array, i), out);
 		}
 		out.append(']');
 	}
