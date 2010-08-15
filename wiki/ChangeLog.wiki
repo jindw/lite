@@ -11,7 +11,7 @@
     # JSEL(BF): [http://code.google.com/p/lite/issues/detail?id=15 表达式数组参数低级错误]
   * 2.0A3
     # JSEL(NF): [http://code.google.com/p/lite/wiki/JSON JSON编码/解析实现优化]
-    # JSE(NewFeatrue)L: [http://code.google.com/p/lite/wiki/CPEL 命令行工具优化]
+    # JSEL(NF): [http://code.google.com/p/lite/wiki/CPEL 命令行工具优化]
   * 2.0A2
     # JSEL(NF): [http://code.google.com/p/lite/wiki/JSELExtension 表达式扩展支持]
   * 2.0A1
