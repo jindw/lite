@@ -16,98 +16,123 @@ import java.util.WeakHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 public abstract class ReflectUtil {
 	private static final Log log = LogFactory.getLog(ReflectUtil.class);
 	private static final String LENGTH = "length";
-	private static final Map<Class<?>, Map<String, AccessDescriptor>> classPropertyMap = new WeakHashMap<Class<?>, Map<String, AccessDescriptor>>();
+	private static final Map<Class<?>, Map<String, Method>> readerMap = new WeakHashMap<Class<?>, Map<String, Method>>();
+	private static final Map<Class<?>, Map<String, Method>> writerMap = new WeakHashMap<Class<?>, Map<String, Method>>();
+	private static final Map<Class<?>, Map<String, Class<?>>> typeMap = new WeakHashMap<Class<?>, Map<String, Class<?>>>();
+	private static Object initLock = new Object();;
 
-	private static Map<String, AccessDescriptor> getPropertyMap(Class<?> clazz) {
-		Map<String, AccessDescriptor> propertyMap = classPropertyMap.get(clazz);
+	public static Map<String, Method> getReaderMap(final Class<?> clazz) {
+		Map<String, Method> propertyMap = readerMap.get(clazz);
 		if (propertyMap == null) {
-			try {
-				propertyMap = new HashMap<String, AccessDescriptor>();
-				if (!clazz.equals(Object.class)) {
-
-					Map<String, AccessDescriptor> pm = getPropertyMap(clazz.getSuperclass());
-					for(String p : pm.keySet()){
-						AccessDescriptor ad = pm.get(p);
-						AccessDescriptor ad2 = new AccessDescriptor();
-						ad2.type = ad.type;
-						ad2.reader = ad.reader;
-						ad2.writer = ad.writer;
-						propertyMap.put(p,ad2);
-					}
-				}
-				Method[] methods = clazz.getDeclaredMethods();
-				for (Method m : methods) {
-					if ((m.getModifiers() & Modifier.PUBLIC) > 0) {
-						initProperty(propertyMap, m);
-					}
-				}
-				classPropertyMap.put(clazz, propertyMap);
-			} catch (Exception e) {
-			}
+			initProperties(clazz);
+			propertyMap = readerMap.get(clazz);
 		}
 		return propertyMap;
 	}
 
-	private static void initMethod(Map<String, AccessDescriptor> propertyMap,
-			Method m, Class<? extends Object> type, boolean write, String name) {
+	public static Map<String, Method> getWriterMap(final Class<?> clazz) {
+		Map<String, Method> propertyMap = writerMap.get(clazz);
+		if (propertyMap == null) {
+			initProperties(clazz);
+			propertyMap = writerMap.get(clazz);
+		}
+		return propertyMap;
+	}
+
+	private static Map<String, Class<?>> getTypeMap(final Class<?> clazz) {
+		Map<String, Class<?>> propertyMap = typeMap.get(clazz);
+		if (propertyMap == null) {
+			initProperties(clazz);
+			propertyMap = typeMap.get(clazz);
+		}
+		return propertyMap;
+	}
+
+	private static void initProperties(final Class<?> clazz) {
+		synchronized (initLock) {
+			HashMap<String, Method> getterMap = new HashMap<String, Method>();
+			HashMap<String, Method> setterMap = new HashMap<String, Method>();
+			HashMap<String, Class<?>> propertyMap = new HashMap<String, Class<?>>();
+			try {
+				if (!clazz.equals(Object.class)) {
+					getterMap.putAll(getReaderMap(clazz.getSuperclass()));
+					setterMap.putAll(getWriterMap(clazz.getSuperclass()));
+					propertyMap.putAll(getTypeMap(clazz.getSuperclass()));
+				}
+				Method[] methods = clazz.getDeclaredMethods();
+
+				for (Method m : methods) {
+					if ((m.getModifiers() & Modifier.PUBLIC) > 0) {
+						Class<? extends Object> type = m.getReturnType();
+						Class<? extends Object>[] params = m
+								.getParameterTypes();
+						String name = m.getName();
+						if (type == Void.TYPE) {
+							if (params.length == 1 && name.startsWith("set")) {
+								type = params[0];
+								initMethod(setterMap, propertyMap, m, name
+										.substring(3));
+							}
+						} else {
+							if (params.length == 0) {
+								if (name.startsWith("get")) {
+									initMethod(getterMap, propertyMap, m, name
+											.substring(3));
+								} else if (type == Boolean.TYPE
+										&& name.startsWith("is")) {
+									initMethod(getterMap, propertyMap, m, name
+											.substring(2));
+								}
+							}
+						}
+					}
+				}
+			} catch (Exception e) {
+				log.warn("初始化属性集合异常", e);
+			} finally {
+				readerMap.put(clazz, Collections.unmodifiableMap(getterMap));
+				writerMap.put(clazz, Collections.unmodifiableMap(setterMap));
+				typeMap.put(clazz, Collections.unmodifiableMap(propertyMap));
+			}
+		}
+	}
+
+	private static void initMethod(Map<String, Method> propertyMap,
+			Map<String, Class<?>> typeMap, Method m, String name) {
 		if (name.length() > 0) {
 			char c = name.charAt(0);
 			if (Character.isUpperCase(c)) {
 				name = Character.toLowerCase(c) + name.substring(1);
-				AccessDescriptor ad = propertyMap.get(name);
-				if (ad == null) {
-					ad = new AccessDescriptor();
-					propertyMap.put(name, ad);
-				}
-				if (type != ad.type) {
-					ad.reader = null;
-					ad.writer = null;
-					ad.type = type;
-				}
 				m.setAccessible(true);
-				if (write) {
-					ad.writer = m;
-				} else {
-					ad.reader = m;
+				propertyMap.put(name, m);
+				Class<?> type = m.getReturnType();
+				if (type == Void.TYPE) {
+					type = m.getParameterTypes()[0];
 				}
+				Class<?> ot = typeMap.get(name);
+				if (ot != null) {
+					if (ot != type) {
+						log.warn("属性类型冲突："+ot+"!="+type);
+					}
+				}
+				typeMap.put(name, type);
 			}
 		}
 
-	}
-
-	private static void initProperty(Map<String, AccessDescriptor> propertyMap,
-			Method m) {
-		String name = m.getName();
-		Class<? extends Object> type = m.getReturnType();
-		Class<? extends Object>[] params = m.getParameterTypes();
-		if (type == Void.TYPE) {
-			if (params.length == 1 && name.startsWith("set")) {
-				type = params[0];
-				initMethod(propertyMap, m, type, true, name.substring(3));
-			}
-		} else {
-			if (params.length == 0) {
-				if (name.startsWith("get")) {
-					initMethod(propertyMap, m, type, false, name.substring(3));
-				} else if (type == Boolean.TYPE && name.startsWith("is")) {
-					initMethod(propertyMap, m, type, false, name.substring(2));
-				}
-			}
-		}
 	}
 
 	@SuppressWarnings("unchecked")
 	public static Map<String, ? extends Object> map(final Object context) {
-		if(context == null){
+		if (context == null) {
 			return Collections.EMPTY_MAP;
-		}else if(context instanceof Map){
-			return (Map<String, ? extends Object>)context;
+		} else if (context instanceof Map) {
+			return (Map<String, ? extends Object>) context;
 		}
-		Map<String, AccessDescriptor> ps = getPropertyMap(context.getClass());
-		return new ProxyMap(context, ps.keySet());
+		return new ProxyMap(context, getTypeMap(context.getClass()).keySet());
 	}
 
 	private static int toIndex(Object key) {
@@ -117,7 +142,7 @@ public abstract class ReflectUtil {
 
 	public static Class<? extends Object> getValueType(Type type) {
 		Type result = null;
-		Class<? extends Object>  clazz = null;
+		Class<? extends Object> clazz = null;
 		if (type instanceof ParameterizedType) {
 			clazz = (Class<?>) ((ParameterizedType) type).getRawType();
 		} else {
@@ -125,7 +150,7 @@ public abstract class ReflectUtil {
 		}
 		if (Collection.class.isAssignableFrom(clazz)) {
 			result = getParameterizedType(type, Collection.class, 0);
-		}else if (Map.class.isAssignableFrom(clazz)) {
+		} else if (Map.class.isAssignableFrom(clazz)) {
 			result = getParameterizedType(type, Map.class, 1);
 		}
 		if (result != null) {
@@ -133,6 +158,7 @@ public abstract class ReflectUtil {
 		}
 		return Object.class;
 	}
+
 	public static Class<?> getKeyType(Type type) {
 		Class<?> clazz = null;
 		if (type instanceof ParameterizedType) {
@@ -225,7 +251,7 @@ public abstract class ReflectUtil {
 			if (clazz.isArray()) {
 				if (LENGTH.equals(key)) {
 					return Integer.TYPE;
-				} else if(Number.class.isInstance(key)){
+				} else if (Number.class.isInstance(key)) {
 					return clazz.getComponentType();
 				}
 			} else if (Collection.class.isAssignableFrom(clazz)) {
@@ -233,10 +259,9 @@ public abstract class ReflectUtil {
 			} else if (Map.class.isAssignableFrom(clazz)) {
 				return getValueType(type);
 			} else {
-				AccessDescriptor pd = getPropertyDescriptor(clazz, String
-						.valueOf(key));
+				Class<?> pd = getTypeMap(clazz).get(String.valueOf(key));
 				if (pd != null) {
-					return pd.type;
+					return pd;
 				}
 			}
 		}
@@ -259,21 +284,18 @@ public abstract class ReflectUtil {
 					} else if (context instanceof List<?>) {
 						return ((List<?>) context).get(toIndex(key));
 					}
-				}else if (context instanceof String) {
+				} else if (context instanceof String) {
 					if (LENGTH.equals(key)) {
-						return ((String)context).length();
+						return ((String) context).length();
 					}
 				}
 				if (context instanceof Map<?, ?>) {
 					return ((Map<?, ?>) context).get(key);
 				}
-				AccessDescriptor pd = getPropertyDescriptor(context.getClass(),
+				Method method = getReaderMap(context.getClass()).get(
 						String.valueOf(key));
-				if (pd != null) {
-					Method method = pd.reader;
-					if (method != null) {
-						return method.invoke(context);
-					}
+				if (method != null) {
+					return method.invoke(context);
 				}
 			} catch (Exception e) {
 				if (log.isDebugEnabled()) {
@@ -285,11 +307,13 @@ public abstract class ReflectUtil {
 			try {
 
 				if (context instanceof Class<?>) {
-					return ((Class<?>) context).getField((String) key).get(context);
+					return ((Class<?>) context).getField((String) key).get(
+							context);
 				} else {
-					return context.getClass().getField((String)key).get(context);
+					return context.getClass().getField((String) key).get(
+							context);
 				}
-			}catch(NoSuchFieldException e){
+			} catch (NoSuchFieldException e) {
 			} catch (Exception e) {
 				if (log.isDebugEnabled()) {
 					log.debug(e);
@@ -297,12 +321,6 @@ public abstract class ReflectUtil {
 			}
 		}
 		return null;
-	}
-
-	private static AccessDescriptor getPropertyDescriptor(
-			Class<? extends Object> type, String key) {
-		Map<String, AccessDescriptor> pm = getPropertyMap(type);
-		return pm.get(key);
 	}
 
 	public static void setValues(Object base, Map<String, Object> attributeMap) {
@@ -323,23 +341,19 @@ public abstract class ReflectUtil {
 				if (base instanceof Map) {
 					((Map<Object, Object>) base).put(key, value);
 				}
-				AccessDescriptor pd = getPropertyDescriptor(base.getClass(),
+				Method method = getWriterMap(base.getClass()).get(
 						String.valueOf(key));
-				if (pd != null) {
-					Method method = pd.writer;
-					if (method != null) {
-						if (value != null) {
-							Class<? extends Object>  type = pd.type;
-							if (!type.isInstance(value)) {
-								type = toWrapper(type);
-								if (Number.class.isAssignableFrom(type)) {
-									value = toValue((Number) value,
-											type);
-								}
+				if (method != null) {
+					if (value != null) {
+						Class<?> type = method.getParameterTypes()[0];
+						if (!type.isInstance(value)) {
+							type = toWrapper(type);
+							if (Number.class.isAssignableFrom(type)) {
+								value = toValue((Number) value, type);
 							}
 						}
-						method.invoke(base, value);
 					}
+					method.invoke(base, value);
 				}
 			} catch (Exception e) {
 				if (log.isDebugEnabled()) {
@@ -349,6 +363,7 @@ public abstract class ReflectUtil {
 		}
 
 	}
+
 	public static Number toValue(Number value, Class<? extends Object> type) {
 		if (type == Long.class) {
 			return value.longValue();
@@ -364,9 +379,9 @@ public abstract class ReflectUtil {
 			return value.floatValue();
 		} else {
 			Class<? extends Object> clazz = ReflectUtil.toWrapper(type);
-			if(clazz == type){
+			if (clazz == type) {
 				return null;
-			}else{
+			} else {
 				return toValue(value, clazz);
 			}
 		}
@@ -396,9 +411,3 @@ public abstract class ReflectUtil {
 		return type;
 	}
 }
-class AccessDescriptor {
-	Method reader;
-	Method writer;
-	Class<? extends Object> type;
-}
-

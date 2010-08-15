@@ -1,8 +1,5 @@
 package org.xidea.el.json;
 
-import java.beans.BeanInfo;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
@@ -13,6 +10,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.xidea.el.impl.ReflectUtil;
 
 /**
  * 改造自stringtree
@@ -39,7 +37,7 @@ public class JSONEncoder {
 			boolean addressEqual, boolean throwError) {
 		this.dateFormat = dateFormat;
 		this.ignoreClassName = ignoreClassName;
-		this.parent = new Object[depth];
+		this.parent = depth > 0 ? new Object[depth] : null;
 		this.addressEqual = addressEqual;
 		this.throwError = throwError;
 	}
@@ -59,11 +57,11 @@ public class JSONEncoder {
 	}
 
 	public void encode(Object value, Appendable out) throws IOException {
-		index = 0;
 		if (this.parent == null) {
 			print(value, out);
 		} else {
 			synchronized (parent) {
+				index = 0;
 				print(value, out);
 			}
 		}
@@ -73,18 +71,21 @@ public class JSONEncoder {
 	protected void print(Object object, Appendable out) throws IOException {
 		if (object == null) {
 			out.append("null");
-		} else if (object instanceof Boolean) {
+			return;
+		}
+		Class<?> type = object.getClass();
+		if (type == Boolean.class) {
 			out.append(String.valueOf(object));
-		} else if (object instanceof Number) {
+		} else if (type == String.class) {
+			printString((String) object, out);
+		} else if (type == Character.class) {
+			printString(String.valueOf(object), out);
+		} else if (Number.class.isAssignableFrom(type)) {
 			out.append(String.valueOf(object));
-		} else if (object instanceof Class<?>) {
+		} else if (type == Class.class) {
 			// Class 系列化容易导致死循环
 			printString(((Class<?>) object).getName(), out);
-		} else if (object instanceof String) {
-			printString((String) object, out);
-		} else if (object instanceof Character) {
-			printString(String.valueOf(object), out);
-		} else if (object instanceof Date && dateFormat != null) {
+		} else if (Date.class.isAssignableFrom(type) && dateFormat != null) {
 			// see http://www.w3.org/TR/NOTE-datetime
 			String date = new SimpleDateFormat(dateFormat)
 					.format((Date) object);
@@ -148,9 +149,9 @@ public class JSONEncoder {
 			char c = text.charAt(i);
 			switch (c) {
 			case '"':
-				// case '\'':
-				// case '/':
-			case '\\':
+			// case '\'':
+			// case '/':
+			//case '\\':
 				out.append('\\');
 				out.append(c);
 				break;
@@ -188,31 +189,27 @@ public class JSONEncoder {
 
 	protected void printMap(Object object, Appendable out) throws IOException {
 		out.append('{');
-		BeanInfo info;
-		boolean addedSomething = false;
 		try {
-			info = Introspector.getBeanInfo(object.getClass());
-			PropertyDescriptor[] props = info.getPropertyDescriptors();
-			for (int i = 0; i < props.length; ++i) {
+			Map<String, Method> props = ReflectUtil.getReaderMap(object.getClass());
+			boolean first = true;
+			for (String name : props.keySet()) {
 				try {
-					PropertyDescriptor prop = props[i];
-					String name = prop.getName();
-					Method accessor = prop.getReadMethod();
+					Method accessor = props.get(name);
 					if (accessor == null
 							|| (ignoreClassName && "class".equals(name))) {
 						continue;
 					}
-					if (!accessor.isAccessible()) {
-						accessor.setAccessible(true);
-					}
 					Object value = accessor.invoke(object);
-					if (addedSomething) {
+					if (first) {
+						first = false;
+					}else{
 						out.append(',');
 					}
-					printString(name, out);
+					out.append('"');
+					out.append(name);
+					out.append('"');
 					out.append(':');
 					print(value, out);
-					addedSomething = true;
 				} catch (Exception e) {
 					log.warn("属性获取失败", e);
 				}
@@ -224,18 +221,24 @@ public class JSONEncoder {
 	}
 
 	protected void printMap(Map<?, ?> map, Appendable out) throws IOException {
-		out.append('{');
 		Iterator<?> it = map.entrySet().iterator();
-		while (it.hasNext()) {
-			Map.Entry<?, ?> e = (Map.Entry<?, ?>) it.next();
-			printString(String.valueOf(e.getKey()), out);
-			out.append(':');
-			print(e.getValue(), out);
-			if (it.hasNext()) {
-				out.append(',');
+		if (it.hasNext()) {
+			out.append('{');
+			while (true) {
+				Map.Entry<?, ?> e = (Map.Entry<?, ?>) it.next();
+				printString(String.valueOf(e.getKey()), out);
+				out.append(':');
+				print(e.getValue(), out);
+				if (it.hasNext()) {
+					out.append(',');
+				} else {
+					break;
+				}
 			}
+			out.append('}');
+		} else {
+			out.append("{}");
 		}
-		out.append('}');
 	}
 
 	protected void printList(Object[] object, Appendable out)
@@ -251,13 +254,19 @@ public class JSONEncoder {
 	}
 
 	protected void printList(Iterator<?> it, Appendable out) throws IOException {
-		out.append('[');
-		while (it.hasNext()) {
-			print(it.next(), out);
-			if (it.hasNext()) {
-				out.append(',');
+		if (it.hasNext()) {
+			out.append('[');
+			while (true) {
+				print(it.next(), out);
+				if (it.hasNext()) {
+					out.append(',');
+				} else {
+					break;
+				}
 			}
+			out.append(']');
+		} else {
+			out.append("[]");
 		}
-		out.append(']');
 	}
 }

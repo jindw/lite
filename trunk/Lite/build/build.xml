@@ -237,7 +237,7 @@
 		</java>
 	</target>
 	<target name="build" depends="compress,package,php-example">
-
+		<copy tofile="../TT/web/WEB-INF/lib/Lite-${version}.jar" file="build/dest/Lite.jar" />
 	</target>
 
 	<target name="php-example">
