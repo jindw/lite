@@ -4,7 +4,7 @@
 
 function ExtensionParser(){
 	this.packageMap = {};
-	this.addExtensionObject("http://www.xidea.org/ns/lite/core",Core);
+	this.addExtensionObject("http://www.xidea.org/lite/core",Core);
 	this.addExtensionObject("",defaultTextSeeker);
 	
 }
@@ -169,7 +169,7 @@ ExtensionParser.prototype = {
 					}
 				}
 				if(!ns && prefix == 'c'){
-					ns = "http://www.xidea.org/ns/lite/core"
+					ns = "http://www.xidea.org/lite/core"
 				}
 			}
 			if(ns == null){

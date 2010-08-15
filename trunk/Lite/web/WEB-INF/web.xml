@@ -14,21 +14,9 @@
 			<param-name>contentType</param-name>
 			<param-value>text/html;charset=UTF-8</param-value>
 		</init-param>
-		<!-- 设置压缩编译属性 -->
-		<init-param>
-			<param-name>compress</param-name>
-			<param-value>true</param-value>
-		</init-param>
 		<init-param>
 			<param-name>contentType</param-name>
 			<param-value>text/html;charset=UTF-8</param-value>
-		</init-param>
-		<init-param>
-			<!-- 如果您需要添加自动表单功能，请设置该参数 form|anyway -->
-			<param-name>
-				http://www.xidea.org/ns/lite/autoform
-			</param-name>
-			<param-value>form</param-value>
 		</init-param>
 	</servlet>
 	<servlet-mapping>

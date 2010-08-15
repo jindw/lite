@@ -9,25 +9,25 @@ var testTemplate = {
 		assertEquals(template.render({}),"<xml a=\"11true\">11true</xml>")
 	},
 	testIf:function(){
-		var template = new Template("<c:if xmlns:c='http://www.xidea.org/ns/template' test='${true}'>1" +
+		var template = new Template("<c:if xmlns:c='http://www.xidea.org/template' test='${true}'>1" +
 		"<c:if test='${1==2}'>2</c:if>  \t<c:else>3</c:else>"+
 				"</c:if>");
 		assertEquals(template.render({}),"13")
 	},
 	testChoose:function(){
-		var template = new Template("<c:choose xmlns:c='http://www.xidea.org/ns/template'>这些文字是无效的" +
+		var template = new Template("<c:choose xmlns:c='http://www.xidea.org/template'>这些文字是无效的" +
 		"<c:when  test='${true}'>1</c:when>"+
 		"<c:when test='${true}'>2</c:when>  \t<c:otherwise>3</c:otherwise>"+
 				"</c:choose>");
 		assertEquals(template.render({}),"1")
-		var template = new Template("<c:choose xmlns:c='http://www.xidea.org/ns/template'>1" +
+		var template = new Template("<c:choose xmlns:c='http://www.xidea.org/template'>1" +
 		"<c:when  test='${false}'>1</c:when>"+
 		"<c:when test='${false}'>2</c:when>  \t<c:otherwise>3</c:otherwise>"+
 				"</c:choose>");
 		assertEquals(template.render({}),"3")
 	},
 	testFor:function(){
-		var template = new Template("<c:if test='${true}' xmlns:c='http://www.xidea.org/ns/template'>" +
+		var template = new Template("<c:if test='${true}' xmlns:c='http://www.xidea.org/template'>" +
 		"<c:for var='item' items='${[1,2]}'>${for.index}${item}</c:for>"+
 		"<c:else>skip</c:else>"+
 		"-"+

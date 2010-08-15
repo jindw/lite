@@ -43,7 +43,7 @@ public class AvoidErrorParserTest {
 	public void testMutiRoot() throws SAXException, IOException,
 			URISyntaxException {
 		ParseContext context = createContext();
-		Document doc = toDoc(context, "<xml/><c:group xmlns:c='http://www.xidea.org/ns/lite/core'><xml/></c:group>");
+		Document doc = toDoc(context, "<xml/><c:group xmlns:c='http://www.xidea.org/lite/core'><xml/></c:group>");
 		System.out.println(doc);
 		context.parse(doc);
 		String result = toString(context);

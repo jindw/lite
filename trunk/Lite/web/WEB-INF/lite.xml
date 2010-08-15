@@ -3,7 +3,7 @@
 		value="org.jside.jsi.tools.JSACompressor" />
 	<extension namespace="http://www.w3c.org/1999/xhtml" package="org.xidea.lite.xhtml" />
 	<group layout="/guide/layout.xhtml">
-		<extension namespace="http://www.xidea.org/ns/lite/core"
+		<extension namespace="http://www.xidea.org/lite/core"
 			package="org.xidea.lite.xhtml" />
 		<group layout="/example/layout.xhtml">
 			<include>/example/*.xhtml</include>

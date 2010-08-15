@@ -15,7 +15,7 @@ import org.xml.sax.SAXException;
  * @see ParseContextImpl
  */
 public interface ParseContext extends ResultContext, ParseConfig, ParserHolder {
-	public String NS_CORE = "http://www.xidea.org/ns/lite/core";
+	public String NS_CORE = "http://www.xidea.org/lite/core";
 	// 默认值：link|input|meta|img|br|hr
 	public String FEATRUE_HTML_LEAF = "http://www.xidea.org/featrues/lite/html-leaf";
 	// 默认值为空

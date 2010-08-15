@@ -42,7 +42,7 @@ public class ParseUtil {
 
 	private static Log log = LogFactory.getLog(ParseUtil.class);
 	static final ThreadLocal<JSIRuntime> jsi = new ThreadLocal<JSIRuntime>();
-//	static final String CORE_URI = "http://www.xidea.org/ns/lite/core";
+//	static final String CORE_URI = "http://www.xidea.org/lite/core";
 
 	static XPathFactory xpathFactory;
 

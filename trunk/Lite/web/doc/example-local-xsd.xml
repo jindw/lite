@@ -1,7 +1,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:c="http://www.xidea.org/ns/lite/core"
+	xmlns:c="http://www.xidea.org/lite/core"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.xidea.org/ns/lite/core core.xsd">
+	xsi:schemaLocation="http://www.xidea.org/lite/core core.xsd">
 	<body>
 		<!-- 
 			其实，不需要在源代码中现实申明 xsd文件，在eclipse下可以配置命名空间xsd

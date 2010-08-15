@@ -27,7 +27,7 @@
   }
 }
 	]]></context>
-		<source><![CDATA[<div xmlns:c="http://www.xidea.org/ns/lite/core">
+		<source><![CDATA[<div xmlns:c="http://www.xidea.org/lite/core">
   <p>您好：${user}，您的的ip地址是：${ip.part0}.${ip.part1}.${ip.part2}.${ip.part3}。</p>
   <p>对应的整数值是：${(((ip.part0*256)+ip.part1)*256+ip.part2)*256+ip.part3}</p>
 </div>]]></source>
@@ -41,7 +41,7 @@
   "html":"Hello <b>Guest</b>!"
 }
 	]]></context>
-		<source><![CDATA[<div xmlns:c="http://www.xidea.org/ns/lite/core">
+		<source><![CDATA[<div xmlns:c="http://www.xidea.org/lite/core">
     <p>text:${html}</p>
     <p>html:<c:out value="${html}"/></p>
 </div>]]></source>
@@ -61,7 +61,7 @@
   }
 }
 	]]></context>
-		<source><![CDATA[<div xmlns:c="http://www.xidea.org/ns/lite/core">
+		<source><![CDATA[<div xmlns:c="http://www.xidea.org/lite/core">
 <div onclick="${event.onclick}"
      ondblclick="${event.ondblclick}"
      onmouseover="${event.onmouseover}"
@@ -84,7 +84,7 @@
     "test4":true
 }
 	]]></context>
-		<source><![CDATA[<div xmlns:c="http://www.xidea.org/ns/lite/core">
+		<source><![CDATA[<div xmlns:c="http://www.xidea.org/lite/core">
   <c:if test="${test1}">test1</c:if>
   <c:else-if test="${test2}">test2</c:else-if>
   <c:else-if test="${test3}">test3</c:else-if>
@@ -106,7 +106,7 @@
     "test4":true
 }
 	]]></context>
-		<source><![CDATA[<div xmlns:c="http://www.xidea.org/ns/lite/core">
+		<source><![CDATA[<div xmlns:c="http://www.xidea.org/lite/core">
     <c:choose >
         <c:when test="${test1}">分支1</c:when >
         <c:when test="${test2}">分支2</c:when >
@@ -130,7 +130,7 @@
 		<p> {index:0,lastIndex:6}。</p>
 		<p> 循环过程中将维护for的状态（index属性），用户在循环体内使用${for.index}获取当前循环的重复次数（从0开始）。 </p>
 		]]></description>
-		<source><![CDATA[<div xmlns:c="http://www.xidea.org/ns/lite/core">
+		<source><![CDATA[<div xmlns:c="http://www.xidea.org/lite/core">
     [
     <c:for var="item" list="${list}">
         ${item}
@@ -143,7 +143,7 @@
 		<description><![CDATA[<h3>循环标签的 else 标记说明：</h3>
 		<p>当其与for循环组合，当for循环执行0次后，与其配合的else节点可以执行（常见于做空循环的友好提示，如没有查询到任何数据）。 </p>
 	    ]]></description>
-		<source><![CDATA[<div xmlns:c="http://www.xidea.org/ns/lite/core">
+		<source><![CDATA[<div xmlns:c="http://www.xidea.org/lite/core">
     [
     <c:for var="item" list="${[]}">
         ${item}
@@ -166,7 +166,7 @@
 		<ul>
 			<li>定义变量，内容来自value属性。 </li>
 		</ul>]]></description>
-		<source><![CDATA[<div xmlns:c="http://www.xidea.org/ns/lite/core">
+		<source><![CDATA[<div xmlns:c="http://www.xidea.org/lite/core">
   <c:var name="myName" value="${'jin '+'dawei'}" />
   [${myName}]
 </div>]]></source>
@@ -189,7 +189,7 @@
     "lastName":"dawei"
   }
 }]]></context>
-		<source><![CDATA[<div xmlns:c="http://www.xidea.org/ns/lite/core">
+		<source><![CDATA[<div xmlns:c="http://www.xidea.org/lite/core">
   <c:var name="myName" >
     ${user.firstName} ${user.lastName}
   </c:var>
@@ -213,7 +213,7 @@
     "lastName":"dawei"
   }
 }]]></context>
-		<source><![CDATA[<div xmlns:c="http://www.xidea.org/ns/lite/core">
+		<source><![CDATA[<div xmlns:c="http://www.xidea.org/lite/core">
   <c:def name="test(user2)" >
     ${user2.firstName} ${user2.lastName}
   </c:def>
@@ -237,7 +237,7 @@
 			<li>xpath确实有点烦琐,但毕竟事标准，标准永远不是最好的，但他是可行的。  </li>
 		</ul>
 	    ]]></description>
-		<source><![CDATA[<div xmlns:c="http://www.xidea.org/ns/lite/core">
+		<source><![CDATA[<div xmlns:c="http://www.xidea.org/lite/core">
   <c:include path="menu.xml" xpath="//entry[@key='PageMesh']/description" >
   </c:include>
 </div>]]></source>

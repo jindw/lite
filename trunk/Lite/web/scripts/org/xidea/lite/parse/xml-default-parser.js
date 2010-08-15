@@ -116,7 +116,7 @@ function processAttribute(node,context,chain){
     }
     context.append(" "+name+'="');
     if(/^xmlns$/i.test(name)){
-        if(buf[0] == 'http://www.xidea.org/ns/lite/xhtml'){
+        if(buf[0] == 'http://www.xidea.org/lite/xhtml'){
             buf[0] = 'http://www.w3.org/1999/xhtml'
         }
     }
