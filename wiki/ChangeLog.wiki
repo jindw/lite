@@ -1,0 +1,17 @@
+#labels Featured
+该文档记录Lite自2.0开始的全部更新日志
+
+=== 2.0 ===
+  目前2.0尚在开发阶段，当前最新版本[url=http://code.google.com/p/lite/downloads/list]2.0A4[/url]
+  * 2.0A4
+    # JSEL: [http://code.google.com/p/lite/issues/detail?id=16&can=1 支持日期的编码解码，采用W3C日期标准]
+    # JSEL: [http://code.google.com/p/lite/issues/detail?id=17&can=1 运算符二级优先级判断错误]  
+    # JSEL:[http://code.google.com/p/lite/issues/detail?id=15&can=1 表达式数组参数低级错误]
+  * 2.0A3
+    # JSEL:[http://code.google.com/p/lite/wiki/JSON JSON编码/解析实现优化]
+    # JSEL:[http://code.google.com/p/lite/wiki/CPEL 命令行工具优化]
+  * 2.0A2
+    # JSEL:[http://code.google.com/p/lite/wiki/JSELExtension 表达式扩展支持]
+  * 2.0A1
+    # Lite: 优化插件模型, 用javascript重构核心逻辑，方便前端工程师对语法设计的控制。
+
