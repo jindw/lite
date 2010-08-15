@@ -1,19 +1,20 @@
 === JSON ===
-JSON 是一个互联网上广泛运用的数据交互格式，语法介绍见：http://www.json.org/
+  JSON 是一个互联网上广泛运用的数据交互格式，语法介绍见：http://www.json.org/
 
 === 存在价值 ===
-Java环境下官方的JSON实现并不理想。不仅接口繁琐复杂。效率也非常难堪。
-接口的设计完全不能发挥Java自身优势，Java标准集合，常见原始类型，JavaBean不便直接JSON化。
+  Java环境下官方的JSON实现并不理想。不仅接口繁琐复杂。效率也非常难堪。
 
-更残酷的现实是，目前其他可用的JSON实现都严重被官方网站的形式影响，都表现的拖泥带水，严重背离了JSON简单特性。
+  接口的设计完全不能发挥Java自身优势，Java标准集合，常见原始类型，JavaBean不便直接JSON化。
 
-而JSEL 的JSON支持，就是为了打破这个僵局，让JSON与Java更好的融合。
+  更残酷的现实是，目前其他可用的JSON实现都严重被官方网站的形式影响，都表现的拖泥带水，严重背离了JSON简单特性。
+
+  而JSEL 的JSON支持，就是为了打破这个僵局，让JSON与Java更好的融合。
 
 
 === 使用JSEL 解析JSON++ ===
-Lite 的默认表达式实现JSEL，支持JavaScript 表达式语法，本身就是一个JSON 的父集。他除了能解释普通JSON 数据之外，也可以在JSON语法中增加注释，甚至表达式，变量等支持。
+  Lite 的默认表达式实现JSEL，支持JavaScript 表达式语法，本身就是一个JSON 的父集。他除了能解释普通JSON 数据之外，也可以在JSON语法中增加注释，甚至表达式，变量等支持。
 
-JSEL 可以直接执行JavaScript表达式，解析JSON这个JavaScript表达式子集当能也就不在话下了。通过JSEL解释JSON不仅可以按照宽松的语法模式，还可以在解析的过程中完成一些基本的表达式计算。
+  JSEL 可以直接执行JavaScript表达式，解析JSON这个JavaScript表达式子集当能也就不在话下了。通过JSEL解释JSON不仅可以按照宽松的语法模式，还可以在解析的过程中完成一些基本的表达式计算。
 {{{
     .....
     Expression el = ExpressionFactory.getInstance().create("{aa:1+1}");
@@ -41,8 +42,7 @@ JSEL 可以直接执行JavaScript表达式，解析JSON这个JavaScript表达式
 
 
 === 使用JSONEncoder 编码JSON ===
-
-这是一个简单的线程安全的工具类，允许安全的将普通JavaBean对象或者Java集合编码成JSON输出。
+  这是一个简单的线程安全的工具类，允许安全的将普通JavaBean对象或者Java集合编码成JSON输出。
   * 防止递归
     不能表示数据引用的递归形式是JSON的一大软肋，所以我们需要一个用来处理递归问题的机制。
      # 最大深度控制
