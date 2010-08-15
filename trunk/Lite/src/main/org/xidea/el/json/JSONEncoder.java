@@ -28,18 +28,18 @@ public class JSONEncoder {
 	private static Log log = LogFactory.getLog(JSONEncoder.class);
 	private static JSONEncoder encoder = new JSONEncoder();
 	private final boolean ignoreClassName;
-	private final boolean addressEqual;
+	private final boolean checkByAddress;
 	private final boolean throwError;
 	private final String dateFormat;
 	private final Object[] parent;
 	private int index = 0;
 
 	public JSONEncoder(String dateFormat, boolean ignoreClassName, int depth,
-			boolean addressEqual, boolean throwError) {
+			boolean checkByAddress, boolean throwError) {
 		this.dateFormat = dateFormat;
 		this.ignoreClassName = ignoreClassName;
 		this.parent = depth > 0 ? new Object[depth] : null;
-		this.addressEqual = addressEqual;
+		this.checkByAddress = checkByAddress;
 		this.throwError = throwError;
 	}
 
@@ -97,7 +97,7 @@ public class JSONEncoder {
 			if (parent != null) {
 				int i = index;
 				if (i < parent.length) {
-					if (addressEqual) {
+					if (checkByAddress) {
 						while (i-- > 0) {
 							if (parent[i] == object) {
 								break;
