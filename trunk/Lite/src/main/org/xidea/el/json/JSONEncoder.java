@@ -25,7 +25,7 @@ public class JSONEncoder {
 	public final static String W3C_DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mmZ";
 	public final static String W3C_DATE_TIME_SECOND_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";
 	public final static String W3C_DATE_TIME_MILLISECOND_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
-	
+
 	private static Log log = LogFactory.getLog(JSONEncoder.class);
 	private static JSONEncoder encoder = new JSONEncoder();
 	private final boolean ignoreClassName;
@@ -35,10 +35,9 @@ public class JSONEncoder {
 	private final Object[] parent;
 	private int index = 0;
 
-
-	public JSONEncoder(String dateFormat,boolean ignoreClassName, 
-			int depth, boolean addressEqual,boolean throwError) {
-		this.dateFormat =  dateFormat;
+	public JSONEncoder(String dateFormat, boolean ignoreClassName, int depth,
+			boolean addressEqual, boolean throwError) {
+		this.dateFormat = dateFormat;
 		this.ignoreClassName = ignoreClassName;
 		this.parent = new Object[depth];
 		this.addressEqual = addressEqual;
@@ -46,7 +45,7 @@ public class JSONEncoder {
 	}
 
 	private JSONEncoder() {
-		this(W3C_DATE_TIME_MILLISECOND_FORMAT,true, 64, true, true);
+		this(W3C_DATE_TIME_MILLISECOND_FORMAT, true, 64, true, true);
 	}
 
 	public static String encode(Object value) {
@@ -58,6 +57,7 @@ public class JSONEncoder {
 		}
 		return buf.toString();
 	}
+
 	public void encode(Object value, Appendable out) throws IOException {
 		index = 0;
 		if (this.parent == null) {
@@ -84,61 +84,65 @@ public class JSONEncoder {
 			printString((String) object, out);
 		} else if (object instanceof Character) {
 			printString(String.valueOf(object), out);
-		}else if(object instanceof Date && dateFormat !=null){
-			//see http://www.w3.org/TR/NOTE-datetime
-			String date = new SimpleDateFormat(dateFormat).format((Date)object);
-			date = new StringBuilder(date).insert(date.length()-2, ':').toString();
-			printString(date,out);
-		} else {//PATTERN
+		} else if (object instanceof Date && dateFormat != null) {
+			// see http://www.w3.org/TR/NOTE-datetime
+			String date = new SimpleDateFormat(dateFormat)
+					.format((Date) object);
+			date = new StringBuilder(date).insert(date.length() - 2, ':')
+					.toString();
+			printString(date, out);
+		} else {// PATTERN
 			if (parent != null) {
 				int i = index;
-				String error = null;
-				if (i >= parent.length) {
-					error = "深度超出许可范围：" + out;
-					out.append("null");
-				} else {
-					while (i-- > 0) {
-						if (parent[i] == object || addressEqual
-								&& object.equals(parent[i])) {
-							System.out.println(i + "@@@@" + object + "/"
-									+ parent[i]);
-							error = "JSON 数据源中发现递归行为:" + out + "，递归数据将当null处理";
-
-							out.append("null");
-							throw new RuntimeException();
-							// return;
+				if (i < parent.length) {
+					if (addressEqual) {
+						while (i-- > 0) {
+							if (parent[i] == object) {
+								break;
+							}
+						}
+					} else {
+						while (i-- > 0) {
+							if (object.equals(parent[i])) {
+								break;
+							}
 						}
 					}
 				}
-				if (error == null) {
+				if (i < 0) {
 					parent[index++] = object;
 				} else {
+					String error = i < parent.length ? "JSON 数据源中发现递归行为:" + out
+							+ "，递归数据将当null处理" : "深度超出许可范围：" + out;
 					log.error(error);
 					if (throwError) {
 						throw new IllegalStateException(error);
 					}
+					out.append("null");
+					return;
 				}
-
 			}
-			if (object instanceof Map<?, ?>) {
-				printMap((Map<?, ?>) object, out);
-			} else if (object instanceof Object[]) {
-				printList((Object[]) object, out);
-			} else if (object instanceof Iterator<?>) {
-				printList((Iterator<?>) object, out);
-			} else if (object instanceof Collection<?>) {
-				printList(((Collection<?>) object).iterator(), out);
-			} else {
-				printMap(object, out);
-			}
-			if (parent != null) {
-				parent[--index] = null;
+			try {
+				if (object instanceof Map<?, ?>) {
+					printMap((Map<?, ?>) object, out);
+				} else if (object instanceof Object[]) {
+					printList((Object[]) object, out);
+				} else if (object instanceof Iterator<?>) {
+					printList((Iterator<?>) object, out);
+				} else if (object instanceof Collection<?>) {
+					printList(((Collection<?>) object).iterator(), out);
+				} else {
+					printMap(object, out);
+				}
+			} finally {
+				if (parent != null) {
+					parent[--index] = null;
+				}
 			}
 		}
 	}
 
-	protected void printString(String text, Appendable out)
-			throws IOException {
+	protected void printString(String text, Appendable out) throws IOException {
 		out.append('"');
 		for (int i = 0; i < text.length(); i++) {
 			char c = text.charAt(i);
@@ -182,8 +186,7 @@ public class JSONEncoder {
 		out.append('"');
 	}
 
-	protected void printMap(Object object, Appendable out)
-			throws IOException {
+	protected void printMap(Object object, Appendable out) throws IOException {
 		out.append('{');
 		BeanInfo info;
 		boolean addedSomething = false;
@@ -196,7 +199,7 @@ public class JSONEncoder {
 					String name = prop.getName();
 					Method accessor = prop.getReadMethod();
 					if (accessor == null
-						|| (ignoreClassName && "class".equals(name))) {
+							|| (ignoreClassName && "class".equals(name))) {
 						continue;
 					}
 					if (!accessor.isAccessible()) {
@@ -211,17 +214,16 @@ public class JSONEncoder {
 					print(value, out);
 					addedSomething = true;
 				} catch (Exception e) {
-					log.warn("属性获取失败",e);
+					log.warn("属性获取失败", e);
 				}
 			}
 		} catch (Exception e) {
-			log.warn("JavaBean信息获取失败",e);
+			log.warn("JavaBean信息获取失败", e);
 		}
 		out.append('}');
 	}
 
-	protected void printMap(Map<?, ?> map, Appendable out)
-			throws IOException {
+	protected void printMap(Map<?, ?> map, Appendable out) throws IOException {
 		out.append('{');
 		Iterator<?> it = map.entrySet().iterator();
 		while (it.hasNext()) {
@@ -248,8 +250,7 @@ public class JSONEncoder {
 		out.append(']');
 	}
 
-	protected void printList(Iterator<?> it, Appendable out)
-			throws IOException {
+	protected void printList(Iterator<?> it, Appendable out) throws IOException {
 		out.append('[');
 		while (it.hasNext()) {
 			print(it.next(), out);
