@@ -17,7 +17,6 @@
     * [LiteXML 基本语法(LiteXML)]
     * [LiteUI UI语法扩展]
     * [LiteXHTML HTML语法扩展]
-
   * 扩展机制
     * [自定义名称空间]
   * [ChangeLog 更新日志]
