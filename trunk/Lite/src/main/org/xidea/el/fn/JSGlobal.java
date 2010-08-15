@@ -84,7 +84,7 @@ class JSGlobal implements Invocable {
 			String text = String.valueOf(JSObject.getArg(args, 0, "null"));
 			final String charset = String.valueOf(JSObject.getArg(args, 1,
 					"utf-8"));
-			return edscode(0 == (type&1), 2 == (type&2), text, charset);
+			return edscode(0 == (type&1), type<402, text, charset);
 		//parseInt,parseFloat
 		case 300://parseInt
 		case 301://parseFloat

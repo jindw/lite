@@ -29,8 +29,6 @@ public class ConvertorTest {
 		doTest(value,Double.TYPE,123d);
 		doTest(null,Double.TYPE,0d);
 		doTest(null,Double.class,null);
-		doTest("D"+value,Double.TYPE,0d);
-		doTest("D"+value,Double.class,null);
 		doTest(value,Boolean.TYPE,true);
 		doTest(value,Boolean.class,true);
 		doTest("",Boolean.TYPE,false);
@@ -40,6 +38,8 @@ public class ConvertorTest {
 		doTest("false",String.class,"false");
 		doTest("false",String.class.getSuperclass(),"false");
 		doTest("false",this.getClass(),null);
+		doTest("D"+value,Double.TYPE,0d);
+		doTest("D"+value,Double.class,null);
 	}
 	private void doTest(String value, Class<?> type, Object expected) {
 		Convertor c = Convertor.DEFAULT;
