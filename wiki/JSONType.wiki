@@ -32,7 +32,7 @@ JSONEncoder myEncoder = (JSONEncoder.W3C_DATE_TIME_FORMAT, true, 64, true, true)
 
 }}}
   * 解码支持
-    日期解码时。只要给出的字符串符合W3C日期格式的任何一种（一共六种），都可以正确解码。
+    日期解码时。只要给出的字符串符合W3C日期格式的任何一种（一共六种），都可以正确解码(日期解码是自定义的解析实现，性能比标准的SimpleDateFormat快一倍左右)。
 {{{
    Year:
       YYYY (eg 1997)
