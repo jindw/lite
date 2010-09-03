@@ -67,8 +67,8 @@ public class CommandParser {
 							result.setValue(getValue(values, type, context,
 									name));
 						} else if (context != null) {
-							log.warn("找不到相关属性：" + name);
 							if (log.isInfoEnabled()) {
+								log.info("找不到相关属性：" + name);
 								Object properties = ReflectUtil.map(context)
 										.keySet();
 								log.info("当前对象可能属性有：" + properties);
