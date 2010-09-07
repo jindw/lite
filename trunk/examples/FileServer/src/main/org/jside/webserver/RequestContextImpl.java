@@ -31,6 +31,7 @@ public class RequestContextImpl implements RequestContext {
 	private ArrayList<String> requestHeaders = new ArrayList<String>();
 	private ParamsMap paramsMap;
 	private BufferedReader in;
+	private String post;
 	private ResponseOutputStream out;
 	private WebServer server;
 	private String requestLine;
@@ -111,18 +112,16 @@ public class RequestContextImpl implements RequestContext {
 	@Override
 	public Map<String, String[]> getParams() {
 		if (paramsMap == null) {
-			paramsMap = new ParamsMap();
-			paramsMap.parse(query);
+			String data = query;
 			String contentLength = getRequestHeader(CONTENT_LENGTH);
 			if (contentLength != null) {
 				try {
-					String post = getPost(in, Integer.parseInt(contentLength));
-					paramsMap.parse(post);
+					data += getPost(in, Integer.parseInt(contentLength));
 				} catch (Exception e) {
 					log.warn(e);
 				}
 			}
-			paramsMap.reset(this.getEncoding());
+			paramsMap = new ParamsMap(data,this.getEncoding());
 		}
 		return paramsMap;
 	}
@@ -191,14 +190,17 @@ public class RequestContextImpl implements RequestContext {
 
 
 
-	private String getPost(Reader in, int contentLength) throws IOException {
-		StringBuffer buf = new StringBuffer();
-		int b;
-		while (contentLength > 0 && (b = in.read()) > -1) {
-			contentLength--;
-			buf.append((char) b);
+	public String getPost(Reader in, int contentLength) throws IOException {
+		if (post == null) {
+			StringBuffer buf = new StringBuffer();
+			int b;
+			while (contentLength > 0 && (b = in.read()) > -1) {
+				contentLength--;
+				buf.append((char) b);
+			}
+			post = buf.toString();
 		}
-		return buf.toString();
+		return post;
 	}
 
 

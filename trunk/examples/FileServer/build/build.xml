@@ -11,7 +11,7 @@
 				<include name="**/*"/>
 			</fileset>
 		</copy>
-		<javac target="1.5" debug="on" srcdir="build/dest/classes" destdir="build/dest/classes">
+		<javac target="1.5" debug="on" srcdir="build/dest/classes" destdir="build/dest/classes" encoding="utf-8">
 			<classpath>
 				<fileset dir="web/WEB-INF/lib">
 					<include name="*.jar"/>

@@ -1,12 +1,9 @@
 package org.jside.webserver;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.AbstractMap;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -20,10 +17,14 @@ class ParamsMap extends AbstractMap<String, String[]> implements
 	private static final Log log = LogFactory.getLog(ParamsMap.class);
 	private static final Pattern QUERY_PATTERN = Pattern
 			.compile("([^=&]+)(?:=([^&]*))?");
-	private Map<String, List<String>> rawMap = new LinkedHashMap<String, List<String>>();
-	private Map<String, String[]> cacheMap = new LinkedHashMap<String, String[]>();
+	private Map<String, String[]> cacheMap = null;
 	private Map<String, String> paramMap;
-	public ParamsMap() {
+	private String raw;
+	private String encoding;
+	public ParamsMap(String raw,String encoding) {
+		this.raw = raw;
+		this.encoding = encoding;
+		parse();
 	}
 	Map<String, String> toParam(){
 		if(paramMap == null){
@@ -37,42 +38,20 @@ class ParamsMap extends AbstractMap<String, String[]> implements
 		return cacheMap.get(key);
 	}
 
-	private String decode(String v, String encoding) {
-		try {
-			return URLDecoder.decode(v, encoding);
-		} catch (UnsupportedEncodingException e) {
-			return v;
-		}
-	}
 
-	void reset(String encoding) {
-		if(encoding == null){
-			encoding = "UTF-8";
-		}
-		for (Map.Entry<String, List<String>> entry : rawMap.entrySet()) {
-			List<String> vs = entry.getValue();
-			String[] values = new String[vs.size()];
-			for (int i = 0; i < values.length; i++) {
-				String value = vs.get(i);
-				if(value!=null){
-					values[i] = decode(value, encoding);
-				}
-			}
-			cacheMap.put(decode(entry.getKey(), encoding), values);
-		}
 
-	}
-
-	void parse(String query) {
-		if (query != null) {
-			Matcher matcher = QUERY_PATTERN.matcher(query);
+	private void parse() {
+		cacheMap =  new LinkedHashMap<String, String[]>();
+		if (raw != null) {
+			Matcher matcher = QUERY_PATTERN.matcher(raw);
 			while (matcher.find()) {
 				String name = matcher.group(1);
 				String value = matcher.group(2);
 				try {
+					value = URLDecoder.decode(value, encoding);
 					this.addRaw(name, value);
 				} catch (Exception e) {
-					log.info("解析失败: " + query + "\n" + name + "=" + value, e);
+					log.info("解析失败: " + raw + "\n" + name + "=" + value, e);
 				}
 
 			}
@@ -80,12 +59,20 @@ class ParamsMap extends AbstractMap<String, String[]> implements
 	}
 
 	private void addRaw(String name, String value) {
-		List<String> vs = rawMap.get(name);
+		String[] vs = cacheMap.get(name);
 		if (vs == null) {
-			vs = new ArrayList<String>();
-			rawMap.put(name, vs);
+			vs = new String[]{value};
+		}else{
+			String[] vs2 = new String[vs.length+1];
+			System.arraycopy(vs, 0, vs2, 0, vs.length);
+			vs2[vs.length] = value;
+			vs = vs2;
 		}
-		vs.add(value);
+		cacheMap.put(name, vs);
+	}
+	public void reset(String encoding) {
+		this.encoding = encoding;
+		parse();
 	}
 
 	@Override
@@ -104,6 +91,9 @@ class ParamsMap extends AbstractMap<String, String[]> implements
 	@Override
 	public boolean containsKey(Object key) {
 		return cacheMap.containsKey(key);
+	}
+	public String toString(){
+		return raw;
 	}
 
 	class ParamMap extends AbstractMap<String, String> implements
