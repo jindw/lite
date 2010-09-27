@@ -26,8 +26,6 @@ public class DefaultXMLNodeParser implements NodeParser<Node> {
 			"^(?:script|style|pre|textarea)$", Pattern.CASE_INSENSITIVE);
 	// public static final Pattern SCRIPT_TAG = Pattern.compile("^script$",
 	// Pattern.CASE_INSENSITIVE);
-	final static Pattern PRIM_PATTERN = Pattern
-			.compile("^\\s*([\\r\\n])\\s*|\\s*([\\r\\n])\\s*$|^(\\s)+|(\\s)+$");
 
 	public void parse(Node node, ParseContext context, ParseChain chain) {
 		switch (node.getNodeType()) {
@@ -154,16 +152,11 @@ public class DefaultXMLNodeParser implements NodeParser<Node> {
 	private void parseTextNode(Node node, ParseContext context) {
 		String text = ((Text) node).getData();
 		if (!context.isReserveSpace()) {
-			text = safeTrim(text);
+			text = ParseUtil.safeTrim(text);
 		}
 		if (text.length() > 0) {
 			context.appendAll(context.parseText(text, Template.XT_TYPE));
 		}
-	}
-
-	protected String safeTrim(String text) {
-		text = PRIM_PATTERN.matcher(text).replaceAll("$1$2$3$4");
-		return text;
 	}
 
 	private void parseAttribute(Node node, ParseContext context) {

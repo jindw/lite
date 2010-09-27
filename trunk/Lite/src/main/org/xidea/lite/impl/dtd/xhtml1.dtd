@@ -18,10 +18,10 @@
 <!ATTLIST html
   id          ID             #IMPLIED
   xmlns       CDATA          #FIXED 'http://www.w3.org/1999/xhtml'
-  xmlns:c     CDATA          #FIXED 'http://www.xidea.org/ns/lite/core'
+  xmlns:c     CDATA          #FIXED 'http://www.xidea.org/lite/core'
   >
 <!-- wml -->
 <!ELEMENT wml ANY>
 <!ATTLIST wml
-  xmlns:c     CDATA          #FIXED 'http://www.xidea.org/ns/lite/core'
+  xmlns:c     CDATA          #FIXED 'http://www.xidea.org/lite/core'
   >

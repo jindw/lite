@@ -42,7 +42,6 @@ public class ParseUtil {
 
 	private static Log log = LogFactory.getLog(ParseUtil.class);
 	static final ThreadLocal<JSIRuntime> jsi = new ThreadLocal<JSIRuntime>();
-//	static final String CORE_URI = "http://www.xidea.org/lite/core";
 
 	static XPathFactory xpathFactory;
 
@@ -71,6 +70,41 @@ public class ParseUtil {
 		return rt;
 	}
 
+	static String safeTrim(String text) {
+		StringBuffer buf = new StringBuffer(text);
+		int len = buf.length();
+		int end = len;
+		char s1 = ' ';
+		while(end-->0){
+			char c = buf.charAt(end);
+			if(c == '\r' || c == '\n'){
+				s1 = c;
+			}else if(c != ' ' && c!='\t'){
+				end++;
+				if(end<len){
+					buf.setCharAt(end, s1);
+					end++;
+				}else{
+				}
+				s1 = ' ';
+				for(int j=0;j<end;j++){
+					c = buf.charAt(j);
+					if(c == '\r' || c == '\n'){
+						s1 = c;
+					}else if(c != ' ' && c!='\t'){
+						j--;
+						if(j>=0){
+							buf.setCharAt(j, s1);
+						}else{
+							j++;
+						}
+						return buf.substring(j, end);
+					}
+				}
+			}
+		}
+		return "";
+	}
 	// static Object eval(String source){
 	// return getJSIRuntime().eval(source);
 	// }
