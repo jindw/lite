@@ -1,4 +1,4 @@
-#labels Phase-Design,Phase-Support
+#labels Deprecated
 == 何为Lite运行时 ==
 Lite模板引擎包含一套自己的中间指令集，Lite运行时就是一个能够解析之中中间指令集的运行环境。
 Lite运行时无需做模板编译工作，他通过JSON格式的中间代码初始化
