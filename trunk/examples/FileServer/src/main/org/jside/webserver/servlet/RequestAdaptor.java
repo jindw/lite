@@ -288,10 +288,11 @@ abstract class RequestAdaptor implements HttpServletRequest {
 		base().getContextMap().put(key,value);
 	}
 	public Object getAttribute(String key) {
-		if ("javax.servlet.include.servlet_path".equals(key)) {
+		Object path = base().getContextMap().get(key);
+		if (path == null && "javax.servlet.include.servlet_path".equals(key)) {
 			return base().getRequestURI();
 		}
-		return base().getContextMap().get(key);
+		return path;
 	}
 	public void setCharacterEncoding(String encoding)
 			throws UnsupportedEncodingException {

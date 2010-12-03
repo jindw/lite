@@ -1,6 +1,7 @@
 package org.jside.webserver.servlet;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -74,10 +75,10 @@ public class ServletContextImpl extends ResponseAdaptor implements
 			URL res = getResource(path);
 			File file = toFile(res);
 			if (file != null && file.exists()) {
-				return file.getAbsolutePath();
+				return file.getCanonicalFile().getAbsolutePath();
 			}
 			return res.toString();
-		} catch (MalformedURLException e) {
+		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
