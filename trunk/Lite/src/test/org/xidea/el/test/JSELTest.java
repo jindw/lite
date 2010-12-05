@@ -1,7 +1,9 @@
 package org.xidea.el.test;
 
 import java.util.HashMap;
+import java.util.logging.Logger;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.xidea.el.Expression;
 import org.xidea.el.ExpressionFactory;
@@ -9,6 +11,19 @@ import org.xidea.el.ExpressionFactory;
 public class JSELTest {
     private ExpressionFactory factory = ExpressionFactory.getInstance();
 
+    
+    private final double EPS6 = 0.000001;
+
+     @Test
+    public void testMapContext2() {
+        Expression el = factory.create("var1 +2 * var2 + null");
+
+        Object result21 = el.evaluate("var1", 123, "var2", 456, "obj2",
+ this);
+       System.out.println(String.format("result21 = %s", result21));
+        Assert.assertEquals(1035.0, ((Number) result21).doubleValue(), EPS6);
+    }
+    
     public int testAdd(int i,int j){
         return i+j;
     }
