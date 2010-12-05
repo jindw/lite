@@ -18,7 +18,7 @@ class JSArray extends JSObject implements Invocable {
 	@SuppressWarnings({"unchecked"})
 	private final static Object toList(Object thiz) {
 		if (thiz instanceof Object[]) {
-			thiz = Arrays.asList(thiz);
+			thiz = Arrays.asList((Object[])thiz);
 		} else if (thiz.getClass().isArray()) {
 			int length = Array.getLength(thiz);
 			List buf = new ArrayList(length);

@@ -24,6 +24,7 @@ public class JSArrayTest {
  */
 	@Test
 	public void testArray() throws Exception{
+		testELValue("[1,2,3,4].toArray().slice(1,-1).join('-')","2-3");
 		testELValue("[1,2,3,4].slice(1,-1).join('-')","2-3");
 		testELValue("[1,2,3,4].reverse(5).join(',')","4,3,2,1");
 		testELValue("[1,2,3,4].push(5,4)",6);
