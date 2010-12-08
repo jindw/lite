@@ -144,7 +144,7 @@ abstract class RequestAdaptor implements HttpServletRequest {
 	}
 
 	public String getServletPath() {
-		return null;
+		return this.getRequestURI();
 	}
 
 	public HttpSession getSession() {
