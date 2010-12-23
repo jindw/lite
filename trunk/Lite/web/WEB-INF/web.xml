@@ -14,10 +14,6 @@
 			<param-name>contentType</param-name>
 			<param-value>text/html;charset=UTF-8</param-value>
 		</init-param>
-		<init-param>
-			<param-name>contentType</param-name>
-			<param-value>text/html;charset=UTF-8</param-value>
-		</init-param>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>LiteXML</servlet-name>

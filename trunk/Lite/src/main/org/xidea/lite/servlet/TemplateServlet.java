@@ -105,6 +105,6 @@ public class TemplateServlet extends GenericServlet {
 	}
 
 	protected Map<Object, Object> createModel(final HttpServletRequest req) {
-		return new RequestMap(req);
+		return new RequestSessionMap(req);
 	}
 }

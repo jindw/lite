@@ -7,7 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 
 public class RequestMap extends AbstractMap<Object, Object> {
 	private static final long serialVersionUID = 1L;
-	private final HttpServletRequest request;
+	protected final HttpServletRequest request;
 
 	public RequestMap(final HttpServletRequest request) {
 		this.request = request;
