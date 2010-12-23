@@ -35,7 +35,7 @@ public class TemplateServlet extends GenericServlet {
 
 	protected TemplateEngine templateEngine;
 	protected String contentType;
-	private boolean autocompile = false;
+	private boolean autocompile = true;
 	private boolean debugModel = false;
 
 	@Override
