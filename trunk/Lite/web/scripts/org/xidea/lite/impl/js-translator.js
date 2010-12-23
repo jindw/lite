@@ -42,6 +42,10 @@ function charReplacer(item) {
 }
 function encodeString(value){
 	stringRegexp.lastIndex = 0;
+	$log.error('"' + (stringRegexp.test(value) ?
+                    value.replace(stringRegexp,charReplacer) :
+                    value)
+               + '"');
     return '"' + (stringRegexp.test(value) ?
                     value.replace(stringRegexp,charReplacer) :
                     value)

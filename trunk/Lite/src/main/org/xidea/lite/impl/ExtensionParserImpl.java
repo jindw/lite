@@ -86,6 +86,7 @@ public class ExtensionParserImpl implements ExtensionParser {
 				return;
 			}
 		}
+		//System.out.println(((Element) node).getTagName());
 		chain.next(node);
 	}
 
@@ -106,8 +107,11 @@ public class ExtensionParserImpl implements ExtensionParser {
 					rt.invoke(null, parserMap.get(name), el, context, chain);
 					return true;
 				} else if (parserMap.containsKey("")) {
+					System.out.println(parserMap);
 					rt.invoke(null, parserMap.get(""), el, context, chain);
 					return true;
+				}else{
+					//System.out.println(el.getTagName());
 				}
 			}
 		}

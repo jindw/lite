@@ -3,6 +3,7 @@ package org.xidea.lite.impl;
 import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -59,13 +60,16 @@ public class ParseConfigImpl implements ParseConfig {
 		}
 	}
 
-	// protected ParseConfigImpl(URI root) {
-	// this.root = root;
-	// groups.add(DEFAULT_GROUP);
-	// }
 
 	public URI getRoot() {
 		return root;
+	}
+	public final Collection<URI> getResources() {
+		Collection<URI> result = new ArrayList<URI>();
+		if(config!=null){
+			result.add(config);
+		}
+		return result;
 	}
 
 	private Group find(String path, boolean defaultRoot) {
@@ -82,10 +86,12 @@ public class ParseConfigImpl implements ParseConfig {
 	}
 
 	public Map<String, List<String>> getExtensions(String path) {
+		this.reset();
 		return find(path, true).extensionMap;
 	}
 
 	public Map<String, String> getFeatrueMap(String path) {
+		this.reset();
 		return find(path, true).featrueMap;
 	}
 
@@ -95,20 +101,15 @@ public class ParseConfigImpl implements ParseConfig {
 	 * @see
 	 * org.xidea.lite.parser.DecoratorMapperI#getDecotatorPage(java.lang.String)
 	 */
-	public String getDecotatorPage(String path) {
-		this.reset();
-		Group g = find(path, false);
-		if (g != null) {
-			return g.featrueMap.get(ParseContext.FEATRUE_CONFIG_LAYOUT);
-		}
-		return null;
-	}
-
-	File getFile() {
-		return checkFile;
-	}
-
-	protected long lastModified() {
+//	public String getDecotatorPage(String path) {
+//		this.reset();
+//		Group g = find(path, false);
+//		if (g != null) {
+//			return g.featrueMap.get(ParseContext.FEATRUE_CONFIG_LAYOUT);
+//		}
+//		return null;
+//	}
+	private long lastModified() {
 		return checkFile == null ? 0 : checkFile.lastModified();
 	}
 
@@ -127,21 +128,21 @@ public class ParseConfigImpl implements ParseConfig {
 					.newDocumentBuilder().parse(source);
 			reset(doc);
 		} catch (Exception e) {
-			log.fatal("装饰配置解析失败:" + e.getMessage());
+			log.fatal("装饰配置解析失败:" , e);
 			reset((Document) null);
 		}
 	}
 
 	protected void reset(Document doc) {
 		JSIRuntime rt = ParseUtil.getJSIRuntime();
-		Object parse = rt
-				.eval("function(stringifyJSON,parseConfig,doc){return stringify((doc))}");
 		Object parseConfig = rt
 				.eval("$import('org.xidea.lite.parse:parseConfig',{})");
 		Object stringifyJSON = rt
 				.eval("$import('org.xidea.lite.util:stringifyJSON',{})");
-		String json = (String) rt.invoke(null, parse, stringifyJSON,
-				parseConfig, doc);
+		//parse(stringifyJSON,parseConfig,doc)
+		Object config = (Object) rt.invoke(null, parseConfig, doc);
+		String json = (String) rt.invoke(null,  stringifyJSON,
+				config);
 		List<Map<String, Object>> groups = JSONDecoder.decode(json);
 		List<Group> groups2 = new ArrayList<Group>();
 		if (groups.size() > 0) {

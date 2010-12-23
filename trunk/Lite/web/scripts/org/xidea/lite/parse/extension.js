@@ -17,10 +17,11 @@ function Extension(){
 	this.seekMap = null;
 }
 Extension.prototype={
-	
 	initialize:function(objectMap){
+		
 		for(var key in objectMap){
 			var o = objectMap[key];
+//			$log.error("["+key+"]:"+o+"\n\n")
 			if(o instanceof Function){
 				var dest = null;
 				var match = key.match(/^(document|xmlns|on|before|parse|seek)(.*)/);

@@ -162,7 +162,7 @@ function getAttribute(el,key){
 		}
 	}
 	if(required){
-		$log.error("属性：",key ,'为必要属性。');
+		$log.error("标记："+el.tagName+"属性：'"+key +"' 为必要属性。");
 	}
 	return null;
 }

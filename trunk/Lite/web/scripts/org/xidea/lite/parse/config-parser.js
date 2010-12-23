@@ -49,11 +49,11 @@
  * ]
  */
 function parseConfig(doc){
-	var doc = loadXML(doc);
+	var doc = doc.nodeType?doc:loadXML(doc);
 	var lites = doc.getElementsByTagName("lite");
 	var len = lites.length;
 	if(len >= 1){
-		var root = new LiteGroup(lites[0])
+		var root = new LiteGroup(lites.item(0))
 		if(len>1){
 			$log.error("配置文件只允许一个lite节点","您的文档中包含"+len+"个节点，后续节点将作为第一个节点子节点解析。");
 			for(var i=1;i<len;i++){

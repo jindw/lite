@@ -2,6 +2,8 @@ package org.xidea.lite.impl;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -140,6 +142,14 @@ public class ParseUtil {
 				}
 				return in;
 			} else {
+				if(isFile(uri)){
+					File f = new File(uri);
+					if(f.exists()){
+						return new FileInputStream(f);
+					}else{
+						return null;
+					}
+				}
 				return uri.toURL().openStream();
 			}
 		} catch (IOException e) {
@@ -317,6 +327,10 @@ public class ParseUtil {
 			in.read();
 		}
 		return in;
+	}
+
+	static boolean isFile(URI uri){
+		return "file".equals(uri.getScheme());
 	}
 }
 

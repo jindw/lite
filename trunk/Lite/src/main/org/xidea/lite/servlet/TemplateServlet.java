@@ -2,7 +2,10 @@ package org.xidea.lite.servlet;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -52,18 +55,19 @@ public class TemplateServlet extends GenericServlet {
 		if (configPath == null) {
 			configPath = "/WEB-INF/lite.xml";
 		}
-		File root = new File(context.getRealPath("/"));
-		File configFile = new File(context.getRealPath(configPath));
+		final File root = new File(context.getRealPath("/"));
+		final File litecode = new File(root,"WEB-INF/litecode/.");
 		if (this.autocompile) {
+			final File configFile = new File(context.getRealPath(configPath));
 			ParseConfigImpl parseConfig = new ParseConfigImpl(root.toURI(),
 					configFile.toURI());
 			templateEngine = new HotTemplateEngine(parseConfig);
+			((HotTemplateEngine)templateEngine).setCompiledBase(litecode.toURI());
 		} else {
-			URI base = new File(root,"WEB-INF/litecode").toURI();
 			if(debugModel){
-				templateEngine = new HotTemplateEngine(base);
+				templateEngine = new HotTemplateEngine(litecode.toURI());
 			}else{
-				templateEngine = new TemplateEngine(base);
+				templateEngine = new TemplateEngine(litecode.toURI());
 			}
 		}
 	}

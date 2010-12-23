@@ -286,18 +286,23 @@ function processClient(node,context,chain){
 }
 
 
-function processChild(context,node,chain){
-	if(node.nodeType == 2){
-		context.parse(node.ownerElement);
-	}else{
+function processChild(context,node){
+	//if(node.nodeType == 2){
+	//	context.parse(node.ownerElement);
+	//}else {
+	if(node.nodeType == 1){
 		context.parse(node.childNodes)
+	}else{
+		context.parse(node)
 	}
+	
+	//}
 }
 var Core = {};
 function addParsers(fn){
 	var i = arguments.length;
-	while(i){
-		var tn = arguments[--i];
+	while(--i){
+		var tn = arguments[i];
 		Core['parse'+tn] = fn
 		Core['before'+tn] = fn
 	}

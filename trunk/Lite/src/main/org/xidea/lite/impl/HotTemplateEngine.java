@@ -1,7 +1,10 @@
 package org.xidea.lite.impl;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,18 +24,25 @@ public class HotTemplateEngine extends TemplateEngine {
 	private HashMap<String, Object> lock = new HashMap<String, Object>();
 	private HashMap<String, Info> infoMap = new HashMap<String, Info>();
 	protected ParseConfig config;
+	private URI compiledBase;
+	private boolean checkFile;
 
 	public HotTemplateEngine(URI base) {
 		super(base);
 	}
 
 	public HotTemplateEngine(URI root, URI config) {
-		super(root);
-		this.config = new ParseConfigImpl(root, config);
+		this(new ParseConfigImpl(root, config));
 	}
 
 	public HotTemplateEngine(ParseConfig config) {
+		super(config.getRoot());
+		this.checkFile = true;
 		this.config = config;
+	}
+
+	public void setCompiledBase(URI compiledBase) {
+		this.compiledBase = compiledBase;
 	}
 
 	protected ParseContext createParseContext(String path) {
@@ -68,49 +78,96 @@ public class HotTemplateEngine extends TemplateEngine {
 		return templateEntry == null || templateEntry.isModified();
 	}
 
-	@SuppressWarnings("unchecked")
-	@Override
-	protected Template createTemplate(String path) throws IOException {
-		ArrayList<File> files = new ArrayList<File>();
-		if (config == null) {
-			URI uri = this.base.resolve(path.substring(1));
-			String litecode = loadText(ParseUtil.openStream(uri));
-			try {
-				List<Object> list = JSONDecoder.decode(litecode);
-				if ("file".equals(uri.getScheme())) {
-					files.add(new File(uri));
-				}
-				Info entry = new Info(files);
-				infoMap.put(path, entry);
-				return new Template((List<Object>) list.get(1));
-			} catch (RuntimeException e) {
-				log.error("装载模板中间代码失败", e);
-				throw e;
+	public String getLiteCode(String path) {
+		try {
+			if(buildFromCode(path) == null){
+				URI uri = this.compiledBase.resolve(path.substring(1));
+				return loadText(ParseUtil.openStream(uri));
 			}
-
-		} else {
 			ParseContext context = createParseContext(path);
 			List<Object> items = parse(path, context);
-			if ("file".equals(config.getRoot().getScheme())) {
-				File base = new File(config.getRoot());
-				for (String p : getAssociatedPaths(context)) {
-					files.add(new File(base, p));
-				}
-			}
-			Template template = new Template(items);
-			Info entry = new Info(files);
-			infoMap.put(path, entry);
-			return template;
+			return buildLiteCode(context, items);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 	}
 
-	public String getLiteCode(String path) {
-		ParseContext context = createParseContext(path);
-		List<Object> items = parse(path, context);
-		return getLiteCode(context, items);
+	@Override
+	protected Template createTemplate(String path) throws IOException {
+		if (compiledBase != null) {
+			Template t =  buildFromCode(path);
+			if(t!=null){
+				return t;
+			}
+		}
+		return buildFromSource(path);
 	}
 
-	private String getLiteCode(ParseContext context, List<Object> items) {
+	private Template buildFromSource(String path) throws IOException {
+		ArrayList<File> files = new ArrayList<File>();
+		ParseContext context = createParseContext(path);
+		List<Object> items = parse(path, context);
+		if ("file".equals(config.getRoot().getScheme())) {
+			File base = new File(config.getRoot());
+			for (String p : getAssociatedPaths(context)) {
+				files.add(new File(base, p));
+			}
+		}
+		Template template = new Template(items);
+		
+		if(compiledBase!=null && ParseUtil.isFile(compiledBase)){
+			File file = new File(new File(compiledBase),path);
+			file.getParentFile().mkdirs();
+			OutputStreamWriter out = new OutputStreamWriter(
+					new FileOutputStream(file), "UTF-8");
+			out.write(buildLiteCode(context, items));
+			out.close();
+		}
+		Info entry = new Info(files);
+		infoMap.put(path, entry);
+		return template;
+	}
+	
+
+	@SuppressWarnings("unchecked")
+	private Template buildFromCode(String path) throws IOException {
+		URI uri = this.compiledBase.resolve(path.substring(1));
+		InputStream in = ParseUtil.openStream(uri);
+		if(in == null){
+			return null;
+		}
+		String litecode = loadText(in);
+		try {
+			ArrayList<File> files = new ArrayList<File>();
+			List<Object> list = JSONDecoder.decode(litecode);
+			if (ParseUtil.isFile(uri)) {
+				files.add(new File(uri));
+				if(checkFile){
+					List<String> resource = (List<String>) list.get(0);
+					long lm = 0;
+					File root = new File(this.root);
+					for(String res:resource){
+						File f = new File(root,res);
+						long l = f.lastModified();
+						files.add(f);
+						if(l > lm){
+							lm = l;
+						}else if(l == 0){
+							return null;
+						}
+					}
+				}
+				Info entry = new Info(files);
+				infoMap.put(path, entry);
+			}
+			return new Template((List<Object>) list.get(1));
+		} catch (RuntimeException e) {
+			log.error("装载模板中间代码失败", e);
+			return null;
+		}
+	}
+
+	private String buildLiteCode(ParseContext context, List<Object> items) {
 		ArrayList<Object> result = new ArrayList<Object>();
 		List<String> resource = getAssociatedPaths(context);
 		result.add(resource);
@@ -119,14 +176,14 @@ public class HotTemplateEngine extends TemplateEngine {
 		return JSONEncoder.encode(result);
 
 	}
-
 	private List<String> getAssociatedPaths(ParseContext context) {
 		ArrayList<String> resource = new ArrayList<String>();
-		if (config instanceof ParseConfigImpl) {
-			File configFile = ((ParseConfigImpl) config).getFile();
-			if (configFile != null) {
-				String root = config.getRoot().toString();
-				String config = configFile.toURI().toString();
+		String root = config.getRoot().toString();
+		for (URI uri : context.getResources()) {
+			if ("lite".equals(uri.getScheme())) {
+				resource.add(uri.getPath());
+			} else {
+				String config = uri.toString();
 				if (config.startsWith(root)) {
 					config = config.substring(root.length());
 					if (config.length() > 0) {
@@ -135,16 +192,9 @@ public class HotTemplateEngine extends TemplateEngine {
 						}
 						resource.add(config);
 					}
+				}else{// if("file".equals(uri.getScheme())){
+					log.warn("忽略关联文件:" + uri);
 				}
-			}
-		}
-		for (URI uri : context.getResources()) {
-			if ("lite".equals(uri.getScheme())) {
-				resource.add(uri.getPath());
-			} else {
-				// if("file".equals(uri.getScheme())){
-				log.warn("忽略关联文件:" + uri);
-				// }
 			}
 		}
 		return resource;

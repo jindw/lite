@@ -3,6 +3,7 @@ package org.xidea.lite.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -81,9 +82,9 @@ abstract public class ParseContextProxy implements ParseContext {
 		return ParseUtil.parse(uri, (ParseContext) this);
 	}
 
-	public final String getDecotatorPage(String path) {
-		return config.getDecotatorPage(path);
-	}
+//	public final String getDecotatorPage(String path) {
+//		return config.getDecotatorPage(path);
+//	}
 
 	public final Map<String, String> getFeatrueMap(String path) {
 		return config.getFeatrueMap(path);
@@ -211,7 +212,9 @@ abstract public class ParseContextProxy implements ParseContext {
 	}
 
 	public final Collection<URI> getResources() {
-		return resultContext.getResources();
+		Collection<URI> result = new ArrayList<URI>(resultContext.getResources());
+		result.addAll(config.getResources());
+		return result;
 	}
 
 	public final void setCurrentURI(URI currentURI) {

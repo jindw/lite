@@ -4,11 +4,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 import java.io.File;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.xidea.lite.impl.ParseConfigImpl;
 import org.xidea.lite.parse.ParseConfig;
+import org.xidea.lite.parse.ParseContext;
 
 public class DecoratorMapperTest {
 	ParseConfig mapper;
@@ -36,10 +38,14 @@ public class DecoratorMapperTest {
 
 	@Test
 	public void testGetDecotatorNotExist() {
-		assertNull( mapper
-				.getDecotatorPage("/test1/login.action"));
-		assertNull( mapper
-				.getDecotatorPage("/test2/xxx/dd.action"));
+		assertNull( 
+				getDecotatorPage("/test1/login.action"));
+		assertNull( 
+				getDecotatorPage("/test2/xxx/dd.action"));
 	}
+	public String getDecotatorPage(String path) {
+		Map<String, String> rm = mapper.getFeatrueMap(path);
+	return rm.get(ParseContext.FEATRUE_CONFIG_LAYOUT);
+}
 
 }

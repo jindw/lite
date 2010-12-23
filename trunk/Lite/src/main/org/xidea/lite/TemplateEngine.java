@@ -15,7 +15,7 @@ import org.xidea.el.json.JSONDecoder;
 public class TemplateEngine {
 	@SuppressWarnings("unused")
 	private static final Log log = LogFactory.getLog(TemplateEngine.class);
-	protected URI base;
+	protected URI root;
 	/**
 	 * WeakHashMap 回收的太快了?
 	 */
@@ -25,7 +25,7 @@ public class TemplateEngine {
 	}
 
 	public TemplateEngine(URI base) {
-		this.base = base.normalize();
+		this.root = base.normalize();
 	}
 
 	public void render(String path, Object context, Writer out)
@@ -54,10 +54,10 @@ public class TemplateEngine {
 	}
 
 	protected String getLiteCode(String path) throws IOException {
-		URI uri = base.resolve(path.substring(1));
+		URI uri = root.resolve(path.substring(1));
 		InputStream in ;
-		if("classpath".equals(base.getScheme())){
-			String bp= base.normalize().getPath();
+		if("classpath".equals(root.getScheme())){
+			String bp= root.normalize().getPath();
 			in = TemplateEngine.class.getResourceAsStream(bp);
 		}else{
 			in = uri.toURL().openStream();
