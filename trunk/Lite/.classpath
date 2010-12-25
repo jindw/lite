@@ -10,7 +10,7 @@
 	<classpathentry kind="lib" path="web/WEB-INF/lib/commons-logging-1.0.4.jar"/>
 	<classpathentry kind="lib" path="web/WEB-INF/lib/js.jar" sourcepath="/JSA/lib/js.jar"/>
 	<classpathentry kind="lib" path="web/WEB-INF/lib/junit.jar"/>
-	<classpathentry kind="lib" path="web/WEB-INF/lib/JSI-20101223.jar"/>
+	<classpathentry kind="lib" path="web/WEB-INF/lib/JSI-20101225.jar"/>
 	<classpathentry kind="var" path="TOMCAT_HOME/lib/servlet-api.jar"/>
 	<classpathentry kind="var" path="TOMCAT_HOME/lib/jsp-api.jar"/>
 	<classpathentry kind="output" path="web/WEB-INF/classes"/>

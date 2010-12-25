@@ -103,7 +103,7 @@ public class HotTemplateEngine extends TemplateEngine {
 		return buildFromSource(path);
 	}
 
-	private Template buildFromSource(String path) throws IOException {
+	private Template buildFromSource(final String path) throws IOException {
 		ArrayList<File> files = new ArrayList<File>();
 		ParseContext context = createParseContext(path);
 		List<Object> items = parse(path, context);
@@ -123,6 +123,7 @@ public class HotTemplateEngine extends TemplateEngine {
 			out.write(buildLiteCode(context, items));
 			out.close();
 		}
+		log.info("文件关联："+path+":\t"+files);
 		Info entry = new Info(files);
 		infoMap.put(path, entry);
 		return template;
@@ -158,6 +159,7 @@ public class HotTemplateEngine extends TemplateEngine {
 					}
 				}
 				Info entry = new Info(files);
+				log.info("文件关联："+path+":\t"+files);
 				infoMap.put(path, entry);
 			}
 			return new Template((List<Object>) list.get(1));

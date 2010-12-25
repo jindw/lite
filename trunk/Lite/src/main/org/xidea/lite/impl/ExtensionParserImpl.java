@@ -10,6 +10,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.xidea.jsi.JSIRuntime;
+import org.xidea.jsi.impl.RuntimeSupport;
 import org.xidea.lite.parse.ExtensionParser;
 import org.xidea.lite.parse.ParseChain;
 import org.xidea.lite.parse.ParseContext;
@@ -73,18 +74,23 @@ public class ExtensionParserImpl implements ExtensionParser {
 
 	public void parse(Node node, ParseContext context, ParseChain chain) {
 		int type = node.getNodeType();
-		if (type == 9) {
-			if (this.parseDocument(node, context, chain)) {
-				return;
+		try {
+			RuntimeSupport.setInfo(context.getCurrentURI().getPath());
+			if (type == 9) {
+				if (this.parseDocument(node, context, chain)) {
+					return;
+				}
+			} else if (type == 2) {
+				if (this.parseAttribute(node, context, chain)) {
+					return;
+				}
+			} else if (type == 1) {
+				if (this.parseElement((Element) node, context, chain)) {
+					return;
+				}
 			}
-		} else if (type == 2) {
-			if (this.parseAttribute(node, context, chain)) {
-				return;
-			}
-		} else if (type == 1) {
-			if (this.parseElement((Element) node, context, chain)) {
-				return;
-			}
+		} finally {
+			// RuntimeSupport.setInfo(null);
 		}
 		//System.out.println(((Element) node).getTagName());
 		chain.next(node);

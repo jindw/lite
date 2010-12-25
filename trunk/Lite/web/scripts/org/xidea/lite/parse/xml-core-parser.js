@@ -221,6 +221,18 @@ function mergeAttribute(element,node){
 		}
 	}
 }
+function setNodeURI(context,node){
+	if(!node.nodeType){
+		if(node.length){
+			node = node.item(0);
+		}
+	}
+	var doc = node.nodeType == 9?node:node.ownerDocument;
+	var uri = doc && doc.documentURI
+	if(uri){
+		context.currentURI = context.createURI(uri);
+	}
+}
 function parseInclude(node,context,chain){
 	if(node.nodeType == 2){
 		$log.warn("暂不支持属性包含")
@@ -233,9 +245,8 @@ function parseInclude(node,context,chain){
 	    if(path!=null){
 	    	if(path.charAt() == '$'){
 	    		doc = context.getAttribute(path);
-	    		context.currentURI = context.createURI(String(doc.documentURI));
+	    		setNodeURI(context,node);
 	    	}else{
-	    		
 		        var url = context.createURI(path);
 	    		//$log.warn(path,context.currentURI+'',url+'')
 		        var doc = context.loadXML(url);
@@ -259,19 +270,86 @@ function parseInclude(node,context,chain){
     }
 }
 
-function processBlock(node,context,chain){
-	var ns = node.namespaceURI;
-	var value = getAttribute(node,"name","id");
-	var cached = value && context.getAttribute("#" + value);
-	if(cached){
-		node = cached;
-	}else if(node.nodeType == 2){
-		node = node.ownerElement;
-	}else{
-		node = node.childNodes;
+function processExtends(node,context,chain){
+	var oldConfig = context.getAttribute("#extends");
+	var extendsConfig = {blockMap:{},parse:false};
+	if(oldConfig){
+		if(oldConfig.parse){//解析进行时
+			var el = node.nodeType == 1?node:node.ownerElement;
+			var isRoot = node == node.ownerDocument.documentElement;
+			if(isRoot){//模板继承
+				context.reset(0);
+				extendsConfig = oldConfig;
+				extendsConfig.parse = false;
+			}
+		}else{//查找进行时
+			return;
+		}
 	}
-	processChild(context,node);
+	
+	context.setAttribute("#extends" ,extendsConfig);
+	if(node.nodeType == 1){//element
+		var element = node.childNodes;
+		var parentURL = getAttribute(node,"*path","value","parent");
+	}else{//attribute
+		var parentURL = node.getValue();
+		var element = removeNode(node);
+	}
+	
+	var url = context.createURI(parentURL);
+	//$log.warn(path,context.currentURI+'',url+'')
+	var parentNode = context.loadXML(url);
+	
+	var i = context.mark();
+	context.parse(element);
+	context.reset(i);
+    var parentURI = context.currentURI;
+	try{
+		context.currentURI = url;
+		extendsConfig.parse=true;
+		context.parse(parentNode);
+	}finally{
+        context.currentURI = parentURI;
+	}
+	context.setAttribute("#extends" ,oldConfig);
 }
+
+function processBlock(node,context,chain){
+	var extendsConfig = context.getAttribute("#extends");
+	if(node.nodeType == 1){//element
+		var element = node.childNodes;
+		var value = getAttribute(node,"*name","id");
+	}else{//attribute
+		var value = node.getValue();
+		var element = removeNode(node);
+	}
+	if(extendsConfig){//
+		var blockMap = extendsConfig.blockMap;
+		var cached = (value in blockMap) && blockMap[value];
+		if(extendsConfig.parse){
+			if(cached){
+				var parentURI = context.currentURI;
+				try{
+					//set current uri
+					setNodeURI(context,cached);
+					extendsConfig.parse=true;
+					context.parse(cached);
+				}finally{
+	        		context.currentURI = parentURI;
+				}
+			}else{
+				context.parse(element);
+			}
+		}else{
+			if(!cached){
+				blockMap[value] = element;
+			}
+		}
+	}else{
+		context.parse(element);
+	}
+}
+
 
 function processClient(node,context,chain){
 	var context2 = context.createNew();
@@ -327,6 +405,7 @@ Core.parseInclude =  parseInclude;
 Core.beforeInclude =  beforeInclude;
 addParsers(processClient,"client");
 addParsers(processBlock,"block","group");
+addParsers(processExtends,"extends","extend");
 //addParsers(processXMLNS,"xmlns");
 Core.xmlns = function(){};
 //Core.parse = function(node){
