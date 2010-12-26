@@ -142,7 +142,8 @@ public class HotTemplateEngine extends TemplateEngine {
 			ArrayList<File> files = new ArrayList<File>();
 			List<Object> list = JSONDecoder.decode(litecode);
 			if (ParseUtil.isFile(uri)) {
-				files.add(new File(uri));
+				File lc = new File(uri);
+				files.add(lc);
 				if(checkFile){
 					List<String> resource = (List<String>) list.get(0);
 					long lm = 0;
@@ -156,6 +157,9 @@ public class HotTemplateEngine extends TemplateEngine {
 						}else if(l == 0){
 							return null;
 						}
+					}
+					if(lm>lc.lastModified()){
+						return null;
 					}
 				}
 				Info entry = new Info(files);

@@ -109,8 +109,8 @@
 				<include name="org/xidea/el/**/*.class" />
 				<include name="org/xidea/lite/*.js" />
 				<include name="org/xidea/lite/**/*.class" />
-				<include name="org/xidea/lite/parser/impl/dtd/**/*.ent" />
-				<include name="org/xidea/lite/parser/impl/dtd/**/xhtml1.dtd" />
+				<include name="org/xidea/lite/impl/dtd/**/*.ent" />
+				<include name="org/xidea/lite/impl/dtd/**/xhtml1.dtd" />
 				<exclude name="**/test/**/*.*" />
 			</fileset>
 			<fileset dir="src/main/" defaultexcludes="true">
@@ -118,17 +118,22 @@
 				<exclude name="org/xidea/**/*Test*.java" />
 				<include name="org/xidea/**/*.java" />
 			</fileset>
-
+			<!--
 			<zipfileset prefix="org/xidea/" dir="build/dest/jslite/">
 				<include name="*/**/*.js" />
 			</zipfileset>
+			-->
+			<fileset dir="web/WEB-INF/classes">
+				<include name="org/xidea/lite/*/*.js" />
+				<include name="org/xidea/el/*.js" />
+			</fileset>
+			
 			<zipgroupfileset dir="web/WEB-INF/lib/">
 				<include name="commons-logging*.jar" />
 				<include name="JSI-*.jar" />
 			</zipgroupfileset>
 		</jar>
 		<jar destfile="build/dest/LiteRT.jar" compress="true">
-
 			<fileset dir="web/WEB-INF/classes">
 				<include name="org/xidea/lite/*.class" />
 			</fileset>

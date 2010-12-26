@@ -242,6 +242,7 @@ function parseInclude(node,context,chain){
     var selector = getAttribute(node,'selector');
     var parentURI = context.currentURI;
 	try{
+		
 	    if(path!=null){
 	    	if(path.charAt() == '$'){
 	    		doc = context.getAttribute(path);
@@ -250,6 +251,7 @@ function parseInclude(node,context,chain){
 		        var url = context.createURI(path);
 	    		//$log.warn(path,context.currentURI+'',url+'')
 		        var doc = context.loadXML(url);
+		        context.currentURI = url;
 	    	}
 	    }else{
 	    	var doc = node.ownerDocument
@@ -272,15 +274,19 @@ function parseInclude(node,context,chain){
 
 function processExtends(node,context,chain){
 	var oldConfig = context.getAttribute("#extends");
-	var extendsConfig = {blockMap:{},parse:false};
+	var el = node.nodeType == 1?node:node.ownerElement;
+	var root = el == el.ownerDocument.documentElement;
+	var extendsConfig = {blockMap:{},parse:false,root:root};
 	if(oldConfig){
 		if(oldConfig.parse){//解析进行时
-			var el = node.nodeType == 1?node:node.ownerElement;
-			var isRoot = node == node.ownerDocument.documentElement;
-			if(isRoot){//模板继承
-				context.reset(0);
+			if(root){//模板继承
+				if(extendsConfig.root){
+					context.reset(0);
+				}
 				extendsConfig = oldConfig;
 				extendsConfig.parse = false;
+			}else{
+				extendsConfig.root = false;
 			}
 		}else{//查找进行时
 			return;
@@ -299,7 +305,9 @@ function processExtends(node,context,chain){
 	var url = context.createURI(parentURL);
 	//$log.warn(path,context.currentURI+'',url+'')
 	var parentNode = context.loadXML(url);
-	
+	if(!root){//元素继承
+		parentNode = parentNode.documentElement;
+	}
 	var i = context.mark();
 	context.parse(element);
 	context.reset(i);

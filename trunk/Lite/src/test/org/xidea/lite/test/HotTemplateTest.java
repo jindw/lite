@@ -23,8 +23,9 @@ public class HotTemplateTest {
 		System.out.println(root);
 		HotTemplateEngine ht = new HotTemplateEngine(new ParseConfigImpl(root.toURI(), config.toURI()));
 		StringWriter out = new StringWriter();
-		ht.getTemplate("/example/block.xhtml").render(new Object(),out);
+		ht.getTemplate("/example/test.xhtml").render(new Object(),out);
 		System.out.println(out);
+		new File(root,"WEB-INF/litecode/example/test.xhtml").delete();
 	}
 	@Test
 	public void testA(){

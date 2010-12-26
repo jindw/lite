@@ -16,7 +16,6 @@ import org.xidea.lite.parse.ParseChain;
 import org.xidea.lite.parse.ParseContext;
 
 public class ExtensionParserImpl implements ExtensionParser {
-
 	private static Pattern pattern = Pattern.compile("^[\\w\\-]\\:|[\\-]");
 	private static final Object CURRENT_NODE_KEY = new Object();
 	private static Pattern FN_SEEKER = Pattern

@@ -55,6 +55,7 @@ public class ParseContextImpl extends ParseContextProxy implements ParseContext 
 			}
 		}
 		this.extensionParser = ep;
+		this.setCurrentURI(parent.getCurrentURI());
 	}
 	public ParseContext create(ParseContext parent){
 		return new ParseContextImpl(parent);

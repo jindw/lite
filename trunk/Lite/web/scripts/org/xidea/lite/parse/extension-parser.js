@@ -79,34 +79,38 @@ ExtensionParser.prototype = {
 		var attrs = el.attributes;
 		var len = attrs.length;
 		var exclusiveMap = {};
-		for (var i =  len- 1; i >= 0; i--) {
-			var attr = attrs.item(i);
-			var ans = attr.namespaceURI;
-			var ext = this.packageMap[ans || ''];
-			var an = formatName(attr.localName);
-			if (ext && ext.beforeMap) {
-				var fn = ext.beforeMap[an];
-				if(fn && an in ext.beforeMap){
-					el.removeAttributeNode(attr);
-					fn.call(chain,attr,context,chain);
-					return;
-				}else{
-					an+='$';
-					if(an in ext.beforeMap){
-						exclusiveMap[an] = attr;
+		try{
+			for (var i =  len- 1; i >= 0; i--) {
+				var attr = attrs.item(i);
+				var ans = attr.namespaceURI;
+				var ext = this.packageMap[ans || ''];
+				var an = formatName(attr.localName);
+				if (ext && ext.beforeMap) {
+					var fn = ext.beforeMap[an];
+					if(fn && an in ext.beforeMap){
+						el.removeAttributeNode(attr);
+						fn.call(chain,attr,context,chain);
+						return;
 					}else{
-						$log.error("未支持属性：",el.name,context.currentURI)
+						an+='$';
+						if(an in ext.beforeMap){
+							exclusiveMap[an] = attr;
+						}else{
+							$log.error("未支持属性：",el.name,context.currentURI)
+						}
 					}
 				}
 			}
-		}
-		for(an in exclusiveMap){
-			var attr = exclusiveMap[an];
-			var ans = attr.namespaceURI;
-			var ext = this.packageMap[ans || ''];
-			el.removeAttributeNode(attr);
-			ext.beforeMap[an].call(chain,attr,context,chain);
-			return;
+			for(an in exclusiveMap){
+				var attr = exclusiveMap[an];
+				var ans = attr.namespaceURI;
+				var ext = this.packageMap[ans || ''];
+				el.removeAttributeNode(attr);
+				ext.beforeMap[an].call(chain,attr,context,chain);
+				return;
+			}
+		}finally{
+			
 		}
 		var ext = this.packageMap[nns||''];
 		var nn = formatName(el.localName||el.nodeName);
