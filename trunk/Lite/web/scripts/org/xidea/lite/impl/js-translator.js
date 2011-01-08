@@ -8,7 +8,7 @@
 
 var ID_PREFIX = "_$";
 
-var SAFE_FOR_KEY = "_$context";
+var SAFE_FOR_KEY = "_$for";
 
 /**
  * IE 好像容易出问题，可能是线程不安全导致。
@@ -57,8 +57,9 @@ function getEL(el){
 /**
  * JS原生代码翻译器实现
  */
-function Translator(id){
+function Translator(id,params){
     this.id = id;
+    this.params = params;
 }
 
 Translator.prototype = {
@@ -66,7 +67,7 @@ Translator.prototype = {
 	    try{
 	    	//var result =  stringifyJSON(context.toList())
 	        var list = context.toList();
-		    var context = new Context(list);
+		    var context = new Context(list,this.params);
 		    context.parse();
 		    var code = context.toString();
 		    new Function("function x(){"+code+"\n}");
@@ -78,7 +79,7 @@ Translator.prototype = {
 	    	$log.error(code,e);
 	        code = "return ('生成js代码失败：'+"+encodeString(buf.join("\n"))+');';
 	    }
-	    var body = "(){"+code+"\n}";
+	    var body = "("+(this.params?this.params.join(','):'')+"){"+code+"\n}";
 	    if(this.id){
 	    	try{
 	    		new Function("function "+this.id+"(){}");
@@ -96,7 +97,7 @@ Translator.prototype = {
 /**
  * <code>
 function(context){
-    function _$items(source,objectType){
+    function _$toList(source,objectType){
         if(objectType){
             var result = [];
             for(objectType in source){
@@ -107,7 +108,7 @@ function(context){
         objectType = typeof source;
         return objectType == "number"? new Array(source):
             objectType == "string"?source.split(""):
-            source instanceof Array?source:_$items(source,1);
+            source instanceof Array?source:_$toList(source,1);
     }
 
 	function replacer(k){return k in context?context[k]:this[k];}
@@ -115,9 +116,10 @@ function(context){
 	var var2 = replacer("var2")
 	replace = function(c){return "&#"+c.charCodeAt()+";";}</code>
  */
-function Context(code){
+function Context(code,params){
     var vs = this.vs = new VarStatus(code);
     this.code = code;
+    this.params = params;
     this.hasFor = vs.forInfos.length;
     this.needReplacer = vs.needReplacer;
     this.defs = vs.defs;
@@ -130,30 +132,30 @@ function Context(code){
 Context.prototype = {
 	parse:function(){
 		var code = this.code;
-	    this.out = [
-	    	'\n\tfunction _$replacer(k){return k in _$context?_$context[k]:this[k];}',
-	    	"\n\tvar _$context = arguments[0];",
-	    	"\n\tvar _$out = [];"];
-		for(var n in this.refs){
-	       if(n!= 'for'){
-	    	  this.append('var ',n,'=_$replacer("',n,'");')
-	       }
-	    }
-	    //add function
-	    for(var i=0;i<this.defs.length;i++){
-	        var def = this.defs[i];
-	        var n = def.name;
-	        this.append("function ",n,"(",def.params.join(','),'){')
-	        this.depth++;
-	        this.append('var _$out=[];');
-	        this.appendCode(def.code);
-	        this.append("return _$out.join('');");
-	        this.depth--;
-	        this.append("}");
-	     	this.append('if("',n,'" in _$context){',n,'=_$context["',n,'"];}')
+		var params = this.params;
+		this.out = [];
+		var firstAppend = true;
+		if(!params){
+		    for(var n in this.refs){
+		    	if(n!= 'for'){
+		    		if(firstAppend){
+		    			firstAppend = false;
+		    			this.append('function _$replacer(k){return k in _$context?_$context[k]:this[k];}')
+		    			this.append('var _$context = arguments[0];');
+		    		}
+		    		this.append('var ',n,'=_$replacer("',n,'");')
+		    		
+		    	}
+		    }
+		}
+		this.append("var _$out=[];")//小心空格，需要做文本搜索的
+		
+	    if(this.needReplacer){
+	    	this.append((params?'function _$replacer':'_$replacer = function')+'(c){return "&#"+c.charCodeAt()+";";}')
+	    	this.append('function _$replace(text){return String(text).replace(/[<&"]/g,_$replacer)}')
 	    }
 	    /**
-function _$items(source,result,type) {
+function _$toList(source,result,type) {
   if (result){
     if(type == "number" && source>0){
       while(source--){
@@ -169,11 +171,12 @@ function _$items(source,result,type) {
     return result;
   }
   return source instanceof Array ? source
-            : _$items(source, [],typeof source);
+            : _$toList(source, [],typeof source);
 }
 	     */
 	    if(this.hasFor){
-	        this.append('function _$items(source,result,type) {');
+	        this.append('var _$for');
+	        this.append('function _$toList(source,result,type) {');
 	        this.append('  if (result){');
 	        this.append('    if(type == "number" && source>0){');
 	        this.append('      while(source--){');
@@ -187,12 +190,23 @@ function _$items(source,result,type) {
 	        this.append('    return result;');
 	        this.append('  }');
 	        this.append('  return source instanceof Array ? source');
-	        this.append('            : _$items(source, [],typeof source);');
+	        this.append('            : _$toList(source, [],typeof source);');
 	        this.append('}');
 	    }
-	    if(this.needReplacer){
-	    	this.append('_$replacer = function(c){return "&#"+c.charCodeAt()+";";}')
-	    	this.append('function _$replace(text){return String(text).replace(/[<&"]/g,_$replacer)}')
+	    
+	    
+	    //add function
+	    for(var i=0;i<this.defs.length;i++){
+	        var def = this.defs[i];
+	        var n = def.name;
+	        this.append("function ",n,"(",def.params.join(','),'){')
+	        this.depth++;
+	        this.append('var _$out=[];');
+	        this.appendCode(def.code);
+	        this.append("return _$out.join('');");
+	        this.depth--;
+	        this.append("}");
+	     	this.append('if("',n,'" in _$context){',n,'=_$context["',n,'"];}')
 	    }
 	    try{
 	        this.appendCode(code);
@@ -200,7 +214,7 @@ function _$items(source,result,type) {
 	        //alert(["编译失败：",buf.join(""),code])
 	        throw e;
 	    }
-	    this.append("return _$out.join('');");
+	    //this.append("return _$out.join('');");
 	},
     getForStatus:function(forCode){
         return this.vs.getForStatus(forCode);
@@ -219,6 +233,19 @@ function _$items(source,result,type) {
         var i = id.substring(ID_PREFIX.length);
         delete this.idMap[i];
     },
+    appendOut:function(){
+    	var len = arguments.length;
+    	var last = this.out[this.out.length-1];
+    	var data = Array.prototype.join.call(arguments,',');
+    	if(last == this.lastOut){
+    		data = last.substring(0,last.length-2)+","+data+");";
+    		this.out[this.out.length-1] = data;
+    	}else{
+    		data = "_$out.push("+data+");";
+    		this.append(data);
+    	}
+    	this.lastOut = data
+    },
     append:function(){
         var depth = this.depth;
         this.out.push("\n");
@@ -235,7 +262,7 @@ function _$items(source,result,type) {
     	for(var i=0;i<code.length;i++){
     		var item = code[i];
     		if(typeof item == 'string'){
-    			this.append("_$out.push(",encodeString(item),");")
+    			this.appendOut(encodeString(item))
     		}else{
     			switch(item[0]){
                 case EL_TYPE:
@@ -269,30 +296,30 @@ function _$items(source,result,type) {
     	}
     },
     processEL:function(item){
-    	this.append("_$out.push(",getEL(item[1]),");")
+    	this.appendOut(getEL(item[1]))
     },
     processXMLText:function(item){
-        this.append("_$out.push(_$replace(",getEL(item[1]),"));")
+        this.appendOut("_$replace("+getEL(item[1])+")")
     },
     processXMLAttribute:function(item){
         //[7,[[0,"value"]],"attribute"]
         var value = getEL(item[1]);
         try{
-        var attributeName = item.length>2?item[2]:null;
+        	var attributeName = item.length>2?item[2]:null;
         }catch(e){
-        	$log.info("@@@@@"+item.get(2),e)
+        	$log.info("@@@@@属性异常："+item.get(2),e)
         }
         if(attributeName){
             var testId = this.getVarId();
             this.append("var ",testId,"=",value);
             this.append("if(",testId,"!=null){");
             this.depth++;
-            this.append("_$out.push(' ",attributeName,"=\"',_$replace(",testId,"),'\"')");
+            this.appendOut("' ",attributeName,"=\"',_$replace("+testId+"),'\"'");
             this.depth--;
             this.append("}");
             this.freeVarId(testId);
         }else{
-        	this.append("_$out.push(_$replace(",value,"));")
+        	this.appendOut("_$replace("+value+")")
         }
     },
     processVar:function(item){
@@ -351,20 +378,20 @@ function _$items(source,result,type) {
         //初始化 items 开始
         this.append("var ",itemsId,"=",itemsEL,";");
         this.append("var ",indexId,"=0;")
-        this.append(itemsId,"=_$items(",itemsId,")");
+        this.append(itemsId,"=_$toList(",itemsId,")");
         
         //初始化 for状态
         var needForStatus = forInfo.ref || forInfo.index || forInfo.lastIndex;
         if(needForStatus){
             if(forInfo.depth){
-                this.append("var ",previousForValueId ,"=_$context;");
+                this.append("var ",previousForValueId ,"=_$for;");
             }
-            this.append("_$context = {lastIndex:",itemsId,".length-1};");
+            this.append("_$for = {lastIndex:",itemsId,".length-1};");
         }
         this.append("for(;",indexId,"<",itemsId,".length;",indexId,"++){");
         this.depth++;
         if(needForStatus){
-            this.append("_$context.index=",indexId,";");
+            this.append("_$for.index=",indexId,";");
         }
         this.append("var ",varNameId,"=",itemsId,"[",indexId,"];");
         this.appendCode(childCode);
@@ -372,7 +399,7 @@ function _$items(source,result,type) {
         this.append("}");
         
         if(needForStatus && forInfo.depth){
-           this.append("_$context=",previousForValueId);
+           this.append("_$for=",previousForValueId);
         }
         this.freeVarId(itemsId);;
         if(forInfo.depth){
@@ -400,6 +427,16 @@ function _$items(source,result,type) {
         return i;
     },
     toString:function(){
-        return this.out.join('')
+    	var s = this.out.join('');
+    	var p = /\b_\$out.push\((?:(.*)\);)?/g;
+    	p.lastIndex=0;
+    	p.exec(s);
+    	if(!p.exec(s)){
+    		s = s.replace(/^\s+var _\$out=\[\];/,'');
+    		s = s.replace(p,"return [$1].join('')")
+        	return s;
+    	}else{
+    		return s+ "\n\treturn _$out.join('');\n";
+    	}
     }
 }

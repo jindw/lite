@@ -15,10 +15,10 @@ function doLiteFormat(json,prefix,showName){
             var type = item[j++];
             buf.push("[",showName?TIN[type]:type,",");
             switch (type) {
-    		case TIT.CAPTRUE_TYPE:
-    		case TIT.IF_TYPE:
-    		case TIT.ELSE_TYPE:
-    		case TIT.FOR_TYPE:
+    		case CAPTRUE_TYPE:
+    		case IF_TYPE:
+    		case ELSE_TYPE:
+    		case FOR_TYPE:
     		    var child = item[j++];
     		    buf.push("\n",doLiteFormat(child,prefix+"\t\t",showName),",");
     			break;

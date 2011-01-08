@@ -74,7 +74,13 @@ height:125px
 			/*]]> /* */
 		</style>
 		<script src="scripts/?path=boot.js"></script>
-		<script>$import("org.xidea.lite.demo.TestCase",true)</script>
+		<script>
+		$import("org.xidea.lite.web.*",true);
+		</script>
+		<script>
+		var fn=liteFunction("#\n$if{test} test${test} $else$ test else $end$","test");
+		alert(fn.render(1));
+		</script>
 	</head>
 	<body>
 		<div id="main">
@@ -100,9 +106,9 @@ height:125px
 					</td>
 					<td class="source">
 						<textarea id="templateSource">
-&lt;html style="margin:10px;" xmlns:c="http://www.xidea.org/ns/template/core"&gt;
+&lt;html style="margin:10px;" xmlns:c="http://www.xidea.org/lite/core"&gt;
 	&lt;body&gt;
-		&lt;c:for var="item" items="${blocks}"&gt;
+		&lt;c:for var="item" list="${blocks}"&gt;
 		&lt;div style='position:absolute;background:#048;font-size:1px;left:${item[0]}px;top:${item[1]}px;width:${item[2]}px;height:${item[3]}px;'&gt;&#160;&lt;/div&gt;
 		&lt;/c:for&gt;
 		&lt;div style="float:right"&gt;&lt;h2&gt;这就是Lite的logo&lt;/h2&gt;&lt;/div&gt;

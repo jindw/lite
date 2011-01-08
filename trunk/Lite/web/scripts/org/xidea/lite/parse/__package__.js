@@ -6,7 +6,7 @@ this.addScript('config.js','ParseConfig'
 				,['org.xidea.lite.util:URI']);
 this.addScript('extension-parser.js','ExtensionParser'
 				,0
-				,['Extension','Core','defaultTextSeeker']);
+				,['Extension','Core']);
 this.addScript('extension.js','Extension'
 				,0
 				,[
@@ -28,9 +28,9 @@ this.addScript('parse-chain.js','buildTopChain');
 this.addScript('xml-default-parser.js','parseDefaultXMLNode');
 this.addScript('xml-core-parser.js','Core'
                 ,0
-                ,['org.xidea.lite.parse:ParseContext','org.xidea.lite.util:*','org.xidea.lite.util:stringifyJSON','org.xidea.lite.util:selectNodes','org.xidea.lite.util:URI']);
+                ,["org.xidea.el:findELEnd",'org.xidea.lite.parse:ParseContext','org.xidea.lite.util:*','org.xidea.lite.util:stringifyJSON','org.xidea.lite.util:selectNodes','org.xidea.lite.util:URI']);
 
-this.addScript('text-parser.js',['parseText','defaultTextSeeker']
+this.addScript('text-parser.js',['parseText']
                 ,0
                 ,["org.xidea.el:findELEnd",'org.xidea.el:ExpressionTokenizer']);
 

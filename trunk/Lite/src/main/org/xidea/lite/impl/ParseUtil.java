@@ -159,7 +159,7 @@ public class ParseUtil {
 
 	public static Document parse(URI uri, ParseContext context)
 			throws IOException, SAXException {
-		InputStream in1 = ParseUtil.trimBOM(openStream(uri, context));
+		InputStream in1 = ParseUtil.trimBOM(context,uri);
 		in1.mark(1);
 		if (in1.read() != '<') {
 			return null;
@@ -277,8 +277,19 @@ public class ParseUtil {
 		}
 		return xpathFactory.newXPath();
 	}
+	private static InputStream trimBOM(ParseContext context,URI uri) throws IOException{
+		try{
+			return trimBOM(openStream(uri, context));
+		}catch(IOException e){
+			log.warn(uri+"读取异常:",e);
+			throw e;
+		}catch(RuntimeException e){
+			log.warn(uri+"读取异常:",e);
+			throw e;
+		}
+	}
 
-	static InputStream trimBOM(InputStream in) throws IOException {
+	private static InputStream trimBOM(InputStream in) throws IOException {
 		in = new BufferedInputStream(in, 3);
 		int trim = 0;
 		in.mark(3);

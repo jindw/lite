@@ -7,9 +7,16 @@ this.addScript('lite-demo-util.js',["TestCase"]
                    "org.xidea.jsi:$log"
                ]
                ,"org.xidea.jsidoc.util:XMLHttpRequest");
-
+this.addScript('lite-compiler.js',["liteFunction","liteTemplate"]
+               ,[
+                   "org.xidea.lite.impl.*",
+                   "org.xidea.lite.parse.*",
+                   "org.xidea.lite.util.*",
+                   "org.xidea.jsi:$log"
+               ]
+               ,"org.xidea.jsidoc.util:XMLHttpRequest");
 this.addScript('lite-formatter.js',["liteFormat"]
                 ,[
-                    "org.xidea.lite.*",
+                    "org.xidea.lite.impl.*",
                     "org.xidea.lite.util.*"
                 ]);

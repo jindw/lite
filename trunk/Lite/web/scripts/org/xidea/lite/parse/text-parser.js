@@ -8,54 +8,6 @@
 /**
  * for extension text parser
  */
-var defaultTextSeeker = {
-	seek:function(text){
-		var end = findELEnd(text,-1);
-		if(end>0){
-			try{
-				var el = text.substring(0,end);
-				el = this.parseEL(el);
-	            switch(this.getTextType()){
-	            case XT_TYPE:
-	            	this.appendXT(el);
-	            	break;
-	            case XA_TYPE:
-	            	this.appendXA(null,el);
-	            	break;
-	            default:
-	            	this.appendEL(el);
-	            }
-	            return end+1;
-			}catch(e){
-				$log.error("表达式解析异常，请检查是否手误：[fileName:"+this.currentURI+",el:"+el+"]",e)
-				return -1;
-			}
-		}else{
-			$log.warn("表达式解析异常，请检查是否手误：[fileName:"+this.currentURI+",el:"+el+"]")
-			return -1;
-		}
-	},
-	"seek!":function(text){
-		var end = findELEnd(text,-1);
-		if(end>0){
-			try{
-				var el = text.substring(0,end);
-				el = this.parseEL(el);
-	            this.appendEL(el);
-	            return end+1;
-			}catch(e){
-				$log.error("表达式解析异常，请检查是否手误：[fileName:"+this.currentURI+",el:"+el+"]",e)
-				return -1;
-			}
-		}else{
-			$log.warn("表达式解析异常，请检查是否手误：[fileName:"+this.currentURI+",el:"+el+"]")
-			return -1;
-		}
-		
-	}
-}
-
-
 function parseText(text,context,chain,textParsers){
 	if(typeof text != 'string'){
 		chain.next(text);
@@ -106,7 +58,7 @@ function parseText(text,context,chain,textParsers){
 				try {
 					start = nip.parseText(text, start, context);
 				} catch (e) {
-					$log.warn("尝试表达式解析失败:[fileName:"+context.currentURI+"]",text,e);
+					$log.warn("尝试表达式解析失败:[source:"+text+",fileName:"+context.currentURI+"]",e);
 				}
 				if (start <= p$) {
 					context.reset(mark);

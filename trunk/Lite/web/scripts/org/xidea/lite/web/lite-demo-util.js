@@ -10,7 +10,9 @@ var TestCase = {
 	    }
 	    try{
 	    	var parser = new ParseContext();
-	    	parser.parse(templateSource);
+	    	var u = parser.createURI(templateSource);
+	    	
+	    	parser.parse(u);
 	    	var jsonCode = parser.toList();
 	        var jsonTemplate = new TemplateImpl(jsonCode);
 	    }catch(e){

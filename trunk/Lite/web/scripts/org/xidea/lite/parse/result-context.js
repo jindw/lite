@@ -195,42 +195,46 @@ function buildTreeResult(result){
 	var defs = [];
 	var current = [];// new ArrayList<Object>();
 	stack.push(current);
-	for (var i = 0;i<result.length;i++) {
-	    var item = result[i];
-		if ('string' == typeof item) {
-			current.push(item);
-		} else {
-			if (item.length == 0) {//end
-				var children = stack.pop();
-				current = stack[stack.length-1];//向上一级列表
-				var parentNode = current.pop();//最后一个是当前结束的标签
-				parentNode[1]=children;
-				if(parentNode[0] == PLUGIN_TYPE && parentNode[3]== 'org.xidea.lite.DefinePlugin'){
-					defs.push(parentNode);
-				}else{
-					current.push(parentNode);
-				}
-				
+	try{
+		for (var i = 0;i<result.length;i++) {
+		    var item = result[i];
+			if ('string' == typeof item) {
+				current.push(item);
 			} else {
-				var type = item[0];
-				var cmd2 =[];
-				cmd2.push(item[0]);
-				current.push(cmd2);
-				switch (type) {
-				case CAPTRUE_TYPE:
-				case IF_TYPE:
-				case ELSE_TYPE:
-				case PLUGIN_TYPE:
-				case FOR_TYPE:
-					cmd2.push(null);
-					stack.push(current = []);
+				if (item.length == 0) {//end
+					var children = stack.pop();
+					current = stack[stack.length-1];//向上一级列表
+					var parentNode = current.pop();//最后一个是当前结束的标签
+					parentNode[1]=children;
+					if(parentNode[0] == PLUGIN_TYPE && parentNode[3]== 'org.xidea.lite.DefinePlugin'){
+						defs.push(parentNode);
+					}else{
+						current.push(parentNode);
+					}
+					
+				} else {
+					var type = item[0];
+					var cmd2 =[];
+					cmd2.push(item[0]);
+					current.push(cmd2);
+					switch (type) {
+					case CAPTRUE_TYPE:
+					case IF_TYPE:
+					case ELSE_TYPE:
+					case PLUGIN_TYPE:
+					case FOR_TYPE:
+						cmd2.push(null);
+						stack.push(current = []);
+					}
+					for (var j = 1; j < item.length; j++) {
+						cmd2.push(item[j]);
+					}
+	
 				}
-				for (var j = 1; j < item.length; j++) {
-					cmd2.push(item[j]);
-				}
-
 			}
 		}
+	}catch(e){
+		$log.error("中间代码异常：",result);
 	}
 	return defs.concat(current);
 }

@@ -74,14 +74,19 @@ ParseContext.prototype = {
 	parse:function(source) {
 		var type = source.nodeType;
 		if(type>0){//xml
+			//$log.info(len,source && source.xml)
 		}else{//text
 			if(typeof source != 'string'){
 				//NodeList
 				if(source instanceof URI){
 					source = this.loadXML(source);
+					if(typeof source == 'string'){
+						source=source.replace(/#.*[\r\n]*/,'');
+					}
 				}else{
 					var len = source.length;
-					if(len >= 0 && source.item){//NodeList
+					
+					if(len >= 0 && typeof source.item != 'undefined'){//NodeList
 						for(var i = 0;i<len;i++){
 							this.topChain.next(source.item(i));
 						}
@@ -90,6 +95,7 @@ ParseContext.prototype = {
 				}
 			}
 		}
+		
 		this.topChain.next(source);
 	},
     createURI:function(path) {

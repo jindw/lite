@@ -34,7 +34,12 @@ function TemplateImpl(data,parseContext,runAsLiteCode){
             parseContext = new $import(parseContext)();
         }
         if(typeof data == 'string'){
-        	data = parseContext.createURI(data);
+        	var data2 = data.replace(/^#.*/,'');
+        	if(data!=data2){
+        		data = data2;
+        	}else{
+        		data = parseContext.createURI(data);
+        	}
         }
         parseContext.parse(data);
         if(runAsLiteCode){

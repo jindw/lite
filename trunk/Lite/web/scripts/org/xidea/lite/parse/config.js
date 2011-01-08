@@ -27,7 +27,7 @@
  * ]
  */
 function ParseConfig(root,json){
-	this.root = new URI(root||'http://localhost/');
+	this.root = new URI(root||(window.location?window.location.href.replace(/(.*?\w\/).*/,'$1'):'http://localhost/'));
 	this.config = defaultConfig;
 	if(json){
 		var result = [];

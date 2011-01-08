@@ -17,13 +17,17 @@ function loadXML(uri,root){
     	    //alert([data,doc.documentElement.tagName])
     	}else{
     		//print(url)
-    	    var pos = uri.indexOf('#')+1;
-    	    var xpath = pos && uri.substr(pos);
-    	    var uri = pos?uri.substr(0,pos-1):uri;
-    	    var doc = parseXMLByURL(uri);
-    	    if(xpath){
-    	        doc = selectNodes(doc,xpath);
-    	    }
+    		if(/^(?:https?\/\/|\/).*$/.test(uri)){
+	    	    var pos = uri.indexOf('#')+1;
+	    	    var xpath = pos && uri.substr(pos);
+	    	    var uri = pos?uri.substr(0,pos-1):uri;
+	    	    var doc = parseXMLByURL(uri);
+	    	    if(xpath && doc.nodeType){
+	    	        doc = selectNodes(doc,xpath);
+	    	    }
+    		}
+    		//文本看待
+    		return uri;
     	}
 	}catch(e){
 		$log.error("文档解析失败:"+uri,e)
@@ -46,24 +50,40 @@ function parseXMLByURL(url){
  * @private
  */
 function parseXMLByText(text){
+	if(!/^[\s\ufeff]*</.test(text)){
+		return text;
+	}
 	try{
+		var error;
 		if(this.DOMParser){
 	        var doc = new DOMParser().parseFromString(text,"text/xml");
 	        var root = doc.documentElement;
 	        if(root.tagName == "parsererror"){
 	        	var s = new XMLSerializer();
-	        	$log.error("解析xml失败",s.serializeToString(root))
+	        	error = s.serializeToString(root);
+	        	throw new Error("XML解析失败："+error);
 	        }
 	    }else{
 	        //["Msxml2.DOMDocument.6.0", "Msxml2.DOMDocument.3.0", "MSXML2.DOMDocument", "MSXML.DOMDocument", "Microsoft.XMLDOM"];
-	        var doc = new ActiveXObject("Microsoft.XMLDOM");
+	        var doc = new ActiveXObject("Msxml2.DOMDocument.3.0");
+	        //var doc = new ActiveXObject("Microsoft.XMLDOM");
 	        doc.loadXML(text);
+	        if (doc.parseError.errorCode!=0){
+	        	//todo....
+	        	error = doc.parseError.reason+";code:"+doc.parseError.errorCode;
+	        }
+	        doc.setProperty("SelectionLanguage", "XPath");
 	        doc.documentElement.tagName;
 	    }
-	    
 	    return doc;
     }catch(e){
-    	$log.error("解析xml失败",e,text);
+    	if(!text.match(/\sxmlns\:c\b/) && text.match(/\bc:\w+\b/)){
+    		var text2 = text.replace(/<[\w\-\:]+/,"$& xmlns:c='http://www.xidea.org/lite/core'");
+    		if(text2!=text){
+    			return parseXMLByText(text2);
+    		}
+    	}
+    	$log.error("解析xml失败:",error,e,text);
     	throw e;
     }
 }
@@ -145,6 +165,7 @@ function getAttribute(el,key){
 	if(el.nodeType == 2){
 		return el.value;
 	}
+	try{
 	//el
 	var required = key.charAt() == '*';
 	if(required){
@@ -154,15 +175,21 @@ function getAttribute(el,key){
 		var an = arguments[i];
 		if(an == '#text'){
 			return el.textContent;
-		}else if(el.hasAttribute(an)){
-			if(i>1 && key.charAt(0) != '#'){
-				$log.warn("标准属性名为：",key ,'您采用的是：',an);
+		}else{
+			var v = el.getAttribute(an);//ie bug: no hasAttribute
+			if(v || (typeof el.hasAttribute != 'undefined') && el.hasAttribute(an)){//ie bug
+				if(i>1 && key.charAt(0) != '#'){
+					$log.warn("标准属性名为：",key ,'您采用的是：',an);
+				}
+				return v;
 			}
-			return el.getAttribute(an);
 		}
 	}
 	if(required){
 		$log.error("标记："+el.tagName+"属性：'"+key +"' 为必要属性。");
+	}
+	}catch(e){
+		$log.error(e)
 	}
 	return null;
 }

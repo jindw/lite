@@ -23,9 +23,14 @@ function addChainAddon(TopChain,context){
 	pt.constructor = TopChain;
 }
 function doNext(node){
-	var parser = this.nodeParsers[this.index];
-	var n = this.nextChain||this.buildNext();
-	parser(node,this,n);
+	//$log.info(typeof node,node&& node.tagName)
+	try{
+		var parser = this.nodeParsers[this.index];
+		var n = this.nextChain||this.buildNext();
+		parser(node,this,n);
+	}catch(e){
+		$log.error("解析器执行异常："+parser,e)
+	}
 }
 function buildNext(){
 	var index = (this.index||0) +1;

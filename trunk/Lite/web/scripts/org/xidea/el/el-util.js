@@ -14,6 +14,7 @@
  * @return }的位置
  */
 function findELEnd(text, elQuteBegin) {
+	elQuteBegin = elQuteBegin||0;
 	var length = text.length;
 	var next = elQuteBegin + 1;
 	if (next >= length) {

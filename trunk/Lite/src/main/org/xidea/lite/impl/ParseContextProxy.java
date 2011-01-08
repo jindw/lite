@@ -60,8 +60,8 @@ abstract public class ParseContextProxy implements ParseContext {
 			// TODO
 			URI parent = this.getCurrentURI();
 			return parent.resolve(path);
-
 		} catch (Exception e) {
+			log.error("uri 创建异常."+path,e);
 			throw new RuntimeException(e);
 		}
 	}

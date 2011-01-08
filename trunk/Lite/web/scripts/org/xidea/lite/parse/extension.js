@@ -50,9 +50,10 @@ Extension.prototype={
 	seek:function(text,fn,context){
 		if(fn in this.seekMap){
 			fn = this.seekMap[fn];
-			return fn.call(context,text);
+			var rtv = fn.call(context,text);
+			return rtv == null?-1:rtv;
 		}else{
-			$log.warn("文本解析时,找不到相关的解析函数,请检查模板源码,是否手误：[function:"+fn+",document:"+context.currentURI+"]")
+			$log.warn("文本解析时,找不到相关的解析函数,请检查模板源码,是否手误：[function:"+fn+",document:"+(context && context.currentURI)+"]")
 			return -1;
 		}
 	}

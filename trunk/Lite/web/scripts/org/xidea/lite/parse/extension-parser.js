@@ -5,12 +5,12 @@
 function ExtensionParser(){
 	this.packageMap = {};
 	this.addExtensionObject("http://www.xidea.org/lite/core",Core);
-	this.addExtensionObject("",defaultTextSeeker);
 	
 }
 
-function formatName(tagName){
-	tagName = tagName.replace(/[\-]/g,"");
+function formatName(el){
+	var tagName = el.localName|| el.nodeName ||''
+	tagName = tagName.replace(/[\-]|^\w+\:/g,"");
 	return tagName.toLowerCase();
 }
 
@@ -80,16 +80,24 @@ ExtensionParser.prototype = {
 		var len = attrs.length;
 		var exclusiveMap = {};
 		try{
+			var es = 0;
 			for (var i =  len- 1; i >= 0; i--) {
 				var attr = attrs.item(i);
 				var ans = attr.namespaceURI;
 				var ext = this.packageMap[ans || ''];
-				var an = formatName(attr.localName);
+				var an = formatName(attr);
+				es = 2
 				if (ext && ext.beforeMap) {
 					var fn = ext.beforeMap[an];
 					if(fn && an in ext.beforeMap){
-						el.removeAttributeNode(attr);
-						fn.call(chain,attr,context,chain);
+						es = 2.1
+						try{
+							el.removeAttributeNode(attr);
+							fn.call(chain,attr,context,chain);
+							es =2.2
+						}finally{
+							
+						}
 						return;
 					}else{
 						an+='$';
@@ -101,19 +109,28 @@ ExtensionParser.prototype = {
 					}
 				}
 			}
+			es = 4;
 			for(an in exclusiveMap){
 				var attr = exclusiveMap[an];
 				var ans = attr.namespaceURI;
 				var ext = this.packageMap[ans || ''];
-				el.removeAttributeNode(attr);
-				ext.beforeMap[an].call(chain,attr,context,chain);
+				try{
+					el.removeAttributeNode(attr);
+					ext.beforeMap[an].call(chain,attr,context,chain);
+				}finally{
+					
+				}
+				
 				return;
 			}
+		}catch(e){
+			$log.error("元素扩展解析异常",es,attr.xml,ans,an,e)
+			throw e;
 		}finally{
 			
 		}
 		var ext = this.packageMap[nns||''];
-		var nn = formatName(el.localName||el.nodeName);
+		var nn = formatName(el);
 		if(ext && ext.parserMap){
 			var fn = ext.parserMap[nn];
 			if(fn && (nn in ext.parserMap)
@@ -126,71 +143,90 @@ ExtensionParser.prototype = {
 		}
 	},
 	parse:function(node,context,chain){
-		var type = node.nodeType;
-		if(type == 9){
-			if(this.parseDocument(node,context,chain)){
-				return ;
-			}
-		}else if(type == 2){
-			if(node.namespaceURI == 'http://www.w3.org/2000/xmlns/'){
-				if(this.parseNamespace(node,context,chain)){
-					return;
+		try{
+			var es = 0;
+			var type = node.nodeType;
+			if(type == 9){
+				if(this.parseDocument(node,context,chain)){
+					return ;
 				}
-			}
-			var el = node.ownerElement;
-			var ns = el.namespaceURI||'';
-			var ext = this.packageMap[ns];
-			if(ext && ext.onMap){
-				if(fn in ext.onMap){
-					var fn = ext.onMap[fn];
-					fn.call(chain,node,context,chain);
-					return true;
+			}else if(type == 2){
+				try{
+					if(this.parseNamespace(node,context,chain)){
+						return;
+					}
+					es = 3;
+					var el = node.ownerElement;
+					//ie bug.no ownerElement
+					var ns = el && el.namespaceURI||'';
+					var ext = this.packageMap[ns];
+					es=4;
+					if(ext && ext.onMap){
+						if(fn in ext.onMap){
+							var fn = ext.onMap[fn];
+							fn.call(chain,node,context,chain);
+							return true;
+						}
+					}
+				}catch(e){
+					$log.error("属性扩展解析异常：",node.xml,el==null,es,e)
 				}
-			}
-		}else if(type === 1){
-			if(this.parseElement(node,context,chain)){
-				return ;
-			}
+			}else if(type === 1){
+				if(this.parseElement(node,context,chain)){
+					return ;
+				}
+			} 
+			es += 10;
+			chain.next(node)
+		}catch(e){
+			$log.error("扩展解析异常：",node.xml,es,e)
 		}
-		chain.next(node)
 	},
 	parseText:function(text,start,context){
 		var text2 = text.substring(start+1);
 		var match = text2.match(/^(?:(\w*)\:)?([\w!#]*)[\$\{]/);
-		if(match){
-			var matchLength = match[0].length;
-			var currentNode = context.getAttribute(CURRENT_NODE_KEY)
-			var prefix = match[1];
-			var fn = match[2]
-			if(prefix == null){
-				var ns = ""
-			}else{
-				if(currentNode){
-					var ns = currentNode.lookupNamespaceURI(prefix);
-					if (ns == null) {
-						var doc = currentNode.getOwnerDocument();
-						ns = doc && doc.documentElement.lookupNamespaceURI(prefix);
+		try{
+			var es = 0;
+			if(match){
+				var matchLength = match[0].length;
+				var currentNode = context.getAttribute(CURRENT_NODE_KEY)
+				var prefix = match[1];
+				var fn = match[2]
+				if(prefix == null){
+					var ns = ""
+				}else{
+					es = 1;
+					if(currentNode && currentNode.lookupNamespaceURI){
+						var ns = currentNode.lookupNamespaceURI(prefix);
+						if (ns == null) {
+							var doc = currentNode.getOwnerDocument();
+							ns = doc && doc.documentElement.lookupNamespaceURI(prefix);
+						}
 					}
+					es =2
 				}
-				if(!ns && prefix == 'c'){
+				
+				if(!ns && (prefix == 'c' || !prefix)){
 					ns = "http://www.xidea.org/lite/core"
 				}
-			}
-			if(ns == null){
-				$log.warn("文本解析时,查找名称空间失败,请检查是否缺少XML名称空间申明：[code:$"+match[0]+",prefix:"+prefix+",document:"+context.currentURI+"]")
-			}else{
-				var fp = this.packageMap[ns||''];
-				if(fp){
-					//{之后的位置，el内容
-					var text3 = text2.substring(matchLength);
-					var p = fp.seek(text3,fn,context);
-					if(p>=0){
-						return start+1+matchLength+p
-					}
+				if(ns == null){
+					$log.warn("文本解析时,查找名称空间失败,请检查是否缺少XML名称空间申明：[code:$"+match[0]+",prefix:"+prefix+",document:"+context.currentURI+"]")
 				}else{
-					$log.warn("文本解析时,名称空间未注册实现程序,请检查lite.xml是否缺少语言扩展定义：[code:$"+match[0]+",namespace:"+ns+",document:"+context.currentURI+"]")
+					var fp = this.packageMap[ns||''];
+					if(fp){
+						//{开始的位置，el内容
+						var text3 = text2.substring(matchLength-1);
+						var p = fp.seek(text3,fn,context);
+						if(p>=0){
+							return start+matchLength+p+1
+						}
+					}else{
+						$log.warn("文本解析时,名称空间未注册实现程序,请检查lite.xml是否缺少语言扩展定义：[code:$"+match[0]+",namespace:"+ns+",prefix:"+prefix+",document:"+context.currentURI+"]")
+					}
 				}
 			}
+		}catch(e){
+			$log.error("文本解析异常：",es,e)
 		}
 		//seek
 		return -1;
@@ -210,7 +246,7 @@ ExtensionParser.prototype = {
 				return -1;
 			}
 			var text2 = text.substring(begin+1);
-			var match = text2.match(/^(?:\w*\:)?\w*[\$\{]/);
+			var match = text2.match(/^(?:\w*\:)?[\w#!]*[\$\{]/);
 			if(match){
 				return begin;
 			}

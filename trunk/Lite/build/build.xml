@@ -188,8 +188,20 @@
 	</target>
 
 	<target name="compress" depends="init">
-		<echo>压缩JSLite实现</echo>
+		<echo>压缩JS普通版本</echo>
+		<java classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
+			<arg value="-scriptBase" />
+			<arg value="${basedir}/web/scripts" />
+			<arg value="-config.features" />
+			<arg value=":Debug" />
+			<arg value="-exports" />
+			<arg value="org.xidea.lite.web:liteTemplate" />
+			<arg value="org.xidea.lite.web:liteFunction" />
 
+			<arg value="-outputExported" />
+			<arg value="${basedir}/build/dest/lite-compiler.js" />
+		</java>
+		<echo>压缩JSLite实现</echo>
 		<!-- export lite -->
 		<!-- empty -->
 		<!-- export lite impl,parse,el -->
@@ -234,11 +246,13 @@
 			<arg value="-config.features" />
 			<arg value=":Debug" />
 			<arg value="-exports" />
-			<arg value="org.xidea.lite.web.demo:TestCase" />
+			<arg value="org.xidea.lite.web:TestCase" />
 
 			<arg value="-outputExported" />
 			<arg value="${basedir}/build/dest/jslite/demo.js" />
 		</java>
+		
+
 	</target>
 	<target name="build" depends="compress,package,php-example">
 		<copy tofile="../TT/web/WEB-INF/lib/Lite-${version}.jar" file="build/dest/Lite.jar" />
