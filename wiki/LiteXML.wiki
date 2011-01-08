@@ -3,7 +3,7 @@
     Lite基本语法，命名为LiteXML，是一个基于XML的基本模板语法聚合，包括最基本的模板功能。
   ==== 名称空间 ====
     LiteXML所属名称空间为：http://www.xidea.org/lite/core
-    推荐前缀是c。支持的标签有 if,else,choose,for,var,def,include
+    推荐前缀是c。支持的标签有 if,else,choose,for,var,def,include,extends,block
 
   ==== 支持模式 ====
     LiteXML支持标记，属性和文本三种模式，这里为了简单起见，只列出标记模式。
@@ -128,7 +128,7 @@ $!{user.name}
 </c:def>
 <!-- 使用函数 -->
 <table>
-<c:for var="user" items="${users}">
+<c:for var="user" list="${users}">
     $!{userRow(user)}
 </c:for>
 </table>
@@ -156,3 +156,18 @@ $!{user.name}
 
   * 说明：
     xpath确实有点烦琐,但毕竟事标准，标准永远不是最好的，但他是可行的。
+
+  ==== 继承标签 ====
+  * 示例：
+  {{{
+#标签语法
+<c:extends path="parent.xhtml">
+   <c:block name="member1">....</c:block>
+</c:extends>
+  }}}
+  * 属性表：
+    * _ path _ ：用于<c:extends 标签，字符串，必选，用于指定需要继承的父模板路径。
+    * _ name _ ：用于<c:block 标签,用于指定区域名称。
+
+  * 功能：
+    从继承父模板开始渲染，遇到c:block节点时，从子页面寻找同名替代节点，取代父模板的同名节点。
