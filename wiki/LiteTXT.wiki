@@ -1,0 +1,78 @@
+#labels Featured
+== 基本信息 ==
+    Lite基本语法的文本格式，功能是LiteXML的子集，包括最基本的模板功能。
+    文本语法格式可由有如下两种
+    * $<FN>{<EL>} 
+       <FN> 代表一个语法名称，语法名称可以是一个标识符([a-zA-Z0-9_]+)。
+       <EL> 代表一个模板表达式，这可以是Lite标准JavaScript表达式，或者是该文本语法自己定义的表达式。
+    * $<FN>$
+        对于没有表达式的语法，必须以$结束。
+
+       
+    LiteTXT 支持的语法有 if,else,for,var,def
+    尚未支持：include,extends,block
+
+== 表达式输出语法 ==
+ ==== 自动编码输出 ====
+  * 示例:
+{{{
+${user.name}。
+}}}
+  * 功能:
+    直接输出。
+  * 说明:
+    在LiteXML中改语法是自动编码的，LiteTXT没有XML上下文，无法自动编码，职能直接输出。
+
+
+
+==控制标签==
+ ==== 条件标签 ====
+  * 示例:
+{{{
+$if{index == 0}[${index},
+$else{index == end}${index}
+$else$${index},
+$end$
+}}}
+
+ ==== 循环标签 ====
+  * 示例:
+{{{
+$for{item:list}
+	${for.index}:${item}.
+$end$
+}}}
+
+== 变量申明标签 ==
+  ==== 通过属性值申明变量====
+  {{{
+$var{myname=user.name}
+  }}}
+
+  ==== 通过子节点申明变量====
+    {{{
+$var{myName}
+	${user.firstName} ${user.lastName}
+$end$
+    }}}
+
+== 模板函数定义标签 ==
+    模板中常见一些重复的逻辑，我们需要重用代码，编写模板函数是一种有效的用模板来扩充模板系统内置函数，做好代码重用的方法。
+  * 示例：
+  {{{
+<!-- 这里的内容会编译成文本处理函数，将插入到模板的默认变量集中 -->
+$def{userRow(user)}
+    <tr>
+        <td>${user.name}</td>
+        <td>${user.city}</td>
+    </tr>
+$end$
+
+<!-- 使用函数 -->
+<table>
+$for{user:users}
+    $!{userRow(user)}
+$end$
+</table>
+  }}}
+ 
