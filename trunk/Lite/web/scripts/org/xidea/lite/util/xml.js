@@ -12,12 +12,12 @@ function loadXML(uri,root){
 	    		uri+='';
 	    	}
 		}
-        if(/^[\s\ufeff]*</.test(uri)){
-    	    var doc =parseXMLByText(uri.substring(uri.indexOf('<')))
+        if(/^[\s\ufeff]*[<#]/.test(uri)){
+    	    var doc =parseXMLByText(uri.replace(/^[\s\ufeff]*/,''))
     	    //alert([data,doc.documentElement.tagName])
     	}else{
     		//print(url)
-    		if(/^(?:https?\/\/|\/).*$/.test(uri)){
+    		if(/^(?:https?\:\/\/|\/).*$/.test(uri)){
 	    	    var pos = uri.indexOf('#')+1;
 	    	    var xpath = pos && uri.substr(pos);
 	    	    var uri = pos?uri.substr(0,pos-1):uri;
@@ -25,15 +25,21 @@ function loadXML(uri,root){
 	    	    if(xpath && doc.nodeType){
 	    	        doc = selectNodes(doc,xpath);
 	    	    }
+    		}else{
+    			//文本看待
+    			return parseXMLByText(uri);
     		}
-    		//文本看待
-    		return uri;
     	}
 	}catch(e){
 		$log.error("文档解析失败:"+uri,e)
 		throw e;
 	}
 	return doc;
+}
+function txt2xml(source){
+	return "<out xmlns='http://www.xidea.org/lite/core'><![CDATA["+
+			source.replace(/^\ufeff?#.*[\r\n]*/, "").replace(/]]>/, "]]]]><![CDATA[>")+
+			"]]></out>";
 }
 /**
  * @private
@@ -51,7 +57,7 @@ function parseXMLByURL(url){
  */
 function parseXMLByText(text){
 	if(!/^[\s\ufeff]*</.test(text)){
-		return text;
+		text = txt2xml(text);
 	}
 	try{
 		var error;
@@ -104,13 +110,15 @@ function getNamespaceMap(node){
 	}
 	return map;
 }
-
+function nodeListItem(i){
+	return this[i];
+}
 /**
  * TODO:貌似需要importNode
  */
 function selectNodes(currentNode,xpath){
 	var doc = currentNode.ownerDocument || currentNode;
-    var docFragment = doc.createDocumentFragment();
+    //var docFragment = doc.createDocumentFragment();
     var nsMap = getNamespaceMap(doc.documentElement);
     try{//ie
     	var buf = [];
@@ -120,24 +128,25 @@ function selectNodes(currentNode,xpath){
     	doc.setProperty("SelectionNamespaces",buf.join(' '));
     	doc.setProperty("SelectionLanguage","XPath");
         var nodes = currentNode.selectNodes(xpath);
-        var buf = [];
-        for (var i=0; i<nodes.length; i++) {
-            buf.push(nodes.item(i))
-        }
+//        var buf = [];
+//        for (var i=0; i<nodes.length; i++) {
+//            buf.push(nodes.item(i))
+//        }
     }catch(e){
         var xpe = doc.evaluate? doc: new XPathEvaluator();
         //var nsResolver = xpe.createNSResolver(doc.documentElement);
         var result = xpe.evaluate(xpath, currentNode, function(prefix){return nsMap[prefix]}, 5, null);
         var node;
-        var buf = [];
+        var nodes = [];
         while (node = result.iterateNext()){
-            buf.push(node);
+            nodes.push(node);
         }
+        nodes.item = nodeListItem;
     }
-    while (node = buf.shift()){
-        docFragment.appendChild(node.cloneNode(true));
-    }
-    return docFragment;
+//    while (node = buf.shift()){
+//        docFragment.appendChild(node.cloneNode(true));
+//    }
+    return nodes;
 }
 if(!(window.DOMParser && window.XMLHttpRequest || window.ActiveXObject)){
     var pu = Packages.org.xidea.lite.impl.ParseUtil;
@@ -147,9 +156,9 @@ if(!(window.DOMParser && window.XMLHttpRequest || window.ActiveXObject)){
         if(/^[\s\ufeff]*</.test(url)){
         	return pu.loadXML(url,null);
         }else{
-        	var pos = url.indexOf('#')+1;
-        	var xpath = pos && url.substr(pos);
-        	var url = pos?url.substr(0,pos-1):url;
+        	var pos = url.indexOf('#');
+        	var xpath = pos>0 && url.substr(pos+1);
+        	var url = pos>0?url.substr(0,pos):url;
         	var doc = pu.loadXML(url,null);
         	if(xpath){
 		        doc = selectNodes(doc,xpath);
@@ -174,7 +183,7 @@ function getAttribute(el,key){
 	for(var i=1,len = arguments.length;i<len;i++){
 		var an = arguments[i];
 		if(an == '#text'){
-			return el.textContent;
+			return el.textContent||el.text;
 		}else{
 			var v = el.getAttribute(an);//ie bug: no hasAttribute
 			if(v || (typeof el.hasAttribute != 'undefined') && el.hasAttribute(an)){//ie bug

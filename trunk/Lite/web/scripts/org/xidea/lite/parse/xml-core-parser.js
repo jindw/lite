@@ -37,7 +37,6 @@ var Core = {
 		if(end>0){
 			try{
 				var el = text.substring(1,end);
-				el = this.parseEL(el);
 	            this.appendEL(el);
 	            return end;
 			}catch(e){
@@ -49,6 +48,45 @@ var Core = {
 			return -1;
 		}
 		
+	},
+	seekxa:function(text){
+		var end = findELEnd(text,0);
+		if(end>0){
+			try{
+				var el = text.substring(1,end);
+				if(/^\s*([\w\-]+|"[^"]+"|'[^']+')\s*\:/.test(el)){
+					var map = findParamMap(el);
+					for(var n in map){
+						this.appendXA(n,map[n]);
+					}
+				}else{
+					this.appendXA(null,el)
+				}
+		    	return end;
+			}catch(e){
+				$log.error("XML属性表达式解析异常，请检查是否手误：[fileName:"+this.currentURI+",el:"+el+"]",e)
+				return -1;
+			}
+		}else{
+			$log.warn("XML属性表达式解析异常，请检查是否手误：[fileName:"+this.currentURI+",el:"+el+"]")
+			return -1;
+		}
+	},
+	seekxt:function(text){
+		var end = findELEnd(text,0);
+		if(end>0){
+			try{
+				var el = text.substring(1,end);
+				this.appendXT(el)
+	            return end;
+			}catch(e){
+				$log.error("XML文本表达式解析异常，请检查是否手误：[fileName:"+this.currentURI+",el:"+el+"]",e)
+				return -1;
+			}
+		}else{
+			$log.warn("XML文本表达式解析异常，请检查是否手误：[fileName:"+this.currentURI+",el:"+el+"]")
+			return -1;
+		}
 	}
 };
 function addParser(fn){
@@ -287,13 +325,13 @@ function seekVar(text){
 	var end = findELEnd(text);
 	if(end>0){
 		var value = text.substring(1,end);
-		var map = findParamMap(value);
-		if(map){
+		if(/^\s*(?:\w+|['"][^"]+['"])\s*$/.test(value)){
+	        this.appendCaptrue(value.replace(/['"]/g,''));
+		}else{
+			var map = findParamMap(value);
 			for(var n in map){
 				this.appendVar(n,map[n]);
 			}
-		}else{
-	        this.appendCaptrue(value);
 		}
     	return end;
 	}
@@ -408,9 +446,6 @@ function setNodeURI(context,node){
 	}
 }
 function parseInclude(node,context,chain){
-	if(node.nodeType == 2){
-		$log.warn("暂不支持属性包含")
-	}
     var path = getAttribute(node,'path');
     var xpath = getAttribute(node,'xpath');
     var selector = getAttribute(node,'selector');
@@ -434,7 +469,9 @@ function parseInclude(node,context,chain){
 			context.append("<strong style='color:red'>没找到包含节点："+context.currentURI+ node.value+"</strong>");
 		}else{
 		    if(xpath!=null){
+		    	var d = doc;
 		        doc = selectNodes(doc,xpath);
+		        //alert([url,xpath,new XMLSerializer().serializeToString(d),doc.length])
 		    }
 		    if(selector != null){
 		    	$log.warn("目前尚不支持css selector 选择节点");

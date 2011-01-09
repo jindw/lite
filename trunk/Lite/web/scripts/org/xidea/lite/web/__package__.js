@@ -18,5 +18,6 @@ this.addScript('lite-compiler.js',["liteFunction","liteTemplate"]
 this.addScript('lite-formatter.js',["liteFormat"]
                 ,[
                     "org.xidea.lite.impl.*",
-                    "org.xidea.lite.util.*"
+                    "org.xidea.lite.util.*",
+                    "org.xidea.el.*"
                 ]);

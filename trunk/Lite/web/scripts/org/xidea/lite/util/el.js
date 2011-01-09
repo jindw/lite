@@ -2,15 +2,16 @@
 function findParamMap(value){
 	var result = {};
 	while(value){
-		var match = value.match(/^\s*([\w\$\_]+)\s*(?:[\:=]\s*([\s\S]+))\s*$/);
+		var match = value.match(/^\s*([\w\$\_]+|'[^']*'|"[^"]*")\s*(?:[\:=]\s*([\s\S]+))\s*$/);
 		if(!match){
 			throw $log.error("非法参数信息",value);
 			return null;
 		}
 		value =match[2];
-		var key = match[1];
+		var key = match[1].replace(/^['"]|['"]$/g,'');
 		var p = findStatementEnd(value);
 		var statment = value.substring(0,p);
+		
 		result[key] = statment;
 		value = value.substring(p+1);
 	}

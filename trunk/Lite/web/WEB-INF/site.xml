@@ -1,0 +1,14 @@
+<!-- 新版配置方式，PHP，Java统一配置格式  -->
+<site xmlns="http://firekylin.my.baidu.com/ns/config/1.1" encoding="UTF-8">
+	<resource>
+		<group>
+			<include>/doc/**</include>
+		</group> 
+	</resource>
+	<!-- 设置同步终端 
+	http://firekylin.my.baidu.com:80/fireup.php
+	-->
+	<sync upload="http://www.xidea.org/project/lite/fireup.php">
+
+	</sync>
+</site>

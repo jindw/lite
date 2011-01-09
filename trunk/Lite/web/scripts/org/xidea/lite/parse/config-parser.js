@@ -23,10 +23,10 @@
  * 		"includes":"^[\\\\/]example[\\\\/][^\\\\/]*\.xhtml$",
  * 		"excludes":"",
  * 		"featrueMap":{
- * 			"http://www.xidea.org/featrues/lite/layout":"/layout.xhtml",
- * 			"http://www.xidea.org/featrues/lite/output-encoding":"utf-8",
- * 			"http://www.xidea.org/featrues/lite/output-mime-type":"text/html",
- * 			"http://www.xidea.org/featrue/lite/html-javascript-compressor":"org.jside.jsi.tools.JSACompressor"
+ * 			"http://www.xidea.org/lite/featrues/layout":"/layout.xhtml",
+ * 			"http://www.xidea.org/lite/featrues/output-encoding":"utf-8",
+ * 			"http://www.xidea.org/lite/featrues/output-mime-type":"text/html",
+ * 			"http://www.xidea.org/lite/featrues/html-javascript-compressor":"org.jside.jsi.tools.JSACompressor"
  * 		},
  * 		"extensionMap":[
  * 			{
@@ -39,8 +39,8 @@
  * 		"includes":"^.*\.xhtml$",
  * 		"excludes":"",
  * 		"featrueMap":{
- * 			"http://www.xidea.org/featrues/lite/output-encoding":"utf-8",
- * 			"http://www.xidea.org/featrues/lite/output-mime-type":"text/html"
+ * 			"http://www.xidea.org/lite/featrues/output-encoding":"utf-8",
+ * 			"http://www.xidea.org/lite/featrues/output-mime-type":"text/html"
  * 		},
  * 		"extensionMap":{
  * 			"http://www.w3.org/1999/xhtml":["org.xidea.lite.xhtml"]
@@ -168,11 +168,11 @@ LiteGroup.prototype.initialize = function(){
 			this.mimeType=contentType;
 		}
 	}
-	this.featrueMap["http://www.xidea.org/featrues/lite/output-encoding"] = this.encoding;
-	this.featrueMap["http://www.xidea.org/featrues/lite/output-mime-type"] = this.mimeType;
+	this.featrueMap["http://www.xidea.org/lite/featrues/output-encoding"] = this.encoding;
+	this.featrueMap["http://www.xidea.org/lite/featrues/output-mime-type"] = this.mimeType;
 	if(this.layout != null){
 		if(!this.layout || this.layout.charAt() == '/'){
-			this.featrueMap["http://www.xidea.org/featrues/lite/layout"] = this.layout;
+			this.featrueMap["http://www.xidea.org/lite/featrues/layout"] = this.layout;
 		}else{
 			$log.error("layout 必须为绝对地址('/'开始),你的设置为："+this.layout);
 		}

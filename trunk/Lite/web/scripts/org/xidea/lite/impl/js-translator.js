@@ -236,7 +236,7 @@ function _$toList(source,result,type) {
     appendOut:function(){
     	var len = arguments.length;
     	var last = this.out[this.out.length-1];
-    	var data = Array.prototype.join.call(arguments,',');
+    	var data = Array.prototype.join.call(arguments,'');
     	if(last == this.lastOut){
     		data = last.substring(0,last.length-2)+","+data+");";
     		this.out[this.out.length-1] = data;
@@ -299,7 +299,7 @@ function _$toList(source,result,type) {
     	this.appendOut(getEL(item[1]))
     },
     processXMLText:function(item){
-        this.appendOut("_$replace("+getEL(item[1])+")")
+        this.appendOut("_$replace(",getEL(item[1]),")")
     },
     processXMLAttribute:function(item){
         //[7,[[0,"value"]],"attribute"]
@@ -319,7 +319,7 @@ function _$toList(source,result,type) {
             this.append("}");
             this.freeVarId(testId);
         }else{
-        	this.appendOut("_$replace("+value+")")
+        	this.appendOut("_$replace(",value,")")
         }
     },
     processVar:function(item){

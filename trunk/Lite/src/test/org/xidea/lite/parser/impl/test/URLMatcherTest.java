@@ -11,11 +11,7 @@ public class URLMatcherTest {
 	@Before
 	public void setUp() throws Exception {
 	}
-	@Test
-	public void testBeginMatch(){
 
-		Assert.fail();
-	}
 //		Assert.assertTrue(new PathMatcher("**").match("/bb/aa"));
 //		Assert.assertTrue(new PathMatcher("**/aa").match("/bb/aa"));
 //		Assert.assertTrue(new PathMatcher("**b/aa").match("/bb/aa"));

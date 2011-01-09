@@ -27,11 +27,21 @@
   }
 }
 	]]></context>
-		<source><![CDATA[<div xmlns:c="http://www.xidea.org/lite/core">
+		<source-xml><![CDATA[<div xmlns:c="http://www.xidea.org/lite/core">
   <p>您好：${user}，您的的ip地址是：${ip.part0}.${ip.part1}.${ip.part2}.${ip.part3}。</p>
   <p>对应的整数值是：${(((ip.part0*256)+ip.part1)*256+ip.part2)*256+ip.part3}</p>
-</div>]]></source>
+</div>]]></source-xml>
+		<source-txt><![CDATA[#LiteTXT,$xt{..}:输出xml文本，$xa{..}:输出xml属性文本 ，${..}:输出不编码文本（与xml中的$!{..}等价）
+<div>
+  <p>您好：$xt{user}，您的的ip地址是：$xt{ip.part0}.$xt{ip.part1}.$xt{ip.part2}.$xt{ip.part3}。</p>
+  <p>对应的整数值是：$xt{(((ip.part0*256)+ip.part1)*256+ip.part2)*256+ip.part3}</p>
+</div>
+]]></source-txt>
+
+
 	</entry>
+	
+	
 	<entry key="表达式（不编码xml特殊字符）">
 		<description><![CDATA[ <h3>表达式输出（不编码）</h3>
 		<p>与直接的表达式唯一的区别是：不编码。 </p>]]>
@@ -41,10 +51,15 @@
   "html":"Hello <b>Guest</b>!"
 }
 	]]></context>
-		<source><![CDATA[<div xmlns:c="http://www.xidea.org/lite/core">
+		<source-xml><![CDATA[<div xmlns:c="http://www.xidea.org/lite/core">
     <p>text:${html}</p>
-    <p>html:<c:out value="${html}"/></p>
-</div>]]></source>
+    <p>html:$!{html}</p>
+</div>]]></source-xml>
+		<source-txt><![CDATA[#LiteTXT
+<div>
+    <p>text:$xt{html}</p>
+    <p>html:${html}</p>
+</div>]]></source-txt>
 	</entry>
 	<entry key="属性表达式">
 		<description><![CDATA[<h3> 属性内表达式</h3>。<br/>输出完整的XML属性节点。<br/>
@@ -61,12 +76,19 @@
   }
 }
 	]]></context>
-		<source><![CDATA[<div xmlns:c="http://www.xidea.org/lite/core">
-<div onclick="${event.onclick}"
+		<source-xml><![CDATA[<div xmlns:c="http://www.xidea.org/lite/core">
+  <div onclick="${event.onclick}"
      ondblclick="${event.ondblclick}"
      onmouseover="${event.onmouseover}"
      onmouseout="${event.onmouseout}"/>
-</div>]]></source>
+</div>]]></source-xml>
+		<source-txt><![CDATA[#LiteTXT
+<div>
+  <div $xa{onclick:event.onclick}
+     $xa{ondblclick:event.ondblclick}
+     $xa{"onmouseover":event.onmouseover}
+     $xa{onmouseout:event.onmouseout}/>
+</div>]]></source-txt>
 	</entry>
 
 	<entry key="条件标签(if-else)">
@@ -84,13 +106,22 @@
     "test4":true
 }
 	]]></context>
-		<source><![CDATA[<div xmlns:c="http://www.xidea.org/lite/core">
+		<source-xml><![CDATA[<div xmlns:c="http://www.xidea.org/lite/core">
   <c:if test="${test1}">test1</c:if>
   <c:else-if test="${test2}">test2</c:else-if>
   <c:else-if test="${test3}">test3</c:else-if>
   <c:else-if test="${test4}">test4</c:else-if>
   <c:else>else</c:else>
-</div>]]></source>
+</div>]]></source-xml>
+<source-txt><![CDATA[#LiteTXT
+<div>
+  $if{test1}test1
+  $elif{test2}test2
+  $elif{test3}test3
+  $elif{test4}test4
+  $else$else
+  $end$
+</div>]]></source-txt>
 	</entry>
 
 	<entry key="选择标签(choose)">
@@ -106,14 +137,22 @@
     "test4":true
 }
 	]]></context>
-		<source><![CDATA[<div xmlns:c="http://www.xidea.org/lite/core">
+		<source-xml><![CDATA[<div xmlns:c="http://www.xidea.org/lite/core">
     <c:choose >
         <c:when test="${test1}">分支1</c:when >
         <c:when test="${test2}">分支2</c:when >
         <c:when test="${test3}">分支3</c:when >
         <c:otherwise>分支4</c:otherwise>
     </c:choose >
-</div>]]></source>
+</div>]]></source-xml>
+		<source-txt><![CDATA[#LiteTXT
+<div>
+    $if{test1}分支1
+    $elif{test2}分支2
+    $elif{test3}分支3
+    $else$分支4
+    $end$
+</div>]]></source-txt>
 	</entry>
 
 
@@ -130,30 +169,50 @@
 		<p> {index:0,lastIndex:6}。</p>
 		<p> 循环过程中将维护for的状态（index属性），用户在循环体内使用${for.index}获取当前循环的重复次数（从0开始）。 </p>
 		]]></description>
-		<source><![CDATA[<div xmlns:c="http://www.xidea.org/lite/core">
+		<source-xml><![CDATA[<div xmlns:c="http://www.xidea.org/lite/core">
     [
     <c:for var="item" list="${list}">
         ${item}
         <c:if test="${for.index != for.lastIndex}">,</c:if>
     </c:for>
     ]
-</div>]]></source>
+</div>]]></source-xml>
+		<source-txt><![CDATA[#
+<div>
+    [
+    $for{item:list}
+        ${item}
+        $if{for.index != for.lastIndex},$end$
+    $end$
+    ]
+</div>]]></source-txt>
 	</entry>
 	<entry key="空循环处理(与for匹配的else)">
 		<description><![CDATA[<h3>循环标签的 else 标记说明：</h3>
 		<p>当其与for循环组合，当for循环执行0次后，与其配合的else节点可以执行（常见于做空循环的友好提示，如没有查询到任何数据）。 </p>
 	    ]]></description>
-		<source><![CDATA[<div xmlns:c="http://www.xidea.org/lite/core">
+		<source-xml><![CDATA[<div xmlns:c="http://www.xidea.org/lite/core">
     [
     <c:for var="item" list="${[]}">
         ${item}
         <c:if test="${for.index != for.lastIndex}">,</c:if>
     </c:for>
     <c:else>
-    '没有记录'
+               没有记录
     </c:else>
     ]
-</div>]]></source>
+</div>]]></source-xml>
+		<source-txt><![CDATA[#LiteTXT
+<div>
+    [
+    $for{item:[]}
+        ${item}
+        $if{for.index != for.lastIndex},$end$
+    $else$
+                没有记录
+    $end$
+    ]
+</div>]]></source-txt>
 	</entry>
 
 	<entry key="通过属性申明变量">
@@ -166,10 +225,15 @@
 		<ul>
 			<li>定义变量，内容来自value属性。 </li>
 		</ul>]]></description>
-		<source><![CDATA[<div xmlns:c="http://www.xidea.org/lite/core">
+		<source-xml><![CDATA[<div xmlns:c="http://www.xidea.org/lite/core">
   <c:var name="myName" value="${'jin '+'dawei'}" />
   [${myName}]
-</div>]]></source>
+</div>]]></source-xml>
+		<source-txt><![CDATA[#LiteTXT
+<div>
+  $var{myName='jin '+'dawei'}
+  [${myName}]
+</div>]]></source-txt>
 	</entry>
 	<entry key="通过子节点内容申明变量">
 		<description><![CDATA[<h3>通过子节点申明变量</h3：
@@ -189,12 +253,19 @@
     "lastName":"dawei"
   }
 }]]></context>
-		<source><![CDATA[<div xmlns:c="http://www.xidea.org/lite/core">
+		<source-xml><![CDATA[<div xmlns:c="http://www.xidea.org/lite/core">
   <c:var name="myName" >
     ${user.firstName} ${user.lastName}
   </c:var>
   [${myName}]
-</div>]]></source>
+</div>]]></source-xml>
+		<source-txt><![CDATA[#LiteTXT
+<div>
+  $var{myName}
+    ${user.firstName} ${user.lastName}
+  $end$
+  [${myName}]
+</div>]]></source-txt>
 	</entry>
 	<entry key="函数申明">
 		<description><![CDATA[<h3>函数申明</h3：
@@ -213,12 +284,19 @@
     "lastName":"dawei"
   }
 }]]></context>
-		<source><![CDATA[<div xmlns:c="http://www.xidea.org/lite/core">
+		<source-xml><![CDATA[<div xmlns:c="http://www.xidea.org/lite/core">
   <c:def name="test(user2)" >
     ${user2.firstName} ${user2.lastName}
   </c:def>
   [${test(user)}]
-</div>]]></source>
+</div>]]></source-xml>
+		<source-txt><![CDATA[#LiteTXT
+<div>
+  $def{test(user2)}
+    ${user2.firstName} ${user2.lastName}
+  $end$
+  [${test(user)}]
+</div>]]></source-txt>
 	</entry>
 
 
@@ -237,10 +315,13 @@
 			<li>xpath确实有点烦琐,但毕竟事标准，标准永远不是最好的，但他是可行的。  </li>
 		</ul>
 	    ]]></description>
-		<source><![CDATA[<div xmlns:c="http://www.xidea.org/lite/core">
+		<source-xml><![CDATA[<div xmlns:c="http://www.xidea.org/lite/core">
   <c:include path="menu.xml" xpath="//entry[@key='PageMesh']/description" >
   </c:include>
-</div>]]></source>
+</div>]]></source-xml>
+		<source-txt><![CDATA[#LiteTXT
+尚未支持
+]]></source-txt>
 	</entry>
 
 	<entry key="PageMesh">
@@ -250,10 +331,14 @@
 		<context><![CDATA[
 {"url":"http://code.google.com/p/lite/wiki/XMLLiteSiteMesh"}
 		]]></context>
-		<source><![CDATA[<!-- 
+		<source-xml><![CDATA[<!-- 
 改功能不便在此演示，希望了解更多，请参看：
 http://code.google.com/p/lite/wiki/XMLLiteSiteMesh
 -->
-<a href="${url}">${url}</a>]]></source>
+<a href="${url}">${url}</a>]]></source-xml>
+-xml>
+		<source-txt><![CDATA[#LiteTXT
+尚未支持
+]]></source-txt>
 	</entry>
 </root>

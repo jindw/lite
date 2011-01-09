@@ -45,7 +45,7 @@ public class DecoratorMapperTest {
 	}
 	public String getDecotatorPage(String path) {
 		Map<String, String> rm = mapper.getFeatrueMap(path);
-	return rm.get(ParseContext.FEATRUE_CONFIG_LAYOUT);
+	return rm.get(ParseContext.FEATRUE_LAYOUT);
 }
 
 }

@@ -17,17 +17,17 @@ import org.xml.sax.SAXException;
 public interface ParseContext extends ResultContext, ParseConfig, ParserHolder {
 	public String NS_CORE = "http://www.xidea.org/lite/core";
 	// 默认值：link|input|meta|img|br|hr
-	public String FEATRUE_HTML_LEAF = "http://www.xidea.org/featrues/lite/html-leaf";
+//	public String FEATRUE_HTML_LEAF = "http://www.xidea.org/lite/featrues/html-leaf";
 	// 默认值为空
-	public String FEATRUE_HTML_TRIM = "http://www.xidea.org/featrues/lite/html-trim";
+	public String FEATRUE_HTML_TRIM = "http://www.xidea.org/lite/featrues/html-trim";
 	// 默认值为空
-	public String FEATRUE_HTML_JAVASCRIPT_COMPRESSOR = "http://www.xidea.org/featrues/lite/html-javascript-compressor";
+	public String FEATRUE_HTML_JAVASCRIPT_COMPRESSOR = "http://www.xidea.org/lite/featrues/html-javascript-compressor";
 	// 默认值为utf-8
-	public String FEATRUE_ENCODING = "http://www.xidea.org/featrues/lite/output-encoding";
+	public String FEATRUE_ENCODING = "http://www.xidea.org/lite/featrues/output-encoding";
 	// 默认值为 text/html
-	public String FEATRUE_MIME_TYPE = "http://www.xidea.org/featrues/lite/output-mime-type";
-	// 默认值为 text/html
-	public String FEATRUE_CONFIG_LAYOUT = "http://www.xidea.org/featrues/lite/config-layout";
+	public String FEATRUE_MIME_TYPE = "http://www.xidea.org/lite/featrues/output-mime-type";
+	// 默认值为 null,推荐用通配符模式：layout='${dir}/layout.xhtml'
+	public String FEATRUE_LAYOUT = "http://www.xidea.org/lite/featrues/config-layout";
 
 	/**
 	 * 给出文件内容或url，解析模版源文件

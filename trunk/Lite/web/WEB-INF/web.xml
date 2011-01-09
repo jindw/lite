@@ -5,6 +5,14 @@
 	version="2.4">
 	<display-name>Lite</display-name>
 	<description>Lite Example</description>
+	<filter>
+		<filter-class>org.xidea.jsi.web.JSIFilter</filter-class>
+		<filter-name>JSIFilter</filter-name>
+	</filter>
+	<filter-mapping>
+		<filter-name>JSIFilter</filter-name>
+		<url-pattern>/scripts/*</url-pattern>
+	</filter-mapping>
 	<servlet>
 		<servlet-name>LiteXML</servlet-name>
 		<servlet-class>

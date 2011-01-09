@@ -13,6 +13,7 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.regex.Pattern;
 
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.parsers.DocumentBuilder;
@@ -197,9 +198,17 @@ public class ParseUtil {
 		return context == null ? openStream(uri) : context.openStream(uri);
 	}
 
+	private static Pattern TXT_HEADER = Pattern.compile("^#.*[\r\n]+");
+	private static Pattern TXT_CDATA_END = Pattern.compile("]]>");
+	
 	public static Document loadXML(String path, ParseContext context)
 			throws SAXException, IOException {
 		URI uri;
+		if(path.startsWith("#")){
+			path = "<out xmlns='http://www.xidea.org/lite/core'><![CDATA["+
+				TXT_CDATA_END.matcher(TXT_HEADER.matcher(path).replaceAll("")).replaceAll("]]]]><![CDATA[>")+
+				"]]></out>";
+		}
 		if (path.startsWith("<")) {
 			uri = createSourceURI(path);
 		} else if (context != null) {

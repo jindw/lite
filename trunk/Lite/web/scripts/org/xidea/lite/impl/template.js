@@ -34,12 +34,12 @@ function TemplateImpl(data,parseContext,runAsLiteCode){
             parseContext = new $import(parseContext)();
         }
         if(typeof data == 'string'){
-        	var data2 = data.replace(/^#.*/,'');
-        	if(data!=data2){
-        		data = data2;
-        	}else{
+//        	var data2 = data.replace(/^#.*/,'');
+//        	if(data!=data2){
+//        		data = data2;
+//        	}else{
         		data = parseContext.createURI(data);
-        	}
+//        	}
         }
         parseContext.parse(data);
         if(runAsLiteCode){
@@ -254,8 +254,14 @@ function processFor(context, data, out) {
             //hack $for as buf
             forStatus = [];
             //hack len as key
-            for(len in data){
-                forStatus.push({key:len,value:data[len]});
+            if(typeof items == 'number'){
+            	while(items>0){
+            		forStatus.unshift(items--);
+            	}
+            }else{
+            	for(len in items){
+                	forStatus.push(len);
+            	}
             }
             items = forStatus;
         }

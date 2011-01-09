@@ -66,20 +66,17 @@ height:38px;
 width:95%;
 background:#ddd;
 height:85px;
-white-space:nowrap;
+/*white-space:nowrap;*/
 }
 #optimizedResult,#htmlResult{
 height:125px
 }
 			/*]]> /* */
 		</style>
-		<script src="scripts/?path=boot.js"></script>
+		<script src="scripts/?path=boot.js"></script><script>$import("org.xidea.lite.web.*",true);</script>
 		<script>
-		$import("org.xidea.lite.web.*",true);
-		</script>
-		<script>
-		var fn=liteFunction("#\n$if{test} test${test} $else$ test else $end$","test");
-		alert(fn.render(1));
+		//var fn=liteFunction("#\n$if{test} test${test} $else$ test else $end$","test");
+		//alert(fn.render(1));
 		</script>
 	</head>
 	<body>
@@ -151,6 +148,12 @@ height:125px
 			</table>
 		</div>
 		<div id="menu">
+			<form>
+				<h3>选择实例语法</h3>
+				<label onclick="TestCase.initialize('xml')" for="syntax_lite_xml"><input type="radio" checked="checked" name="syntax_lite" id="syntax_lite_xml"/>LiteXML</label>
+				<label onclick="TestCase.initialize('txt')" for="syntax_lite_txt"><input type="radio" name="syntax_lite" id="syntax_lite_txt"/>LiteTXT</label>
+				<hr/>
+			</form>
 			<ul id="menuContent"></ul>
 			<div class="goto-lite">
 				<a href="http://code.google.com/p/lite/">
@@ -161,7 +164,8 @@ height:125px
 		</div>
 		
 		<script>
-		TestCase.initialize();
+		document.getElementById('syntax_lite_xml').checked=true;
+		TestCase.initialize('xml');
 		</script>
 		
 		<style type="text/css">

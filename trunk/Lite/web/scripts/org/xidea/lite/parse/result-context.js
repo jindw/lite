@@ -40,25 +40,6 @@ ResultContext.prototype = {
 	        throw new Error();
 	    }
     },
-    /**
-	 * 添加静态文本（不编码）
-	 * @param <String>text
-	 * @param <boolean>encode
-	 * @param <char>escapeQute
-	 */
-	append:function( text,  encode,  escapeQute){
-		if(encode){
-			if(escapeQute == '"'){
-				var replaceExp = /[<&"]/g;
-			}else if(escapeQute == '\''){
-				var replaceExp = /[<&']/g;
-			}else{
-				var replaceExp = /[<&]/g;
-			}
-			text = text.replace(replaceExp,xmlReplacer);
-		}
-		this.result.push(text);
-	},
 
 	/**
 	 * 添加模板指令

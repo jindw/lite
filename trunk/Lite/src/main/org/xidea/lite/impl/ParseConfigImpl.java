@@ -26,9 +26,9 @@ import org.xml.sax.InputSource;
  * {
  *   "includes":"^[\\\\/]example[\\\\/][^\\\\/]*\.xhtml$", 
  *   "excludes":"^$",//不匹配
- *   "featrueMap":{ "http://www.xidea.org/featrues/lite/layout":"/layout.xhtml",
- *     "http://www.xidea.org/featrues/lite/output-encoding":"utf-8",
- *     "http://www.xidea.org/featrues/lite/output-mime-type":"text/html",
+ *   "featrueMap":{ "http://www.xidea.org/lite/featrues/layout":"/layout.xhtml",
+ *     "http://www.xidea.org/lite/featrues/output-encoding":"utf-8",
+ *     "http://www.xidea.org/lite/featrues/output-mime-type":"text/html",
  *     "http://www.xidea.org/featrue/lite/html-javascript-compressor":"org.jside.jsi.tools.JSACompressor" 
  *   }, 
  *   "extensionMap":[]

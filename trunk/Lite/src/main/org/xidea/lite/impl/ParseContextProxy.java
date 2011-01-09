@@ -19,7 +19,6 @@ import org.xidea.lite.parse.ResultContext;
 import org.xml.sax.SAXException;
 
 abstract public class ParseContextProxy implements ParseContext {
-	@SuppressWarnings("unused")
 	private static Log log = LogFactory.getLog(ParseContextProxy.class);
 	
 
@@ -79,7 +78,18 @@ abstract public class ParseContextProxy implements ParseContext {
 
 
 	public final Document loadXML(URI uri) throws SAXException, IOException {
-		return ParseUtil.parse(uri, (ParseContext) this);
+		try{
+			return ParseUtil.parse(uri, (ParseContext) this);
+		}catch (SAXException e) {
+			log.error("XML 解析失败："+uri,e);
+			throw e;
+		}catch (IOException e) {
+			log.error("模板装载失败："+uri,e);
+			throw e;
+		}catch (RuntimeException e) {
+			log.error("XML装载失败："+uri,e);
+			throw e;
+		}
 	}
 
 //	public final String getDecotatorPage(String path) {
@@ -108,9 +118,9 @@ abstract public class ParseContextProxy implements ParseContext {
 		resultContext.append(text);
 	}
 
-	public final void append(String text, boolean encode, char escapeQute) {
-		resultContext.append(text, encode, escapeQute);
-	}
+//	public final void append(String text,char escapeQute) {
+//		resultContext.append(text, escapeQute);
+//	}
 
 	public final void appendAll(List<Object> instruction) {
 		resultContext.appendAll(instruction);
@@ -165,9 +175,9 @@ abstract public class ParseContextProxy implements ParseContext {
 		return resultContext.reset(mark);
 	}
 
-	public final int getDepth() {
-		return resultContext.getDepth();
-	}
+//	public final int getDepth() {
+//		return resultContext.getDepth();
+//	}
 
 	public final int getType(int offset) {
 		return resultContext.getType(offset);

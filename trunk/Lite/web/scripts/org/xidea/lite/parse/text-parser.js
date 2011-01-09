@@ -47,9 +47,9 @@ function parseText(text,context,chain,textParsers){
 		}
 		if (nip != null) {
 			var escapeCount = countEescape(text, p$);
-			context.append(text
-					.substring(start, p$ - ((escapeCount + 1) >>1)), encode,
-					qute);
+			appendText(context,
+					text.substring(start, p$ - ((escapeCount + 1) >>1)),
+					encode,	qute);
 			if ((escapeCount & 1) == 1) {// escapsed
 				start = nextPosition(context, text, p$);
 			} else {
@@ -71,8 +71,27 @@ function parseText(text,context,chain,textParsers){
 		}
 	} while (start < len);
 	if (start < len) {
-		context.append(text.substring(start), encode, qute);
+		appendText(context,text.substring(start), encode, qute);
 	}
+}
+/**
+ * 添加静态文本（不编码）
+ * @param <String>text
+ * @param <boolean>encode
+ * @param <char>escapeQute
+ */
+function appendText(context,text, encode,  escapeQute){
+	if(encode){
+		if(escapeQute == '"'){
+			var replaceExp = /[<&"]/g;
+		}else if(escapeQute == '\''){
+			var replaceExp = /[<&']/g;
+		}else{
+			var replaceExp = /[<&]/g;
+		}
+		text = text.replace(replaceExp,xmlReplacer);
+	}
+	context.append(text);
 }
 function nextPosition(context, text, p$) {
 	context.append(text.substring(p$, p$ + 1));

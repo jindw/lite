@@ -11,7 +11,6 @@ var TestCase = {
 	    try{
 	    	var parser = new ParseContext();
 	    	var u = parser.createURI(templateSource);
-	    	
 	    	parser.parse(u);
 	    	var jsonCode = parser.toList();
 	        var jsonTemplate = new TemplateImpl(jsonCode);
@@ -19,7 +18,7 @@ var TestCase = {
 	        $log.error("模板解析失败（JSON）",e);
 	        return false;
 	    }
-	    E("templateCode").value = liteFormat(jsonCode,false);
+	    setText("templateCode",liteFormat(jsonCode,false));
 	    try{
 	    	var jsTemplate = new TemplateImpl(templateSource);
 	    	var jsCode = jsTemplate.data+'';
@@ -27,8 +26,7 @@ var TestCase = {
 	        $log.error("模板解析失败（JS）",e);
 	        return false;
 	    }
-	    E("optimizedResult").value = jsCode;
-	    
+	    setText("optimizedResult",jsCode);
 	    var templateResult = E("templateResult");
 	    var htmlResult = E("htmlResult");
 	    var step = 5;
@@ -62,7 +60,7 @@ var TestCase = {
 	        "jsTime:"+jsTime,
 	        "json:"+(new Date()-t1))
 	        
-	        templateResult.value = jsonResult;
+	        setText(templateResult,jsonResult);
 	    }catch(e){
 	        $log.error("Lite JSON模板渲染错误",e)
 	    }
@@ -85,7 +83,7 @@ var TestCase = {
 	        templateResult.scrollIntoView();
 	    }catch(e){}
 	},
-	initialize:function(){
+	initialize:function(type){
 		var url = window.location.href;
 		url = url.replace(/[^\/]*$/,"menu.xml");
 		var xhr = new XMLHttpRequest();
@@ -97,7 +95,7 @@ var TestCase = {
 					var xml = new ActiveXObject("Microsoft.XMLDOM");
 					xml.loadXML(xhr.responseText);
 				}
-				updateData(xml)
+				updateData(xml,type)
 				xhr = null;
 			}
 		}
@@ -118,16 +116,19 @@ var TestCase = {
 		}
 	},
 	setSource:function(jsonSource,templateSource){
-		E("jsonSource").value = jsonSource;
-		E("templateSource").value = templateSource;
+		setText("jsonSource",jsonSource);
+		setText("templateSource",templateSource);
 	},
 	liteFormat:function(text){
 	    confirm(liteFormat(parseJSON(text),true));
 	}
 }
 var data;
+function setText(id,text){
+	E(id).value = text.replace(/\r?\n|\r/g,'\r\n');//ie
+}
 function E(id){
-	return document.getElementById(id);
+	return id.tagName?id:document.getElementById(id);
 }
 function getText(parentNode,tagName){
 	var node = parentNode.firstChild;
@@ -145,17 +146,19 @@ function getText(parentNode,tagName){
 	}
 }
 
-function updateData(doc){
+function updateData(doc,type){
 	var entrys = doc.getElementsByTagName("entry");
 	var defaultContext = getText(doc.documentElement,"context")||"{}"
 	var buf = [];
 	data = {};
 	for(var i=0;i<entrys.length;i++){
 		var entry = entrys[i];
-		var context = getText(entry,"context") || defaultContext;
-		var source = getText(entry,"source");
-		var description = getText(entry,"description");
 		var key = entry.getAttribute("key");
+		var context = getText(entry,"context") || defaultContext;
+		var source = getText(entry,
+			'source-'+(type=='txt'?"txt":"xml"));
+
+		var description = getText(entry,"description");
 		data[key] = {
 			"context":context.replace(/^\s+|\s+$/g,''),
 			"source":source.replace(/^\s+|\s+$/g,''),
@@ -164,5 +167,6 @@ function updateData(doc){
 		buf.push("<li onclick='TestCase.prepare(this,"+stringifyJSON(key)+")'>"+key+"</li>")
 	}
 	//alert(buf.join(""))
+	
 	E("menuContent").innerHTML = buf.join("");
 }

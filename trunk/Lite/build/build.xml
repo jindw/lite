@@ -251,7 +251,18 @@
 			<arg value="-outputExported" />
 			<arg value="${basedir}/build/dest/jslite/demo.js" />
 		</java>
-		
+		<copy tofile="${basedir}/build/dest/jslite/demo-prefix.html" file="${basedir}/web/demo.html"/>
+		<replaceregexp replace="&lt;script>" match='&lt;script src="scripts/\?path=boot.js".*([\s\S]+)$' file="${basedir}/build/dest/jslite/demo-prefix.html" encoding="utf-8">
+			
+		</replaceregexp>
+		<copy tofile="${basedir}/build/dest/jslite/demo-postfix.html" file="${basedir}/web/demo.html"/>
+		<replaceregexp replace="&lt;/script>" match='^([\s\S]+)&lt;script src="scripts/\?path=boot.js".*' file="${basedir}/build/dest/jslite/demo-postfix.html" encoding="utf-8">
+		</replaceregexp>
+		<concat destfile="${basedir}/build/dest/jslite/demo.html" encoding="utf-8">
+			<path path="${basedir}/build/dest/jslite/demo-prefix.html"></path>
+			<path path="${basedir}/build/dest/jslite/demo.js"></path>
+			<path path="${basedir}/build/dest/jslite/demo-postfix.html"></path>
+		</concat>
 
 	</target>
 	<target name="build" depends="compress,package,php-example">
@@ -273,6 +284,20 @@
 				<include name="Lite.jar" />
 			</zipfileset>
 		</zip>
+	</target>
+	<target name="javadoc">
+		<javadoc charset="UTF-8" docencoding="UTF-8"  encoding="UTF-8" sourcepath="src/main" destdir="web/doc/api/2_0" linksource="true">
+			<fileset dir="src/main">
+				<include name="**.java"/>
+			</fileset>
+			<classpath>
+				<fileset dir="web/WEB-INF/lib">
+					<include name="**/*.jar" />
+				</fileset>
+			</classpath>
+		</javadoc>
+		<replace dir="web/doc/api/2_0/src-html" includes="**/*.html" token="&lt;HTML>" value='&lt;HTML>&lt;META http-equiv="Content-Type" content="text/html; charset=UTF-8">'>
+		</replace>
 	</target>
 
 	<target name="static">

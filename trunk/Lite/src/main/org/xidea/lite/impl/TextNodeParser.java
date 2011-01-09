@@ -1,5 +1,7 @@
 package org.xidea.lite.impl;
 
+import java.io.StringWriter;
+
 import org.xidea.lite.Template;
 import org.xidea.lite.parse.NodeParser;
 import org.xidea.lite.parse.ParseChain;
@@ -63,9 +65,8 @@ public class TextNodeParser implements NodeParser<String> {
 			}
 			if (nip != null) {
 				int escapeCount = countEescape(text, p$);
-				context.append(text
-						.substring(start, p$ - (escapeCount + 1) / 2), encode,
-						qute);
+				String t = text.substring(start, p$ - (escapeCount + 1) / 2);
+				appendText(context,t,encode,qute);
 				if ((escapeCount & 1) == 1) {// escapsed
 					start = nextPosition(context, text, p$);
 				} else {
@@ -86,10 +87,47 @@ public class TextNodeParser implements NodeParser<String> {
 			}
 		} while (start < length);
 		if (start < length) {
-			context.append(text.substring(start), encode, qute);
+			appendText(context,text.substring(start),encode,  qute);
 		}
 	}
-	
+
+	public void appendText(ParseContext context,String text,boolean encode, char quteChar) {
+		if(encode){
+			text = encodeText(text, quteChar);
+		}
+		context.append(text);
+	}
+
+	private String encodeText(String text, int quteChar) {
+		StringWriter out = new StringWriter();
+		for (int i = 0; i < text.length(); i++) {
+			int c = text.charAt(i);
+			switch (c) {
+			case '<':
+				out.write("&lt;");
+				break;
+			case '>':
+				out.write("&gt;");
+				break;
+			case '&':
+				out.write("&amp;");
+				break;
+			case '\'':
+			case '"':
+				if (quteChar == c) {
+					out.write("&#");
+					out.write(c);
+					out.write(';');
+				} else {
+					out.write((char)c);
+				}
+				break;
+			default:
+				out.write(c);
+			}
+		}
+		return out.toString();
+	}
 
 	protected int nextPosition(ParseContext context, final String text, int p$) {
 		context.append(text.substring(p$, p$ + 1));

@@ -50,8 +50,8 @@ public interface ResultContext {
 	 * @see org.xidea.lite.impl.ResultContextImpl#getDepth()
 	 * @return
 	 */
-	public int getDepth();
-
+//	public int getDepth();
+//
 	/**
 	 * 是否保留空白（默认为false）
 	 * @return
@@ -64,7 +64,7 @@ public interface ResultContext {
 	 */
 	public int getType(int offset);
 
-	public Object parseEL(String eltext);
+	public Object parseEL(String el);
 
 	/**
 	 * 获取当前正在解析的模版URI
@@ -99,22 +99,24 @@ public interface ResultContext {
 	 */
 	public void append(String text);
 
-	public void append(String text, boolean encode, char escapeQute);
+//	/**
+//	 * 
+//	 * @param text
+//	 * @param escapeQute
+//	 */
+//	public void append(String text, char escapeQute);
 	
-
-	/**
-	 * 添加一段呆编译的中间代码
-	 * @param item
-	 */
-//	public void append(ResultItem item);
 
 	/**
 	 * 添加模板指令
 	 * 
-	 * @param text
+	 * @param instruction
 	 */
 	public void appendAll(List<Object> instruction);
 
+	/**
+	 * @param el
+	 */
 	public void appendEL(Object el);
 
 	public void appendXA(String name, Object el);
@@ -129,7 +131,7 @@ public interface ResultContext {
 	 */
 	public void appendElse(Object testEL);
 
-	public void appendFor(String var, Object itemsEL, String status);
+	public void appendFor(String var, Object listEL, String status);
 
 	public int appendEnd();
 

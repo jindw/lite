@@ -1,6 +1,5 @@
 package org.xidea.lite.impl;
 
-import java.io.StringWriter;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -69,47 +68,6 @@ public class ResultContextImpl implements ResultContext {
 //		this.result.add(item);
 //	}
 
-	public void append(String text, boolean encode, char quteChar) {
-		if (encode) {
-			text = encodeText(text, quteChar);
-		}
-		append(text);
-	}
-
-	private String encodeText(String text, int quteChar) {
-		StringWriter out = new StringWriter();
-		for (int i = 0; i < text.length(); i++) {
-			int c = text.charAt(i);
-			switch (c) {
-			case '<':
-				out.write("&lt;");
-				break;
-			case '>':
-				out.write("&gt;");
-				break;
-			case '&':
-				out.write("&amp;");
-				break;
-			case '\'':
-				if (quteChar == c) {
-					out.write("&#39;");
-				} else {
-					out.write("'");
-				}
-				break;
-			case '"':
-				if (quteChar == c) {
-					out.write("&#34;");
-				} else {
-					out.write("\"");
-				}
-				break;
-			default:
-				out.write(c);
-			}
-		}
-		return out.toString();
-	}
 
 	private void append(Object[] object) {
 		result.add(object);
