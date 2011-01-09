@@ -40,6 +40,13 @@ ResultContext.prototype = {
 	        throw new Error();
 	    }
     },
+    /**
+	 * 添加静态文本（不编码）
+	 * @param <String>text
+	 */
+	append:function( text){
+		this.result.push(text);
+	},
 
 	/**
 	 * 添加模板指令
@@ -220,17 +227,3 @@ function buildTreeResult(result){
 	return defs.concat(current);
 }
 
-function xmlReplacer(c){
-    switch(c){
-        case '<':
-          return '&lt;';
-        case '>':
-          return '&gt;';
-        case '&':
-          return '&amp;';
-        case "'":
-          return '&#39;';
-        case '"':
-          return '&#34;';
-    }
-}

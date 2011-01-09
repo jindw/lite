@@ -253,7 +253,6 @@
 		</java>
 		<copy tofile="${basedir}/build/dest/jslite/demo-prefix.html" file="${basedir}/web/demo.html"/>
 		<replaceregexp replace="&lt;script>" match='&lt;script src="scripts/\?path=boot.js".*([\s\S]+)$' file="${basedir}/build/dest/jslite/demo-prefix.html" encoding="utf-8">
-			
 		</replaceregexp>
 		<copy tofile="${basedir}/build/dest/jslite/demo-postfix.html" file="${basedir}/web/demo.html"/>
 		<replaceregexp replace="&lt;/script>" match='^([\s\S]+)&lt;script src="scripts/\?path=boot.js".*' file="${basedir}/build/dest/jslite/demo-postfix.html" encoding="utf-8">

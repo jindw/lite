@@ -93,6 +93,20 @@ function appendText(context,text, encode,  escapeQute){
 	}
 	context.append(text);
 }
+function xmlReplacer(c){
+    switch(c){
+        case '<':
+          return '&lt;';
+        case '>':
+          return '&gt;';
+        case '&':
+          return '&amp;';
+        case "'":
+          return '&#39;';
+        case '"':
+          return '&#34;';
+    }
+}
 function nextPosition(context, text, p$) {
 	context.append(text.substring(p$, p$ + 1));
 	return p$ + 1;

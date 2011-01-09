@@ -1,0 +1,54 @@
+﻿<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+		<title>Lite2 for static web</title>
+		<style>
+		textarea{
+		width:90%;
+		height:100px;
+		}
+		</style>
+		<script src="lite-compiler.js"></script>
+		<script src="scripts/?path=boot.js"></script><script>$import("org.xidea.lite.web:*")</script>
+	</head>
+	<body>
+		<p>火麒麟模板的无依赖纯JavaScript版，可在文件系统上直接打开网页运行，也可以通过JSA等代码压缩工具压缩优化（自动将模板编译成js函数代码，删除编译器代码）</p>
+		<h3>函数参考 </h3>
+		<ul>
+			<li>liteFunction(source,params)
+				<p>给出源代码（源代码文本或者模板文件url），参数表，创建模板函数。</p>
+				<textarea ondblclick="window.eval(this.value)" title="双击运行">
+var fn=liteFunction("#\n$if{test} test${test} $else$ test else $end$","test");
+
+alert("目标函数代码："  +  fn+
+		"\n\n运行结果："  +  fn(1));
+				</textarea>
+				<div onclick="window.eval(document.getElementsByTagName('textarea')[0].value)" style="background:yellow;color:red;float:right;width:40%">双击文本框运行代码</div>
+			</li>
+			
+			<li>liteTemplate(source)
+				<p>通过模板源码（源代码文本或者模板文件url）创建模板对象。对象包含render(map) 方法用来渲染模板</p>
+				<textarea ondblclick="window.eval(this.value)" title="双击运行">
+var tpl=liteTemplate("<div><c:if test='${test}'> test${test} </c:if><c:else> test else </c:else></div>");
+
+alert("函数代码："+tpl.compileData+"\n\n运行结果"+tpl.render({test:1}));
+				</textarea>
+			</li>
+		</ul>
+		<h3>XML 语法 </h3>
+		<p><ul>
+			<li>&ltc:if test="${test}">...&lt/c:if></li>
+			<li>&ltc:else test="${test}">...&lt/c:else></li>
+			<li>&ltc:for var="item" list="${items}">...&lt/c:for></li>
+			<li>&ltc:var name="var1">...&lt/c:var></li>
+			<li>....</li>
+		</ul></p>
+		<h3>文本语法 </h3>
+		<p>
+		为了标明源码是文本语法，第一行需要#开头，不输出（可做编译配置用）。
+		<ul>
+			<li>$if,$else$ $for $var</li>
+			<li>....</li>
+		</ul></p>
+	</body>
+</html>
