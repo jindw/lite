@@ -37,8 +37,8 @@ public class LiteCompiler {
 	public static void main(String[] args) {
 		if(args == null || args .length == 0){
 			args = new String[]{
-					//"-root","D:\\workspace\\FileServer/src/main/org/jside/filemanager/","-litecached","D:\\workspace\\FileServer/build/dest/lite","-nodeParsers","org.xidea.lite.parser.impl.HTMLNodeParser"
-					"-root","D:\\workspace\\FileServer/src/main/org/jside/filemanager/","-litecached","D:\\workspace\\FileServer/build/dest/lite"
+					//"-root","D:\\workspace\\FileServer/src/main/org/jside/filemanager/","-litecode","D:\\workspace\\FileServer/build/dest/lite","-nodeParsers","org.xidea.lite.parser.impl.HTMLNodeParser"
+					"-root","D:\\workspace\\FileServer/src/main/org/jside/filemanager/","-litecode","D:\\workspace\\FileServer/build/dest/lite"
 			};
 		}
 		new LiteCompiler(args).execute();
@@ -64,7 +64,7 @@ public class LiteCompiler {
 		if(config == null){
 			config = new File(root,"/WEB-INF/lite.xml");
 		}
-		this.parseConfig = new ParseConfigImpl(root.toURI(),config.toURI());
+		this.parseConfig = new ParseConfigImpl(root.toURI(),config.exists()?config.toURI():null);
 		engine = new HotTemplateEngine(parseConfig);
 
 		litecode = createIfNotExist(litecode, "WEB-INF/litecode/");
@@ -91,6 +91,7 @@ public class LiteCompiler {
 			String encoding =  fm.get(ParseContext.FEATRUE_ENCODING);
 			{
 				File cachedFile = new File(litecode, path);
+				cachedFile.getParentFile().mkdirs();
 				Writer out = new OutputStreamWriter(new FileOutputStream(
 						cachedFile),encoding);
 				try {
@@ -124,7 +125,7 @@ public class LiteCompiler {
 	}
 
 	public void processDir(final File dir, final String path) {
-		log.info("处理目录："+dir+","+path);
+		log.info("处理目录："+dir+path);
 		dir.listFiles(new FileFilter() {
 			public boolean accept(File file) {
 				if (!file.equals(result) && !file.equals(litecode)) {

@@ -40,6 +40,17 @@ public class ELTest {
 		System.out.println(Double.NEGATIVE_INFINITY);
 		testEL(null,"'abc'*123");
 	}
+
+	@Test
+	public void testIn(){
+		String expression = "srcPort in [1,2,30]";  
+		Expression expressionInstance = expressionFactory.create(expression); 
+		HashMap variables = new HashMap();  
+		variables.put("srcPort", 2);  
+		System.out.println(expressionInstance.evaluate(variables));  
+	}
+	
+	
 	public static Object testEL(Object context,String source){
 				String contextJSON;
 		System.out.println("测试表达式："+source+",context:"+context);

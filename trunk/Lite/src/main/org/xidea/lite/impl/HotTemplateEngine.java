@@ -80,7 +80,7 @@ public class HotTemplateEngine extends TemplateEngine {
 
 	public String getLiteCode(String path) {
 		try {
-			if(buildFromCode(path) == null){
+			if(buildFromCode(path) != null){
 				URI uri = this.compiledBase.resolve(path.substring(1));
 				return loadText(ParseUtil.openStream(uri));
 			}
@@ -132,6 +132,9 @@ public class HotTemplateEngine extends TemplateEngine {
 
 	@SuppressWarnings("unchecked")
 	private Template buildFromCode(String path) throws IOException {
+		if(this.compiledBase == null){
+			return null;
+		}
 		URI uri = this.compiledBase.resolve(path.substring(1));
 		InputStream in = ParseUtil.openStream(uri);
 		if(in == null){
