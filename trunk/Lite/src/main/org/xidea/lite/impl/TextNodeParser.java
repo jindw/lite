@@ -42,6 +42,7 @@ public class TextNodeParser implements NodeParser<String> {
 	 */
 	protected void parse(ParseContext context, final String text,
 			final boolean encode, final char qute) {
+		//尾部优先
 		TextParser[] textParsers = context.getTextParsers();
 		final int length = text.length();
 		int start = 0;
@@ -50,7 +51,8 @@ public class TextNodeParser implements NodeParser<String> {
 			int p$ = length + 1;
 			{
 				int pri = 0;
-				for (TextParser ip : textParsers) {
+				for (int i = textParsers.length-1;i>=0;) {
+					TextParser  ip = textParsers[i--];
 					int p$2 = ip.findStart(text, start, p$);
 					int pri2 = ip.getPriority();
 					if (p$2 >= start ){

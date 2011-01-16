@@ -77,6 +77,10 @@ abstract public class ParseContextProxy implements ParseContext {
 	}
 
 
+	public final String loadText(URI uri) throws IOException {
+		return ParseUtil.loadText(uri, (ParseContext) this);
+	}
+
 	public final Document loadXML(URI uri) throws SAXException, IOException {
 		try{
 			return ParseUtil.parse(uri, (ParseContext) this);

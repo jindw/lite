@@ -53,15 +53,22 @@ public interface ParseContext extends ResultContext, ParseConfig, ParserHolder {
 	public InputStream openStream(URI url);
 
 	/**
-	 * 装载指定文档。数据源需要从ResourceContext中获取资源数据
+	 * 装载指定XML文档。
 	 * 
-	 * @see ResourceContext#openStream(parentURI)
-	 * @param createURI
+	 * @param uri
 	 * @return
 	 * @throws SAXException
 	 * @throws IOException
 	 */
-	public Document loadXML(URI parentURI) throws SAXException, IOException;
+	public Document loadXML(URI uri) throws SAXException, IOException;
+	/**
+	 * 装载指定资源文本。
+	 * 
+	 * @param uri
+	 * @return
+	 * @throws IOException
+	 */
+	public String loadText(URI uri) throws IOException;
 
 	
 	public ParseContext createNew();

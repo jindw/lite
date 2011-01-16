@@ -1,6 +1,7 @@
 package org.xidea.lite.test;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 
@@ -12,6 +13,7 @@ import org.xidea.lite.impl.ParseConfigImpl;
 import org.xidea.lite.impl.ParseContextImpl;
 import org.xidea.lite.impl.ParseUtil;
 import org.xidea.lite.parse.ParseContext;
+import org.xml.sax.SAXException;
 
 public class LiteTestUtil {
 	private static boolean useJS = false;
@@ -52,21 +54,20 @@ public class LiteTestUtil {
 		return parseContext.toList();
 	}
 
-	public static List<Object> parse(String source) {
-		URI uri = ParseUtil.createSourceURI(source);
-		ParseContext parseContext = LiteTestUtil.buildParseContext(uri);
-		parseContext.parse(loadXML(source, parseContext));
+	public static List<Object> parse(String source) throws SAXException, IOException {
+		ParseContext parseContext = LiteTestUtil.buildParseContext(URI
+				.create("classpath:///"));
+		parseContext.parse(ParseUtil.loadXML(source, parseContext));
 		return parseContext.toList();
 	}
 
 	public static Document loadXML(String source, ParseContext parseContext) {
 		try {
-			URI uri = ParseUtil.createSourceURI(source);
 			if (parseContext == null) {
 				parseContext = LiteTestUtil.buildParseContext(URI
 						.create("classpath:///"));
 			}
-			return parseContext.loadXML(uri);
+			return ParseUtil.loadXML(source,parseContext);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

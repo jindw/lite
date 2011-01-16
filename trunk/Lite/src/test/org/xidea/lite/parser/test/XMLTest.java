@@ -48,7 +48,7 @@ public class XMLTest {
 
 	@Test
 	public void runMacroTest() throws Exception {
-		System.out.println(ParseUtil.createSourceURI("<xml a='1'/>"));
+//		System.out.println(ParseUtil.createSourceURI("<xml a='1'/>"));
 		runTest("MacroTest");
 	}
 	@Test

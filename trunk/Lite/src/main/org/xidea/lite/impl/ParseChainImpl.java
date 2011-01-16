@@ -23,8 +23,8 @@ public class ParseChainImpl extends ParseContextProxy implements ParseChain {
 	private int index = 0;
 
 	ParseChain getNext(){
-		if(next == null && index+1<parsers.length){
-			next = new ParseChainImpl(context,parsers,index+1);
+		if(next == null && index>0){
+			next = new ParseChainImpl(context,parsers,index-1);
 		}
 		return next;
 	}
@@ -93,8 +93,8 @@ public class ParseChainImpl extends ParseContextProxy implements ParseChain {
 		context.addTextParser(textParser);
 		
 	}
-	public void addExtension(String namespace, String packageName) {
-		context.addExtension(namespace, packageName);
+	public void addExtension(String namespace, Object packageObject) {
+		context.addExtension(namespace, packageObject);
 		
 	}
 	public void addNodeParser(NodeParser<? extends Object> nodeParser) {

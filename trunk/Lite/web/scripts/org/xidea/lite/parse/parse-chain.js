@@ -17,7 +17,7 @@ function buildTopChain(context){
 function addChainAddon(TopChain,context){
 	TopChain.prototype = context;
 	var pt = TopChain.prototype = new TopChain();
-	pt.index = 0;
+	pt.index = context.nodeParsers.length-1;
 	pt.next = doNext;
 	pt.buildNext = buildNext;
 	pt.constructor = TopChain;
@@ -33,8 +33,8 @@ function doNext(node){
 	}
 }
 function buildNext(){
-	var index = (this.index||0) +1;
-	if(this.nodeParsers.length>index){
+	var index = this.index-1;
+	if(index>=0){
 		var n = new this.constructor();
 		n.index = index
 		return this.nextChain = n;

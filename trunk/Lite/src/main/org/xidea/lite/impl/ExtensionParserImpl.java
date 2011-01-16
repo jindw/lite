@@ -31,14 +31,8 @@ public class ExtensionParserImpl implements ExtensionParser {
 		proxy = rt.wrapToJava(impl, ExtensionParser.class);
 		reset();
 	}
-
-	public void addExtensionPackage(String namespace, String packageName) {
-		proxy.addExtensionPackage(namespace, packageName);
-		reset();
-	}
-
-	public void addExtensionObject(String namespace, Object parserMap) {
-		proxy.addExtensionObject(namespace, parserMap);
+	public void addExtension(String namespace, Object parserMap) {
+		proxy.addExtension(namespace, parserMap);
 		reset();
 	}
 
@@ -109,11 +103,11 @@ public class ExtensionParserImpl implements ExtensionParser {
 				String name = el.getNodeName();
 				name = formatName(name);
 				if (parserMap.containsKey(name)) {
-					rt.invoke(null, parserMap.get(name), el, context, chain);
+					rt.invoke(chain, parserMap.get(name), el);
 					return true;
 				} else if (parserMap.containsKey("")) {
 					System.out.println(parserMap);
-					rt.invoke(null, parserMap.get(""), el, context, chain);
+					rt.invoke(chain, parserMap.get(""), el);
 					return true;
 				}else{
 					//System.out.println(el.getTagName());
@@ -178,7 +172,7 @@ public class ExtensionParserImpl implements ExtensionParser {
 
 	private boolean parseBefore(Object fn, Attr attr, ParseContext context,
 			ParseChain chain) {
-		rt.invoke(null, fn, attr, context, chain);
+		rt.invoke(chain, fn, attr);
 		return true;
 	}
 
@@ -205,10 +199,10 @@ public class ExtensionParserImpl implements ExtensionParser {
 			if (onMap != null) {
 				String name = formatName(attr.getName());
 				if (onMap.containsKey(name)) {
-					rt.invoke(null, onMap.get(name), attr, context, chain);
+					rt.invoke(chain, onMap.get(name), attr);
 					return true;
 				} else if (onMap.containsKey("")) {
-					rt.invoke(null, onMap.get(""), attr, context, chain);
+					rt.invoke(chain, onMap.get(""), attr);
 					return true;
 				}
 			}

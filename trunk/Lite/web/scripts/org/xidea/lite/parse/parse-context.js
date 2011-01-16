@@ -35,16 +35,24 @@ ParseContext.prototype = {
 		for(var len = extensions.length,i=0;i<len;i++){
 			var ext = extensions[i];
 			var impl = ext['package'];
-			if(/[\\\/]/.test(impl)){
-				
-			}
-			extensionParser.addExtensionPackage(ext.namespace,impl)
+//			if(/[\\\/]/.test(impl)){
+//			}
+			extensionParser.addExtension(ext.namespace,impl)
 		}
-    	this.nodeParsers = [parseExtension,parseDefaultXMLNode,parseText2];
+    	this.nodeParsers = [parseText2,parseDefaultXMLNode,parseExtension];
     	this.textParsers = [extensionParser];
     	this.extensionParser = extensionParser;
 	    this.result = new ResultContext();
 	    this.topChain = buildTopChain(this);
+	},
+	addNodeParser:function(np){
+		this.nodeParsers.push(np);
+	},
+	addTextParser:function(tp){
+		this.textParsers.push(tp);
+	},
+	addExtension:function(ns,pkg){
+		this.extensionParser.addExtension(ns,pkg);
 	},
 	parseText:function(source, textType) {
 		switch(textType){
@@ -118,13 +126,27 @@ ParseContext.prototype = {
     	this.currentURI = new URI(uri);
     },
     openStream:function(uri){
+//    	//only for java
+//    	if(uri.scheme == 'lite'){
+//    		var path = uri.path+(uri.query||'');
+//    		path = path.replace(/^\//,'./')
+//    		uri = this.config.root.resolve(path);
+//    	}
+//    	return Packages.org.xidea.lite.impl.ParseUtil.openStream(uri)
+		throw new Error("only for java");
+    },
+    loadText:function(uri){
     	//only for java
     	if(uri.scheme == 'lite'){
     		var path = uri.path+(uri.query||'');
     		path = path.replace(/^\//,'./')
     		uri = this.config.root.resolve(path);
     	}
-    	return Packages.org.xidea.lite.impl.ParseUtil.openStream(uri)
+    	var xhr = new XMLHttpRequest();
+	    xhr.open("GET",url,false)
+	    xhr.send('');
+	    ////text/xml,application/xml...
+	    return xhr.responseText;
     },
     createNew:function(){
     	return new ParseContext(this.config,this.currentURI);

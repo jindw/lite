@@ -50,7 +50,23 @@ function parseXMLByURL(url){
     xhr.send('');
     ////text/xml,application/xml...
     var xml = /\/xml/.test(xhr.getResponseHeader("Content-Type")) && xhr.responseXML;//chrome 在content-type 为apllication/xml+xhtml时，responseXML为空
-    return xml || parseXMLByText(xhr.responseText)
+    if(xml){
+    	xml = addInst(xml,xhr.responseText);
+
+    }else{
+    	return parseXMLByText(xhr.responseText)
+    }
+}
+function addInst(xml,s){
+    var p = /^\s*<\?(\w+)\s+(.*)\?>/;
+	var m;
+	var first = xml.firstChild;
+	while(m = s.match(p)){
+		var pi = xml.createProcessingInstruction(m[1], m[2]);
+		xml.insertBefore(pi, first);
+		s = s.substring(m[0].length);
+	}
+	return xml;
 }
 /**
  * @private
@@ -81,7 +97,7 @@ function parseXMLByText(text){
 	        doc.setProperty("SelectionLanguage", "XPath");
 	        doc.documentElement.tagName;
 	    }
-	    return doc;
+	    return addInst(doc,text);
     }catch(e){
     	if(!text.match(/\sxmlns\:c\b/) && text.match(/\bc:\w+\b/)){
     		var text2 = text.replace(/<[\w\-\:]+/,"$& xmlns:c='http://www.xidea.org/lite/core'");

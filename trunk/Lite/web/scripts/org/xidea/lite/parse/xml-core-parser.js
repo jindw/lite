@@ -87,6 +87,19 @@ var Core = {
 			$log.warn("XML文本表达式解析异常，请检查是否手误：[fileName:"+this.currentURI+",el:"+el+"]")
 			return -1;
 		}
+	},
+	parseExtension:function(node){
+		var ns = getAttribute(node,'*namespace','ns');
+		var file = getAttribute(node,'file');
+		var pkg = getAttribute(node,'package');
+		if(pkg){
+			source = pkg;
+		}else if(file){
+			var source = this.loadText(this.createURI(file))+'\n';
+		}else{
+			var source = getAttribute(node,'#text')+'\n';
+		}
+		this.addExtension(ns,source);
 	}
 };
 function addParser(fn){
@@ -97,14 +110,16 @@ function addParser(fn){
 		fn[2] && (Core['seek'+arguments[i]] = fn[2])
 	}
 }
+
+
 /**
  * node,attribute
  */
-function processIf(node,context,chain){
+function processIf(node){
 	var test = getAttributeEL(node,'*test','value');
-    context.appendIf(test);
-    processChild(context,node);
-    context.appendEnd();
+    this.appendIf(test);
+    processChild(this,node);
+    this.appendEnd();
 }
 
 function seekIf(text){
@@ -116,11 +131,11 @@ function seekIf(text){
 }
 addParser([processIf,processIf,seekIf],'if')
 
-function processElse(node,context,chain){
+function processElse(node){
     var test = getAttributeEL(node,'test','value');
-    context.appendElse(test || null);
-    processChild(context,node);
-    context.appendEnd();
+    this.appendElse(test || null);
+    processChild(this,node);
+    this.appendEnd();
 }
 function seekElse(text){
 	if(text.charAt() == '$'){
@@ -137,11 +152,11 @@ function seekElse(text){
 	}
 }
 addParser([processElse,processElse,seekElse],'else');
-function processElif(node,context,chain){
+function processElif(node){
     var test = getAttributeEL(node,'*test','value');
-    context.appendElse(test || null);
-    processChild(context,node);
-    context.appendEnd();
+    this.appendElse(test || null);
+    processChild(this,node);
+    this.appendEnd();
 }
 function seekElif(text){
 	var end = findELEnd(text);
@@ -156,12 +171,12 @@ addParser([processElif,processElif,seekElif],"elseif","elif");
 
 
 
-function processChoose(node,context,chain){
+function processChoose(node){
 	var value = getAttributeEL(node,"value");
-	var oldStatus = context.getAttribute(processChoose);
-	context.setAttribute(processChoose,{value:value,first:true});
-	processChild(context,node);
-	context.setAttribute(processChoose,oldStatus);
+	var oldStatus = this.getAttribute(processChoose);
+	this.setAttribute(processChoose,{value:value,first:true});
+	processChild(this,node);
+	this.setAttribute(processChoose,oldStatus);
 }
 //function seekChoose(text){
 //	if(text.charAt() != '$'){
@@ -175,39 +190,39 @@ function processChoose(node,context,chain){
 //	}else{
 //		end = 1;
 //	}
-//	var oldStatus = context.getAttribute(processChoose);
-//	context.setAttribute(processChoose,{value:value,first:true});
-//	processChild(context,node);
-//	value && context.setAttribute(processChoose,oldStatus);
+//	var oldStatus = this.getAttribute(processChoose);
+//	this.setAttribute(processChoose,{value:value,first:true});
+//	processChild(this,node);
+//	value && this.setAttribute(processChoose,oldStatus);
 //	return end;
 //}
 addParser([processChoose,processChoose],"choose");
-function processWhen(node,context,chain){
-	var stat = context.getAttribute(processChoose);
+function processWhen(node){
+	var stat = this.getAttribute(processChoose);
 	var value = getAttributeEL(node,"*test","if");
 	if(stat.value){
 		value = stat.value + '=='+value;
 	}
 	if(stat.first){
 		stat.first = false;
-		context.appendIf(value);
+		this.appendIf(value);
 	}else{
-		context.appendElse(value);
+		this.appendElse(value);
 	}
-	processChild(context,node);
-	context.appendEnd();
+	processChild(this,node);
+	this.appendEnd();
 }
 
 addParser([processWhen,processWhen],"when");
-function processOtherwise(node,context,chain){
-	context.appendElse(null);
-	processChild(context,node);
-	context.appendEnd();
+function processOtherwise(node){
+	this.appendElse(null);
+	processChild(this,node);
+	this.appendEnd();
 }
 addParser([processOtherwise,processOtherwise],"otherwise");
 
 var FOR_PATTERN = /\s*([\$\w_]+)\s*(?:,\s*([\w\$_]+))?\s*(?:\:|in)([\s\S]*)/;
-function processFor(node,context,chain){
+function processFor(node){
 	if(node.nodeType == 1){
     	var value = getAttributeEL(node,'*list','values','items','value');
     	var var_ = getAttribute(node,'*var','name','id','item');
@@ -222,9 +237,9 @@ function processFor(node,context,chain){
 		var status_ =match[2];
 		var value =match[3];
 	}
-    startFor(context,var_,value,status_ || null);
-    processChild(context,node);
-    context.appendEnd();
+    startFor(this,var_,value,status_ || null);
+    processChild(this,node);
+    this.appendEnd();
 }
 function seekFor(text){
 	var end = findELEnd(text);
@@ -283,41 +298,41 @@ function startFor(context,key,list,status_){
 
 addParser([processFor,processFor,seekFor],"for","foreach");
 
-function processVar(node,context,chain){
+function processVar(node){
     var name_ = getAttribute(node,'*name','id');
 	if(node.nodeType == 1){
 		var value = getAttribute(node,'value');
 	    if(value){
-	    	var code = context.parseText(value,0);
+	    	var code = this.parseText(value,0);
 	    	if(code.length == 1){
 	    		code = code[0];
 	    		if(code instanceof Array){
-	    			context.appendVar(name_,code[1]);
+	    			this.appendVar(name_,code[1]);
 	    		}else{
 	    			$log.warn("标签:"+node.tagName+"的value属性"+value+"建议设置为表达式，您的输入没有表达式，系统自动按静态文本处理");
-	    			context.appendVar(name_,stringifyJSON(code));
+	    			this.appendVar(name_,stringifyJSON(code));
 	    		}
 	    	}else{
-	    		context.appendCaptrue(name_);
-		        context.appendAll(code)
-		        context.appendEnd();
+	    		this.appendCaptrue(name_);
+		        this.appendAll(code)
+		        this.appendEnd();
 	    	}
 	    }else{
-	        context.appendCaptrue(name_);
-	        processChild(context,node);
-	        context.appendEnd();
+	        this.appendCaptrue(name_);
+	        processChild(this,node);
+	        this.appendEnd();
 	    }
 	}else{
 		var map = findParamMap(name_);
 		if(map){
 			for(var n in map){
-				context.appendVar(n,map[n]);
+				this.appendVar(n,map[n]);
 			}
-			processChild(context,node);
+			processChild(this,node);
 		}else{
-	        context.appendCaptrue(name_);
-	        processChild(context,node);
-	        context.appendEnd();
+	        this.appendCaptrue(name_);
+	        processChild(this,node);
+	        this.appendEnd();
 		}
 	}
 }
@@ -339,10 +354,10 @@ function seekVar(text){
 addParser([processVar,processVar,seekVar],"var","set");
 
 
-function parseOut(node,context,chain){
+function parseOut(node){
     var value = getAttribute(node,"value","#text");
-    value = context.parseText(value,EL_TYPE);
-    context.appendAll(value);
+    value = this.parseText(value,EL_TYPE);
+    this.appendAll(value);
 }
 function seekOut(text){
 	var end = findELEnd(text);
@@ -355,7 +370,7 @@ function seekOut(text){
 addParser([parseOut,parseOut,seekOut],"out");
 
 
-function processDef(node,context,chain){
+function processDef(node){
     var ns = getAttribute(node,'*name');
     ns = (ns.replace(/^\s+/,'')+'{end').split(/[^\w]+/);
     ns.pop();
@@ -368,9 +383,9 @@ function processDef(node,context,chain){
     }
     el.push("]}")
     //prompt('',el.join(''))
-    context.appendPlugin(PLUGIN_DEFINE,context.parseEL(el.join('')));
-    processChild(context,node);
-    context.appendEnd();
+    this.appendPlugin(PLUGIN_DEFINE,this.parseEL(el.join('')));
+    processChild(this,node);
+    this.appendEnd();
 }
 
 function seekDef(text){
@@ -395,31 +410,31 @@ function seekDef(text){
 
 addParser([processDef,processDef,seekDef],"def",'macro');
 
-function beforeInclude(attr, context,chain){
+function beforeInclude(attr){
 	var match = attr.value.match(/^([^#]*)(?:#(.*))?$/);
 	var path = match[1];
 	var xpath = match[2];
 	if(path){
 		var path2 = path.replace(/^[\$#]([\w\$_]+)$/,'$$$1');
 		if(path2.charAt() == '$') {
-			doc = context.getAttribute(path);
+			doc = this.getAttribute(path);
 		}else{
-			var doc = context.loadXML(context.createURI(path))
+			var doc = this.loadXML(this.createURI(path))
 		}
 	}else{
 		var doc = attr.ownerDocument;
 	}
 	if(doc==null){
-		context.append("<strong style='color:red'>没找到包含节点："+context.currentURI+ attr.value+"</strong>");
+		this.append("<strong style='color:red'>没找到包含节点："+this.currentURI+ attr.value+"</strong>");
 	}else{
-		var attrs = context.selectNodes(doc, xpath);
+		var attrs = this.selectNodes(doc, xpath);
 		var element = attr.ownerElement;
 		//element.removeAttributeNode(attr)
 		for(var i = attrs.length;i--;){
 			var a = attrs.item(i);
 			mergeAttribute(element,a);
 		}
-		chain.process(element);
+		this.process(element);
 	}
 }
 function mergeAttribute(element,node){
@@ -445,28 +460,28 @@ function setNodeURI(context,node){
 		context.currentURI = context.createURI(uri);
 	}
 }
-function parseInclude(node,context,chain){
+function parseInclude(node){
     var path = getAttribute(node,'path');
     var xpath = getAttribute(node,'xpath');
     var selector = getAttribute(node,'selector');
-    var parentURI = context.currentURI;
+    var parentURI = this.currentURI;
 	try{
 		
 	    if(path!=null){
 	    	if(path.charAt() == '$'){
-	    		doc = context.getAttribute(path);
-	    		setNodeURI(context,node);
+	    		doc = this.getAttribute(path);
+	    		setNodeURI(this,node);
 	    	}else{
-		        var url = context.createURI(path);
-	    		//$log.warn(path,context.currentURI+'',url+'')
-		        var doc = context.loadXML(url);
-		        context.currentURI = url;
+		        var url = this.createURI(path);
+	    		//$log.warn(path,this.currentURI+'',url+'')
+		        var doc = this.loadXML(url);
+		        this.currentURI = url;
 	    	}
 	    }else{
 	    	var doc = node.ownerDocument
 	    }
 		if(doc==null){
-			context.append("<strong style='color:red'>没找到包含节点："+context.currentURI+ node.value+"</strong>");
+			this.append("<strong style='color:red'>没找到包含节点："+this.currentURI+ node.value+"</strong>");
 		}else{
 		    if(xpath!=null){
 		    	var d = doc;
@@ -476,15 +491,15 @@ function parseInclude(node,context,chain){
 		    if(selector != null){
 		    	$log.warn("目前尚不支持css selector 选择节点");
 		    }
-		    context.parse(doc)
+		    this.parse(doc)
 		}
     }finally{
-        context.currentURI = parentURI;
+        this.currentURI = parentURI;
     }
 }
 
-function processExtends(node,context,chain){
-	var oldConfig = context.getAttribute("#extends");
+function processExtends(node){
+	var oldConfig = this.getAttribute("#extends");
 	var el = node.nodeType == 1?node:node.ownerElement;
 	var root = el == el.ownerDocument.documentElement;
 	var extendsConfig = {blockMap:{},parse:false,root:root};
@@ -492,7 +507,7 @@ function processExtends(node,context,chain){
 		if(oldConfig.parse){//解析进行时
 			if(root){//模板继承
 				if(extendsConfig.root){
-					context.reset(0);
+					this.reset(0);
 				}
 				extendsConfig = oldConfig;
 				extendsConfig.parse = false;
@@ -504,30 +519,30 @@ function processExtends(node,context,chain){
 		}
 	}
 	
-	context.setAttribute("#extends" ,extendsConfig);
+	this.setAttribute("#extends" ,extendsConfig);
 	var parentURL = getAttribute(node,"*path","value","parent");
 	//childNodes
-	var url = context.createURI(parentURL);
-	var parentNode = context.loadXML(url);
+	var url = this.createURI(parentURL);
+	var parentNode = this.loadXML(url);
 	if(!root){//元素继承
 		parentNode = parentNode.documentElement;
 	}
-	var i = context.mark();
-	 processChild(context,node);
-	context.reset(i);
-    var parentURI = context.currentURI;
+	var i = this.mark();
+	 processChild(this,node);
+	this.reset(i);
+    var parentURI = this.currentURI;
 	try{
-		context.currentURI = url;
+		this.currentURI = url;
 		extendsConfig.parse=true;
-		context.parse(parentNode);
+		this.parse(parentNode);
 	}finally{
-        context.currentURI = parentURI;
+        this.currentURI = parentURI;
 	}
-	context.setAttribute("#extends" ,oldConfig);
+	this.setAttribute("#extends" ,oldConfig);
 }
 
-function processBlock(node,context,chain){
-	var extendsConfig = context.getAttribute("#extends");
+function processBlock(node){
+	var extendsConfig = this.getAttribute("#extends");
 	var value = getAttribute(node,"name","id");
 	var childNodes = node.nodeType == 1?node.childNodes:node.ownerElement;
 		
@@ -536,17 +551,17 @@ function processBlock(node,context,chain){
 		var cached = value && (value in blockMap) && blockMap[value];
 		if(extendsConfig.parse){
 			if(cached){
-				var parentURI = context.currentURI;
+				var parentURI = this.currentURI;
 				try{
 					//set current uri
-					setNodeURI(context,cached);
+					setNodeURI(this,cached);
 					extendsConfig.parse=true;
-					context.parse(cached);
+					this.parse(cached);
 				}finally{
-	        		context.currentURI = parentURI;
+	        		this.currentURI = parentURI;
 				}
 			}else{
-				context.parse(childNodes);
+				this.parse(childNodes);
 			}
 		}else{
 			if(!cached){
@@ -554,20 +569,20 @@ function processBlock(node,context,chain){
 			}
 		}
 	}else{
-		context.parse(childNodes);
+		this.parse(childNodes);
 	}
 }
 
 
-function processClient(node,context,chain){
-	var context2 = context.createNew();
-	// new ParseContext(context.config,context.currentURI);
+function processClient(node){
+	var context2 = this.createNew();
+	// new ParseCothisontext.config,this.currentURI);
 	var id = getAttribute(node,'*name','id');
 	var translator = new Translator(id);
 	
 	processChild(context2,node);
 	var code = translator.translate(context2);
-	context.append("<!--//--><script>//<![CDATA[\n"
+	this.append("<!--//--><script>//<![CDATA[\n"
 				+code.replace(/<\/script>/ig,'<\\/script>')+"//]]></script>\n");
 }
 

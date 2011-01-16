@@ -45,13 +45,13 @@ public interface ResultContext {
 	 */
 	public List<Object> reset(int mark);
 
-	/**
-	 * 获取结束节点,开始为0
-	 * @see org.xidea.lite.impl.ResultContextImpl#getDepth()
-	 * @return
-	 */
+//	/**
+//	 * 获取结束节点,开始为0
+//	 * @see org.xidea.lite.impl.ResultContextImpl#getDepth()
+//	 * @return
+//	 */
 //	public int getDepth();
-//
+
 	/**
 	 * 是否保留空白（默认为false）
 	 * @return
@@ -98,14 +98,6 @@ public interface ResultContext {
 	 * @param text
 	 */
 	public void append(String text);
-
-//	/**
-//	 * 
-//	 * @param text
-//	 * @param escapeQute
-//	 */
-//	public void append(String text, char escapeQute);
-	
 
 	/**
 	 * 添加模板指令

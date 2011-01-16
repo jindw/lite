@@ -4,6 +4,7 @@ import java.io.File;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -41,6 +42,7 @@ public class AutoTest {
 	 */
 	@Test
 	public void testEscape() throws Exception{
+//		System.out.println(Charset.availableCharsets());
 		testURI();
 		StringBuilder source = new StringBuilder();
 		for(int i=Character.MAX_VALUE;i>=0;i--){

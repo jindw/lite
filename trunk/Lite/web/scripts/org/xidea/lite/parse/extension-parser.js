@@ -4,7 +4,7 @@
 
 function ExtensionParser(){
 	this.packageMap = {};
-	this.addExtensionObject("http://www.xidea.org/lite/core",Core);
+	this.addExtension("http://www.xidea.org/lite/core",Core);
 	
 }
 
@@ -24,6 +24,29 @@ function copyParserMap(mapClazz,p,p2,key){
 		}
 	}
 }
+
+function loadExtObject(source){
+	var p = /\b(?:document|xmlns|(?:on|parse|before|seek)\w*)\b/g;
+	var fn = new Function(source+"\n return function(){return eval(arguments[0])}");
+	var m,o;
+	var objectMap = {};
+	try{
+		fn = fn();
+	}catch(e){
+		$log.error("扩展脚本装载失败：",source);
+	}
+	while(m = p.exec(source)){
+		try{
+			o = fn(m[0]);
+			if(o instanceof Function){
+				objectMap[m[0]] = o;
+			}
+		}catch(e){
+		}
+	}
+	return objectMap;
+}
+
 var CURRENT_NODE_KEY = {}
 /**
  * 
@@ -55,7 +78,7 @@ ExtensionParser.prototype = {
 		for(var p in this.packageMap){
 			p = this.packageMap[p];
 			if(p.documentParser){
-				p.documentParser.apply(chain,arguments);
+				p.documentParser.call(chain,node);
 				return true;
 			}
 		}
@@ -66,7 +89,7 @@ ExtensionParser.prototype = {
 			var v = attr.value;
 			var fp = this.packageMap[v||''];
 			if(fp && fp.namespaceParser){
-				fp.namespaceParser.call(chain,attr,context,chain);
+				fp.namespaceParser.call(chain,attr);
 				return true;
 			}
 			//$log.error(v,fp.namespaceParser);
@@ -93,7 +116,7 @@ ExtensionParser.prototype = {
 						es = 2.1
 						try{
 							el.removeAttributeNode(attr);
-							fn.call(chain,attr,context,chain);
+							fn.call(chain,attr);
 							es =2.2
 						}finally{
 							
@@ -116,7 +139,7 @@ ExtensionParser.prototype = {
 				var ext = this.packageMap[ans || ''];
 				try{
 					el.removeAttributeNode(attr);
-					ext.beforeMap[an].call(chain,attr,context,chain);
+					ext.beforeMap[an].call(chain,attr);
 				}finally{
 					
 				}
@@ -135,9 +158,9 @@ ExtensionParser.prototype = {
 			var fn = ext.parserMap[nn];
 			if(fn && (nn in ext.parserMap)
 				 || (fn = ext.parserMap[''])){
-				fn.call(chain,el,context,chain);
+				fn.call(chain,el);
 				return true;
-			}else{
+			}else if(nns && nns != 'http://www.w3.org/1999/xhtml'){
 				$log.error("未支持标签：",el.tagName,context.currentURI)
 			}
 		}
@@ -164,7 +187,7 @@ ExtensionParser.prototype = {
 					if(ext && ext.onMap){
 						if(fn in ext.onMap){
 							var fn = ext.onMap[fn];
-							fn.call(chain,node,context,chain);
+							fn.call(chain,node);
 							return true;
 						}
 					}
@@ -253,22 +276,23 @@ ExtensionParser.prototype = {
 			begin++;
 		}
 	},
-	addExtensionPackage:function(namespace,packageName){
-		var target = {};
+	addExtension:function(namespace,packageName){
 		if(typeof packageName == 'string'){
-			var packageObject = $import(packageName+':');
-		}else{
-			packageObject = packageName;
-		}
-		for(var n in packageObject.objectScriptMap){
-			var match = n.match(/^(?:document|xmlns|on|parse|before|seek).*/);
-			if(match){
-				var o = $import(packageObject.name+':'+n,target);
+			if(/^[\w\.]+$/.test(packageName)){
+				var objectMap = {};
+				var packageObject = $import(packageName+':');
+				for(var n in packageObject.objectScriptMap){
+					var match = n.match(/^(?:document|xmlns|on|parse|before|seek).*/);
+					if(match){
+						var o = $import(packageObject.name+':'+n,objectMap);
+					}
+				}
+			}else{
+				objectMap = loadExtObject(packageName)
 			}
+		}else{
+			objectMap = packageName;
 		}
-		this.addExtensionObject(namespace,target);
-	},
-	addExtensionObject:function(namespace,objectMap){
 		var ext = this.packageMap[namespace||''];
 		if(ext == null){
 			ext = this.packageMap[namespace||''] = new Extension();

@@ -2,17 +2,21 @@ package org.xidea.lite.impl;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import javax.xml.namespace.NamespaceContext;
@@ -28,7 +32,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
-import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -73,9 +76,17 @@ public class ParseUtil {
 		return rt;
 	}
 
+	/**
+	 * 删除多余的xml空格，如果有换行，尽量保留换行，方便阅读
+	 * @param text
+	 * @return
+	 */
 	static String safeTrim(String text) {
 		StringBuffer buf = new StringBuffer(text);
-		int len = buf.length();
+		final int len = buf.length();
+		if(len == 0){
+			return "";
+		}
 		int end = len;
 		char s1 = ' ';
 		while(end-->0){
@@ -106,11 +117,13 @@ public class ParseUtil {
 				}
 			}
 		}
-		return "";
+		return String.valueOf(s1);
 	}
-	// static Object eval(String source){
-	// return getJSIRuntime().eval(source);
-	// }
+
+	private static InputStream openStream(URI uri, ParseContext context)
+			throws IOException {
+		return context == null ? openStream(uri) : context.openStream(uri);
+	}
 
 	public static InputStream openStream(URI uri) {
 		try {
@@ -160,7 +173,7 @@ public class ParseUtil {
 
 	public static Document parse(URI uri, ParseContext context)
 			throws IOException, SAXException {
-		InputStream in1 = ParseUtil.trimBOM(context,uri);
+		InputStream in1 = ParseUtil.trimBOM(context,uri,null);
 		in1.mark(1);
 		if (in1.read() != '<') {
 			return null;
@@ -170,7 +183,7 @@ public class ParseUtil {
 		try {
 			return documentBuilder.parse(in1, id);
 		} catch (SAXParseException e) {
-			InputStream in2 = ParseUtil.trimBOM(openStream(uri, context));
+			InputStream in2 = ParseUtil.trimBOM(openStream(uri, context),null);
 			try {
 				// 做一次容错处理
 				log.warn("Invalid xml source:" + e.toString()
@@ -193,10 +206,6 @@ public class ParseUtil {
 		}
 	}
 
-	private static InputStream openStream(URI uri, ParseContext context)
-			throws MalformedURLException, IOException {
-		return context == null ? openStream(uri) : context.openStream(uri);
-	}
 
 	private static Pattern TXT_HEADER = Pattern.compile("^#.*[\r\n]+");
 	private static Pattern TXT_CDATA_END = Pattern.compile("]]>");
@@ -219,7 +228,7 @@ public class ParseUtil {
 		return parse(uri, context);
 	}
 
-	public static URI createSourceURI(String path) {
+	private static URI createSourceURI(String path) {
 		try {
 			return URI.create("data:text/xml;charset=utf-8,"
 					+ URLEncoder.encode(path, "UTF-8").replace("+", "%20"));
@@ -244,19 +253,7 @@ public class ParseUtil {
 		return nodes;
 	}
 
-	static DocumentFragment toFragment(Node node, NodeList nodes) {
-		Document doc;
-		if (node instanceof Document) {
-			doc = (Document) node;
-		} else {
-			doc = node.getOwnerDocument();
-		}
-		DocumentFragment frm = doc.createDocumentFragment();
-		for (int i = 0; i < nodes.getLength(); i++) {
-			frm.appendChild(nodes.item(i).cloneNode(true));
-		}
-		return frm;
-	}
+
 
 	private static XPath createXPath(String xpathFactoryClass) {
 		if (xpathFactory == null) {
@@ -286,9 +283,15 @@ public class ParseUtil {
 		}
 		return xpathFactory.newXPath();
 	}
-	private static InputStream trimBOM(ParseContext context,URI uri) throws IOException{
+
+	public static String loadText(URI uri, ParseContext parseContext) throws IOException {
+		StringBuilder buf = new StringBuilder();
+		trimBOM(parseContext,uri, buf);
+		return buf.toString();
+	}
+	private static InputStream trimBOM(ParseContext context,URI uri,StringBuilder out) throws IOException{
 		try{
-			return trimBOM(openStream(uri, context));
+			return trimBOM(openStream(uri, context),out);
 		}catch(IOException e){
 			log.warn(uri+"读取异常:",e);
 			throw e;
@@ -298,10 +301,11 @@ public class ParseUtil {
 		}
 	}
 
-	private static InputStream trimBOM(InputStream in) throws IOException {
+	private static InputStream trimBOM(InputStream in,StringBuilder out) throws IOException {
 		in = new BufferedInputStream(in, 3);
-		int trim = 0;
+//		int trim = 0;
 		in.mark(3);
+		String charset = null;
 		outer: for (int i = 0; i < 3; i++) {// bugfix \ufeff
 			// Unicode(UTF-16) FF-FE 31 00 32 00 33 00 34 00
 			// Unicode big endian FE-FF 00 31 00 32 00 33 00 34
@@ -314,7 +318,12 @@ public class ParseUtil {
 			case 0xFF:
 			case 0xFE:
 				if (i == 1) {
-					trim = 2;
+//					trim = 2;
+					//{Big5=Big5, Big5-HKSCS=Big5-HKSCS, EUC-JP=EUC-JP, EUC-KR=EUC-KR, GB18030=GB18030, GB2312=GB2312, GBK=GBK, IBM-Thai=IBM-Thai, IBM00858=IBM00858, IBM01140=IBM01140, IBM01141=IBM01141, IBM01142=IBM01142, IBM01143=IBM01143, IBM01144=IBM01144, IBM01145=IBM01145, IBM01146=IBM01146, IBM01147=IBM01147, IBM01148=IBM01148, IBM01149=IBM01149, IBM037=IBM037, IBM1026=IBM1026, IBM1047=IBM1047, IBM273=IBM273, IBM277=IBM277, IBM278=IBM278, IBM280=IBM280, IBM284=IBM284, IBM285=IBM285, IBM297=IBM297, IBM420=IBM420, IBM424=IBM424, IBM437=IBM437, IBM500=IBM500, IBM775=IBM775, IBM850=IBM850, IBM852=IBM852, IBM855=IBM855, IBM857=IBM857, IBM860=IBM860, IBM861=IBM861, IBM862=IBM862, IBM863=IBM863, IBM864=IBM864, IBM865=IBM865, IBM866=IBM866, IBM868=IBM868, IBM869=IBM869, IBM870=IBM870, IBM871=IBM871, IBM918=IBM918, ISO-2022-CN=ISO-2022-CN, ISO-2022-JP=ISO-2022-JP, ISO-2022-JP-2=ISO-2022-JP-2, ISO-2022-KR=ISO-2022-KR, ISO-8859-1=ISO-8859-1, ISO-8859-13=ISO-8859-13, ISO-8859-15=ISO-8859-15, ISO-8859-2=ISO-8859-2, ISO-8859-3=ISO-8859-3, ISO-8859-4=ISO-8859-4, ISO-8859-5=ISO-8859-5, ISO-8859-6=ISO-8859-6, ISO-8859-7=ISO-8859-7, ISO-8859-8=ISO-8859-8, ISO-8859-9=ISO-8859-9, JIS_X0201=JIS_X0201, JIS_X0212-1990=JIS_X0212-1990, KOI8-R=KOI8-R, KOI8-U=KOI8-U, Shift_JIS=Shift_JIS, TIS-620=TIS-620, US-ASCII=US-ASCII, UTF-16=UTF-16, UTF-16BE=UTF-16BE, UTF-16LE=UTF-16LE, UTF-32=UTF-32, UTF-32BE=UTF-32BE, UTF-32LE=UTF-32LE, UTF-8=UTF-8, windows-1250=windows-1250, windows-1251=windows-1251, windows-1252=windows-1252, windows-1253=windows-1253, windows-1254=windows-1254, windows-1255=windows-1255, windows-1256=windows-1256, windows-1257=windows-1257, windows-1258=windows-1258, windows-31j=windows-31j, x-Big5-Solaris=x-Big5-Solaris, x-euc-jp-linux=x-euc-jp-linux, x-EUC-TW=x-EUC-TW, x-eucJP-Open=x-eucJP-Open, x-IBM1006=x-IBM1006, x-IBM1025=x-IBM1025, x-IBM1046=x-IBM1046, x-IBM1097=x-IBM1097, x-IBM1098=x-IBM1098, x-IBM1112=x-IBM1112, x-IBM1122=x-IBM1122, x-IBM1123=x-IBM1123, x-IBM1124=x-IBM1124, x-IBM1381=x-IBM1381, x-IBM1383=x-IBM1383, x-IBM33722=x-IBM33722, x-IBM737=x-IBM737, x-IBM834=x-IBM834, x-IBM856=x-IBM856, x-IBM874=x-IBM874, x-IBM875=x-IBM875, x-IBM921=x-IBM921, x-IBM922=x-IBM922, x-IBM930=x-IBM930, x-IBM933=x-IBM933, x-IBM935=x-IBM935, x-IBM937=x-IBM937, x-IBM939=x-IBM939, x-IBM942=x-IBM942, x-IBM942C=x-IBM942C, x-IBM943=x-IBM943, x-IBM943C=x-IBM943C, x-IBM948=x-IBM948, x-IBM949=x-IBM949, x-IBM949C=x-IBM949C, x-IBM950=x-IBM950, x-IBM964=x-IBM964, x-IBM970=x-IBM970, x-ISCII91=x-ISCII91, x-ISO-2022-CN-CNS=x-ISO-2022-CN-CNS, x-ISO-2022-CN-GB=x-ISO-2022-CN-GB, x-iso-8859-11=x-iso-8859-11, x-JIS0208=x-JIS0208, x-JISAutoDetect=x-JISAutoDetect, x-Johab=x-Johab, x-MacArabic=x-MacArabic, x-MacCentralEurope=x-MacCentralEurope, x-MacCroatian=x-MacCroatian, x-MacCyrillic=x-MacCyrillic, x-MacDingbat=x-MacDingbat, x-MacGreek=x-MacGreek, x-MacHebrew=x-MacHebrew, x-MacIceland=x-MacIceland, x-MacRoman=x-MacRoman, x-MacRomania=x-MacRomania, x-MacSymbol=x-MacSymbol, x-MacThai=x-MacThai, x-MacTurkish=x-MacTurkish, x-MacUkraine=x-MacUkraine, x-MS932_0213=x-MS932_0213, x-MS950-HKSCS=x-MS950-HKSCS, x-mswin-936=x-mswin-936, x-PCK=x-PCK, x-SJIS_0213=x-SJIS_0213, x-UTF-16LE-BOM=x-UTF-16LE-BOM, X-UTF-32BE-BOM=X-UTF-32BE-BOM, X-UTF-32LE-BOM=X-UTF-32LE-BOM, x-windows-50220=x-windows-50220, x-windows-50221=x-windows-50221, x-windows-874=x-windows-874, x-windows-949=x-windows-949, x-windows-950=x-windows-950, x-windows-iso2022jp=x-windows-iso2022jp}
+
+					//UTF-16BE, UTF-16LE
+					//FFFE :UTF-16LE
+					charset = c == 0xFE?"UTF-16LE":"UTF-16BE";
 					break outer;
 				} else if (i > 1) {
 					break outer;
@@ -331,27 +340,60 @@ public class ParseUtil {
 				}
 				break;
 			case 0xBF:
-				if (i != 2) {
-					break outer;
-				} else {
-					trim = 3;
+				if (i == 2) {
+					charset = "UTF-8";
+//					trim = 3;
 				}
-				break;
+				break outer;
 			default:
 				break outer;
 			}
 		}
-		;
-		in.reset();
-		while (trim-- > 0) {
-			in.read();
+		if(charset==null){
+			in.reset();
+		}
+		if(out!=null){
+			ByteArrayOutputStream out2 = new ByteArrayOutputStream();
+			write(in, out2);
+			if(charset==null){
+				byte[] data = out2.toByteArray();
+				String s = loadString(data,"UTF-8","GBK");
+				if(s == null){
+					Set<String> ks = Charset.availableCharsets().keySet();
+					s = loadString(data, ks.toArray(new String[ks.size()]));
+				}
+				out.append(s);
+			}else{
+				out.append(out2.toString(charset));
+			}
+			return null;
 		}
 		return in;
+	}
+	private static String loadString(byte[] data,String...cs) throws UnsupportedEncodingException{
+		for(String c:cs){
+			String rtv = new String(data,c);
+			byte[] data2 = rtv.getBytes(c);
+			if(Arrays.equals(data, data2)){
+				return rtv;
+			}
+		}
+		return null;
+	}
+
+	private static void write(InputStream in, OutputStream out)
+			throws IOException {
+		byte[] data = new byte[64];
+		int i ;
+		while((i = in.read(data))>=0){
+			out.write(data,0,i);
+		}
 	}
 
 	static boolean isFile(URI uri){
 		return "file".equals(uri.getScheme());
 	}
+
 }
 
 class NamespaceContextImpl implements NamespaceContext {

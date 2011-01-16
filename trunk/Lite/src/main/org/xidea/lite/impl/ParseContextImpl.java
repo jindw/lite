@@ -24,10 +24,11 @@ import org.xidea.lite.parse.TextParser;
  */
 public class ParseContextImpl extends ParseContextProxy implements ParseContext {
 	private static final long serialVersionUID = 1L;
-	private static NodeParser<?>[] DEFAULT_PARSER_LIST = {null, new DefaultXMLNodeParser(), new TextNodeParser() };
+	private static NodeParser<?>[] DEFAULT_PARSER_LIST = { new TextNodeParser(),new DefaultXMLNodeParser(),null};
 	
 	private ParseChain topChain;
 	private final ExtensionParser  extensionParser;
+	//尾部优先原则
 	private NodeParser<? extends Object>[] nodeParsers;
 	private TextParser[] textParsers;
 	
@@ -35,7 +36,7 @@ public class ParseContextImpl extends ParseContextProxy implements ParseContext 
 		super(config,config.getFeatrueMap(path));
 		this.extensionParser = new ExtensionParserImpl();
 		this.nodeParsers = DEFAULT_PARSER_LIST.clone();
-		nodeParsers[0] = extensionParser;
+		nodeParsers[2] = extensionParser;
 		textParsers = new TextParser[]{extensionParser};
 	}
 
@@ -57,18 +58,18 @@ public class ParseContextImpl extends ParseContextProxy implements ParseContext 
 		this.extensionParser = ep;
 		this.setCurrentURI(parent.getCurrentURI());
 	}
-	public ParseContext create(ParseContext parent){
-		return new ParseContextImpl(parent);
-	}
+//	public ParseContext create(ParseContext parent){
+//		return new ParseContextImpl(parent);
+//	}
 	public final ParseChain getTopChain() {
 		if(topChain == null){//nodeParsers != topChain.getNodeParsers()
-			topChain = new ParseChainImpl(this, nodeParsers, 0);
+			topChain = new ParseChainImpl(this, nodeParsers, nodeParsers.length-1);
 		}
 		return topChain;
 	}
 
-	public final void addExtension(String namespace, String packageName) {
-		extensionParser.addExtensionPackage(namespace, packageName);
+	public final void addExtension(String namespace, Object packageName) {
+		extensionParser.addExtension(namespace, packageName);
 	}
 	
 	public ExtensionParser getExtensionParser() {
@@ -78,7 +79,7 @@ public class ParseContextImpl extends ParseContextProxy implements ParseContext 
 	public void addNodeParser(NodeParser<? extends Object> nodeParser) {
 		int length = this.nodeParsers.length;
 		NodeParser<?>[] ips2 = new NodeParser<?>[length + 1];
-		System.arraycopy(this.nodeParsers, 0, ips2, 1, length);
+		System.arraycopy(this.nodeParsers, 0, ips2, 0, length);
 		ips2[length] = nodeParser;
 		this.nodeParsers = ips2;
 	}

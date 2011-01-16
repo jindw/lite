@@ -16,7 +16,7 @@ public interface ParserHolder{
 	 */
 	public TextParser[] getTextParsers();
 	/**
-	 * 添加指令解析器
+	 * 添加文本解析器
 	 * @param textParser
 	 */
 	public void addTextParser(TextParser textParser);
@@ -25,11 +25,13 @@ public interface ParserHolder{
 	 * @param nodeParser
 	 */
 	public void addNodeParser(NodeParser<? extends Object> nodeParser);
+
 	/**
-	 * 添加指令解析器
-	 * @param textParser
+	 * 添加扩展
+	 * @param namespace
+	 * @param packageObject
 	 */
-	public void addExtension(String namespace,String packageName);
+	public void addExtension(String namespace,Object packageObject);
 	/**
 	 * 获取当前context的顶级 parseChain对象
 	 * @param iparser
