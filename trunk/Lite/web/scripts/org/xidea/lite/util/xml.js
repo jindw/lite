@@ -62,8 +62,10 @@ function addInst(xml,s){
 	var m;
 	var first = xml.firstChild;
 	while(m = s.match(p)){
-		var pi = xml.createProcessingInstruction(m[1], m[2]);
-		xml.insertBefore(pi, first);
+		if(m[1] == 'xml'){
+			var pi = xml.createProcessingInstruction(m[1], m[2]);
+			xml.insertBefore(pi, first);
+		}
 		s = s.substring(m[0].length);
 	}
 	return xml;

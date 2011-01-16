@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.xml.namespace.NamespaceContext;
@@ -37,7 +38,6 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xidea.jsi.JSIRuntime;
-import org.xidea.jsi.impl.JSIText;
 import org.xidea.jsi.impl.RuntimeSupport;
 import org.xidea.lite.impl.dtd.DefaultEntityResolver;
 import org.xidea.lite.parse.ParseContext;
@@ -170,40 +170,83 @@ public class ParseUtil {
 			throw new RuntimeException(e);
 		}
 	}
+	static String readTo(InputStream in,char...cs) throws IOException{
+		StringBuilder buf = new StringBuilder();
+		int c;
+		int i=-cs.length;//-2
+		read:while((c = in.read())>=0){//?>
+			buf.append((char)c);
+			i++;//-1
+			if(i>=0){
+				for (int j = 0; j <cs.length ; j++) {
+					if(cs[j] != buf.charAt(i+j)){
+						continue read;
+					}
+				}
+				return buf.toString();
+			}
+		}
+		return null;
+	}
+	private static Pattern XMLNS_CDEC = Pattern.compile("\\sxmlns\\:c\\b");
+	private static Pattern XMLNS_CUSE = Pattern.compile("\\bc:\\w+\\b");
+	private static Pattern XMLNS_FE = Pattern.compile("<[\\w\\-\\:]+");
+	private static Pattern XMLNS_ENCODE = Pattern.compile("<\\?xml\\s*[^>]*?encoding\\s*=\\s*['\"]([\\w\\-]+)['\"]");
 
 	public static Document parse(URI uri, ParseContext context)
 			throws IOException, SAXException {
-		InputStream in1 = ParseUtil.trimBOM(context,uri,null);
-		in1.mark(1);
-		if (in1.read() != '<') {
-			return null;
-		}
-		in1.reset();
 		String id = uri.toString();
-		try {
-			return documentBuilder.parse(in1, id);
+		InputStream in1 = ParseUtil.trimBOM(context,uri,null);
+		try{
+			return loadXML(in1, id);
 		} catch (SAXParseException e) {
-			InputStream in2 = ParseUtil.trimBOM(openStream(uri, context),null);
-			try {
-				// 做一次容错处理
-				log.warn("Invalid xml source:" + e.toString()
-						+ ",try to fix it：");
-				System.out.println(JSIText.loadText(in2, "utf-8"));
-				// return new XMLFixerImpl().parse(documentBuilder, in2, id);
-				// in2 = new SequenceInputStream(new
-				// ByteArrayInputStream(DEFAULT_STARTS),in2);
-				// return documentBuilder.parse(in2, uri.toString());
-			} catch (Exception ex) {
-				log.debug(ex);
-			} finally {
-				in2.close();
+			String source = loadText(uri, context);
+			if(!XMLNS_CDEC.matcher(source).find() && XMLNS_CUSE.matcher(source).find()){
+				source = XMLNS_FE.matcher(source).replaceFirst("$0 xmlns:c='http://www.xidea.org/lite/core'");
+			}
+			try{
+				Matcher m = XMLNS_ENCODE.matcher(source);
+				String encoding = "UTF-8";
+				if(m.find()){
+					encoding =  m.group(1);
+				}
+				return loadXML(new ByteArrayInputStream(source.getBytes(encoding)), id);
+			}catch (Exception ex) {
 			}
 			throw new SAXException("XML Parser Error:" + id + "("
-					+ e.getLineNumber() + "," + e.getColumnNumber() + ")\r\n"
-					+ e.getMessage());
+						+ e.getLineNumber() + "," + e.getColumnNumber() + ")\r\n"
+						+ e.getMessage());
 		} finally {
 			in1.close();
 		}
+	}
+
+	private static Document loadXML(InputStream in, String id)
+			throws IOException, SAXException {
+		in.mark(1024);
+		if (in.read() != '<') {
+			return null;
+		}
+		String ins = getXMLInstruction(in);
+		in.reset();
+		Document xml = documentBuilder.parse(in, id);
+		if(ins!=null){
+			xml.insertBefore(xml.createProcessingInstruction("xml", ins),xml.getFirstChild());
+		}
+		return xml;
+		
+	}
+
+	private static String getXMLInstruction(InputStream in) throws IOException {
+		String ins = null;
+		if(in.read() == '?'){
+			in.reset();
+			ins = readTo(in, '?','>');
+			if(ins.startsWith("<?xml")){
+				ins = ins.substring(6, ins.length()-2);
+			}
+		}
+		return ins;
 	}
 
 
@@ -286,7 +329,8 @@ public class ParseUtil {
 
 	public static String loadText(URI uri, ParseContext parseContext) throws IOException {
 		StringBuilder buf = new StringBuilder();
-		trimBOM(parseContext,uri, buf);
+		InputStream in = trimBOM(parseContext,uri, buf);
+		in.close();
 		return buf.toString();
 	}
 	private static InputStream trimBOM(ParseContext context,URI uri,StringBuilder out) throws IOException{
@@ -302,9 +346,9 @@ public class ParseUtil {
 	}
 
 	private static InputStream trimBOM(InputStream in,StringBuilder out) throws IOException {
-		in = new BufferedInputStream(in, 3);
+		in = new BufferedInputStream(in, 1024);
 //		int trim = 0;
-		in.mark(3);
+		in.mark(1024);
 		String charset = null;
 		outer: for (int i = 0; i < 3; i++) {// bugfix \ufeff
 			// Unicode(UTF-16) FF-FE 31 00 32 00 33 00 34 00
