@@ -202,6 +202,7 @@ public class ParseUtil {
 		} catch (SAXParseException e) {
 			String source = loadText(uri, context);
 			if(!XMLNS_CDEC.matcher(source).find() && XMLNS_CUSE.matcher(source).find()){
+				log.warn("缺乏名称空间申明："+id);
 				source = XMLNS_FE.matcher(source).replaceFirst("$0 xmlns:c='http://www.xidea.org/lite/core'");
 			}
 			try{
