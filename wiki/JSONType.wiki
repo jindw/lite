@@ -28,7 +28,7 @@
 public JSONEncoder(String dateFormat, boolean ignoreClassName, int depth,
 			boolean checkByAddress, boolean throwError) ;
 //自定义构造器，日期格式只支持到分（yyyy-MM-dd'T'HH:mmZ）
-JSONEncoder myEncoder = (JSONEncoder.W3C_DATE_TIME_FORMAT, true, 64, true, true);
+JSONEncoder myEncoder = new JSONEncoder(JSONEncoder.W3C_DATE_TIME_FORMAT, true, 64, true, true);
 
 }}}
   * 解码支持
