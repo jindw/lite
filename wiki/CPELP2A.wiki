@@ -5,7 +5,7 @@
 在转化为命令对象属性之前，我们先将命令行数组转化为参数数组的键值对模型。
 比如 
 {{{
-<CMD> -key1 value1 value2 -key2 value3 -key3 true -key4 1,2 -key4 3
+<CMD> -key1 value1 value2 -key2 value3 -key3 true -key4 1 2 -key4 3
 }}}
 将转化为如下模型：
 {{{
