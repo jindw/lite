@@ -3,6 +3,7 @@ package org.xidea.lite.parse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -34,6 +35,49 @@ public interface ParseContext extends ResultContext, ParseConfig, ParserHolder {
 	 */
 	public void parse(Object source);
 
+	/**
+	 * 获取当前正在解析的模版URI
+	 * @return
+	 */
+	public URI getCurrentURI();
+
+	/**
+	 * 获取当前正在解析的模版URI
+	 * 同事将该url记录在资源列表中
+	 * @return
+	 */
+	public void setCurrentURI(URI currentURI);
+	/**
+	 * 添加（记录）解析相关的资源
+	 * @param resource
+	 */
+	public void addResource(URI resource);
+	
+	public Collection<URI> getResources();
+	
+	/**
+	 * 记录一下编译上下文状态
+	 * @param key
+	 * @param value
+	 */
+	public void setAttribute(Object key, Object value);
+	public <T> T getAttribute(Object key);
+	/**
+	 * 当前代码类型；
+	 * 直接使用Template中的常量定义：
+	 * Template.XT_TYPE
+	 * Template.XA_TYPE
+	 * Template.EL_TYPE
+	 * @return
+	 */
+	public int getTextType();
+	public void setTextType(int textType);
+	/**
+	 * 是否保留空白（默认为false）
+	 * @return
+	 */
+	public boolean isReserveSpace();
+	public void setReserveSpace(boolean keepSpace);
 	/**
 	 * 给出文件内容或url，解析模版源文件
 	 */

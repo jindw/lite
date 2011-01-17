@@ -47,7 +47,6 @@ function loadExtObject(source){
 	return objectMap;
 }
 
-var CURRENT_NODE_KEY = {}
 /**
  * 
 	public boolean parseElement(Element el, ParseContext context,
@@ -97,7 +96,7 @@ ExtensionParser.prototype = {
 		return false;
 	},
 	parseElement:function(el, context,chain,ns, name){
-		context.setAttribute(CURRENT_NODE_KEY,el)
+//		context.setAttribute(CURRENT_NODE_KEY,el)
 		var nns = el.namespaceURI;
 		var attrs = el.attributes;
 		var len = attrs.length;
@@ -212,7 +211,7 @@ ExtensionParser.prototype = {
 			var es = 0;
 			if(match){
 				var matchLength = match[0].length;
-				var currentNode = context.getAttribute(CURRENT_NODE_KEY)
+				var currentNode = context.getCurrentNode();//getAttribute(CURRENT_NODE_KEY)
 				var prefix = match[1];
 				var fn = match[2]
 				if(prefix == null){

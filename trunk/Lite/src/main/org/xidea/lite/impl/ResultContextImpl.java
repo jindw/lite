@@ -1,12 +1,8 @@
 package org.xidea.lite.impl;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,14 +25,9 @@ public class ResultContextImpl implements ResultContext {
 	private static final Log log = LogFactory.getLog(ParseContextImpl.class);
 	
 
-	private HashMap<Object, Object> attributeMap = new HashMap<Object, Object>();
-	private HashSet<URI> resources = new HashSet<URI>();
-	private int textType = 0;
-	private URI currentURI = URI.create("lite:///");
 	private ExpressionFactory expressionFactory = ExpressionFactoryImpl.getInstance();
 	private int inc = 0;
 
-	private boolean preserveSpace;
 	private final ArrayList<Object> result = new ArrayList<Object>();
 
 	private ParseContext context;
@@ -63,10 +54,6 @@ public class ResultContextImpl implements ResultContext {
 			result.add(text);
 		}
 	}
-
-//	public void append(ResultItem item) {
-//		this.result.add(item);
-//	}
 
 
 	private void append(Object[] object) {
@@ -352,48 +339,7 @@ public class ResultContextImpl implements ResultContext {
 	}
 
 
-	public URI getCurrentURI() {
-		return currentURI;
-	}
 
-	public Set<URI> getResources() {
-		return resources;
-	}
 
-	public void addResource(URI resource) {
-		resources.add(resource);
-	}
-
-	public void setCurrentURI(URI currentURI) {
-		if (currentURI != null) {
-			context.addResource(currentURI);
-			this.currentURI = currentURI;
-		}
-	}
-
-	public void setAttribute(Object key, Object value) {
-		this.attributeMap.put(key, value);
-	}
-
-	@SuppressWarnings("unchecked")
-	public <T> T getAttribute(Object key) {
-		return (T)this.attributeMap.get(key);
-	}
-
-	public int getTextType() {
-		return textType;
-	}
-
-	public void setTextType(int textType) {
-		this.textType = textType;
-	}
-
-	public boolean isReserveSpace() {
-		return preserveSpace;
-	}
-
-	public void setReserveSpace(boolean keepSpace) {
-		this.preserveSpace = keepSpace;
-	}
 
 }

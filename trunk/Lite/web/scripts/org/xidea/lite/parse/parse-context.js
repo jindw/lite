@@ -14,9 +14,10 @@ function ParseContext(config,path){
 	config = config || new ParseConfig();
     this.config = config;
 	this.path = path;
-//	this.currentURI = defaultBase;
+	this.currentURI = defaultBase;
 	this.featrueMap = config.getFeatrueMap(path);
 	this.initialize(config);
+	this.self = this;
 }
 function parseExtension(node,context,chain){//extension
 	return context.extensionParser.parse(node,context,chain);
@@ -81,6 +82,7 @@ ParseContext.prototype = {
      */
 	parse:function(source) {
 		var type = source.nodeType;
+		this.setCurrentNode(source);
 		if(type>0){//xml
 			//$log.info(len,source && source.xml)
 		}else{//text
@@ -123,7 +125,13 @@ ParseContext.prototype = {
     	return this.currentURI;
     },
     setCurrentURI:function(uri){
-    	this.currentURI = new URI(uri);
+    	this.self.currentURI = new URI(uri);
+    },
+    getCurrentNode:function(){
+    	return this.currentNode;
+    },
+    setCurrentNode:function(node){
+    	this.self.currentNode = node;
     },
     openStream:function(uri){
 //    	//only for java

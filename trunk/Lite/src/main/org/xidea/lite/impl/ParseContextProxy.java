@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -23,13 +25,25 @@ abstract public class ParseContextProxy implements ParseContext {
 	
 
 	/**
-	 * 外部不允许修改
+	 * createNew 共享
 	 */
 	private final Map<String, String> featrueMap;
-
+	private HashSet<URI> resources = new HashSet<URI>();
+	private HashMap<Object, Object> attributeMap = new HashMap<Object, Object>();
 	
-	protected ResultContext resultContext;
 	protected ParseConfig config;
+	protected ResultContext resultContext;
+	/**
+	 * createNew 复制
+	 */
+	private URI currentURI = URI.create("lite:///");
+	/**
+	 * createNew 重置
+	 */
+	private int textType = 0;
+	private boolean preserveSpace;
+	
+	
 
 	
 	protected ParseContextProxy(ParseConfig config,Map<String, String> featrueMap) {
@@ -38,11 +52,13 @@ abstract public class ParseContextProxy implements ParseContext {
 		this.resultContext = new ResultContextImpl(this);
 	}
 
-	public ParseContextProxy(ParseContext parent) {
+	ParseContextProxy(ParseContextProxy parent) {
 		// 需要重设 ParseChain 的context
 		this.config = parent;
 		this.featrueMap =  parent.getFeatrueMap();
 		this.resultContext = parent;
+		this.setCurrentURI(parent.getCurrentURI());
+		this.resources = parent.resources;
 	}
 
 
@@ -53,7 +69,30 @@ abstract public class ParseContextProxy implements ParseContext {
 	public Map<String, String> getFeatrueMap() {
 		return featrueMap;
 	}
+	public void setAttribute(Object key, Object value) {
+		this.attributeMap.put(key, value);
+	}
 
+	@SuppressWarnings("unchecked")
+	public <T> T getAttribute(Object key) {
+		return (T)this.attributeMap.get(key);
+	}
+
+	public int getTextType() {
+		return textType;
+	}
+
+	public void setTextType(int textType) {
+		this.textType = textType;
+	}
+
+	public boolean isReserveSpace() {
+		return preserveSpace;
+	}
+
+	public void setReserveSpace(boolean keepSpace) {
+		this.preserveSpace = keepSpace;
+	}
 	public final URI createURI(String path) {
 		try {
 			// TODO
@@ -122,10 +161,6 @@ abstract public class ParseContextProxy implements ParseContext {
 		resultContext.append(text);
 	}
 
-//	public final void append(String text,char escapeQute) {
-//		resultContext.append(text, escapeQute);
-//	}
-
 	public final void appendAll(List<Object> instruction) {
 		resultContext.appendAll(instruction);
 	}
@@ -179,29 +214,14 @@ abstract public class ParseContextProxy implements ParseContext {
 		return resultContext.reset(mark);
 	}
 
-//	public final int getDepth() {
-//		return resultContext.getDepth();
-//	}
 
 	public final int getType(int offset) {
 		return resultContext.getType(offset);
 	}
 
-	public final boolean isReserveSpace() {
-		return resultContext.isReserveSpace();
-	}
-
-	public final void setReserveSpace(boolean keepSpace) {
-		resultContext.setReserveSpace(keepSpace);
-	}
-
 	public final List<Object> toList() {
 		return resultContext.toList();
 	}
-
-//	public final String toResult() {
-//		return resultContext.toResult();
-//	}
 
 	/**
 	 * 自定义表达式解析器
@@ -216,39 +236,26 @@ abstract public class ParseContextProxy implements ParseContext {
 		return resultContext.parseEL(eltext);
 	}
 
-	public final void addResource(URI resource) {
-		resultContext.addResource(resource);
 
+	public URI getCurrentURI() {
+		return currentURI;
 	}
 
-	public final URI getCurrentURI() {
-		return resultContext.getCurrentURI();
+
+	public void addResource(URI resource) {
+		resources.add(resource);
+	}
+
+	public void setCurrentURI(URI currentURI) {
+		if (currentURI != null) {
+			this.addResource(currentURI);
+			this.currentURI = currentURI;
+		}
 	}
 
 	public final Collection<URI> getResources() {
-		Collection<URI> result = new ArrayList<URI>(resultContext.getResources());
+		Collection<URI> result = new ArrayList<URI>(resources);
 		result.addAll(config.getResources());
 		return result;
 	}
-
-	public final void setCurrentURI(URI currentURI) {
-		resultContext.setCurrentURI(currentURI);
-	}
-
-	public final <T> T getAttribute(Object key) {
-		return resultContext.getAttribute(key);
-	}
-
-	public final void setAttribute(Object key, Object value) {
-		resultContext.setAttribute(key, value);
-	}
-
-	public final int getTextType() {
-		return resultContext.getTextType();
-	}
-
-	public final void setTextType(int textType) {
-		resultContext.setTextType(textType);
-	}
-
 }

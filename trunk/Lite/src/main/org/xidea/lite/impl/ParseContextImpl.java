@@ -10,6 +10,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xidea.jsi.impl.RuntimeSupport;
 import org.xidea.lite.parse.ExtensionParser;
 import org.xidea.lite.parse.NodeParser;
 import org.xidea.lite.parse.ParseChain;
@@ -31,6 +32,12 @@ public class ParseContextImpl extends ParseContextProxy implements ParseContext 
 	//尾部优先原则
 	private NodeParser<? extends Object>[] nodeParsers;
 	private TextParser[] textParsers;
+	private Object currentNode = null;
+	private Object contextInfo = new Object(){
+		public String toString(){
+			return currentNode+"@"+getCurrentURI();
+		}
+	};
 	
 	public ParseContextImpl(ParseConfig config, String path) {
 		super(config,config.getFeatrueMap(path));
@@ -43,7 +50,7 @@ public class ParseContextImpl extends ParseContextProxy implements ParseContext 
 	public ParseContext createNew() {
 		return new ParseContextImpl(this);
 	}
-	private ParseContextImpl(ParseContext parent) {
+	private ParseContextImpl(ParseContextProxy parent) {
 		super(parent);
 		this.resultContext = new ResultContextImpl(this);
 		// 需要重设 ParseChain 的context
@@ -56,7 +63,6 @@ public class ParseContextImpl extends ParseContextProxy implements ParseContext 
 			}
 		}
 		this.extensionParser = ep;
-		this.setCurrentURI(parent.getCurrentURI());
 	}
 //	public ParseContext create(ParseContext parent){
 //		return new ParseContextImpl(parent);
@@ -95,6 +101,7 @@ public class ParseContextImpl extends ParseContextProxy implements ParseContext 
 	}
 
 	public void parse(Object node) {
+		currentNode = node;
 		ParseChain topChain = getTopChain();
 		if (node instanceof Node || node instanceof String) {
 			topChain.next(node);
@@ -107,6 +114,7 @@ public class ParseContextImpl extends ParseContextProxy implements ParseContext 
 				}
 			}
 			if (node instanceof URI) {
+				Object oldInfo= RuntimeSupport.setTitle(contextInfo);
 				try {
 					URI uri = (URI) node;
 					this.setCurrentURI(uri);
@@ -126,6 +134,8 @@ public class ParseContextImpl extends ParseContextProxy implements ParseContext 
 					}
 				} catch (Exception e) {
 					throw new RuntimeException(e);
+				} finally{
+					RuntimeSupport.setTitle(oldInfo);
 				}
 			} else if (node instanceof NodeList) {
 				NodeList list = (NodeList) node;

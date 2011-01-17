@@ -10,14 +10,13 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.xidea.jsi.JSIRuntime;
-import org.xidea.jsi.impl.RuntimeSupport;
 import org.xidea.lite.parse.ExtensionParser;
 import org.xidea.lite.parse.ParseChain;
 import org.xidea.lite.parse.ParseContext;
 
 public class ExtensionParserImpl implements ExtensionParser {
 	private static Pattern pattern = Pattern.compile("^[\\w\\-]\\:|[\\-]");
-	private static final Object CURRENT_NODE_KEY = new Object();
+//	private static final Object CURRENT_NODE_KEY = new Object();
 	private static Pattern FN_SEEKER = Pattern
 			.compile("^(?:\\w*\\:)?\\w*[\\$\\{]");
 	private Object impl;
@@ -67,31 +66,24 @@ public class ExtensionParserImpl implements ExtensionParser {
 
 	public void parse(Node node, ParseContext context, ParseChain chain) {
 		int type = node.getNodeType();
-		try {
-			RuntimeSupport.setInfo(context.getCurrentURI().getPath());
-			if (type == 9) {
-				if (this.parseDocument(node, context, chain)) {
-					return;
-				}
-			} else if (type == 2) {
-				if (this.parseAttribute(node, context, chain)) {
-					return;
-				}
-			} else if (type == 1) {
-				if (this.parseElement((Element) node, context, chain)) {
-					return;
-				}
+		if (type == 9) {
+			if (this.parseDocument(node, context, chain)) {
+				return;
 			}
-		} finally {
-			// RuntimeSupport.setInfo(null);
+		} else if (type == 2) {
+			if (this.parseAttribute(node, context, chain)) {
+				return;
+			}
+		} else if (type == 1) {
+			if (this.parseElement((Element) node, context, chain)) {
+				return;
+			}
 		}
-		//System.out.println(((Element) node).getTagName());
 		chain.next(node);
 	}
 
 	private boolean parseElement(Element el, ParseContext context,
 			ParseChain chain) {
-		context.setAttribute(CURRENT_NODE_KEY, el);
 		String nns = getNS(el);
 		if (parseBefore(el, context, chain)) {
 			return true;
@@ -106,7 +98,6 @@ public class ExtensionParserImpl implements ExtensionParser {
 					rt.invoke(chain, parserMap.get(name), el);
 					return true;
 				} else if (parserMap.containsKey("")) {
-					System.out.println(parserMap);
 					rt.invoke(chain, parserMap.get(""), el);
 					return true;
 				}else{

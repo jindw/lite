@@ -1,7 +1,5 @@
 package org.xidea.lite.parse;
 
-import java.net.URI;
-import java.util.Collection;
 import java.util.List;
 
 import org.xidea.el.ExpressionFactory;
@@ -13,25 +11,15 @@ import org.xidea.el.ExpressionFactory;
  */
 public interface ResultContext {
 
-	/**
-	 * 记录一下编译上下文状态
-	 * @param key
-	 * @param value
-	 */
-	public void setAttribute(Object key, Object value);
-	public <T> T getAttribute(Object key);
-	
+	public Object parseEL(String el);
 
 	/**
-	 * 当前代码类型；
-	 * 直接使用Template中的常量定义：
-	 * Template.XT_TYPE
-	 * Template.XA_TYPE
-	 * Template.EL_TYPE
-	 * @return
+	 * 自定义表达式解析器
+	 * 
+	 * @param expressionFactory
 	 */
-	public int getTextType();
-	public void setTextType(int textType);
+	public void setExpressionFactory(ExpressionFactory expressionFactory);
+
 	/**
 	 * 记录一下当前位置，reset的参考位置
 	 * 
@@ -44,54 +32,11 @@ public interface ResultContext {
 	 * @return 经过优化后的一维结果集
 	 */
 	public List<Object> reset(int mark);
-
-//	/**
-//	 * 获取结束节点,开始为0
-//	 * @see org.xidea.lite.impl.ResultContextImpl#getDepth()
-//	 * @return
-//	 */
-//	public int getDepth();
-
-	/**
-	 * 是否保留空白（默认为false）
-	 * @return
-	 */
-	public boolean isReserveSpace();
-	public void setReserveSpace(boolean keepSpace);
 	/**
 	 * 获取指定位置的节点类别
 	 * @return
 	 */
 	public int getType(int offset);
-
-	public Object parseEL(String el);
-
-	/**
-	 * 获取当前正在解析的模版URI
-	 * @return
-	 */
-	public URI getCurrentURI();
-
-	/**
-	 * 获取当前正在解析的模版URI
-	 * 同事将该url记录在资源列表中
-	 * @return
-	 */
-	public void setCurrentURI(URI currentURI);
-	/**
-	 * 添加（记录）解析相关的资源
-	 * @param resource
-	 */
-	public void addResource(URI resource);
-	
-	public Collection<URI> getResources();
-	/**
-	 * 自定义表达式解析器
-	 * 
-	 * @param expressionFactory
-	 */
-	public void setExpressionFactory(ExpressionFactory expressionFactory);
-
 	/**
 	 * 添加静态文本（不编码）
 	 * 

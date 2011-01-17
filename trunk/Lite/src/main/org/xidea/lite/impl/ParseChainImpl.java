@@ -1,6 +1,7 @@
 package org.xidea.lite.impl;
 
 import java.lang.reflect.Method;
+import java.net.URI;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -12,7 +13,7 @@ import org.xidea.lite.parse.TextParser;
 
 public class ParseChainImpl extends ParseContextProxy implements ParseChain {
 	private static Log log = LogFactory.getLog(ParseChainImpl.class);
-	private ParseContext context;
+	private ParseContextProxy context;
 	private ParseChainImpl pre;
 	private ParseChainImpl next;
 	private NodeParser<?>[] parsers;
@@ -28,7 +29,7 @@ public class ParseChainImpl extends ParseContextProxy implements ParseChain {
 		}
 		return next;
 	}
-	ParseChainImpl(ParseContext context, NodeParser<? extends Object>[] parsers,int index) {
+	ParseChainImpl(ParseContextProxy context, NodeParser<? extends Object>[] parsers,int index) {
 		super(context);
 		this.context = context;
 		this.parsers = parsers;
@@ -75,10 +76,36 @@ public class ParseChainImpl extends ParseContextProxy implements ParseChain {
 		return pre;
 	}
 
+	
+	/* 覆盖代理 */
+	@Override
+	public URI getCurrentURI() {
+		return context.getCurrentURI();
+	}
+	@Override
+	public int getTextType() {
+		return context.getTextType();
+	}
+	@Override
+	public boolean isReserveSpace() {
+		return context.isReserveSpace();
+	}
+	@Override
+	public void setCurrentURI(URI currentURI) {
+		context.setCurrentURI(currentURI);
+	}
+	@Override
+	public void setReserveSpace(boolean keepSpace) {
+		context.setReserveSpace(keepSpace);
+	}
+	@Override
+	public void setTextType(int textType) {
+		context.setTextType(textType);
+	}
+	/* 支持代理*/
 	public void parse(Object source) {
 		context.parse(source);
 	}
-
 	public List<Object> parseText(String text, int textType) {
 		return context.parseText(text, textType);
 	}
@@ -91,7 +118,6 @@ public class ParseChainImpl extends ParseContextProxy implements ParseChain {
 	}
 	public void addTextParser(TextParser textParser) {
 		context.addTextParser(textParser);
-		
 	}
 	public void addExtension(String namespace, Object packageObject) {
 		context.addExtension(namespace, packageObject);
