@@ -22,8 +22,13 @@ function ParseContext(config,path){
 function parseExtension(node,context,chain){//extension
 	return context.extensionParser.parse(node,context,chain);
 }
-function parseText2(node,context,chain){
-	return parseText(node,context,chain,context.textParsers)
+function parseText2(text,context){
+	if(typeof text == 'string'){
+		return parseText(text,context,context.textParsers)
+	}else{
+		$log.error("未知节点类型",typeof text,text)
+		//chain.next(text);
+	}
 }
 ParseContext.prototype = {
 	/**
@@ -69,7 +74,8 @@ ParseContext.prototype = {
 		var mark = this.mark();
 		var oldType = this.getTextType();
 		this.setTextType(textType);
-		this.parse(source);
+		//this.parse(source);
+		parseText2(source,this);
 		this.setTextType(oldType);
 		var result = this.reset(mark);
 		return result;
@@ -85,28 +91,28 @@ ParseContext.prototype = {
 		this.setCurrentNode(source);
 		if(type>0){//xml
 			//$log.info(len,source && source.xml)
+			this.topChain.next(source);
 		}else{//text
-			if(typeof source != 'string'){
-				//NodeList
-				if(source instanceof URI){
-					source = this.loadXML(source);
-					if(typeof source == 'string'){
-						source=source.replace(/#.*[\r\n]*/,'');
-					}
-				}else{
-					var len = source.length;
-					
-					if(len >= 0 && typeof source.item != 'undefined'){//NodeList
-						for(var i = 0;i<len;i++){
-							this.topChain.next(source.item(i));
-						}
-						return;
-					}
+			if(source instanceof URI){
+				source = this.loadXML(source);
+				if(typeof source == 'string'){
+					source=source.replace(/#.*[\r\n]*/,'');
 				}
 			}
+			if(typeof source != 'string'){
+				//NodeList
+				var len = source.length;
+				if(len >= 0 && typeof source.item != 'undefined'){//NodeList
+					for(var i = 0;i<len;i++){
+						this.topChain.next(source.item(i));
+					}
+					return;
+				}
+			}
+			this.topChain.next(source);
 		}
 		
-		this.topChain.next(source);
+		
 	},
     createURI:function(path) {
     	//$log.error(path,this.currentURI,this.config.root)

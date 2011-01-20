@@ -15,7 +15,8 @@
  */
 function Template(data,parseContext,runAsLiteCode){
     if(":debug"){
-        return new $import("org.xidea.lite.impl:TemplateImpl",{})(data,parseContext,runAsLiteCode)
+    	var impl = $import("org.xidea.lite.impl:TemplateImpl",{});
+        return new impl(data,parseContext,runAsLiteCode)
     }else{
 	    /**
 	     * 模板数据

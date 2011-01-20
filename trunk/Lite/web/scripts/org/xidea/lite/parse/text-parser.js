@@ -8,10 +8,7 @@
 /**
  * for extension text parser
  */
-function parseText(text,context,chain,textParsers){
-	if(typeof text != 'string'){
-		chain.next(text);
-	}
+function parseText(text,context,textParsers){
 	switch(context.getTextType()){
     case XA_TYPE :
         var qute = '"';
