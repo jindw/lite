@@ -8,44 +8,6 @@
 
 var ID_PREFIX = "_$";
 
-
-/**
- * IE 好像容易出问题，可能是线程不安全导致。
- * @internal
- */
-var stringRegexp = /["\\\x00-\x1f\x7f-\x9f]/g;
-/**
- * 转义替换字符
- * @internal
- */
-var charMap = {
-    '\b': '\\b',
-    '\t': '\\t',
-    '\n': '\\n',
-    '\f': '\\f',
-    '\r': '\\r',
-    '"' : '\\"',
-    '\\': '\\\\'
-};
-/**
- * 转义替换函数
- * @internal
- */
-function charReplacer(item) {
-    var c = charMap[item];
-    if (c) {
-        return c;
-    }
-    c = item.charCodeAt().toString(16);
-    return '\\u00' + (c.length>1?c:'0'+c);
-}
-function encodeString(value){
-	stringRegexp.lastIndex = 0;
-    return '"' + (stringRegexp.test(value) ?
-                    value.replace(stringRegexp,charReplacer) :
-                    value)
-               + '"';
-}
 function checkEL(el){
     new Function("return "+el)
 }
@@ -63,7 +25,7 @@ Translator.prototype = {
 	    try{
 	    	//var result =  stringifyJSON(context.toList())
 	        var list = context.toList();
-		    var context = new JSContext(list,this.params);
+		    var context = new TranslateContext(list,this.params);
 		    context.parse();
 		    var code = context.toString();
 		    new Function("function x(){"+code+"\n}");
@@ -73,7 +35,7 @@ Translator.prototype = {
 	    		buf.push(n+':'+e[n]);
 	    	}
 	    	$log.error(code,e);
-	        code = "return ('生成js代码失败：'+"+encodeString(buf.join("\n"))+');';
+	        code = "return ('生成js代码失败：'+"+stringifyJSON(buf.join("\n"))+');';
 	    }
 	    var body = "("+(this.params?this.params.join(','):'')+"){"+code+"\n}";
 	    if(this.id){
@@ -112,11 +74,11 @@ function(context){
 	var var2 = replacer("var2")
 	replace = function(c){return "&#"+c.charCodeAt()+";";}</code>
  */
-function JSContext(code,params){
-    var vs = this.vs = new VarStatus(code);
+function TranslateContext(code,params){
+    var vs = new VarStatus(code);
     this.code = code;
     this.params = params;
-    this.hasFor = vs.forInfos.length;
+    this.forInfos = vs.forInfos;
     this.needReplacer = vs.needReplacer;
     this.defs = vs.defs;
     this.refMap = vs.refMap;
@@ -125,7 +87,7 @@ function JSContext(code,params){
     this.index = 0
     //print([vs.defs,vs.refMap])
 }
-JSContext.prototype = {
+TranslateContext.prototype = {
 	getEL:function (el){
 		if(el instanceof ELTranslator){
 			return el;
@@ -174,7 +136,7 @@ function _$toList(source,result,type) {
             : _$toList(source, [],typeof source);
 }
 	     */
-	    if(this.hasFor){
+	    if(this.forInfos.length){
 	        this.append('var ',FOR_STATUS_KEY);
 	        this.append('function _$toList(source,result,type) {');
 	        this.append('  if (result){');
@@ -217,7 +179,15 @@ function _$toList(source,result,type) {
 	    //this.append("return _$out.join('');");
 	},
     getForStatus:function(forCode){
-        return this.vs.getForStatus(forCode);
+	    var fis = this.forInfos;
+	    var i = fis.length;
+	    while(i--){
+	        var fi = fis[i];
+	        if(fi.code == code){
+	            return fi;
+	        }
+	    }
+        //return this.vs.getForStatus(forCode);
     },
     getVarId:function(){
         var i = this.index;
@@ -233,36 +203,13 @@ function _$toList(source,result,type) {
         var i = id.substring(ID_PREFIX.length);
         delete this.idMap[i];
     },
-    appendOut:function(){
-    	var len = arguments.length;
-    	var last = this.out[this.out.length-1];
-    	var data = Array.prototype.join.call(arguments,'');
-    	if(last == this.lastOut){
-    		data = last.substring(0,last.length-2)+","+data+");";
-    		this.out[this.out.length-1] = data;
-    	}else{
-    		data = "_$out.push("+data+");";
-    		this.append(data);
-    	}
-    	this.lastOut = data
-    },
-    append:function(){
-        var depth = this.depth;
-        this.out.push("\n");
-        while(depth--){
-            this.out.push("\t")
-        }
-        for(var i=0;i<arguments.length;i++){
-            this.out.push(arguments[i]);
-        }
-    },
     /**
      */
     appendCode:function(code){
     	for(var i=0;i<code.length;i++){
     		var item = code[i];
     		if(typeof item == 'string'){
-    			this.appendOut(encodeString(item))
+    			this.appendOut(stringifyJSON(item))
     		}else{
     			switch(item[0]){
                 case EL_TYPE:
@@ -294,6 +241,29 @@ function _$toList(source,result,type) {
                 }
     		}
     	}
+    },
+    append:function(){
+        var depth = this.depth;
+        this.out.push("\n");
+        while(depth--){
+            this.out.push("\t")
+        }
+        for(var i=0;i<arguments.length;i++){
+            this.out.push(arguments[i]);
+        }
+    },
+    appendOut:function(){
+    	var len = arguments.length;
+    	var last = this.out[this.out.length-1];
+    	var data = Array.prototype.join.call(arguments,'');
+    	if(last == this.lastOut){
+    		data = last.substring(0,last.length-2)+","+data+");";
+    		this.out[this.out.length-1] = data;
+    	}else{
+    		data = "_$out.push("+data+");";
+    		this.append(data);
+    	}
+    	this.lastOut = data
     },
     processEL:function(item){
     	this.appendOut(this.getEL(item[1]))
