@@ -1,7 +1,6 @@
 package org.xidea.el.fn;
 
 import java.util.Locale;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.xidea.el.Invocable;
@@ -70,20 +69,16 @@ class JSString extends JSObject implements Invocable {
 
 	// 15.5.4.11 String.prototype.replace(searchValue, replaceValue)
 	public String replace(String thiz, Object[] args) {
-		if(args !=null &&  args.length>0){
-			String replaceValue = String.valueOf(JSObject.getStringArg(args, 1, "undefined"));
-			if (args[0] instanceof Pattern) {
-				Pattern searchPattern = (Pattern) args[0];
-				//int f = searchPattern.flags();
-				Matcher match = searchPattern.matcher(thiz);
-				return match.replaceAll(
-						replaceValue);
-			} else {
-				return Pattern.compile(String.valueOf(args[0]), Pattern.LITERAL).matcher(thiz)
-						.replaceFirst(Matcher.quoteReplacement(replaceValue));
-			}
+		if(args.length>0){
+			Object regexp = args[0];
+			String replaceValue = JSObject.getStringArg(args, 1, "undefined");
+			return JSRegExp.replace(thiz, regexp, replaceValue);
+			
 		}
 		return thiz;
+	}
+	public boolean match(String thiz, Object[] args) {
+		return args.length>0 && JSRegExp.match(thiz,args[0]);
 	}
 	// 15.5.4.13 String.prototype.slice(start, end)
 	public String slice(String thiz, Object[] args) {
