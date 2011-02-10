@@ -65,7 +65,19 @@ function _evaluate(item,context){
     	if(arg1 instanceof Function){
             return arg1.apply(context,arg2);
     	}else if(arg1 instanceof PropertyValue){
-            return arg1[0][arg1[1]].apply(arg1[0],arg2);
+    		var thiz = arg1[0];
+    		var key = arg1[1];
+    		var fn = thiz[key];
+    		//bugfix replace(RegExp
+    		if(fn == String.prototype.replace || fn == String.prototype.match){
+    			arg2 = arg2.slice(0);
+    			var exp = arg2[0];
+    			if(exp && exp['class'] == 'RegExp'){
+    				arg2[0] = window.eval(exp.source)
+    			}
+    			
+    		}
+            return fn.apply(thiz,arg2);
     	}else{
     		throw new Error("not a fn!!"+arg1)
     	}

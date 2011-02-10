@@ -9,8 +9,8 @@
 
 function VarStatus(code){
 	this.needReplacer = false;
-	this.vars={};
-	this.refs={};
+	this.varMap={};
+	this.refMap={};
 	this.defs = [];
     this.forInfos = [];
     this.forStack = [];
@@ -35,19 +35,19 @@ VarStatus.prototype = {
         }
     },
     addVar : function(n){
-    	this.vars[n] = true;
+    	this.varMap[n] = true;
     },
     vistEL : function(el){
     	el = new ELTranslator(el);
     	var fs = this.forStack[this.forStack.length-1];
 	    if(fs){
-		    fs.index = fs.index || el.forIndex;
-		    fs.lastIndex = fs.lastIndex || el.forLastIndex;
-		    fs.ref = fs.ref || el.forRef;
+	    	if(el.forIndex){fs.index =true;}
+	    	if(el.forLastIndex){fs.lastIndex =true;}
+	    	if(el.refMap['for']){fs.ref =true;}
 	    }
-	    for(var n in el.varMap){
-    		if(!this.vars[n]){
-    			this.refs[n] = true;
+	    for(var n in el.refMap){
+    		if(!this.varMap[n]){
+    			this.refMap[n] = true;
     		}
     	}
     	return el;
@@ -95,17 +95,17 @@ function doFindDef(item,pvs){
     
 	vs.params = args;
 	for(var i=0;i<args.length;i++){
-	    vs.vars[args[i]] = true;
+	    vs.varMap[args[i]] = true;
 	}
 	vs.name = el.name;
 	vs.code = item[1];
 	pvs.defs.push(vs);
 	doFind(item[1],vs);
-	for(var n in vs.refs){
-		if(!vs.vars[n]){
-			vs.refs[n] = true;
-			if(!pvs.vars[n]){
-			    pvs.refs[n] = true;
+	for(var n in vs.refMap){
+		if(!vs.varMap[n]){
+			vs.refMap[n] = true;
+			if(!pvs.varMap[n]){
+			    pvs.refMap[n] = true;
 			}
 		}
 	}

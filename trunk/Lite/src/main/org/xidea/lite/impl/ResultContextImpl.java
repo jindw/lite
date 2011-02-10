@@ -3,6 +3,8 @@ package org.xidea.lite.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -47,6 +49,14 @@ public class ResultContextImpl implements ResultContext {
 			expression = parseEL((String)expression);
 		}
 		return expression;
+	}
+	static Pattern VAR_PATTERN = Pattern.compile("^(break|case|catch|const|continue|default|do|else|false|finally|for|function|if|in|instanceof|new|null|return|switch|this|throw|true|try|var|void|while|with)|[a-zA-Z_][\\w_]*$");
+	private String checkVar(String var){
+		Matcher matcher = VAR_PATTERN.matcher(var);
+		if(var == null || !matcher.find() || matcher.group(1)!=null){
+			throw new IllegalArgumentException("无效变量名：Lite有效变量名为(不包括括弧中的保留字)："+VAR_PATTERN.pattern()+"\n当前变量名为："+var);
+		}
+		return var;
 	}
 
 	public void append(String text) {
@@ -116,11 +126,11 @@ public class ResultContextImpl implements ResultContext {
 
 	public final void appendVar(String name, Object el) {
 		el = requrieEL(el);
-		this.append(new Object[] { Template.VAR_TYPE, el, name });
+		this.append(new Object[] { Template.VAR_TYPE, el, checkVar(name)});
 	}
 
 	public final void appendCaptrue(String varName) {
-		this.append(new Object[] { Template.CAPTRUE_TYPE, varName });
+		this.append(new Object[] { Template.CAPTRUE_TYPE, checkVar(varName) });
 
 	}
 
@@ -128,7 +138,7 @@ public class ResultContextImpl implements ResultContext {
 		itemsEL = requrieEL(itemsEL);
 		this.append(new Object[] { Template.FOR_TYPE, itemsEL, var });
 		if (status != null && status.length() > 0) {
-			this.appendVar(status, this.context.parseEL("for"));
+			this.appendVar(checkVar(status), this.context.parseEL("for"));
 		}
 	}
 

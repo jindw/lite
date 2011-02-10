@@ -49,8 +49,8 @@ function stringifyJSON(value) {
                             value.replace(stringRegexp,charReplacer) :
                             value)
                        + '"';
-        case 'function':
-            return value.toString();
+        //case 'function':
+        //    return value.toString();
         case 'object':
             if (!value) {
                 return 'null';
@@ -63,7 +63,9 @@ function stringifyJSON(value) {
                 }
                 return '[' + buf.join(',') + ']';
             }else if(value instanceof RegExp){
-            	return value+'';
+            	//RegExp Source
+            	//return value+'';
+            	return '{"class":"RegExp","source":'+stringifyJSON(value+'')+"}";
             }
             for (var k in value) {
                 var v = stringifyJSON(value[k]);

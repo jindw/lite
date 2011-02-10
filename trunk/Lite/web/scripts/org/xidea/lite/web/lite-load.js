@@ -1,13 +1,8 @@
-var liteImpl = "http://lite.googlecode.com/svn/publish/web/lite-compiler.js";
-function liteInitialize(eventHander){
+var liteImpl = "http://lite.googlecode.com/svn/publish/script/lite-compiler.js";
+function liteInitialize(){
 	if(/\bLITE_COMPILER=true\b/.test(document.cookie)){
 		document.write("<script src='"+impl+"'></script>");
 		liteImpl = null;
-	}
-	if(eventHander){
-		eventHander(liteLoad)
-	}else{
-		window.onload = liteLoad
 	}
 }
 function liteLoad(){
@@ -64,7 +59,7 @@ function buildTemplate(source,o){
 function _reloadFN(type){
 	if(type != 'function'){
 		document.cookie = "LITE_COMPILER=true";
-		if(prompt("模板未编译，不能成功运行，调试期间可以刷新后自动编译！")){
+		if(prompt("模板未编译，不能成功运行，尝试自动编译（调试期间有效）？")){
 			location.reload();
 		}
 	}

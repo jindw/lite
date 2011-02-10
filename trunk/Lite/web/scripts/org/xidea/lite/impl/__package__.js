@@ -4,7 +4,7 @@ this.addScript('template.js',["TemplateImpl","PLUGIN_DEFINE",'VAR_TYPE','XA_TYPE
 
 this.addScript('js-translator.js',["Translator"]
                 ,0
-                ,["org.xidea.el:ELTranslator",'VarStatus','org.xidea.jsi:$log']);
+                ,["org.xidea.el:ELTranslator","org.xidea.el:FOR_STATUS_KEY",'VarStatus','org.xidea.jsi:$log']);
 
 this.addScript('variable-finder.js','VarStatus'
                 ,0

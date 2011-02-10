@@ -8,7 +8,6 @@
 
 var ID_PREFIX = "_$";
 
-var SAFE_FOR_KEY = "_$for";
 
 /**
  * IE 好像容易出问题，可能是线程不安全导致。
@@ -51,9 +50,6 @@ function checkEL(el){
     new Function("return "+el)
 }
 
-function getEL(el){
-	return el && new ELTranslator(el)
-}
 /**
  * JS原生代码翻译器实现
  */
@@ -67,7 +63,7 @@ Translator.prototype = {
 	    try{
 	    	//var result =  stringifyJSON(context.toList())
 	        var list = context.toList();
-		    var context = new Context(list,this.params);
+		    var context = new JSContext(list,this.params);
 		    context.parse();
 		    var code = context.toString();
 		    new Function("function x(){"+code+"\n}");
@@ -116,27 +112,33 @@ function(context){
 	var var2 = replacer("var2")
 	replace = function(c){return "&#"+c.charCodeAt()+";";}</code>
  */
-function Context(code,params){
+function JSContext(code,params){
     var vs = this.vs = new VarStatus(code);
     this.code = code;
     this.params = params;
     this.hasFor = vs.forInfos.length;
     this.needReplacer = vs.needReplacer;
     this.defs = vs.defs;
-    this.refs = vs.refs;
+    this.refMap = vs.refMap;
     this.idMap = {};
     this.depth = 1;
     this.index = 0
-    //print([vs.defs,vs.refs])
+    //print([vs.defs,vs.refMap])
 }
-Context.prototype = {
+JSContext.prototype = {
+	getEL:function (el){
+		if(el instanceof ELTranslator){
+			return el;
+		}
+		return new ELTranslator(el)
+	},
 	parse:function(){
 		var code = this.code;
 		var params = this.params;
 		this.out = [];
 		var firstAppend = true;
 		if(!params){
-		    for(var n in this.refs){
+		    for(var n in this.refMap){
 		    	if(n!= 'for'){
 		    		if(firstAppend){
 		    			firstAppend = false;
@@ -161,8 +163,6 @@ function _$toList(source,result,type) {
       while(source--){
         result[source] = source+1;
       }
-//    }else if(type == "string"){
-//      result = source.split('')
     }else{
       for (type in source) {
         result.push(type);
@@ -175,7 +175,7 @@ function _$toList(source,result,type) {
 }
 	     */
 	    if(this.hasFor){
-	        this.append('var _$for');
+	        this.append('var ',FOR_STATUS_KEY);
 	        this.append('function _$toList(source,result,type) {');
 	        this.append('  if (result){');
 	        this.append('    if(type == "number" && source>0){');
@@ -296,14 +296,14 @@ function _$toList(source,result,type) {
     	}
     },
     processEL:function(item){
-    	this.appendOut(getEL(item[1]))
+    	this.appendOut(this.getEL(item[1]))
     },
     processXMLText:function(item){
-        this.appendOut("_$replace(",getEL(item[1]),")")
+        this.appendOut("_$replace(",this.getEL(item[1]),")")
     },
     processXMLAttribute:function(item){
         //[7,[[0,"value"]],"attribute"]
-        var value = getEL(item[1]);
+        var value = this.getEL(item[1]);
         try{
         	var attributeName = item.length>2?item[2]:null;
         }catch(e){
@@ -323,7 +323,7 @@ function _$toList(source,result,type) {
         }
     },
     processVar:function(item){
-        this.append("var ",item[2],"=",getEL(item[1]),";");
+        this.append("var ",item[2],"=",this.getEL(item[1]),";");
     },
     processCaptrue:function(item){
         var childCode = item[1];
@@ -337,7 +337,7 @@ function _$toList(source,result,type) {
     processIf:function(code,i){
         var item = code[i];
         var childCode = item[1];
-        var test = getEL(item[2]);
+        var test = this.getEL(item[2]);
         this.append("if(",test,"){");
         this.depth++;
         this.appendCode(childCode)
@@ -348,7 +348,7 @@ function _$toList(source,result,type) {
         while(nextElse && nextElse[0] == ELSE_TYPE){
             i++;
             var childCode = nextElse[1];
-            var test = getEL(nextElse[2]);
+            var test = this.getEL(nextElse[2]);
             if(test){
                 this.append("else if(",test,"){");
             }else{
@@ -367,7 +367,7 @@ function _$toList(source,result,type) {
         var item = code[i];
         var indexId = this.getVarId();
         var itemsId = this.getVarId();
-        var itemsEL = getEL(item[2]);
+        var itemsEL = this.getEL(item[2]);
         var varNameId = item[3]; 
         //var statusNameId = item[4]; 
         var childCode = item[1];
@@ -384,14 +384,14 @@ function _$toList(source,result,type) {
         var needForStatus = forInfo.ref || forInfo.index || forInfo.lastIndex;
         if(needForStatus){
             if(forInfo.depth){
-                this.append("var ",previousForValueId ,"=_$for;");
+                this.append("var ",previousForValueId ,"=",FOR_STATUS_KEY,";");
             }
-            this.append("_$for = {lastIndex:",itemsId,".length-1};");
+            this.append(FOR_STATUS_KEY," = {lastIndex:",itemsId,".length-1};");
         }
         this.append("for(;",indexId,"<",itemsId,".length;",indexId,"++){");
         this.depth++;
         if(needForStatus){
-            this.append("_$for.index=",indexId,";");
+            this.append(FOR_STATUS_KEY,".index=",indexId,";");
         }
         this.append("var ",varNameId,"=",itemsId,"[",indexId,"];");
         this.appendCode(childCode);
@@ -399,7 +399,7 @@ function _$toList(source,result,type) {
         this.append("}");
         
         if(needForStatus && forInfo.depth){
-           this.append("_$for=",previousForValueId);
+           this.append(FOR_STATUS_KEY,"=",previousForValueId);
         }
         this.freeVarId(itemsId);;
         if(forInfo.depth){
@@ -410,7 +410,7 @@ function _$toList(source,result,type) {
         while(notEnd && nextElse && nextElse[0] == ELSE_TYPE){
             i++;
             var childCode = nextElse[1];
-            var test = getEL(nextElse[2]);
+            var test = this.getEL(nextElse[2]);
             if(test){
                 this.append("if(!",indexId,"&&",test,"){");
             }else{

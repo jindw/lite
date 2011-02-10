@@ -13,7 +13,14 @@ function ResultContext(){
 	this.result = [];
 	this.attributeMap = [[],[]]
 }
-
+function checkVar(v){
+	var exp = /^(break|case|catch|const|continue|default|do|else|false|finally|for|function|if|in|instanceof|new|null|return|switch|this|throw|true|try|var|void|while|with)|[a-zA-Z_][\w_]*$/;
+	var match = v.match(exp);
+	if(v == null || !match || match[1]!=null){
+		throw new Error("无效变量名：Lite有效变量名为(不包括括弧中的保留字)："+exp+"\n当前变量名为："+v);
+	}
+	return v;
+}
 ResultContext.prototype = {
 	textType:0,
 	setTextType:function(textType){
@@ -96,7 +103,7 @@ ResultContext.prototype = {
 	appendFor:function(varName, itemsEL, statusName){
 		this.result.push([FOR_TYPE,requireEL(this,itemsEL), varName ]);
 		if(statusName){
-			this.appendVar(statusName , this.parseEL('for'));
+			this.appendVar(checkVar(statusName) , this.parseEL('for'));
 		}
 	},
 
@@ -105,11 +112,11 @@ ResultContext.prototype = {
 	},
 
 	appendVar:function(varName, valueEL){
-		this.result.push([VAR_TYPE,requireEL(this,valueEL),varName]);
+		this.result.push([VAR_TYPE,requireEL(this,valueEL),checkVar(varName)]);
 	},
 
 	appendCaptrue:function(varName){
-		this.result.push([CAPTRUE_TYPE,varName]);
+		this.result.push([CAPTRUE_TYPE,checkVar(varName)]);
 	},
 	appendPlugin:function(clazz, el){
 		this.result.push([PLUGIN_TYPE,requireEL(this,el),clazz]);

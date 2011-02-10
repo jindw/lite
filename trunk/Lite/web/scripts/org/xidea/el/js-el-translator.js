@@ -5,17 +5,23 @@
  * @author jindw
  * @version $Id: template.js,v 1.4 2008/02/28 14:39:06 jindw Exp $
  */
+ 
+var FOR_STATUS_KEY = '$__for';
+
 var ID_PATTERN = /^[a-zA-Z_\$][_\$\w]*$/;
+var NUMBER_CALL = /^(\d+)(\.\w+)$/;
 /**
- * 将Lite的逆波兰式序列转化为php表达式
+ * 将Lite的表达式结构转化为javascript表达式
  */
 function ELTranslator(tokens){
-	if(tokens instanceof ELTranslator){
-		return tokens;
-	}
 	this.tree = tokens;
-	this.varMap = {};
-	walkTree(this,this.tree)
+	this.refMap = {};
+	/**
+	 * for  状态设置
+	 */
+	this.forIndex = false;
+	this.forLastIndex = false;
+	this.tree && walkTree(this,this.tree)
 }
 
 ELTranslator.prototype = {
@@ -50,10 +56,10 @@ ELTranslator.prototype = {
 		var param = el[1];
 		switch(el[0]){
         case VALUE_CONSTANTS:
-            return (param && param.source) || stringifyJSON(param);
+            return (param && param['class']=='RegExp' && param.source) || stringifyJSON(param);
         case VALUE_VAR:
         	if(param == 'for'){
-        		return "_$for";
+        		return FOR_STATUS_KEY;
         	}else{
         		return param;
         	}
@@ -71,18 +77,16 @@ ELTranslator.prototype = {
 		var opc = findTokenText(el[0]);
 		var value1 = this.stringify(el[1]);
 		var value2 = this.stringify(el[2]);
-		var param = getTokenParam(el);
 		if(this.getPriority(el[1])<this.getPriority(el)){
 			value1 = '('+value1+')';
 		}
 		switch(type){
-//		case OP_INVOKE_WITH_ONE_PARAM:
-//			value2="["+value2+']';
 		case OP_INVOKE:
 			value2 = value2.slice(1,-1);
+			value1 = value1.replace(NUMBER_CALL,'($1)$2')
 			return value1+"("+value2+')';
 		case OP_GET:
-			value1 = toOperatable(el[1][0],value1);
+			//value1 = toOperatable(el[1][0],value1);
 			if(el[2][0] == VALUE_CONSTANTS){
 				var p = getTokenParam(el[2])
 				if(typeof p == 'string'){
@@ -98,16 +102,20 @@ ELTranslator.prototype = {
 			}else{
 				return value1.slice(0,-1)+','+value2+"]"
 			}
-			//return value1.replace(/(,?)\)$/,'$1')+value2+")"
 		case OP_PUSH:
-			value2 = stringifyJSON(param)+":"+value2+"}";
+			value2 = stringifyJSON(getTokenParam(el))+":"+value2+"}";
 			if("{}"==value1){
 				return "{"+value2
 			}else{
 				return value1.slice(0,-1)+','+value2
 			}
         case OP_QUESTION:
-        	return null;
+        	//1?2:3 => [QUESTION_SELECT,
+        	// 					[QUESTION,[CONSTANTS,1],[CONSTANTS,2]],
+        	// 					[CONSTANTS,3]
+        	// 			]
+        	//throw new Error("表达式异常：QUESTION 指令翻译中应该被QUESTION_SELECT跳过");
+        	return null;//前面有一个尝试，此处应返回null，而不是抛出异常。
         case OP_QUESTION_SELECT:
         /**
      ${a?b:c}
@@ -138,28 +146,12 @@ ELTranslator.prototype = {
 		return opc+value;
 	}
 }
-function toOperatable(type,value1){
-	if(type == VALUE_CONSTANTS){
-		switch(value1.charAt()){
-			case '"'://string
-			case "'"://string
-			case '/'://regexp
-			break;
-			default://number,boolean..
-			value1 = '('+value1+')';
-		}
-	}
-	return  value1;
-}
 function walkTree(thiz,el){
 	var op = el[0];
 	if(op<=0){
 		if(op == VALUE_VAR){
 			var varName = el[1];
-			thiz.varMap[varName] = true;
-			if(varName == "for"){
-				thiz.forRef = true;
-			}
+			thiz.refMap[varName] = true;
 		}
 		return;
 	}else{
