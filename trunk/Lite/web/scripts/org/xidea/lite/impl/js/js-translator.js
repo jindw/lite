@@ -8,9 +8,9 @@
 
 var ID_PREFIX = "_$";
 
-function checkEL(el){
-    new Function("return "+el)
-}
+//function checkEL(el){
+//    new Function("return "+el)
+//}
 
 /**
  * JS原生代码翻译器实现
@@ -84,7 +84,6 @@ function TranslateContext(code,params){
 //    this.refMap = vs.refMap;
     this.idMap = {};
     this.depth = 1;
-    this.index = 0
     //print([vs.defs,vs.refMap])
 }
 TranslateContext.prototype = {
@@ -187,7 +186,7 @@ function _$toList(source,result,type) {
         //return this.vs.getForStatus(forCode);
     },
     allocateId:function(){
-        var i = this.index;
+        var i = 0;
         while(true){
             if(!this.idMap[i]){
                 this.idMap[i] = true;
