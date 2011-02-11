@@ -10,11 +10,6 @@ this.addScript('expression-token.js',
 				,"evaluate");
 
 
-this.addScript('js-el-translator.js',['ELTranslator','FOR_STATUS_KEY']
-                ,0
-                ,['getTokenParamIndex','getTokenParam','getPriority',"findTokenText","org.xidea.lite.util:stringifyJSON",'org.xidea.jsi:$log']);
-
-
 this.addScript('expression.js',['evaluate','Expression']
                 ,['getTokenParam']
                 ,"ExpressionTokenizer");

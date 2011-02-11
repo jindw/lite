@@ -8,10 +8,10 @@
 
 /**
  * 将Lite的表达式结构转化为php表达式
+ * @param tokens
  */
- 
-function PHPELTranslator(tokens){
-	ELTranslator.call(this,tokens)
+function PHPELTranslator(){
+	ELTranslator.apply(this,arguments)
 }
 PHPELTranslator.prototype = new ELTranslator();
 PHPELTranslator.prototype.stringifyValue = function(el){

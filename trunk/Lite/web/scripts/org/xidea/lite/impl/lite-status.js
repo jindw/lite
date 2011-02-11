@@ -7,14 +7,14 @@
  */
 
 
-function VarStatus(code){
+function LiteStatus(code){
 	this.needReplacer = false;
 	this.varMap={};
 	this.refMap={};
 	this.defs = [];
     this.forInfos = [];
     if(code){
-    	vistCode(this,code,[])
+    	walkCode(this,code,[])
     }
 }
 
@@ -23,6 +23,58 @@ function ForStatus(code){
     this.index;
     this.lastIndex;
     this.ref;
+}
+/**
+ * 遍历Lite的表达式结构，收集表达式信息
+ */
+function ELStatus(tokens){
+	this.tree = tokens;
+	this.refMap = {};
+	/**
+	 * for  状态设置
+	 */
+	this.forIndex = false;
+	this.forLastIndex = false;
+	this.tree && walkEL(this,this.tree)
+}
+
+function walkEL(thiz,el){
+	var op = el[0];
+	if(op<=0){
+		if(op == VALUE_VAR){
+			var varName = el[1];
+			thiz.refMap[varName] = true;
+		}
+		return;
+	}else{
+		var arg1 = el[1];
+		if(op == OP_GET){
+			var arg2 = el[2];
+			if(arg1[0] == VALUE_VAR && arg1[1] == 'for' && arg2[0] == VALUE_CONSTANTS){
+				var param = arg2[1];
+				if(param == 'index'){
+					thiz.forIndex = true;
+				}else if(param == 'lastIndex'){
+					thiz.forLastIndex = true;
+				}else{
+					throw new Error("for不支持属性:"+param);
+				}
+				return ;
+			}
+		}
+		arg1 && walkEL(thiz,arg1);
+		
+		var pos = getTokenParamIndex(el[0]);
+		if(pos>2){
+			walkEL(thiz, el[2]);
+		}
+	}
+}
+
+function walkCode(vs,code,forStack){
+	vs._forStack = forStack;
+	doFind(vs,vs.code = code);
+    delete vs._forStack;
 }
 
 function doFind(vs,code){
@@ -84,7 +136,7 @@ function doFindDef(pvs,item){
         $log.error(error)
         throw new Error(error)
     }
-	var vs = new VarStatus(null);
+	var vs = new LiteStatus(null);
 	var el = evaluate(item[2],{});
 	var args = el.params.slice(0);
 	addVar(pvs,vs.name = el.name);
@@ -98,7 +150,7 @@ function doFindDef(pvs,item){
 	//
 	
 	pvs.defs.push(vs);
-	vistCode(vs,item[1],pvs._forStack);
+	walkCode(vs,item[1],pvs._forStack);
     delete vs._forStack;
     	
 	for(var n in vs.refMap){
@@ -110,14 +162,8 @@ function doFindDef(pvs,item){
 		}
 	}
 }
-function vistCode(vs,code,forStack){
-	vs._forStack = forStack;
-	doFind(vs,vs.code = code);
-    delete vs._forStack;
-}
-
 function vistEL(vs,el){
-	el = new ELTranslator(el);
+	el = new ELStatus(el);
 	var fs = vs._forStack[vs._forStack.length-1];
     if(fs){
     	if(el.forIndex){fs.index =true;}

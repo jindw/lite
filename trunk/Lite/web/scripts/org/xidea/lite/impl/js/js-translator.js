@@ -75,24 +75,21 @@ function(context){
 	replace = function(c){return "&#"+c.charCodeAt()+";";}</code>
  */
 function TranslateContext(code,params){
-    var vs = new VarStatus(code);
-    this.code = code;
+    LiteStatus.apply(this,arguments);
     this.params = params;
-    this.forInfos = vs.forInfos;
-    this.needReplacer = vs.needReplacer;
-    this.defs = vs.defs;
-    this.refMap = vs.refMap;
+//    this.code = code;
+//    this.forInfos = vs.forInfos;
+//    this.needReplacer = vs.needReplacer;
+//    this.defs = vs.defs;
+//    this.refMap = vs.refMap;
     this.idMap = {};
     this.depth = 1;
     this.index = 0
     //print([vs.defs,vs.refMap])
 }
 TranslateContext.prototype = {
-	getEL:function (el){
-		if(el instanceof ELTranslator){
-			return el;
-		}
-		return new ELTranslator(el)
+	stringifyEL:function (el){
+		return el?stringifyJSEL(el.tree):null;
 	},
 	parse:function(){
 		var code = this.code;
@@ -178,7 +175,7 @@ function _$toList(source,result,type) {
 	    }
 	    //this.append("return _$out.join('');");
 	},
-    getForStatus:function(forCode){
+    findForStatus:function(forCode){
 	    var fis = this.forInfos;
 	    var i = fis.length;
 	    while(i--){
@@ -189,7 +186,7 @@ function _$toList(source,result,type) {
 	    }
         //return this.vs.getForStatus(forCode);
     },
-    getVarId:function(){
+    allocateId:function(){
         var i = this.index;
         while(true){
             if(!this.idMap[i]){
@@ -199,7 +196,7 @@ function _$toList(source,result,type) {
             i++;
         }
     },
-    freeVarId:function(id){
+    freeId:function(id){
         var i = id.substring(ID_PREFIX.length);
         delete this.idMap[i];
     },
@@ -266,48 +263,48 @@ function _$toList(source,result,type) {
     	this.lastOut = data
     },
     processEL:function(item){
-    	this.appendOut(this.getEL(item[1]))
+    	this.appendOut(this.stringifyEL(item[1]))
     },
     processXMLText:function(item){
-        this.appendOut("_$replace(",this.getEL(item[1]),")")
+        this.appendOut("_$replace(",this.stringifyEL(item[1]),")")
     },
     processXMLAttribute:function(item){
         //[7,[[0,"value"]],"attribute"]
-        var value = this.getEL(item[1]);
+        var value = this.stringifyEL(item[1]);
         try{
         	var attributeName = item.length>2?item[2]:null;
         }catch(e){
         	$log.info("@@@@@属性异常："+item.get(2),e)
         }
         if(attributeName){
-            var testId = this.getVarId();
+            var testId = this.allocateId();
             this.append("var ",testId,"=",value);
             this.append("if(",testId,"!=null){");
             this.depth++;
             this.appendOut("' ",attributeName,"=\"',_$replace("+testId+"),'\"'");
             this.depth--;
             this.append("}");
-            this.freeVarId(testId);
+            this.freeId(testId);
         }else{
         	this.appendOut("_$replace(",value,")")
         }
     },
     processVar:function(item){
-        this.append("var ",item[2],"=",this.getEL(item[1]),";");
+        this.append("var ",item[2],"=",this.stringifyEL(item[1]),";");
     },
     processCaptrue:function(item){
         var childCode = item[1];
         var varName = item[2];
-        var bufbak = this.getVarId();
+        var bufbak = this.allocateId();
         this.append("var ",bufbak,"=_$out;_$out=[];");
         this.appendCode(childCode);
         this.append("var ",varName,"=_$out.join('');_$out=",bufbak,";");
-        this.freeVarId(bufbak);
+        this.freeId(bufbak);
     },
     processIf:function(code,i){
         var item = code[i];
         var childCode = item[1];
-        var test = this.getEL(item[2]);
+        var test = this.stringifyEL(item[2]);
         this.append("if(",test,"){");
         this.depth++;
         this.appendCode(childCode)
@@ -318,7 +315,7 @@ function _$toList(source,result,type) {
         while(nextElse && nextElse[0] == ELSE_TYPE){
             i++;
             var childCode = nextElse[1];
-            var test = this.getEL(nextElse[2]);
+            var test = this.stringifyEL(nextElse[2]);
             if(test){
                 this.append("else if(",test,"){");
             }else{
@@ -335,15 +332,15 @@ function _$toList(source,result,type) {
     },
     processFor:function(code,i){
         var item = code[i];
-        var indexId = this.getVarId();
-        var itemsId = this.getVarId();
-        var itemsEL = this.getEL(item[2]);
+        var indexId = this.allocateId();
+        var itemsId = this.allocateId();
+        var itemsEL = this.stringifyEL(item[2]);
         var varNameId = item[3]; 
         //var statusNameId = item[4]; 
         var childCode = item[1];
-        var forInfo = this.getForStatus(item)
+        var forInfo = this.findForStatus(item)
         if(forInfo.depth){
-            var previousForValueId = this.getVarId();
+            var previousForValueId = this.allocateId();
         }
         //初始化 items 开始
         this.append("var ",itemsId,"=",itemsEL,";");
@@ -371,16 +368,16 @@ function _$toList(source,result,type) {
         if(needForStatus && forInfo.depth){
            this.append(FOR_STATUS_KEY,"=",previousForValueId);
         }
-        this.freeVarId(itemsId);;
+        this.freeId(itemsId);;
         if(forInfo.depth){
-            this.freeVarId(previousForValueId);
+            this.freeId(previousForValueId);
         }
         var nextElse = code[i+1];
         var notEnd = true;
         while(notEnd && nextElse && nextElse[0] == ELSE_TYPE){
             i++;
             var childCode = nextElse[1];
-            var test = this.getEL(nextElse[2]);
+            var test = this.stringifyEL(nextElse[2]);
             if(test){
                 this.append("if(!",indexId,"&&",test,"){");
             }else{
@@ -393,7 +390,7 @@ function _$toList(source,result,type) {
             this.append("}");
             nextElse = code[i+1];
         }
-        this.freeVarId(indexId);
+        this.freeId(indexId);
         return i;
     },
     toString:function(){

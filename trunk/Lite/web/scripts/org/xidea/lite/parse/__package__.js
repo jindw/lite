@@ -28,7 +28,7 @@ this.addScript('parse-chain.js','buildTopChain');
 this.addScript('xml-default-parser.js','parseDefaultXMLNode');
 this.addScript('xml-core-parser.js','Core'
                 ,0
-                ,["org.xidea.el:findELEnd",'org.xidea.lite.parse:ParseContext','org.xidea.lite.util:*','org.xidea.lite.util:stringifyJSON','org.xidea.lite.util:selectNodes','org.xidea.lite.util:URI']);
+                ,["org.xidea.lite.impl.js:Translator","org.xidea.el:findELEnd",'org.xidea.lite.parse:ParseContext','org.xidea.lite.util:*','org.xidea.lite.util:stringifyJSON','org.xidea.lite.util:selectNodes','org.xidea.lite.util:URI']);
 
 this.addScript('text-parser.js',['parseText']
                 ,0

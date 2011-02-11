@@ -26,4 +26,7 @@
  
 function PHPTranslator(context){
 }
-PHPTranslator.prototype = new JSTranslator();
+function PHPTranslateContext(){
+	TranslateContext.apply(this,arguments)
+} 
+PHPTranslateContext.prototype = new TranslateContext();
