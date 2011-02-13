@@ -78,7 +78,7 @@ function stringifyInfix(el){
 		}else{
 			return value1.slice(0,-1)+','+value2+"]"
 		}
-	case OP_PUSH:
+	case OP_PUT:
 		value2 = stringifyJSON(getTokenParam(el))+":"+value2+"}";
 		if("{}"==value1){
 			return "{"+value2

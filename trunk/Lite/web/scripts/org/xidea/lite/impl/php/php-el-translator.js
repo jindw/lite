@@ -5,16 +5,21 @@
  * @author jindw
  * @version $Id: template.js,v 1.4 2008/02/28 14:39:06 jindw Exp $
  */
-
+var VAR_TEMP = "$__lite_tmp"
 /**
  * 将Lite的表达式结构转化为php表达式
- * @param tokens
  */
-function PHPELTranslator(){
-	ELTranslator.apply(this,arguments)
+function stringifyPHPEL(el){
+	var type = el[0];
+	if(type<=0){//value
+		return stringifyValue(el)
+	}else if(getTokenParamIndex(type) ==3){//两个操作数
+		return stringifyInfix(el);
+	}else{
+		return stringifyPrefix(el);
+	}
 }
-PHPELTranslator.prototype = new ELTranslator();
-PHPELTranslator.prototype.stringifyValue = function(el){
+function stringifyValue(el){
 		var param = el[1];
 		switch(el[0]){
         case VALUE_CONSTANTS:
@@ -29,21 +34,21 @@ PHPELTranslator.prototype.stringifyValue = function(el){
         case VALUE_MAP:
         	return "array()";
 		}
-};
+}
 /**
  * 翻译中缀运算符
  */
-PHPELTranslator.prototype.stringifyInfix = function(el){
+function stringifyInfix(el){
 	var type = el[0];
 	var opc = findTokenText(el[0]);
-	var value1 = this.stringify(el[1]);
-	var value2 = this.stringify(el[2]);
-	if(this.getPriority(el[1])<this.getPriority(el)){
+	var value1 = stringifyPHPEL(el[1]);
+	var value2 = stringifyPHPEL(el[2]);
+	if(getELPriority(el[1])<getELPriority(el)){
 		value1 = '('+value1+')';
 	}
 	switch(type){
 	case OP_ADD://+
-	case OP_NOT://!
+	//case OP_NOT://! infix
     case OP_EQ://==
     case OP_NOTEQ://!=
 	case OP_GET://.
@@ -67,7 +72,7 @@ PHPELTranslator.prototype.stringifyInfix = function(el){
 		}else{
 			return value1.slice(0,-1)+','+value2+")"
 		}
-	case OP_PUSH:
+	case OP_PUT:
 		value2 = stringifyPHP(getTokenParam(el))+"=>"+value2+")";
 		if("array()"==value1){
 			return "array("+value2
@@ -88,21 +93,21 @@ PHPELTranslator.prototype.stringifyInfix = function(el){
  ${222+2|a?b1?b2:b3:c}
      */
      	var arg1 = el[1];
-    	var test = this.stringify(arg1[1]);    	var value1 = this.stringify(arg1[2]);
-    	return '($__engine->op('+OP_NOT+','+test+')?'+value2+":"+value1+')';
-    	
+    	var test = stringifyPHPEL(arg1[1]);    	var value1 = stringifyPHPEL(arg1[2]);
+    	//return '($__engine->op('+OP_NOT+','+test+')?'+value2+":"+value1+')';
+    	return '('+toBoolean(test,arg1[1])+'?'+value1+':'+value2+')'
     case OP_AND://&&
     	if(value1.match(/^[\w_\$]+$/)){
-    		return '($__engine->op('+OP_NOT+','+value1 +')?'+value1+':'+value2+')'
+    		return '('+toBoolean(value1,el[1])+'?'+value2+':'+value1+')'
     	}
-    	return '($__engine->op('+OP_NOT+',$__el='+value1 +')?$__el:'+value2+')'
+    	return '('+toBoolean(value1,el[1],true)+'?'+value2+':'+VAR_TEMP+')'
     case OP_OR://||
     	if(value1.match(/^[\w_\$]+$/)){
-    		return '($__engine->op('+OP_NOT+','+value1 +')?'+value2+':'+value1+')'
+    		return '('+toBoolean(value1,el[1])+'?'+value1+':'+value2+')'
     	}
-    	return '(!$__engine->op('+OP_NOT+',$__el'+value1 +')?$__el:'+value2+')'
+    	return '('+toBoolean(value1,el[1],true)+'?'+VAR_TEMP+':'+value2 +')'
 	}
-	if(this.getPriority(el)>=this.getPriority(el[2])){
+	if(getELPriority(el)>=getELPriority(el[2])){
 		value2 = '('+value2+')';
 	}
 	return value1 + opc + value2;
@@ -143,4 +148,123 @@ function stringifyPHP(value) {
         default://boolean
             return String(value);
     }
+}
+
+/**
+ * 翻译前缀运算符
+ */
+function stringifyPrefix(el){
+	var type = el[0];
+	var el1 = el[1];
+	var value = stringifyJSEL(el1);
+	var param = getTokenParam(el);
+	if(type == OP_NOT){//!
+		//return value1+'['+value2+']';
+		return "$__engine->op("+type+","+value+")";
+	}
+	if(getELPriority(el)>=getELPriority(el1)){
+		value = '('+value+')';
+	}
+    var opc = findTokenText(type);
+	return opc+value;
+}
+function getType(el){
+	var op = el[0];
+	var type;
+	if(op<=0){
+		switch(op){
+		case VALUE_CONSTANTS:
+			return typeof el[1];
+		case VALUE_VAR:
+			return null;
+		case VALUE_LIST:
+		case VALUE_MAP:
+		default:
+			return 'object';
+		}
+	}else{
+		var arg1 = el[1];
+		var arg2 = el[2];
+		switch(op[0]){
+		case OP_ADD:
+			//if(isNumberAdder(arg1)&&isNumberAdder(arg2)){
+			//	//return 'number';
+			//}else{
+			return 'string,number';
+			//}
+		case OP_POS:
+		case OP_NEG:
+		case OP_MUL:
+		case OP_DIV:
+		case OP_MOD:
+		case OP_SUB:
+			return 'number';
+		case OP_NOT:
+		case OP_LT:
+		case OP_GT:
+		case OP_LTEQ:
+		case OP_GTEQ:
+		case OP_EQ:
+		case OP_NE:
+		case OP_EQ_STRICT:
+		case OP_NE_STRICT:
+//		case OP_AND:
+//		case OP_OR:
+			return 'boolean';
+//		case OP_GET:
+//			if(arg1[0] == VALUE_VAR && arg1[1] == 'for'){
+//				if(op[1] == 'index' || op[1] == 'lastIndex'){
+//					return 'number';
+//				}
+//			}
+		}
+	}
+}
+/**
+ * 如果不是变量或者常量，则必须设置零时变量
+ */
+function toBoolean(value,el,setTempVar){
+	var op = el[0];
+	if(op<=0){
+		switch(op){
+		case VALUE_CONSTANTS:
+			if(setTempVar){
+				if(el[1]){
+					return '(('+VAR_TEMP+'='+value+')||true)';
+				}else{
+					return '(('+VAR_TEMP+'='+value+')&&false)';
+				}
+			}else{
+				return !!el[1]+'';
+			}
+			
+		//case VALUE_VAR:
+		case VALUE_LIST:
+		case VALUE_MAP:
+		default:
+			if(setTempVar){
+				return '(('+VAR_TEMP+'='+value+')||true)'
+			}
+			return 'true';
+		}
+	}
+	var type = getType();
+	if(!setTempVar){//持续优化
+		if(type == 'boolean' || type =='number'){
+			return value;
+		}
+		if(value.match(/^[\w_\$]+$/)){
+			return '('+value+' || '+value+">0 || '0' === "+value+')'
+		}
+	}
+	if(type == 'boolean' || type =='number'){
+		return '('+VAR_TEMP +'='+value+')';
+	}
+	return "(("+VAR_TEMP +"="+ value+") || "+VAR_TEMP+">0 || "+VAR_TEMP+" === '0')";
+}
+/**
+ * 获取某个运算符号的优先级
+ */
+function getELPriority(el) {
+	return getPriority(el[0]);
 }

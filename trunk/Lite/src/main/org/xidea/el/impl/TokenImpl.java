@@ -256,7 +256,7 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 		case OP_GET_STATIC:// 1
 		case OP_INVOKE_WITH_STATIC_PARAM:// 1
 			// case OP_INVOKE_WITH_ONE_PARAM:// 2
-		case ExpressionToken.OP_PUSH:// 1
+		case ExpressionToken.OP_PUT:// 1
 			return true;
 		default:
 			return false;

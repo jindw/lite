@@ -243,7 +243,7 @@ public class OperationStrategyImpl implements OperationStrategy {
 		case ExpressionToken.OP_JOIN:
 			((List) arg1).add(arg2);
 			return arg1;
-		case ExpressionToken.OP_PUSH:
+		case ExpressionToken.OP_PUT:
 			((Map) arg1).put(item.getParam(), arg2);
 			return arg1;
 		case ExpressionToken.OP_IN:

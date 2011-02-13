@@ -39,7 +39,7 @@ var OP_OR= 72;
 var OP_QUESTION= 68;
 var OP_QUESTION_SELECT= 69;
 var OP_JOIN= 64;
-var OP_PUSH= 65;
+var OP_PUT= 65;
 
 
 
@@ -104,7 +104,7 @@ function hasTokenParam(type) {
 //	case OP_GET_STATIC_PROP:
 //	case OP_INVOKE_WITH_STATIC_PARAM:
 //	case OP_INVOKE_WITH_ONE_PARAM:
-	case OP_PUSH:
+	case OP_PUT:
 		return true;
 	default:
 		return  false;

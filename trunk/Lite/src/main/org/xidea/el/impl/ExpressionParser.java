@@ -10,7 +10,7 @@ import static org.xidea.el.ExpressionToken.BIT_PRIORITY_SUB;
 import static org.xidea.el.ExpressionToken.OP_GET;
 
 import static org.xidea.el.ExpressionToken.OP_INVOKE;
-import static org.xidea.el.ExpressionToken.OP_PUSH;
+import static org.xidea.el.ExpressionToken.OP_PUT;
 import static org.xidea.el.ExpressionToken.OP_NEG;
 import static org.xidea.el.ExpressionToken.OP_JOIN;
 import static org.xidea.el.ExpressionToken.OP_POS;
@@ -503,7 +503,7 @@ public class ExpressionParser extends JSONTokenizer {
 			TokenImpl token = tokens.get(i);
 			int type = token.getType();
 			if (depth == 0) {
-				if (type == OP_PUSH || type == VALUE_MAP) {// (
+				if (type == OP_PUT || type == VALUE_MAP) {// (
 					// <#newMap>
 					// <#push>
 					return true;
@@ -524,7 +524,7 @@ public class ExpressionParser extends JSONTokenizer {
 
 	private void addKeyOrObject(Object object, boolean isVar) {
 		if (skipSpace(':') && isMapMethod()) {// object key
-			addToken(new TokenImpl(OP_PUSH, object));
+			addToken(new TokenImpl(OP_PUT, object));
 			this.start++;// skip :
 		} else if (isVar) {
 			addToken(new TokenImpl(VALUE_VAR, object));

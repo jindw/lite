@@ -6,6 +6,7 @@
  * @version $Id: template.js,v 1.4 2008/02/28 14:39:06 jindw Exp $
  */
 
+var FOR_STATUS_KEY = '$__for';
 var ID_PREFIX = "_$";
 
 //function checkEL(el){
@@ -174,7 +175,7 @@ function _$toList(source,result,type) {
 	    }
 	    //this.append("return _$out.join('');");
 	},
-    findForStatus:function(forCode){
+    findForStatus:function(code){
 	    var fis = this.forInfos;
 	    var i = fis.length;
 	    while(i--){

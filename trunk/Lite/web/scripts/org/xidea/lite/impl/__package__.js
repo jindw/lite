@@ -4,6 +4,8 @@ this.addScript('template.js',["TemplateImpl","PLUGIN_DEFINE",'VAR_TYPE','XA_TYPE
 
 this.addScript('lite-status.js','LiteStatus'
                 ,0
-                ,["org.xidea.el:evaluate",'org.xidea.jsi:$log']);
+                ,[
+                	"org.xidea.el:*",
+                	'org.xidea.jsi:$log']);
                 
-//this.addDependence("*",'*',true);
+this.addDependence("*",'*',true);

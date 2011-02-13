@@ -83,7 +83,7 @@ public abstract interface ExpressionToken {
 	//与Map Join 共享字面量（map join 会忽略）
 	public static final int OP_JOIN   = 0<<12 | 0<<8 | 1<<6 | 0<<2 | 0;
 	//与三元运算符共享字面值
-	public static final int OP_PUSH   = 0<<12 | 0<<8 | 1<<6 | 0<<2 | 1;
+	public static final int OP_PUT   = 0<<12 | 0<<8 | 1<<6 | 0<<2 | 1;
 	
 
 	

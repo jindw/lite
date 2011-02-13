@@ -138,7 +138,7 @@ var fns = {
 			var token = this.tokens[i];
 			var type = token[0];
 			if (depth == 0) {
-				if (type == OP_PUSH
+				if (type == OP_PUT
 						|| type == VALUE_MAP) {// (
 					// <#newMap>
 					// <#push>
@@ -271,7 +271,7 @@ var fns = {
 
 	addKeyOrObject :function(object, isVar) {
 		if (this.skipSpace(':') && this.isMapMethod()) {// object key
-			this.addToken([OP_PUSH, object]);
+			this.addToken([OP_PUT, object]);
 			this.start++;// skip :
 		} else if (isVar) {
 			this.addToken([VALUE_VAR, object]);

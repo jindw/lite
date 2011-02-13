@@ -129,7 +129,7 @@ function _evaluate(item,context){
     case OP_JOIN:
         arg1.push(arg2)
         return arg1;
-    case OP_PUSH:
+    case OP_PUT:
         arg1[getTokenParam(item)]= arg2;
         return arg1;
     }

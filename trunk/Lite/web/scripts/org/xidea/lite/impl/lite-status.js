@@ -37,6 +37,90 @@ function ELStatus(tokens){
 	this.forLastIndex = false;
 	this.tree && walkEL(this,this.tree)
 }
+var offset = 0
+var TYPE_FIX = 1<<offset++;
+var TYPE_FIX2 = 1<<offset++;
+var TYPE_NULL = 1<<offset++;
+var TYPE_ARRAY = 1<<offset++;
+var TYPE_MAP = 1<<offset++;
+var TYPE_OBJECT = 1<<offset++;
+var TYPE_NUMBER = 1<<offset++;
+var TYPE_STRING = 1<<offset++;
+var TYPE_BOOLEAN = 1<<offset++;
+function getType(el){
+	var op = el[0];
+	var type;
+	if(op<=0){
+		switch(op){
+		case VALUE_CONSTANTS:
+			var v= el[1];
+			if(v == null){
+				return TYPE_FIX|TYPE_NULL;
+			}
+			switch(typeof v){
+			case 'boolean':
+				return TYPE_FIX|TYPE_BOOLEAN;
+			case 'number':
+				return TYPE_FIX|TYPE_NUMBER;
+			case 'string':
+				return TYPE_FIX|TYPE_STRING;
+			case 'object':
+				if(v instanceof Array){
+					return TYPE_FIX|TYPE_ARRAY;
+				}
+				return TYPE_FIX|TYPE_OBJECT;
+			}
+			return typeof el[1];
+		case VALUE_VAR:
+			return 0;
+		case VALUE_LIST:
+		case VALUE_MAP:
+		default:
+			return TYPE_FIX;
+		}
+	}else{
+		var arg1 = el[1];
+		var arg2 = el[2];
+		switch(op[0]){
+		case OP_JOIN:
+			return TYPE_FIX|TYPE_ARRAY;
+		case OP_PUT:
+			return TYPE_FIX|TYPE_MAP;
+		case OP_ADD:
+			//if(isNumberAdder(arg1)&&isNumberAdder(arg2)){
+			//	//return 'number';
+			//}else{
+			return TYPE_FIX2|TYPE_NUMBER|TYPE_STRING;
+			//}
+		case OP_POS:
+		case OP_NEG:
+		case OP_MUL:
+		case OP_DIV:
+		case OP_MOD:
+		case OP_SUB:
+			return  TYPE_FIX|TYPE_NUMBER;
+		case OP_NOT:
+		case OP_LT:
+		case OP_GT:
+		case OP_LTEQ:
+		case OP_GTEQ:
+		case OP_EQ:
+		case OP_NE:
+		case OP_EQ_STRICT:
+		case OP_NE_STRICT:
+//		case OP_AND:
+//		case OP_OR:
+			return  TYPE_FIX|TYPE_BOOLEAN;
+//		case OP_GET:
+//			if(arg1[0] == VALUE_VAR && arg1[1] == 'for'){
+//				if(op[1] == 'index' || op[1] == 'lastIndex'){
+//					return 'number';
+//				}
+//			}
+		}
+	}
+}
+
 
 function walkEL(thiz,el){
 	var op = el[0];
