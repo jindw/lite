@@ -1,5 +1,7 @@
 package org.jside.fileserver.test;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.List;
 
 import javax.script.ScriptEngineFactory;
@@ -12,6 +14,11 @@ public class ScriptEngine {
 	public void listEngine(){
 		main();
 		System.out.println(new ScriptEngineManager().getEngineByExtension("js"));
+	}
+	@Test
+	public void testDecode() throws UnsupportedEncodingException{
+		
+		System.out.println(URLDecoder.decode("@abd","GBK"));
 	}
 
 	public static void main(String... args) {

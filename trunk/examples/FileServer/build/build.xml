@@ -40,9 +40,9 @@
 	<target name="compileLite">
 		<delete dir="${basedir}/build/dest/lite" />
 		<mkdir dir="${basedir}/build/dest/lite" />
-		<java fork="true" jar="web/WEB-INF/lib/Template.jar">
+		<java fork="true" jar="web/WEB-INF/lib/Lite.jar">
 			<arg value="-root" />
-			<arg value="${basedir}/src/main/org/jside/filemanager/" />
+			<arg value="${basedir}/src/main/" />
 			<arg value="-litecode" />
 			<arg value="${basedir}/build/dest/lite" />
 		</java>

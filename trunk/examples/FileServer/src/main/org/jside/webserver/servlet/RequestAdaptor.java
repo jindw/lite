@@ -2,6 +2,7 @@ package org.jside.webserver.servlet;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
 import java.text.SimpleDateFormat;
@@ -194,11 +195,22 @@ abstract class RequestAdaptor implements HttpServletRequest {
 	}
 
 	public String getContentType() {
-		return RequestUtil.get().getRequestHeader("Content-Type");
+		String ct = RequestUtil.get().getRequestHeader("Content-Type");
+		return ct == null?"text/html":ct;
 	}
 
 	public ServletInputStream getInputStream() throws IOException {
-		return null;
+		RequestContextImpl rc = (RequestContextImpl) RequestUtil.get();
+		
+		final byte[] data= rc.getPost().getBytes("ISO-8859-1");
+		return new ServletInputStream(){
+			int pos = 0;
+			@Override
+			public int read() throws IOException {
+				return pos<data.length?data[pos++]:-1;
+			}
+			
+		};
 	}
 
 	public String getLocalAddr() {
@@ -242,7 +254,7 @@ abstract class RequestAdaptor implements HttpServletRequest {
 	}
 
 	public BufferedReader getReader() throws IOException {
-		return base().getInput();
+		return new BufferedReader(new StringReader(base().getPost()));
 	}
 
 	public abstract String getRealPath(String path);

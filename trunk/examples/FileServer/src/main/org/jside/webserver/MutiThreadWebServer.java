@@ -61,7 +61,8 @@ public class MutiThreadWebServer extends SimpleWebServer {
 				t.setName(n);
 			}
 		} catch (Exception e) {
-			log.error(e);
+			//e.printStackTrace();
+			log.debug(e);
 		} finally {
 			try {
 				if(log.isDebugEnabled()){

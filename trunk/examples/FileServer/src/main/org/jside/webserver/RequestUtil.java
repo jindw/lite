@@ -229,8 +229,8 @@ public abstract class RequestUtil {
 			String encoding = get().getEncoding();
 			out.write(String.valueOf(data).getBytes(encoding));
 		}
-		out.write('\r');
-		out.write('\n');
+//		out.write('\r');
+//		out.write('\n');
 	}
 
 	private static File getFile(URI root) {

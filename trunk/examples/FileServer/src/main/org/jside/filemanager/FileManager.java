@@ -12,6 +12,7 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.HashMap;
 
+import org.jside.webserver.CGIAdaptor;
 import org.jside.webserver.RequestUtil;
 import org.jside.webserver.RequestContext;
 import org.jside.webserver.action.ActionWebServer;
@@ -165,12 +166,16 @@ public class FileManager {
 	}
 
 	public static void main(String[] args) throws MalformedURLException {
-		ActionWebServer aws = new ActionWebServer(null);
-		String file = ".";
+		String file = "./";
 		if(args != null && args.length>0){
 			file = args[0];
 		}
-		aws.addAction("/fs/**", new FileManager(new File(file), "/fs"));
+		File root = new File(file).getAbsoluteFile();
+		System.out.println(root);
+		ActionWebServer aws = new ActionWebServer(root.toURI());
+		
+		aws.addAction("/cgi/**", new CGIAdaptor(aws));
+		aws.addAction("/fs/**", new FileManager(root, "/fs"));
 		aws.addAction("/**",new Object(){
 			@SuppressWarnings("unused")
 			public void execute(){

@@ -17,6 +17,7 @@ public interface RequestContext {
 	public String getRequestHeader(String key);
 	
 	public void setResponseHeader(String value);
+	public void addResponseHeader(String value);
 	
 	public String getMethod();
 	public String getEncoding();
@@ -33,10 +34,13 @@ public interface RequestContext {
 	public boolean isAccept();
 	
 	public OutputStream getOutputStream();
+	public InputStream getInputStream();
 
 	
 	public URI getResource(String path);
 	public void setMimeType(String mimeType);
 	public InputStream openStream(URI path);
+
+
 
 }

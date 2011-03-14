@@ -1,18 +1,18 @@
 package org.jside.webserver;
 
-import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,42 +24,33 @@ import org.apache.commons.logging.LogFactory;
 public class RequestContextImpl implements RequestContext {
 	private static final Log log = LogFactory.getLog(RequestContextImpl.class);
 	private static final String CONTENT_LENGTH = "Content-Length";
-	private static final String ISO_8859_1 = "ISO-8859-1";
-
+	private WebServer server;
+	private Map<String, Object> contextMap=new HashMap<String, Object>();
 	private String encoding;
 	private String requestURI = "/";
 	private ArrayList<String> requestHeaders = new ArrayList<String>();
 	private ParamsMap paramsMap;
-	private BufferedReader in;
-	private String post;
-	private ResponseOutputStream out;
-	private WebServer server;
 	private String requestLine;
 	private String method;
 	private String query;
-	private Map<String, Object> contextMap=new HashMap<String, Object>();
+	private String post;
 	private Socket remote;
-	public BufferedReader getInput(){
-		return in;
-	}
+	private InputStream in;
+	private ResponseOutputStream out;
+	private InetAddress remoteAddr;
 
 	RequestContextImpl(WebServer server,Socket remote) throws IOException {
-
 		InputStream sin = remote.getInputStream();
 		OutputStream out = remote.getOutputStream();
+		this.remoteAddr = remote.getInetAddress();
 		this.remote = remote;
 		this.encoding = server.getEncoding();
 		this.server = server;
-		try {
-			this.in = new BufferedReader(
-					new InputStreamReader(sin, ISO_8859_1));
-		} catch (UnsupportedEncodingException e) {
-			throw new RuntimeException(e);
-		}
+		this.in = sin;
 		this.out = new ResponseOutputStream(this,out);
 		this.server = server;
 		try {
-			requestLine = this.in.readLine();
+			requestLine = this.readLine();
 			String[] rls = requestLine.split("[\\s]");
 			method = rls[0];
 			requestURI = rls[1];
@@ -71,12 +62,42 @@ public class RequestContextImpl implements RequestContext {
 				query = requestURI.substring(p + 1);
 				requestURI = requestURI.substring(0, p);
 			}
-			parseHeaders(this.in);
+			parseHeaders();
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
+	public InetAddress getRemoteAddr(){
+		return remoteAddr;
+	}
 
+	public OutputStream getOutputStream() {
+		return out;
+	}
+
+	public InputStream getInputStream() {
+		if(post == null){
+			byte[] chars = post.getBytes(Charset.forName("ISO-8859-1"));
+			return new ByteArrayInputStream(chars);
+		}
+		return in;
+	}
+	private String readLine(){
+		StringBuilder buf = new StringBuilder();
+		int c;
+		try {
+			while((c = in.read())>=0){
+				if(c == '\n'){
+					return buf.toString();
+				}else if(c != '\r'){//r//n
+					buf.append((char)c);
+				}
+			}
+		} catch (IOException e) {
+			log.error(e);
+		}
+		throw new RuntimeException("请求异常");
+	}
 	@Override
 	public Map<String, Object> getApplication() {
 		return server.getApplication();
@@ -113,14 +134,7 @@ public class RequestContextImpl implements RequestContext {
 	public Map<String, String[]> getParams() {
 		if (paramsMap == null) {
 			String data = query;
-			String contentLength = getRequestHeader(CONTENT_LENGTH);
-			if (contentLength != null) {
-				try {
-					data += getPost(in, Integer.parseInt(contentLength));
-				} catch (Exception e) {
-					log.warn(e);
-				}
-			}
+			data= data + getPost();
 			paramsMap = new ParamsMap(data,this.getEncoding());
 		}
 		return paramsMap;
@@ -144,14 +158,11 @@ public class RequestContextImpl implements RequestContext {
 		return null;
 	}
 
-	public OutputStream getOutputStream() {
-		return out;
-	}
-
-	public String getParameter(String name) {
-		String[] values = getParams().get(name);
-		return values != null ? values[0] : null;
-	}
+//
+//	public String getParameter(String name) {
+//		String[] values = getParams().get(name);
+//		return values != null ? values[0] : null;
+//	}
 
 	public void dispatch(String path) {
 		String preuri = this.requestURI;
@@ -170,35 +181,39 @@ public class RequestContextImpl implements RequestContext {
 
 	}
 
-	private String parseHeaders(BufferedReader in) {
-		try {
-			while (true) {
-				String line = in.readLine();
-				if (line == null) {
-					break;
-				} else if (line.length() == 0) {
-					break;
-				} else {
-					this.requestHeaders.add(line);
-				}
+	private void parseHeaders() {
+		while (true) {
+			String line = readLine();
+			if (line.length() == 0) {
+				break;
+			} else {
+				this.requestHeaders.add(line);
 			}
-		} catch (IOException e) {
-			throw new RuntimeException(e);
 		}
-		return null;
 	}
 
 
 
-	public String getPost(Reader in, int contentLength) throws IOException {
+	public String getPost(){
 		if (post == null) {
-			StringBuffer buf = new StringBuffer();
-			int b;
-			while (contentLength > 0 && (b = in.read()) > -1) {
-				contentLength--;
-				buf.append((char) b);
+			String contentLengths = getRequestHeader(CONTENT_LENGTH);
+			if (contentLengths != null) {
+				int contentLength = Integer.parseInt(contentLengths);
+				StringBuffer buf = new StringBuffer();
+				int b;
+				try {
+					while (contentLength > 0 && (b = in.read()) > -1) {
+						contentLength--;
+						buf.append((char) b);
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				post = buf.toString();
+			}else{
+				return post = "";
 			}
-			post = buf.toString();
+			
 		}
 		return post;
 	}
@@ -282,7 +297,7 @@ public class RequestContextImpl implements RequestContext {
 	}
 
 	public void close() throws IOException {
-		getOutputStream().flush();
+		this.out.flush();
 		this.in.close();
 		this.out.close();
 		this.remote.close();

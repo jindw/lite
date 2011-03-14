@@ -48,8 +48,10 @@ class ParamsMap extends AbstractMap<String, String[]> implements
 				String name = matcher.group(1);
 				String value = matcher.group(2);
 				try {
-					value = URLDecoder.decode(value, encoding);
-					this.addRaw(name, value);
+					if(value!=null){
+						value = URLDecoder.decode(value, encoding);
+						this.addRaw(name, value);
+					}
 				} catch (Exception e) {
 					log.info("解析失败: " + raw + "\n" + name + "=" + value, e);
 				}
