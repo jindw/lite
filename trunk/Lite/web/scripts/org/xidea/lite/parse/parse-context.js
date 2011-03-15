@@ -118,13 +118,17 @@ ParseContext.prototype = {
     	//$log.error(path,this.currentURI,this.config.root)
     	var cu = this.currentURI;
     	if(cu){
-    		if(cu.scheme != 'data'){
-    			return cu.resolve(path);
-    		}
+    		//if(cu.scheme == 'data'){
+    		//	return new URI(cu);
+    		//}else{
+    		return cu.resolve(path);
+    		//}
+    	}else{
+    		path= path.replace(/^[\\\/]/,'./');// /xxx=>./xxx
+    		//$log.warn(defaultBase+'',path,defaultBase.resolve(path)+'',defaultBase.authority)
+    		return defaultBase.resolve(path);
     	}
-    	path= path.replace(/^[\\\/]/,'./');
-    	//$log.warn(defaultBase+'',path,defaultBase.resolve(path)+'',defaultBase.authority)
-    	return defaultBase.resolve(path);
+    	
     	
     },
     getCurrentURI:function(){

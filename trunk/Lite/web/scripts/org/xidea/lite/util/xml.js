@@ -70,6 +70,17 @@ function addInst(xml,s){
 	}
 	return xml;
 }
+function isParserError(root,depth){
+	if(root){
+		if(root.tagName == "parsererror"){
+			return true;
+		}
+		if(depth>0){
+			return isParserError(root.firstChild,depth-1)
+		}
+	}
+	return false;
+}
 /**
  * @private
  */
@@ -82,7 +93,8 @@ function parseXMLByText(text){
 		if(this.DOMParser){
 	        var doc = new DOMParser().parseFromString(text,"text/xml");
 	        var root = doc.documentElement;
-	        if(root.tagName == "parsererror"){
+	        
+	        if(isParserError(root,2)){//http://www.mozilla.org/newlayout/xml/parsererror.xml
 	        	var s = new XMLSerializer();
 	        	error = s.serializeToString(root);
 	        	throw new Error("XML解析失败："+error);
