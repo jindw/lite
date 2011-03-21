@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -14,8 +13,18 @@ public class MutiThreadWebServer extends SimpleWebServer {
 	private static final Log log = LogFactory.getLog(MutiThreadWebServer.class);
 	private List<RequestThread> requestThreads = new ArrayList<RequestThread>();
 	private Object taskNotifier = new Object();
-	private List<Socket> taskList = Collections
-			.synchronizedList(new ArrayList<Socket>());
+	private List<Socket> taskList = new ArrayList<Socket>();
+	private long timeout = 1000 * 60 * 10; //默认十分钟上线，超时忽略
+	private int alive = 0;
+	private boolean started = false;
+
+	public long getTimeout() {
+		return timeout;
+	}
+
+	public void setTimeout(long timeout) {
+		this.timeout = timeout;
+	}
 
 	public MutiThreadWebServer(URI webRoot) {
 		super(webRoot);
@@ -28,45 +37,68 @@ public class MutiThreadWebServer extends SimpleWebServer {
 
 	public void start(int threadCount) {
 		for (int i = 0; i < threadCount; i++) {
-			RequestThread thread = new RequestThread("Wait Request:"+i);
+			RequestThread thread = new RequestThread("Wait Request:" + requestThreads.size());
 			thread.start();
 			requestThreads.add(thread);
 		}
-		super.start();
+		if(!started){
+			started = true;
+			super.start();
+		}
 	}
 
 	@Override
 	protected void scheduleRequest(final Socket remote) {
-		taskList.add(remote);
 		synchronized (taskNotifier) {
+			if (alive <1) {
+				for (RequestThread t : requestThreads) {
+					if (t.start > 0
+							&& t.start - System.currentTimeMillis() > timeout){
+						//超时关闭
+						log.warn("WEB线程超时关闭："+t);
+						t.running = false;
+					}
+				}
+				log.info("WEB 线程池耗尽，启用新线程:"+requestThreads.size());
+				start(1);
+			}else {
+				if(log.isDebugEnabled()){
+					if(taskList.size()>0){
+						log.debug("历史任务未处理："+taskList);
+					}
+				}
+				
+			}
+			taskList.add(remote);
 			taskNotifier.notify();
 		}
 	}
 
-	private void processRequest(final Socket remote){
+	private void processRequest(final Socket remote) {
+		RequestContext context = null;
 		try {
-			RequestContext context = RequestUtil.enter(this, remote);
-			Thread t = Thread.currentThread();
-			String n  = t.getName();
+			context = RequestUtil.enter(this, remote);
+//			RequestThread t = (RequestThread) Thread.currentThread();
+//			String n = t.url;
 			try {
-				t.setName("Running Request:"+context.getRequestURI());
+				//t.setName("Running Request:" + context.getRequestURI());
 				processRequest(context);
-			}catch (java.net.SocketException e) {
-				log.debug(context.getRequestURI() +":",e);
+			} catch (java.net.SocketException e) {
+				log.debug(context.getRequestURI() + ":", e);
 			} catch (Exception e) {
-				log.info(context.getRequestURI() +":",e);
-				//RequestUtil.printResource(e, "text");
-			}finally{
+				log.info(context.getRequestURI() + ":", e);
+			} finally {
 				RequestUtil.exit();
-				t.setName(n);
+				//t.setName(n);
 			}
 		} catch (Exception e) {
-			//e.printStackTrace();
+			// e.printStackTrace();
 			log.debug(e);
 		} finally {
 			try {
-				if(log.isDebugEnabled()){
-					log.debug("complete:"+RequestUtil.get().getRequestURI()+"\n"+remote);
+				if (log.isDebugEnabled()) {
+					log.debug("complete:" + context.getRequestURI()
+							+ "\n" + remote);
 				}
 				remote.close();
 			} catch (IOException e) {
@@ -75,9 +107,11 @@ public class MutiThreadWebServer extends SimpleWebServer {
 		}
 	}
 
-	private synchronized Socket offerTask() {
-		if (taskList.size() > 0) {
-			return taskList.remove(0);
+	private Socket offerTask() {
+		synchronized (taskNotifier) {
+			if (taskList.size() > 0) {
+				return taskList.remove(0);
+			}
 		}
 		return null;
 	}
@@ -85,30 +119,43 @@ public class MutiThreadWebServer extends SimpleWebServer {
 	class RequestThread extends Thread {
 		private boolean running = true;
 
+		private long start;
+
 		public RequestThread(String name) {
 			super(name);
 		}
 
 		public void run() {
-			while (this.running) {
-				Socket remote = offerTask();
-				if (remote != null) {
-					processRequest(remote);
-				}
-				if (taskList.isEmpty()) {
-					try {
-						synchronized (taskNotifier) {
-							taskNotifier.wait();
+			try {
+				alive++;
+				while (this.running) {
+					Socket remote = offerTask();
+					if (remote != null) {
+						alive--;
+						try {
+							start = System.currentTimeMillis();
+							processRequest(remote);
+						} finally {
+							alive++;
 						}
-					} catch (InterruptedException e) {
-						log.warn(e);
+					}
+					start = 0;
+					synchronized (taskNotifier) {
+						if (taskList.isEmpty()) {
+							try {
+								taskNotifier.wait();
+							} catch (InterruptedException e) {
+								log.warn(e);
+							}
+						}
 					}
 				}
+				// this.running = false;
+			} finally {
+				alive--;
 			}
-			this.running = false;
 		}
 
 	}
-
 
 }

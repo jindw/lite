@@ -90,7 +90,6 @@ public abstract class SimpleWebServer implements WebServer {
 			state = Status.STOPING;
 			waitWhen(Status.STOPING);
 		}
-
 	}
 
 	private void waitWhen(Status state) {
@@ -145,6 +144,7 @@ public abstract class SimpleWebServer implements WebServer {
 				try {
 					if (serverSocket.isBound() && !serverSocket.isClosed()) {
 						Socket remote = serverSocket.accept();
+						remote.setSoTimeout(1000 * 60 * 2);
 						// remote is now the connected socket
 						log.debug("Connectioned, begin schedule.");
 						scheduleRequest(remote);

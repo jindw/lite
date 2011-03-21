@@ -173,10 +173,12 @@ public class CGIEnvironment {
 				}
 			}
 		}
+
+		envp.put("REDIRECT_STATUS", "200");
 	}
 
-	public boolean isValid() {
-		return true;
-	}
+//	public boolean isValid() {
+//		return true;
+//	}
 
 }

@@ -27,7 +27,7 @@ public class CGIRunner {
 	/** response object used to set headers & get output stream */
 	private RequestContext response = null;
 	/** boolean tracking whether this object has enough info to run() */
-	private String cgiExecutable = "php-cgi -d cgi.force_redirect=Off";
+	private String cgiExecutable = "php-cgi";
 	private long stderrTimeout = 1000 * 60 *2;
 
 	/**
