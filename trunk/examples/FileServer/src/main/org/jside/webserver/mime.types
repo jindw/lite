@@ -8,3 +8,5 @@ application/zip	zip
 audio/basic	snd,au
 audio/x	wav
 text/plain	text,c,cc,c++,h,pl,txt,java,json
+text/javascript	js
+text/css	css
