@@ -181,7 +181,7 @@ public class HotTemplateEngine extends TemplateEngine {
 		List<String> resource = getAssociatedPaths(context);
 		result.add(resource);
 		result.add(items);
-		result.add(context.getFeatrueMap());
+		result.add(context.getFeatureMap());
 		return JSONEncoder.encode(result);
 
 	}

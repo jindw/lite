@@ -103,8 +103,8 @@ URI.prototype = {
 	resolve:function(path){
 		path = String(path);
 		
-		if( /^[#<]/.test(path) ||absURIPattern.test(path)){
-			path = new URI(path);
+		if( /^\s*[#<]/.test(path) ||absURIPattern.test(path)){
+			path = new URI(path.replace(/^\s+/,''));
 			return path;
 		}
 		

@@ -40,7 +40,7 @@ public class ParseContextImpl extends ParseContextProxy implements ParseContext 
 	};
 	
 	public ParseContextImpl(ParseConfig config, String path) {
-		super(config,config.getFeatrueMap(path));
+		super(config,config.getFeatureMap(path));
 		this.extensionParser = new ExtensionParserImpl();
 		this.nodeParsers = DEFAULT_PARSER_LIST.clone();
 		nodeParsers[2] = extensionParser;

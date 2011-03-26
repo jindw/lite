@@ -87,8 +87,8 @@ public class LiteCompiler {
 	public boolean processFile(final String path) {
 		log.info("处理文件："+path);
 		try {
-			Map<String, String> fm = parseConfig.getFeatrueMap(path);
-			String encoding =  fm.get(ParseContext.FEATRUE_ENCODING);
+			Map<String, String> fm = parseConfig.getFeatureMap(path);
+			String encoding =  fm.get(ParseContext.FEATURE_ENCODING);
 			{
 				File cachedFile = new File(litecode, path);
 				cachedFile.getParentFile().mkdirs();

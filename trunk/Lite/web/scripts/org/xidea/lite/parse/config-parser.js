@@ -12,7 +12,7 @@
  *               package="org.xidea.lite.xhtml"/>
  * 	  <include>**.xhtml</include>
  *    <group layout="/layout.xhtml">
- *       <featrue name="http://www.xidea.org/featrue/lite/html-javascript-compressor"
+ *       <feature name="http://www.xidea.org/feature/lite/html-javascript-compressor"
  *               package="org.jside.jsi.tools.JSACompressor"/>
  *       <include>/example/*.xhtml</include>
  *    </group>
@@ -22,11 +22,11 @@
  * 	{
  * 		"includes":"^[\\\\/]example[\\\\/][^\\\\/]*\.xhtml$",
  * 		"excludes":"",
- * 		"featrueMap":{
- * 			"http://www.xidea.org/lite/featrues/layout":"/layout.xhtml",
- * 			"http://www.xidea.org/lite/featrues/output-encoding":"utf-8",
- * 			"http://www.xidea.org/lite/featrues/output-mime-type":"text/html",
- * 			"http://www.xidea.org/lite/featrues/html-javascript-compressor":"org.jside.jsi.tools.JSACompressor"
+ * 		"featureMap":{
+ * 			"http://www.xidea.org/lite/features/layout":"/layout.xhtml",
+ * 			"http://www.xidea.org/lite/features/output-encoding":"utf-8",
+ * 			"http://www.xidea.org/lite/features/output-mime-type":"text/html",
+ * 			"http://www.xidea.org/lite/features/html-javascript-compressor":"org.jside.jsi.tools.JSACompressor"
  * 		},
  * 		"extensionMap":[
  * 			{
@@ -38,9 +38,9 @@
  * 	{
  * 		"includes":"^.*\.xhtml$",
  * 		"excludes":"",
- * 		"featrueMap":{
- * 			"http://www.xidea.org/lite/featrues/output-encoding":"utf-8",
- * 			"http://www.xidea.org/lite/featrues/output-mime-type":"text/html"
+ * 		"featureMap":{
+ * 			"http://www.xidea.org/lite/features/output-encoding":"utf-8",
+ * 			"http://www.xidea.org/lite/features/output-mime-type":"text/html"
  * 		},
  * 		"extensionMap":{
  * 			"http://www.w3.org/1999/xhtml":["org.xidea.lite.xhtml"]
@@ -66,7 +66,7 @@ function parseConfig(doc){
 }
 function LiteGroup(node,parentConfig){
 	this.parentConfig = parentConfig || null
-	this.featrueMap = {}
+	this.featureMap = {}
 	this.encoding= getAttribute(node,'encoding','charset');
 	this.mimeType = getAttribute(node,'mimeType','mimiType','metaType');
 	this.layout = getAttribute(node,'layout');
@@ -79,8 +79,8 @@ function LiteGroup(node,parentConfig){
 	while(child){
 		if(child.nodeType == 1){
 			switch(child.localName){
-			case 'featrue':
-				this.featrueMap[getAttribute(node,'name','key','uri','url')] = 
+			case 'feature':
+				this.featureMap[getAttribute(node,'name','key','uri','url')] = 
 						getAttribute(node,'value','#text')
 				break;
 			case 'extension':
@@ -117,7 +117,7 @@ LiteGroup.prototype.toJSON = function(){
 	}
 	json.includes = this.includes;
 	json.excludes = this.excludes;
-	json.featrueMap = this.featrueMap;
+	json.featureMap = this.featureMap;
 	json.extensionMap = this.extensionMap;
 	result.push(json);
 	return result;
@@ -127,10 +127,10 @@ LiteGroup.prototype.initialize = function(){
 	this.initialize = Function.prototype;
 	var parentConfig = this.parentConfig
 	if(parentConfig){
-		var featrueMap = {};
-		copy(parentConfig.featrueMap,featrueMap);
-		copy(this.featrueMap,featrueMap);
-		this.featrueMap=featrueMap;
+		var featureMap = {};
+		copy(parentConfig.featureMap,featureMap);
+		copy(this.featureMap,featureMap);
+		this.featureMap=featureMap;
 		this.extensionMap = margeExtensionMap(parentConfig.extensionMap,this.extensionMap);
 	}
 	if(this.encoding == null){
@@ -168,11 +168,11 @@ LiteGroup.prototype.initialize = function(){
 			this.mimeType=contentType;
 		}
 	}
-	this.featrueMap["http://www.xidea.org/lite/featrues/output-encoding"] = this.encoding;
-	this.featrueMap["http://www.xidea.org/lite/featrues/output-mime-type"] = this.mimeType;
+	this.featureMap["http://www.xidea.org/lite/features/output-encoding"] = this.encoding;
+	this.featureMap["http://www.xidea.org/lite/features/output-mime-type"] = this.mimeType;
 	if(this.layout != null){
 		if(!this.layout || this.layout.charAt() == '/'){
-			this.featrueMap["http://www.xidea.org/lite/featrues/layout"] = this.layout;
+			this.featureMap["http://www.xidea.org/lite/features/layout"] = this.layout;
 		}else{
 			$log.error("layout 必须为绝对地址('/'开始),你的设置为："+this.layout);
 		}

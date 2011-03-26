@@ -15,7 +15,7 @@ function ParseContext(config,path){
     this.config = config;
 	this.path = path;
 	this.currentURI = defaultBase;
-	this.featrueMap = config.getFeatrueMap(path);
+	this.featureMap = config.getFeatureMap(path);
 	this.initialize(config);
 	this.self = this;
 }

@@ -1,5 +1,5 @@
 <lite encoding="utf-8" mime-type="text/html">
-	<featrue key="http://www.xidea.org/featrue/lite/javascript-compressor"
+	<feature key="http://www.xidea.org/feature/lite/javascript-compressor"
 		value="org.jside.jsi.tools.JSACompressor" />
 	<extension namespace="http://www.w3c.org/1999/xhtml" package="org.xidea.lite.xhtml" />
 	<group layout="/guide/layout.xhtml">

@@ -102,7 +102,7 @@ public class XMLTest {
 
 		System.out.println(text+result);
 		String info = "第"+index+"个测试错误：";
-//		parseContext.getFeatrueMap().put(HTMLNodeParser.AUTO_FORM_FEATRUE_URI, HTMLNodeParser.AUTO_IN_FORM);
+//		parseContext.getFeatureMap().put(HTMLNodeParser.AUTO_FORM_FEATURE_URI, HTMLNodeParser.AUTO_IN_FORM);
 		String source =
 		"<div xmlns:c=\"http://www.xidea.org/lite/core\">"
 		+ text + "</div>";

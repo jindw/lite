@@ -26,10 +26,10 @@ import org.xml.sax.InputSource;
  * {
  *   "includes":"^[\\\\/]example[\\\\/][^\\\\/]*\.xhtml$", 
  *   "excludes":"^$",//不匹配
- *   "featrueMap":{ "http://www.xidea.org/lite/featrues/layout":"/layout.xhtml",
- *     "http://www.xidea.org/lite/featrues/output-encoding":"utf-8",
- *     "http://www.xidea.org/lite/featrues/output-mime-type":"text/html",
- *     "http://www.xidea.org/featrue/lite/html-javascript-compressor":"org.jside.jsi.tools.JSACompressor" 
+ *   "featureMap":{ "http://www.xidea.org/lite/features/layout":"/layout.xhtml",
+ *     "http://www.xidea.org/lite/features/output-encoding":"utf-8",
+ *     "http://www.xidea.org/lite/features/output-mime-type":"text/html",
+ *     "http://www.xidea.org/feature/lite/html-javascript-compressor":"org.jside.jsi.tools.JSACompressor" 
  *   }, 
  *   "extensionMap":[]
  * }
@@ -90,9 +90,9 @@ public class ParseConfigImpl implements ParseConfig {
 		return find(path, true).extensionMap;
 	}
 
-	public Map<String, String> getFeatrueMap(String path) {
+	public Map<String, String> getFeatureMap(String path) {
 		this.reset();
-		return find(path, true).featrueMap;
+		return find(path, true).featureMap;
 	}
 
 	/*
@@ -105,7 +105,7 @@ public class ParseConfigImpl implements ParseConfig {
 //		this.reset();
 //		Group g = find(path, false);
 //		if (g != null) {
-//			return g.featrueMap.get(ParseContext.FEATRUE_CONFIG_LAYOUT);
+//			return g.featureMap.get(ParseContext.FEATURE_CONFIG_LAYOUT);
 //		}
 //		return null;
 //	}
@@ -156,7 +156,7 @@ public class ParseConfigImpl implements ParseConfig {
 	}
 
 	private static class Group {
-		private Map<String, String> featrueMap = Collections.emptyMap();
+		private Map<String, String> featureMap = Collections.emptyMap();
 		private Map<String, List<String>> extensionMap = Collections.emptyMap();
 		private Pattern includes;
 		private Pattern excludes;
@@ -169,18 +169,18 @@ public class ParseConfigImpl implements ParseConfig {
 		private Group() {
 			this.includes = Pattern.compile("\\.xhtml$");
 			this.excludes = Pattern.compile("^[\\.^]");
-			this.featrueMap = new HashMap<String, String>();
-			this.featrueMap.put(ParseContext.FEATRUE_ENCODING, "UTF-8");
-			this.featrueMap = Collections.unmodifiableMap(this.featrueMap);
+			this.featureMap = new HashMap<String, String>();
+			this.featureMap.put(ParseContext.FEATURE_ENCODING, "UTF-8");
+			this.featureMap = Collections.unmodifiableMap(this.featureMap);
 		}
 
 		@SuppressWarnings("unchecked")
 		public Group(Map<String, Object> item) {
 			this.includes = buildMatch((String) item.get("includes"));
 			this.excludes = buildMatch((String) item.get("excludes"));
-			this.featrueMap = Collections
+			this.featureMap = Collections
 					.unmodifiableMap((Map<String, String>) item
-							.get("featrueMap"));
+							.get("featureMap"));
 			this.extensionMap = Collections
 					.unmodifiableMap((Map<String, List<String>>) item
 							.get("extensionMap"));

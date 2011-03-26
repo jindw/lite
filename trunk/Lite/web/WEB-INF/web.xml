@@ -13,6 +13,8 @@
 		<filter-name>JSIFilter</filter-name>
 		<url-pattern>/scripts/*</url-pattern>
 	</filter-mapping>
+	
+	
 	<servlet>
 		<servlet-name>LiteXML</servlet-name>
 		<servlet-class>

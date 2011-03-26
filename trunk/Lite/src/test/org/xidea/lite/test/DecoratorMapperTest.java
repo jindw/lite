@@ -44,8 +44,8 @@ public class DecoratorMapperTest {
 				getDecotatorPage("/test2/xxx/dd.action"));
 	}
 	public String getDecotatorPage(String path) {
-		Map<String, String> rm = mapper.getFeatrueMap(path);
-	return rm.get(ParseContext.FEATRUE_LAYOUT);
+		Map<String, String> rm = mapper.getFeatureMap(path);
+	return rm.get(ParseContext.FEATURE_LAYOUT);
 }
 
 }

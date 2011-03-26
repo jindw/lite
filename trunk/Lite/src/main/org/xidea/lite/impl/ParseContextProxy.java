@@ -27,7 +27,7 @@ abstract public class ParseContextProxy implements ParseContext {
 	/**
 	 * createNew 共享
 	 */
-	private final Map<String, String> featrueMap;
+	private final Map<String, String> featureMap;
 	private HashSet<URI> resources = new HashSet<URI>();
 	private HashMap<Object, Object> attributeMap = new HashMap<Object, Object>();
 	
@@ -46,28 +46,28 @@ abstract public class ParseContextProxy implements ParseContext {
 	
 
 	
-	protected ParseContextProxy(ParseConfig config,Map<String, String> featrueMap) {
+	protected ParseContextProxy(ParseConfig config,Map<String, String> featureMap) {
 		this.config = config;
-		this.featrueMap = featrueMap;
+		this.featureMap = featureMap;
 		this.resultContext = new ResultContextImpl(this);
 	}
 
 	ParseContextProxy(ParseContextProxy parent) {
 		// 需要重设 ParseChain 的context
 		this.config = parent;
-		this.featrueMap =  parent.getFeatrueMap();
+		this.featureMap =  parent.getFeatureMap();
 		this.resultContext = parent;
 		this.setCurrentURI(parent.getCurrentURI());
 		this.resources = parent.resources;
 	}
 
 
-	public String getFeatrue(String key) {
-		return featrueMap.get(key);
+	public String getFeature(String key) {
+		return featureMap.get(key);
 	}
 
-	public Map<String, String> getFeatrueMap() {
-		return featrueMap;
+	public Map<String, String> getFeatureMap() {
+		return featureMap;
 	}
 	public void setAttribute(Object key, Object value) {
 		this.attributeMap.put(key, value);
@@ -139,8 +139,8 @@ abstract public class ParseContextProxy implements ParseContext {
 //		return config.getDecotatorPage(path);
 //	}
 
-	public final Map<String, String> getFeatrueMap(String path) {
-		return config.getFeatrueMap(path);
+	public final Map<String, String> getFeatureMap(String path) {
+		return config.getFeatureMap(path);
 	}
 
 

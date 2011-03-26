@@ -12,10 +12,10 @@
  * 	{
  * 		"includes":["/example\\/*.xhtml"],
  * 		"excludes":[],
- * 		"featrueMap":{
- *          "http://www.xidea.org/lite/featrues/output-encoding":"utf-8",
- * 			"http://www.xidea.org/lite/featrues/output-mime-type":"text/html",
- * 			"http://www.xidea.org/lite/featrues/html-javascript-compressor":"org.jside.jsi.tools.JSACompressor"
+ * 		"featureMap":{
+ *          "http://www.xidea.org/lite/features/output-encoding":"utf-8",
+ * 			"http://www.xidea.org/lite/features/output-mime-type":"text/html",
+ * 			"http://www.xidea.org/lite/features/html-javascript-compressor":"org.jside.jsi.tools.JSACompressor"
  * 		},
  * 		"extensions":[
  * 			{
@@ -61,13 +61,13 @@ function findGroup(groups,path,require){
 ParseConfig.prototype = {
 //	getDecotatorPage:function(path){
 //		var g = findGroup(this.config,path,null)
-//		return g && g.featrueMap['http://www.xidea.org/lite/featrues/layout'];
+//		return g && g.featureMap['http://www.xidea.org/lite/features/layout'];
 //	},
-	getFeatrueMap:function(path){
+	getFeatureMap:function(path){
 		var result = {}
 		var g = findGroup(this.config,path,null);
 		if(g){
-			copy(g.featrueMap,result);
+			copy(g.featureMap,result);
 		}
 		return result;
 	},
@@ -84,11 +84,11 @@ ParseConfig.prototype = {
 var defaultConfig = {
 		"includes":/./,//"/example\\/*.xhtml"
 		"excludes":/^$/,
-		"featrueMap":{
+		"featureMap":{
 			//必要属性（控制xml编译）
-			"http://www.xidea.org/lite/featrues/output-encoding":"utf-8",
+			"http://www.xidea.org/lite/features/output-encoding":"utf-8",
 			//必要属性（控制xml编译）
-			"http://www.xidea.org/lite/featrues/output-mime-type":"text/html"
+			"http://www.xidea.org/lite/features/output-mime-type":"text/html"
 		},
 		"extensions":[
 			//core 自行编译

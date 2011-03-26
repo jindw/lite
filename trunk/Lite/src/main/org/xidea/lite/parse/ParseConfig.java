@@ -9,6 +9,6 @@ public interface ParseConfig {
 	public URI getRoot();
 	public Collection<URI> getResources();
 //	public String getDecotatorPage(String path);
-	public Map<String,String> getFeatrueMap(String path);
+	public Map<String,String> getFeatureMap(String path);
 	public Map<String, List<String>> getExtensions(String path);
 }
