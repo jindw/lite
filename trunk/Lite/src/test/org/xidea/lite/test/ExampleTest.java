@@ -144,7 +144,7 @@ public class ExampleTest {
 		ParseContext pc = LiteTestUtil.buildParseContext(menuURL);
 		source = source.replace("=\"menu.xml\"", "=\""+menuURL+"\"");
 		System.out.println(source);
-		pc.parse(ParseUtil.loadXML(source,null));
+		pc.parse(ParseUtil.loadXML(source));
 		StringWriter out = new StringWriter();
 		System.out.println(JSONEncoder.encode(pc.toList()));
 		new Template(pc.toList()).render(JSONDecoder.decode(contextJSON),

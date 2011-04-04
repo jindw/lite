@@ -181,22 +181,33 @@ public class ParseUtil {
 		}
 	}
 
-	public static Document parse(URI uri, ParseContext context)
-			throws IOException, SAXException {
+
+	public static Document parse(URI uri, ParseContext context) throws SAXException, IOException {
 		String id = uri.toString();
 		String text = loadText(uri, context);
-		try {
-			return loadXML(text, id);
-		} catch (SAXParseException e) {
-			text = new XMLNormalizeImpl().normalize(text);
-			return loadXML(text, id);
-//			throw new SAXException("XML Parser Error:" + id + "("
-//					+ e.getLineNumber() + "," + e.getColumnNumber() + ")\r\n"
-//					+ e.getMessage());
-		}
+		return loadXMLBySource(text, id);
 	}
 
-	private static Document loadXML(String text, String id)
+	public static Document loadXML(String path)
+			throws SAXException, IOException {
+		URI uri;
+		if (path.startsWith("#")) {
+			path = "<out xmlns='http://www.xidea.org/lite/core'><![CDATA["
+					+ TXT_CDATA_END.matcher(
+							TXT_HEADER.matcher(path).replaceAll(""))
+							.replaceAll("]]]]><![CDATA[>") + "]]></out>";
+		}
+		if (path.startsWith("<")) {
+			return loadXMLBySource(path,path);
+		} else {
+			uri = URI.create(path);
+		}
+		String id = uri.toString();
+		String text = loadText(uri, null);
+		return loadXMLBySource(text, id);
+	}
+
+	public static Document loadXMLBySource(String text, String id)
 			throws IOException, SAXException {
 		if (!text.startsWith("<")) {
 			return null;
@@ -204,7 +215,14 @@ public class ParseUtil {
 		String ins = getXMLInstruction(text);
 		InputSource in = new InputSource(new StringReader(text));
 		in.setSystemId(id);
-		Document xml = documentBuilder.parse(in);
+		Document xml;
+		try {
+			xml = documentBuilder.parse(in);
+		} catch (SAXParseException e) {
+			text = new XMLNormalizeImpl().normalize(text);
+			in.setCharacterStream(new StringReader(text));
+			xml = documentBuilder.parse(in);
+		}
 		if (ins != null) {
 			xml.insertBefore(xml.createProcessingInstruction("xml", ins), xml
 					.getFirstChild());
@@ -227,33 +245,8 @@ public class ParseUtil {
 	private static Pattern TXT_HEADER = Pattern.compile("^#.*[\r\n]+");
 	private static Pattern TXT_CDATA_END = Pattern.compile("]]>");
 
-	public static Document loadXML(String path, ParseContext context)
-			throws SAXException, IOException {
-		URI uri;
-		if (path.startsWith("#")) {
-			path = "<out xmlns='http://www.xidea.org/lite/core'><![CDATA["
-					+ TXT_CDATA_END.matcher(
-							TXT_HEADER.matcher(path).replaceAll(""))
-							.replaceAll("]]]]><![CDATA[>") + "]]></out>";
-		}
-		if (path.startsWith("<")) {
-			uri = createSourceURI(path);
-		} else if (context != null) {
-			uri = context.createURI(path);
-		} else {
-			uri = URI.create(path);
-		}
-		return parse(uri, context);
-	}
 
-	private static URI createSourceURI(String path) {
-		try {
-			return URI.create("data:text/xml;charset=utf-8,"
-					+ URLEncoder.encode(path, "UTF-8").replace("+", "%20"));
-		} catch (UnsupportedEncodingException e) {
-			throw new RuntimeException(e);
-		}
-	}
+
 
 	public static NodeList selectNodes(Node currentNode, String xpath)
 			throws XPathExpressionException {
@@ -300,10 +293,10 @@ public class ParseUtil {
 		return xpathFactory.newXPath();
 	}
 
-	public static String loadText(URI uri, ParseContext parseContext)
+	static String loadText(URI uri, ParseContext context)
 			throws IOException {
 		StringBuilder buf = new StringBuilder();
-		loadTextAndClose(parseContext.openStream(uri));
+		loadTextAndClose(context == null?openStream(uri):context.openStream(uri));
 		return buf.toString();
 	}
 

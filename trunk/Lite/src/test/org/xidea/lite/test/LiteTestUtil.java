@@ -57,7 +57,7 @@ public class LiteTestUtil {
 	public static List<Object> parse(String source) throws SAXException, IOException {
 		ParseContext parseContext = LiteTestUtil.buildParseContext(URI
 				.create("classpath:///"));
-		parseContext.parse(ParseUtil.loadXML(source, parseContext));
+		parseContext.parse(ParseUtil.loadXML(source));
 		return parseContext.toList();
 	}
 
@@ -67,7 +67,7 @@ public class LiteTestUtil {
 				parseContext = LiteTestUtil.buildParseContext(URI
 						.create("classpath:///"));
 			}
-			return ParseUtil.loadXML(source,parseContext);
+			return ParseUtil.loadXML(source);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

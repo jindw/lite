@@ -184,12 +184,12 @@ if(!(window.DOMParser && window.XMLHttpRequest || window.ActiveXObject)){
     	//TODO:data for text
     	url = $JSI.loadText&&$JSI.loadText(url) || url;
         if(/^[\s\ufeff]*</.test(url)){
-        	return pu.loadXML(url,null);
+        	return pu.loadXML(url);
         }else{
         	var pos = url.indexOf('#');
         	var xpath = pos>0 && url.substr(pos+1);
         	var url = pos>0?url.substr(0,pos):url;
-        	var doc = pu.loadXML(url,null);
+        	var doc = pu.loadXML(url);
         	if(xpath){
 		        doc = selectNodes(doc,xpath);
 		    }
