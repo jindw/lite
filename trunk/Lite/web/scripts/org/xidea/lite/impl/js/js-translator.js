@@ -231,6 +231,11 @@ function _$toList(source,result,type) {
                     i = this.processFor(code,i);
                     break;
     			case PLUGIN_TYPE://not support
+    				if(/^(?:baidu\.)?org\.xidea\.lite\.EncodePlugin$/.test(item[3])){
+    					this.processEncodePlugin(item[1][0]);
+    				}else{
+    					
+    				}
     				break;
                 //case ELSE_TYPE:
                 default:
@@ -261,6 +266,9 @@ function _$toList(source,result,type) {
     		this.append(data);
     	}
     	this.lastOut = data
+    },
+    processEncodePlugin:function(item){
+        this.appendOut("String(",getEL(item[1]),").replace(/[<\"]/g,_$replacer);")
     },
     processEL:function(item){
     	this.appendOut(this.stringifyEL(item[1]))

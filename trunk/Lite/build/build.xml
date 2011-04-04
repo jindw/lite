@@ -67,10 +67,10 @@
 		</javac>
 	</target>
 	<target name="join-php">
-		<concat destfile="build/dest/TemplateEngine.php" encoding="utf-8">
-			<path path="src/php/lite/TemplateEngine.php" />
-			<path path="src/php/lite/Template.php" />
-			<path path="src/php/lite/Expression.php" />
+		<concat destfile="build/dest/LiteEngine.php" encoding="utf-8">
+			<path path="src/php/lite/LiteEngine.php" />
+			<path path="src/php/lite/LiteFunction.php" />
+			<path path="src/php/lite/LiteCompiler.php" />
 		</concat>
 		<!-- 合并之后替换掉多余的require_once  -->
 		<!--
