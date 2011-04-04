@@ -359,7 +359,7 @@ public class CGIRunner {
 	}
 	private static final Pattern ERROR = Pattern.compile("^\\w+\\s*(?:(Fatal)|(Error)|(Warning)|(Notice))\\:",Pattern.CASE_INSENSITIVE);
 
-	private void log(BufferedReader rdr) {
+	protected void log(BufferedReader rdr) {
 		String line = null;
 		int lineCount = 0;
 		try {
