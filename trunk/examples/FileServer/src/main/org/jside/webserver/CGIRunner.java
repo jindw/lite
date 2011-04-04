@@ -9,6 +9,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 import org.apache.commons.logging.Log;
@@ -205,7 +207,7 @@ public class CGIRunner {
 			final BufferedReader stdErrRdr = commandsStdErr;
 			errReaderThread = new Thread() {
 				public void run() {
-					sendToLog(stdErrRdr);
+					log(stdErrRdr);
 				};
 			};
 			errReaderThread.start();
@@ -355,22 +357,33 @@ public class CGIRunner {
 		}
 		return statusCode;
 	}
+	private static final Pattern ERROR = Pattern.compile("^\\w+\\s*(?:(Fatal)|(Error)|(Warning)|(Notice))\\:",Pattern.CASE_INSENSITIVE);
 
-	private void sendToLog(BufferedReader rdr) {
+	private void log(BufferedReader rdr) {
 		String line = null;
 		int lineCount = 0;
 		try {
 			while ((line = rdr.readLine()) != null) {
-				log.error("runCGI (stderr):" + line);
+				Matcher m = ERROR.matcher(line);
+				if(m.group(1) != null){
+					log.fatal("CGI STDERR:" + line);
+				}else if(m.group(2) != null){
+					log.error("CGI STDERR:" + line);
+				}else if(m.group(3) != null){
+					log.warn("CGI STDERR:" + line);
+				}else {//if(m.group(4) != null){
+					log.info("CGI STDERR:" + line);
+				}
+				
 				lineCount++;
 			}
 		} catch (IOException e) {
-			log.error("sendToLog error", e);
+			log.error("log error", e);
 		} finally {
 			try {
 				rdr.close();
 			} catch (IOException ce) {
-				log.error("sendToLog error", ce);
+				log.error("log error", ce);
 			}
 			;
 		}

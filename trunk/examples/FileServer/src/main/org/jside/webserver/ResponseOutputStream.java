@@ -6,7 +6,11 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Date;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 class ResponseOutputStream extends FilterOutputStream {
+	private static final Log log = LogFactory.getLog(ResponseOutputStream.class);
 	private static final String CHARSET = "charset=";
 	static final String CONTENT_TYPE = "Content-Type";
 	private String httpVersion = "HTTP/1.1";
@@ -89,9 +93,13 @@ class ResponseOutputStream extends FilterOutputStream {
 	}
 
 	private void println(String msg) throws IOException {
-		out.write(msg.getBytes(context.getEncoding()));
-		out.write('\r');
-		out.write('\n');
+		try{
+			out.write(msg.getBytes(context.getEncoding()));
+			out.write('\r');
+			out.write('\n');
+		}catch (java.net.SocketException e) {
+			log.debug("web 数据流输出失败",e);
+		}
 	}
 
 
@@ -108,11 +116,19 @@ class ResponseOutputStream extends FilterOutputStream {
 	@Override
 	public void write(byte[] b, int off, int len) throws IOException {
 		this.beforeWrite();
-		out.write(b, off, len);
+		try{
+			out.write(b, off, len);
+		}catch (java.net.SocketException e) {
+			log.debug("web 数据流输出失败",e);
+		}
 	}
 
 	public void write(int b) throws IOException {
 		this.beforeWrite();
-		out.write(b);
+		try{
+			out.write(b);
+		}catch (java.net.SocketException e) {
+			log.debug("web 数据流输出失败",e);
+		}
 	}
 }
