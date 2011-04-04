@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -30,14 +29,13 @@ public class CGIRunner {
 	private RequestContext response = null;
 	/** boolean tracking whether this object has enough info to run() */
 	private String cgiExecutable = "php-cgi";
-	private long stderrTimeout = 1000 * 60 *2;
+	private long stderrTimeout = 1000 * 60 * 2;
 
 	/**
-	 * Creates a CGIRunner and initializes its environment, working
-	 * directory, and query parameters. <BR>
-	 * Input/output streams (optional) are set using the
-	 * <code>setInput</code> and <code>setResponse</code> methods,
-	 * respectively.
+	 * Creates a CGIRunner and initializes its environment, working directory,
+	 * and query parameters. <BR>
+	 * Input/output streams (optional) are set using the <code>setInput</code>
+	 * and <code>setResponse</code> methods, respectively.
 	 * 
 	 * @param command
 	 *            string full path to command to be executed
@@ -46,11 +44,11 @@ public class CGIRunner {
 	 * @param wd
 	 *            File with the script's desired working directory
 	 * @param params
-	 *            ArrayList with the script's query command line paramters
-	 *            as strings
+	 *            ArrayList with the script's query command line paramters as
+	 *            strings
 	 */
-	public CGIRunner(RequestContext req,String command, Map<String,String> env, File wd,
-			String[] arguments) {
+	public CGIRunner(RequestContext req, String command,
+			Map<String, String> env, File wd, String[] arguments) {
 
 		this.response = req;
 		this.command = command;
@@ -59,12 +57,10 @@ public class CGIRunner {
 		this.arguments = arguments;
 	}
 
-
-
 	/**
-	 * Converts a Hashtable to a String array by converting each key/value
-	 * pair in the Hashtable to a String in the form "key=value" (hashkey +
-	 * "=" + hash.get(hashkey).toString())
+	 * Converts a Hashtable to a String array by converting each key/value pair
+	 * in the Hashtable to a String in the form "key=value" (hashkey + "=" +
+	 * hash.get(hashkey).toString())
 	 * 
 	 * @param h
 	 *            Hashtable to convert
@@ -75,10 +71,10 @@ public class CGIRunner {
 	 *                if a hash key has a null value
 	 * 
 	 */
-	protected String[] hashToStringArray(Map<String,String> h)
+	protected String[] hashToStringArray(Map<String, String> h)
 			throws NullPointerException {
 		ArrayList<String> v = new ArrayList<String>();
-		for (Map.Entry<String, String> e:h.entrySet()) {
+		for (Map.Entry<String, String> e : h.entrySet()) {
 			v.add(e.getKey() + "=" + e.getValue());
 		}
 		return v.toArray(new String[v.size()]);
@@ -92,35 +88,34 @@ public class CGIRunner {
 	 * This implements the following CGI specification recommedations:
 	 * <UL>
 	 * <LI>Servers SHOULD provide the "<code>query</code>" component of the
-	 * script-URI as command-line arguments to scripts if it does not
-	 * contain any unencoded "=" characters and the command-line arguments
-	 * can be generated in an unambiguous manner.
-	 * <LI>Servers SHOULD set the AUTH_TYPE metavariable to the value of the
-	 * "<code>auth-scheme</code>" token of the "<code>Authorization</code>"
-	 * if it was supplied as part of the request header. See
+	 * script-URI as command-line arguments to scripts if it does not contain
+	 * any unencoded "=" characters and the command-line arguments can be
+	 * generated in an unambiguous manner.
+	 * <LI>Servers SHOULD set the AUTH_TYPE metavariable to the value of the "
+	 * <code>auth-scheme</code>" token of the "<code>Authorization</code>" if it
+	 * was supplied as part of the request header. See
 	 * <code>getCGIEnvironment</code> method.
-	 * <LI>Where applicable, servers SHOULD set the current working
-	 * directory to the directory in which the script is located before
-	 * invoking it.
-	 * <LI>Server implementations SHOULD define their behavior for the
-	 * following cases:
+	 * <LI>Where applicable, servers SHOULD set the current working directory to
+	 * the directory in which the script is located before invoking it.
+	 * <LI>Server implementations SHOULD define their behavior for the following
+	 * cases:
 	 * <ul>
-	 * <LI><u>Allowed characters in pathInfo</u>: This implementation does
-	 * not allow ASCII NUL nor any character which cannot be URL-encoded
-	 * according to internet standards;
-	 * <LI><u>Allowed characters in path segments</u>: This implementation
-	 * does not allow non-terminal NULL segments in the the path --
-	 * IOExceptions may be thrown;
+	 * <LI><u>Allowed characters in pathInfo</u>: This implementation does not
+	 * allow ASCII NUL nor any character which cannot be URL-encoded according
+	 * to internet standards;
+	 * <LI><u>Allowed characters in path segments</u>: This implementation does
+	 * not allow non-terminal NULL segments in the the path -- IOExceptions may
+	 * be thrown;
 	 * <LI><u>"<code>.</code>" and "<code>..</code>" path segments</u>: This
-	 * implementation does not allow "<code>.</code>" and "<code>..</code>"
-	 * in the the path, and such characters will result in an IOException
-	 * being thrown;
+	 * implementation does not allow "<code>.</code>" and "<code>..</code>" in
+	 * the the path, and such characters will result in an IOException being
+	 * thrown;
 	 * <LI><u>Implementation limitations</u>: This implementation does not
-	 * impose any limitations except as documented above. This
-	 * implementation may be limited by the servlet container used to house
-	 * this implementation. In particular, all the primary CGI variable
-	 * values are derived either directly or indirectly from the container's
-	 * implementation of the Servlet API methods.
+	 * impose any limitations except as documented above. This implementation
+	 * may be limited by the servlet container used to house this
+	 * implementation. In particular, all the primary CGI variable values are
+	 * derived either directly or indirectly from the container's implementation
+	 * of the Servlet API methods.
 	 * </ul>
 	 * </UL>
 	 * </p>
@@ -131,7 +126,7 @@ public class CGIRunner {
 	 * @see java.lang.Runtime#exec(String command, String[] envp, File dir)
 	 */
 	public void run() throws IOException {
-		
+
 		if (log.isDebugEnabled()) {
 			log.debug("runCGI(envp=[" + env + "], command=" + command + ")");
 		}
@@ -140,14 +135,13 @@ public class CGIRunner {
 				|| (command.indexOf(".." + File.separator) >= 0)) {
 			throw new IOException(this.getClass().getName()
 					+ "Illegal Character in CGI command "
-					+ "path ('.' or '..') detected.  Not "
-					+ "running CGI [" + command + "].");
+					+ "path ('.' or '..') detected.  Not " + "running CGI ["
+					+ command + "].");
 		}
 		/*
 		 * original content/structure of this section taken from
-		 * http://developer.java.sun.com/developer/
-		 * bugParade/bugs/4216884.html with major modifications by Martin
-		 * Dengler
+		 * http://developer.java.sun.com/developer/ bugParade/bugs/4216884.html
+		 * with major modifications by Martin Dengler
 		 */
 		Runtime rt = null;
 		InputStream cgiOutput = null;
@@ -185,12 +179,10 @@ public class CGIRunner {
 		cmdAndArgs = command;
 		try {
 			rt = Runtime.getRuntime();
-			proc = rt.exec(cmdAndArgs.toString(), hashToStringArray(env),
-					wd);
+			proc = rt.exec(cmdAndArgs.toString(), hashToStringArray(env), wd);
 			String sContentLength = (String) env.get("CONTENT_LENGTH");
 			if (!"".equals(sContentLength)) {
-				commandsStdIn = new BufferedOutputStream(proc
-						.getOutputStream());
+				commandsStdIn = new BufferedOutputStream(proc.getOutputStream());
 				flow(response.getInputStream(), commandsStdIn);
 				commandsStdIn.flush();
 				commandsStdIn.close();
@@ -225,21 +217,22 @@ public class CGIRunner {
 							log.debug("runCGI: addHeader(\"" + line + "\")");
 						}
 						if (line.startsWith("HTTP")) {
-							response
-									.setStatus(getSCFromHttpStatusLine(line),"");
+							response.setStatus(getSCFromHttpStatusLine(line),
+									"");
 						} else if (line.indexOf(":") >= 0) {
-							String header = line.substring(0,
-									line.indexOf(":")).trim();
+							String header = line
+									.substring(0, line.indexOf(":")).trim();
 							if (header.equalsIgnoreCase("status")) {
 								String value = line.substring(
 										line.indexOf(":") + 1).trim();
-								response
-										.setStatus(getSCFromCGIStatusHeader(value),"");
+								response.setStatus(
+										getSCFromCGIStatusHeader(value), "");
 							} else {
 								response.addResponseHeader(line.trim());
 							}
 						} else {
-							log.error("runCGI: bad header line \"" + line + "\"");
+							log.error("runCGI: bad header line \"" + line
+									+ "\"");
 						}
 					}
 					// write output
@@ -309,15 +302,15 @@ public class CGIRunner {
 	 * 
 	 * @param line
 	 *            The HTTP Status-Line (RFC2616, section 6.1)
-	 * @return The extracted status code or the code representing an
-	 *         internal error if a valid status code cannot be extracted.
+	 * @return The extracted status code or the code representing an internal
+	 *         error if a valid status code cannot be extracted.
 	 */
 	private int getSCFromHttpStatusLine(String line) {
 		int statusStart = line.indexOf(' ') + 1;
 		if (statusStart < 1 || line.length() < statusStart + 3) {
 			// Not a valid HTTP Status-Line
 			log.error("runCGI: invalid HTTP Status-Line:" + line);
-			return 500;//HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+			return 500;// HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 		}
 		String status = line.substring(statusStart, statusStart + 3);
 		int statusCode;
@@ -326,7 +319,7 @@ public class CGIRunner {
 		} catch (NumberFormatException nfe) {
 			// Not a valid status code
 			log.error("runCGI: invalid status code:" + status);
-			return 500;//HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+			return 500;// HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 		}
 		return statusCode;
 	}
@@ -337,14 +330,14 @@ public class CGIRunner {
 	 * @param value
 	 *            The CGI Status value of the form <code>
         *             digit digit digit SP reason-phrase</code>
-	 * @return The extracted status code or the code representing an
-	 *         internal error if a valid status code cannot be extracted.
+	 * @return The extracted status code or the code representing an internal
+	 *         error if a valid status code cannot be extracted.
 	 */
 	private int getSCFromCGIStatusHeader(String value) {
 		if (value.length() < 3) {
 			// Not a valid status value
 			log.error("runCGI: invalid status value:" + value);
-			return 500;//HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+			return 500;// HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 		}
 		String status = value.substring(0, 3);
 		int statusCode;
@@ -353,11 +346,14 @@ public class CGIRunner {
 		} catch (NumberFormatException nfe) {
 			// Not a valid status code
 			log.error("runCGI: invalid status code:" + status);
-			return 500;//HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+			return 500;// HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 		}
 		return statusCode;
 	}
-	private static final Pattern ERROR = Pattern.compile("^\\w+\\s*(?:(Fatal)|(Error)|(Warning)|(Notice))\\:",Pattern.CASE_INSENSITIVE);
+
+	private static final Pattern ERROR = Pattern.compile(
+			"^(?:\\w+\\s*)?(?:(Fatal)|(Error)|(Warning)|(Notice))\\:",
+			Pattern.CASE_INSENSITIVE);
 
 	protected void log(BufferedReader rdr) {
 		String line = null;
@@ -365,16 +361,21 @@ public class CGIRunner {
 		try {
 			while ((line = rdr.readLine()) != null) {
 				Matcher m = ERROR.matcher(line);
-				if(m.group(1) != null){
-					log.fatal("CGI STDERR:" + line);
-				}else if(m.group(2) != null){
-					log.error("CGI STDERR:" + line);
-				}else if(m.group(3) != null){
-					log.warn("CGI STDERR:" + line);
-				}else {//if(m.group(4) != null){
+				if (m.find()) {
+					int c = m.groupCount();
+					if (c > 1 && m.group(1) != null) {
+						log.fatal("CGI STDERR:" + line);
+					} else if (c > 2 && m.group(2) != null) {
+						log.error("CGI STDERR:" + line);
+					} else if (c > 3 && m.group(3) != null) {
+						log.warn("CGI STDERR:" + line);
+					} else {// if(m.group(4) != null){
+						log.info("CGI STDERR:" + line);
+					}
+				} else {
 					log.info("CGI STDERR:" + line);
 				}
-				
+
 				lineCount++;
 			}
 		} catch (IOException e) {
@@ -393,12 +394,10 @@ public class CGIRunner {
 		}
 		;
 	}
-	
 
 	public void setCgiExecutable(String cgiExecutable) {
 		this.cgiExecutable = cgiExecutable;
 	}
-
 
 	/**
 	 * This is an input stream specifically for reading HTTP headers. It reads

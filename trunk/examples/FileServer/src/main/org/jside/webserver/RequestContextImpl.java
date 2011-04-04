@@ -134,7 +134,11 @@ public class RequestContextImpl implements RequestContext {
 	public Map<String, String[]> getParams() {
 		if (paramsMap == null) {
 			String data = query;
-			data= data + getPost();
+			if(data == null){
+				data = getPost();
+			}else{
+				data= data + getPost();
+			}
 			paramsMap = new ParamsMap(data,this.getEncoding());
 		}
 		return paramsMap;
