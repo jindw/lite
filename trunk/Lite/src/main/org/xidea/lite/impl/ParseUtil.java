@@ -219,7 +219,7 @@ public class ParseUtil {
 		try {
 			xml = documentBuilder.parse(in);
 		} catch (SAXParseException e) {
-			text = new XMLNormalizeImpl().normalize(text);
+			text = new XMLNormalizeImpl().normalize(text,id);
 			in.setCharacterStream(new StringReader(text));
 			xml = documentBuilder.parse(in);
 		}

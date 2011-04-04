@@ -8,6 +8,7 @@ public class XMLNormalizeTest {
 	XMLNormalizeImpl impl = new XMLNormalizeImpl();
 	@Test
 	public void testUnmach(){
+		assertNorm("<hr><a></a2>","<hr><a></a2>");
 		assertNorm("<hr>","<hr/>");
 		assertNorm("<hr><hr title=jindw selected>","<c:group xmlns:c='http://www.xidea.org/lite/core'><hr/><hr title=\"jindw\" selected=\"selected\"/></c:group>");
 		assertNorm("<img src=\"'<hr>\">","<img src=\"'&lt;hr>\"/>");
@@ -16,7 +17,7 @@ public class XMLNormalizeTest {
 		//System.out.println(impl.normalize("<hr>"));
 	}
 	private void assertNorm(String source, String expect) {
-		String result = impl.normalize(source);
+		String result = impl.normalize(source,source);
 		Assert.assertEquals("转换失败:"+source, expect, result);
 		
 	}

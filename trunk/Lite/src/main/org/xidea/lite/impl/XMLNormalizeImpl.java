@@ -12,7 +12,7 @@ import org.xidea.lite.XMLNormalize;
 
 public class XMLNormalizeImpl implements XMLNormalize {
 	private static final Log log = LogFactory.getLog(XMLNormalizeImpl.class);
-	private static final Pattern LINE = Pattern.compile(".*(?:\r\n?|\n)");
+	private static final Pattern LINE = Pattern.compile(".*(?:\\r\\n?|\\n)?");
 	
 	//key (= value)?
 	private static final Pattern ELEMENT_ATTR_END = Pattern.compile("(?:^|\\s+)([\\w_](?:[\\w_\\-\\.\\:]*[\\w_\\-\\.])?)(?:\\s*=\\s*('[^']*'|\"[^\"]*\"|\\w+|\\$\\{[^}]+\\}))?|\\/?>");
@@ -30,6 +30,7 @@ public class XMLNormalizeImpl implements XMLNormalize {
 	private String text;
 	private ArrayList<Tag> tags;
 	private StringBuilder result;
+	private String uri;
 	public XMLNormalizeImpl(){
 		defaultEntryMap.put("&nbsp;", "&#160;");
 		defaultEntryMap.put("&copy;", "&#169;");
@@ -77,7 +78,8 @@ public class XMLNormalizeImpl implements XMLNormalize {
 		}
 	}
 	
-	public String normalize(String text){
+	public String normalize(String text,String uri){
+		this.uri = uri;
 		this.text = text;
 		this.start = 0;
 		this.rootCount = 0;
@@ -94,7 +96,6 @@ public class XMLNormalizeImpl implements XMLNormalize {
 			}
 		}
 		if(this.rootCount>1){
-			System.out.println(this.rootCount);
 			result.append(documentEnd);
 			String rtv = result.toString();
 			return rtv.replaceFirst("<[\\w_]", documentStart+"$0");
@@ -248,16 +249,17 @@ public class XMLNormalizeImpl implements XMLNormalize {
 		result.append(content);
 	}
 
-	private void appendCommon() {
+	protected void appendCommon() {
 		String content = sourceTo("-->");
 		int p = content.indexOf("--",4);
 		if(p!= content.lastIndexOf("--")){//<!--- --> error <!-- --->
 			warn("注释中不能出现连续的--");
 			content = "<!--"+content .substring(4,content.length()-2).replaceAll("[\\-]", " -")+"->";
 		}
+		//<!--[if lt IE 9]><![endif]-->
 		result.append(content);
 	}
-	private void appendTextTo(int p) {
+	protected void appendTextTo(int p) {
 		if(p>start){
 			String text = this.text.substring(start,p);
 			text = formatXMLValue(text, (char)0);
@@ -266,7 +268,7 @@ public class XMLNormalizeImpl implements XMLNormalize {
 		}
 	}
 
-	private String sourceTo(String endText) {
+	protected String sourceTo(String endText) {
 		int end = text.indexOf(endText,start);
 		if(end >0){
 			return text.substring(start,start=end+endText.length());
@@ -274,32 +276,32 @@ public class XMLNormalizeImpl implements XMLNormalize {
 			return null;
 		}
 	}
-	private boolean isElementStart(char type) {
+	protected boolean isElementStart(char type) {
 		return Character.isJavaIdentifierPart(type)&& type != '$';
 	}
-	private void appendEnd() {
+	protected void appendEnd() {
 		String end = text.substring(start);
 		if(end.trim().length()>0){
 			warn("异常文件内容:"+end);
 		}
 	}
 
-	private void error(String msg) {
-		log.error(msg+position());
+	protected void error(String msg) {
+		log.error(position(msg));
 	}
-	private void warn(String msg) {
-		log.warn(msg+position());
+	protected void warn(String msg) {
+		log.warn(position(msg));
 	}
 	@SuppressWarnings("unused")
-	private void info(String msg) {
-		log.info(msg+position());
+	protected void info(String msg) {
+		log.info(position(msg));
 	}
 	/**
 	 * "[^'&]"
 	 * @param value
 	 * @return
 	 */
-	private String formatXMLValue(String value,char qute) {
+	protected String formatXMLValue(String value,char qute) {
 		Matcher m = XML_TEXT.matcher(value);
         if (m.find()) {
             StringBuffer sb = new StringBuffer();
@@ -336,17 +338,17 @@ public class XMLNormalizeImpl implements XMLNormalize {
         }
         return value;
 	}
-	private String position(){
+	protected String position(String msg){
 		Matcher m = LINE.matcher(text);
 		int line = 0;
 		while(m.find()){
 			line++;
 			int offset = start-m.start();
 			if(offset>0 && start<=m.end()){
-				return "[line:"+line+";col:"+(offset+1)+"]";
+				return msg + "\n"+uri+"@[line:"+line+";col:"+(offset+1)+"]";
 			}
 		}
-		return "";//unhit
+		return msg+ "\n"+uri;//unhit
 	}
 
 	private char getNext(int offset){
@@ -368,4 +370,5 @@ public class XMLNormalizeImpl implements XMLNormalize {
 		this.documentStart = start;
 		this.documentEnd = end;
 	}
+
 }
