@@ -20,7 +20,7 @@ public class XMLNormalizeImpl implements XMLNormalize {
 	protected static final String TAG_NAME = "[\\w_](?:[\\w_\\-\\.\\:]*[\\w_\\-\\.])?";
 	
 	//key (= value)?
-	protected static final Pattern ELEMENT_ATTR_END = Pattern.compile("(?:^|\\s+)("+TAG_NAME+")\\s*(?:=\\s*('[^']*'|\"[^\"]*\"|\\w+|\\$\\{[^}]+\\}))?|\\/?>");
+	protected static final Pattern ELEMENT_ATTR_END = Pattern.compile("(?:^|\\s+)("+TAG_NAME+")(?:\\s*=\\s*('[^']*'|\"[^\"]*\"|\\w+|\\$\\{[^}]+\\}))?|\\s*\\/?>");
 	protected static final Pattern XML_TEXT = Pattern.compile(
 			"&\\w+;|&#\\d+;|&#x[\\da-fA-F]+;|([&\"\'<])");
 	protected static final Pattern LEAF_TAG = Pattern.compile("^(?:meta|link|img|br|hr|input)$",Pattern.CASE_INSENSITIVE);
