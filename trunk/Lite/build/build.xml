@@ -130,7 +130,7 @@
 			
 			<zipgroupfileset dir="web/WEB-INF/lib/">
 				<include name="commons-logging*.jar" />
-				<include name="JSI-*.jar" />
+				<include name="JSI*.jar" />
 			</zipgroupfileset>
 		</jar>
 		<jar destfile="build/dest/LiteRT.jar" compress="true">

@@ -312,19 +312,19 @@ public class ParseUtil {
 
 		bin.mark(3);
 		// //\ufeff %EF%BB%BF
-		if (in.read() == 0xEF && in.read() == 0xBB && in.read() == 0xBF) {
+		if (bin.read() == 0xEF && bin.read() == 0xBB && bin.read() == 0xBF) {
 			// readUTF8;
 			return loadTextAndClose(new InputStreamReader(bin, "utf-8"));
 		}
-		in.reset();
-		if (in.read() == 0xFE && in.read() == 0xFF) {
+		bin.reset();
+		if (bin.read() == 0xFE && bin.read() == 0xFF) {
 			return loadTextAndClose(new InputStreamReader(bin, "UTF16BE"));
 		}
-		in.reset();
-		if (in.read() == 0xFF && in.read() == 0xFE) {
+		bin.reset();
+		if (bin.read() == 0xFF && bin.read() == 0xFE) {
 			return loadTextAndClose(new InputStreamReader(bin, "UTF16LE"));
 		}
-		in.reset();
+		bin.reset();
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		try{
 			write(bin, out);

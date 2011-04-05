@@ -2,8 +2,8 @@ package org.xidea.lite;
 
 public interface XMLNormalize {
 	public String normalize(String text,String id);
-	public String addDefaultNS(String namespace,String prefix);
-	public String addDefaultEntry(String entry,String value);
-	public void setDefaultRoot(String start,String end);
+	public String addDefaultNS(String prefix,String namespace);
+	public String addDefaultEntity(String entry,String replaceEntry);
+	public void setDefaultRoot(String elementTag);
 
 }
