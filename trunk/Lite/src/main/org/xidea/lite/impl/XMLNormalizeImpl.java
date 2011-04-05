@@ -16,32 +16,32 @@ import org.xidea.lite.XMLNormalize;
  */
 public class XMLNormalizeImpl implements XMLNormalize {
 	private static final Log log = LogFactory.getLog(XMLNormalizeImpl.class);
-	private static final Pattern LINE = Pattern.compile(".*(?:\\r\\n?|\\n)?");
-	private static final String TAG_NAME = "[\\w_](?:[\\w_\\-\\.\\:]*[\\w_\\-\\.])?";
+	protected static final Pattern LINE = Pattern.compile(".*(?:\\r\\n?|\\n)?");
+	protected static final String TAG_NAME = "[\\w_](?:[\\w_\\-\\.\\:]*[\\w_\\-\\.])?";
 	
 	//key (= value)?
-	private static final Pattern ELEMENT_ATTR_END = Pattern.compile("(?:^|\\s+)("+TAG_NAME+")\\s*(?:=\\s*('[^']*'|\"[^\"]*\"|\\w+|\\$\\{[^}]+\\}))?|\\/?>");
-	private static final Pattern XML_TEXT = Pattern.compile(
+	protected static final Pattern ELEMENT_ATTR_END = Pattern.compile("(?:^|\\s+)("+TAG_NAME+")\\s*(?:=\\s*('[^']*'|\"[^\"]*\"|\\w+|\\$\\{[^}]+\\}))?|\\/?>");
+	protected static final Pattern XML_TEXT = Pattern.compile(
 			"&\\w+;|&#\\d+;|&#x[\\da-fA-F]+;|([&\"\'<])");
-	private static final Pattern LEAF_TAG = Pattern.compile("^(?:meta|link|img|br|hr|input)$",Pattern.CASE_INSENSITIVE);
+	protected static final Pattern LEAF_TAG = Pattern.compile("^(?:meta|link|img|br|hr|input)$",Pattern.CASE_INSENSITIVE);
 	
-	private Map<String, String> defaultNSMap = new HashMap<String, String>();
-	private Map<String, String> defaultEntryMap = new HashMap<String, String>();
-	private String documentStart = "<c:group xmlns:c='http://www.xidea.org/lite/core'>";
-	private String documentEnd = "</c:group>";
+	protected Map<String, String> defaultNSMap = new HashMap<String, String>();
+	protected Map<String, String> defaultEntryMap = new HashMap<String, String>();
+	protected String documentStart = "<c:group xmlns:c='http://www.xidea.org/lite/core'>";
+	protected String documentEnd = "</c:group>";
 	
-	private int start;
-	private int  rootCount;
-	private String text;
-	private ArrayList<Tag> tags;
-	private StringBuilder result;
-	private String uri;
+	protected int start;
+	protected int  rootCount;
+	protected String text;
+	protected ArrayList<Tag> tags;
+	protected StringBuilder result;
+	protected String uri;
 	public XMLNormalizeImpl(){
 		defaultEntryMap.put("&nbsp;", "&#160;");
 		defaultEntryMap.put("&copy;", "&#169;");
 		defaultNSMap.put("xmlns:c", "http://www.xidea.org/lite/core");
 	}
-	class Tag{
+	protected class Tag{
 		String name;
 		Map<String,String> nsMap;
 		void add(String name,String value) {
