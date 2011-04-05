@@ -292,11 +292,11 @@ public class XMLNormalizeImpl implements XMLNormalize {
 			content = "<!--"+content .substring(4,content.length()-2).replaceAll("[\\-]", " -")+"->";
 		}
 		//<!--[if lt IE 9]><![endif]-->
-		appendComment(content);
-	}
-	protected void appendComment(String content){
 		result.append(content);
 	}
+//	protected void appendComment(String content){
+//		result.append(content);
+//	}
 	protected void appendTextTo(int p) {
 		if(p>start){
 			String text = this.text.substring(start,p);
