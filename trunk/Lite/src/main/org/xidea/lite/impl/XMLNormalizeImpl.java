@@ -20,7 +20,7 @@ public class XMLNormalizeImpl implements XMLNormalize {
 	private static final String TAG_NAME = "[\\w_](?:[\\w_\\-\\.\\:]*[\\w_\\-\\.])?";
 	
 	//key (= value)?
-	private static final Pattern ELEMENT_ATTR_END = Pattern.compile("(?:^|\\s+)("+TAG_NAME+")(?:\\s*=\\s*('[^']*'|\"[^\"]*\"|\\w+|\\$\\{[^}]+\\}))?|\\s*\\/?>");
+	private static final Pattern ELEMENT_ATTR_END = Pattern.compile("(?:^|\\s+)("+TAG_NAME+")\\s*(?:=\\s*('[^']*'|\"[^\"]*\"|\\w+|\\$\\{[^}]+\\}))?|\\/?>");
 	private static final Pattern XML_TEXT = Pattern.compile(
 			"&\\w+;|&#\\d+;|&#x[\\da-fA-F]+;|([&\"\'<])");
 	private static final Pattern LEAF_TAG = Pattern.compile("^(?:meta|link|img|br|hr|input)$",Pattern.CASE_INSENSITIVE);
@@ -91,12 +91,29 @@ public class XMLNormalizeImpl implements XMLNormalize {
 	}
 	
 	public String normalize(String text,String uri){
-		this.uri = uri;
-		this.text = text;
-		this.start = 0;
-		this.rootCount = 0;
-		this.tags = new ArrayList<Tag>();
-		result = new StringBuilder(text.length()*11/10);
+		final String text0 = this.text;
+		final String uri0 = this.uri;
+		final int start0 = this.start;
+		final StringBuilder result0 = this.result;
+		try{
+			this.uri = uri;
+			this.text = text;
+			this.start = 0;
+			this.rootCount = 0;
+			this.tags = new ArrayList<Tag>();
+			this.result = new StringBuilder(text.length()*11/10);
+			String result = parse();
+			return result;
+		}finally{
+			this.text=text0;
+			this.uri = uri0;
+			this.start=start0;
+			this.result=result0;
+		}
+		
+	}
+
+	private String parse() {
 		while(true){
 			int p = text.indexOf('<',start);
 			if(p>=start){
@@ -365,7 +382,7 @@ public class XMLNormalizeImpl implements XMLNormalize {
 			line++;
 			int offset = start-m.start();
 			if(offset>0 && start<=m.end()){
-				return msg + "\n"+uri+"@[line:"+line+";col:"+(offset+1)+"]";
+				return msg + "\n"+uri+"@[line:"+line+";col:"+(offset+1)+"]\nline-text:"+m.group();
 			}
 		}
 		return msg+ "\n"+uri;//unhit

@@ -11,10 +11,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -74,8 +72,9 @@ public class ParseUtil {
 			throw new RuntimeException(e);
 		}
 		LinkedHashSet<Charset> cs = new LinkedHashSet<Charset>();
-		cs.add(Charset.defaultCharset());
 		cs.add(Charset.forName("UTF-8"));
+		cs.add(Charset.defaultCharset());
+		cs.add(Charset.forName("GBK"));
 		cs.addAll(Charset.availableCharsets().values());
 		CHARSETS = Collections.unmodifiableList(new ArrayList<Charset>(cs));
 
