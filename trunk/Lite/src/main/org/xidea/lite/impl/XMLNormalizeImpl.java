@@ -349,8 +349,10 @@ public class XMLNormalizeImpl implements XMLNormalize {
             		switch(c){
             		case '&':
             			entity = "&amp;";
+            			break;
             		case '<':
             			entity = "&lt;";
+            			break;
             		case '\'':
             		case '\"':
             			if(qute == c){
