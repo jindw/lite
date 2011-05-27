@@ -575,6 +575,22 @@ public class ExpressionParser extends JSONTokenizer {
 		}
 		return -1;
 	}
+
+	protected boolean skipSpace(int nextChar) {
+		while (start < end) {
+			if (!Character.isWhitespace(value.charAt(start))) {
+				break;
+			}
+			start++;
+		}
+		if (nextChar > 0 && start < end) {
+			int next = value.charAt(start);
+			if (nextChar == next) {
+				return true;
+			}
+		}
+		return false;
+	}
 }
 enum ParseStatus {
 	BEGIN, EXPRESSION, OPERATOR

@@ -32,6 +32,7 @@ public class ParseChainImpl extends ParseContextProxy implements ParseChain {
 	ParseChainImpl(ParseContextProxy context, NodeParser<? extends Object>[] parsers,int index) {
 		super(context);
 		this.context = context;
+		this.setCurrentURI(context.getCurrentURI());
 		this.parsers = parsers;
 		this.index  = index;
 		this.parser = parsers[index];

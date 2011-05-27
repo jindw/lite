@@ -52,6 +52,7 @@ public class ParseContextImpl extends ParseContextProxy implements ParseContext 
 	}
 	private ParseContextImpl(ParseContextProxy parent) {
 		super(parent);
+		this.setCurrentURI(parent.getCurrentURI());
 		this.resultContext = new ResultContextImpl(this);
 		// 需要重设 ParseChain 的context
 		this.textParsers = parent.getTextParsers();

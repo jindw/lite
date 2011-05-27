@@ -19,6 +19,12 @@ public class JSONParserTest {
 		doParser("{\"a\":1}//111");
 	}
 
+	@Test
+	public void testObject(){
+		doParser("{\"a\":1}");
+		doParser("{\'a\':1}//111");
+	}
+
 	public void doParser(String json){
 		JSONDecoder.decode(json);
 	}

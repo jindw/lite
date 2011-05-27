@@ -52,6 +52,7 @@ public class LiteCompiler {
 			} else {
 				this.processFile(path);
 			}
+			log.info("执行成功");
 		} catch (Exception e) {
 			log.error("编译失败",e);
 		}

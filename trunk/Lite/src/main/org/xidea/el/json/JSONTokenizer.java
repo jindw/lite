@@ -12,7 +12,7 @@ public class JSONTokenizer {
 	protected String value;
 	protected int start;
 	protected final int end;
-	private boolean strict = false;
+	protected boolean strict = false;
 
 	public JSONTokenizer(String source,boolean strict) {
 		this.value = source.trim();
@@ -78,11 +78,18 @@ public class JSONTokenizer {
 		while (true) {
 			// result.add(parse());
 			char c = value.charAt(start);
-			String key;
+			final String key;
 			if(c == '"'){
 				key = findString();
 			}else{
-				key = findId();
+				if(c == '\''){
+					key = findString();
+				}else{
+					if(strict){
+						throw buildError("JSON 标准Object Key 必须为标准JSON 字符串,如:{\"key\":\"value\"}");
+					}
+					key = findId();
+				}
 			}
 			skipComment();
 			c = value.charAt(start++);
@@ -92,14 +99,14 @@ public class JSONTokenizer {
 			Object valueObject = parse();
 			skipComment();
 			c = value.charAt(start++);
-			if (c == '}') {
-				result.put(key, valueObject);
-				return result;
-			} else if (c != ',') {
-				throw buildError("无效对象语法");
-			} else {
+			if (c == ',') {
 				result.put(key, valueObject);
 				skipComment();
+			} else if (c == '}') {
+				result.put(key, valueObject);
+				return result;
+			} else {
+				throw buildError("无效对象语法");
 			}
 		}
 	}
@@ -121,7 +128,6 @@ public class JSONTokenizer {
 			if (c == ']') {
 				return result;
 			} else if (c == ',') {
-				skipComment();
 				result.add(parse());
 			} else {
 				throw buildError("无效数组语法:");
@@ -433,19 +439,4 @@ public class JSONTokenizer {
 		}
 	}
 
-	protected boolean skipSpace(int nextChar) {
-		while (start < end) {
-			if (!Character.isWhitespace(value.charAt(start))) {
-				break;
-			}
-			start++;
-		}
-		if (nextChar > 0 && start < end) {
-			int next = value.charAt(start);
-			if (nextChar == next) {
-				return true;
-			}
-		}
-		return false;
-	}
 }

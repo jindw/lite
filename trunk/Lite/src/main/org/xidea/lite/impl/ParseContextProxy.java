@@ -57,7 +57,6 @@ abstract public class ParseContextProxy implements ParseContext {
 		this.config = parent;
 		this.featureMap =  parent.getFeatureMap();
 		this.resultContext = parent;
-		this.setCurrentURI(parent.getCurrentURI());
 		this.resources = parent.resources;
 	}
 
