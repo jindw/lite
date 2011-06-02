@@ -53,7 +53,7 @@ public class ParseContextImpl extends ParseContextProxy implements ParseContext 
 	private ParseContextImpl(ParseContextProxy parent) {
 		super(parent);
 		this.setCurrentURI(parent.getCurrentURI());
-		this.resultContext = new ResultContextImpl(this);
+		this.resultContext = new ResultContextImpl();
 		// 需要重设 ParseChain 的context
 		this.textParsers = parent.getTextParsers();
 		this.nodeParsers = parent.getTopChain().getNodeParsers();
@@ -158,14 +158,14 @@ public class ParseContextImpl extends ParseContextProxy implements ParseContext 
 	}
 
 	public List<Object> parseText(String text, int defaultType) {
-		int type = this.getTextType();
+		int oldType = this.getTextType();
 		int mark = this.mark();
 		List<Object> result;
 		try {
-			this.setTextType(defaultType);
+			this.textType = defaultType;
 			parse(text);
 		} finally {
-			this.setTextType(type);
+			this.textType = oldType;
 			result = this.reset(mark);
 		}
 		return result;

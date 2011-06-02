@@ -17,7 +17,7 @@ function buildTopChain(context){
 function addChainAddon(TopChain,context){
 	TopChain.prototype = context;
 	var pt = TopChain.prototype = new TopChain();
-	pt.index = context.nodeParsers.length-1;
+	pt.index = context._nodeParsers.length-1;
 	pt.next = doNext;
 	pt.buildNext = buildNext;
 	pt.constructor = TopChain;
@@ -25,7 +25,7 @@ function addChainAddon(TopChain,context){
 function doNext(node){
 	//$log.info(typeof node,node&& node.tagName)
 	try{
-		var parser = this.nodeParsers[this.index];
+		var parser = this._nodeParsers[this.index];
 		var n = this.nextChain||this.buildNext();
 		parser(node,this,n);
 	}catch(e){

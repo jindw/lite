@@ -11,7 +11,6 @@
  */
 function ResultContext(){
 	this.result = [];
-	this.attributeMap = [[],[]]
 }
 function checkVar(v){
 	var exp = /^(break|case|catch|const|continue|default|do|else|false|finally|for|function|if|in|instanceof|new|null|return|switch|this|throw|true|try|var|void|while|with)|[a-zA-Z_][\w_]*$/;
@@ -22,19 +21,6 @@ function checkVar(v){
 	return v;
 }
 ResultContext.prototype = {
-	textType:0,
-	setTextType:function(textType){
-		this.textType = textType;
-	},
-	getTextType:function(){
-		return this.textType;
-	},
-	setAttribute:function(key,value){
-		setByKey(this.attributeMap,key,value)
-	},
-	getAttribute:function(key){
-		return getByKey(this.attributeMap,key)
-	},
     /**
      * 异常一定要抛出去，让parseText做回退处理
      */

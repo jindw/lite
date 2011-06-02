@@ -99,10 +99,10 @@ public class ParseChainImpl extends ParseContextProxy implements ParseChain {
 	public void setReserveSpace(boolean keepSpace) {
 		context.setReserveSpace(keepSpace);
 	}
-	@Override
-	public void setTextType(int textType) {
-		context.setTextType(textType);
-	}
+//	@Override
+//	public void setTextType(int textType) {
+//		context.setTextType(textType);
+//	}
 	/* 支持代理*/
 	public void parse(Object source) {
 		context.parse(source);

@@ -27,7 +27,7 @@ public interface ParseContext extends ResultContext, ParseConfig, ParserHolder {
 	public String FEATURE_ENCODING = "http://www.xidea.org/lite/features/output-encoding";
 	// 默认值为 text/html
 	public String FEATURE_MIME_TYPE = "http://www.xidea.org/lite/features/output-mime-type";
-	// 默认值为 null,推荐用通配符模式：layout='${dir}/layout.xhtml'
+	// 默认值为 null,可以采用相对路径模式：layout='./layout.xhtml'
 	public String FEATURE_LAYOUT = "http://www.xidea.org/lite/features/config-layout";
 
 	/**
@@ -71,7 +71,7 @@ public interface ParseContext extends ResultContext, ParseConfig, ParserHolder {
 	 * @return
 	 */
 	public int getTextType();
-	public void setTextType(int textType);
+//	public void setTextType(int textType);
 	/**
 	 * 是否保留空白（默认为false）
 	 * @return

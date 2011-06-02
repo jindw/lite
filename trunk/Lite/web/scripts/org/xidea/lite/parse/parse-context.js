@@ -12,54 +12,46 @@ var defaultBase = new URI("lite:///");
  */
 function ParseContext(config,path){
 	config = config || new ParseConfig();
-    this.config = config;
-	this.path = path;
-	this.currentURI = defaultBase;
-	this.featureMap = config.getFeatureMap(path);
-	this.initialize(config);
-	this.self = this;
+	this._path = path;
+	this._currentURI = defaultBase;
+	this._featureMap = config.getFeatureMap(path);
+    this._config = config;
+    this._textType=0;
+	this._attributeMap = [[],[]]
+    this._result = new ResultContext();
+	this._context = this;
+	initializeParser(this,config.getExtensions(path));
+}
+/**
+ * 初始化上下文
+ * @arguments 链顶插入的解析器列表（第一个元素为初始化后的链顶解析器，以后类推）
+ */
+function initializeParser(context,extensions){
+	var extensionParser = new ExtensionParser();
+	for(var len = extensions.length,i=0;i<len;i++){
+		var ext = extensions[i];
+		var impl = ext['package'];
+//		if(/[\\\/]/.test(impl)){
+//		}
+		extensionParser.addExtension(ext.namespace,impl)
+	}
+	context._nodeParsers = [parseText2,parseDefaultXMLNode,parseExtension];
+	context._textParsers = [extensionParser];
+	context._extensionParser = extensionParser;
+    context._topChain = buildTopChain(context);
 }
 function parseExtension(node,context,chain){//extension
-	return context.extensionParser.parse(node,context,chain);
+	return context._extensionParser.parse(node,context,chain);
 }
 function parseText2(text,context){
 	if(typeof text == 'string'){
-		return parseText(text,context,context.textParsers)
+		return parseText(text,context,context._textParsers)
 	}else{
 		$log.error("未知节点类型",typeof text,text)
 		//chain.next(text);
 	}
 }
 ParseContext.prototype = {
-	/**
-	 * 初始化上下文
-	 * @arguments 链顶插入的解析器列表（第一个元素为初始化后的链顶解析器，以后类推）
-	 */
-	initialize:function(config){
-		var extensions = config.getExtensions(this.path);
-		var extensionParser = new ExtensionParser();
-		for(var len = extensions.length,i=0;i<len;i++){
-			var ext = extensions[i];
-			var impl = ext['package'];
-//			if(/[\\\/]/.test(impl)){
-//			}
-			extensionParser.addExtension(ext.namespace,impl)
-		}
-    	this.nodeParsers = [parseText2,parseDefaultXMLNode,parseExtension];
-    	this.textParsers = [extensionParser];
-    	this.extensionParser = extensionParser;
-	    this.result = new ResultContext();
-	    this.topChain = buildTopChain(this);
-	},
-	addNodeParser:function(np){
-		this.nodeParsers.push(np);
-	},
-	addTextParser:function(tp){
-		this.textParsers.push(tp);
-	},
-	addExtension:function(ns,pkg){
-		this.extensionParser.addExtension(ns,pkg);
-	},
 	parseText:function(source, textType) {
 		switch(textType){
 		case XA_TYPE :
@@ -73,10 +65,9 @@ ParseContext.prototype = {
 		
 		var mark = this.mark();
 		var oldType = this.getTextType();
-		this.setTextType(textType);
-		//this.parse(source);
+		this._context._textType = textType;
 		parseText2(source,this);
-		this.setTextType(oldType);
+		this._context._textType = oldType;
 		var result = this.reset(mark);
 		return result;
 	},
@@ -91,7 +82,7 @@ ParseContext.prototype = {
 		this.setCurrentNode(source);
 		if(type>0){//xml
 			//$log.info(len,source && source.xml)
-			this.topChain.next(source);
+			this._topChain.next(source);
 		}else{//text
 			if(source instanceof URI){
 				source = this.loadXML(source);
@@ -104,19 +95,19 @@ ParseContext.prototype = {
 				var len = source.length;
 				if(len >= 0 && typeof source.item != 'undefined'){//NodeList
 					for(var i = 0;i<len;i++){
-						this.topChain.next(source.item(i));
+						this._topChain.next(source.item(i));
 					}
 					return;
 				}
 			}
-			this.topChain.next(source);
+			this._topChain.next(source);
 		}
 		
 		
 	},
     createURI:function(path) {
-    	//$log.error(path,this.currentURI,this.config.root)
-    	var cu = this.currentURI;
+    	//$log.error(path,this.currentURI,this.config._root)
+    	var cu = this.getCurrentURI();
     	if(cu){
     		//if(cu.scheme == 'data'){
     		//	return new URI(cu);
@@ -131,34 +122,12 @@ ParseContext.prototype = {
     	
     	
     },
-    getCurrentURI:function(){
-    	return this.currentURI;
-    },
-    setCurrentURI:function(uri){
-    	this.self.currentURI = new URI(uri);
-    },
-    getCurrentNode:function(){
-    	return this.currentNode;
-    },
-    setCurrentNode:function(node){
-    	this.self.currentNode = node;
-    },
-    openStream:function(uri){
-//    	//only for java
-//    	if(uri.scheme == 'lite'){
-//    		var path = uri.path+(uri.query||'');
-//    		path = path.replace(/^\//,'./')
-//    		uri = this.config.root.resolve(path);
-//    	}
-//    	return Packages.org.xidea.lite.impl.ParseUtil.openStream(uri)
-		throw new Error("only for java");
-    },
     loadText:function(uri){
     	//only for java
     	if(uri.scheme == 'lite'){
     		var path = uri.path+(uri.query||'');
     		path = path.replace(/^\//,'./')
-    		uri = this.config.root.resolve(path);
+    		uri = this.config._root.resolve(path);
     	}
     	var xhr = new XMLHttpRequest();
 	    xhr.open("GET",url,false)
@@ -166,26 +135,67 @@ ParseContext.prototype = {
 	    ////text/xml,application/xml...
 	    return xhr.responseText;
     },
-    createNew:function(){
-    	return new ParseContext(this.config,this.currentURI);
-    },
     loadXML:function(path){
     	if(!(path instanceof URI)){
     		path = new URI(path)
     	}
-    	this.currentURI = path;
-    	return loadXML(this.currentURI,this.config.root)
+    	this.setCurrentURI(path);
+    	return loadXML(path,this._config._root)
+    },
+    openStream:function(uri){
+//    	//only for java
+//    	if(uri.scheme == 'lite'){
+//    		var path = uri.path+(uri.query||'');
+//    		path = path.replace(/^\//,'./')
+//    		uri = this.config._root.resolve(path);
+//    	}
+//    	return Packages.org.xidea.lite.impl.ParseUtil.openStream(uri)
+		throw new Error("only for java");
+    },
+    getCurrentURI:function(){
+    	return this._context._currentURI;
+    },
+    setCurrentURI:function(uri){
+    	this._context._currentURI = new URI(uri);
+    },
+    getCurrentNode:function(){
+    	return this._context._currentNode;
+    },
+    setCurrentNode:function(node){
+    	this._context._currentNode = node;
+    },
+	getTextType:function(){
+		return this._context._textType;
+	},
+	setAttribute:function(key,value){
+		setByKey(this._context._attributeMap,key,value)
+	},
+	getAttribute:function(key){
+		return getByKey(this._context._attributeMap,key)
+	},
+
+	addNodeParser:function(np){
+		this._nodeParsers.push(np);
+	},
+	addTextParser:function(tp){
+		this._textParsers.push(tp);
+	},
+	addExtension:function(ns,pkg){
+		this._extensionParser.addExtension(ns,pkg);
+	},
+    createNew:function(){
+    	return new ParseContext(this._config,this.getCurrentURI());
     }
 }
 var rm = ResultContext.prototype;
 for(var n in rm){
 	if(rm[n] instanceof Function){
-		ParseContext.prototype[n] = buildWrapper(n);
+		ParseContext.prototype[n] = buildResultWrapper(n);
 	}
 }
-function buildWrapper(n){
+function buildResultWrapper(n){
 	return function(){
-		var result = this.result;
+		var result = this._result;
 		return result[n].apply(result,arguments)
 	}
 }

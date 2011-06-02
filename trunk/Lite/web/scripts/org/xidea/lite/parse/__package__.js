@@ -17,11 +17,11 @@ this.addScript('extension.js','Extension'
            
 this.addScript('parse-context.js','ParseContext'
                 ,['ResultContext','ParseConfig','org.xidea.lite.util:URI','org.xidea.lite.util:loadXML','org.xidea.lite.util:selectNodes']
-                ,['buildTopChain','ExtensionParser','Extension','parseDefaultXMLNode','parseText']);
+                ,['buildTopChain','ExtensionParser','Extension','parseDefaultXMLNode','parseText','org.xidea.lite.util:getByKey','org.xidea.lite.util:setByKey']);
 
 this.addScript('result-context.js','ResultContext'
                 ,0
-                ,['org.xidea.el.ExpressionTokenizer','org.xidea.lite.util:getByKey','org.xidea.lite.util:setByKey']);
+                ,['org.xidea.el.ExpressionTokenizer']);
      
 this.addScript('parse-chain.js','buildTopChain');
 

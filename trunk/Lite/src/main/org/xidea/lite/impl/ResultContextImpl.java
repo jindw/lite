@@ -14,7 +14,6 @@ import org.xidea.lite.DefinePlugin;
 import org.xidea.lite.Plugin;
 import org.xidea.lite.Template;
 import org.xidea.lite.parse.IllegalEndException;
-import org.xidea.lite.parse.ParseContext;
 import org.xidea.lite.parse.ResultContext;
 
 /**
@@ -32,13 +31,6 @@ public class ResultContextImpl implements ResultContext {
 
 	private final ArrayList<Object> result = new ArrayList<Object>();
 
-	private ParseContext context;
-
-
-
-	public ResultContextImpl(ParseContext context) {
-		this.context = context;
-	}
 
 	public Object parseEL(String expression) {
 		return expressionFactory.parse(expression);
@@ -138,7 +130,7 @@ public class ResultContextImpl implements ResultContext {
 		itemsEL = requrieEL(itemsEL);
 		this.append(new Object[] { Template.FOR_TYPE, itemsEL, var });
 		if (status != null && status.length() > 0) {
-			this.appendVar(checkVar(status), this.context.parseEL("for"));
+			this.appendVar(checkVar(status), this.parseEL("for"));
 		}
 	}
 

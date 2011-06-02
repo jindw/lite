@@ -40,7 +40,7 @@ abstract public class ParseContextProxy implements ParseContext {
 	/**
 	 * createNew 重置
 	 */
-	private int textType = 0;
+	protected int textType = 0;
 	private boolean preserveSpace;
 	
 	
@@ -49,7 +49,7 @@ abstract public class ParseContextProxy implements ParseContext {
 	protected ParseContextProxy(ParseConfig config,Map<String, String> featureMap) {
 		this.config = config;
 		this.featureMap = featureMap;
-		this.resultContext = new ResultContextImpl(this);
+		this.resultContext = new ResultContextImpl();
 	}
 
 	ParseContextProxy(ParseContextProxy parent) {
@@ -81,9 +81,9 @@ abstract public class ParseContextProxy implements ParseContext {
 		return textType;
 	}
 
-	public void setTextType(int textType) {
-		this.textType = textType;
-	}
+//	public void setTextType(int textType) {
+//		this.textType = textType;
+//	}
 
 	public boolean isReserveSpace() {
 		return preserveSpace;
