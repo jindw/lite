@@ -76,7 +76,7 @@ public class RequestContextImpl implements RequestContext {
 	}
 
 	public InputStream getInputStream() {
-		if(post == null){
+		if(post != null){
 			byte[] chars = post.getBytes(Charset.forName("ISO-8859-1"));
 			return new ByteArrayInputStream(chars);
 		}

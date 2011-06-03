@@ -28,7 +28,7 @@ public class CGIRunner {
 	/** response object used to set headers & get output stream */
 	private RequestContext response = null;
 	/** boolean tracking whether this object has enough info to run() */
-	private String cgiExecutable = "php-cgi";
+	private String[] cgiExecutable = {"php-cgi"};
 	private long stderrTimeout = 1000 * 60 * 2;
 
 	/**
@@ -151,35 +151,23 @@ public class CGIRunner {
 		Process proc = null;
 		int bufRead = -1;
 		// create query arguments
-		StringBuffer cmdAndArgs = new StringBuffer();
-		if (command.indexOf(" ") < 0) {
-			cmdAndArgs.append(command);
-		} else {
-			// Spaces used as delimiter, so need to use quotes
-			cmdAndArgs.append("\"");
-			cmdAndArgs.append(command);
-			cmdAndArgs.append("\"");
+		ArrayList<String> cmdAndArgs = new ArrayList<String>(cgiExecutable.length+1);
+		for (String arg : cgiExecutable) {
+			cmdAndArgs.add(arg);
 		}
+		cmdAndArgs.add(command);
 		if (arguments != null) {
 			for (String arg : arguments) {
-				cmdAndArgs.append(" ");
-				if (arg.indexOf(" ") < 0) {
-					cmdAndArgs.append(arg);
-				} else {
-					// Spaces used as delimiter, so need to use quotes
-					cmdAndArgs.append("\"");
-					cmdAndArgs.append(arg);
-					cmdAndArgs.append("\"");
-				}
+				cmdAndArgs.add(arg);
 			}
 		}
-		StringBuffer command = new StringBuffer(cgiExecutable);
-		command.append(" ");
-		command.append(cmdAndArgs.toString());
-		cmdAndArgs = command;
+//		StringBuffer commands = new StringBuffer(cgiExecutable[0]);
+//		commands.append(" ");
+//		commands.append(cmdAndArgs.toString());
+//		cmdAndArgs = commands;
 		try {
 			rt = Runtime.getRuntime();
-			proc = rt.exec(cmdAndArgs.toString(), hashToStringArray(env), wd);
+			proc = rt.exec(cmdAndArgs.toArray(new String[cmdAndArgs.size()]), hashToStringArray(env), wd);
 			String sContentLength = (String) env.get("CONTENT_LENGTH");
 			if (!"".equals(sContentLength)) {
 				commandsStdIn = new BufferedOutputStream(proc.getOutputStream());
@@ -370,7 +358,7 @@ public class CGIRunner {
 					} else if (c > 3 && m.group(3) != null) {
 						log.warn("CGI STDERR:" + line);
 					} else {// if(m.group(4) != null){
-						log.info("CGI STDERR:" + line);
+						log.debug("CGI STDERR:" + line);
 					}
 				} else {
 					log.info("CGI STDERR:" + line);
@@ -395,7 +383,7 @@ public class CGIRunner {
 		;
 	}
 
-	public void setCgiExecutable(String cgiExecutable) {
+	public void setCgiExecutable(String[] cgiExecutable) {
 		this.cgiExecutable = cgiExecutable;
 	}
 
