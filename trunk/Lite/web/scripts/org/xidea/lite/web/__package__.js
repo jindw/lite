@@ -16,6 +16,15 @@ this.addScript('lite-compiler.js',["liteFunction","liteTemplate"]
                    "org.xidea.jsi:$log"
                ]
                ,"org.xidea.jsidoc.util:XMLHttpRequest");
+
+this.addScript('server-compiler.js',["WebCompiler"]
+               ,[
+                   "org.xidea.lite.impl.php:PHPTranslator",
+                   "org.xidea.lite.parse.*",
+                   "org.xidea.lite.util.*",
+                   "org.xidea.jsi:$log"
+               ]
+               ,"org.xidea.jsidoc.util:XMLHttpRequest");
 this.addScript('lite-formatter.js',["liteFormat"]
                 ,[
                     "org.xidea.lite.impl.*",

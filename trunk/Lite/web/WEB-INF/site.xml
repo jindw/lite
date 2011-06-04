@@ -1,5 +1,8 @@
 <!-- 新版配置方式，PHP，Java统一配置格式  -->
-<site xmlns="http://firekylin.my.baidu.com/ns/config/1.1" encoding="UTF-8">
+<site xmlns="http://firekylin.my.baidu.com/ns/config" encoding="UTF-8">
+	<lite>
+		<include>/test/**.xhtml</include>
+	</lite>
 	<resource>
 		<group>
 			<include>/doc/**</include>

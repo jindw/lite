@@ -35,7 +35,7 @@ function initializeParser(context,extensions){
 //		}
 		extensionParser.addExtension(ext.namespace,impl)
 	}
-	context._nodeParsers = [parseText2,parseDefaultXMLNode,parseExtension];
+	context._nodeParsers = [parseTextLeaf,parseDefaultXMLNode,parseExtension];
 	context._textParsers = [extensionParser];
 	context._extensionParser = extensionParser;
     context._topChain = buildTopChain(context);
@@ -43,7 +43,7 @@ function initializeParser(context,extensions){
 function parseExtension(node,context,chain){//extension
 	return context._extensionParser.parse(node,context,chain);
 }
-function parseText2(text,context){
+function parseTextLeaf(text,context){
 	if(typeof text == 'string'){
 		return parseText(text,context,context._textParsers)
 	}else{
@@ -66,7 +66,7 @@ ParseContext.prototype = {
 		var mark = this.mark();
 		var oldType = this.getTextType();
 		this._context._textType = textType;
-		parseText2(source,this);
+		parseTextLeaf(source,this);
 		this._context._textType = oldType;
 		var result = this.reset(mark);
 		return result;
@@ -107,6 +107,10 @@ ParseContext.prototype = {
 	},
     createURI:function(path) {
     	//$log.error(path,this.currentURI,this.config._root)
+    	var base = this._config._root.toString();
+    	if(path.indexOf(base) ==0){
+    		path = path.substring(base.length-1);
+    	}
     	var cu = this.getCurrentURI();
     	if(cu){
     		//if(cu.scheme == 'data'){
@@ -130,7 +134,7 @@ ParseContext.prototype = {
     		uri = this.config._root.resolve(path);
     	}
     	var xhr = new XMLHttpRequest();
-	    xhr.open("GET",url,false)
+	    xhr.open("GET",uri,false)
 	    xhr.send('');
 	    ////text/xml,application/xml...
 	    return xhr.responseText;
@@ -173,7 +177,6 @@ ParseContext.prototype = {
 	getAttribute:function(key){
 		return getByKey(this._context._attributeMap,key)
 	},
-
 	addNodeParser:function(np){
 		this._nodeParsers.push(np);
 	},

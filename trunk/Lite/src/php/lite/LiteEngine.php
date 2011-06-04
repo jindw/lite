@@ -23,7 +23,7 @@ class LiteEngine{
 	/**
 	 * 中间代码根目录（默认为：/[网站根目录]/WEB-INF/litecode）
 	 */
-	public $code;	
+	public $litecode;	
 	/**
 	 * 上线后建议关闭
 	 * 可以制定true,false,客户端 ip 匹配正则表达式
@@ -32,51 +32,56 @@ class LiteEngine{
 	 * C：192.168.0.0-192.168.255.255 
 	 */
 	public $debug = '127\.0\.0\.1|10\..+|172\.(?:1[6789]|2.|30|31)\..+|192\.168\..+';
+	/**
+	 * 当前执行的模板示例
+	 */
+	private static $instance;
 	
 	/**
 	 * 上线后建议置空
 	 * 设置是编译器实现，有则自动编译，必须在$debug 为true时，才能生效
 	 */
-	public $compiler = "LiteBrowserCompile";
+	public $compiler = "LiteService";
 	function LiteEngine($root=null,$litecode=null){
-		$this->root = realpath($root?$root:$this->_root());
-		$this->code = $code?$code:$this->root.'/WEB-INF/litecode/';
-		if(is_string($this->debug)){
-			$this->debug = !!preg_match("/^(?:$this->debug)$/",$_SERVER["REMOTE_ADDR"]);
+		if(!$root){
+			$pos = strrpos(__FILE__,'WEB-INF');
+			$root = $pos ? substr(__FILE__,0,$pos) : $_SERVER['DOCUMENT_ROOT'];
 		}
-		if(!$this->debug){
-			$this->compiler = null;
-		}
-	}
-	function _root(){
-		//自动探测虚拟目录
-		$dir = realpath($_SERVER['SCRIPT_FILENAME']);
-		while($dir!=($dir2 = dirname($dir))){
-			$dir=$dir2;
-			if(file_exists($dir.'/WEB-INF')){
-				return $dir;
-			}
-		}
-		return $_SERVER['DOCUMENT_ROOT'];
+		$this->root = strtr(realpath($root),'\','/').'/';
+		$this->litecode = $litecode?$litecode:$this->root.'WEB-INF/litecode/';
 	}
 
 	function render($path,$context=array()){
+		$old = LiteEngine::instance;
+		if($old == null){
+			if(is_string($this->debug)){
+				$this->debug = !!preg_match("/^(?:$this->debug)$/",$_SERVER["REMOTE_ADDR"]);
+			}
+			if(!$this->debug){
+				$this->compiler = null;
+			}
+		}
+	    LiteEngine::instance = $this;
 		$fn = $this->load($path);
-		$fn($this,$context);
+	    $fn($context);
+	    LiteEngine::instance = $old;
 		
 	}
-	function load($path){
-	    if($this->compiler){
-	    	$compiler = $this->compiler;
-	    	require_once($compiler.'.php');
-	    	$compiler = new $compiler(this);
+	static function load($path){
+		$engine = LiteEngine::instance;
+		$fn = 'lite_template'.str_replace(array('.','/','-','!','%'),'_',$path);
+	    if($engine->compiler){
+	    	$compiler = $engine->compiler;
+	    	$compiler = new $compiler($engine->root,$engine->litecode);
 	    	$compiler->compile($path);
 	    }
-	    return 'lite_template'.str_replace(array('.','/','-','!','%'),'_',$path);
+	    require_once($engine->litecode.strtr($path,'/','^').'.php');
+	    return $fn;
 	}
-	function op($type,$arg1,$arg2=null){
+	static function op($type,$arg1,$arg2=null){
 		switch($type){
 		case OP_ADD://+
+			//严格的规则是:任意一方为: "number","boolean","NULL",date 时,采用number 加法
 			if(is_string($arg1)||is_string($arg2)){
 				return $arg1.$arg2;
 			}else{
@@ -89,6 +94,9 @@ class LiteEngine{
 		case OP_NOTEQ://!=
 			return $arg1!=$arg2;
 		case OP_GET://.
+			if($arg2 == 'length' && is_array($arg2) && !array_key_exists('length',$arg1)){
+				return count($arg1);
+			}
 			return $arg1[$arg2];
 		case OP_INVOKE://member only
 			if(is_array($arg1)){//member

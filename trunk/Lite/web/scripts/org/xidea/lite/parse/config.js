@@ -28,7 +28,6 @@
  */
 function ParseConfig(root,json){
 	this._root = new URI(root||(window.location?window.location.href.replace(/(.*?\w\/).*/,'$1'):'http://localhost/'));
-	this._config = defaultConfig;
 	if(json){
 		var result = [];
 		var i = json.length
@@ -40,6 +39,8 @@ function ParseConfig(root,json){
 			result[i] = item;
 		}
 		this._config = result;
+	}else{
+		this._config = defaultConfig;
 	}
 }
 function copy(source,dest){

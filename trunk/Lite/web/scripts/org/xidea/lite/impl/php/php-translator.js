@@ -34,68 +34,23 @@ var ID_PREFIX = "_$";
 /**
  * JS原生代码翻译器实现
  */
-function Translator(id,params){
+function PHPTranslator(id){
     this.id = id;
-    this.params = params;
 }
 
-Translator.prototype = {
+PHPTranslator.prototype = {
 	translate:function(context){
-	    try{
-	    	//var result =  stringifyJSON(context.toList())
-	        var list = context.toList();
-		    var context = new TranslateContext(list,this.params);
-		    context.parse();
-		    var code = context.toString();
-		    new Function("function x(){"+code+"\n}");
-	    }catch(e){
-	    	var buf = [];
-	    	for(var n in e){
-	    		buf.push(n+':'+e[n]);
-	    	}
-	    	$log.error(code,e);
-	        code = "return ('生成js代码失败：'+"+stringifyJSON(buf.join("\n"))+');';
-	    }
-	    var body = "("+(this.params?this.params.join(','):'')+"){"+code+"\n}";
-	    if(this.id){
-	    	try{
-	    		new Function("function "+this.id+"(){}");
-	    		return "function "+this.id+body;
-	    	}catch(e){
-	    		return this.id+"=function"+body;
-	    	}
-	    	
-	    }else{
-	    	return "function"+body;
-	    }
+	    //var result =  stringifyJSON(context.toList())
+	    var list = context.toList();
+		var context = new TranslateContext(list);
+		context.parse();
+		var code = context.toString();
+	    return code;
 		
 	}
 }
-/**
- * <code>
-function(context){
-    function _$toList(source,objectType){
-        if(objectType){
-            var result = [];
-            for(objectType in source){
-                result.push({key:objectType,value:source[objectType]})
-            }
-            return result;
-        }
-        objectType = typeof source;
-        return objectType == "number"? new Array(source):
-            objectType == "string"?source.split(""):
-            source instanceof Array?source:_$toList(source,1);
-    }
-
-	function replacer(k){return k in context?context[k]:this[k];}
-	var var1 = replacer("var1")
-	var var2 = replacer("var2")
-	replace = function(c){return "&#"+c.charCodeAt()+";";}</code>
- */
 function TranslateContext(code,params){
     LiteStatus.apply(this,arguments);
-    this.params = params;
 //    this.code = code;
 //    this.forInfos = vs.forInfos;
 //    this.needReplacer = vs.needReplacer;
@@ -121,9 +76,9 @@ TranslateContext.prototype = {
 	    for(var i=0;i<this.defs.length;i++){
 	        var def = this.defs[i];
 	        var n = def.name;
-	        this.append("function ",n,"(",def.params.join(','),'){')
+	        this.append("function lite_def_",n,"(",def.params.join(','),'){')
 	        this.depth++;
-	        this.append('var _$out=[];');
+	        this.append('ob_start();');
 	        this.appendCode(def.code);
 	        this.append("return _$out.join('');");
 	        this.depth--;

@@ -5,11 +5,15 @@
 		<style>textarea{width:90%;height:100px;}</style>
 		<script src="scripts/?path=boot.js"></script>
 		<script>
-		$import("org.xidea.lite.*");
-		$import("org.xidea.lite.web.*");
+		$import("org.xidea.lite.*",true);
+		$import("org.xidea.lite.web.*",true);
 		</script>
 	</head>
 	<body>
-		
+		<script>
+		var wc = new WebCompiler("http://localhost/");
+		wc.compile("/test/logo.xhtml");
+		wc.compile("/test/logo.xhtml");
+		</script>
 	</body>
 </html>

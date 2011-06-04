@@ -6,8 +6,12 @@ function WebCompiler(urlbase){
 	this.base = urlbase;
 	var config = new ParseConfig(urlbase);
 }
-WebCompiler.prototype.compule = function(path){
+WebCompiler.prototype.compile = function(path){
 	var context = new ParseContext();
+	var t = +new Date();
     context.parse(context.createURI(path));
-	alert(JSON.stringify(context.toList()))
+	var data = context.toList();
+	alert(new Date() - t + data)
+	var pt = new PHPTranslator();
+	
 }
