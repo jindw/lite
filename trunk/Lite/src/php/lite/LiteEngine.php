@@ -1,18 +1,14 @@
 <?php
-require_once('LiteFunction.php');
+//require_once('LiteFunction.php');
 /**
  * Lite 使用实例代码：
  * <?php
  * require_once("../WEB-INF/classes/LiteEngine.php");
  * # 通过上下文数据方式传递模板参数：
- * LiteEngine::render("/example/test.xhtml",array("int1"=>1,"text1"=>'1'));
+ * #$engine = new LiteEngine();
+ * #$context = array("int1"=>1,"text1"=>'1');
+ * #$engine->render("/example/test.xhtml",$context);
  * 
- * ## 直接通过全局变量传递模板参数：
- * #$int1 = 1;
- * #$text1 = '1';
- * #LiteEngine::render("/example/test.xhtml");
- *
- * @see http://lite.googlecode.com 
  */
 
 class LiteEngine{
@@ -51,7 +47,7 @@ class LiteEngine{
 		$this->litecode = $litecode?$litecode:$this->root.'WEB-INF/litecode/';
 	}
 
-	function render($path,$context=array()){
+	function render($path,$context){
 		$old = LiteEngine::instance;
 		if($old == null){
 			if(is_string($this->debug)){
@@ -62,60 +58,104 @@ class LiteEngine{
 			}
 		}
 	    LiteEngine::instance = $this;
-		$fn = $this->load($path);
+		$fn = lite_load($path);
 	    $fn($context);
 	    LiteEngine::instance = $old;
-		
 	}
-	static function load($path){
-		$engine = LiteEngine::instance;
-		$fn = 'lite_template'.str_replace(array('.','/','-','!','%'),'_',$path);
-	    if($engine->compiler){
-	    	$compiler = $engine->compiler;
-	    	$compiler = new $compiler($engine->root,$engine->litecode);
-	    	$compiler->compile($path);
-	    }
-	    require_once($engine->litecode.strtr($path,'/','^').'.php');
-	    return $fn;
-	}
-	static function op($type,$arg1,$arg2=null){
-		switch($type){
-		case OP_ADD://+
-			//严格的规则是:任意一方为: "number","boolean","NULL",date 时,采用number 加法
-			if(is_string($arg1)||is_string($arg2)){
-				return $arg1.$arg2;
-			}else{
-				return $arg1+$arg2;
-			}
-		case OP_NOT://!
-			return !$arg1;
-		case OP_EQ://==
-			return $arg1==$arg2;
-		case OP_NOTEQ://!=
-			return $arg1!=$arg2;
-		case OP_GET://.
-			if($arg2 == 'length' && is_array($arg2) && !array_key_exists('length',$arg1)){
-				return count($arg1);
-			}
-			return $arg1[$arg2];
-		case OP_INVOKE://member only
-			if(is_array($arg1)){//member
-				$thiz = $arg1[0];
-				$key = $arg1[1];
-				$type = gettype($thiz);
-				if(function_exist("$type_$key")){
-					array_unshift($arg2,$thiz);
-					return call_user_func_array(array($this,"$type_$key"),$arg2);
-				}else if($type == 'object'){
-					return call_user_func_array(arg1,$arg2);
-				}
-			}else{//不会执行
-				return call_user_func_array($arg1,$arg2);
-				//lite__name
-			}
+}
+/**
+ * 装载模板函数
+ * @return function name
+ */
+function lite_load($path,$engine=null){
+	$engine = LiteEngine::instance;
+	$fn = 'lite_template'.str_replace(array('.','/','-','!','%'),'_',$path);
+    if($engine->compiler){
+    	$compiler = $engine->compiler;
+    	$compiler = new $compiler($engine->root,$engine->litecode);
+    	$compiler->compile($path);
+    }
+    require_once($engine->litecode.strtr($path,'/','^').'.php');
+    return $fn;
+}
+/**
+ * javascript == 运算符模拟
+ * @return bool
+ */
+function lite_op__eq($lop, $rop) {
+    if($lop === null || $rop === null){
+    	return $rop === $lop;
+    }
+    if(is_string($lop) || is_string($rop)){//0 == 'ttt'=>false
+        return strcmp($lop,$rop) == 0;
+    }else{
+        return $lop == $rop;
+    }
+}
+
+/**
+ * javascript + 运算符模拟
+ * @return string|number
+ */
+function lite_op__add($lop, $rop) {
+	if($lop === null || $lop === false || $lop === true || is_numeric($lop)){
+		if($rop === null || $rop === false){
+			return $lop;
+		}else if($rop === true || is_numeric($rop)){
+			return $lop + $rop;
 		}
 	}
-	
+	return $lop . $rop;
+}
+/**
+ *
+ * 左操作数为确定数值类型(number/boolean/null)的 javascript + 运算符模拟
+ * @return string|number
+ */
+function lite_op__add_nx($lop, $rop) {
+	if($rop === null || $rop === false){
+		return $lop;
+	}else if($rop === true || is_numeric($rop)){
+		return $lop + $rop;
+	}else{
+		return $lop . $rop;
+	}
+}
+
+/**
+ * 获取属性懂得函数(当有特殊属性的时候(length),需要调用这个函数)
+ * @param array|object $base
+ * @param string $key
+ * @return mixed
+ */
+function lite_op__get($obj, $key) {
+	//switch 有陷阱 $key == 0 =>0 =='length'
+	if($key === 'length'){
+		if(is_string($obj)){
+			//TODO: add muti-charsets supported
+			return mb_strlen($obj);
+		}else if(is_array($obj)){
+			return count($obj);
+		}
+	}
+	return @$obj[$key];
+}
+
+function lite_op__invoke($lop, $rop) {
+	if(is_array($arg1)){//member
+		$thiz = $arg1[0];
+		$key = $arg1[1];
+		$type = gettype($thiz);
+		if(function_exist("$type_$key")){
+			array_unshift($arg2,$thiz);
+			return call_user_func_array(array($this,"$type_$key"),$arg2);
+		}else if($type == 'object'){
+			return call_user_func_array(arg1,$arg2);
+		}
+	}else{//不会执行
+		return call_user_func_array($arg1,$arg2);
+		//lite__name
+	}
 }
 
 ?>

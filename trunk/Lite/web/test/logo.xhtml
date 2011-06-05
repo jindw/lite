@@ -2,42 +2,8 @@
 <head>
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
 <title>Lite XML 模板引擎在线测试系统</title>
-<style>
-html,body{
-    width:98%;
-    height:98%;
-    margin:1%;
-    padding:0px;
-}
-.block{
-    background:#048;
-}
-.text *{
-    font-family:'Arial Black';
-    padding:0px;
-    margin:0px;
-    line-height:100%;
-    color:#048;
-}
-div.logo {
-	width:200px;
-	height:200px;
-	position:relative;
-	float:left;
-}
-</style>
 </head>
 <body>
-<div class="aaa bbb ccc">
-aaa bbb ccc
-</div>
-<f:for var="item" list="${xx}">
-<div class="yy">${for.index}</div>
-</f:for>
-<f:client name="mm">
-<f:include xpath="//*[@class='yy']" />
-</f:client>
-
 <c:var name="blocks" value="${[
     [0,0,19,100],
     [0,81,42,19],

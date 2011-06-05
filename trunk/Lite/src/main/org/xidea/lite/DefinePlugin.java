@@ -17,6 +17,7 @@ public class DefinePlugin implements Plugin,Invocable {
 	private String name;
 	private String[] params;
 	private Object[] children;
+	private Object[] defaults;
 	
 	private String type;
 	private Object instance;
@@ -40,12 +41,15 @@ public class DefinePlugin implements Plugin,Invocable {
 	public void setParams(List<String> params) {
 		this.params = params.toArray(new String[params.size()]);
 	}
+	public void setDefaults(List<String> defaults) {
+		this.defaults = defaults.toArray(new String[defaults.size()]);
+	}
 	public void setType(String type) {
 		this.type = type;
 	}
 
 	public void execute(ValueStack context,Writer out) {
-		if (instance==null) {
+		if (type==null) {
 			context.put(this.name, this);
 		} else {
 			context.put(name, instance);
@@ -60,10 +64,19 @@ public class DefinePlugin implements Plugin,Invocable {
 	}
 
 	public void apply(Object thiz, Writer out, Object... args) {
-		int i = Math.min(args.length, params.length);
 		Context context = new Context(null);
-		while (i-- > 0) {
-			context.put(params[i], args[i]);
+		for (int i = 0; i < params.length; i++) {
+			if(i<args.length){
+				context.put(params[i], args[i]);
+			}else{
+				int begin = i - (params.length -defaults.length);
+				if(i>=0 && i<defaults.length){
+					context.put(params[i], defaults[begin]);
+				//}else{
+				//	//context.put(params[i], null);
+				}
+				
+			}
 		}
 		template.renderList(context,children, out);
 	}

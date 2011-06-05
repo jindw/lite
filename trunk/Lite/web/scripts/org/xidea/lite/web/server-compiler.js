@@ -12,6 +12,9 @@ WebCompiler.prototype.compile = function(path){
     context.parse(context.createURI(path));
 	var data = context.toList();
 	alert(new Date() - t + data)
+	var t = +new Date();
 	var pt = new PHPTranslator();
+	var data = pt.translate(context);
+	alert(new Date() - t + data)
 	
 }

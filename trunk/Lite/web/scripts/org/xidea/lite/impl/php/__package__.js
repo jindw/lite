@@ -4,6 +4,9 @@ this.addScript('php-el-translator.js',['stringifyPHPEL','stringifyPHP','php2jsBo
                 	'org.xidea.jsi:$log']);
 this.addScript('php-translator.js',["PHPTranslator"]
                 ,'org.xidea.lite.impl:*'
-                ,['php2jsBoolean','isSimplePHPEL',"stringifyPHP","stringifyPHPEL",'org.xidea.jsi:$log']);
+                ,['php2jsBoolean','isSimplePHPEL',"stringifyPHP","stringifyPHPEL"
+                	,'org.xidea.jsi:$log'
+                	,'org.xidea.lite.util:stringifyJSON'
+                	]);
 
                 

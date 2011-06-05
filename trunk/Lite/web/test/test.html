@@ -1,3 +1,4 @@
+<script>
 /*
  * List Template
  * License LGPL(您可以在任何地方免费使用,但请不要吝啬您对框架本身的改进)
@@ -17,7 +18,6 @@
  *  $test = 'index_xhtml_php__test';
  *  extract($__context);
  *  
- *   
  * }
  * function index_xhtml_php__test($__engine,$arg1,$arg2){
  *  	
@@ -74,27 +74,9 @@ function toArgList(params,defaults){
 }
 function _stringifyPHPLine(line){//.*[\r\n]*
 	var endrn="'";
-	line = line.replace(/['\\]|(\?>)|([\r\n]+$)|[\r\n]/,function(a,pend,lend){
-		if(lend){
-			endrn  = '';
-			return "'."+JSON.stringify(a);
-		}else if(pend){
-			return "?'.'>";
-		}else{//'\\
-			if(a == '\\'){
-				return '\\\\';
-			}else if(a == "'"){
-				return "\\'";
-			}else{
-				$log.error("非法输出行!!"+JSON.stringify(line));
-			}
-			return a == '\\'?'\\\\': "\\'";
-		}
+	line = line.replace(/['\\]|(\?>)|([\r\n]+$)|[\r\n]/,function(){
+		
 	});
-	line = "'"+line+endrn;
-	if("''." == line.substring(0,3)){
-		line = line.substring(3)
-	}
 	return line;
 }
 PHPTranslateContext.prototype = new TCP({
@@ -314,3 +296,4 @@ PHPTranslateContext.prototype = new TCP({
     	return this.out.join('');
     }
 });
+</script>
