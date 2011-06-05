@@ -3,10 +3,9 @@ this.addScript('el-translator.js',['stringifyJSEL']
                 ,["org.xidea.el:*",
                 	"org.xidea.lite.util:stringifyJSON",
                 	'org.xidea.jsi:$log']);
-this.addScript('js-translator.js',["Translator","TranslateContext"]
-                ,0
-                ,['org.xidea.lite.impl:*',
-                	"stringifyJSEL",
+this.addScript('js-translator.js',["JSTranslator"]
+                ,'org.xidea.lite.impl:*'
+                ,["stringifyJSEL",
                 	'org.xidea.lite.util:stringifyJSON',
                 	'org.xidea.jsi:$log']);
                 

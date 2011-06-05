@@ -23,7 +23,7 @@ function liteFunction(source,config){
         var data = parseContext.createURI(source);
     }
     parseContext.parse(data);
-	var translator = new Translator(config.name,args);
+	var translator = new JSTranslator(config.name,args);
 	var code = translator.translate(parseContext);
     data =  window.eval("["+(code||null)+"][0]");
     data.toString=function(){//_$1 encodeXML

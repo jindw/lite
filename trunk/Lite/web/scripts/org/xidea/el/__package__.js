@@ -5,6 +5,8 @@ this.addScript('expression-token.js',
 					,"BIT_*"
 					,"VALUE_*"
 					,"OP_*"
+					,"getELType"
+					,"TYPE_*"
 					]
 				,0
 				,"evaluate");

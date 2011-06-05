@@ -46,7 +46,7 @@ function TemplateImpl(data,parseContext,runAsLiteCode){
         	data = parseContext.toList();
         }else{
 	        try{
-		    	var translator = new Translator("");
+		    	var translator = new JSTranslator("");
 		    	var code = translator.translate(parseContext);
 	            data =  window.eval("["+(code||null)+"][0]");
 	            data.toString=function(){//_$1 encodeXML

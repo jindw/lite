@@ -369,21 +369,74 @@ function seekOut(text){
 }
 addParser([parseOut,parseOut,seekOut],"out");
 
-
+function _parseDefName(name){
+	var n = name;
+	var i = n.indexOf(n);
+	var defaults = [];
+	var params = [];
+	if(i>0){
+		var args = n.substring(i+1);
+		args = args.replace(/^\s+|\)\s*$/g,'')
+		n = toid(n.substring(0,i));
+		i = 0;
+		while(args){
+			i = args.indexOf(',',i);
+			if(i>0){
+				var arg = args.substring(0,i);
+				try{
+					new Function(arg);
+					i=0;
+					args = args.substring(i+1).replace(/^\s+|\s+$/g,'');
+				}catch(e){
+					i++;
+					continue;
+				}
+			}else{
+				arg = args;
+				args = null;
+				try{
+					new Function(arg);
+				}catch(e){
+					$log.error("函数定义中参数表语法错误:"+arg,e);
+					throw e;
+				}
+			}
+			var p = arg.indexOf('=',i);
+			if(p>0){
+				params.push('"'+toid(arg.substring(0,p))+'"');
+				defaults.push(arg.substring(p+1));
+			}else{
+				if(defaults.length){
+					var msg = "函数定义中参数表语法错误:默认参数值能出现在参数表最后:"+name;
+					log.error(msg);
+					throw new Error(msg);
+				}
+				params.push('"'+toid(arg)+'"');
+			}
+			
+			
+		}
+		
+	}
+	return ['{"name":"',n,
+		'","params":[',params.join(','),
+		'],"defaults":[',defaults.join(','),
+		']}'].join('')
+}
+function toid(n){
+	n = n.replace(/^\s+|\s+$/g,'');
+	try{
+		new Function("return "+n);
+	}catch(e){
+		$log.error("无效id:"+n,e);
+		throw e;
+	}
+	return n;
+}
 function processDef(node){
     var ns = getAttribute(node,'*name');
-    ns = (ns.replace(/^\s+/,'')+'{end').split(/[^\w]+/);
-    ns.pop();
-    var el = ['{"name":"',ns[0],'","params":['];
-    for(var i=1;i<ns.length;i++){
-    	if(i>1){
-    		el.push(",")
-    	}
-    	el.push('"',ns[i],'"');
-    }
-    el.push("]}")
-    //prompt('',el.join(''))
-    this.appendPlugin(PLUGIN_DEFINE,this.parseEL(el.join('')));
+    var el = _parseDefName(ns);
+    this.appendPlugin(PLUGIN_DEFINE,this.parseEL(el));
     processChild(this,node);
     this.appendEnd();
 }
@@ -392,18 +445,9 @@ function seekDef(text){
     var end = findELEnd(text);
 	if(end>0){
 		var ns = text.substring(1,end);
-	    ns = (ns.replace(/^\s+/,'')+'{end').split(/[^\w]+/);
-	    ns.pop();
-	    var el = ['{"name":"',ns[0],'","params":['];
-	    for(var i=1;i<ns.length;i++){
-	    	if(i>1){
-	    		el.push(",")
-	    	}
-	    	el.push('"',ns[i],'"');
-	    }
-	    el.push("]}")
+	    var el = _parseDefName(ns);
 	    //prompt('',el.join(''))
-	    this.appendPlugin(PLUGIN_DEFINE,this.parseEL(el.join('')));
+	    this.appendPlugin(PLUGIN_DEFINE,this.parseEL(el));
     	return end;
 	}
 }
@@ -578,7 +622,7 @@ function processClient(node){
 	var context2 = this.createNew();
 	// new ParseCothisontext.config,this.currentURI);
 	var id = getAttribute(node,'*name','id');
-	var translator = new Translator(id);
+	var translator = new JSTranslator(id);
 	
 	processChild(context2,node);
 	var code = translator.translate(context2);

@@ -162,3 +162,163 @@ function getTokenParamIndex(type) {
 	var c = (type & BIT_ARGS) >> 6;
 	return c + 2;
 }
+
+var offset = 0
+var TYPE_NULL = 1<<offset++;
+var TYPE_BOOLEAN = 1<<offset++;
+var TYPE_NUMBER = 1<<offset++;
+var TYPE_STRING = 1<<offset++;
+var TYPE_ARRAY = 1<<offset++;
+var TYPE_MAP = 1<<offset++;
+var TYPE_ANY = (1<<offset++) -1;
+
+//var TYPE_NULL = 1<<offset++;
+//var TYPE_BOOLEAN = 1<<offset++;
+//var TYPE_NUMBER = 1<<offset++;
+
+//var TYPE_STRING = 1<<offset++;
+//var TYPE_ARRAY = 1<<offset++;
+//var TYPE_MAP = 1<<offset++;
+/**
+ * number return true
+ * string return false;
+ */
+function isNTSFAN(type){
+	var isN = (type & TYPE_NULL) ||(type & TYPE_BOOLEAN) ||(type & TYPE_NUMBER);
+	var isS = (type & TYPE_STRING) ||(type & TYPE_ARRAY) ||(type & TYPE_MAP);
+	if(!isS ){
+		return true;
+	}
+	if(!isN ){
+		return false;
+	}
+	return null;
+}
+function getAddType(arg1,arg2){
+	var t1 = getELType(arg1);
+	var t2 = getELType(arg2);
+	var ns1 = isNTSFAN(t1);
+	var ns2 = isNTSFAN(t2);
+	if(ns1 === true || ns2 === true){
+		if(ns1 === true){
+			if(ns2 === true){//n,n
+				return TYPE_NUMBER;
+			}else{//n,sn
+				
+			}
+		}else{//sn n
+			
+		}
+		return TYPE_NUMBER|TYPE_STRING;
+	}
+	if(ns1 === false || ns2 === false){
+		return TYPE_STRING;
+	}
+	return TYPE_NUMBER|TYPE_STRING;
+}
+function getELType(el){
+	var op = el[0];
+	var type;
+	if(op>0){
+		var arg1 = el[1];
+		var arg2 = el[2];
+		switch(op[0]){
+		case OP_JOIN:
+			return TYPE_ARRAY;
+		case OP_PUT:
+			return TYPE_MAP;
+		case OP_ADD:
+			//if(isNumberAdder(arg1)&&isNumberAdder(arg2)){
+			//	//return 'number';
+			//}else{
+			getAddType(arg1,arg2)
+			//}
+		case OP_POS:
+		case OP_NEG:
+		case OP_MUL:
+		case OP_DIV:
+		case OP_MOD:
+		case OP_SUB:
+		case OP_BIT_AND:
+		case OP_BIT_XOR:
+		case OP_BIT_OR:
+		case OP_BIT_NOT:
+			return  TYPE_NUMBER;
+		case OP_NOT:
+		case OP_LT:
+		case OP_GT:
+		case OP_LTEQ:
+		case OP_GTEQ:
+		case OP_EQ:
+		case OP_NE:
+		case OP_EQ_STRICT:
+		case OP_NE_STRICT:
+			return  TYPE_BOOLEAN;
+		case OP_AND:
+		case OP_OR:
+			return  getELType(arg1) | getELType(arg2);
+		case OP_GET:
+			if(arg1[0] == VALUE_VAR && arg1[1] == 'for'){
+				if(op[1] == 'index' || op[1] == 'lastIndex'){
+					return TYPE_NUMBER;
+				}
+			}else if(arg2[0] == VALUE_CONSTANTS && arg2[1] == 'length'){
+				var t1 = getELType(arg1);
+//var TYPE_NULL = 1<<offset++;
+//var TYPE_BOOLEAN = 1<<offset++;
+//var TYPE_NUMBER = 1<<offset++;
+
+//var TYPE_STRING = 1<<offset++;
+//var TYPE_ARRAY = 1<<offset++;
+
+//var TYPE_MAP = 1<<offset++;
+				if(t1 & TYPE_MAP){
+					return TYPE_ANY;
+				}else if((t1 & TYPE_ARRAY) || (t1 & TYPE_STRING)){
+					if((t1 & TYPE_STRING) || (t1 & TYPE_BOOLEAN)||(t1 & TYPE_NUMBER)){
+						return TYPE_NULL|TYPE_NUMBER;
+					}else{
+						return TYPE_NUMBER;
+					}
+				}else{//only TYPE_STRING TYPE_BOOLEAN TYPE_NUMBER
+					return TYPE_NULL;
+				}
+			}
+			return TYPE_ANY;
+		case OP_INVOKE:
+			return TYPE_ANY;
+		default:
+			return TYPE_ANY;
+		}
+	}else{
+		switch(op){
+		case VALUE_CONSTANTS:
+			var v= el[1];
+			if(v == null){
+				return TYPE_NULL;
+			}
+			switch(typeof v){
+			case 'boolean':
+				return TYPE_BOOLEAN;
+			case 'number':
+				return TYPE_NUMBER;
+			case 'string':
+				return TYPE_STRING;
+			case 'object':
+				if(v instanceof Array){
+					return TYPE_ARRAY;
+				}
+				return TYPE_MAP;
+			}
+			return TYPE_ANY;
+		case VALUE_VAR:
+			return TYPE_ANY;
+		case VALUE_LIST:
+			return TYPE_ARRAY;
+		case VALUE_MAP:
+			return TYPE_MAP;
+		default:
+			return TYPE_ANY;
+		}
+	}
+}

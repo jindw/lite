@@ -25,7 +25,6 @@
  */
 
 var FOR_STATUS_KEY = '$__for';
-var ID_PREFIX = "_$";
 
 //function checkEL(el){
 //    new Function("return "+el)
@@ -42,188 +41,136 @@ PHPTranslator.prototype = {
 	translate:function(context){
 	    //var result =  stringifyJSON(context.toList())
 	    var list = context.toList();
-		var context = new TranslateContext(list);
+		var context = new PHPTranslateContext(list,this.id);
+		context.elPrefix = '';//:'@';
+		context.encoding = "UTF-8";
+	    context.htmlspecialcharsEncoding = encoding;
 		context.parse();
 		var code = context.toString();
-	    return code;
+	    return '<?php'+code ;
 		
 	}
 }
-function TranslateContext(code,params){
-    LiteStatus.apply(this,arguments);
-//    this.code = code;
-//    this.forInfos = vs.forInfos;
-//    this.needReplacer = vs.needReplacer;
-//    this.defs = vs.defs;
-//    this.refMap = vs.refMap;
-    this.idMap = {};
-    this.depth = 1;
-    //print([vs.defs,vs.refMap])
+function PHPTranslateContext(code,id){
+    TranslateContext.call(this,code,null);
+    this.id = id;
 }
-TranslateContext.prototype = {
+function TCP(pt){
+	for(var n in pt){
+		this[n] = pt[n];
+	}
+}
+TCP.prototype = TranslateContext.prototype;
+function toArgList(params,defaults){
+	if(defaults && defaults.length){
+		params = params.concat();
+		var i = params.length;
+		var j = defaults.length;
+		while(j--){
+			params[--i] += '='+stringifyPHP(defaults[j]);
+		}
+	}
+	return params.join(',')
+}
+PHPTranslateContext.prototype = new TCP({
 	stringifyEL:function (el){
 		return el?stringifyPHPEL(el.tree):null;
 	},
-//	parseDef
 	parse:function(){
 		var code = this.code;
-		var params = this.params;
 		this.out = [];
-		var firstAppend = true;
-		this.append("extract($__context__,EXTR_SKIP);");
-
 	    //add function
 	    for(var i=0;i<this.defs.length;i++){
 	        var def = this.defs[i];
 	        var n = def.name;
-	        this.append("function lite_def_",n,"(",def.params.join(','),'){')
+	        this.append("if(function_exists('lite_def_",n,"')){function lite_def_",
+	        		n,"(",toArgList(def.params),'){')
 	        this.depth++;
-	        this.append('ob_start();');
+	        this.append("ob_start();");
 	        this.appendCode(def.code);
-	        this.append("return _$out.join('');");
+    		this.append("$rtv= ob_get_contents();ob_end_clean();return $rtv;");
 	        this.depth--;
-	        this.append("}");
-	     	this.append('if("',n,'" in _$context){',n,'=_$context["',n,'"];}')
+	        this.append("}}");
 	    }
 	    try{
+	        this.append("function lite_tpl_",n,'($__context__){')
+			this.append("extract($__context__,EXTR_SKIP);");
+	        this.depth++;
 	        this.appendCode(code);
+	        this.depth--;
+	        this.append("}");
 	    }catch(e){
 	        //alert(["编译失败：",buf.join(""),code])
 	        throw e;
 	    }
 	    //this.append("return _$out.join('');");
 	},
-    findForStatus:function(code){
-	    var fis = this.forInfos;
-	    var i = fis.length;
-	    while(i--){
-	        var fi = fis[i];
-	        if(fi.code == code){
-	            return fi;
-	        }
-	    }
-        //return this.vs.getForStatus(forCode);
+    _appendEL:function(el,model,text,prefix){
+    	prefix = prefix!=null? prefix : 'echo '+this.elPrefix
+    	//@see http://notownme.javaeye.com/blog/335036
+    	var encoding = this.htmlspecialcharsEncoding;
+    	var text = text || this.stringifyEL(el);
+    	
+    	//TODO: check el type
+		if(model == -1){
+			this.append(prefix,"htmlspecialchars(",text,",ENT_COMPAT",encoding,",false);");
+			//this.append(prefix,"strtr(",el,",array('<'=>'&lt;','\"'=>'&#34;'));");
+		}else if(model == XA_TYPE){
+			this.append(prefix,"htmlspecialchars(",text,",ENT_COMPAT",encoding,");");
+		}else if(model == XT_TYPE){
+			//ENT_COMPAT 
+			this.append(prefix,"htmlspecialchars(",text,",ENT_NOQUOTES",encoding,");");
+		}else{
+			this.append(prefix,text,";");
+		}
     },
-    allocateId:function(){
-        var i = 0;
-        while(true){
-            if(!this.idMap[i]){
-                this.idMap[i] = true;
-                return ID_PREFIX+i.toString(36);
-            }
-            i++;
-        }
+    appendEL:function(item){
+    	this._appendEL(item[1],EL_TYPE)
     },
-    freeId:function(id){
-        var i = id.substring(ID_PREFIX.length);
-        delete this.idMap[i];
+    appendXT:function(item){
+    	this._appendEL(item[1],XT_TYPE)
     },
-    /**
-     */
-    appendCode:function(code){
-    	for(var i=0;i<code.length;i++){
-    		var item = code[i];
-    		if(typeof item == 'string'){
-    			this.appendOut(stringifyJSON(item))
-    		}else{
-    			switch(item[0]){
-                case EL_TYPE:
-                    this.processEL(item);
-                    break;
-                case XT_TYPE:
-                    this.processXMLText(item);
-    			    break;
-                case XA_TYPE:
-                    this.processXMLAttribute(item);
-                    break;
-                case VAR_TYPE:
-                    this.processVar(item);
-                    break;
-                case CAPTRUE_TYPE:
-                    this.processCaptrue(item);
-                    break;
-                case IF_TYPE:
-                    i = this.processIf(code,i);
-                    break;
-                case FOR_TYPE:
-                    i = this.processFor(code,i);
-                    break;
-    			case PLUGIN_TYPE://not support
-    				break;
-                //case ELSE_TYPE:
-                default:
-                    throw Error('无效指令：'+item)
-                }
-    		}
-    	}
-    },
-    append:function(){
-        var depth = this.depth;
-        this.out.push("\n");
-        while(depth--){
-            this.out.push("\t")
-        }
-        for(var i=0;i<arguments.length;i++){
-            this.out.push(arguments[i]);
-        }
-    },
-    appendOut:function(){
-    	var len = arguments.length;
-    	var last = this.out[this.out.length-1];
-    	var data = Array.prototype.join.call(arguments,'');
-    	if(last == this.lastOut){
-    		data = last.substring(0,last.length-2)+","+data+");";
-    		this.out[this.out.length-1] = data;
-    	}else{
-    		data = "_$out.push("+data+");";
-    		this.append(data);
-    	}
-    	this.lastOut = data
-    },
-    processEL:function(item){
-    	this.appendOut(this.stringifyEL(item[1]))
-    },
-    processXMLText:function(item){
-        this.appendOut("_$replace(",this.stringifyEL(item[1]),")")
-    },
-    processXMLAttribute:function(item){
+    appendXA:function(item){
         //[7,[[0,"value"]],"attribute"]
-        var value = this.stringifyEL(item[1]);
-        try{
-        	var attributeName = item.length>2?item[2]:null;
-        }catch(e){
-        	$log.info("@@@@@属性异常："+item.get(2),e)
+        var el = item[1];
+        var value = this.stringifyEL(el);
+        var attributeName = item.length>2 && item[2];
+        var testId = this.allocateId(value);
+        if(testId != value){
+            this.append(testId,"=",value);
         }
         if(attributeName){
-            var testId = this.allocateId();
-            this.append("var ",testId,"=",value);
             this.append("if(",testId,"!=null){");
             this.depth++;
-            this.appendOut("' ",attributeName,"=\"',_$replace("+testId+"),'\"'");
+            this.append("echo ' "+attributeName+"=\"';");
+            this._appendEL(el,XA_TYPE,testId)
+            this.append("echo '\"';");
             this.depth--;
             this.append("}");
-            this.freeId(testId);
         }else{
-        	this.appendOut("_$replace(",value,")")
+        	this._appendEL(el,XA_TYPE,testId);
         }
+        this.freeId(testId);
     },
-    processVar:function(item){
-        this.append("var ",item[2],"=",this.stringifyEL(item[1]),";");
+    appendVar:function(item){
+        this.append("$",item[2],"=",this.stringifyEL(item[1]),";");
     },
-    processCaptrue:function(item){
+    appendCaptrue:function(item){
         var childCode = item[1];
         var varName = item[2];
-        var bufbak = this.allocateId();
-        this.append("var ",bufbak,"=_$out;_$out=[];");
-        this.appendCode(childCode);
-        this.append("var ",varName,"=_$out.join('');_$out=",bufbak,";");
-        this.freeId(bufbak);
+	    this.append("ob_start();");
+	    this.appendCode(childCode);
+	    this.append("$",varName,"= ob_get_contents();ob_end_clean();");
+    },
+    appendEncodePlugin:function(item){
+    	this._appendEL(item[1],-1,this.stringifyEL(item[1]));
     },
     processIf:function(code,i){
         var item = code[i];
         var childCode = item[1];
-        var test = this.stringifyEL(item[2]);
-        this.append("if(",test,"){");
+        var testEL = item[2];
+        var test = this.stringifyEL(testEL);
+        this.append("if(",php2jsBoolean(testEL,test),"){");
         this.depth++;
         this.appendCode(childCode)
         this.depth--;
@@ -233,9 +180,10 @@ TranslateContext.prototype = {
         while(nextElse && nextElse[0] == ELSE_TYPE){
             i++;
             var childCode = nextElse[1];
-            var test = this.stringifyEL(nextElse[2]);
+            var testEL = nextElse[2];
+            var test = this.stringifyEL(testEL);
             if(test){
-                this.append("else if(",test,"){");
+                this.append("else if(",php2jsBoolean(testEL,test),"){");
             }else{
                 notEnd = false;
                 this.append("else{");
@@ -250,8 +198,10 @@ TranslateContext.prototype = {
     },
     processFor:function(code,i){
         var item = code[i];
-        var indexId = this.allocateId();
         var itemsId = this.allocateId();
+        var indexId = this.allocateId();
+        var keyId = this.allocateId();
+        var isKeyId = this.allocateId();
         var itemsEL = this.stringifyEL(item[2]);
         var varNameId = item[3]; 
         //var statusNameId = item[4]; 
@@ -261,46 +211,60 @@ TranslateContext.prototype = {
             var previousForValueId = this.allocateId();
         }
         //初始化 items 开始
-        this.append("var ",itemsId,"=",itemsEL,";");
-        this.append("var ",indexId,"=0;")
-        this.append(itemsId,"=_$toList(",itemsId,")");
-        
+	    this.append("if(",itemsId,"<=PHP_INT_MAX){");
+	    this.append(itemsId,'=range(1,',itemsId,');');
+        this.append("}");
         //初始化 for状态
         var needForStatus = forInfo.ref || forInfo.index || forInfo.lastIndex;
         if(needForStatus){
             if(forInfo.depth){
-                this.append("var ",previousForValueId ,"=",FOR_STATUS_KEY,";");
+                this.append(previousForValueId ,"=",FOR_STATUS_KEY,";");
             }
-            this.append(FOR_STATUS_KEY," = {lastIndex:",itemsId,".length-1};");
+            this.append(FOR_STATUS_KEY," = array('lastIndex'=>count(",itemsId,")-1};");
         }
-        this.append("for(;",indexId,"<",itemsId,".length;",indexId,"++){");
+        
+        this.append(indexId,"=-1;")
+        this.append("foreach(",itemsId," as ",keyId,"=>",varNameId,"){");
         this.depth++;
+	    this.append("if(++",indexId," === 0){");
+        this.depth++;
+	    this.append(isKeyId,"=",indexId," === 0;");
+        this.depth--;
+	    this.append("}else if(",isKeyId,"){",varNameId,'=',keyId,"}");
+        
         if(needForStatus){
-            this.append(FOR_STATUS_KEY,".index=",indexId,";");
+            this.append(FOR_STATUS_KEY,"['index']=",indexId,";");
         }
-        this.append("var ",varNameId,"=",itemsId,"[",indexId,"];");
+        this.append(varNameId,"=",itemsId,"[",indexId,"];");
         this.appendCode(childCode);
         this.depth--;
-        this.append("}");
+        this.append("}");//end for
+        
         
         if(needForStatus && forInfo.depth){
            this.append(FOR_STATUS_KEY,"=",previousForValueId);
         }
-        this.freeId(itemsId);;
+        this.freeId(isKeyId);
+        this.freeId(keyId);
+        this.freeId(itemsId);
         if(forInfo.depth){
             this.freeId(previousForValueId);
         }
         var nextElse = code[i+1];
         var notEnd = true;
+        var elseIndex = 0;
         while(notEnd && nextElse && nextElse[0] == ELSE_TYPE){
             i++;
+            elseIndex++;
             var childCode = nextElse[1];
-            var test = this.stringifyEL(nextElse[2]);
+            var testEL = nextElse[2];
+            var test = this.stringifyEL(testEL);
+            var ifstart = elseIndex >1 ?'else if' :'if';
             if(test){
-                this.append("if(!",indexId,"&&",test,"){");
+                this.append(ifstart,"(!",indexId,"&&",php2jsBoolean(testEL,test),"){");
             }else{
                 notEnd = false;
-                this.append("if(!",indexId,"){");
+                this.append(ifstart,"(!",indexId,"){");
             }
             this.depth++;
             this.appendCode(childCode)
@@ -312,16 +276,6 @@ TranslateContext.prototype = {
         return i;
     },
     toString:function(){
-    	var s = this.out.join('');
-    	var p = /\b_\$out.push\((?:(.*)\);)?/g;
-    	p.lastIndex=0;
-    	p.exec(s);
-    	if(!p.exec(s)){
-    		s = s.replace(/^\s+var _\$out=\[\];/,'');
-    		s = s.replace(p,"return [$1].join('')")
-        	return s;
-    	}else{
-    		return s+ "\n\treturn _$out.join('');\n";
-    	}
+    	return this.out.join('');
     }
-}
+});

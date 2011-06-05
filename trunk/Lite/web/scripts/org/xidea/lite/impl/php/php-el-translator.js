@@ -6,6 +6,8 @@
  * @version $Id: template.js,v 1.4 2008/02/28 14:39:06 jindw Exp $
  */
 var VAR_TEMP = "$__lite_tmp"
+var FOR_STATUS_KEY = '$__for';
+var LITE_INVOKE = "$__engine->op(";
 /**
  * 将Lite的表达式结构转化为php表达式
  */
@@ -35,11 +37,97 @@ function stringifyValue(el){
         	return "array()";
 		}
 }
+
+function typesOnly(t1,t2){
+	var i = arguments.length;
+	var a = 0;
+	while(--i>1){
+		a |= arguments[i];
+	}
+	return (t1 & a) == a && (t2 & a) == a;
+}
+function stringifyADD(el){
+	var t = getELType(el);
+	var value1 = stringifyPHPEL(el[1]);
+	var value2 = stringifyPHPEL(el[2]);
+	if(t == TYPE_NUMBER){
+		return value1+'+'+value2;//动态部分要考虑 array的问题,这里不需要考虑
+	}else if(t == TYPE_STRING){
+		return value1+'.'+value2;
+	}
+	
+	var t1 = getELType(el[1]);
+	var t2 = getELType(el[2]);
+	if(typesOnly(t1,t1,TYPE_NULL,TYPE_NUMBER,TYPE_BOOLEAN)){
+		return "lite_op__add_nx("+value1+','+value2+")"
+	}
+	if(typesOnly(t2,t2,TYPE_NULL,TYPE_NUMBER,TYPE_BOOLEAN)){
+		return "lite_op__add_nx("+value2+','+value1+")"
+	}
+	return "lite_op__add("+value1+','+value2+")"
+}
+
+//var TYPE_NULL = 1<<offset++;
+
+//var TYPE_BOOLEAN = 1<<offset++;
+//var TYPE_NUMBER = 1<<offset++;
+
+//var TYPE_STRING = 1<<offset++;
+//var TYPE_ARRAY = 1<<offset++;
+//var TYPE_MAP = 1<<offset++;
+function stringifyEQ(el,opc){
+	var t1 = getELType(el[1]);
+	var t2 = getELType(el[2]);
+	var value1 = stringifyPHPEL(el[1]);
+	var value2 = stringifyPHPEL(el[2]);
+	opc = opc || '==';
+	if(t1 ==  TYPE_STRING ||  t2 == TYPE_STRING){//0 == 'ttt'=>false
+        return "strcmp($lop,$rop) "+opc+"0";
+    }
+    
+    if(t1 === TYPE_NULL || t2 === TYPE_NULL){
+    	return value1+opc+'='+value2;
+    }
+    if(typesOnly(t1,t2,TYPE_NUMBER,TYPE_BOOLEAN)
+//    		||typesOnly(t1,t2,TYPE_BOOLEAN,TYPE_STRING)//'0' ==false;
+//    		||typesOnly(t1,t2,TYPE_NUMBER,TYPE_STRING)//'0' == 0
+//    		||typesOnly(t1,t2,TYPE_NUMBER,TYPE_BOOLEAN)//'0' ==false;"
+    		||typesOnly(t1,t2,TYPE_ARRAY,TYPE_MAP,TYPE_STRING)//'' ==array() => false,忽略array.toString ==//php ;
+    		||t1.toString(2).replace(/0/g,'').length==1 && t1 == t2){
+        return value1+opc+value2;
+    }
+    return (opc=='!='?'!':'')+"lite_op__eq("+value1+','+value2+")"
+}
+function stringifyNOTEQ(el){
+	return stringifyEQ(el,'!=');
+}
+function stringifyGET(el){
+	var arg1 = el[1];
+	var arg2 = el[2];
+	var value1 = stringifyPHPEL(el[1]);
+	var value2 = stringifyPHPEL(el[2]);
+	if(arg2[0] == VALUE_CONSTANTS){
+		if( arg2[1] != 'length'){
+			return value1+'['+value2+']';
+		}
+	}
+	return "lite_op__get("+value1+','+value2+")"
+}
+
 /**
  * 翻译中缀运算符
  */
 function stringifyInfix(el){
 	var type = el[0];
+	if(type == OP_ADD){
+		return stringifyADD(el)
+	}else if(type == OP_EQ){
+		return stringifyEQ(el)
+	}else if(type == OP_NOTEQ){
+		return stringifyNOTEQ(el);
+	}else if(type == OP_GET){
+		return stringifyGET(el);
+	}
 	var opc = findTokenText(el[0]);
 	var value1 = stringifyPHPEL(el[1]);
 	var value2 = stringifyPHPEL(el[2]);
@@ -47,13 +135,12 @@ function stringifyInfix(el){
 		value1 = '('+value1+')';
 	}
 	switch(type){
-	case OP_ADD://+
-	//case OP_NOT://! infix
-    case OP_EQ://==
-    case OP_NOTEQ://!=
-	case OP_GET://.
-		//return value1+'['+value2+']';
-		return "$__engine->op("+type+","+value1+","+value2+")";
+//	case OP_ADD://+
+//	case OP_EQ://==
+//	case OP_NOTEQ://!=
+//	case OP_GET://.
+//		//return value1+'['+value2+']';
+		
 	case OP_INVOKE:
 		var arg1 = el[1];
 		var type1 = arg1[0];
@@ -65,7 +152,7 @@ function stringifyInfix(el){
 		}else{
 			throw new Error("Invalid Invoke EL");
 		}
-		return "$__engine->op("+type+","+value1+","+value2+")";
+		return LITE_INVOKE+type+","+value1+","+value2+")";
 	case OP_JOIN:
 		if("array()"==value1){
 			return "array("+value2+")"
@@ -94,18 +181,18 @@ function stringifyInfix(el){
      */
      	var arg1 = el[1];
     	var test = stringifyPHPEL(arg1[1]);    	var value1 = stringifyPHPEL(arg1[2]);
-    	//return '($__engine->op('+OP_NOT+','+test+')?'+value2+":"+value1+')';
-    	return '('+toBoolean(test,arg1[1])+'?'+value1+':'+value2+')'
+    	//return '('+LITE_INVOKE+OP_NOT+','+test+')?'+value2+":"+value1+')';
+    	return '('+php2jsBoolean(arg1[1],test)+'?'+value1+':'+value2+')'
     case OP_AND://&&
     	if(value1.match(/^[\w_\$]+$/)){
-    		return '('+toBoolean(value1,el[1])+'?'+value2+':'+value1+')'
+    		return '('+php2jsBoolean(el[1],value1)+'?'+value2+':'+value1+')'
     	}
-    	return '('+toBoolean(value1,el[1],true)+'?'+value2+':'+VAR_TEMP+')'
+    	return '('+php2jsBoolean(el[1],value1,VAR_TEMP)+'?'+value2+':'+VAR_TEMP+')'
     case OP_OR://||
     	if(value1.match(/^[\w_\$]+$/)){
-    		return '('+toBoolean(value1,el[1])+'?'+value1+':'+value2+')'
+    		return '('+php2jsBoolean(el[1],value1)+'?'+value1+':'+value2+')'
     	}
-    	return '('+toBoolean(value1,el[1],true)+'?'+VAR_TEMP+':'+value2 +')'
+    	return '('+php2jsBoolean(el[1],value1,VAR_TEMP)+'?'+VAR_TEMP+':'+value2 +')'
 	}
 	if(getELPriority(el)>=getELPriority(el[2])){
 		value2 = '('+value2+')';
@@ -160,7 +247,11 @@ function stringifyPrefix(el){
 	var param = getTokenParam(el);
 	if(type == OP_NOT){//!
 		//return value1+'['+value2+']';
-		return "$__engine->op("+type+","+value+")";
+		var rtv = php2jsBoolean(el1,value);
+		if(!isSimpleEL(rtv)){
+			rtv = '('+rtv+')';
+		}
+		return '!'+rtv;
 	}
 	if(getELPriority(el)>=getELPriority(el1)){
 		value = '('+value+')';
@@ -168,99 +259,81 @@ function stringifyPrefix(el){
     var opc = findTokenText(type);
 	return opc+value;
 }
-function getType(el){
-	var op = el[0];
-	var type;
-	if(op<=0){
-		switch(op){
-		case VALUE_CONSTANTS:
-			return typeof el[1];
-		case VALUE_VAR:
-			return null;
-		case VALUE_LIST:
-		case VALUE_MAP:
-		default:
-			return 'object';
-		}
-	}else{
-		var arg1 = el[1];
-		var arg2 = el[2];
-		switch(op[0]){
-		case OP_ADD:
-			//if(isNumberAdder(arg1)&&isNumberAdder(arg2)){
-			//	//return 'number';
-			//}else{
-			return 'string,number';
-			//}
-		case OP_POS:
-		case OP_NEG:
-		case OP_MUL:
-		case OP_DIV:
-		case OP_MOD:
-		case OP_SUB:
-			return 'number';
-		case OP_NOT:
-		case OP_LT:
-		case OP_GT:
-		case OP_LTEQ:
-		case OP_GTEQ:
-		case OP_EQ:
-		case OP_NE:
-		case OP_EQ_STRICT:
-		case OP_NE_STRICT:
-//		case OP_AND:
-//		case OP_OR:
-			return 'boolean';
-//		case OP_GET:
-//			if(arg1[0] == VALUE_VAR && arg1[1] == 'for'){
-//				if(op[1] == 'index' || op[1] == 'lastIndex'){
-//					return 'number';
-//				}
-//			}
-		}
-	}
-}
+
 /**
  * 如果不是变量或者常量，则必须设置零时变量
  */
-function toBoolean(value,el,setTempVar){
+function php2jsBoolean(el,value,keepValue){
+	if(!value){
+		value = stringifyJSEL(el);
+	}
 	var op = el[0];
 	if(op<=0){
 		switch(op){
 		case VALUE_CONSTANTS:
-			if(setTempVar){
+			
+			if(keepValue){
 				if(el[1]){
-					return '(('+VAR_TEMP+'='+value+')||true)';
+					return '(('+keepValue+'='+value+')||true)';
 				}else{
-					return '(('+VAR_TEMP+'='+value+')&&false)';
+					return '(('+keepValue+'='+value+')&&false)';
 				}
+//			}else if(booleanVar){//keepValue 和 booleanVar 只选一个
+//				if(el[1]){
+//					return '('+booleanVar+'=true)';
+//				}else{
+//					return '('+booleanVar+'=false)';
+//				}
 			}else{
 				return !!el[1]+'';
 			}
 			
-		//case VALUE_VAR:
+		case VALUE_VAR:
+			break;
 		case VALUE_LIST:
 		case VALUE_MAP:
 		default:
-			if(setTempVar){
-				return '(('+VAR_TEMP+'='+value+')||true)'
+			if(keepValue){
+				return '(('+keepValue+'='+value+')||true)'
+			}else{
+				return 'true';
 			}
-			return 'true';
 		}
 	}
-	var type = getType();
-	if(!setTempVar){//持续优化
-		if(type == 'boolean' || type =='number'){
+//var TYPE_NULL = 1<<offset++;
+//var TYPE_BOOLEAN = 1<<offset++;
+//var TYPE_NUMBER = 1<<offset++;
+
+//var TYPE_STRING = 1<<offset++;
+//var TYPE_ARRAY = 1<<offset++;
+//var TYPE_MAP = 1<<offset++;
+//var TYPE_ANY = (1<<offset++) -1;
+	var type = getELType(el);
+	
+	if(!((type & TYPE_STRING)||(type & TYPE_ARRAY)||(type & TYPE_MAP))){
+		if(!keepValue){//持续优化
 			return value;
-		}
-		if(value.match(/^[\w_\$]+$/)){
-			return '('+value+' || '+value+">0 || '0' === "+value+')'
+		}else{
+			return '('+keepValue +'='+value+')';
 		}
 	}
-	if(type == 'boolean' || type =='number'){
-		return '('+VAR_TEMP +'='+value+')';
+	if(isSimplePHPEL(value) && !keepValue){
+		var rtv = value;
+		keepValue = value;
+	}else{
+		keepValue = keepValue || VAR_TEMP;
+		var rtv = "("+keepValue +"="+ value+")"
 	}
-	return "(("+VAR_TEMP +"="+ value+") || "+VAR_TEMP+">0 || "+VAR_TEMP+" === '0')";
+	if((type & TYPE_ARRAY)||(type & TYPE_MAP)){
+		rtv+=' || 0 < '+keepValue;
+	}
+	if((type & TYPE_STRING)){
+		rtv+=" || '0' ==="+keepValue;
+	}
+	return '('+rtv+')'
+}
+function isSimplePHPEL(value){
+	return value.match(/^([\w_\$]+|[\d\.]+)$/)
 }
 /**
  * 获取某个运算符号的优先级
