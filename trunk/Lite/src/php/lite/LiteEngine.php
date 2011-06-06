@@ -141,21 +141,352 @@ function lite_op__get($obj, $key) {
 	return @$obj[$key];
 }
 
-function lite_op__invoke($lop, $rop) {
-	if(is_array($arg1)){//member
-		$thiz = $arg1[0];
-		$key = $arg1[1];
-		$type = gettype($thiz);
-		if(function_exist("$type_$key")){
-			array_unshift($arg2,$thiz);
-			return call_user_func_array(array($this,"$type_$key"),$arg2);
-		}else if($type == 'object'){
-			return call_user_func_array(arg1,$arg2);
-		}
-	}else{//不会执行
-		return call_user_func_array($arg1,$arg2);
-		//lite__name
+/**
+ * 成员函数调用入口
+ */
+function lite_member__($obj,$method,$args){
+	if(is_object( $obj ) && method_exists($obj,$method)){
+		return call_user_func_array(array($obj,$method),$args);
 	}
+	$method = 'lite_member_'.$method;
+	if(function_exists($method)){
+		array_unshift($args,$obj);
+		return call_user_func_array($method,$args);
+	}else{
+		trigger_error("method not existed:".$method);
+	}
+}
+/*============ 标准函数库 ==============*/
+
+/**
+ * 所有对象都应该支持的成员方法
+ */
+function lite_member_toString($obj, $radix=10){
+	if ($obj === true || $obj ===  false || $obj ===  null) {
+		return json_encode($obj);
+	}else if(is_array($obj)) {
+		$buf = array();
+		foreach($obj as $key=>$value){
+			if(!$buf && $key !== 0){
+				return '[object Object]';
+			}
+			array_push($buf,lite_member_toString($value))
+		}
+        return join(",", $buf);
+    }else if(is_numeric($obj)) {
+        if ($radix<2 || $radix>36) {
+            throw new Error("Error: illegal radix {$radix}");
+    	}
+    	$float = floatval($obj);
+    	if ($radix === 10) {
+        	return strval($float);
+    	}
+    	$int = intval($obj);
+    	if($int == $float){
+    		return base_convert($float, 10, $radix);//小数没有考虑
+    	}else{
+    		throw new Error("float toString(radix) not support:{$radix}");
+    	}
+    }else{
+   		return strval($obj);
+    }
+}
+
+/* =================== string ====================*/
+
+/**
+ * String.prototype.split
+ * @see http://www.xidea.org/project/jsidoc/js1.5/string.html#1194452
+ * @owner array
+ * @return mixed
+ */
+function lite_member_split($obj, $separator=null, $limit=-1){
+	if('' === $separator){
+		return str_split($obj);
+	}
+	if(is_string($separator)){
+		$rtv = explode($separator, $obj);
+	}else{
+		$rtv = preg_split('/'.$separator['source']+'/',$obj);
+	}
+	if($limit<0){
+		return $rtv;
+	}else{
+		//php -r "print_r(array_slice(array(1,2,3),0,1))
+		return array_slice($rtv,0,$limit);
+	}
+}
+
+/**
+ * String.prototype.charAt
+ * @see http://www.xidea.org/project/jsidoc/js1.5/string.html#1196596
+ * @owner string
+ * @return char
+ */
+function lite_member_charAt($obj, $index) {
+	$len = mb_strlen($obj);
+	if ($index <0 || $index >= $len) {
+		return "";
+	}
+	return mb_substr($obj, $index, 1);
+}
+
+/**
+ * String.prototype.charCodeAt
+ * @see http://www.xidea.org/project/jsidoc/js1.5/string.html#1196647
+ * @owner string
+ * @return number
+ */
+function lite_member_charCodeAt($obj, $index) {
+    $len = mb_strlen($obj);
+    if ($index <0 || $index >= $len) {
+        //TODO: how to return a  NaN
+        return null;
+    }
+    $char = mb_substr($obj, $index);
+    $char = iconv(mb_internal_encoding(), 'utf-16BE', $char);
+    $code = unpack("n", $char);
+    return $code[1];
+}
+
+/**
+ * String.prototype.indexOf
+ * @see http://www.xidea.org/project/jsidoc/js1.5/string.html#1196895
+ * @owner string
+ * @return number
+ */
+function lite_member_indexOf($obj, $needle, $from_index=0) {
+	return false === ($index = mb_strpos($obj, $needle, $from_index))? -1 : $index;
+}
+
+/**
+ * String.prototype.lastIndexOf
+ * @see http://www.xidea.org/project/jsidoc/js1.5/string.html#1197005
+ * @owner string
+ * @return number
+ */
+function lite_member_lastIndexOf($obj, $needle, $from_index=null) {
+	if($from_index === null){
+		$index = mb_strrpos($obj, $needle);
+	}else{
+		$index = mb_strrpos($obj, $needle, $from_index);
+	}
+	return $index === false ? -1 : $index;
+}
+
+/**
+ * String.prototype.match
+ * @see http://www.xidea.org/project/jsidoc/js1.5/string.html#1205239
+ * @owner string
+ * @deprecate  ugly implement
+ * @return array
+ */
+function lite_member_match($obj, $regexp) {
+	//TODO:flag没有加上
+	preg_match_all('/'.$regexp['source'].'/', $obj, $matches);
+	return $matches;
+}
+
+/**
+ * String.prototype.replace
+ * @see http://www.xidea.org/project/jsidoc/js1.5/string.html#1194258
+ * @owner string
+ * @deprecate ugly implement
+ * @return string
+ */
+function lite_member_replace($obj, $regexp, $replacement) {
+    if(is_array($regexp)){
+    	//TODO:flags
+        return preg_replace('/'.$regexp['source'].'/', $replacement, $obj);
+    }else{
+    	//if(is_string($regexp)){
+    	$pos = strpos($obj, $regexp);
+    	return $pos?substr_replace($obj, $replacement, strlen($regexp)) :$obj;
+    }
+}
+
+/**
+ * String.prototype.toLowerCase
+ * @see http://www.xidea.org/project/jsidoc/js1.5/string.html#1194765
+ * @owner string
+ */
+function lite_member_toLowerCase($obj) {
+	return mb_strtolower($obj);
+}
+
+/**
+ * String.prototype.toUpperCase
+ * @see http://www.xidea.org/project/jsidoc/js1.5/string.html#1194823
+ * @owner string
+ */
+function lite_member_toUpperCase($obj) {
+	return mb_strtoupper($obj);
+}
+
+/**
+ * String.prototype.substr
+ * @see http://www.xidea.org/project/jsidoc/js1.5/string.html#1194823
+ * @owner string
+ */
+function lite_member_substr($obj, $start, $length=null) {
+	if ($length<0) {
+		return '';
+	}else if($length === null){
+		return mb_substr($obj, $start);
+	}
+	return mb_substr($obj, $start, $length);
+}
+
+/**
+ * String.prototype.substring
+ * @see http://www.xidea.org/project/jsidoc/js1.5/string.html#1194665
+ * @owner string
+ */
+function lite_member_substring($obj, $start, $end=null) {
+	if(!is_string($obj)){
+	}
+	if ($end ===null) {
+		return mb_substr($obj, $start);
+	}
+	$len = mb_strlen($obj);
+	$end = min($len,max($end,0));
+	$start = min($len,max($start,0));
+	return mb_substr($obj, min($start,$end), abs($start-$end));
+}
+/* =============== array|string ==================*/
+/**
+ * 给数组或字符串链接
+ * String.prototype.concat
+ * @see http://www.xidea.org/project/jsidoc/js1.5/string.html#1196678
+ * Array.prototype.concat
+ * @see http://www.xidea.org/project/jsidoc/js1.5/array.html#1194827
+ * eg : print_r(lite_member_concat(array(1,2,3),1,2,3,array(4,5)));
+ *      print_r(lite_member_concat("array(1,2,3)",1,2,3,array(4,5)));
+ *      print_r(lite_member_concat("array(1,2,3)",1,2,3,"array(4,5)"));
+ * @owner array|string
+ * @return mixed
+ */
+function lite_member_concat($obj){
+	$args = func_get_args();
+	if (is_array($obj)) {
+		$result = array();
+		foreach($args as $a){
+			array_splice($result,count($result),0,$a);
+		}
+	}else{
+		$result = '';
+		foreach($args as $a){
+			$result .= lite_member_toString($a);
+		}
+	}
+	return $result;
+}
+
+/**
+ * 给数组或字符串取子系列
+ * String.prototype.slice
+ * @see http://www.xidea.org/project/jsidoc/js1.5/string.html#1194366
+ * Array.prototype.slice
+ * @see http://www.xidea.org/project/jsidoc/js1.5/array.html#1193713
+ * @owner array|string
+ * @return mixed
+ */
+function lite_member_slice($obj, $start, $end=0){
+	if (is_array($obj)) {
+		$len = count($obj);
+		$impl = 'array_slice';
+	}else if(is_string($obj)){
+		$obj = strval($obj);
+		$len = mb_strlen($obj);
+		$impl = 'mb_substr';
+	}else{
+		throw new Error("method not support $obj->slice");
+	}
+	if(func_num_args()<3){
+		$end = $len;
+	}
+	$start = $start <0? max($start + $len,0):min($start,$len);
+	$end = $end <0? max($end + $len,0):min($end,$len);
+	return $impl($obj, $start, $end - $start);
+}
+
+/* =============== array ==================*/
+
+/**
+ * Array.prototype.join
+ * @see http://www.xidea.org/project/jsidoc/js1.5/array.html#1195456
+ * @owner array
+ * @return mixed
+ */
+function lite_member_join($obj, $separator=","){
+	$result = null;
+	foreach($obj as $e){
+		if($result === null){
+			$result = '';
+		}else{
+			$result.=$separator;
+		}
+		$result.=lite_member_toString($e);;
+	}
+	return $result == null?'':$result;
+}
+/**
+ * Array.prototype.concat,Array.prototype.reverse 两个方法同时调用的效果
+ * @see http://www.xidea.org/project/jsidoc/js1.5/array.html#1194827
+ * @see lite_member_concat
+ * @owner array
+ * @return return a refer to the reversed array 
+ */
+function lite_member_concat_reverse($obj) {
+	if(func_num_args()>1){
+		$obj = call_user_func_array('lite_member_concat',func_get_args());
+	}
+	return array_reverse($obj);
+}
+
+
+/* =============== number ==================*/
+
+/**
+ * 实现js函数的toFixed方法
+ * @liteMethod number
+ * @return string
+ */
+function lite_member_toFixed($obj, $digits=0){
+	$ret = sprintf("%.{$digits}f", $obj);
+	return $ret;
+}
+
+/* =============== date ==================*/
+/**
+ * JavaScript 基本日期函数支持
+ */
+function _lite_date_get($date,$s){
+	return +strftime($s,$date);
+}
+function lite_member_getFullYear($d){
+	return _lite_date_get($d,'%Y');
+}
+function lite_member_getYear($d){
+	return _lite_date_get($d,'%Y')-1900;
+}
+function lite_member_getMonth($d){
+	return _lite_date_get($d,'%m')-1;
+}
+function lite_member_getDay($d){
+	return _lite_date_get($d,'%w');
+}
+function lite_member_getDate($d){
+	return _lite_date_get($d,'%d');
+}
+function lite_member_getHours($d){
+	return _lite_date_get($d,'%H');
+}
+function lite_member_getMinutes($d){
+	return _lite_date_get($d,'%M');
+}
+function lite_member_getSeconds($d){
+	return _lite_date_get($d,'%S');
 }
 
 ?>

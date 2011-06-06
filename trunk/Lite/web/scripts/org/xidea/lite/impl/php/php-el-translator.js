@@ -7,21 +7,20 @@
  */
 var VAR_TEMP = "$__lite_tmp"
 var FOR_STATUS_KEY = '$__for';
-var LITE_INVOKE = "$__engine->op(";
 /**
  * 将Lite的表达式结构转化为php表达式
  */
-function stringifyPHPEL(el){
+function stringifyPHPEL(context,el){
 	var type = el[0];
 	if(type<=0){//value
-		return stringifyValue(el)
+		return stringifyValue(context,el)
 	}else if(getTokenParamIndex(type) ==3){//两个操作数
-		return stringifyInfix(el);
+		return stringifyInfix(context,el);
 	}else{
-		return stringifyPrefix(el);
+		return stringifyPrefix(context,el);
 	}
 }
-function stringifyValue(el){
+function stringifyValue(context,el){
 		var param = el[1];
 		switch(el[0]){
         case VALUE_CONSTANTS:
@@ -46,10 +45,10 @@ function typesOnly(t1,t2){
 	}
 	return (t1 & a) == a && (t2 & a) == a;
 }
-function stringifyADD(el){
+function stringifyADD(context,el){
 	var t = getELType(el);
-	var value1 = stringifyPHPEL(el[1]);
-	var value2 = stringifyPHPEL(el[2]);
+	var value1 = stringifyPHPEL(context,el[1]);
+	var value2 = stringifyPHPEL(context,el[2]);
 	if(t == TYPE_NUMBER){
 		return value1+'+'+value2;//动态部分要考虑 array的问题,这里不需要考虑
 	}else if(t == TYPE_STRING){
@@ -75,11 +74,11 @@ function stringifyADD(el){
 //var TYPE_STRING = 1<<offset++;
 //var TYPE_ARRAY = 1<<offset++;
 //var TYPE_MAP = 1<<offset++;
-function stringifyEQ(el,opc){
+function stringifyEQ(context,el,opc){
 	var t1 = getELType(el[1]);
 	var t2 = getELType(el[2]);
-	var value1 = stringifyPHPEL(el[1]);
-	var value2 = stringifyPHPEL(el[2]);
+	var value1 = stringifyPHPEL(context,el[1]);
+	var value2 = stringifyPHPEL(context,el[2]);
 	opc = opc || '==';
 	if(t1 ==  TYPE_STRING ||  t2 == TYPE_STRING){//0 == 'ttt'=>false
         return "strcmp($lop,$rop) "+opc+"0";
@@ -98,14 +97,11 @@ function stringifyEQ(el,opc){
     }
     return (opc=='!='?'!':'')+"lite_op__eq("+value1+','+value2+")"
 }
-function stringifyNE(el){
-	return stringifyEQ(el,'!=');
-}
-function stringifyGET(el){
+function stringifyGET(context,el){
 	var arg1 = el[1];
 	var arg2 = el[2];
-	var value1 = stringifyPHPEL(el[1]);
-	var value2 = stringifyPHPEL(el[2]);
+	var value1 = stringifyPHPEL(context,el[1]);
+	var value2 = stringifyPHPEL(context,el[2]);
 	if(arg2[0] == VALUE_CONSTANTS){
 		if( arg2[1] != 'length'){
 			return value1+'['+value2+']';
@@ -113,24 +109,71 @@ function stringifyGET(el){
 	}
 	return "lite_op__get("+value1+','+value2+")"
 }
-
+function stringifyINVOKE(context,el){
+	var arg1 = el[1];
+	var type1 = arg1[0];
+	//var value1 = stringifyPHPEL(context,arg1);
+	var value2 = stringifyPHPEL(context,el[2]);//array(arg1,arg2...)
+	if(type1 == OP_GET){//member_call
+		var oel = arg1[1];
+		var pel = arg1[2];
+		if(oel[0] == VALUE_VAR){
+			var varName = oel[1];
+		}
+		if(pel[0] == VALUE_CONSTANTS){
+			var prop = pel[1];
+		}
+		if(varName && prop){
+//			random=>rand(0, PHP_INT_MAX
+//			sin,sqrt,tan,cos,acos,asin,atan,atan2 
+//			max,min,,floor,round,abs,ceil,exp,log,pow,
+			if(varName == 'Math'){
+				var mp = /^(?:sin|sqrt|tan|cos|acos|asin|atan|atan2|max|min||floor|round|abs|ceil|exp|log|pow)$/;
+				if(prop == 'random'){
+					return 'rand(0, PHP_INT_MAX)';
+				}else if(mp.test(prop)){
+					return value2.replace('array',prop);
+				}else{
+					$log.warn("Math 不支持方法:"+prop+";Math 支持的方法有:random|"+mp.source.replace(/[^\w\|]/g,''))
+				}
+			}else if(varName == 'JSON'){
+				if(prop == "parse"){
+					return value2.replace('array','json_parse').slice(0,-1)+',true)';
+				}else if(prop =='stringify'){
+					return value2.replace('array','json_encode');
+				}else{
+					$log.warn("JSON 不支持方法:"+prop+";JSON 只支持:stringify和parse方法")
+				}
+			}
+		}
+		return "lite_member("+stringifyPHPEL(context,oel)+","+stringifyPHPEL(context,pel)+","+value2+")"
+		value1 = value1.replace(/.*?,([\s\S]+)\)/,'array($1)');
+	}else if(type1 == VALUE_VAR){
+		var name = arg1[1];
+		return value2.replace('array',"lite__"+name)
+	}else{
+		throw new Error("Invalid Invoke EL");
+	}
+}
 /**
  * 翻译中缀运算符
  */
-function stringifyInfix(el){
+function stringifyInfix(context,el){
 	var type = el[0];
 	if(type == OP_ADD){
-		return stringifyADD(el)
+		return stringifyADD(context,el)
 	}else if(type == OP_EQ){
-		return stringifyEQ(el)
+		return stringifyEQ(context,el,'==')
 	}else if(type == OP_NE){
-		return stringifyNE(el);
+		return stringifyEQ(context,el,'!=');
 	}else if(type == OP_GET){
-		return stringifyGET(el);
+		return stringifyGET(context,el);
+	}else if(type == OP_INVOKE){
+		return stringifyINVOKE(context,el);
 	}
 	var opc = findTokenText(el[0]);
-	var value1 = stringifyPHPEL(el[1]);
-	var value2 = stringifyPHPEL(el[2]);
+	var value1 = stringifyPHPEL(context,el[1]);
+	var value2 = stringifyPHPEL(context,el[2]);
 	if(getELPriority(el[1])<getELPriority(el)){
 		value1 = '('+value1+')';
 	}
@@ -140,19 +183,7 @@ function stringifyInfix(el){
 //	case OP_NOTEQ://!=
 //	case OP_GET://.
 //		//return value1+'['+value2+']';
-		
-	case OP_INVOKE:
-		var arg1 = el[1];
-		var type1 = arg1[0];
-		if(type1 == OP_GET){
-			value1 = value1.replace(/.*?,([\s\S]+)\)/,'array($1)');
-		}else if(type1 == VALUE_VAR){
-			value2 = value2.replace('array(','($__engine,');
-			return value1+value2;
-		}else{
-			throw new Error("Invalid Invoke EL");
-		}
-		return LITE_INVOKE+type+","+value1+","+value2+")";
+//	case OP_INVOKE:
 	case OP_JOIN:
 		if("array()"==value1){
 			return "array("+value2+")"
@@ -180,7 +211,7 @@ function stringifyInfix(el){
  ${222+2|a?b1?b2:b3:c}
      */
      	var arg1 = el[1];
-    	var test = stringifyPHPEL(arg1[1]);    	var value1 = stringifyPHPEL(arg1[2]);
+    	var test = stringifyPHPEL(context,arg1[1]);    	var value1 = stringifyPHPEL(context,arg1[2]);
     	//return '('+LITE_INVOKE+OP_NOT+','+test+')?'+value2+":"+value1+')';
     	return '('+php2jsBoolean(arg1[1],test)+'?'+value1+':'+value2+')'
     case OP_AND://&&
@@ -209,6 +240,7 @@ function stringifyPHP(value) {
             if(isNaN(value)){
                 value = 'null';
             }
+            return value;
         case 'undefined':
         	return 'null';
         case 'object':
@@ -240,11 +272,11 @@ function stringifyPHP(value) {
 /**
  * 翻译前缀运算符
  */
-function stringifyPrefix(el){
+function stringifyPrefix(context,el){
 	var type = el[0];
 	var el1 = el[1];
-	var value = stringifyJSEL(el1);
-	var param = getTokenParam(el);
+	var value = stringifyJSEL(context,el1);
+	var param = getTokenParam(el,context);
 	if(type == OP_NOT){//!
 		//return value1+'['+value2+']';
 		var rtv = php2jsBoolean(el1,value);
@@ -263,9 +295,9 @@ function stringifyPrefix(el){
 /**
  * 如果不是变量或者常量，则必须设置零时变量
  */
-function php2jsBoolean(el,value,keepValue){
+function php2jsBoolean(el,value,keepValue,context){
 	if(!value){
-		value = stringifyJSEL(el);
+		value = stringifyJSEL(context,el);
 	}
 	var op = el[0];
 	if(op<=0){
