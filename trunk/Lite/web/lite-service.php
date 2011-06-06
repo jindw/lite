@@ -14,6 +14,9 @@ $service = new LiteService(realpath('./'),realpath('./WEB-INF/litecode'));
  */
 //$service->addJavaScriptSource(realpath('./WEB-INF/lib'));
 //$service->addJavaScriptLib(realpath('./WEB-INF/lib'));
-
+//$_REQUEST['LITE-ACTON'] = 'compile';
+$_REQUEST['LITE-PATH'] = '/test/logo.xhtml';
+$_REQUEST['LITE_SERVICE_URL'] = $_SERVER['REQUEST_URI'];
+phpinfo();
 $service->execute();
 ?>
