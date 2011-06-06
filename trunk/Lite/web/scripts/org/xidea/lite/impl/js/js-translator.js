@@ -110,6 +110,7 @@ function JSTranslateContext(code,id,params,defaults){
     this.id = id;
     this.params = params;
     this.defaults = defaults;
+    
 }
 function optimizeFunction(text,id,refMap,params,defaults){
 	var result = [];
@@ -182,6 +183,7 @@ JSTranslateContext.prototype = new TCP({
 	parse:function(){
 		var code = this.code;
 		var params = this.params;
+		this.depth=0;
 		this.out = [];
 	    //add function
 	    for(var i=0;i<this.defs.length;i++){

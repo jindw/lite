@@ -98,7 +98,7 @@ function stringifyEQ(el,opc){
     }
     return (opc=='!='?'!':'')+"lite_op__eq("+value1+','+value2+")"
 }
-function stringifyNOTEQ(el){
+function stringifyNE(el){
 	return stringifyEQ(el,'!=');
 }
 function stringifyGET(el){
@@ -123,8 +123,8 @@ function stringifyInfix(el){
 		return stringifyADD(el)
 	}else if(type == OP_EQ){
 		return stringifyEQ(el)
-	}else if(type == OP_NOTEQ){
-		return stringifyNOTEQ(el);
+	}else if(type == OP_NE){
+		return stringifyNE(el);
 	}else if(type == OP_GET){
 		return stringifyGET(el);
 	}

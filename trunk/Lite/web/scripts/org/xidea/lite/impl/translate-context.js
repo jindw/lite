@@ -16,7 +16,7 @@ var XML_ENCODE_XT = 2;
 function TranslateContext(){
 	LiteContext.apply(this,arguments)
     this.idMap = {};
-    this.depth = 1;
+    this.depth = 0;
 }
 function LiteContext(code,params,parentContext,name){
 	/**

@@ -77,7 +77,7 @@ function _stringifyPHPLine(line){//.*[\r\n]*
 	line = line.replace(/['\\]|(\?>)|([\r\n]+$)|[\r\n]/,function(a,pend,lend){
 		if(lend){
 			endrn  = '';
-			return "'."+JSON.stringify(a);
+			return "'."+stringifyJSON(a);
 		}else if(pend){
 			return "?'.'>";
 		}else{//'\\
@@ -103,6 +103,7 @@ PHPTranslateContext.prototype = new TCP({
 	},
 	parse:function(){
 		var code = this.code;
+		this.depth = 0;
 		this.out = [];
 	    //add function
 	    for(var i=0;i<this.defs.length;i++){
@@ -131,7 +132,7 @@ PHPTranslateContext.prototype = new TCP({
 	    //this.append("return _$out.join('');");
 	},
 	appendStatic:function(value){
-		var lines = value.match(/.*[\r\n]*/g);
+		var lines = value.match(/.+[\r\n]*|[\r\n]+/g);
 		for(var i=0; i<lines.length; i++) {
 			var line = lines[i];
 			var start = i==0?'echo ':'\t,'
@@ -246,9 +247,7 @@ PHPTranslateContext.prototype = new TCP({
             var previousForValueId = this.allocateId();
         }
         //初始化 items 开始
-	    this.append("if(",itemsId,"<=PHP_INT_MAX){");
-	    this.append(itemsId,'=range(1,',itemsId,');');
-        this.append("}");
+	    this.append("if(",itemsId,"<=PHP_INT_MAX){",itemsId,'=range(1,',itemsId,');}');
         //初始化 for状态
         var needForStatus = forInfo.ref || forInfo.index || forInfo.lastIndex;
         if(needForStatus){
