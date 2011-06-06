@@ -2,6 +2,7 @@ package org.jside.webserver;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
@@ -111,7 +112,29 @@ public class CGIEnvironment {
 		//serverName = "localhost";
 		serverPort = String.valueOf(server.getPort());
 		requestMethod = context.getMethod();
-		requestUri = context.getRequestURI();
+		requestUri = context.getRequestURI().replace('\\', '/');
+		URI base = server.getWebBase();
+		if("file".equals(base.getAuthority())){
+			File root = new File(base);
+			int p = 0;
+			while(true){
+				p = requestUri.indexOf('.',p+1);
+				if(p<0){
+					break;
+				}
+				int p2 = requestUri.indexOf('/',p);
+				if(p2<0){
+					break;
+				}
+				if(new File(root,requestUri.substring(1,p2)).isFile()){
+					pathInfo = requestUri.substring(p2);
+					requestUri = requestUri.substring(p2);
+					break;
+				}
+				
+			};
+		}
+		
 		//pathInfo = "";
 		//pathTranslated = null;
 		scriptName = requestUri;
