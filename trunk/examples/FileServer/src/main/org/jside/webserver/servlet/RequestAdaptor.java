@@ -1,9 +1,11 @@
 package org.jside.webserver.servlet;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.security.Principal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -20,6 +22,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.jside.webserver.CGIEnvironment;
 import org.jside.webserver.RequestContextImpl;
 import org.jside.webserver.RequestUtil;
 import org.jside.webserver.WebServer;
@@ -114,8 +117,10 @@ abstract class RequestAdaptor implements HttpServletRequest {
 	}
 
 	public String getPathInfo() {
-		//TODO:...
-		return "";
+		String requestUri = base().getRequestURI();
+		URI base = server.getWebBase();
+		String realpath =  CGIEnvironment.toRealPath(base,requestUri);
+		return requestUri.substring(realpath.length());
 	}
 
 	public String getPathTranslated() {

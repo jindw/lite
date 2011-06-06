@@ -113,29 +113,9 @@ public class CGIEnvironment {
 		serverPort = String.valueOf(server.getPort());
 		requestMethod = context.getMethod();
 		requestUri = context.getRequestURI().replace('\\', '/');
-		URI base = server.getWebBase();
-		if("file".equals(base.getAuthority())){
-			File root = new File(base);
-			int p = 0;
-			while(true){
-				p = requestUri.indexOf('.',p+1);
-				if(p<0){
-					break;
-				}
-				int p2 = requestUri.indexOf('/',p);
-				if(p2<0){
-					break;
-				}
-				if(new File(root,requestUri.substring(1,p2)).isFile()){
-					pathInfo = requestUri.substring(p2);
-					requestUri = requestUri.substring(p2);
-					break;
-				}
-				
-			};
-		}
+		String realpath = toRealPath(server.getWebBase(),requestUri);
 		
-		//pathInfo = "";
+		pathInfo = requestUri.substring(realpath.length());
 		//pathTranslated = null;
 		scriptName = requestUri;
 		scriptFilename = new File(context.getResource(requestUri)).getAbsolutePath();
@@ -152,6 +132,29 @@ public class CGIEnvironment {
 		}
 		
 		
+	}
+
+	public static String toRealPath(URI base,String requestUri) {
+		if("file".equals(base.getAuthority())){
+			File root = new File(base);
+			int p = 0;
+			while(true){
+				p = requestUri.indexOf('.',p+1);
+				if(p<0){
+					break;
+				}
+				int p2 = requestUri.indexOf('/',p);
+				if(p2<0){
+					break;
+				}
+				if(new File(root,requestUri.substring(1,p2)).isFile()){
+					//pathInfo = requestUri.substring(p2);
+					return requestUri.substring(0,p2);
+				}
+				
+			};
+		}
+		return requestUri;
 	}
 
 	public void appendTo(Map<String, String> envp) {
