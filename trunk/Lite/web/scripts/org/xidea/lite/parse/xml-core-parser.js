@@ -408,7 +408,7 @@ function _parseDefName(name){
 			}else{
 				if(defaults.length){
 					var msg = "函数定义中参数表语法错误:默认参数值能出现在参数表最后:"+name;
-					log.error(msg);
+					$log.error(msg);
 					throw new Error(msg);
 				}
 				params.push('"'+toid(arg)+'"');

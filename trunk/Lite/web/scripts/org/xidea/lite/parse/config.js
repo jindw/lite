@@ -96,6 +96,10 @@ var defaultConfig = {
 			{//xhtml 编译不是自带的，需要自己定义
    				"namespace":"http://www.w3.org/1999/xhtml",
    				"package":"org.xidea.lite.xhtml"
+			},
+			{//xhtml 编译不是自带的，需要自己定义
+   				"namespace":"http://firekylin.my.baidu.com/ns/2010",
+   				"package":"org.xidea.lite.xhtml"
 			}
 		]
 	}

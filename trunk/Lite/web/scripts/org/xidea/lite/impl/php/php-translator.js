@@ -74,7 +74,7 @@ function toArgList(params,defaults){
 }
 function _stringifyPHPLine(line){//.*[\r\n]*
 	var endrn="'";
-	line = line.replace(/['\\]|(\?>)|([\r\n]+$)|[\r\n]/,function(a,pend,lend){
+	line = line.replace(/['\\]|(\?>)|([\r\n]+$)|[\r\n]/gm,function(a,pend,lend){
 		if(lend){
 			endrn  = '';
 			return "'."+stringifyJSON(a);
@@ -99,7 +99,7 @@ function _stringifyPHPLine(line){//.*[\r\n]*
 }
 PHPTranslateContext.prototype = new TCP({
 	stringifyEL:function (el){
-		return el?stringifyPHPEL(el.tree):null;
+		return el?stringifyPHPEL(this,el.tree):null;
 	},
 	parse:function(){
 		var code = this.code;
@@ -119,9 +119,9 @@ PHPTranslateContext.prototype = new TCP({
 	        this.append("}}");
 	    }
 	    try{
-	        this.append("function lite_tpl_",n,'($__context__){')
-			this.append("extract($__context__,EXTR_SKIP);");
+	        this.append("function lite_template",this.id,'($__context__){')
 	        this.depth++;
+			this.append("extract($__context__,EXTR_SKIP);");
 	        this.appendCode(code);
 	        this.depth--;
 	        this.append("}");
@@ -144,7 +144,7 @@ PHPTranslateContext.prototype = new TCP({
     _appendEL:function(el,model,text,prefix){
     	prefix = prefix!=null? prefix : 'echo '+this.elPrefix
     	//@see http://notownme.javaeye.com/blog/335036
-    	var encoding = this.htmlspecialcharsEncoding;
+    	var encoding = "'"+this.htmlspecialcharsEncoding+"'";
     	var text = text || this.stringifyEL(el);
     	
     	//TODO: check el type
@@ -152,10 +152,10 @@ PHPTranslateContext.prototype = new TCP({
 			this.append(prefix,"htmlspecialchars(",text,",ENT_COMPAT",encoding,",false);");
 			//this.append(prefix,"strtr(",el,",array('<'=>'&lt;','\"'=>'&#34;'));");
 		}else if(model == XA_TYPE){
-			this.append(prefix,"htmlspecialchars(",text,",ENT_COMPAT",encoding,");");
+			this.append(prefix,"htmlspecialchars(",text,",ENT_COMPAT,",encoding,");");
 		}else if(model == XT_TYPE){
 			//ENT_COMPAT 
-			this.append(prefix,"htmlspecialchars(",text,",ENT_NOQUOTES",encoding,");");
+			this.append(prefix,"htmlspecialchars(",text,",ENT_NOQUOTES,",encoding,");");
 		}else{
 			this.append(prefix,text,";");
 		}
@@ -171,22 +171,22 @@ PHPTranslateContext.prototype = new TCP({
         var el = item[1];
         var value = this.stringifyEL(el);
         var attributeName = item.length>2 && item[2];
-        var testId = this.allocateId(value);
-        if(testId != value){
-            this.append(testId,"=",value);
+        var testAutoId = this.allocateId(value);
+        if(testAutoId != value){
+            this.append(testAutoId,"=",value,';');
         }
         if(attributeName){
-            this.append("if(",testId,"!=null){");
+            this.append("if(",testAutoId,"!=null){");
             this.depth++;
             this.append("echo ' "+attributeName+"=\"';");
-            this._appendEL(el,XA_TYPE,testId)
+            this._appendEL(el,XA_TYPE,testAutoId)
             this.append("echo '\"';");
             this.depth--;
             this.append("}");
         }else{
-        	this._appendEL(el,XA_TYPE,testId);
+        	this._appendEL(el,XA_TYPE,testAutoId);
         }
-        this.freeId(testId);
+        this.freeId(testAutoId);
     },
     appendVar:function(item){
         this.append("$",item[2],"=",this.stringifyEL(item[1]),";");
@@ -234,55 +234,56 @@ PHPTranslateContext.prototype = new TCP({
     },
     processFor:function(code,i){
         var item = code[i];
-        var itemsId = this.allocateId();
-        var indexId = this.allocateId();
-        var keyId = this.allocateId();
-        var isKeyId = this.allocateId();
+        var itemsAutoId = this.allocateId();
+        var indexAutoId = this.allocateId();
+        var keyAutoId = this.allocateId();
+        var isKeyAutoId = this.allocateId();
         var itemsEL = this.stringifyEL(item[2]);
-        var varNameId = item[3]; 
+        var varName = '$'+item[3]; 
         //var statusNameId = item[4]; 
         var childCode = item[1];
         var forInfo = this.findForStatus(item)
         if(forInfo.depth){
-            var previousForValueId = this.allocateId();
+            var preForAutoId = this.allocateId();
         }
+        this.append(itemsAutoId,'=',itemsEL,';');
         //初始化 items 开始
-	    this.append("if(",itemsId,"<=PHP_INT_MAX){",itemsId,'=range(1,',itemsId,');}');
+	    this.append('if(',itemsAutoId,'<=PHP_INT_MAX){',itemsAutoId,'=',itemsAutoId,'>0?range(1,',itemsAutoId,'):array();}');
         //初始化 for状态
         var needForStatus = forInfo.ref || forInfo.index || forInfo.lastIndex;
         if(needForStatus){
             if(forInfo.depth){
-                this.append(previousForValueId ,"=",FOR_STATUS_KEY,";");
+                this.append(preForAutoId ,"=",FOR_STATUS_KEY,";");
             }
-            this.append(FOR_STATUS_KEY," = array('lastIndex'=>count(",itemsId,")-1};");
+            this.append(FOR_STATUS_KEY," = array('lastIndex'=>count(",itemsAutoId,")-1);");
         }
         
-        this.append(indexId,"=-1;")
-        this.append("foreach(",itemsId," as ",keyId,"=>",varNameId,"){");
+        this.append(indexAutoId,"=-1;")
+        this.append("foreach(",itemsAutoId," as ",keyAutoId,"=>",varName,"){");
         this.depth++;
-	    this.append("if(++",indexId," === 0){");
+	    this.append("if(++",indexAutoId," === 0){");
         this.depth++;
-	    this.append(isKeyId,"=",indexId," === 0;");
+	    this.append(isKeyAutoId,"=",indexAutoId," === 0;");
         this.depth--;
-	    this.append("}else if(",isKeyId,"){",varNameId,'=',keyId,"}");
+	    this.append("}else if(",isKeyAutoId,"){",varName,'=',keyAutoId,";}");
         
         if(needForStatus){
-            this.append(FOR_STATUS_KEY,"['index']=",indexId,";");
+            this.append(FOR_STATUS_KEY,"['index']=",indexAutoId,";");
         }
-        this.append(varNameId,"=",itemsId,"[",indexId,"];");
+        this.append(varName,"=",itemsAutoId,"[",indexAutoId,"];");
         this.appendCode(childCode);
         this.depth--;
         this.append("}");//end for
         
         
         if(needForStatus && forInfo.depth){
-           this.append(FOR_STATUS_KEY,"=",previousForValueId);
+           this.append(FOR_STATUS_KEY,"=",preForAutoId,';');
         }
-        this.freeId(isKeyId);
-        this.freeId(keyId);
-        this.freeId(itemsId);
+        this.freeId(isKeyAutoId);
+        this.freeId(keyAutoId);
+        this.freeId(itemsAutoId);
         if(forInfo.depth){
-            this.freeId(previousForValueId);
+            this.freeId(preForAutoId);
         }
         var nextElse = code[i+1];
         var notEnd = true;
@@ -295,10 +296,10 @@ PHPTranslateContext.prototype = new TCP({
             var test = this.stringifyEL(testEL);
             var ifstart = elseIndex >1 ?'else if' :'if';
             if(test){
-                this.append(ifstart,"(!",indexId,"&&",php2jsBoolean(testEL,test),"){");
+                this.append(ifstart,"(!",indexAutoId,"&&",php2jsBoolean(testEL,test),"){");
             }else{
                 notEnd = false;
-                this.append(ifstart,"(!",indexId,"){");
+                this.append(ifstart,"(!",indexAutoId,"){");
             }
             this.depth++;
             this.appendCode(childCode)
@@ -306,7 +307,7 @@ PHPTranslateContext.prototype = new TCP({
             this.append("}");
             nextElse = code[i+1];
         }
-        this.freeId(indexId);
+        this.freeId(indexAutoId);
         return i;
     },
     toString:function(){

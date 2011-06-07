@@ -1,6 +1,6 @@
 <?php
-require_once("../WEB-INF/classes/lite/TemplateEngine.php");
-$engine = new TemplateEngine();
+require_once(dirname(__FILE__)."/../WEB-INF/classes/lite/LiteEngine.php");
+$engine = new LiteEngine();
 # 通过上下文数据方式传递模板参数：
 $context = array(
 	"int1"=>1,

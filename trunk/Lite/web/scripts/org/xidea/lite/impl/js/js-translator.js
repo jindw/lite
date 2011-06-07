@@ -263,7 +263,7 @@ JSTranslateContext.prototype = new TCP({
         this.freeId(bufbak);
     },
     appendEncodePlugin:function(item){
-        this._appendOutput('lite_encode(',getEL(item[1]),',/[<&"]|(&(?:[a-z]+|#\d+);)/ig);')
+        this._appendOutput('lite_encode(',this.stringifyEL(item[1]),',/[<&"]|(&(?:[a-z]+|#\d+);)/ig);')
     },
     processIf:function(code,i){
         var item = code[i];

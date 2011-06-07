@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Lite 使用实例代码：
  * <?php
@@ -14,36 +14,84 @@
  * @see http://lite.googlecode.com 
  * 
  */
-
 class LiteService{
 	function LiteService($root,$litecode){
 		$this->root = $root;
 		$this->litecode = $litecode;
 	}
 	public function execute(){
-		$lite_action = @$_REQUEST['LITE-ACTON'] ;
+		$lite_action = @$_REQUEST['LITE_ACTION'] ;
+		$lite_path = $_REQUEST['LITE_PATH'] ;
 		if($lite_action == 'compile'){
-			$lite_path = $_REQUEST['LITE-PATH'] ;
 			$this->compile($lite_path);
-		}else{
-			$pathinfo = @$_SERVER['PATH_INFO'];
-			echo $pathinfo;
+		}else if($lite_action == 'save'){
+			$lite_code = $_REQUEST['LITE_CODE'] ;
+			$lite_php = $_REQUEST['LITE_PHP'] ;
+			$litefile = $this->litecode.'/'.strtr($lite_path,'/','^');
+    		$phpfile = $litefile.'.php';
+			file_put_contents($litefile,$lite_code);
+			file_put_contents($phpfile,$lite_php);
+			require($phpfile);
+			echo '{"PHP_PATH":"'.$phpfile.'"}';
+		}else{//prox
+			$pathinfo = @$_SERVER['PATH_INFO']?$_SERVER['PATH_INFO']:$_SERVER['ORIG_PATH_INFO'];
 			if(strncmp($pathinfo,'/scripts/',9) == 0){
-				readfile('.'.$pathinfo);
+				header("Context-Type:text/javascript;charset=utf-8");
+				//echo '!!'.substr($pathinfo,10);
+				readfile(dirname(__FILE__).substr($pathinfo,8));
+			}else if($pathinfo){
+				if(substr($pathinfo,-6) == '.xhtml' || substr($pathinfo,-4) == '.xml'){
+					header("Context-Type:text/xml;charset=utf-8");
+					readfile($this->root.$pathinfo);
+				}else{
+					echo "not support";
+				}
+			}else{
+				echo "not support action [{$lite_action}]";
+				print_r($_REQUEST);
 			}
 		}
 	}
+	function loadJavaScriptClass(){
+		$scriptBase = $_REQUEST['LITE_SERVICE_URL'];
+		$fns = func_get_args();
+		
+		$sns = array();
+		foreach($fns as $fn){
+			array_push($sns,preg_replace('/^.*[\.\:]/','',$fn));
+		}
+		$checkScript = 'window.'.join($sns,'&& window.');
+		$importScript = '$import("'.join($fns,	'",true);$import("').'",true);';
+		
+		
+echo "<script>
+if(!($checkScript)){
+	document.write(\"<script src='$scriptBase/scripts/boot.js'></\"+\"script>\");
+}
+</script><script>
+if(!($checkScript)){
+	$importScript
+}
+</script>";
+	}
 	function compile($path){
 		if($this->getFileModified($path)){
-			$start_script = $_REQUEST['LITE_SERVICE_URL'].'/scripts/compile.js';
-			echo "<script src='$start_script'></script>";
-			ob_flush();flush();
-			
+			$scriptBase = $_REQUEST['LITE_SERVICE_URL'];
+			$this->loadJavaScriptClass('org.xidea.lite.web:WebCompiler');
+			echo "<script>
+				var LITE_WC = window.LITE_WC || new WebCompiler('$scriptBase/');
+				LITE_WC.compile('$path');
+				LITE_WC.save();
+			</script>";
 			$litefile = $this->litecode.'/'.strtr($path,'/','^');
     		$phpfile = $litefile.'.php';
-			if(file_exists($phpfile)){unlink($phpfile);}
-			while(file_exists($phpfile)){
-				sleep(100);
+			if(file_exists($phpfile)){unlink($phpfile);}//.$phpfile.'<hr>';
+			for($i=0;$i<10240 && !file_exists($phpfile);$i++){
+				echo ' ';
+				flush();
+			}
+			while(!file_exists($phpfile)){
+				sleep(1);
 			}
 		}
 	}

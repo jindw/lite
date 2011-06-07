@@ -20,6 +20,7 @@ function ParseContext(config,path){
 	this._attributeMap = [[],[]]
     this._result = new ResultContext();
 	this._context = this;
+	this._resources = [];
 	initializeParser(this,config.getExtensions(path));
 }
 /**
@@ -156,18 +157,6 @@ ParseContext.prototype = {
 //    	return Packages.org.xidea.lite.impl.ParseUtil.openStream(uri)
 		throw new Error("only for java");
     },
-    getCurrentURI:function(){
-    	return this._context._currentURI;
-    },
-    setCurrentURI:function(uri){
-    	this._context._currentURI = new URI(uri);
-    },
-    getCurrentNode:function(){
-    	return this._context._currentNode;
-    },
-    setCurrentNode:function(node){
-    	this._context._currentNode = node;
-    },
 	getTextType:function(){
 		return this._context._textType;
 	},
@@ -186,8 +175,41 @@ ParseContext.prototype = {
 	addExtension:function(ns,pkg){
 		this._extensionParser.addExtension(ns,pkg);
 	},
+	getFeature:function(key){
+		this._featureMap[key];
+	},
+	getFeatureMap:function(key){
+		this._featureMap;
+	},
+    getCurrentNode:function(){
+    	return this._context._currentNode;
+    },
+    setCurrentNode:function(node){
+    	this._context._currentNode = node;
+    },
+    getCurrentURI:function(){
+    	return this._context._currentURI;
+    },
+    setCurrentURI:function(uri){
+    	this._context.addResource(uri=new URI(uri));
+    	this._context._currentURI = uri;
+    },
+    addResource:function(uri){
+    	for(var rs = this._resources, i=0;i<rs.length;i++){
+    		if(rs[i]+'' == uri){
+    			return ;
+    		}
+    	}
+    	this._resources.push(uri);
+    },
+    getResources:function(){
+    	return this._resources;
+    },
     createNew:function(){
-    	return new ParseContext(this._config,this.getCurrentURI());
+    	var nc = new ParseContext(this._config,this.getCurrentURI());
+    	nc._featureMap = this._featureMap;
+    	nc._resources = this._resources;
+    	return nc;
     }
 }
 var rm = ResultContext.prototype;

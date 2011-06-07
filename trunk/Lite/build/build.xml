@@ -201,6 +201,17 @@
 			<arg value="-outputExported" />
 			<arg value="${basedir}/build/dest/lite-compiler.js" />
 		</java>
+		<echo>压缩PHP目标代码 JS编译程序</echo>
+		<java classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
+			<arg value="-scriptBase" />
+			<arg value="${basedir}/web/scripts" />
+			<arg value="-config.features" />
+			<arg value=":Debug" />
+			<arg value="-exports" />
+			<arg value="org.xidea.lite.web:WebCompiler" />
+			<arg value="-outputExported" />
+			<arg value="${basedir}/build/dest/boot.js" />
+		</java>
 		<echo>压缩JSLite实现</echo>
 		<!-- export lite -->
 		<!-- empty -->
@@ -268,19 +279,18 @@
 		<copy tofile="../TT/web/WEB-INF/lib/Lite-${version}.jar" file="build/dest/Lite.jar" />
 	</target>
 
-	<target name="php-example">
-		<zip comment="批量编译:java -jar ./WEB-INF/lib/Lite.jar -root ." file="build/dest/php-example.zip" encoding="GBK">
+	<target name="php-example" depends="compress">
+		<zip comment="前端编译" file="build/dest/php-example.zip" encoding="GBK">
 			<fileset dir="web">
+				<include name="lite-service.php"/>
 				<include name="example/test.php" />
 				<include name="example/test.xhtml" />
-				<include name="example/layout.xhtml" />
-				<include name="WEB-INF/decorators.xml" />
 			</fileset>
-			<zipfileset dir="build/dest/" prefix="WEB-INF/classes/lite/">
-				<include name="LiteEngine.php" />
+			<zipfileset dir="src/php" prefix="WEB-INF/classes/">
+				<include name="lite/*.php" />
 			</zipfileset>
-			<zipfileset dir="build/dest/" prefix="WEB-INF/lib">
-				<include name="Lite.jar" />
+			<zipfileset dir="build/dest/" prefix="WEB-INF/classes/lite/">
+				<include name="boot.js" />
 			</zipfileset>
 		</zip>
 	</target>

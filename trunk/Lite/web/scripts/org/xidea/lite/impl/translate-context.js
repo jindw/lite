@@ -49,7 +49,7 @@ function LiteContext(code,params,parentContext,name){
 		addVar(this,name);
 		addVar(parentContext,name);
 		this.fors = parentContext.fors;
-		parentContext.defs.push(vs);
+		parentContext.defs.push(this);
 	}
     walkCode(this,code)
 

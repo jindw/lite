@@ -31,36 +31,40 @@ class LiteEngine{
 	/**
 	 * 当前执行的模板示例
 	 */
-	private static $instance;
+	public static $instance;
 	
 	/**
 	 * 上线后建议置空
 	 * 设置是编译器实现，有则自动编译，必须在$debug 为true时，才能生效
 	 */
-	public $compiler = "LiteService";
+	public $compiler = "/lite-service.php";
 	function LiteEngine($root=null,$litecode=null){
 		if(!$root){
 			$pos = strrpos(__FILE__,'WEB-INF');
 			$root = $pos ? substr(__FILE__,0,$pos) : $_SERVER['DOCUMENT_ROOT'];
 		}
-		$this->root = strtr(realpath($root),'\','/').'/';
-		$this->litecode = $litecode?$litecode:$this->root.'WEB-INF/litecode/';
+		
+		$this->root = strtr(realpath($root),'\\','/').'/';
+		if($litecode){
+			$this->litecode = $litecode;
+		}else{
+			$this->litecode = $this->root.'WEB-INF/litecode/';
+		}
+		
 	}
 
 	function render($path,$context){
-		$old = LiteEngine::instance;
+		global $lite__instance;
+		$old = $lite__instance;
 		if($old == null){
 			if(is_string($this->debug)){
 				$this->debug = !!preg_match("/^(?:$this->debug)$/",$_SERVER["REMOTE_ADDR"]);
 			}
-			if(!$this->debug){
-				$this->compiler = null;
-			}
 		}
-	    LiteEngine::instance = $this;
+	    $lite__instance = $this;
 		$fn = lite_load($path);
 	    $fn($context);
-	    LiteEngine::instance = $old;
+	    $lite__instance = $old;
 	}
 }
 /**
@@ -68,16 +72,19 @@ class LiteEngine{
  * @return function name
  */
 function lite_load($path,$engine=null){
-	$engine = LiteEngine::instance;
+	global $lite__instance;
 	$fn = 'lite_template'.str_replace(array('.','/','-','!','%'),'_',$path);
-    if($engine->compiler){
-    	$compiler = $engine->compiler;
-    	$compiler = new $compiler($engine->root,$engine->litecode);
-    	$compiler->compile($path);
+    if($lite__instance->compiler && !$lite__instance->debug){
+    	$_REQUEST['LITE_ACTION'] = 'compile';
+    	$_REQUEST['LITE_PATH'] = $path;
+    	$_REQUEST['LITE_SERVICE_URL'] = $lite__instance->compiler;
+    	require($lite__instance->root.$lite__instance->compiler);
     }
-    require_once($engine->litecode.strtr($path,'/','^').'.php');
+    require_once($lite__instance->litecode.strtr($path,'/','^').'.php');
     return $fn;
 }
+
+
 /**
  * javascript == 运算符模拟
  * @return bool
@@ -140,7 +147,84 @@ function lite_op__get($obj, $key) {
 	}
 	return @$obj[$key];
 }
+/* ================ 全局函数调用 =================*/
 
+/**
+ * isFinite Evaluates an argument to determine whether it is a finite number
+ */
+function lite__isFinite($op) {
+	if (!is_numeric($op)) {
+		//in EcmasScript unnumeric string is infinite
+		return false;
+	}
+	return is_finite($op);
+}
+
+/**
+ * isNaN Evaluates an argument to determine if it is not a number
+ */
+function lite__isNaN($op) {
+	return is_nan($op);
+}
+
+/**
+ * parseInt Parses a string argument and returns an integer of the specified radix or base
+ * @param int $radix
+ * @return number
+ */
+function lite__parseInt($value, $radix=null) {
+	if($radix){
+		return intval($value,$radix);
+	}else{
+		if(preg_match('/^([+-]?)(0x?)([0-9a-fA-F]+)/',$value,$result)){
+			if($result[2] == '0'){
+				$radix = 8;
+			}else{
+				$radix = 16;
+			}
+			$value = $result[3];
+			if($result[1] == '-'){
+				return -intval($value,$radix);
+			}
+			return intval($value,$radix);
+		}else{
+			return intval($value);
+		}
+	}
+}
+
+/**
+ * parseFloat Parses a string argument and returns a floating point number
+ * @return number
+ */
+function lite__parseFloat($value) {
+	return floatval($value);
+}
+
+/**
+ * use raurlencode 'cause it's is more comply with the RFC1738
+ * converts blank to %20 as ECMA-262 does, on the contrary urlencode convert blank to '+'
+ * @return string
+ */
+function lite__encodeURIComponent($item,$encoding="UTF-8"){
+	if (mb_internal_encoding() != $encoding) {
+		$item = iconv(mb_internal_encoding(), $encoding, $item);
+	}
+	return rawurlencode($item);
+}
+
+/**
+ * @return string
+ */
+function lite__decodeURIComponent($item,$encoding="UTF-8"){
+	$item = rawurldecode($item);
+	if (mb_internal_encoding() != $encoding) {
+		$item = iconv($encoding, mb_internal_encoding(), $item);
+	}
+	return $item;
+}
+
+/* ===================== 成员函数调用 ======================*/
 /**
  * 成员函数调用入口
  */
@@ -170,7 +254,7 @@ function lite_member_toString($obj, $radix=10){
 			if(!$buf && $key !== 0){
 				return '[object Object]';
 			}
-			array_push($buf,lite_member_toString($value))
+			array_push($buf,lite_member_toString($value));
 		}
         return join(",", $buf);
     }else if(is_numeric($obj)) {

@@ -1,0 +1,12 @@
+<html xmlns:c='http://www.xidea.org/lite/core'>
+<body>
+<c:for var='item' list="${10}" status='x'>
+${item}=>
+<c:for var='item' list="${['a','b','c']}">
+${item} /${for.index}/${x.index}<hr/>
+</c:for>
+<c:else>aaaaa</c:else>
+</c:for>
+${int1}/${text1}
+</body>
+</html>
