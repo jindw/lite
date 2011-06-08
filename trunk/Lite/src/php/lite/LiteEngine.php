@@ -77,8 +77,9 @@ function lite_load($path,$engine=null){
     if($lite__instance->compiler && !$lite__instance->debug){
     	$_REQUEST['LITE_ACTION'] = 'compile';
     	$_REQUEST['LITE_PATH'] = $path;
-    	$_REQUEST['LITE_SERVICE_URL'] = $lite__instance->compiler;
-    	require($lite__instance->root.$lite__instance->compiler);
+    	$compiler =  $lite__instance->compiler;
+    	$_REQUEST['LITE_SERVICE_URL'] =$compiler;
+    	require($lite__instance->root.$compiler);
     }
     require_once($lite__instance->litecode.strtr($path,'/','^').'.php');
     return $fn;

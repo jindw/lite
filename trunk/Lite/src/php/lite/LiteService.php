@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * Lite 使用实例代码：
  * <?php
@@ -19,20 +19,30 @@ class LiteService{
 		$this->root = $root;
 		$this->litecode = $litecode;
 	}
+	function resetService($file){
+		$root = @$_SERVER['DOCUMENT_ROOT'] ;
+		$url = @$_REQUEST['LITE_SERVICE_URL'];
+		if(!$root || 
+			 $url && file_exists($root.$url)
+			 && $this->root && realpath($this->root) == realpath($root)){
+			return;
+		}
+		//放在某个子目录下了.
+		$begin = strlen($root);
+		if(strncmp($file,$root,$begin) ===0){
+			$url =substr($file,$begin);
+			if(file_exists($root.$url)){
+				$_REQUEST['LITE_SERVICE_URL'] = $url;
+			}
+		}
+	}
 	public function execute(){
 		$lite_action = @$_REQUEST['LITE_ACTION'] ;
-		$lite_path = $_REQUEST['LITE_PATH'] ;
+		$lite_path = @$_REQUEST['LITE_PATH'] ;
 		if($lite_action == 'compile'){
 			$this->compile($lite_path);
 		}else if($lite_action == 'save'){
-			$lite_code = $_REQUEST['LITE_CODE'] ;
-			$lite_php = $_REQUEST['LITE_PHP'] ;
-			$litefile = $this->litecode.'/'.strtr($lite_path,'/','^');
-    		$phpfile = $litefile.'.php';
-			file_put_contents($litefile,$lite_code);
-			file_put_contents($phpfile,$lite_php);
-			require($phpfile);
-			echo '{"PHP_PATH":"'.$phpfile.'"}';
+			$this->save($lite_path);
 		}else{//prox
 			$pathinfo = @$_SERVER['PATH_INFO']?$_SERVER['PATH_INFO']:$_SERVER['ORIG_PATH_INFO'];
 			if(strncmp($pathinfo,'/scripts/',9) == 0){
@@ -52,7 +62,24 @@ class LiteService{
 			}
 		}
 	}
-	function loadJavaScriptClass(){
+	private function save($lite_path){
+		$lite_code = base64_decode($_REQUEST['LITE_CODE']);
+		$lite_php = base64_decode($_REQUEST['LITE_PHP']) ;
+		$litefile = $this->litecode.'/'.strtr($lite_path,'/','^');
+		$phpfile = $litefile.'.php';
+		if($lite_code){
+			file_put_contents($litefile,$lite_code);
+		}
+		file_put_contents($phpfile,$lite_php);
+		if($lite_php){
+			require($phpfile);
+			echo '{"success":true,"phpPath":"'.$phpfile.'"}';
+		}else{
+			echo '{"success":false,"phpPath":"'.$phpfile.'"}';
+		}
+		
+	}
+	private function loadJavaScriptClass(){
 		$scriptBase = $_REQUEST['LITE_SERVICE_URL'];
 		$fns = func_get_args();
 		
@@ -74,14 +101,17 @@ if(!($checkScript)){
 }
 </script>";
 	}
-	function compile($path){
+	private function compile($path){
 		if($this->getFileModified($path)){
 			$scriptBase = $_REQUEST['LITE_SERVICE_URL'];
 			$this->loadJavaScriptClass('org.xidea.lite.web:WebCompiler');
 			echo "<script>
 				var LITE_WC = window.LITE_WC || new WebCompiler('$scriptBase/');
-				LITE_WC.compile('$path');
-				LITE_WC.save();
+				try{
+					LITE_WC.compile('$path');
+				}finally{
+					LITE_WC.save();
+				}
 			</script>";
 			$litefile = $this->litecode.'/'.strtr($path,'/','^');
     		$phpfile = $litefile.'.php';

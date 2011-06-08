@@ -7,10 +7,6 @@
  */
 
 var FOR_STATUS_KEY = '$__for';
-
-//function checkEL(el){
-//    new Function("return "+el)
-//}
 var INIT_SCRIPT = String(function(){
 	/**
 	 * @public
@@ -54,9 +50,11 @@ var INIT_SCRIPT = String(function(){
 	}
 	function lite__replacer(c,a){return a || "&#"+c.charCodeAt(0)+";"}
 	var lite__g = {};
-	
-	
-}).replace(/^[^{]+\{|\}$/g,'')
+	//避免被压缩
+	with(""){
+		alert([lite__def,lite__init,lite__list,lite__encode,lite__encode])
+	}
+}).replace(/^[^{]+\{|\bwith\b[\s\S]*$/g,'')
 /**
  * JS原生代码翻译器实现
  */
