@@ -3,13 +3,43 @@
 <script>
 $import("org.xidea.lite.impl.js.stringifyJSEL",true);
 $import("org.xidea.lite.impl.php.stringifyPHPEL",true);
-//$import("org.xidea.lite.impl.php.JSTranslator",true);
-//$import("org.xidea.lite.parse.*",true);
 $import("org.xidea.el.ExpressionTokenizer",true);
+
+ 
 </script>
 
 <script>
-var el  = new ExpressionTokenizer("[[1,2,3]]").getResult();
-document.write(stringifyJSEL(el))
-document.write(stringifyPHPEL(null,el));
+function testEL(el){
+	var el  = new ExpressionTokenizer(el).getResult();
+	document.write(stringifyJSEL(el)+"<br/>")
+	document.write(stringifyPHPEL(null,el)+"<hr/>")	
+}
+//testEL("[[1,2,3]]");
+//testEL("1+2+'a'");
+//testEL("'1'+2+'a'");
+</script>
+
+
+
+<script>
+$import("org.xidea.lite.impl.php.PHPTranslator",true);
+$import("org.xidea.lite.parse.*",true);
+</script>
+
+
+<script>
+function testTpl(xml){
+	var context = new ParseContext();
+	context.parse(xml)
+	var pt = new PHPTranslator('test');
+	var php = pt.translate(context);
+	document.write('<textarea>'+php+"</textarea><br/>")
+}
+testTpl("<xml>${null}/${true}/${1||false}</xml>");
+testTpl("<xml>${1||true}</xml>");
+testTpl("<xml>${a}</xml>");
+testTpl("<xml>${1+2+'a'}</xml>");
+testTpl("<xml>${'1'+2+'a'}</xml>");
+testTpl("<xml>${1+2+a}</xml>");
+testTpl("<xml>\r\n</xml>");//test \r\n
 </script>

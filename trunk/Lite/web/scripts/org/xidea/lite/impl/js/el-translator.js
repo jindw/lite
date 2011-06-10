@@ -53,9 +53,7 @@ function stringifyInfix(el){
 	var opc = findTokenText(el[0]);
 	var value1 = stringifyJSEL(el[1]);
 	var value2 = stringifyJSEL(el[2]);
-	if(getELPriority(el[1])<getELPriority(el)){
-		value1 = '('+value1+')';
-	}
+	//value1 = addELQute(el,el[1],value1);
 	switch(type){
 	case OP_INVOKE:
 		value2 = value2.slice(1,-1);
@@ -63,6 +61,7 @@ function stringifyInfix(el){
 		return value1+"("+value2+')';
 	case OP_GET:
 		//value1 = toOperatable(el[1][0],value1);
+		value1 = addELQute(el,el[1],value1)
 		if(el[2][0] == VALUE_CONSTANTS){
 			var p = getTokenParam(el[2])
 			if(typeof p == 'string'){
@@ -98,14 +97,14 @@ function stringifyInfix(el){
  ${a?b1?b2:b3:c}
  ${222+2|a?b1?b2:b3:c}
      */
+     	//?:已经是最低优先级了,无需qute,而且javascript 递归?: 也无需优先级控制
      	var el1 = el[1];
     	var test = stringifyJSEL(el1[1]);
     	var value1 = stringifyJSEL(el1[2]);
     	return test+'?'+value1+":"+value2;
 	}
-	if(getELPriority(el)>=getELPriority(el[2])){
-		value2 = '('+value2+')';
-	}
+	value1 = addELQute(el,el[1],value1)
+	value2 = addELQute(el,el[2],null,value2)
 	return value1 + opc + value2;
 }
 /**
@@ -116,15 +115,7 @@ function stringifyPrefix(el){
 	var el1 = el[1];
 	var value = stringifyJSEL(el1);
 	var param = getTokenParam(el);
-	if(getELPriority(el)>=getELPriority(el1)){
-		value = '('+value+')';
-	}
+	value = addELQute(el,el1,null,value)
     var opc = findTokenText(type);
 	return opc+value;
-}
-/**
- * 获取某个运算符号的优先级
- */
-function getELPriority(el) {
-	return getPriority(el[0]);
 }

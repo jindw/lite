@@ -174,16 +174,7 @@ function stringifyInfix(context,el){
 	var opc = findTokenText(el[0]);
 	var value1 = stringifyPHPEL(context,el[1]);
 	var value2 = stringifyPHPEL(context,el[2]);
-	if(getELPriority(el[1])<getELPriority(el)){
-		value1 = '('+value1+')';
-	}
 	switch(type){
-//	case OP_ADD://+
-//	case OP_EQ://==
-//	case OP_NOTEQ://!=
-//	case OP_GET://.
-//		//return value1+'['+value2+']';
-//	case OP_INVOKE:
 	case OP_JOIN:
 		if("array()"==value1){
 			return "array("+value2+")"
@@ -215,19 +206,18 @@ function stringifyInfix(context,el){
     	//return '('+LITE_INVOKE+OP_NOT+','+test+')?'+value2+":"+value1+')';
     	return '('+php2jsBoolean(arg1[1],test)+'?'+value1+':'+value2+')'
     case OP_AND://&&
-    	if(value1.match(/^[\w_\$]+$/)){
+    	if(isSimplePHPEL(value1)){
     		return '('+php2jsBoolean(el[1],value1)+'?'+value2+':'+value1+')'
     	}
-    	return '('+php2jsBoolean(el[1],value1,VAR_TEMP)+'?'+value2+':'+VAR_TEMP+')'
+    	return '(('+php2jsBoolean(el[1],value1,VAR_TEMP)+')?'+value2+':'+VAR_TEMP+')'
     case OP_OR://||
-    	if(value1.match(/^[\w_\$]+$/)){
+    	if(isSimplePHPEL(value1)){
     		return '('+php2jsBoolean(el[1],value1)+'?'+value1+':'+value2+')'
     	}
-    	return '('+php2jsBoolean(el[1],value1,VAR_TEMP)+'?'+VAR_TEMP+':'+value2 +')'
+    	return '(('+php2jsBoolean(el[1],value1,VAR_TEMP)+')?'+VAR_TEMP+':'+value2 +')'
 	}
-	if(getELPriority(el)>=getELPriority(el[2])){
-		value2 = '('+value2+')';
-	}
+	value1 = addELQute(el,el[1],value1)
+	value2 = addELQute(el,el[2],null,value2)
 	return value1 + opc + value2;
 }
 
@@ -240,7 +230,7 @@ function stringifyPHP(value) {
             if(isNaN(value)){
                 value = 'null';
             }
-            return value;
+            return ''+value;
         case 'undefined':
         	return 'null';
         case 'object':
@@ -275,21 +265,19 @@ function stringifyPHP(value) {
 function stringifyPrefix(context,el){
 	var type = el[0];
 	var el1 = el[1];
-	var value = stringifyJSEL(context,el1);
+	var value2 = stringifyJSEL(context,el1);
 	var param = getTokenParam(el,context);
 	if(type == OP_NOT){//!
 		//return value1+'['+value2+']';
-		var rtv = php2jsBoolean(el1,value);
+		var rtv = php2jsBoolean(el1,value2);
 		if(!isSimpleEL(rtv)){
 			rtv = '('+rtv+')';
 		}
 		return '!'+rtv;
 	}
-	if(getELPriority(el)>=getELPriority(el1)){
-		value = '('+value+')';
-	}
+	value2 = addELQute(el,el[1],null,value2)
     var opc = findTokenText(type);
-	return opc+value;
+	return opc+value2;
 }
 
 /**

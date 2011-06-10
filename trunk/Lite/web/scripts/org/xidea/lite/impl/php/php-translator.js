@@ -72,14 +72,14 @@ function toArgList(params,defaults){
 	}
 	return params.join(',')
 }
-function _stringifyPHPLine(line){//.*[\r\n]*
+function _stringifyPHPLineArgs(line){//.*[\r\n]*
 	var endrn="'";
 	line = line.replace(/['\\]|(\?>)|([\r\n]+$)|[\r\n]/gm,function(a,pend,lend){
 		if(lend){
 			endrn  = '';
-			return "'."+stringifyJSON(a);
+			return "',"+stringifyJSON(a);
 		}else if(pend){
-			return "?'.'>";
+			return "?','>";
 		}else{//'\\
 			if(a == '\\'){
 				return '\\\\';
@@ -92,7 +92,7 @@ function _stringifyPHPLine(line){//.*[\r\n]*
 		}
 	});
 	line = "'"+line+endrn;
-	if("''." == line.substring(0,3)){
+	if("''," == line.substring(0,3)){
 		line = line.substring(3)
 	}
 	return line;
@@ -137,28 +137,75 @@ PHPTranslateContext.prototype = new TCP({
 			var line = lines[i];
 			var start = i==0?'echo ':'\t,'
 			var end = i == lines.length-1?';':'';
-			line = _stringifyPHPLine(line);
-			this.append(start+line+end);
+			line = _stringifyPHPLineArgs(line);
+			this.append(start,line,end);
 		}
+	},
+	_encodeEL:function (text,model){
+    	var encoding = "'"+this.htmlspecialcharsEncoding+"'";
+		//TODO: check el type
+		if(model == -1){
+			var encode = "htmlspecialchars("+text+",ENT_COMPAT"+encoding+",false";
+			//this.append(prefix,"strtr(",el,",array('<'=>'&lt;','\"'=>'&#34;'));");
+		}else if(model == XA_TYPE){
+			var encode = "htmlspecialchars("+text+",ENT_COMPAT,"+encoding;
+		}else if(model == XT_TYPE){
+			//ENT_COMPAT 
+			var encode = "htmlspecialchars("+text+",ENT_NOQUOTES,"+encoding;
+		}else{
+			var encode = text;
+		}
+		return encode;
 	},
     _appendEL:function(el,model,text,prefix){
     	prefix = prefix!=null? prefix : 'echo '+this.elPrefix
     	//@see http://notownme.javaeye.com/blog/335036
-    	var encoding = "'"+this.htmlspecialcharsEncoding+"'";
     	var text = text || this.stringifyEL(el);
+    	var type = getELType(el.tree);
+    	//null,boolean
     	
-    	//TODO: check el type
-		if(model == -1){
-			this.append(prefix,"htmlspecialchars(",text,",ENT_COMPAT",encoding,",false);");
-			//this.append(prefix,"strtr(",el,",array('<'=>'&lt;','\"'=>'&#34;'));");
-		}else if(model == XA_TYPE){
-			this.append(prefix,"htmlspecialchars(",text,",ENT_COMPAT,",encoding,");");
-		}else if(model == XT_TYPE){
-			//ENT_COMPAT 
-			this.append(prefix,"htmlspecialchars(",text,",ENT_NOQUOTES,",encoding,");");
+		if(isSimplePHPEL(text)){//var encode = 
+			var initText = text;
+			var tmpId = text;
 		}else{
-			this.append(prefix,text,";");
+			tmpId = "$__lite_tmp";
+			initText = '('+tmpId+'='+text+')';
 		}
+    	if(type != TYPE_ANY){
+	    	if(type == TYPE_NULL){
+	    		this.append(prefix,"'null';");
+	    		return;
+	    	}else if(type == TYPE_BOOLEAN){
+	    		this.append(prefix,text,"?'true'?'false';");
+	    		return;
+	    	}else if(type == TYPE_NUMBER){
+	    		this.append(prefix,text,";");
+	    		return;
+	    	}
+	    	//
+			if((TYPE_NULL|TYPE_BOOLEAN)==type){//onlu null boolean
+				this.append(prefix,initText,"?'true':(",tmpId,"===null?'null':'false');");
+				return;
+			}else if(!((TYPE_NULL|TYPE_BOOLEAN) & type)){//number,string,map,array...
+	    		this.append(prefix,this._encodeEL(text),";");
+	    		return;
+	    	}
+			//v1=== null?'null':(v===true?'true':(v == false ?'false':txt))
+			if(!(type & TYPE_NULL)){
+				this.append(prefix,
+	    			initText," === true?'true':",
+	    				"(",tmpId,"===false?'false':(",this._encodeEL(tmpId),"));");
+	    		return ;
+			}else if(!(type & TYPE_BOOLEAN)){
+	    		this.append(prefix,
+	    			initText,"===null?'null':(",this._encodeEL(tmpId),");");
+	    		return ;
+			}
+    	}
+    	this.append(prefix,
+    		initText," ===null?'null':",
+    		"(",tmpId," === true?'true':",
+    			"(",tmpId,"===false?'false':(",this._encodeEL(tmpId),")));");
     },
     appendEL:function(item){
     	this._appendEL(item[1],EL_TYPE)

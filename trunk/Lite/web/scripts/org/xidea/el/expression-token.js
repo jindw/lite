@@ -199,20 +199,13 @@ function getAddType(arg1,arg2){
 	var t2 = getELType(arg2);
 	var ns1 = isNTSFAN(t1);
 	var ns2 = isNTSFAN(t2);
-	if(ns1 === true || ns2 === true){
-		if(ns1 === true){
-			if(ns2 === true){//n,n
-				return TYPE_NUMBER;
-			}else{//n,sn
-				
-			}
-		}else{//sn n
-			
-		}
-		return TYPE_NUMBER|TYPE_STRING;
-	}
+	//alert([ns1,ns2])
+	
 	if(ns1 === false || ns2 === false){
 		return TYPE_STRING;
+	}
+	if(ns1 === true && ns2 === true){
+		return TYPE_NUMBER;
 	}
 	return TYPE_NUMBER|TYPE_STRING;
 }
@@ -222,7 +215,7 @@ function getELType(el){
 	if(op>0){
 		var arg1 = el[1];
 		var arg2 = el[2];
-		switch(op[0]){
+		switch(op){
 		case OP_JOIN:
 			return TYPE_ARRAY;
 		case OP_PUT:
@@ -231,7 +224,7 @@ function getELType(el){
 			//if(isNumberAdder(arg1)&&isNumberAdder(arg2)){
 			//	//return 'number';
 			//}else{
-			getAddType(arg1,arg2)
+			return getAddType(arg1,arg2)
 			//}
 		case OP_POS:
 		case OP_NEG:
@@ -258,30 +251,32 @@ function getELType(el){
 		case OP_OR:
 			return  getELType(arg1) | getELType(arg2);
 		case OP_GET:
-			if(arg1[0] == VALUE_VAR && arg1[1] == 'for'){
-				if(op[1] == 'index' || op[1] == 'lastIndex'){
-					return TYPE_NUMBER;
-				}
-			}else if(arg2[0] == VALUE_CONSTANTS && arg2[1] == 'length'){
-				var t1 = getELType(arg1);
-//var TYPE_NULL = 1<<offset++;
-//var TYPE_BOOLEAN = 1<<offset++;
-//var TYPE_NUMBER = 1<<offset++;
-
-//var TYPE_STRING = 1<<offset++;
-//var TYPE_ARRAY = 1<<offset++;
-
-//var TYPE_MAP = 1<<offset++;
-				if(t1 & TYPE_MAP){
-					return TYPE_ANY;
-				}else if((t1 & TYPE_ARRAY) || (t1 & TYPE_STRING)){
-					if((t1 & TYPE_STRING) || (t1 & TYPE_BOOLEAN)||(t1 & TYPE_NUMBER)){
-						return TYPE_NULL|TYPE_NUMBER;
-					}else{
+			if(arg2[0] == VALUE_CONSTANTS){
+				if(arg1[0] == VALUE_VAR && arg1[1] == 'for'){
+					if(arg2[1] == 'index' || arg2[1] == 'lastIndex'){
 						return TYPE_NUMBER;
 					}
-				}else{//only TYPE_STRING TYPE_BOOLEAN TYPE_NUMBER
-					return TYPE_NULL;
+				}else if( arg2[1] == 'length'){
+					var t1 = getELType(arg1);
+	//var TYPE_NULL = 1<<offset++;
+	//var TYPE_BOOLEAN = 1<<offset++;
+	//var TYPE_NUMBER = 1<<offset++;
+	
+	//var TYPE_STRING = 1<<offset++;
+	//var TYPE_ARRAY = 1<<offset++;
+	
+	//var TYPE_MAP = 1<<offset++;
+					if(t1 & TYPE_MAP){
+						return TYPE_ANY;
+					}else if((t1 & TYPE_ARRAY) || (t1 & TYPE_STRING)){
+						if((t1 & TYPE_STRING) || (t1 & TYPE_BOOLEAN)||(t1 & TYPE_NUMBER)){
+							return TYPE_NULL|TYPE_NUMBER;
+						}else{
+							return TYPE_NUMBER;
+						}
+					}else{//only TYPE_STRING TYPE_BOOLEAN TYPE_NUMBER
+						return TYPE_NULL;
+					}
 				}
 			}
 			return TYPE_ANY;
@@ -321,4 +316,21 @@ function getELType(el){
 			return TYPE_ANY;
 		}
 	}
+}
+
+/**
+ * 获取某个运算符号的优先级
+ */
+function addELQute(parentEl,childEL,value1,value2){
+	var pp = getPriority(parentEl[0]);
+	var cp = getPriority(childEL[0]);
+	if(value1){
+		if(cp<pp){
+			value1 = '('+value1+')';
+		}
+		return value1;
+	}else if(value2 && pp>=cp){
+		value2 = '('+value2+')';
+	}
+	return value2;
 }

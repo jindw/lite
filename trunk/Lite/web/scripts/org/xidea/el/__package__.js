@@ -2,14 +2,14 @@ this.addScript('expression-token.js',
 				[
 					//函数
 					"getTokenParam","hasTokenParam","getTokenParamIndex",'getTokenLength','findTokenType','findTokenText'
+					,"getELType","addELQute"
 					,"BIT_*"
 					,"VALUE_*"
 					,"OP_*"
-					,"getELType"
 					,"TYPE_*"
 					]
 				,0
-				,"evaluate");
+				,["evaluate",'getPriority']);
 
 
 this.addScript('expression.js',['evaluate','Expression']
