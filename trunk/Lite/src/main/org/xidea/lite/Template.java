@@ -134,7 +134,8 @@ public class Template {
 				}
 				result.add(cmd);
 			} else {
-				result.add(item);
+				String cs = (String)item;//长字符串切片
+				result.add(cs.toCharArray());
 			}
 		}
 		return result.toArray();
@@ -145,9 +146,9 @@ public class Template {
 		try {
 			int forCount0 = forCount;
 			Expression el = createExpression(cmd[2]);
-			Class<? extends Plugin> addonType = (Class<? extends Plugin>) Class
+			Class<? extends RuntimePlugin> addonType = (Class<? extends RuntimePlugin>) Class
 					.forName((String) cmd[3]);
-			Plugin addon = addonType.newInstance();
+			RuntimePlugin addon = addonType.newInstance();
 			ReflectUtil.setValues(addon, (Map) el.evaluate());
 			Object[] children = compile((List<Object>) cmd[1]);
 			if (addonType == DefinePlugin.class) {// definePlugin no status care
@@ -168,8 +169,8 @@ public class Template {
 		while (index-- > 0) {
 			final Object item = children[index];
 			try {
-				if (item instanceof String) {
-					out.write((String) item);
+				if (item instanceof char[]) {
+					out.write((char[]) item);
 				} else {
 					final Object[] data = (Object[]) item;
 					switch ((Integer) data[0]) {
@@ -200,7 +201,7 @@ public class Template {
 						processExpression(context, data, out, true);
 						break;
 					case XA_TYPE:// ":attribute":
-						processAttribute(context, data, out);
+						processXA(context, data, out);
 						break;
 					case BREAK_TYPE://
 						prossesBreak(data);
@@ -229,7 +230,7 @@ public class Template {
 
 	private void prossesPlugin(ValueStack context, Object[] data, Writer out)
 			throws Exception {
-		Plugin addon = (Plugin) data[3];
+		RuntimePlugin addon = (RuntimePlugin) data[3];
 		addon.execute(context, out);
 	}
 
@@ -237,7 +238,7 @@ public class Template {
 			Writer out, boolean encodeXML) throws IOException {
 		Object value = ((Expression) data[1]).evaluate(context);
 		if (encodeXML && value != null) {
-			printXMLText(ECMA262Impl.ToString(value), out);
+			printXT(ECMA262Impl.ToString(value), out);
 		} else {
 			out.write(ECMA262Impl.ToString(value));
 		}
@@ -351,14 +352,14 @@ public class Template {
 		context.put(data[2], buf.toString());
 	}
 
-	protected void processAttribute(ValueStack context, Object[] data,
+	protected void processXA(ValueStack context, Object[] data,
 			Writer out) throws IOException {
 		Object result = ((Expression) data[1]).evaluate(context);
 		if (data[2] == null) {
-			printXMLAttribute(ECMA262Impl.ToString(result), out);
+			printXA(ECMA262Impl.ToString(result), out);
 		} else if (result != null) {
 			out.write((String) data[2]);// prefix
-			printXMLAttribute(ECMA262Impl.ToString(result), out);
+			printXA(ECMA262Impl.ToString(result), out);
 			out.write('"');
 		}
 
@@ -368,7 +369,7 @@ public class Template {
 		throw new Break(((Number) data[1]).intValue());
 	}
 
-	protected void printXMLAttribute(String text, Writer out)
+	protected void printXA(String text, Writer out)
 			throws IOException {
 		for (int i = 0; i < text.length(); i++) {
 			int c = text.charAt(i);
@@ -388,7 +389,7 @@ public class Template {
 		}
 	}
 
-	protected void printXMLText(String text, Writer out) throws IOException {
+	protected void printXT(String text, Writer out) throws IOException {
 		for (int i = 0; i < text.length(); i++) {
 			int c = text.charAt(i);
 			switch (c) {

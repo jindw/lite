@@ -12,7 +12,7 @@ import org.xidea.el.ValueStack;
  * 自定义函数和扩展函数（Invocable接口类）
  * @author jindw
  */
-public class DefinePlugin implements Plugin,Invocable {
+public class DefinePlugin implements RuntimePlugin,Invocable {
 	private static Log log = LogFactory.getLog(DefinePlugin.class);
 	private String name;
 	private String[] params;

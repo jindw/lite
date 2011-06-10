@@ -46,15 +46,15 @@ var INIT_SCRIPT = String(function(){
 	 * @public
 	 */
 	function lite__encode(text,exp){
-		return String(text).replace(exp||/[<&"]/g,lite__replacer);
+		return String(text).replace(exp||/[<&"]/g,lite__r);
 	}
-	function lite__replacer(c,a){return a || "&#"+c.charCodeAt(0)+";"}
+	function lite__r(c,a){return a || "&#"+c.charCodeAt(0)+";"}
 	var lite__g = {};
 	//避免被压缩
 	with(""){
-		alert([lite__def,lite__init,lite__list,lite__encode,lite__encode])
+		alert([lite__def,lite__init,lite__list,lite__encode,lite__g,lite__r])
 	}
-}).replace(/^[^{]+\{|\bwith\b[\s\S]*$/g,'')
+}).replace(/^[^{]+\{\s*|\bwith\b[\s\S]*$/g,'').replace(/\s*([^\w_$\s]+)\s*/g,'$1')
 /**
  * JS原生代码翻译器实现
  */

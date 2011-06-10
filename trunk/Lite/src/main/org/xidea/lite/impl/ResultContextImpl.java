@@ -11,42 +11,47 @@ import org.apache.commons.logging.LogFactory;
 import org.xidea.el.ExpressionFactory;
 import org.xidea.el.impl.ExpressionFactoryImpl;
 import org.xidea.lite.DefinePlugin;
-import org.xidea.lite.Plugin;
+import org.xidea.lite.RuntimePlugin;
 import org.xidea.lite.Template;
 import org.xidea.lite.parse.IllegalEndException;
+import org.xidea.lite.parse.ParsePlugin;
 import org.xidea.lite.parse.ResultContext;
 
 /**
  * 接口函数不能直接相互调用，用context对象！！！
+ * 
  * @author jindw
  */
 public class ResultContextImpl implements ResultContext {
 	static final Object END_INSTRUCTION = new Object[0];
-	
-	private static final Log log = LogFactory.getLog(ParseContextImpl.class);
-	
 
-	private ExpressionFactory expressionFactory = ExpressionFactoryImpl.getInstance();
+	private static final Log log = LogFactory.getLog(ParseContextImpl.class);
+
+	private ExpressionFactory expressionFactory = ExpressionFactoryImpl
+			.getInstance();
 	private int inc = 0;
 
 	private final ArrayList<Object> result = new ArrayList<Object>();
-
 
 	public Object parseEL(String expression) {
 		return expressionFactory.parse(expression);
 	}
 
-	private Object requrieEL(Object expression){
-		if(expression instanceof String){
-			expression = parseEL((String)expression);
+	private Object requrieEL(Object expression) {
+		if (expression instanceof String) {
+			expression = parseEL((String) expression);
 		}
 		return expression;
 	}
-	static Pattern VAR_PATTERN = Pattern.compile("^(break|case|catch|const|continue|default|do|else|false|finally|for|function|if|in|instanceof|new|null|return|switch|this|throw|true|try|var|void|while|with)|[a-zA-Z_][\\w_]*$");
-	private String checkVar(String var){
+
+	static Pattern VAR_PATTERN = Pattern
+			.compile("^(break|case|catch|const|continue|default|do|else|false|finally|for|function|if|in|instanceof|new|null|return|switch|this|throw|true|try|var|void|while|with)|[a-zA-Z_][\\w_]*$");
+
+	private String checkVar(String var) {
 		Matcher matcher = VAR_PATTERN.matcher(var);
-		if(var == null || !matcher.find() || matcher.group(1)!=null){
-			throw new IllegalArgumentException("无效变量名：Lite有效变量名为(不包括括弧中的保留字)："+VAR_PATTERN.pattern()+"\n当前变量名为："+var);
+		if (var == null || !matcher.find() || matcher.group(1) != null) {
+			throw new IllegalArgumentException("无效变量名：Lite有效变量名为(不包括括弧中的保留字)："
+					+ VAR_PATTERN.pattern() + "\n当前变量名为：" + var);
 		}
 		return var;
 	}
@@ -57,7 +62,6 @@ public class ResultContextImpl implements ResultContext {
 		}
 	}
 
-
 	private void append(Object[] object) {
 		result.add(object);
 	}
@@ -66,9 +70,9 @@ public class ResultContextImpl implements ResultContext {
 		for (Object text : items) {
 			if (text instanceof String) {
 				this.append((String) text);
-			} else if(text instanceof Collection<?>){
-				this.append(((Collection<?>)text).toArray());
-			} else{
+			} else if (text instanceof Collection<?>) {
+				this.append(((Collection<?>) text).toArray());
+			} else {
 				this.append((Object[]) text);
 			}
 		}
@@ -109,7 +113,7 @@ public class ResultContextImpl implements ResultContext {
 
 	public final int appendEnd() {
 		int type = this.findBegin();
-		if(type<0){
+		if (type < 0) {
 			throw new IllegalEndException();
 		}
 		this.result.add(END_INSTRUCTION);
@@ -118,7 +122,7 @@ public class ResultContextImpl implements ResultContext {
 
 	public final void appendVar(String name, Object el) {
 		el = requrieEL(el);
-		this.append(new Object[] { Template.VAR_TYPE, el, checkVar(name)});
+		this.append(new Object[] { Template.VAR_TYPE, el, checkVar(name) });
 	}
 
 	public final void appendCaptrue(String varName) {
@@ -147,12 +151,15 @@ public class ResultContextImpl implements ResultContext {
 
 	public final void appendPlugin(String pluginClazz, Object el) {
 		try {
-			Class<?> clazz =  Class.forName(pluginClazz);
-			if(Plugin.class.isAssignableFrom(clazz)){
+			Class<?> clazz = Class.forName(pluginClazz);
+			if (RuntimePlugin.class.isAssignableFrom(clazz)
+					|| ParsePlugin.class.isAssignableFrom(clazz)) {
 				el = requrieEL(el);
-				this.append(new Object[] { Template.PLUGIN_TYPE, el, pluginClazz });
-			}else{
-				log.error("Plugin class not found(plugin ignored):"+pluginClazz);
+				this.append(new Object[] { Template.PLUGIN_TYPE, el,
+						pluginClazz });
+			} else {
+				log.error("Plugin class not found(plugin ignored):"
+						+ pluginClazz);
 			}
 		} catch (ClassNotFoundException e) {
 			log.error(e);
@@ -174,30 +181,80 @@ public class ResultContextImpl implements ResultContext {
 		return optimizeResult(pops);
 	}
 
-	@SuppressWarnings({"unchecked" })
 	public List<Object> toList() {
+		// toMergeText
 		List<Object> result2 = optimizeResult(this.result);
-		ArrayList<ArrayList<Object>> stack = new ArrayList<ArrayList<Object>>();
-		ArrayList<Object> current = new ArrayList<Object>();
-		stack.add(current);
-		int stackTop = 0;
-		ArrayList<ArrayList<Object>> previous = new ArrayList<ArrayList<Object>>();
+		// toTree
+
+		//
+		ArrayList<ArrayList<Object>> parsePlugins = new ArrayList<ArrayList<Object>>();
+		ArrayList<ArrayList<Object>> previousDefs = new ArrayList<ArrayList<Object>>();
+		ArrayList<Object> currentList = toTree(result2, parsePlugins,
+				previousDefs);
+		currentList.addAll(0, previousDefs);
+
+		if (parsePlugins.size() > 0) {
+			ArrayList<ParsePlugin> pluginList = new ArrayList<ParsePlugin>();
+			for (ArrayList<Object> parsePlugin : parsePlugins) {
+				String className = (String) parsePlugin.get(3);
+				try {
+					ParsePlugin plugin = (ParsePlugin) Class.forName(className)
+							.newInstance();
+					plugin.initialize(currentList, parsePlugin);
+					pluginList.add(plugin);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			for (ParsePlugin plugin : pluginList) {
+				plugin.parse();
+			}
+			for (ParsePlugin plugin : pluginList) {
+				//plugin.remove();
+			}
+		}
+		// 将defs 添加到中间代码的最前端
+		return currentList;
+	}
+
+	@SuppressWarnings( { "unchecked" })
+	private ArrayList<Object> toTree(List<Object> result2,
+			ArrayList<ArrayList<Object>> parsePlugins,
+			ArrayList<ArrayList<Object>> previousDefs) {
+		ArrayList<ArrayList<Object>> childStack = new ArrayList<ArrayList<Object>>();
+		ArrayList<Object> currentList = new ArrayList<Object>();
+		childStack.add(currentList);
 		for (Object item : result2) {
 			if (item instanceof Object[]) {
 				Object[] cmd = (Object[]) item;
 				// System.out.println(Arrays.asList(cmd));
 				if (cmd.length == 0) {
-					ArrayList<Object> children = stack.remove(stackTop--);
-					current = stack.get(stackTop);
-					
-					int currentTop = current.size() - 1;
-					ArrayList instruction = ((ArrayList) current.get(currentTop));
-					instruction.set(1,children);
-					Number type = (Number)instruction.get(0);
-					if(type.intValue() == Template.PLUGIN_TYPE){
-						if(DefinePlugin.class.getName().equals((instruction.get(3)))){
-							previous.add(instruction);
-							current.remove(currentTop);
+					int childTop = childStack.size() - 1;
+					ArrayList<Object> children = childStack.remove(childTop--);
+					currentList = childStack.get(childTop);
+
+					int currentLast = currentList.size() - 1;
+					ArrayList instruction = ((ArrayList) currentList
+							.get(currentLast));
+					instruction.set(1, children);
+					Number type = (Number) instruction.get(0);
+					if (type.intValue() == Template.PLUGIN_TYPE) {
+						String className = (String) instruction.get(3);
+						if (DefinePlugin.class.getName().equals(className)) {
+							// def 前移
+							previousDefs.add(instruction);
+							currentList.remove(currentLast);
+						} else {
+							try {
+								Class<?> clazz = Class.forName(className);
+								if (ParsePlugin.class.isAssignableFrom(clazz)) {
+									parsePlugins.add(instruction);
+								}
+							} catch (ClassNotFoundException e) {
+								log.warn("ParsePlugin:" + className
+										+ " not found");
+							}
+
 						}
 					}
 				} else {
@@ -205,7 +262,7 @@ public class ResultContextImpl implements ResultContext {
 					ArrayList<Object> cmd2 = new ArrayList<Object>(
 							cmd.length + 1);
 					cmd2.add(cmd[0]);
-					current.add(cmd2);
+					currentList.add(cmd2);
 					switch (type) {
 					case Template.CAPTRUE_TYPE:
 					case Template.IF_TYPE:
@@ -214,33 +271,19 @@ public class ResultContextImpl implements ResultContext {
 					case Template.PLUGIN_TYPE:
 						// case IF_STRING_IN_TYPE:
 						cmd2.add(null);
-						stackTop++;
-						stack.add(current = new ArrayList<Object>());
+						childStack.add(currentList = new ArrayList<Object>());
 					}
 					for (int i = 1; i < cmd.length; i++) {
 						cmd2.add(cmd[i]);
 					}
 
 				}
-			}else{
-				current.add(item.toString());
-			} 
+			} else {
+				currentList.add(item.toString());
+			}
 		}
-		current.addAll(0, previous);
-		return current;
+		return currentList;
 	}
-
-//	public String addGlobalObject(Class<? extends Object> class1, String key) {
-//		String name = class1.getName();
-//		String id = (String) (key == null ? typeIdMap.get(name) : key);
-//		if (id == null) {
-//			id = allocateId();
-//			typeIdMap.put(name, id);
-//		}
-//		return id;
-//	}
-
-
 
 	public String allocateId() {
 		String id;
@@ -250,6 +293,7 @@ public class ResultContextImpl implements ResultContext {
 
 	/**
 	 * 合并相邻文本
+	 * 
 	 * @param result
 	 * @return
 	 */
@@ -335,13 +379,8 @@ public class ResultContextImpl implements ResultContext {
 		return -2;// string type
 	}
 
-
 	public void setExpressionFactory(ExpressionFactory expressionFactory) {
 		this.expressionFactory = expressionFactory;
 	}
-
-
-
-
 
 }
