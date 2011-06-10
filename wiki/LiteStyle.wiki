@@ -5,6 +5,7 @@
     * 表达式定义
       表达式是一段描述一个简单运算逻辑的文本，表达式执行过程具有无状态、只读的基本特征。他包含，变量，常量，运算符（函数调用也可以封装成一种特殊的操作符）三种基本元素；表达式执行(求值)时，他从上下文读取若干变量或者常量，并将这些原始数据处理成一个唯一的返回值。
       *[表达式实例]*
+
 <blockquote><blockquote><blockquote>
 <table border="1">
 <tr><th> 表达式 </th><th> 值 </th></tr>
@@ -16,13 +17,14 @@
       简单的表达式阔幅形式如下：${el}，通过表达式阔幅包围起来的源码，本身可以是一个自动编码的模板输出，也可以用于给模板语法提供数据。
       表达式括弧不允许嵌套使用!!
       *[表达式运用实例]*
+
 <blockquote><blockquote><blockquote>
 <table border="1">
 <tr><th> 示例 </th><th> 值 </th></tr>
 <tr><td>您的幸运数字是:${parseInt(Math.random())}</td>
 <td> 输出一个随机数</td>
 </tr>
-<tr><td>&lt;f:if test="${test>0}">...&lt;/f:if></td>
+<tr><td><f:if test="${test>0}">...</f:if></td>
 <td> 表达式用作if判断的条件(绝对不能写成${${test}>0})</td></tr></table></blockquote></blockquote></blockquote>
 
   === 模板语法 ===
