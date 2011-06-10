@@ -1,8 +1,10 @@
+#labels Featured
 ==== 基本原则　====
   * 兼容ECMA262-3标准
     很明显，不管是模板系统还是业务系统，这个函数库都不是最好用的，但是，这是一个已有的标准，且有一定的用户基础。所以，我们默认支持这个函数库，用户也可以根据自己需求扩展自己的函数库，甚至重写某些运算符。
-  * 不建议在表达式中执行对上下文有影响的函数
+  * 不能在表达式中执行对上下文有影响的函数
     如：~~pop,push,shift,unshift,splice,reverse~~
+          _reverse 需求比较常见, 允许 适用array.concat().reverse();组合方式变通使用(concat 会复制 原数组, 抵消reverse 副作用)._
   * 正则支持有限
     不支持正则表达式相关函数，引擎设计考虑不同平台下的兼容性，所以暂时不考虑正则支持。
 
@@ -47,22 +49,16 @@ join
 类型：List,
 lastIndexOf
 类型：String,
-pop
-类型：List,
-push
-类型：List,
+
 replace
 类型：String,
-reverse
-类型：List,
-shift
-类型：List,
+
+
 slice
 类型：String,List,
 sort
 类型：List,
-splice
-类型：List,
+
 split
 类型：String,
 substr
@@ -85,6 +81,9 @@ toString
 类型：Number,List,
 toUpperCase
 类型：String,
-unshift
+
+
+
+concat(..).reverse()//不能单独调用reverse.
 类型：List,
 }}}
