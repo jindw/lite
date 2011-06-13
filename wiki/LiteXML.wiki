@@ -3,7 +3,9 @@
     Lite基本语法，命名为LiteXML，是一个基于XML的基本模板语法聚合，包括最基本的模板功能。
   ==== 名称空间 ====
     LiteXML所属名称空间为：http://www.xidea.org/lite/core
-    推荐前缀是c。支持的标签有 if,else,choose,for,var,def,include,extends,block
+    推荐前缀是c。支持的标签有 :
+|| <a href="#条件标签">if</a>||<a href="#">else</a>||<a href="#">choose</a>||<a href="#">for</a>||<a href="#">var</a>||<a href="#">def</a>||<a href="#">include</a>||<a href="#">extends</a>||<a href="#">block</a>||
+
 
   ==== 支持模式 ====
     LiteXML支持标记，属性和文本三种模式，这里为了简单起见，只列出标记模式。
@@ -79,7 +81,7 @@ $!{user.name}
 }}}
   * for标签属性：
     * _ var _：    字符串，且内容为合法变量名（Java/JavaScript）。 
-    * _ list _ ： EL, 循环数据，可以是数组或java,util.Collection 实例，也可以是整数（表示循环次数）。
+    * _ list _ ： EL, 循环数据(早期版本中该属性名为:items)，可以是数组或java,util.Collection 实例，也可以是整数（表示循环次数）。
     * _ status _： 可选属性，表示状态变量名，是该循环内for状态的别名。
 
   * 功能：
