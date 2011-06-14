@@ -2,7 +2,10 @@ package org.xidea.lite.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -10,11 +13,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.el.ExpressionFactory;
 import org.xidea.el.impl.ExpressionFactoryImpl;
-import org.xidea.lite.DefinePlugin;
 import org.xidea.lite.RuntimePlugin;
 import org.xidea.lite.Template;
 import org.xidea.lite.parse.IllegalEndException;
-import org.xidea.lite.parse.ParsePlugin;
+import org.xidea.lite.parse.OptimizeContext;
+import org.xidea.lite.parse.OptimizePlugin;
 import org.xidea.lite.parse.ResultContext;
 
 /**
@@ -62,19 +65,24 @@ public class ResultContextImpl implements ResultContext {
 		}
 	}
 
-	private void append(Object[] object) {
-		result.add(object);
+	private void append(int type,Object... args) {
+		Object[] item = new Object[args.length+1];
+		item[0] = type;
+		System.arraycopy(args, 0, item, 1, args.length);
+		result.add(item);
 	}
 
 	public final void appendAll(List<Object> items) {
 		for (Object text : items) {
 			if (text instanceof String) {
 				this.append((String) text);
+				return;
 			} else if (text instanceof Collection<?>) {
-				this.append(((Collection<?>) text).toArray());
-			} else {
-				this.append((Object[]) text);
+				text = ((Collection<?>) text).toArray();
 			}
+			Object[] item = (Object[]) text;
+			item[0] = ((Number)item[0]).intValue();
+			result.add(item);
 		}
 	}
 
@@ -93,13 +101,13 @@ public class ResultContextImpl implements ResultContext {
 
 	public final void appendXA(String name, Object el) {
 		el = requrieEL(el);
-		this.append(new Object[] { Template.XA_TYPE, el, name });
+		this.append( Template.XA_TYPE, el, name );
 
 	}
 
 	public final void appendIf(Object testEL) {
 		testEL = requrieEL(testEL);
-		this.append(new Object[] { Template.IF_TYPE, testEL });
+		this.append(Template.IF_TYPE, testEL );
 	}
 
 	public final void appendElse(Object testEL) {
@@ -108,7 +116,7 @@ public class ResultContextImpl implements ResultContext {
 		if (this.getType(this.result.size() - 1) != -1) {
 			this.appendEnd();
 		}
-		this.append(new Object[] { Template.ELSE_TYPE, testEL });
+		this.append(Template.ELSE_TYPE, testEL );
 	}
 
 	public final int appendEnd() {
@@ -122,17 +130,17 @@ public class ResultContextImpl implements ResultContext {
 
 	public final void appendVar(String name, Object el) {
 		el = requrieEL(el);
-		this.append(new Object[] { Template.VAR_TYPE, el, checkVar(name) });
+		this.append(Template.VAR_TYPE, el, checkVar(name) );
 	}
 
 	public final void appendCaptrue(String varName) {
-		this.append(new Object[] { Template.CAPTRUE_TYPE, checkVar(varName) });
+		this.append(Template.CAPTRUE_TYPE, checkVar(varName) );
 
 	}
 
 	public final void appendFor(String var, Object itemsEL, String status) {
 		itemsEL = requrieEL(itemsEL);
-		this.append(new Object[] { Template.FOR_TYPE, itemsEL, var });
+		this.append(Template.FOR_TYPE, itemsEL, var );
 		if (status != null && status.length() > 0) {
 			this.appendVar(checkVar(status), this.parseEL("for"));
 		}
@@ -140,23 +148,24 @@ public class ResultContextImpl implements ResultContext {
 
 	public final void appendEL(Object el) {
 		el = requrieEL(el);
-		this.append(new Object[] { Template.EL_TYPE, el });
+		this.append(Template.EL_TYPE, el);
 
 	}
 
 	public final void appendXT(Object el) {
 		el = requrieEL(el);
-		this.append(new Object[] { Template.XT_TYPE, el });
+		this.append(Template.XT_TYPE, el );
 	}
 
-	public final void appendPlugin(String pluginClazz, Object el) {
+	public final void appendPlugin(String pluginClazz, Map<String, Object> config) {
 		try {
 			Class<?> clazz = Class.forName(pluginClazz);
 			if (RuntimePlugin.class.isAssignableFrom(clazz)
-					|| ParsePlugin.class.isAssignableFrom(clazz)) {
-				el = requrieEL(el);
-				this.append(new Object[] { Template.PLUGIN_TYPE, el,
-						pluginClazz });
+					|| OptimizePlugin.class.isAssignableFrom(clazz)) {
+				//el = requrieEL(el);
+				HashMap<String, Object> config2 = new HashMap<String, Object>(config);
+				config2.put("class",pluginClazz);
+				this.append(Template.PLUGIN_TYPE, config2 );
 			} else {
 				log.error("Plugin class not found(plugin ignored):"
 						+ pluginClazz);
@@ -178,112 +187,23 @@ public class ResultContextImpl implements ResultContext {
 		while (i-- > mark) {
 			result.remove(i);
 		}
-		return optimizeResult(pops);
+		return OptimizeUtil.optimizeList(pops);
 	}
 
+	
 	public List<Object> toList() {
 		// toMergeText
-		List<Object> result2 = optimizeResult(this.result);
+		List<Object> result2 = OptimizeUtil.optimizeList(this.result);
 		// toTree
-
-		//
-		ArrayList<ArrayList<Object>> parsePlugins = new ArrayList<ArrayList<Object>>();
-		ArrayList<ArrayList<Object>> previousDefs = new ArrayList<ArrayList<Object>>();
-		ArrayList<Object> currentList = toTree(result2, parsePlugins,
-				previousDefs);
-		currentList.addAll(0, previousDefs);
-
-		if (parsePlugins.size() > 0) {
-			ArrayList<ParsePlugin> pluginList = new ArrayList<ParsePlugin>();
-			for (ArrayList<Object> parsePlugin : parsePlugins) {
-				String className = (String) parsePlugin.get(3);
-				try {
-					ParsePlugin plugin = (ParsePlugin) Class.forName(className)
-							.newInstance();
-					plugin.initialize(currentList, parsePlugin);
-					pluginList.add(plugin);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-			for (ParsePlugin plugin : pluginList) {
-				plugin.parse();
-			}
-			for (ParsePlugin plugin : pluginList) {
-				//plugin.remove();
-			}
-		}
+//		List<List<Object>> parsePlugins = new ArrayList<List<Object>>();
+		Map<String, List<Object>> defMap = new LinkedHashMap<String,List<Object>>();
+		List<Object> templateList = OptimizeUtil.toListTree(result2, defMap);
+		OptimizeContext ppc = new OptimizeContextImpl(templateList,defMap);
 		// 将defs 添加到中间代码的最前端
-		return currentList;
+		return ppc.optimize();
 	}
 
-	@SuppressWarnings( { "unchecked" })
-	private ArrayList<Object> toTree(List<Object> result2,
-			ArrayList<ArrayList<Object>> parsePlugins,
-			ArrayList<ArrayList<Object>> previousDefs) {
-		ArrayList<ArrayList<Object>> childStack = new ArrayList<ArrayList<Object>>();
-		ArrayList<Object> currentList = new ArrayList<Object>();
-		childStack.add(currentList);
-		for (Object item : result2) {
-			if (item instanceof Object[]) {
-				Object[] cmd = (Object[]) item;
-				// System.out.println(Arrays.asList(cmd));
-				if (cmd.length == 0) {
-					int childTop = childStack.size() - 1;
-					ArrayList<Object> children = childStack.remove(childTop--);
-					currentList = childStack.get(childTop);
 
-					int currentLast = currentList.size() - 1;
-					ArrayList instruction = ((ArrayList) currentList
-							.get(currentLast));
-					instruction.set(1, children);
-					Number type = (Number) instruction.get(0);
-					if (type.intValue() == Template.PLUGIN_TYPE) {
-						String className = (String) instruction.get(3);
-						if (DefinePlugin.class.getName().equals(className)) {
-							// def 前移
-							previousDefs.add(instruction);
-							currentList.remove(currentLast);
-						} else {
-							try {
-								Class<?> clazz = Class.forName(className);
-								if (ParsePlugin.class.isAssignableFrom(clazz)) {
-									parsePlugins.add(instruction);
-								}
-							} catch (ClassNotFoundException e) {
-								log.warn("ParsePlugin:" + className
-										+ " not found");
-							}
-
-						}
-					}
-				} else {
-					int type = (Integer) cmd[0];
-					ArrayList<Object> cmd2 = new ArrayList<Object>(
-							cmd.length + 1);
-					cmd2.add(cmd[0]);
-					currentList.add(cmd2);
-					switch (type) {
-					case Template.CAPTRUE_TYPE:
-					case Template.IF_TYPE:
-					case Template.ELSE_TYPE:
-					case Template.FOR_TYPE:
-					case Template.PLUGIN_TYPE:
-						// case IF_STRING_IN_TYPE:
-						cmd2.add(null);
-						childStack.add(currentList = new ArrayList<Object>());
-					}
-					for (int i = 1; i < cmd.length; i++) {
-						cmd2.add(cmd[i]);
-					}
-
-				}
-			} else {
-				currentList.add(item.toString());
-			}
-		}
-		return currentList;
-	}
 
 	public String allocateId() {
 		String id;
@@ -291,31 +211,6 @@ public class ResultContextImpl implements ResultContext {
 		return id;
 	}
 
-	/**
-	 * 合并相邻文本
-	 * 
-	 * @param result
-	 * @return
-	 */
-	protected List<Object> optimizeResult(List<Object> result) {
-		ArrayList<Object> optimizeResult = new ArrayList<Object>(result.size());
-		StringBuilder buf = new StringBuilder();
-		for (Object item : result) {
-			if (item instanceof String) {
-				buf.append(item);
-			} else {
-				if (buf.length() > 0) {
-					optimizeResult.add(buf.toString());
-					buf.setLength(0);
-				}
-				optimizeResult.add(item);
-			}
-		}
-		if (buf.length() > 0) {
-			optimizeResult.add(buf.toString());
-		}
-		return optimizeResult;
-	}
 
 	@SuppressWarnings("unused")
 	private int findBeginType() {

@@ -29,7 +29,7 @@ ResultContext.prototype = {
 	        new Function("return "+el.replace(/\bfor\b/g,"f"));
 	        return new ExpressionTokenizer(el).getResult();
 	    }catch(e){
-	        $log.debug("表达式解析失败2[fileName:"+this.currentURI+"]",el,e.message)
+	        $log.info("表达式解析失败[fileName:"+this._context.getCurrentURI()+"]",el,e.message)
 	        throw new Error();
 	    }
     },
@@ -104,8 +104,12 @@ ResultContext.prototype = {
 	appendCaptrue:function(varName){
 		this.result.push([CAPTRUE_TYPE,checkVar(varName)]);
 	},
-	appendPlugin:function(clazz, el){
-		this.result.push([PLUGIN_TYPE,requireEL(this,el),clazz]);
+	appendPlugin:function(clazz, config){
+		if(typeof config == 'string'){
+			config = window.eval('('+config+')');
+		}
+		config['class'] = clazz;
+		this.result.push([PLUGIN_TYPE,config]);
 	},
 	mark:function(){
 		return this.result.length;
@@ -115,7 +119,8 @@ ResultContext.prototype = {
 	},
 	toList:function(){
 		var result = optimizeResult(this.result);
-    	return buildTreeResult(result);
+		var defMap = {};
+    	var pureCode = buildTreeResult(result,defMap);
 	}
 }
 function requireEL(context,el){
@@ -141,82 +146,4 @@ function clearPreviousText(result){
     }
 }
 
-
-/**
- * 想当前栈顶添加数据
- * 解析和编译过程中使用
- * @public
- */
-function optimizeResult(source){
-    var result = [];
-    var previousText;
-    for(var i=0,j=0;i<source.length;i++){
-    	var item = source[i];
-		if ('string' == typeof item) {
-			if(previousText==null){
-				previousText = item;
-			}else{
-				previousText += item;
-			}
-		}else{
-			if(previousText){
-				result[j++] = previousText;
-			}
-			previousText = null;
-			result[j++] = item;
-		}
-    }
-    if(previousText){
-    	result[j++] = previousText;
-    }
-    return result;
-}
-function buildTreeResult(result){
-	var stack = [];//new ArrayList<ArrayList<Object>>();
-	var defs = [];
-	var current = [];// new ArrayList<Object>();
-	stack.push(current);
-	try{
-		for (var i = 0;i<result.length;i++) {
-		    var item = result[i];
-			if ('string' == typeof item) {
-				current.push(item);
-			} else {
-				if (item.length == 0) {//end
-					var children = stack.pop();
-					current = stack[stack.length-1];//向上一级列表
-					var parentNode = current.pop();//最后一个是当前结束的标签
-					parentNode[1]=children;
-					if(parentNode[0] == PLUGIN_TYPE && parentNode[3]== 'org.xidea.lite.DefinePlugin'){
-						defs.push(parentNode);
-					}else{
-						current.push(parentNode);
-					}
-					
-				} else {
-					var type = item[0];
-					var cmd2 =[];
-					cmd2.push(item[0]);
-					current.push(cmd2);
-					switch (type) {
-					case CAPTRUE_TYPE:
-					case IF_TYPE:
-					case ELSE_TYPE:
-					case PLUGIN_TYPE:
-					case FOR_TYPE:
-						cmd2.push(null);
-						stack.push(current = []);
-					}
-					for (var j = 1; j < item.length; j++) {
-						cmd2.push(item[j]);
-					}
-	
-				}
-			}
-		}
-	}catch(e){
-		$log.error("中间代码异常：",result);
-	}
-	return defs.concat(current);
-}
 

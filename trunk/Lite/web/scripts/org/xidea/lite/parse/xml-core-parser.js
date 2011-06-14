@@ -371,7 +371,7 @@ addParser([parseOut,parseOut,seekOut],"out");
 
 function _parseDefName(name){
 	var n = name;
-	var i = n.indexOf(n);
+	var i = n.indexOf('(');
 	var defaults = [];
 	var params = [];
 	if(i>0){
@@ -403,25 +403,25 @@ function _parseDefName(name){
 			}
 			var p = arg.indexOf('=',i);
 			if(p>0){
-				params.push('"'+toid(arg.substring(0,p))+'"');
-				defaults.push(arg.substring(p+1));
+				params.push(toid(arg.substring(0,p)));
+				defaults.push(window.eval(arg.substring(p+1)));
 			}else{
 				if(defaults.length){
 					var msg = "函数定义中参数表语法错误:默认参数值能出现在参数表最后:"+name;
 					$log.error(msg);
 					throw new Error(msg);
 				}
-				params.push('"'+toid(arg)+'"');
+				params.push(toid(arg));
 			}
 			
 			
 		}
 		
 	}
-	return ['{"name":"',n,
-		'","params":[',params.join(','),
-		'],"defaults":[',defaults.join(','),
-		']}'].join('')
+	return {"name":n,
+		"params":params,
+		"defaults":defaults,
+		};
 }
 function toid(n){
 	n = n.replace(/^\s+|\s+$/g,'');
@@ -435,8 +435,8 @@ function toid(n){
 }
 function processDef(node){
     var ns = getAttribute(node,'*name');
-    var el = _parseDefName(ns);
-    this.appendPlugin(PLUGIN_DEFINE,this.parseEL(el));
+    var config = _parseDefName(ns);
+    this.appendPlugin(PLUGIN_DEFINE,stringifyJSON(config));
     processChild(this,node);
     this.appendEnd();
 }
@@ -445,11 +445,34 @@ function seekDef(text){
     var end = findELEnd(text);
 	if(end>0){
 		var ns = text.substring(1,end);
-	    var el = _parseDefName(ns);
+	    var config = _parseDefName(ns);
 	    //prompt('',el.join(''))
-	    this.appendPlugin(PLUGIN_DEFINE,this.parseEL(el));
+	    this.appendPlugin(PLUGIN_DEFINE,stringifyJSON(config));
     	return end;
 	}
+}
+
+
+function processClient(node){
+	var name_ = getAttribute(node,'*name','id');
+	// new ParseCothisontext.config,this.currentURI);
+	if(/\(/.test(name_)){
+		var config = _parseDefName(name_);
+	}else{
+		config = {name:name_}
+	}
+	this.appendPlugin("org.xidea.lite.parse.ClientPlugin",stringifyJSON(el));
+	this.processChild(context,node);
+	this.appendEnd();
+	
+	
+//	var context2 = this.createNew();
+//	processChild(context2,node);
+//	var translator = new JSTranslator(name_);
+//	var code = translator.translate(context2);
+//	this.append("<!--//--><script>//<![CDATA[\n"
+//				+code.replace(/<\/script>/ig,'<\\/script>')+"//]]></script>\n");
+	
 }
 
 addParser([processDef,processDef,seekDef],"def",'macro');
@@ -618,17 +641,6 @@ function processBlock(node){
 }
 
 
-function processClient(node){
-	var context2 = this.createNew();
-	// new ParseCothisontext.config,this.currentURI);
-	var id = getAttribute(node,'*name','id');
-	var translator = new JSTranslator(id);
-	
-	processChild(context2,node);
-	var code = translator.translate(context2);
-	this.append("<!--//--><script>//<![CDATA[\n"
-				+code.replace(/<\/script>/ig,'<\\/script>')+"//]]></script>\n");
-}
 
 
 function processChild(context,node){

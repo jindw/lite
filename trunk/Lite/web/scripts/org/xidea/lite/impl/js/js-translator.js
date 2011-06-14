@@ -58,20 +58,20 @@ var INIT_SCRIPT = String(function(){
 /**
  * JS原生代码翻译器实现
  */
-function JSTranslator(id,params,defaults){
-    this.id = id;
+function JSTranslator(name,params,defaults){
+    this.name = name;
     this.params = params;
     this.defaults = defaults;
 }
 /**
  */
 JSTranslator.prototype = {
-	translate:function(context){
+	translate:function(list){
 		var result = [];
 	    try{
 	    	//var result =  stringifyJSON(context.toList())
-	        var list = context.toList();
-		    var context = new JSTranslateContext(list,this.id,this.params,this.defaults);
+	        //var list = context.toList();
+		    var context = new JSTranslateContext(list,this.name,this.params,this.defaults);
 		    context.parse();
 		    var code = context.toString();
 		    new Function("function x(){"+code+"\n}");
@@ -103,14 +103,12 @@ function($_context){
 	....
 }
  */
-function JSTranslateContext(code,id,params,defaults){
-    TranslateContext.call(this,code,params);
-    this.id = id;
-    this.params = params;
+function JSTranslateContext(code,name,params,defaults){
+    TranslateContext.call(this,code,name,params);
     this.defaults = defaults;
     
 }
-function optimizeFunction(text,id,refMap,params,defaults){
+function optimizeFunction(text,name,refMap,params,defaults){
 	var result = [];
 	var p = /\b\$_out.push\((?:(.*)\);)?/g;
 	var args = '$_context';
@@ -155,17 +153,17 @@ function optimizeFunction(text,id,refMap,params,defaults){
 	}else{
 		text+= "\n\treturn $_out.join('');\n";
 	}
-	if(id){
+	if(name){
     	try{
-    		new Function("function "+id+"(){}");
-    		id = "function "+id;
+    		new Function("function "+name+"(){}");
+    		name = "function "+name;
     	}catch(e){
-    		id += "=function";
+    		name += "=function";
     	}
     }else{
-    	id = "function";
+    	name = "function";
     }
-    return id+"("+args+'){'+text+'\n}';
+    return name+"("+args+'){'+text+'\n}';
 }
 
 function TCP(pt){
@@ -201,7 +199,7 @@ JSTranslateContext.prototype = new TCP({
 	        //alert(["编译失败：",buf.join(""),code])
 	        throw e;
 	    }
-	    this.body = optimizeFunction(this.reset(),this.id,this.refMap,this.params,this.defaults);
+	    this.body = optimizeFunction(this.reset(),this.name,this.refMap,this.params,this.defaults);
 	    //this.append("return $_out.join('');");
 	},
 	

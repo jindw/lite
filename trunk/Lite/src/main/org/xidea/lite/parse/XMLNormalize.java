@@ -1,4 +1,4 @@
-package org.xidea.lite;
+package org.xidea.lite.parse;
 
 public interface XMLNormalize {
 	public String normalize(String text,String id);

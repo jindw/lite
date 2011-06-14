@@ -83,7 +83,7 @@ TemplateImpl.prototype.render = function(context){
 	        while(i--){//本来是编译期处理的,偷懒,性能优化在toNative中处理吧:(
 	            var item = data[i];
 	            if(item instanceof Array && item[0] == PLUGIN_TYPE){
-	                if(item[3] == PLUGIN_DEFINE){
+	                if(item[2]['class'] == PLUGIN_DEFINE){
 	                    processDef(context2, item);
 	                }
 	            }
@@ -102,7 +102,7 @@ TemplateImpl.prototype.render = function(context){
 
 
 function processDef(context, item){
-    var fn = evaluate(item[2],context);
+    var fn = item[2];
     var args = fn.params;
     var fn = fn.name;
     context[fn] = function(){

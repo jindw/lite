@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.xidea.lite.XMLNormalize;
+import org.xidea.lite.parse.XMLNormalize;
 
 /**
  * @author jindawei

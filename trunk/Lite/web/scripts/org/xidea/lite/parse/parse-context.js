@@ -20,6 +20,7 @@ function ParseContext(config,path){
 	this._attributeMap = [[],[]]
     this._result = new ResultContext();
 	this._context = this;
+	this._result._context = this;
 	this._resources = [];
 	initializeParser(this,config.getExtensions(path));
 }

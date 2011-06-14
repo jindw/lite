@@ -5,6 +5,7 @@
 	</lite>
 	<resource>
 		<group>
+			<include>/**.txt</include>
 			<include>/doc/**</include>
 		</group> 
 	</resource>

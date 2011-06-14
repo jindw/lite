@@ -38,6 +38,7 @@ public class Template {
 	public static final int CAPTRUE_TYPE = 9; // [9,[...],'var']
 
 	public static final String FOR_KEY = "for";
+	private static final int PLUGIN_POS = 2;
 
 	protected ExpressionFactory expressionFactory = new ExpressionFactoryImpl();
 
@@ -145,17 +146,17 @@ public class Template {
 	protected void compilePlugin(final Object[] cmd, List<Object> result) {
 		try {
 			int forCount0 = forCount;
-			Expression el = createExpression(cmd[2]);
+			Map<String, Object> config = (Map<String, Object>) cmd[2];
 			Class<? extends RuntimePlugin> addonType = (Class<? extends RuntimePlugin>) Class
-					.forName((String) cmd[3]);
+					.forName((String) config.get("class"));
 			RuntimePlugin addon = addonType.newInstance();
-			ReflectUtil.setValues(addon, (Map) el.evaluate());
+			ReflectUtil.setValues(addon, config);
 			Object[] children = compile((List<Object>) cmd[1]);
 			if (addonType == DefinePlugin.class) {// definePlugin no status care
 				forCount = forCount0;
 			}
 			addon.initialize(this, children);
-			cmd[3] = addon;
+			cmd[PLUGIN_POS] = addon;
 		} catch (Exception e) {
 			log.error("装载扩展失败", e);
 		}
@@ -230,7 +231,7 @@ public class Template {
 
 	private void prossesPlugin(ValueStack context, Object[] data, Writer out)
 			throws Exception {
-		RuntimePlugin addon = (RuntimePlugin) data[3];
+		RuntimePlugin addon = (RuntimePlugin) data[PLUGIN_POS];
 		addon.execute(context, out);
 	}
 

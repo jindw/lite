@@ -12,7 +12,6 @@ import org.xidea.el.ExpressionToken;
 import org.xidea.el.Reference;
 import org.xidea.el.ReferenceExpression;
 import org.xidea.el.ValueStack;
-import org.xidea.el.json.JSONEncoder;
 
 public class ExpressionImpl implements Expression, ReferenceExpression,
 		ExpressionInfo {
@@ -56,7 +55,7 @@ public class ExpressionImpl implements Expression, ReferenceExpression,
 		for(int i = 0;i<context.length;i++){
 			map.put(context[i], context[++i]);
 		}
-		System.out.println(JSONEncoder.encode(map));
+		//System.out.println(JSONEncoder.encode(map));
 		return evaluate(map);
 	}
 
@@ -106,7 +105,7 @@ public class ExpressionImpl implements Expression, ReferenceExpression,
 		return list;
 	}
 
-	static void appendVar(ExpressionToken el, List<String> list) {
+	private static void appendVar(ExpressionToken el, List<String> list) {
 		if (el != null) {
 			int type = el.getType();
 			if (type > 0) {

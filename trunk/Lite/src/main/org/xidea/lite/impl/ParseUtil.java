@@ -80,7 +80,7 @@ public class ParseUtil {
 
 	}
 
-	static JSIRuntime getJSIRuntime() {
+	public static JSIRuntime getJSIRuntime() {
 		JSIRuntime rt = jsi.get();
 		if (rt == null) {
 			jsi.set(rt = RuntimeSupport.create());

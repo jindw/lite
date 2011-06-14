@@ -62,15 +62,19 @@ function TCP(pt){
 }
 TCP.prototype = TranslateContext.prototype;
 function toArgList(params,defaults){
-	if(defaults && defaults.length){
-		params = params.concat();
-		var i = params.length;
-		var j = defaults.length;
-		while(j--){
-			params[--i] += '='+stringifyPHP(defaults[j]);
+	if(params.length){
+		if(defaults && defaults.length){
+			params = params.concat();
+			var i = params.length;
+			var j = defaults.length;
+			while(j--){
+				params[--i] += '='+stringifyPHP(defaults[j]);
+			}
 		}
+		return '$'+params.join(',$')
+	}else{
+		return '';
 	}
-	return params.join(',')
 }
 function _stringifyPHPLineArgs(line){//.*[\r\n]*
 	var endrn="'";
@@ -109,7 +113,7 @@ PHPTranslateContext.prototype = new TCP({
 	    for(var i=0;i<this.defs.length;i++){
 	        var def = this.defs[i];
 	        var n = def.name;
-	        this.append("if(function_exists('lite_def_",n,"')){function lite_def_",
+	        this.append("if(!function_exists('lite__",n,"')){function lite__",
 	        		n,"(",toArgList(def.params),'){')
 	        this.depth++;
 	        this.append("ob_start();");

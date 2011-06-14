@@ -18,19 +18,23 @@ function TranslateContext(){
     this.idMap = {};
     this.depth = 0;
 }
-function LiteContext(code,params,parentContext,name){
+function LiteContext(code,name,params){
 	/**
 	 * 是否需要XMLEncode 支持
 	 */
 	this.xmlType = 0;
 	/**
-	 * 本地申明变量表[参看:var 语法]
+	 * 本地申明变量表[参看:var,def 语法,包含函数定义]
 	 */
 	this.varMap={};
 	/**
 	 * 外部引用变量表[模板中使用到的外部变量名(不包括模板申明的变量)]
 	 */
 	this.refMap={};
+	/**
+	 * 所有函数调用记录:[true,直接调用, false 可能调用(表达式出口函数)]
+	 */
+	this.callMap={};
 	/**
 	 * 所有函数定义数组
 	 */
@@ -40,55 +44,40 @@ function LiteContext(code,params,parentContext,name){
 	 */
     this.fors = [];
     /**
+     * 函数名称 可以是null
+     */
+    this.name = name;
+    /**
      * 当前域下的参数表[可以为null,null和空数组表示的意思不同]
      */
     this.params = params;
-    this.parentContext = parentContext;
-    this.name = name;
-	if(parentContext){
-		addVar(this,name);
-		addVar(parentContext,name);
-		this.fors = parentContext.fors;
-		parentContext.defs.push(this);
-	}
     walkCode(this,code)
 
 }
 
-function walkCode(vs,code){
-	if(vs.params){
-		for(var i=0;i<vs.params.length;i++){
-		    vs.varMap[vs.params[i]] = true;
+function walkCode(context,code){
+	if(context.params){
+		for(var i=0;i<context.params.length;i++){
+		    context.varMap[context.params[i]] = true;
 		}
 	}
-	vs._forStack = [];
-	doFind(vs,vs.code = code);
-	for(var n in vs.varMap){
-    	if(vs.refMap[n]){
-			vs.refMap[n] = false;
-    	}
-	}
-    delete vs._forStack;
+	context._forStack = [];
+	doFind(context,context.code = code);
+	//for(var n in context.varMap){
+    //if(context.refMap[n]){
+	//	context.refMap[n] = false;
+    //}
+	//}
+    delete context._forStack;
 }
 /**
  * 函数定义只能在根上,即不能在 if,for之内的子节点中
  * 函数定义是上下文无关的.
  */
-function doFindDef(parentContext,item){
-    if(parentContext.parentNode != null){
-        var error = "函数定义不能嵌套!!"
-        $log.error(error)
-        throw new Error(error)
-    }
-    if(parentContext._forStack.length){
-        var error = "函数定义不能在for 循环内!!"
-        $log.error(error)
-        throw new Error(error)
-    }
-	var el = evaluate(item[2],{});
-	var params = el.params.slice(0);
-	var vs = new LiteContext(item[1],params,parentContext,el.name);
-
+function doFindClient(item){
+	//var config = item[2];
+	//var params = config.params?config.params.slice(0):null;
+	//var context = new LiteContext(item[1],el.name,params);
 }
 TranslateContext.prototype = {
     findForStatus:function(code){
@@ -146,11 +135,13 @@ TranslateContext.prototype = {
                     this.appendCaptrue(item);
                     break;
     			case PLUGIN_TYPE://not support
-    				var pn = item[3]
+    				var pn = item[2]['class']
     				if(/^(?:baidu\.)?org\.xidea\.lite\.EncodePlugin$/.test(pn)){
     					this.appendEncodePlugin(item[1][0]);
+    				}else if(/^(?:baidu\.)?org\.xidea\.lite\.DefinePlugin$/.test(pn)){
+    					//continue;
     				}else{
-    					$log.error("插件类型尚未支持:"+pn);
+    					$log.error("插件类型尚未支持:"+pn,item[2]);
     				}
     				break;
                 case IF_TYPE:
@@ -235,8 +226,10 @@ function doFind(vs,code){
 				exitFor(vs);
 				break;
 			case PLUGIN_TYPE:
-				if(item[3] == 'org.xidea.lite.DefinePlugin'){
-					doFindDef(vs,item)
+				if(item[2]['class'] == 'org.xidea.lite.parse.ClientPlugin'){
+					doFindClient(item)
+				}else{
+					$log.info(item[2])
 				}
 				break;
 			}
@@ -255,8 +248,17 @@ function vistEL(vs,el){
     for(var n in el.refMap){
 		if(!vs.varMap[n]){
 			vs.refMap[n] = true;
+		}else if(!(n in vs.refMap)){
+			vs.refMap[n] = false;
 		}
 	}
+    for(var n in el.callMap){
+    	if(el.callMap[n]){
+			vs.callMap[n] = true;
+		}else if(!(n in vs.callMap)){
+			vs.callMap[n] = false;
+		}
+    }
 	return el;
 }
 function enterFor(vs,forCode){
@@ -271,12 +273,7 @@ function exitFor(vs){
 function addVar(vs,n){
 	vs.varMap[n] = true;
 }
-function setXMLEncode(vs,type){
-    while(vs){
-        vs.xmlType |= type;
-        vs = vs.parentContext;
-    }
-}
+
 
 /* ============================= */
 /**
@@ -285,6 +282,7 @@ function setXMLEncode(vs,type){
 function ELStatus(tokens){
 	this.tree = tokens;
 	this.refMap = {};
+	this.callMap = {};
 	/**
 	 * for  状态设置
 	 */
@@ -302,22 +300,39 @@ function walkEL(thiz,el){
 		return;
 	}else{
 		var arg1 = el[1];
-		if(op == OP_GET){
-			var arg2 = el[2];
-			if(arg1[0] == VALUE_VAR && arg1[1] == 'for' && arg2[0] == VALUE_CONSTANTS){
-				var param = arg2[1];
-				if(param == 'index'){
-					thiz.forIndex = true;
-				}else if(param == 'lastIndex'){
-					thiz.forLastIndex = true;
-				}else{
-					throw new Error("for不支持属性:"+param);
+		if(op == OP_INVOKE){
+			if(arg1[0] == VALUE_VAR){
+				var varName = arg1[1];
+				thiz.callMap[varName] = true;
+			}else if(arg1[0] == OP_GET){//member
+				//TODO:...
+				walkEL(thiz,arg1);
+			}else{
+				//TODO:...
+				walkEL(thiz,arg1);
+				for(var n in thiz.varMap){
+					if(!(n in thiz.callMap)){
+						thiz.callMap[n] = false;
+					}
 				}
-				return ;
 			}
+		}else{
+			if(op == OP_GET){
+				var arg2 = el[2];
+				if(arg1[0] == VALUE_VAR && arg1[1] == 'for' && arg2[0] == VALUE_CONSTANTS){
+					var param = arg2[1];
+					if(param == 'index'){
+						thiz.forIndex = true;
+					}else if(param == 'lastIndex'){
+						thiz.forLastIndex = true;
+					}else{
+						throw new Error("for不支持属性:"+param);
+					}
+					return ;
+				}
+			}
+			arg1 && walkEL(thiz,arg1);
 		}
-		arg1 && walkEL(thiz,arg1);
-		
 		var pos = getTokenParamIndex(el[0]);
 		if(pos>2){
 			walkEL(thiz, el[2]);
