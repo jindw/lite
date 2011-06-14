@@ -2,6 +2,7 @@ package org.jside.webserver;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetAddress;
 import java.net.URI;
 import java.util.Map;
 
@@ -11,7 +12,7 @@ import java.util.Map;
  *
  */
 public interface RequestContext {
-	public Map<String, Object> getApplication();
+	public WebServer getServer();
 
 	public String getRequestURI();
 	public String getRequestHeader(String key);
@@ -40,6 +41,9 @@ public interface RequestContext {
 	public URI getResource(String path);
 	public void setMimeType(String mimeType);
 	public InputStream openStream(URI path);
+
+	public String getQuery();
+	public InetAddress getRemoteAddr();
 
 
 

@@ -14,11 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jside.webserver;
+package org.jside.webserver.action;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
+
+import org.jside.webserver.CGIEnvironment;
+import org.jside.webserver.CGIRunner;
+import org.jside.webserver.RequestContext;
+import org.jside.webserver.RequestContextImpl;
+import org.jside.webserver.RequestUtil;
+import org.jside.webserver.WebServer;
 
 /**
  * 
@@ -46,15 +54,13 @@ public final class CGIAdaptor {
 
 	public void execute() throws IOException {
 		RequestContext req = RequestUtil.get();
-		CGIEnvironment cgiEnv = new CGIEnvironment(server,
+		CGIEnvironment cgiEnv = new CGIEnvironment(
 				(RequestContextImpl) req);
 		String filename = cgiEnv.scriptFilename;
 		if (filename != null) {
 			File file = new File(filename);
 			if (file.exists()) {
-				HashMap<String, String> env = new HashMap<String, String>(
-						System.getenv());
-				cgiEnv.appendTo(env);
+				Map<String, String> env = cgiEnv.toMap(System.getenv());
 				String[] args = new String[0];
 				File work = workDir;
 				if(work == null){

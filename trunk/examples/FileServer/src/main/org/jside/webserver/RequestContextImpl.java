@@ -98,11 +98,6 @@ public class RequestContextImpl implements RequestContext {
 		}
 		throw new RuntimeException("请求异常");
 	}
-	@Override
-	public Map<String, Object> getApplication() {
-		return server.getApplication();
-	}
-
 	public String getRequestURI() {
 		return requestURI;
 	}
@@ -305,6 +300,10 @@ public class RequestContextImpl implements RequestContext {
 		this.in.close();
 		this.out.close();
 		this.remote.close();
+	}
+	@Override
+	public WebServer getServer() {
+		return server;
 	}
 
 }

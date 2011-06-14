@@ -12,10 +12,10 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.HashMap;
 
-import org.jside.webserver.CGIAdaptor;
 import org.jside.webserver.RequestUtil;
 import org.jside.webserver.RequestContext;
 import org.jside.webserver.action.ActionWebServer;
+import org.jside.webserver.action.CGIAdaptor;
 import org.jside.webserver.action.TemplateAction;
 
 public class FileManager {

@@ -3,6 +3,7 @@ package org.jside.webserver;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.net.URI;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -97,6 +98,7 @@ public class CGIEnvironment {
 	public String remoteHost = null;
 	public String remoteAddr = null;
 	public String authType = "";
+	public String documentRoot  = "";
 	public String remoteUser = "";// envp.put("REMOTE_USER",
 	// nullsToBlanks(req.getRemoteUser()));
 	public String remoteIdent = "";// envp.put("REMOTE_IDENT", ""); // not
@@ -106,19 +108,20 @@ public class CGIEnvironment {
 	public String contentLength = "";
 	private RequestContext context;
 
-	public CGIEnvironment(WebServer server,RequestContextImpl context) {
+	public CGIEnvironment(RequestContext context) {
+		WebServer server = context.getServer();
 		this.context = context;
-		
 		//serverName = "localhost";
 		serverPort = String.valueOf(server.getPort());
 		requestMethod = context.getMethod();
 		requestUri = context.getRequestURI().replace('\\', '/');
 		String realpath = toRealPath(server.getWebBase(),requestUri);
+		documentRoot = new File(server.getWebBase()).getAbsolutePath();
 		
 		pathInfo = requestUri.substring(realpath.length());
 		//pathTranslated = null;
-		scriptName = requestUri;
-		scriptFilename = new File(context.getResource(requestUri)).getAbsolutePath();
+		scriptName = realpath;
+		scriptFilename = new File(context.getResource(realpath)).getAbsolutePath();
 		queryString = context.getQuery();
 		remoteAddr = context.getRemoteAddr().getHostAddress();
 		remoteHost = context.getRemoteAddr().getHostName();
@@ -135,7 +138,7 @@ public class CGIEnvironment {
 	}
 
 	public static String toRealPath(URI base,String requestUri) {
-		if("file".equals(base.getAuthority())){
+		if("file".equals(base.getScheme())){
 			File root = new File(base);
 			int p = 0;
 			while(true){
@@ -157,7 +160,11 @@ public class CGIEnvironment {
 		return requestUri;
 	}
 
-	public void appendTo(Map<String, String> envp) {
+	public Map<String, String> toMap(Map<String, String> base ) {
+		HashMap<String, String>envp = new HashMap<String, String>();
+		if(base != null){
+			envp.putAll(base);
+		}
 		Field[] fileds = this.getClass().getFields();
 		for(Field f : fileds){
 			if(f.getType() == String.class){
@@ -201,6 +208,7 @@ public class CGIEnvironment {
 		}
 
 		envp.put("REDIRECT_STATUS", "200");
+		return envp;
 	}
 
 //	public boolean isValid() {
