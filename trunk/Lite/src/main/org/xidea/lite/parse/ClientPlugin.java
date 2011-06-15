@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.impl.ParseUtil;
@@ -26,7 +27,7 @@ public class ClientPlugin implements  OptimizeScope {
 			OptimizeContext context) {
 		this.children = children;
 		this.name = (String) config.get("name");
-		this.params = (List<String>) config.get("params");
+		this.params =(List<String>) config.get("params");
 		this.defaults = (List<String>) config.get("defaults");
 		this.context = context;
 		this.scopeInfo = context.parseScope(children, params);
@@ -51,27 +52,27 @@ public class ClientPlugin implements  OptimizeScope {
 		this.children.clear();
 		this.children.add(result);
 	}
+	private static Pattern CAPTURE_REPLACER = Pattern.compile("\u0009.");
 
 	private static void optimizeAll(final OptimizeContext context) {
 		Map<String, Set<String>> callMap = new HashMap<String, Set<String>>(
 				context.getDefCallMap());
+		
 		// List<String> call = scopeInfo.getCallList();
 		final ArrayList<ClientPlugin> pluginList = new ArrayList<ClientPlugin>();
 		final ArrayList<String> positionList = new ArrayList<String>();
 		final Map<String, Set<String>> namedClientCallMap = new HashMap<String, Set<String>>();
 		context.walk(new OptimizeWalker() {
-			public int visit(List<Object> parent, int index, String position) {
+			public int visit(List<Object> parent, int index, String post32) {
 				@SuppressWarnings("unchecked")
 				OptimizePlugin p = context.getPlugin((List<Object>) parent.get(index));
 				if (p instanceof ClientPlugin) {
 					ClientPlugin plugin = (ClientPlugin) p;
-
-					positionList.add(position);
+					positionList.add(CAPTURE_REPLACER.matcher(post32).replaceAll(""));
 					pluginList.add(plugin);
 					if (plugin.name != null && plugin.name.length() > 0) {
 						namedClientCallMap.put(plugin.name, getCall(plugin));
 					}
-
 				}
 				return index;
 			}
@@ -115,6 +116,9 @@ public class ClientPlugin implements  OptimizeScope {
 
 	public List<String> getVarList() {
 		return scopeInfo.getVarList();
+	}
+	public List<String> getParamList() {
+		return scopeInfo.getParamList();
 	}
 
 }

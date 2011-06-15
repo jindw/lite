@@ -14,7 +14,7 @@ var FOR_TYPE = 5;// [5,[...],'items','var']
 var ELSE_TYPE = 6;// [6,[...],'test']//test opt?
 var PLUGIN_TYPE =7;// [7,[...],'el','clazz']
 var VAR_TYPE = 8;// [8,'value','name']
-var CAPTRUE_TYPE = 9;// [9,[...],'var']
+var CAPTURE_TYPE = 9;// [9,[...],'var']
 
 var IF_KEY = "if";
 var FOR_KEY = "for";
@@ -140,8 +140,8 @@ function renderList(context,data,out){
 	            case VAR_TYPE:
 	                processVar(context, item);
 	                break;
-	            case CAPTRUE_TYPE:
-	                processCaptrue(context, item);
+	            case CAPTURE_TYPE:
+	                processCapture(context, item);
 	                break;
 	            case IF_TYPE:
 	                processIf(context, item, out);
@@ -217,10 +217,10 @@ function processVar(context,data){
 	
 /**
  * 构建申明处理
- * var            [CAPTRUE_TYPE,[...],name]             //设置某个变量（el||string）
+ * var            [CAPTURE_TYPE,[...],name]             //设置某个变量（el||string）
  * @internal
  */	
-function processCaptrue(context, data) {
+function processCapture(context, data) {
 	var buf = [];
 	renderList(context, data[1], buf);
 	context[data[2]]= buf.join('');

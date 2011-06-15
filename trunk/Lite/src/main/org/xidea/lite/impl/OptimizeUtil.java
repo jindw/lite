@@ -1,6 +1,6 @@
 package org.xidea.lite.impl;
 
-import static org.xidea.lite.Template.CAPTRUE_TYPE;
+import static org.xidea.lite.Template.CAPTURE_TYPE;
 import static org.xidea.lite.Template.ELSE_TYPE;
 import static org.xidea.lite.Template.EL_TYPE;
 import static org.xidea.lite.Template.FOR_TYPE;
@@ -30,7 +30,7 @@ import org.xidea.lite.parse.OptimizeWalker;
 class OptimizeUtil {
 	private static final Log log = LogFactory.getLog(OptimizeUtil.class);
 
-	static void optimizeCallList(final Map<String, Set<String>> callMap,
+	static void optimizeCallClosure(final Map<String, Set<String>> callMap,
 			final Set<String> closure) {
 		Collection<String> visits = closure;
 		while (true) {
@@ -156,7 +156,7 @@ class OptimizeUtil {
 					cmd2.add(cmd[0]);
 					currentList.add(cmd2);
 					switch (type) {
-					case CAPTRUE_TYPE:
+					case CAPTURE_TYPE:
 					case IF_TYPE:
 					case ELSE_TYPE:
 					case FOR_TYPE:
@@ -179,7 +179,7 @@ class OptimizeUtil {
 	@SuppressWarnings("unchecked")
 	static boolean walk(List source, OptimizeWalker revicer,
 			StringBuilder position) {
-		for (int i = 0; i < source.size(); i--) {
+		for (int i = 0; i < source.size(); i++) {
 			Object item = source.get(i);
 			if (item instanceof List<?>) {
 				List<?> cmd = (List<?>) item;
@@ -203,13 +203,13 @@ class OptimizeUtil {
 						}
 					} catch (Exception e) {
 					}
-				case CAPTRUE_TYPE:
+				case CAPTURE_TYPE:
 				case IF_TYPE:
 				case ELSE_TYPE:
 				case FOR_TYPE:
 					if (position != null) {
 						position.append((char) type);
-						position.append((char) i);
+						position.append((char) (i+32));
 					}
 					try{
 						if (walk((List<?>) cmd.get(1), revicer, position)) {
@@ -234,7 +234,7 @@ class OptimizeUtil {
 
 	static BlockInfoImpl parseList(List<Object> list, List<String> params) {
 		BlockInfoImpl bi = new BlockInfoImpl();
-		bi.varList.addAll(params);
+		bi.paramList.addAll(params);
 		parseList(bi, list, true);
 		return bi;
 	}
@@ -279,7 +279,7 @@ class OptimizeUtil {
 						}
 					} catch (Exception e) {
 					}
-				case CAPTRUE_TYPE:
+				case CAPTURE_TYPE:
 				case IF_TYPE:
 				case ELSE_TYPE:
 				case FOR_TYPE:
@@ -287,7 +287,7 @@ class OptimizeUtil {
 				}
 				switch (type) {
 				case VAR_TYPE:
-				case CAPTRUE_TYPE:
+				case CAPTURE_TYPE:
 					bi.addVar((String) item.get(2));
 				}
 			}
@@ -304,7 +304,7 @@ class OptimizeUtil {
 			if (op == ExpressionToken.VALUE_VAR) {
 				String varName = (String) el.getParam();
 				thiz.refList.add(varName);
-				if(!thiz.varList.contains(varName)){
+				if(!thiz.varList.contains(varName) && thiz.paramList.contains(varName)){
 					thiz.externalRefList.add(varName);
 				}
 			}
@@ -316,7 +316,10 @@ class OptimizeUtil {
 				int op1 = arg1.getType();
 				if (op1 == ExpressionToken.VALUE_VAR) {
 					String varName = (String) arg1.getParam();
-					if (thiz.varList.contains(varName)) {// call 的是表达式, 不靠谱
+					if (thiz.varList.contains(varName)
+							//TODO:如果仅仅是参数被调用,问题不在自身,而在调用者!此问题忽略
+							//|| thiz.argList.contains(varName) 
+							) {// call 的是表达式, 不靠谱
 						log.info("表达式函数调用");
 						thiz.callList.add("*");
 						walkEL(thiz, arg1);
@@ -350,8 +353,8 @@ class OptimizeUtil {
 
 class BlockInfoImpl implements OptimizeScope {
 
+	ArrayList<String> paramList = new ArrayList<String>();
 	ArrayList<String> varList = new ArrayList<String>();
-
 	List<Set<String>> varStack = new ArrayList<Set<String>>();
 	ArrayList<String> refList = new ArrayList<String>();
 	ArrayList<String> externalRefList = new ArrayList<String>();
@@ -378,5 +381,8 @@ class BlockInfoImpl implements OptimizeScope {
 
 	public List<String> getExternalRefList() {
 		return externalRefList;
+	}
+	public List<String> getParamList() {
+		return paramList;
 	}
 }

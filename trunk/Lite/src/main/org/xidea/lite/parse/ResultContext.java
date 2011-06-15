@@ -75,7 +75,7 @@ public interface ResultContext {
 
 	public void appendVar(String name, Object valueEL);
 
-	public void appendCaptrue(String varName);
+	public void appendCapture(String varName);
 
 	public void appendPlugin(String pluginClass,  Map<String, Object> config);
 

@@ -101,8 +101,8 @@ ResultContext.prototype = {
 		this.result.push([VAR_TYPE,requireEL(this,valueEL),checkVar(varName)]);
 	},
 
-	appendCaptrue:function(varName){
-		this.result.push([CAPTRUE_TYPE,checkVar(varName)]);
+	appendCapture:function(varName){
+		this.result.push([CAPTURE_TYPE,checkVar(varName)]);
 	},
 	appendPlugin:function(clazz, config){
 		if(typeof config == 'string'){
@@ -118,9 +118,13 @@ ResultContext.prototype = {
 		return optimizeResult(this.result.splice(mark,this.result.length));
 	},
 	toList:function(){
+		if(!this.optimized){
 		var result = optimizeResult(this.result);
 		var defMap = {};
     	var pureCode = buildTreeResult(result,defMap);
+    	this.optimized = doOptimize(defMap,pureCode);
+		}
+    	return this.optimized;
 	}
 }
 function requireEL(context,el){

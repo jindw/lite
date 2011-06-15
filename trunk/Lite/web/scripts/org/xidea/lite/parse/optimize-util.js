@@ -11,7 +11,7 @@
 function doOptimize(defMap,templateList){
 	var pluginObjectList = [];
 	var optimizeContext = [templateList,defMap,pluginObjectList];
-	optimizePluginWalk(templateList, function(parentNode, index, position) {
+	optimizePluginWalk(templateList, function(parentNode, index) {
 		var cmd = parentNode[index];
 		var config = cmd[2];
 		var className = config["class"];
@@ -22,23 +22,79 @@ function doOptimize(defMap,templateList){
 			//TODO:..
 			//pluginMap.put(cmd, plugin);
 		} catch (e) {
-			log.warn("ParsePlugin initialize failed:" + config, e);
+			$log.warn("ParsePlugin initialize failed:" + config, e);
 		}
 		return index;
 	});
-	for (var i=0,l=pluginObjectList.length;i<l;i++) {
-		plugin[0].before();
-	}
-	// sort walk
-	optimizePluginWalk(templateList, function( parentNode, index, position) {
-		var cmd =  parentNode[index];
-		var p = pluginMap[cmd];
-		if (p != null) {
-			p.optimize();
+	if(pluginObjectList.length){
+		for (var i=0,l=pluginObjectList.length;i<l;i++) {
+			pluginObjectList[i][0].before();
 		}
-		return index;
-	},null);
+		// sort walk
+		optimizePluginWalk(templateList, function( parentNode, index) {
+			var cmd =  parentNode[index];
+			for (var i=0,l=pluginObjectList.length;i<l;i++) {
+				if(pluginObjectList[i][1] == cmd){
+					var p = pluginObjectList[i][0];
+					break;
+				}
+			}
+			if (p != null) {
+				p.optimize();
+			}
+			return index;
+		},null);
+		optimizePluginWalk(templateList, function(  parentNode, index) {
+			var cmd = parentNode[index];
+			var config = cmd[2];
+			var className = config["class"];
+			if(className in PLUGIN_TYPE_MAP){
+				var children = cmd[1];
+				var args = [index,1].concat(children);
+				parentNode.splice.apply(parentNode,args);
+				index--;
+				index += children.length;
+			}
+			return index;
+		});
+	}
+	var result = [];
+	for(var n in defMap){
+		result.push(defMap[n]);
+	}
+	return result.concat(templateList);
 }
+/**
+ * callMap = {"fn":{"fn1":1,"fn2":2...}}
+ * closure = {"fn1":1,"fn2":2}
+ */
+function optimizeCallClosure(callMap,
+			closure) {
+	var waitMap = closure;
+	while (true) {
+		var newClosure = {};
+		for (var fn in waitMap) {
+			var called = callMap[fn];
+			for (var fn2 in called) {
+				if ((fn2 in callMap)
+						&& !(fn2 in closure) && !(fn2 in newClosure)) {
+					newClosure[fn2]=1;
+				}
+			}
+		}
+		var hit  = false;
+		for(var fn in newClosure){
+			hit = true;
+			closure[fn] = 1;
+		}
+		if (hit) {
+			waitMap = newClosure;
+		} else {
+			return;
+		}
+	}
+}
+
 function ClientPlugin(config, children, optimizeContext){
 	this.name = config.name;
 	this.params = config.params;
@@ -54,22 +110,115 @@ ClientPlugin.prototype = {
 			optimizeAllClient.apply(this,this.context);
 		}
 		var jst = new JSTranslator(this.name,this.params,this.defaults);
-		var result = jst.translate(this.children);
+		var defMap = this.context[1]
+		var result = [];
+		for(var n in this.optimizedCall){
+			result.push(defMap[n]);
+		}
+		var result = jst.translate(result.concat(this.children));
 		this.children.length = 0;
 		this.children.push(result);
 	}
 }
-function optimizeAllClient(templateList,defMap,pluginObjectList){
+function getDefScope(data){
+	var scope = data[-1];
+	if(!scope){
+		scope = new OptimizeScope(data[1],data[2].params);
+		data[-1] = scope;
+	}
+	return scope;
+}
+function copy(source,target){
+	for(var n in source){
+		source[n] = target[n];
+	}
+}
+function getDefCall(data){
+	var scope = getDefScope(data);
+	var callMap = {}
+	copy(scope.callMap,callMap);
+	if(scope.callMap['*']){
+		copy(scope.externalRefMap,callMap);
+		delete callMap['*'];
+	}
+	return callMap
 	
+}
+function optimizeAllClient(templateList,defMap,pluginObjectList){
+	var positionList = [];
+	var namedClientCallMap = {};
+	var pluginList = [];
+	var dataList = [];
+	optimizePluginWalk(templateList, function( parentNode, index, post32) {
+		var cmd =  parentNode[index];
+		for(var i = pluginObjectList.length;--i>0;){
+			if(pluginObjectList[i][0] instanceof ClientPlugin){
+				var p = pluginObjectList[i][0];
+				positionList.push(post32.replace(/\u0009./g,''));
+				pluginList.push(p);
+				if(p.name){
+					namedClientCallMap[p.name] = getDefCall(pluginObjectList[i][1]);
+					
+				}
+				break;
+			}
+		}
+		return index;
+	},[]);
+	var callMap = {};
+	for(var n in namedClientCallMap){
+		callMap[n] = namedClientCallMap[n];
+	}
+	for(var n in defMap){
+		if(!(n in callMap)){
+			callMap[n] = getDefCall(defMap[n]);
+		}
+	}
+	for (var i = 0, end = positionList.length; i < end; i++) {
+		var plugin = pluginList[i];
+		var position = positionList[i];
+		var optimizedCall = getDefCall(plugin);
+		optimizeCallClosure(callMap, optimizedCall);
+		for(var n in optimizedCall){
+			if(n in namedClientCallMap){
+				delete optimizedCall[n];
+			}
+		}
+		for (var j = 0; j < i; j++) {
+			if (position.indexOf(positionList[i]) ==0) {
+				var removeMap = pluginList[j].optimizedCall;
+				for(var n in removeMap){
+					delete optimizedCall[n];
+				}
+			}
+		}
+		plugin.optimizedCall = optimizedCall;
+	}
 }
 function ResourcePlugin(config, children, optimizeContext){
 	this.id = config.id;
 	this.context = optimizeContext;
+	this.children = children;
 	
 }
 ResourcePlugin.prototype = {
 	before:function(){
-		
+		var remove = [];
+		var id = this.id;
+		optimizePluginWalk(this.context[0],function(parentNode, index, position) {
+			var cmd = parentNode[index];
+			var config = cmd[2];
+			if (id == config.targetId) {
+				remove.push(parentNode,index)
+			}
+			return index;
+		});
+		while(remove.length){
+			var index = remove.pop();
+			var parentNode = remove.pop();
+			var cmds = parentNode.splice(index,1);
+			this.children.push(cmds[0]);
+		}
 	},
 	optimize:function(){
 		
@@ -84,7 +233,7 @@ var PLUGIN_TYPE_MAP = {
  * @see org.xidea.lite.OptimizeContext#walk(OptimizeWalker parseWalker);
  */
 function optimizePluginWalk(source,callback,position){
-	for (var i = 0; i < source.length; i--) {
+	for (var i = 0; i < source.length; i++) {
 		var item = source[i];
 		if (item instanceof Array) {
 			var cmd = item;
@@ -93,21 +242,21 @@ function optimizePluginWalk(source,callback,position){
 			case PLUGIN_TYPE:
 				var config = cmd[2];
 				var className =  config["class"];
-				if (PLUGIN_TYPE_MAP[clazz]) {//这里不会碰到def
-					var j = callback(source, i, position);
+				if (PLUGIN_TYPE_MAP[className]) {//这里不会碰到def
+					var j = callback(source, i, position && String.fromCharCode.apply(null,position));
 					if (j == -1) {
 						return true;
 					} else {
 						i = j;
 					}
 				}
-			case CAPTRUE_TYPE:
+			case CAPTURE_TYPE:
 			case IF_TYPE:
 			case ELSE_TYPE:
 			case FOR_TYPE:
 				try{
 					if (position) {
-						position.push(type,i);
+						position.push(type,i+32);
 					}
 					if(optimizePluginWalk(cmd[1], callback, position)){
 						return true;
@@ -195,7 +344,7 @@ function buildTreeResult(result,defMap){
 					cmd2.push(item[0]);
 					current.push(cmd2);
 					switch (type) {
-					case CAPTRUE_TYPE:
+					case CAPTURE_TYPE:
 					case IF_TYPE:
 					case ELSE_TYPE:
 					case PLUGIN_TYPE:

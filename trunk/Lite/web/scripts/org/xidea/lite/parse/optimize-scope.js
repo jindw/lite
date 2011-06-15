@@ -7,31 +7,34 @@
  */
 
 function OptimizeScope(code,params){
+	this.paramList =  params?params.concat():[];
+	this.paramMap = listMap(this.paramList,{});
+	this.varList = [];
+	this.varMap = {}
 	this.callList = [];
-	this.callMap = {};
-	
-	this.varList =  params?params.concat():[];
-	this.varMap = {};
-	
 	this.externalRefList = [];
-	
 	this.refList = [];
-	this.refMap = {};
-	this.fors = [];
-	context._forStack = [];
-	vistLite(context,context.code = code);
-    delete context._forStack;
+	this.forList = [];
+	this.defList = [];
+	
+	this._forStack = [];
+	vistLite(this,this.code = code);
+    delete this._forStack;
+	this.callMap =listMap(this.callList, {});
+	this.refMap =listMap(this.refList, {});
+	this.externalRefMap =listMap(this.externalRefList, {});
 }
-function findForStatus(scope,code){
-    var fis = scope.fors;
-    var i = fis.length;
-    while(i--){
-        var fi = fis[i];
-        if(fi.code == code){
-            return fi;
-        }
-    }
-    //return this.vs.getForStatus(forCode);
+function listMap(list,map){
+	var i = list.length;
+	while(i--){
+		var n = list[i];
+		if(n in map){
+			map[n]+=1;
+		}else{
+			map[n] = 1;
+		}
+	}
+	return map;
 }
 function ForStatus(code){
     this.code = code;
@@ -39,9 +42,19 @@ function ForStatus(code){
     this.lastIndex;
     this.ref;
     this.depth
+    //this.beforeStatus
 }
-
-
+function vistDef(context,item){
+	var config = item[2];
+	var params = config.params;
+	var defaults = config.defaults;
+	//def can not change!!. use cache
+	var def = item[-1]||new OptimizeScope(item[1],params);
+	def.name = config.name;
+	def.params = config.params;
+	def.defaults = config.defaults;
+	context.defList.push(item);
+}
 function vistLite(context,code){
 	if(code == null){
 		return null;
@@ -65,20 +78,23 @@ function vistLite(context,code){
 				break;
 			// case Template.PLUGIN_TYPE:
 			// case Template.BREAK_TYPE:
-			// case Template.CAPTRUE_TYPE:
+			// case Template.CAPTURE_TYPE:
 			// break;
 			}
 			//child
 			switch (type) {
 			case PLUGIN_TYPE:
-				if(item[2]['class'] == 'org.xidea.lite.parse.ClientPlugin'){
-					doFindClient(item);
+				var className = item[2]['class'];
+				if(className == 'org.xidea.lite.DefinePlugin'){
+					vistDef(context,item)
+				}else if(className == 'org.xidea.lite.parse.ClientPlugin'){
+					//doFindClient(item);
 					break;
 				}else{
 					$log.info(item[2])
 				}
 				
-			case CAPTRUE_TYPE:
+			case CAPTURE_TYPE:
 			case IF_TYPE:
 			case ELSE_TYPE:
 				vistLite(context,item[1]);
@@ -95,7 +111,7 @@ function vistLite(context,code){
 			}
 			//var
 			switch(type){
-			case CAPTRUE_TYPE:
+			case CAPTURE_TYPE:
 			case VAR_TYPE:
 				addVar(context,item[2]);
 				addVar(context,item[2]);
@@ -107,7 +123,7 @@ function vistLite(context,code){
 function enterFor(context,forCode){
     var fs = new ForStatus(forCode);
     fs.depth = context._forStack.length;
-    context.fors.push(fs)
+    context.forList.push(fs)
     context._forStack.push(fs)
 }
 function exitFor(context){
@@ -115,38 +131,26 @@ function exitFor(context){
 }
 function addVar(context,n){
 	context.varList.push(n);
-	context.varMap[n] = true;
+	var map = context.varMap;
+	if(n in map){
+		map[n]+=1;
+	}else{
+		map[n] = 1;
+	}
 }
 
 
 /* ============================= */
-
-function vistEL(context,el){
-	el = new ELStatus(el);
-    for(var n in el.refMap){
-		if(!context.varMap[n]){
-			context.refMap[n] = true;
-		}else if(!(n in context.refMap)){
-			context.refMap[n] = false;
-		}
-	}
-    for(var n in el.callMap){
-    	if(el.callMap[n]){
-			context.callMap[n] = true;
-		}else if(!(n in context.callMap)){
-			context.callMap[n] = false;
-		}
-    }
-	return el;
-}
-
 function walkEL(thiz,el){
+	if(el == null){
+		return null;
+	}
 	var op = el[0];
 	if(op<=0){
 		if(op == VALUE_VAR){
 			var varName = el[1];
 			if(varName == 'for'){setForStatus(thiz,'*')}
-			if(!thiz.varMap[varName]){
+			if(!(varName in thiz.varMap || varName in thiz.paramMap)){
 				thiz.externalRefList.push('*');
 			}
 			thiz.refList.push(varName);
@@ -157,7 +161,10 @@ function walkEL(thiz,el){
 		if(op == OP_INVOKE){
 			if(arg1[0] == VALUE_VAR){
 				var varName = arg1[1];
-				if(this.varMap[varName]){
+				if(varName in thiz.varMap 
+					//@see javadoc OptimizeUtil#walkEL
+					//|| varName in thiz.paramMap)
+					){
 					thiz.callList.push('*');
 					walkEL(thiz,arg1);
 				}else{
@@ -165,8 +172,15 @@ function walkEL(thiz,el){
 				}
 				//thiz.callMap[varName] = true;
 			}else if(arg1[0] == OP_GET){//member
-				//TODO:...
-				walkEL(thiz,arg1);
+				var arg1Right = arg1[2];
+				if (arg1Right[0] == VALUE_CONSTANTS
+						&& (arg1Right[1] instanceof String)) {
+					// member call
+				} else {
+					$log.info("表达式函数调用");
+					thiz.callList.add("*");
+				}
+				walkEL(thiz, arg1);
 			}else{
 				//TODO:...
 				walkEL(thiz,arg1);

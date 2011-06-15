@@ -19,22 +19,25 @@ public class ResourcePlugin implements OptimizePlugin{
 		
 	}
 	public void before(){
-		final ArrayList<List<?>> result = new ArrayList<List<?>>();
+		final ArrayList<List<?>> parentList = new ArrayList<List<?>>();
+		final ArrayList<Integer> indexList = new ArrayList<Integer>();
 		context.walk(new OptimizeWalker() {
 			public int visit(List<Object> parent, int index,String position) {
 				List<?> cmd = (List<?>) parent.get(index);
 				@SuppressWarnings("unchecked")
 				Map<String,Object> config = (Map<String, Object>) cmd.get(2);
 				if (id.equals(config.get("targetId"))) {
-					parent.remove(index);
-					result.add(cmd);
-					return -1;
+					parentList.add(parent);
+					indexList.add(index);
 				}
 				return index;
 			}
-
 		});
-		children.addAll(result);
+		int i = indexList.size();
+		while(i-->0){
+			Object cmd = parentList.get(i).remove((int)indexList.get(i));
+			children.add(cmd);
+		}
 	}
 	public void optimize() {
 	}

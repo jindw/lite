@@ -133,8 +133,8 @@ public class ResultContextImpl implements ResultContext {
 		this.append(Template.VAR_TYPE, el, checkVar(name) );
 	}
 
-	public final void appendCaptrue(String varName) {
-		this.append(Template.CAPTRUE_TYPE, checkVar(varName) );
+	public final void appendCapture(String varName) {
+		this.append(Template.CAPTURE_TYPE, checkVar(varName) );
 
 	}
 
@@ -226,7 +226,7 @@ public class ResultContextImpl implements ResultContext {
 		int i = this.result.size();
 		while (i-- > 0) {
 			switch (getType(i)) {
-			case Template.CAPTRUE_TYPE:
+			case Template.CAPTURE_TYPE:
 			case Template.IF_TYPE:
 			case Template.ELSE_TYPE:
 			case Template.FOR_TYPE:
@@ -248,7 +248,7 @@ public class ResultContextImpl implements ResultContext {
 		int length = this.result.size();
 		for (int i = 0; i < length; i++) {
 			switch (getType(i)) {
-			case Template.CAPTRUE_TYPE:
+			case Template.CAPTURE_TYPE:
 			case Template.IF_TYPE:
 			case Template.ELSE_TYPE:
 			case Template.FOR_TYPE:

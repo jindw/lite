@@ -313,12 +313,12 @@ function processVar(node){
 	    			this.appendVar(name_,stringifyJSON(code));
 	    		}
 	    	}else{
-	    		this.appendCaptrue(name_);
+	    		this.appendCapture(name_);
 		        this.appendAll(code)
 		        this.appendEnd();
 	    	}
 	    }else{
-	        this.appendCaptrue(name_);
+	        this.appendCapture(name_);
 	        processChild(this,node);
 	        this.appendEnd();
 	    }
@@ -330,7 +330,7 @@ function processVar(node){
 			}
 			processChild(this,node);
 		}else{
-	        this.appendCaptrue(name_);
+	        this.appendCapture(name_);
 	        processChild(this,node);
 	        this.appendEnd();
 		}
@@ -341,7 +341,7 @@ function seekVar(text){
 	if(end>0){
 		var value = text.substring(1,end);
 		if(/^\s*(?:\w+|['"][^"]+['"])\s*$/.test(value)){
-	        this.appendCaptrue(value.replace(/['"]/g,''));
+	        this.appendCapture(value.replace(/['"]/g,''));
 		}else{
 			var map = findParamMap(value);
 			for(var n in map){
@@ -446,7 +446,6 @@ function seekDef(text){
 	if(end>0){
 		var ns = text.substring(1,end);
 	    var config = _parseDefName(ns);
-	    //prompt('',el.join(''))
 	    this.appendPlugin(PLUGIN_DEFINE,stringifyJSON(config));
     	return end;
 	}
@@ -455,14 +454,13 @@ function seekDef(text){
 
 function processClient(node){
 	var name_ = getAttribute(node,'*name','id');
-	// new ParseCothisontext.config,this.currentURI);
 	if(/\(/.test(name_)){
 		var config = _parseDefName(name_);
 	}else{
 		config = {name:name_}
 	}
-	this.appendPlugin("org.xidea.lite.parse.ClientPlugin",stringifyJSON(el));
-	this.processChild(context,node);
+	this.appendPlugin("org.xidea.lite.parse.ClientPlugin",stringifyJSON(config));
+	processChild(this,node);
 	this.appendEnd();
 	
 	

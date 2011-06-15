@@ -77,6 +77,8 @@ class LiteService{
 		}else{
 			echo '{"success":false,"phpPath":"'.$phpfile.'"}';
 		}
+		flush();
+		exit();
 		
 	}
 	private function loadJavaScriptClass(){
@@ -102,7 +104,7 @@ if(!($checkScript)){
 </script>";
 	}
 	private function compile($path){
-		if($this->getFileModified($path)){
+		if(true || $this->getFileModified($path)){
 			$scriptBase = $_REQUEST['LITE_SERVICE_URL'];
 			$this->loadJavaScriptClass('org.xidea.lite.web:WebCompiler');
 			echo "<script>
@@ -124,6 +126,12 @@ if(!($checkScript)){
 				sleep(1);
 			}
 		}
+		/*
+		require_once($phpfile);
+		if(!function_exists('lite_template'.str_replace(array('.','/','-','!','%'),'_',$path))){
+			unlink($phpfile);
+		}
+		*/
 	}
 	public function getFileModified($path){
 		$litefile = $this->litecode.'/'.strtr($path,'/','^');

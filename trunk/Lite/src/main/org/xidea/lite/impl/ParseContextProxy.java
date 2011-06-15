@@ -173,8 +173,8 @@ abstract public class ParseContextProxy implements ParseContext {
 		resultContext.appendXT(el);
 	}
 
-	public final void appendCaptrue(String varName) {
-		resultContext.appendCaptrue(varName);
+	public final void appendCapture(String varName) {
+		resultContext.appendCapture(varName);
 	}
 
 	public final void appendEL(Object el) {

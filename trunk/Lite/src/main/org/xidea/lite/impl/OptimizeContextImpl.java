@@ -116,7 +116,7 @@ public class OptimizeContextImpl implements OptimizeContext {
 
 	public void optimizeCallClosure(Map<String, Set<String>> callMap,
 			Set<String> closure) {
-		OptimizeUtil.optimizeCallList(callMap, closure);
+		OptimizeUtil.optimizeCallClosure(callMap, closure);
 	}
 
 

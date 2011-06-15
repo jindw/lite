@@ -38,9 +38,8 @@ function PHPTranslator(id){
 }
 
 PHPTranslator.prototype = {
-	translate:function(context){
+	translate:function(list){
 	    //var result =  stringifyJSON(context.toList())
-	    var list = context.toList();
 		var context = new PHPTranslateContext(list,this.id);
 		context.elPrefix = '';//:'@';
 		context.encoding = "UTF-8";
@@ -103,7 +102,7 @@ function _stringifyPHPLineArgs(line){//.*[\r\n]*
 }
 PHPTranslateContext.prototype = new TCP({
 	stringifyEL:function (el){
-		return el?stringifyPHPEL(this,el.tree):null;
+		return el?stringifyPHPEL(this,el):null;
 	},
 	parse:function(){
 		var code = this.code;
@@ -165,7 +164,7 @@ PHPTranslateContext.prototype = new TCP({
     	prefix = prefix!=null? prefix : 'echo '+this.elPrefix
     	//@see http://notownme.javaeye.com/blog/335036
     	var text = text || this.stringifyEL(el);
-    	var type = getELType(el.tree);
+    	var type = getELType(el);
     	//null,boolean
     	
 		if(isSimplePHPEL(text)){//var encode = 
@@ -242,7 +241,7 @@ PHPTranslateContext.prototype = new TCP({
     appendVar:function(item){
         this.append("$",item[2],"=",this.stringifyEL(item[1]),";");
     },
-    appendCaptrue:function(item){
+    appendCapture:function(item){
         var childCode = item[1];
         var varName = item[2];
 	    this.append("ob_start();");

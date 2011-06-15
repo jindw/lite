@@ -130,7 +130,7 @@ public class XMLTest {
 				switch(type2){
 				case Template.ELSE_TYPE:
 				case Template.FOR_TYPE:
-				case Template.CAPTRUE_TYPE:
+				case Template.CAPTURE_TYPE:
 				case Template.IF_TYPE:
 				case Template.PLUGIN_TYPE:
 					checkElse((List<Object>)data.get(1),info);

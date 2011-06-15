@@ -13,7 +13,6 @@ this.addScript('extension.js','Extension'
 					'org.xidea.lite.util:removeByKey','org.xidea.lite.util:getByKey','org.xidea.lite.util:setByKey']);
 
 
-
            
 this.addScript('parse-context.js','ParseContext'
                 ,['ResultContext','ParseConfig','org.xidea.lite.util:URI','org.xidea.lite.util:loadXML','org.xidea.lite.util:selectNodes']
@@ -21,7 +20,11 @@ this.addScript('parse-context.js','ParseContext'
 
 this.addScript('result-context.js','ResultContext'
                 ,0
-                ,['org.xidea.el.ExpressionTokenizer']);
+                ,['org.xidea.el.ExpressionTokenizer'
+                	,'buildTreeResult'
+                	,'optimizeResult'
+                	,'doOptimize'
+                	]);
      
 this.addScript('parse-chain.js','buildTopChain');
 
@@ -34,6 +37,15 @@ this.addScript('text-parser.js',['parseText']
                 ,0
                 ,["org.xidea.el:findELEnd",'org.xidea.el:ExpressionTokenizer']);
 
+this.addScript('optimize-scope.js','OptimizeScope',
+				'org.xidea.el.*');
+
+this.addScript('optimize-util.js',['doOptimize','optimizeResult','buildTreeResult','PLUGIN_TYPE_MAP']
+				,'org.xidea.el.*'
+				,['OptimizeScope'
+					,"org.xidea.lite.util.stringifyJSON"
+					,"org.xidea.lite.impl.js:JSTranslator"
+					]);
 this.addDependence("*",'org.xidea.lite.impl:*',true);
 this.addDependence("*",'org.xidea.jsi:$log',true);
 

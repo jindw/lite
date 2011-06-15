@@ -35,7 +35,7 @@ public class Template {
 	public static final int PLUGIN_TYPE = 7; // [7,[...],<add on
 	// el>,'<addon-class>']
 	public static final int VAR_TYPE = 8; // [8,<value el>,'name']
-	public static final int CAPTRUE_TYPE = 9; // [9,[...],'var']
+	public static final int CAPTURE_TYPE = 9; // [9,[...],'var']
 
 	public static final String FOR_KEY = "for";
 	private static final int PLUGIN_POS = 2;
@@ -128,7 +128,7 @@ public class Template {
 					if (cmd[2] != null) {
 						cmd[2] = createExpression(cmd[2]);
 					}
-				case CAPTRUE_TYPE:
+				case CAPTURE_TYPE:
 					// children
 					cmd[1] = compile((List) cmd[1]);
 					break;
@@ -212,7 +212,7 @@ public class Template {
 					case VAR_TYPE:// ":set"://var
 						processVar(context, data);
 						break;
-					case CAPTRUE_TYPE:// ":set"://var
+					case CAPTURE_TYPE:// ":set"://var
 						processCaptrue(context, data);
 						break;
 					}

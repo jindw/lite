@@ -66,23 +66,7 @@
 			</classpath>
 		</javac>
 	</target>
-	<target name="join-php">
-		<concat destfile="build/dest/LiteEngine.php" encoding="utf-8">
-			<path path="src/php/lite/LiteEngine.php" />
-			<path path="src/php/lite/LiteFunction.php" />
-			<path path="src/php/lite/LiteCompiler.php" />
-		</concat>
-		<!-- 合并之后替换掉多余的require_once  -->
-		<!--
-		<replaceregexp file="web/WEB-INF/template.php"
-			match="^require_once|^\?&gt;&lt;\?php" replace="//\0" byline="true" encoding="utf-8"/>
-		-->
-		<replace file="build/dest/LiteEngine.php" encoding="utf-8">
-			<replacefilter token="&#10;require_once" value="&#10;//require_once" />
-			<replacefilter token="&#10;?&gt;&lt;?php" value="&#10;//?&gt;&lt;?php" />
-		</replace>
-	</target>
-	<target name="package" depends="init,compress,join-php">
+	<target name="package" depends="init,compress">
 		<delete>
 			<fileset dir="build/dest/">
 				<include name="Example-*.zip" />
@@ -126,6 +110,7 @@
 			<fileset dir="web/WEB-INF/classes">
 				<include name="org/xidea/lite/*/*.js" />
 				<include name="org/xidea/el/*.js" />
+				<include name="lite/*.*" />
 			</fileset>
 			
 			<zipgroupfileset dir="web/WEB-INF/lib/">
@@ -145,24 +130,6 @@
 		<copy tofile="build/dest/JSEL-${version}.jar" file="build/dest/JSEL.jar" />
 		<copy tofile="build/dest/Lite-${version}.jar" file="build/dest/Lite.jar" />
 		<copy tofile="build/dest/LiteRT-${version}.jar" file="build/dest/LiteRT.jar" />
-
-		<zip destfile="build/dest/Example.zip">
-			<zipfileset dir="build/dest/" prefix="WEB-INF/lib/">
-				<include name="Lite.jar" />
-			</zipfileset>
-			<zipfileset dir="build/dest/" prefix="WEB-INF/classes/lite/">
-				<include name="TemplateEngine.php" />
-			</zipfileset>
-			<zipfileset dir="web/">
-				<include name="WEB-INF/classes/lite/*.py" />
-				<include name="WEB-INF/lite.xml" />
-				<include name="WEB-INF/web.xml" />
-				<include name="example/*.xhtml" />
-				<include name="example/test.php" />
-				<include name="example/test.py" />
-			</zipfileset>
-		</zip>
-		<copy tofile="build/dest/Example-${version}.zip" file="build/dest/Example.zip" />
 
 	</target>
 	<target name="test">

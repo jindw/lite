@@ -72,6 +72,7 @@ JSTranslator.prototype = {
 	    	//var result =  stringifyJSON(context.toList())
 	        //var list = context.toList();
 		    var context = new JSTranslateContext(list,this.name,this.params,this.defaults);
+		    context.litePrefix = this.litePrefix || "lite__";
 		    context.parse();
 		    var code = context.toString();
 		    new Function("function x(){"+code+"\n}");
@@ -83,9 +84,9 @@ JSTranslator.prototype = {
 	    	$log.error(code,e);
 	        code = "return ('生成js代码失败：'+"+stringifyJSON(buf.join("\n"))+');';
 	    }
-	    //if(context.getFeatrue(litefile) == null){
-	    	result.push("if(!window.lite__def){",INIT_SCRIPT,"}")
-	    //}
+    	if(!this.litePrefix){
+    		result.push("if(!window.lite__def){",INIT_SCRIPT,"}");
+    	}
 	    result.push(code);
 	    return result.join("\n");
 	}
@@ -104,11 +105,30 @@ function($_context){
 }
  */
 function JSTranslateContext(code,name,params,defaults){
-    TranslateContext.call(this,code,name,params);
+    TranslateContext.call(this,code,name,params,defaults);
     this.defaults = defaults;
-    
 }
-function optimizeFunction(text,name,refMap,params,defaults){
+var GLOBAL_VAR_MAP ={
+	"JSON":1,
+	"Math":1
+}
+var GLOBAL_DEF_MAP ={
+	"parseInt":1, 	
+	"parseFloat":1, 	
+	"encodeURIComponent":1, 	
+	"decodeURIComponent":1, 	
+	"encodeURI":1, 	
+	"decodeURI":1, 	
+	"isFinite":1, 	
+	"isNaN":1
+};
+function copy(source,target){
+	for(var n in source){
+		target[n] = source[n];
+	}
+}
+function optimizeFunction(context,name,refMap,callMap,params,defaults){
+	var text = context.reset();
 	var result = [];
 	var p = /\b\$_out.push\((?:(.*)\);)?/g;
 	var args = '$_context';
@@ -117,9 +137,12 @@ function optimizeFunction(text,name,refMap,params,defaults){
 	}
 	p.lastIndex=0;
 	p.exec(text);
-	for(var n in refMap){
-		if(refMap[n]){
-			result.push('\tvar ',n,'=lite__init("',n,'"',(params?',"$_context"':'""'),');\n');
+	var map = {};
+	copy(refMap,map);
+	copy(callMap,map);
+	for(var n in map){
+		if(!(n in GLOBAL_VAR_MAP || n in GLOBAL_DEF_MAP)){
+			result.push('\tvar ',n,'=',context.litePrefix,'init("',n,'"',(params?',"$_context"':'""'),');\n');
 		}
 	}
 	//(a,b,c=3,d=4)
@@ -165,48 +188,17 @@ function optimizeFunction(text,name,refMap,params,defaults){
     }
     return name+"("+args+'){'+text+'\n}';
 }
-
-function TCP(pt){
+function PT(pt){
 	for(var n in pt){
-		this[n] = pt[n];
+		this[n]=pt[n];
 	}
 }
-TCP.prototype = TranslateContext.prototype;
-JSTranslateContext.prototype = new TCP({
-	stringifyEL:function (el){
-		return el?stringifyJSEL(el.tree):null;
-	},
-	parse:function(){
-		var code = this.code;
-		var params = this.params;
-		this.depth=0;
-		this.out = [];
-	    //add function
-	    for(var i=0;i<this.defs.length;i++){
-	        var def = this.defs[i];
-	        var n = def.name;
-	        this.depth++;
-	        this.appendCode(def.code);
-	        var content = optimizeFunction(this.reset(),n,def.refMap,def.params,def.defaults);
-	        this.depth--;
-	        this.append("lite_def('",n,"',",content,");");
-	    }
-	    this.header = this.reset();
-	    
-	    try{
-	        this.appendCode(code);
-	    }catch(e){
-	        //alert(["编译失败：",buf.join(""),code])
-	        throw e;
-	    }
-	    this.body = optimizeFunction(this.reset(),this.name,this.refMap,this.params,this.defaults);
-	    //this.append("return $_out.join('');");
-	},
-	
-    _appendOutput:function(){
+PT.prototype = TranslateContext.prototype
+JSTranslateContext.prototype = new PT({
+	_appendOutput:function(){
     	var len = arguments.length;
     	var data = Array.prototype.join.call(arguments,'');
-    	var lastOut = this._lastOut;
+    	var lastOut = this._lastOut;//不能用闭包var代替
     	var lastIndex = this.out.length-1;
     	if(lastOut &&  this.out[lastIndex] == lastOut){
     		data = lastOut.substring(0,lastOut.length-2)+","+data+");";
@@ -217,6 +209,42 @@ JSTranslateContext.prototype = new TCP({
     	}
     	this._lastOut = data
     },
+	stringifyEL:function (el){
+		return el?stringifyJSEL(el):null;
+	},
+	parse:function(){
+		var code = this.code;
+		var params = this.params;
+		this.depth=0;
+		this.out = [];
+	    //add function
+	    var fs = [];
+	    var defList = this.scope.defList;
+	    for(var i=0;i<defList.length;i++){
+	        var def = defList[i];
+	        var n = def.name;
+	        var refMap = def.externalRefMap;
+	        var callMap = def.callMap;
+	        this.depth++;
+	        this.appendCode(def.code);
+	        var content = optimizeFunction(this,n,refMap,callMap,def.params,def.defaults);
+	        this.depth--;
+	        fs.push(this.litePrefix,"def('",n,"',",content,");");
+	    }
+	    this.header = fs.join('');
+	    
+	    try{
+	        this.appendCode(code);
+	    }catch(e){
+	        //alert(["编译失败：",buf.join(""),code])
+	        throw e;
+	    }
+	    var refMap = this.scope.externalRefMap;
+	    var callMap =this.scope.callMap;
+	    this.body = optimizeFunction(this,this.name,refMap,callMap,this.params,this.defaults);
+	    //this.append("return $_out.join('');");
+	},
+	
     appendStatic:function(item){
     	this._appendOutput(stringifyJSON(item));
     },
@@ -224,7 +252,7 @@ JSTranslateContext.prototype = new TCP({
     	this._appendOutput(this.stringifyEL(item[1]))
     },
     appendXT:function(item){
-        this._appendOutput("lite_encode(",this.stringifyEL(item[1]),")")
+        this._appendOutput(this.litePrefix,"encode(",this.stringifyEL(item[1]),")")
     },
     appendXA:function(item){
         //[7,[[0,"value"]],"attribute"]
@@ -238,18 +266,18 @@ JSTranslateContext.prototype = new TCP({
         if(attributeName){
             this.append("if(",testId,"!=null){");
             this.depth++;
-            this._appendOutput("' ",attributeName,"=\"',lite_encode("+testId+"),'\"'");
+            this._appendOutput("' ",attributeName,"=\"',",this.litePrefix,"encode("+testId+"),'\"'");
             this.depth--;
             this.append("}");
             this.freeId(testId);
         }else{
-        	this._appendOutput("lite_encode(",value,")")
+        	this._appendOutput(this.litePrefix,"encode(",value,")")
         }
     },
     appendVar:function(item){
         this.append("var ",item[2],"=",this.stringifyEL(item[1]),";");
     },
-    appendCaptrue:function(item){
+    appendCapture:function(item){
         var childCode = item[1];
         var varName = item[2];
         var bufbak = this.allocateId();
@@ -259,7 +287,7 @@ JSTranslateContext.prototype = new TCP({
         this.freeId(bufbak);
     },
     appendEncodePlugin:function(item){
-        this._appendOutput('lite_encode(',this.stringifyEL(item[1]),',/[<&"]|(&(?:[a-z]+|#\d+);)/ig);')
+        this._appendOutput(this.litePrefix,'encode(',this.stringifyEL(item[1]),',/[<&"]|(&(?:[a-z]+|#\d+);)/ig);')
     },
     processIf:function(code,i){
         var item = code[i];
@@ -306,7 +334,7 @@ JSTranslateContext.prototype = new TCP({
         }
         //初始化 items 开始
         this.append("var ",indexId,"=0;")
-        this.append("var ",itemsId,"=lite__list(",itemsEL,")");
+        this.append("var ",itemsId,'=',this.litePrefix,"list(",itemsEL,")");
         
         //初始化 for状态
         var needForStatus = forInfo.ref || forInfo.index || forInfo.lastIndex;

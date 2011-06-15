@@ -27,7 +27,7 @@ WebCompiler.prototype.compile = function(path){
 	this.compileTime = (new Date() - t )
 	var t = +new Date();
 	var pt = new PHPTranslator(path.replace(/[\/\-\$\.!%]/g,'_'));//'.','/','-','!','%'
-	this.phpcode = pt.translate(context);
+	this.phpcode = pt.translate(context.toList());
 	this.translateTime = (new Date() - t )
 }
 
