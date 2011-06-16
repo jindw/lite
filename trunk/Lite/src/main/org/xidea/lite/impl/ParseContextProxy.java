@@ -127,7 +127,7 @@ abstract public class ParseContextProxy implements ParseContext {
 			log.error("XML 解析失败："+uri,e);
 			throw e;
 		}catch (IOException e) {
-			log.error("模板装载失败："+uri,e);
+			log.error("模板读取失败："+uri,e);
 			throw e;
 		}catch (RuntimeException e) {
 			log.error("XML装载失败："+uri,e);

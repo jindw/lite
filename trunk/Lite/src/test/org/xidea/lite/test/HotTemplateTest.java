@@ -43,6 +43,19 @@ public class HotTemplateTest {
 		ht = new HotTemplateEngine(new ParseConfigImpl(URI.create("classpath:///"),null));
 		cacheTest(path, ht);
 	}
+	
+
+	@Test
+	public void testWeb() throws URISyntaxException, IOException{
+		String path = "/test/client-optimize/test-call-closure.xhtml";
+		URI root = this.getClass().getResource("/").toURI().resolve("../../");
+		System.out.println(root);
+		HotTemplateEngine ht = new HotTemplateEngine(new ParseConfigImpl(root, null));
+		cacheTest(path, ht);
+		StringWriter out = new StringWriter();
+		ht.render(path, new Object(), out);
+		System.out.println(out);
+	}
 
 	private void cacheTest(String path, HotTemplateEngine ht) throws IOException {
 		Template t1 = ht.getTemplate(path);

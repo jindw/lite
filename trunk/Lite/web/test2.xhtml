@@ -1,0 +1,21 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:c='http://www.xidea.org/lite/core'>
+<c:client name="xxx" >
+	<c:include xpath="//xhtml:body"/>
+</c:client>
+<body>
+<c:for var='item' list="${10}" status='x'>
+${item}=>
+<c:for var='item' list="${['a','b','c']}">
+${item} /${for.index}/${x.index}<hr/>
+</c:for> 
+<c:else>aaaaa</c:else>
+</c:for>
+${int1}/${text1}
+ 
+<c:def name="aa(x)">
+~ ${x} ~
+</c:def>
+${aa(1)}/
+${aa(2)}
+</body>
+</html>

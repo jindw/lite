@@ -168,11 +168,22 @@ ExtensionParser.prototype = {
 		try{
 			var es = 0;
 			var type = node.nodeType;
-			if(type == 9){
+			if(type === 1){
+				var old = this.currentNode;
+				this.currentNode = node;
+				try{
+					if(!this.parseElement(node,context,chain)){
+						chain.next(node);
+					}
+				}finally{
+					this.currentNode = old;
+				}
+				return ;
+			} else if(type === 9){
 				if(this.parseDocument(node,context,chain)){
 					return ;
 				}
-			}else if(type == 2){
+			}else if(type === 2){//attribute
 				try{
 					if(this.parseNamespace(node,context,chain)){
 						return;
@@ -193,11 +204,7 @@ ExtensionParser.prototype = {
 				}catch(e){
 					$log.error("属性扩展解析异常：",node.xml,el==null,es,e)
 				}
-			}else if(type === 1){
-				if(this.parseElement(node,context,chain)){
-					return ;
-				}
-			} 
+			}
 			es += 10;
 			chain.next(node)
 		}catch(e){
@@ -211,7 +218,7 @@ ExtensionParser.prototype = {
 			var es = 0;
 			if(match){
 				var matchLength = match[0].length;
-				var currentNode = context.getCurrentNode();//getAttribute(CURRENT_NODE_KEY)
+				var currentNode = this.currentNode;//getAttribute(CURRENT_NODE_KEY)
 				var prefix = match[1];
 				var fn = match[2]
 				if(prefix == null){

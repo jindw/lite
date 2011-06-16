@@ -7,22 +7,44 @@
  */
 
 function OptimizeScope(code,params){
-	this.paramList =  params?params.concat():[];
-	this.paramMap = listMap(this.paramList,{});
-	this.varList = [];
+
+	this.code = code;
+	/**
+	 * @see org.xidea.lite.parse.OptimizeScope#getParams()
+	 */
+	this.params =  params?params.concat():[];
+	this.paramMap = listMap(this.params,{});
+	/**
+	 * @see org.xidea.lite.parse.OptimizeScope#getVars()
+	 */
+	this.vars = [];
 	this.varMap = {}
-	this.callList = [];
-	this.externalRefList = [];
-	this.refList = [];
-	this.forList = [];
-	this.defList = [];
-	
+	/**
+	 * @see org.xidea.lite.parse.OptimizeScope#getCalls()
+	 */
+	this.calls = [];
+	/**
+	 * @see org.xidea.lite.parse.OptimizeScope#getRefs()
+	 */
+	this.refs = [];
+	/**
+	 * @see org.xidea.lite.parse.OptimizeScope#getExternalRefs()
+	 */
+	this.externalRefs = [];
+	/**
+	 * 所有for信息数组,按深度优先出现顺序放置[_forStack 描述的是当前for深度]
+	 */
+	this.fors = [];
+	/**
+	 * 所有函数定义数组
+	 */
+	this.defs = [];
 	this._forStack = [];
 	vistLite(this,this.code = code);
     delete this._forStack;
-	this.callMap =listMap(this.callList, {});
-	this.refMap =listMap(this.refList, {});
-	this.externalRefMap =listMap(this.externalRefList, {});
+	this.callMap =listMap(this.calls, {});
+	this.refMap =listMap(this.refs, {});
+	this.externalRefMap =listMap(this.externalRefs, {});
 }
 function listMap(list,map){
 	var i = list.length;
@@ -53,7 +75,7 @@ function vistDef(context,item){
 	def.name = config.name;
 	def.params = config.params;
 	def.defaults = config.defaults;
-	context.defList.push(item);
+	context.defs.push(def);
 }
 function vistLite(context,code){
 	if(code == null){
@@ -86,7 +108,8 @@ function vistLite(context,code){
 			case PLUGIN_TYPE:
 				var className = item[2]['class'];
 				if(className == 'org.xidea.lite.DefinePlugin'){
-					vistDef(context,item)
+					vistDef(context,item);
+					break;
 				}else if(className == 'org.xidea.lite.parse.ClientPlugin'){
 					//doFindClient(item);
 					break;
@@ -123,14 +146,14 @@ function vistLite(context,code){
 function enterFor(context,forCode){
     var fs = new ForStatus(forCode);
     fs.depth = context._forStack.length;
-    context.forList.push(fs)
+    context.fors.push(fs)
     context._forStack.push(fs)
 }
 function exitFor(context){
     context._forStack.pop()
 }
 function addVar(context,n){
-	context.varList.push(n);
+	context.vars.push(n);
 	var map = context.varMap;
 	if(n in map){
 		map[n]+=1;
@@ -151,9 +174,9 @@ function walkEL(thiz,el){
 			var varName = el[1];
 			if(varName == 'for'){setForStatus(thiz,'*')}
 			if(!(varName in thiz.varMap || varName in thiz.paramMap)){
-				thiz.externalRefList.push('*');
+				thiz.externalRefs.push(varName);
 			}
-			thiz.refList.push(varName);
+			thiz.refs.push(varName);
 		}
 		return;
 	}else{
@@ -165,10 +188,10 @@ function walkEL(thiz,el){
 					//@see javadoc OptimizeUtil#walkEL
 					//|| varName in thiz.paramMap)
 					){
-					thiz.callList.push('*');
+					thiz.calls.push('*');
 					walkEL(thiz,arg1);
 				}else{
-					thiz.callList.push(varName);
+					thiz.calls.push(varName);
 				}
 				//thiz.callMap[varName] = true;
 			}else if(arg1[0] == OP_GET){//member
@@ -178,13 +201,13 @@ function walkEL(thiz,el){
 					// member call
 				} else {
 					$log.info("表达式函数调用");
-					thiz.callList.add("*");
+					thiz.calls.add("*");
 				}
 				walkEL(thiz, arg1);
 			}else{
 				//TODO:...
 				walkEL(thiz,arg1);
-				thiz.callList.add("*");
+				thiz.calls.add("*");
 			}
 		}else{
 			if(op == OP_GET){
@@ -219,7 +242,7 @@ function setForStatus(thiz,attrName){
 // */
 //function ELStatus(tokens){
 //	this.tree = tokens;
-//	this.refList = [];
+//	this.refs = [];
 //	this.re
 //	this.callMap = {};
 //	/**

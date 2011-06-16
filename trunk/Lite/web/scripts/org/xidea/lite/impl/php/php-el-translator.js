@@ -5,7 +5,7 @@
  * @author jindw
  * @version $Id: template.js,v 1.4 2008/02/28 14:39:06 jindw Exp $
  */
-var VAR_TEMP = "$__lite_tmp"
+var VAR_LITE_EL_TEMP = "$__el_tmp"
 var FOR_STATUS_KEY = '$__for';
 /**
  * 将Lite的表达式结构转化为php表达式
@@ -209,12 +209,12 @@ function stringifyInfix(context,el){
     	if(isSimplePHPEL(value1)){
     		return '('+php2jsBoolean(el[1],value1)+'?'+value2+':'+value1+')'
     	}
-    	return '(('+php2jsBoolean(el[1],value1,VAR_TEMP)+')?'+value2+':'+VAR_TEMP+')'
+    	return '(('+php2jsBoolean(el[1],value1,VAR_LITE_EL_TEMP)+')?'+value2+':'+VAR_LITE_EL_TEMP+')'
     case OP_OR://||
     	if(isSimplePHPEL(value1)){
     		return '('+php2jsBoolean(el[1],value1)+'?'+value1+':'+value2+')'
     	}
-    	return '(('+php2jsBoolean(el[1],value1,VAR_TEMP)+')?'+VAR_TEMP+':'+value2 +')'
+    	return '(('+php2jsBoolean(el[1],value1,VAR_LITE_EL_TEMP)+')?'+VAR_LITE_EL_TEMP+':'+value2 +')'
 	}
 	value1 = addELQute(el,el[1],value1)
 	value2 = addELQute(el,el[2],null,value2)
@@ -341,7 +341,7 @@ function php2jsBoolean(el,value,keepValue,context){
 		var rtv = value;
 		keepValue = value;
 	}else{
-		keepValue = keepValue || VAR_TEMP;
+		keepValue = keepValue || VAR_LITE_EL_TEMP;
 		var rtv = "("+keepValue +"="+ value+")"
 	}
 	if((type & TYPE_ARRAY)||(type & TYPE_MAP)){

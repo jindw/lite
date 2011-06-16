@@ -234,7 +234,9 @@ class OptimizeUtil {
 
 	static BlockInfoImpl parseList(List<Object> list, List<String> params) {
 		BlockInfoImpl bi = new BlockInfoImpl();
-		bi.paramList.addAll(params);
+		if(params!=null){
+			bi.paramList.addAll(params);
+		}
 		parseList(bi, list, true);
 		return bi;
 	}
@@ -245,7 +247,7 @@ class OptimizeUtil {
 		for (Object i : list) {
 			if (i instanceof List<?>) {
 				List<?> item = (List<?>) i;
-				int type = (Integer) item.get(1);
+				int type = (Integer) item.get(0);
 				switch (type) {
 				case VAR_TYPE:
 				case EL_TYPE:
@@ -304,7 +306,7 @@ class OptimizeUtil {
 			if (op == ExpressionToken.VALUE_VAR) {
 				String varName = (String) el.getParam();
 				thiz.refList.add(varName);
-				if(!thiz.varList.contains(varName) && thiz.paramList.contains(varName)){
+				if(!(thiz.varList.contains(varName)||thiz.paramList.contains(varName))){
 					thiz.externalRefList.add(varName);
 				}
 			}
@@ -367,22 +369,22 @@ class BlockInfoImpl implements OptimizeScope {
 		varList.add(name);
 	}
 
-	public List<String> getCallList() {
+	public List<String> getCalls() {
 		return callList;
 	}
 
-	public List<String> getVarList() {
+	public List<String> getVars() {
 		return varList;
 	}
 
-	public List<String> getRefList() {
+	public List<String> getRefs() {
 		return refList;
 	}
 
-	public List<String> getExternalRefList() {
+	public List<String> getExternalRefs() {
 		return externalRefList;
 	}
-	public List<String> getParamList() {
+	public List<String> getParams() {
 		return paramList;
 	}
 }

@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.impl.ParseUtil;
 
-public class ClientPlugin implements  OptimizeScope {
+public class ClientPlugin implements OptimizePlugin, OptimizeScope {
 
 	private String name;
 	private List<String> params;
@@ -21,6 +21,7 @@ public class ClientPlugin implements  OptimizeScope {
 	private OptimizeContext context;
 	private OptimizeScope scopeInfo;
 	private Set<String> optimizedCall = null;
+	private boolean first;
 
 	@SuppressWarnings("unchecked")
 	public void initialize(Map<String, Object> config, List<Object> children,
@@ -36,23 +37,34 @@ public class ClientPlugin implements  OptimizeScope {
 		if(this.optimizedCall == null){
 			optimizeAll(context);
 		}
+		ArrayList<Object> result = new ArrayList<Object>();
+		for(String n : optimizedCall){
+			result.add(context.getDefCode(n));
+		}
+		result.addAll(children);
 		StringBuilder code = new StringBuilder("$import('org.xidea.lite.impl.js:JSTranslator');");
-		code.append("new JSTranslator(");
+		code.append("(function(code,name,params,defaults){");
+		code.append("	var t = new JSTranslator(name,params,defaults);");
+		code.append("	t.litePrefix = ");
+		code.append(this.first?"null":"'lite__'");
+		code.append(";");
+		code.append("	return t.translate(code);");
+		code.append("})(");
+		code.append(JSONEncoder.encode(result));
+		code.append(',');
 		code.append(JSONEncoder.encode(this.name));
 		code.append(',');
 		code.append(JSONEncoder.encode(this.params));
 		code.append(',');
 		code.append(JSONEncoder.encode(this.defaults));
-		code.append(").translate(");
-		code.append(JSONEncoder.encode(this.children));
 		code.append(")");
-		String result = (String) ParseUtil
+		String script = (String) ParseUtil
 				.getJSIRuntime()
 				.eval(code.toString());
 		this.children.clear();
-		this.children.add(result);
+		this.children.add(script);
 	}
-	private static Pattern CAPTURE_REPLACER = Pattern.compile("\u0009.");
+	private static Pattern CAPTURE_REPLACER = Pattern.compile("[\\u0009].");
 
 	private static void optimizeAll(final OptimizeContext context) {
 		Map<String, Set<String>> callMap = new HashMap<String, Set<String>>(
@@ -84,41 +96,46 @@ public class ClientPlugin implements  OptimizeScope {
 			HashSet<String> optimizedCall = new HashSet<String>(getCall(plugin));
 			context.optimizeCallClosure(callMap, optimizedCall);
 			optimizedCall.removeAll(namedClientCallMap.keySet());
+			boolean isFirst = true;
 			for (int j = 0; j < i; j++) {
-				if (position.startsWith(positionList.get(i))) {
+				if (position.startsWith(positionList.get(j))) {
 					optimizedCall.removeAll(pluginList.get(j).optimizedCall);
+					isFirst = false;
 				}
 			}
+			plugin.first = isFirst;
 			plugin.optimizedCall = optimizedCall;
 		}
 	}
 
 	private static Set<String> getCall(OptimizeScope si) {
-		HashSet<String> cs = new HashSet<String>(si.getCallList());
+		HashSet<String> cs = new HashSet<String>(si.getCalls());
 		if (cs.contains("*")) {
-			cs.addAll(si.getExternalRefList());
+			cs.addAll(si.getExternalRefs());
 		}
 		cs.remove("*");
 		return cs;
 	}
 
-	public List<String> getCallList() {
-		return scopeInfo.getCallList();
+	public List<String> getCalls() {
+		return scopeInfo.getCalls();
 	}
 
-	public List<String> getExternalRefList() {
-		return scopeInfo.getExternalRefList();
+	public List<String> getExternalRefs() {
+		return scopeInfo.getExternalRefs();
 	}
 
-	public List<String> getRefList() {
-		return scopeInfo.getRefList();
+	public List<String> getRefs() {
+		return scopeInfo.getRefs();
 	}
 
-	public List<String> getVarList() {
-		return scopeInfo.getVarList();
+	public List<String> getVars() {
+		return scopeInfo.getVars();
 	}
-	public List<String> getParamList() {
-		return scopeInfo.getParamList();
+	public List<String> getParams() {
+		return scopeInfo.getParams();
+	}
+	public void before() {
 	}
 
 }

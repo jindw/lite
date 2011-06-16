@@ -12,4 +12,5 @@ public interface OptimizeContext {
 	public void optimizeCallClosure(Map<String, Set<String>> callMap,
 			Set<String> optimizedCall);
 	public List<Object> optimize();
+	public List<Object> getDefCode(String defName);
 }

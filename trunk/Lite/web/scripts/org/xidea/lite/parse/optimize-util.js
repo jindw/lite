@@ -95,17 +95,20 @@ function optimizeCallClosure(callMap,
 	}
 }
 
+var inc = 1;
 function ClientPlugin(config, children, optimizeContext){
 	this.name = config.name;
 	this.params = config.params;
 	this.defaults = config.defaults;
 	this.children = children;
 	this.context = optimizeContext;
+	this.inc = inc++;
 }
 ClientPlugin.prototype = {
 	before:function(){
 	},
 	optimize:function(){
+//		$log.info("optimize!!!",this.optimizedCall == null,this.inc);
 		if(this.optimizedCall == null){
 			optimizeAllClient.apply(this,this.context);
 		}
@@ -114,6 +117,9 @@ ClientPlugin.prototype = {
 		var result = [];
 		for(var n in this.optimizedCall){
 			result.push(defMap[n]);
+		}
+		if(!this.first){
+			jst.litePrefix = jst.litePrefix || 'lite__';
 		}
 		var result = jst.translate(result.concat(this.children));
 		this.children.length = 0;
@@ -130,7 +136,7 @@ function getDefScope(data){
 }
 function copy(source,target){
 	for(var n in source){
-		source[n] = target[n];
+		target[n] = source[n];
 	}
 }
 function getDefCall(data){
@@ -146,19 +152,21 @@ function getDefCall(data){
 }
 function optimizeAllClient(templateList,defMap,pluginObjectList){
 	var positionList = [];
+	var cmdList = [];
 	var namedClientCallMap = {};
 	var pluginList = [];
 	var dataList = [];
 	optimizePluginWalk(templateList, function( parentNode, index, post32) {
 		var cmd =  parentNode[index];
-		for(var i = pluginObjectList.length;--i>0;){
-			if(pluginObjectList[i][0] instanceof ClientPlugin){
+		for(var i = pluginObjectList.length;i--;){
+			var po = pluginObjectList[i];
+			if(po[1] == cmd && po[0] instanceof ClientPlugin){
 				var p = pluginObjectList[i][0];
 				positionList.push(post32.replace(/\u0009./g,''));
 				pluginList.push(p);
+				cmdList.push(cmd);
 				if(p.name){
 					namedClientCallMap[p.name] = getDefCall(pluginObjectList[i][1]);
-					
 				}
 				break;
 			}
@@ -177,21 +185,24 @@ function optimizeAllClient(templateList,defMap,pluginObjectList){
 	for (var i = 0, end = positionList.length; i < end; i++) {
 		var plugin = pluginList[i];
 		var position = positionList[i];
-		var optimizedCall = getDefCall(plugin);
+		var optimizedCall = getDefCall(cmdList[i]);
 		optimizeCallClosure(callMap, optimizedCall);
 		for(var n in optimizedCall){
 			if(n in namedClientCallMap){
 				delete optimizedCall[n];
 			}
 		}
+		var isFirst = true;
 		for (var j = 0; j < i; j++) {
-			if (position.indexOf(positionList[i]) ==0) {
+			if (position.indexOf(positionList[j]) ==0) {
 				var removeMap = pluginList[j].optimizedCall;
+				isFirst = false;
 				for(var n in removeMap){
 					delete optimizedCall[n];
 				}
 			}
 		}
+		plugin.first = isFirst;
 		plugin.optimizedCall = optimizedCall;
 	}
 }

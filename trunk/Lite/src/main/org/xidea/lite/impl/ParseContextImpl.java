@@ -38,7 +38,6 @@ public class ParseContextImpl extends ParseContextProxy implements ParseContext 
 			return currentNode+"@"+getCurrentURI();
 		}
 	};
-	
 	public ParseContextImpl(ParseConfig config, String path) {
 		super(config,config.getFeatureMap(path));
 		this.extensionParser = new ExtensionParserImpl();

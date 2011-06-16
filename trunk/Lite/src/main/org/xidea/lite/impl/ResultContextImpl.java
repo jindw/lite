@@ -28,6 +28,7 @@ import org.xidea.lite.parse.ResultContext;
 public class ResultContextImpl implements ResultContext {
 	static final Object END_INSTRUCTION = new Object[0];
 
+	@SuppressWarnings("unused")
 	private static final Log log = LogFactory.getLog(ParseContextImpl.class);
 
 	private ExpressionFactory expressionFactory = ExpressionFactoryImpl
@@ -70,13 +71,14 @@ public class ResultContextImpl implements ResultContext {
 		item[0] = type;
 		System.arraycopy(args, 0, item, 1, args.length);
 		result.add(item);
+
 	}
 
 	public final void appendAll(List<Object> items) {
 		for (Object text : items) {
 			if (text instanceof String) {
 				this.append((String) text);
-				return;
+				continue;
 			} else if (text instanceof Collection<?>) {
 				text = ((Collection<?>) text).toArray();
 			}
@@ -99,6 +101,17 @@ public class ResultContextImpl implements ResultContext {
 		}
 	}
 
+	public final void appendEL(Object el) {
+		el = requrieEL(el);
+		this.append(Template.EL_TYPE, el);
+
+	}
+
+	public final void appendXT(Object el) {
+
+		el = requrieEL(el);
+		this.append(Template.XT_TYPE, el );
+	}
 	public final void appendXA(String name, Object el) {
 		el = requrieEL(el);
 		this.append( Template.XA_TYPE, el, name );
@@ -146,16 +159,6 @@ public class ResultContextImpl implements ResultContext {
 		}
 	}
 
-	public final void appendEL(Object el) {
-		el = requrieEL(el);
-		this.append(Template.EL_TYPE, el);
-
-	}
-
-	public final void appendXT(Object el) {
-		el = requrieEL(el);
-		this.append(Template.XT_TYPE, el );
-	}
 
 	public final void appendPlugin(String pluginClazz, Map<String, Object> config) {
 		try {
@@ -167,11 +170,11 @@ public class ResultContextImpl implements ResultContext {
 				config2.put("class",pluginClazz);
 				this.append(Template.PLUGIN_TYPE, config2 );
 			} else {
-				log.error("Plugin class not found(plugin ignored):"
+				throw new RuntimeException("Plugin class not found(plugin ignored):"
 						+ pluginClazz);
 			}
 		} catch (ClassNotFoundException e) {
-			log.error(e);
+			throw new RuntimeException(e);
 		}
 	}
 

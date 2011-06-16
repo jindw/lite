@@ -294,9 +294,7 @@ public class ParseUtil {
 
 	static String loadText(URI uri, ParseContext context)
 			throws IOException {
-		StringBuilder buf = new StringBuilder();
-		loadTextAndClose(context == null?openStream(uri):context.openStream(uri));
-		return buf.toString();
+		return loadTextAndClose(context == null?openStream(uri):context.openStream(uri));
 	}
 
 	/**
@@ -332,8 +330,8 @@ public class ParseUtil {
 		}
 		byte[] data = out.toByteArray();
 		for (Charset c : CHARSETS) {
-			String t = new String(data, c);
-			byte[] data2 = t.getBytes(c);
+			String t = new String(data, c.name());
+			byte[] data2 = t.getBytes(c.name());
 			if (Arrays.equals(data, data2)) {
 				return t;
 			}

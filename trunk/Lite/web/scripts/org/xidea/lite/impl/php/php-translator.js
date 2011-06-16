@@ -25,7 +25,7 @@
  */
 
 var FOR_STATUS_KEY = '$__for';
-
+var VAR_LITE_TEMP="$__tmp";
 //function checkEL(el){
 //    new Function("return "+el)
 //}
@@ -100,6 +100,22 @@ function _stringifyPHPLineArgs(line){//.*[\r\n]*
 	}
 	return line;
 }
+
+function _encodeEL(text,model,encoding){
+	//TODO: check el type
+	if(model == -1){
+		var encode = "htmlspecialchars("+text+",ENT_COMPAT"+encoding+",false)";
+		//this.append(prefix,"strtr(",el,",array('<'=>'&lt;','\"'=>'&#34;'));");
+	}else if(model == XA_TYPE){
+		var encode = "htmlspecialchars("+text+",ENT_COMPAT,"+encoding+')';
+	}else if(model == XT_TYPE){
+		//ENT_COMPAT 
+		var encode = "htmlspecialchars("+text+",ENT_NOQUOTES,"+encoding+')';
+	}else{
+		var encode = text;
+	}
+	return encode;
+}
 PHPTranslateContext.prototype = new TCP({
 	stringifyEL:function (el){
 		return el?stringifyPHPEL(this,el):null;
@@ -109,8 +125,9 @@ PHPTranslateContext.prototype = new TCP({
 		this.depth = 0;
 		this.out = [];
 	    //add function
-	    for(var i=0;i<this.defs.length;i++){
-	        var def = this.defs[i];
+	    var defs = this.scope.defs;
+	    for(var i=0;i<defs.length;i++){
+	        var def = defs[i];
 	        var n = def.name;
 	        this.append("if(!function_exists('lite__",n,"')){function lite__",
 	        		n,"(",toArgList(def.params),'){')
@@ -144,23 +161,8 @@ PHPTranslateContext.prototype = new TCP({
 			this.append(start,line,end);
 		}
 	},
-	_encodeEL:function (text,model){
-    	var encoding = "'"+this.htmlspecialcharsEncoding+"'";
-		//TODO: check el type
-		if(model == -1){
-			var encode = "htmlspecialchars("+text+",ENT_COMPAT"+encoding+",false";
-			//this.append(prefix,"strtr(",el,",array('<'=>'&lt;','\"'=>'&#34;'));");
-		}else if(model == XA_TYPE){
-			var encode = "htmlspecialchars("+text+",ENT_COMPAT,"+encoding;
-		}else if(model == XT_TYPE){
-			//ENT_COMPAT 
-			var encode = "htmlspecialchars("+text+",ENT_NOQUOTES,"+encoding;
-		}else{
-			var encode = text;
-		}
-		return encode;
-	},
     _appendEL:function(el,model,text,prefix){
+    	var encoding = "'"+this.htmlspecialcharsEncoding+"'";
     	prefix = prefix!=null? prefix : 'echo '+this.elPrefix
     	//@see http://notownme.javaeye.com/blog/335036
     	var text = text || this.stringifyEL(el);
@@ -171,7 +173,7 @@ PHPTranslateContext.prototype = new TCP({
 			var initText = text;
 			var tmpId = text;
 		}else{
-			tmpId = "$__lite_tmp";
+			tmpId = VAR_LITE_TEMP;
 			initText = '('+tmpId+'='+text+')';
 		}
     	if(type != TYPE_ANY){
@@ -190,25 +192,26 @@ PHPTranslateContext.prototype = new TCP({
 				this.append(prefix,initText,"?'true':(",tmpId,"===null?'null':'false');");
 				return;
 			}else if(!((TYPE_NULL|TYPE_BOOLEAN) & type)){//number,string,map,array...
-	    		this.append(prefix,this._encodeEL(text),";");
+	    		this.append(prefix,_encodeEL(text,model,encoding),";");
 	    		return;
 	    	}
 			//v1=== null?'null':(v===true?'true':(v == false ?'false':txt))
 			if(!(type & TYPE_NULL)){
 				this.append(prefix,
 	    			initText," === true?'true':",
-	    				"(",tmpId,"===false?'false':(",this._encodeEL(tmpId),"));");
+	    				"(",tmpId,"===false?'false':",_encodeEL(tmpId,model,encoding),");");
 	    		return ;
 			}else if(!(type & TYPE_BOOLEAN)){
 	    		this.append(prefix,
-	    			initText,"===null?'null':(",this._encodeEL(tmpId),");");
+	    			initText,"===null?'null':",_encodeEL(tmpId,model,encoding),";");
 	    		return ;
 			}
     	}
-    	this.append(prefix,
-    		initText," ===null?'null':",
-    		"(",tmpId," === true?'true':",
-    			"(",tmpId,"===false?'false':(",this._encodeEL(tmpId),")));");
+//    	this.append(prefix,
+//    		initText," ===null?'null':",
+//    		"(",tmpId," === true?'true':",
+//    			"(",tmpId,"===false?'false':",_encodeEL(tmpId,model,encoding),"));");
+		this.append(prefix,'(',initText,'===null||',tmpId,'===false || ',tmpId,'===true)?json_encode(',tmpId,'):',_encodeEL(tmpId,model,encoding),';')
     },
     appendEL:function(item){
     	this._appendEL(item[1],EL_TYPE)

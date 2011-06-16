@@ -1,0 +1,85 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:c='http://www.xidea.org/lite/core'>
+<body>
+<c:client name="xxx" >
+	${a_call_b_call_c(1)}
+</c:client>
+<c:client name="xxx2" >
+	${b_call_c(1)}
+</c:client>
+<c:if test="${test>0}">
+	<c:client name="xxx3" >
+		${d_call_c(1)}
+	</c:client>
+</c:if>
+<c:client name="xxx4" >
+	${d_call_c(1)}
+</c:client>
+${d_call_c(1)}
+<c:def name="a_call_b_call_c(x)">
+KEY_a_call_b_call_c:${b_call_c(x)}
+</c:def>
+<c:def name="b_call_c(x)">
+KEY_b_call_c:${c(x)}
+</c:def>
+<c:def name="c(x)">
+KEY_c:${x}
+</c:def>
+<c:def name="d_call_c(x)">
+KEY_d_call_c:${x}
+</c:def>
+</body>
+<script>
+function loadKeyMap(text,p){
+	var map = {};
+	text.replace(p,function(a,k){
+		if(k in map){
+			map[k] ++;
+		}else{
+			map[k] = 1;
+		}
+	});
+	return map;
+}
+
+function same(){
+	var list1 = arguments;
+	var list2 = [].concat.apply([],list1)
+	var i = list1.length;
+	list2.push(list2.shift());
+	while(i--){
+		var arg1 = list1[i];
+		var arg2 = list2[i];
+		for(var n in arg1){
+			if(arg1[n] !== arg2[n]){
+				return false;
+			}
+		}
+	}
+	return true;
+}
+function testText(){
+}
+var text = document.body.textContent || document.body.text;
+var expect = {
+	a_call_b_call_c:1,
+	b_call_c:1,
+	c:1,
+	d_call_c:2
+}
+var exact = loadKeyMap(text,/KEY_([\w]+)\:/g);
+if(same(exact,expect)){
+	document.write("Test Success");
+}else{
+	document.write("Test Failed:\nExpect:"+JSON.stringify(expect)+"\nbut was :"+JSON.stringify(exact ));
+}
+var init = loadKeyMap(text,/if\(\!window\.(lite__def)\)/);
+if(init['lite__def'] ==1){
+document.write("Test Success:" + JSON.stringify(init));
+}else{
+document.write("Test Failed:" + JSON.stringify(init));
+}
+document.write(xxx({}))
+document.write(xxx2({}))
+document.write(xxx4({}))
+</script>
+</html>

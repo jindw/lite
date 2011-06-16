@@ -5,7 +5,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -81,7 +83,7 @@ public class HotTemplateEngine extends TemplateEngine {
 	public String getLiteCode(String path) {
 		try {
 			if(buildFromCode(path) != null){
-				URI uri = this.compiledBase.resolve(path.substring(1));
+				URI uri = toCompiedURI(path);
 				return loadText(ParseUtil.openStream(uri));
 			}
 			ParseContext context = createParseContext(path);
@@ -116,7 +118,7 @@ public class HotTemplateEngine extends TemplateEngine {
 		Template template = new Template(items);
 		
 		if(compiledBase!=null && ParseUtil.isFile(compiledBase)){
-			File file = new File(new File(compiledBase),path);
+			File file = new File(toCompiedURI(path));
 			file.getParentFile().mkdirs();
 			OutputStreamWriter out = new OutputStreamWriter(
 					new FileOutputStream(file), "UTF-8");
@@ -128,14 +130,18 @@ public class HotTemplateEngine extends TemplateEngine {
 		infoMap.put(path, entry);
 		return template;
 	}
-	
+	private URI toCompiedURI(String path) throws UnsupportedEncodingException{
+		path =  path.replace('/', '^');
+		return this.compiledBase.resolve(URLEncoder.encode(path, "UTF-8"));
+		
+	}
 
 	@SuppressWarnings("unchecked")
 	private Template buildFromCode(String path) throws IOException {
-		if(this.compiledBase == null){
+		if(this.compiledBase != null){
 			return null;
 		}
-		URI uri = this.compiledBase.resolve(path.substring(1));
+		URI uri = toCompiedURI(path);
 		InputStream in = ParseUtil.openStream(uri);
 		if(in == null){
 			return null;

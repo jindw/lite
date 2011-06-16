@@ -81,7 +81,6 @@ ParseContext.prototype = {
      */
 	parse:function(source) {
 		var type = source.nodeType;
-		this.setCurrentNode(source);
 		if(type>0){//xml
 			//$log.info(len,source && source.xml)
 			this._topChain.next(source);
@@ -182,12 +181,6 @@ ParseContext.prototype = {
 	getFeatureMap:function(key){
 		this._featureMap;
 	},
-    getCurrentNode:function(){
-    	return this._context._currentNode;
-    },
-    setCurrentNode:function(node){
-    	this._context._currentNode = node;
-    },
     getCurrentURI:function(){
     	return this._context._currentURI;
     },

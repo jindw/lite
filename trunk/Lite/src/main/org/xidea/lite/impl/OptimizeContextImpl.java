@@ -1,6 +1,8 @@
 package org.xidea.lite.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +10,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.parse.OptimizePlugin;
 import org.xidea.lite.parse.OptimizeScope;
 import org.xidea.lite.parse.OptimizeWalker;
@@ -31,6 +34,7 @@ public class OptimizeContextImpl implements OptimizeContext {
 	public List<Object> optimize() {
 		List<OptimizePlugin> pluginObjectList = initPlugin();
 		parse(pluginObjectList);
+		
 		replaceWithChild();
 		templateList.addAll(0, defMap.values());
 		return templateList;
@@ -87,9 +91,9 @@ public class OptimizeContextImpl implements OptimizeContext {
 				OptimizePlugin p = pluginMap.get(cmd);
 				if (p != null) {
 					parent.remove(index);
-					index--;
 					List children = (List) cmd.get(1);
 					parent.addAll(index, children);
+					index--;
 					index += children.size();
 				}
 				return index;
@@ -97,10 +101,27 @@ public class OptimizeContextImpl implements OptimizeContext {
 		},null);
 	}
 
+	private HashMap<String, Set<String>>defCallMap ; 
 	public Map<String, Set<String>> getDefCallMap() {
-		return null;
+		if(defCallMap == 	null){
+			defCallMap = new HashMap<String, Set<String>>();
+			for(Map.Entry<String, List> entry : defMap.entrySet()){
+				List data = entry.getValue();
+				Map config = (Map) data.get(2);
+				List code = (List) data.get(1);
+				defCallMap.put(entry.getKey(), getCall(OptimizeUtil.parseList(code, (List)config.get("params"))));
+			}
+		}
+		return defCallMap;
 	}
-
+	private static Set<String> getCall(OptimizeScope si) {
+		HashSet<String> cs = new HashSet<String>(si.getCalls());
+		if (cs.contains("*")) {
+			cs.addAll(si.getExternalRefs());
+		}
+		cs.remove("*");
+		return cs;
+	}
 	public OptimizePlugin getPlugin(List<Object> code) {
 		return pluginMap.get(code);
 	}
@@ -117,6 +138,10 @@ public class OptimizeContextImpl implements OptimizeContext {
 	public void optimizeCallClosure(Map<String, Set<String>> callMap,
 			Set<String> closure) {
 		OptimizeUtil.optimizeCallClosure(callMap, closure);
+	}
+
+	public List<Object> getDefCode(String defName) {
+		return defMap.get(defName);
 	}
 
 

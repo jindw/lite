@@ -52,7 +52,7 @@ public class TemplateServlet extends GenericServlet {
 			configPath = "/WEB-INF/lite.xml";
 		}
 		final File root = new File(context.getRealPath("/"));
-		final File litecode = new File(root,"WEB-INF/litecode/.");
+		final File litecode = new File(root,"WEB-INF/litecode/");
 		if (this.autocompile) {
 			final File configFile = new File(context.getRealPath(configPath));
 			ParseConfigImpl parseConfig = new ParseConfigImpl(root.toURI(),

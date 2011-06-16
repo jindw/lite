@@ -127,22 +127,20 @@ function copy(source,target){
 		target[n] = source[n];
 	}
 }
-function optimizeFunction(context,name,refMap,callMap,params,defaults){
+
+function optimizeFunction(context,functionName,refMap,callMap,params,defaults){
 	var text = context.reset();
 	var result = [];
-	var p = /\b\$_out.push\((?:(.*)\);)?/g;
 	var args = '$_context';
 	if(params){
 		args = params.join(',');
 	}
-	p.lastIndex=0;
-	p.exec(text);
 	var map = {};
 	copy(refMap,map);
 	copy(callMap,map);
 	for(var n in map){
-		if(!(n in GLOBAL_VAR_MAP || n in GLOBAL_DEF_MAP)){
-			result.push('\tvar ',n,'=',context.litePrefix,'init("',n,'"',(params?',"$_context"':'""'),');\n');
+		if(!((n in GLOBAL_VAR_MAP) ||( n in GLOBAL_DEF_MAP))){
+			result.push('\tvar ',n,'=',context.litePrefix,'init("',n,'"',(params?'':',$_context'),');\n');
 		}
 	}
 	//(a,b,c=3,d=4)
@@ -167,26 +165,31 @@ function optimizeFunction(context,name,refMap,callMap,params,defaults){
 				result.push('\t	',params[i],'=',stringifyJSON(defaults[i-begin]),';\n');
 			}
 		}
+		result.push('\t}\n');
 	}
-		
-	result.push('\t}\n');
-	if(!p.exec(text)){
-		text = text.replace(/^\s+var \$_out=\[\];/,'');
-		text = text.replace(p,"return [$1].join('')")
+	var SP = /^\s*\$_out\.push\((?:(.*)\)\s*;?)\s*$/g;
+	if(SP.test(text)){
+		var c  =text.replace(SP,'$1');
+		if(c.indexOf(',')>0){
+			//安全方式吧.
+			text = "\treturn ["+c+"].join('');";
+		}else{
+			text = "\treturn "+c+';';
+		}
 	}else{
-		text+= "\n\treturn $_out.join('');\n";
+		text = "\tvar $_out=[]\n"+text+"\treturn $_out.join('');\n";
 	}
-	if(name){
+	if(functionName){
     	try{
-    		new Function("function "+name+"(){}");
-    		name = "function "+name;
+    		new Function("function "+functionName+"(){}");
+    		functionName = "function "+functionName;
     	}catch(e){
-    		name += "=function";
+    		functionName += "=function";
     	}
     }else{
-    	name = "function";
+    	functionName = "function";
     }
-    return name+"("+args+'){'+text+'\n}';
+    return functionName+"("+args+'){\n'+result.join('')+text.replace(/^[\r\n]+/,'')+'\n}';
 }
 function PT(pt){
 	for(var n in pt){
@@ -219,22 +222,24 @@ JSTranslateContext.prototype = new PT({
 		this.out = [];
 	    //add function
 	    var fs = [];
-	    var defList = this.scope.defList;
-	    for(var i=0;i<defList.length;i++){
-	        var def = defList[i];
+	    var defs = this.scope.defs;
+	    for(var i=0;i<defs.length;i++){
+	        var def = defs[i];
 	        var n = def.name;
 	        var refMap = def.externalRefMap;
 	        var callMap = def.callMap;
 	        this.depth++;
 	        this.appendCode(def.code);
-	        var content = optimizeFunction(this,n,refMap,callMap,def.params,def.defaults);
+	        var content = optimizeFunction(this,'',refMap,callMap,def.params,def.defaults);
 	        this.depth--;
-	        fs.push(this.litePrefix,"def('",n,"',",content,");");
+	        fs.push(this.litePrefix,"def('",n,"',",content,");\n");
 	    }
 	    this.header = fs.join('');
 	    
 	    try{
+	    	this.depth++;
 	        this.appendCode(code);
+	        this.depth--;
 	    }catch(e){
 	        //alert(["编译失败：",buf.join(""),code])
 	        throw e;

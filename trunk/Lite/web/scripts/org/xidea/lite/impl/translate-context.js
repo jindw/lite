@@ -14,26 +14,6 @@ var XML_ENCODE_XT = 2;
  * @extends LiteContext
  */
 function TranslateContext(code,name,params){
-	/**
-	 * 本地申明变量表[参看:var,def 语法,包含函数定义]
-	 */
-	this.varMap={};
-	/**
-	 * 外部引用变量表[模板中使用到的外部变量名(不包括模板申明的变量)]
-	 */
-	this.refMap={};
-	/**
-	 * 所有函数调用记录:[true,直接调用, false 可能调用(表达式出口函数)]
-	 */
-	this.callMap={};
-	/**
-	 * 所有函数定义数组
-	 */
-	this.defs = [];
-	/**
-	 * 所有for信息数组,按深度优先出现顺序放置[_forStack 描述的是当前for深度]
-	 */
-    this.fors = [];
     /**
      * 函数名称 可以是null
      */
@@ -45,7 +25,7 @@ function TranslateContext(code,name,params){
     /**
      * 当前scope的信息(包括变量,引用,函数调用信息,for状态,函数集...) 
      */
-    this.scope = new OptimizeScope(code)
+    this.scope = new OptimizeScope(code,params)
     this.code = code;
     this.idMap = {};
     this.depth = 0;
@@ -55,7 +35,7 @@ function TranslateContext(code,name,params){
 
 TranslateContext.prototype = {
     findForStatus:function(code){
-	    var fis = this.scope.forList;
+	    var fis = this.scope.fors;
 	    var i = fis.length;
 	    while(i--){
 	        var fi = fis[i];
