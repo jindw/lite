@@ -10,17 +10,17 @@ var FOR_STATUS_KEY = '$__for';
 /**
  * 将Lite的表达式结构转化为php表达式
  */
-function stringifyPHPEL(context,el){
+function stringifyPHPEL(el,context){
 	var type = el[0];
 	if(type<=0){//value
-		return stringifyValue(context,el)
+		return stringifyValue(el,context)
 	}else if(getTokenParamIndex(type) ==3){//两个操作数
-		return stringifyInfix(context,el);
+		return stringifyInfix(el,context);
 	}else{
-		return stringifyPrefix(context,el);
+		return stringifyPrefix(el,context);
 	}
 }
-function stringifyValue(context,el){
+function stringifyValue(el,context){
 		var param = el[1];
 		switch(el[0]){
         case VALUE_CONSTANTS:
@@ -45,13 +45,19 @@ function typesOnly(t1,t2){
 	}
 	return (t1 & a) == a && (t2 & a) == a;
 }
-function stringifyADD(context,el){
+function stringifyADD(el,context){
 	var t = getELType(el);
-	var value1 = stringifyPHPEL(context,el[1]);
-	var value2 = stringifyPHPEL(context,el[2]);
+	var value1 = stringifyPHPEL(el[1],context);
+	var value2 = stringifyPHPEL(el[2],context);
 	if(t == TYPE_NUMBER){
 		return value1+'+'+value2;//动态部分要考虑 array的问题,这里不需要考虑
 	}else if(t == TYPE_STRING){
+		if(/^[\d\.]+$/.test(value1)){
+			value1+=' ';
+		}
+		if(/^[\d\.]+$/.test(value2)){
+			value2=' '+value2;
+		}
 		return value1+'.'+value2;
 	}
 	
@@ -74,11 +80,11 @@ function stringifyADD(context,el){
 //var TYPE_STRING = 1<<offset++;
 //var TYPE_ARRAY = 1<<offset++;
 //var TYPE_MAP = 1<<offset++;
-function stringifyEQ(context,el,opc){
+function stringifyEQ(el,context,opc){
 	var t1 = getELType(el[1]);
 	var t2 = getELType(el[2]);
-	var value1 = stringifyPHPEL(context,el[1]);
-	var value2 = stringifyPHPEL(context,el[2]);
+	var value1 = stringifyPHPEL(el[1],context);
+	var value2 = stringifyPHPEL(el[2],context);
 	opc = opc || '==';
 	if(t1 ==  TYPE_STRING ||  t2 == TYPE_STRING){//0 == 'ttt'=>false
         return "strcmp($lop,$rop) "+opc+"0";
@@ -97,11 +103,11 @@ function stringifyEQ(context,el,opc){
     }
     return (opc=='!='?'!':'')+"lite_op__eq("+value1+','+value2+")"
 }
-function stringifyGET(context,el){
+function stringifyGET(el,context){
 	var arg1 = el[1];
 	var arg2 = el[2];
-	var value1 = stringifyPHPEL(context,el[1]);
-	var value2 = stringifyPHPEL(context,el[2]);
+	var value1 = stringifyPHPEL(el[1],context);
+	var value2 = stringifyPHPEL(el[2],context);
 	if(arg2[0] == VALUE_CONSTANTS){
 		if( arg2[1] != 'length'){
 			return value1+'['+value2+']';
@@ -109,11 +115,11 @@ function stringifyGET(context,el){
 	}
 	return "lite_op__get("+value1+','+value2+")"
 }
-function stringifyINVOKE(context,el){
+function stringifyINVOKE(el,context){
 	var arg1 = el[1];
 	var type1 = arg1[0];
-	//var value1 = stringifyPHPEL(context,arg1);
-	var value2 = stringifyPHPEL(context,el[2]);//array(arg1,arg2...)
+	//var value1 = stringifyPHPEL(arg1,context);
+	var value2 = stringifyPHPEL(el[2],context);//array(arg1,arg2...)
 	if(type1 == OP_GET){//member_call
 		var oel = arg1[1];
 		var pel = arg1[2];
@@ -146,7 +152,7 @@ function stringifyINVOKE(context,el){
 				}
 			}
 		}
-		return "lite_member("+stringifyPHPEL(context,oel)+","+stringifyPHPEL(context,pel)+","+value2+")"
+		return "lite_member("+stringifyPHPEL(oel,context)+","+stringifyPHPEL(pel,context)+","+value2+")"
 		value1 = value1.replace(/.*?,([\s\S]+)\)/,'array($1)');
 	}else if(type1 == VALUE_VAR){
 		var name = arg1[1];
@@ -158,22 +164,22 @@ function stringifyINVOKE(context,el){
 /**
  * 翻译中缀运算符
  */
-function stringifyInfix(context,el){
+function stringifyInfix(el,context){
 	var type = el[0];
 	if(type == OP_ADD){
-		return stringifyADD(context,el)
+		return stringifyADD(el,context)
 	}else if(type == OP_EQ){
-		return stringifyEQ(context,el,'==')
+		return stringifyEQ(el,context,'==')
 	}else if(type == OP_NE){
-		return stringifyEQ(context,el,'!=');
+		return stringifyEQ(el,context,'!=');
 	}else if(type == OP_GET){
-		return stringifyGET(context,el);
+		return stringifyGET(el,context);
 	}else if(type == OP_INVOKE){
-		return stringifyINVOKE(context,el);
+		return stringifyINVOKE(el,context);
 	}
 	var opc = findTokenText(el[0]);
-	var value1 = stringifyPHPEL(context,el[1]);
-	var value2 = stringifyPHPEL(context,el[2]);
+	var value1 = stringifyPHPEL(el[1],context);
+	var value2 = stringifyPHPEL(el[2],context);
 	switch(type){
 	case OP_JOIN:
 		if("array()"==value1){
@@ -202,7 +208,7 @@ function stringifyInfix(context,el){
  ${222+2|a?b1?b2:b3:c}
      */
      	var arg1 = el[1];
-    	var test = stringifyPHPEL(context,arg1[1]);    	var value1 = stringifyPHPEL(context,arg1[2]);
+    	var test = stringifyPHPEL(arg1[1],context);    	var value1 = stringifyPHPEL(arg1[2],context);
     	//return '('+LITE_INVOKE+OP_NOT+','+test+')?'+value2+":"+value1+')';
     	return '('+php2jsBoolean(arg1[1],test)+'?'+value1+':'+value2+')'
     case OP_AND://&&
@@ -262,10 +268,10 @@ function stringifyPHP(value) {
 /**
  * 翻译前缀运算符
  */
-function stringifyPrefix(context,el){
+function stringifyPrefix(el,context){
 	var type = el[0];
 	var el1 = el[1];
-	var value2 = stringifyJSEL(context,el1);
+	var value2 = stringifyPHPEL(el1,context);
 	var param = getTokenParam(el,context);
 	if(type == OP_NOT){//!
 		//return value1+'['+value2+']';
@@ -285,7 +291,7 @@ function stringifyPrefix(context,el){
  */
 function php2jsBoolean(el,value,keepValue,context){
 	if(!value){
-		value = stringifyJSEL(context,el);
+		value = stringifyPHPEL(el,context);
 	}
 	var op = el[0];
 	if(op<=0){

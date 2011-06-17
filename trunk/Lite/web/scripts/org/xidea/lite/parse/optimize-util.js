@@ -70,6 +70,11 @@ function doOptimize(defMap,templateList){
  */
 function optimizeCallClosure(callMap,
 			closure) {
+	for(var n in closure){
+		if(!(n in callMap)){
+			delete closure[n]
+		}
+	}
 	var waitMap = closure;
 	while (true) {
 		var newClosure = {};
@@ -116,7 +121,11 @@ ClientPlugin.prototype = {
 		var defMap = this.context[1]
 		var result = [];
 		for(var n in this.optimizedCall){
-			result.push(defMap[n]);
+			if(defMap[n]){
+				result.push(defMap[n]);
+			}else{
+				$log.error("Defined function not found:"+n)
+			}
 		}
 		if(!this.first){
 			jst.litePrefix = jst.litePrefix || 'lite__';

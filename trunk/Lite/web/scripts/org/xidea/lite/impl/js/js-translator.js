@@ -87,7 +87,7 @@ JSTranslator.prototype = {
     	if(!this.litePrefix){
     		result.push("if(!window.lite__def){",INIT_SCRIPT,"}");
     	}
-	    result.push(code);
+	    result.push(code.replace(/<\/script>/g,'<\\/script>'));
 	    return result.join("\n");
 	}
 }

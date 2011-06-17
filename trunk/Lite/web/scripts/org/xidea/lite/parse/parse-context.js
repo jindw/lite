@@ -145,7 +145,9 @@ ParseContext.prototype = {
     		path = new URI(path)
     	}
     	this.setCurrentURI(path);
+    	var t1 = +new Date();
     	return loadXML(path,this._config._root)
+    	this._context._loadTime+=(new Date()-t1)
     },
     openStream:function(uri){
 //    	//only for java
@@ -204,7 +206,8 @@ ParseContext.prototype = {
     	nc._featureMap = this._featureMap;
     	nc._resources = this._resources;
     	return nc;
-    }
+    },
+    _loadTime :0
 }
 var rm = ResultContext.prototype;
 for(var n in rm){

@@ -10,21 +10,21 @@ function WebCompiler(urlbase){
 	this.config = new ParseConfig(urlbase);
 }
 WebCompiler.prototype.compile = function(path){
+	var t = +new Date();
+	var context = new ParseContext(this.config);
 	this.litecode = '';
 	this.phpcode = '';
 	this.path = path;
-	var context = new ParseContext(this.config);
-	var t = +new Date();
     context.parse(context.createURI(path));
-	var litecode = context.toList();
+	this.compileTime = (new Date() - t - (context._loadTime ||0))
 	var res = context.getResources();
 	var featureMap = context.getFeatureMap();
 	var i = res.length;
 	while(i--){
 		res[i] = res[i].path
 	}
+	var litecode = context.toList();
 	this.litecode = stringifyJSON([res,litecode,featureMap])
-	this.compileTime = (new Date() - t )
 	var t = +new Date();
 	var pt = new PHPTranslator(path.replace(/[\/\-\$\.!%]/g,'_'));//'.','/','-','!','%'
 	this.phpcode = pt.translate(context.toList());
@@ -32,9 +32,13 @@ WebCompiler.prototype.compile = function(path){
 }
 
 WebCompiler.prototype.save = function(){
-	var post = 'LITE_PATH='+encodeURIComponent(this.path)+
+	var post = 
+		"compileTime="+this.compileTime+
+		"&translateTime="+this.translateTime+
+		'&LITE_PATH='+encodeURIComponent(this.path)+
 		'&LITE_ACTION=save&LITE_CODE='+encode(this.litecode)+
 		'&LITE_PHP='+encode(this.phpcode);
+		
 	
 	var xhr = new XMLHttpRequest();
 	xhr.open("POST", this.base, false);

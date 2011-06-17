@@ -460,11 +460,11 @@ function processClient(node){
 	}else{
 		config = {name:name_}
 	}
-	this.append("<script>");
+	this.append("<script>//<![CDATA[\n");
 	this.appendPlugin("org.xidea.lite.parse.ClientPlugin",stringifyJSON(config));
 	processChild(this,node);
 	this.appendEnd();
-	this.append("</script>")
+	this.append("//]]></script>")
 	
 	
 //	var context2 = this.createNew();

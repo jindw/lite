@@ -197,17 +197,17 @@ function walkEL(thiz,el){
 			}else if(arg1[0] == OP_GET){//member
 				var arg1Right = arg1[2];
 				if (arg1Right[0] == VALUE_CONSTANTS
-						&& (arg1Right[1] instanceof String)) {
+						&& (typeof arg1Right[1] == 'string')) {
 					// member call
 				} else {
-					$log.info("表达式函数调用");
-					thiz.calls.add("*");
+					$log.info("表达式函数调用:"+stringifyJSEL(arg1));
+					thiz.calls.push("*");
 				}
 				walkEL(thiz, arg1);
 			}else{
 				//TODO:...
 				walkEL(thiz,arg1);
-				thiz.calls.add("*");
+				thiz.calls.push("*");
 			}
 		}else{
 			if(op == OP_GET){

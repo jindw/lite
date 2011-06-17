@@ -72,7 +72,7 @@ TranslateContext.prototype = {
     		if(typeof item == 'string'){
     			this.appendStatic(item)
     		}else{
-    			switch(item[0]){
+    			switch(item && item[0]){
                 case EL_TYPE:
                     this.appendEL(item);
                     break;
@@ -111,7 +111,7 @@ TranslateContext.prototype = {
                 	i = this.processElse(code,i);
     				break;
                 default:
-                    throw Error('无效指令：'+item)
+                    throw Error('无效指令：'+i+JSON.stringify(code))
                 }
     		}
     	}

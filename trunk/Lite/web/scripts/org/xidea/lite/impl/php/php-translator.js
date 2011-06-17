@@ -118,7 +118,7 @@ function _encodeEL(text,model,encoding){
 }
 PHPTranslateContext.prototype = new TCP({
 	stringifyEL:function (el){
-		return el?stringifyPHPEL(this,el):null;
+		return el?stringifyPHPEL(el,this):null;
 	},
 	parse:function(){
 		var code = this.code;

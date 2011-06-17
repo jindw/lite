@@ -26,7 +26,11 @@ this.addScript('el-util.js','findELEnd'
                 ,0
                 ,'org.xidea.jsi:$log');
 
-
+this.addScript('el-translator.js',['stringifyJSEL']
+                ,0
+                ,[
+                	"org.xidea.lite.util:stringifyJSON",
+                	'org.xidea.jsi:$log']);
 this.addDependence("*","expression-token.js",true);
 
 
