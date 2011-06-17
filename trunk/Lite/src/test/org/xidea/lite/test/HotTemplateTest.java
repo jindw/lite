@@ -47,7 +47,8 @@ public class HotTemplateTest {
 
 	@Test
 	public void testWeb() throws URISyntaxException, IOException{
-		String path = "/test/client-optimize/test-call-closure.xhtml";
+		//String path = "/test/client-optimize/test-call-closure.xhtml";
+		String path = "/example/test.xhtml";
 		URI root = this.getClass().getResource("/").toURI().resolve("../../");
 		System.out.println(root);
 		HotTemplateEngine ht = new HotTemplateEngine(new ParseConfigImpl(root, null));

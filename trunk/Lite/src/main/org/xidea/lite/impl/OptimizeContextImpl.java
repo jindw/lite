@@ -10,7 +10,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.parse.OptimizePlugin;
 import org.xidea.lite.parse.OptimizeScope;
 import org.xidea.lite.parse.OptimizeWalker;

@@ -13,6 +13,7 @@ import static org.xidea.lite.Template.XT_TYPE;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,6 +33,12 @@ class OptimizeUtil {
 
 	static void optimizeCallClosure(final Map<String, Set<String>> callMap,
 			final Set<String> closure) {
+		for (Iterator<String> it = closure.iterator(); it.hasNext();) {
+			String fn =  it.next();
+			if(!callMap.containsKey(fn)){
+				it.remove();
+			}
+		}
 		Collection<String> visits = closure;
 		while (true) {
 			HashSet<String> newClosure = new HashSet<String>();
@@ -189,8 +196,12 @@ class OptimizeUtil {
 					Map<String, Object> config = (Map<String, Object>) cmd
 							.get(2);
 					String className = (String) config.get("class");
+					Class<?> clazz;
 					try {
-						Class<?> clazz = Class.forName(className);
+						clazz = Class.forName(className);
+					} catch (ClassNotFoundException e) {
+						throw new RuntimeException(e);
+					}
 						if (OptimizePlugin.class.isAssignableFrom(clazz)) {
 							String p = position == null ? null : position
 									.toString();
@@ -201,8 +212,6 @@ class OptimizeUtil {
 								i = j;
 							}
 						}
-					} catch (Exception e) {
-					}
 				case CAPTURE_TYPE:
 				case IF_TYPE:
 				case ELSE_TYPE:
