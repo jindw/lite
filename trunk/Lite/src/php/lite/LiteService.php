@@ -93,28 +93,25 @@ class LiteService{
 		$importScript = '$import("'.join($fns,	'",true);$import("').'",true);';
 		
 		
-echo "<script>
-if(!($checkScript)){
-	document.write(\"<script src='$scriptBase/scripts/boot.js'></\"+\"script>\");
-}
-</script><script>
-if(!($checkScript)){
-	$importScript
-}
-</script>";
+		echo "<script>if(!($checkScript)){document.write(\"<script src='$scriptBase/scripts/boot.js'></\"+\"script>\");}</script>\n"
+			,"<script>if(!($checkScript)){$importScript}</script>";
 	}
 	private function compile($path){
 		if( $this->getFileModified($path)){
 			$scriptBase = $_REQUEST['LITE_SERVICE_URL'];
 			$this->loadJavaScriptClass('org.xidea.lite.web:WebCompiler');
-			echo "<script>
-				var LITE_WC = window.LITE_WC || new WebCompiler('$scriptBase/');
-				try{
-					LITE_WC.compile('$path');
-				}finally{
-					LITE_WC.save();
-				}
-			</script>";
+			$config = realpath($this->root.'/WEB-INF/lite.xml');
+			if($config){
+				$config = file_get_contents($config);
+			}
+			$config = json_encode($config);
+			echo "<script>"
+				,"var LITE_WC = window.LITE_WC || new WebCompiler('$scriptBase/',$config);\n"
+				,"try{\n"
+				,"	LITE_WC.compile('$path');\n"
+				,"}finally{\n"
+				,"	LITE_WC.save();\n"
+				,"}\n</script>";
 			$litefile = $this->litecode.'/'.strtr($path,'/','^');
     		$phpfile = $litefile.'.php';
 			if(file_exists($phpfile)){unlink($phpfile);}//.$phpfile.'<hr>';
@@ -125,6 +122,7 @@ if(!($checkScript)){
 			while(!file_exists($phpfile)){
 				sleep(1);
 			}
+			echo "\n";
 		}
 		/*
 		require_once($phpfile);

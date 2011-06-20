@@ -1,6 +1,6 @@
 <?php
-require_once("../WEB-INF/classes/lite/TemplateEngine.php");
-$engine = new TemplateEngine();
+require_once("../WEB-INF/classes/lite/LiteEngine.php");
+$engine = new LiteEngine();
 $engine->encoding="UTF-8";
 header("Content-type: text/html;charset=UTF-8");
 //初始化Lite Logo 的点阵数据 

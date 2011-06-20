@@ -6,6 +6,7 @@ this.addScript('translate-context.js','TranslateContext'
                 ,0
                 ,["org.xidea.lite.parse.OptimizeScope",
                 	"org.xidea.el:*",
+                	"org.xidea.lite.util:stringifyJSON",
                 	'org.xidea.jsi:$log']);
                 
 this.addDependence("*",'*',true);

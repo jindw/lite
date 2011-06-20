@@ -95,15 +95,16 @@ public class JSONDecoder {
 		}
 		return null;
 	}
-	public static <T> T decode(Reader value) throws IOException {
-		StringBuilder buf = new StringBuilder();
-		char[] cbuf = new char[32];
-		int c;
-		while ((c = value.read(cbuf)) >= 0) {
-			buf.append(cbuf, 0, c);
-		}
-		return decode(buf.toString());
-	}
+//	public static <T> T decode(Reader value) throws IOException {
+//		StringBuilder buf = new StringBuilder();
+//		char[] cbuf = new char[32];
+//		int c;
+//		while ((c = value.read(cbuf)) >= 0) {
+//			buf.append(cbuf, 0, c);
+//		}
+//		T rtv = decode(buf.toString());
+//		return rtv;
+//	}
 
 	@SuppressWarnings("unchecked")
 	public static <T> T decode(String value) {

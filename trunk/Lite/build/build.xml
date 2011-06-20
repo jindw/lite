@@ -53,12 +53,13 @@
 		<copy todir="web/WEB-INF/classes">
 			<fileset dir="src/main">
 				<include name="**/*.*" />
+				<exclude name="**/*.java" />
 			</fileset>
 			<fileset dir="web/scripts">
 				<include name="**/*.*" />
 			</fileset>
 		</copy>
-		<javac srcdir="web/WEB-INF/classes" fork="true" target="1.5" debug="true" destdir="web/WEB-INF/classes" encoding="UTF-8">
+		<javac srcdir="src/main" fork="true" target="1.5" debug="true" destdir="web/WEB-INF/classes" encoding="UTF-8">
 			<classpath>
 				<fileset dir="web/WEB-INF/lib">
 					<include name="**/*.jar" />
@@ -66,7 +67,7 @@
 			</classpath>
 		</javac>
 	</target>
-	<target name="package" depends="init,compress">
+	<target name="package" depends="init,compress,compile">
 		<delete>
 			<fileset dir="build/dest/">
 				<include name="Example-*.zip" />
@@ -89,30 +90,30 @@
 			<manifest>
 				<attribute name="Main-Class" value="org.xidea.lite.tools.LiteCompiler" />
 			</manifest>
+			<fileset dir="web/scripts">
+				<include name="org/xidea/**/*.js" />
+			</fileset>
+			<fileset dir="src/php/">
+				<include name="lite/*.*" />
+			</fileset>
 			<fileset dir="web/WEB-INF/classes">
 				<include name="org/xidea/el/**/*.class" />
-				<include name="org/xidea/lite/*.js" />
 				<include name="org/xidea/lite/**/*.class" />
-				<include name="org/xidea/lite/impl/dtd/**/*.ent" />
-				<include name="org/xidea/lite/impl/dtd/**/xhtml1.dtd" />
+				<include name="org/xidea/lite/impl/dtd/*.ent" />
+				<include name="org/xidea/lite/impl/dtd/xhtml1.dtd" />
 				<exclude name="**/test/**/*.*" />
 			</fileset>
-			<fileset dir="src/main/" defaultexcludes="true">
+			<fileset dir="src/main/">
+				<include name="org/xidea/**/*.java" />
 				<exclude name="org/xidea/**/test/**.java" />
 				<exclude name="org/xidea/**/*Test*.java" />
-				<include name="org/xidea/**/*.java" />
 			</fileset>
+
 			<!--
 			<zipfileset prefix="org/xidea/" dir="build/dest/jslite/">
 				<include name="*/**/*.js" />
 			</zipfileset>
 			-->
-			<fileset dir="web/WEB-INF/classes">
-				<include name="org/xidea/lite/*/*.js" />
-				<include name="org/xidea/el/*.js" />
-				<include name="lite/*.*" />
-			</fileset>
-			
 			<zipgroupfileset dir="web/WEB-INF/lib/">
 				<include name="commons-logging*.jar" />
 				<include name="JSI*.jar" />
@@ -243,11 +244,13 @@
 
 	</target>
 	<target name="build" depends="compress,package,php-example">
+		<!--
 		<copy tofile="../TT/web/WEB-INF/lib/Lite-${version}.jar" file="build/dest/Lite.jar" />
+		-->
 	</target>
 
 	<target name="php-example" depends="compress">
-		<zip comment="前端编译" file="build/dest/php-example.zip" encoding="GBK">
+		<zip comment="前端编译" file="build/dest/php-example-${version}.zip" encoding="GBK">
 			<fileset dir="web">
 				<include name="lite-service.php"/>
 				<include name="example/test.php" />

@@ -48,7 +48,11 @@
  * 	}
  * ]
  */
-function parseConfigToJSON(doc){
+//function parseConfigToJSON(doc){
+//	var result = stringifyJSON(parseConfig(doc));
+//	return result;
+//}
+function parseConfig(doc){
 	var doc = doc.nodeType?doc:loadXML(doc);
 	var lites = doc.getElementsByTagName("lite");
 	var len = lites.length;
@@ -61,11 +65,10 @@ function parseConfigToJSON(doc){
 			}
 		}
 		var json = root.toJSON();
-		var result = stringifyJSON(json);
-		return result;
+		return json;
 		
 	}
-	return "[]"
+	return null
 }
 function LiteGroup(node,parentConfig){
 	this.parentConfig = parentConfig || null

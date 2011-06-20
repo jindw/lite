@@ -22,20 +22,19 @@ function ParseContext(config,path){
 	this._context = this;
 	this._result._context = this;
 	this._resources = [];
-	initializeParser(this,config.getExtensions(path));
+	initializeParser(this,config.getExtensionMap(path));
 }
 /**
  * 初始化上下文
  * @arguments 链顶插入的解析器列表（第一个元素为初始化后的链顶解析器，以后类推）
  */
-function initializeParser(context,extensions){
+function initializeParser(context,extensionMap){
 	var extensionParser = new ExtensionParser();
-	for(var len = extensions.length,i=0;i<len;i++){
-		var ext = extensions[i];
-		var impl = ext['package'];
-//		if(/[\\\/]/.test(impl)){
-//		}
-		extensionParser.addExtension(ext.namespace,impl)
+	for(var ns in extensionMap){
+		var exts = extensionMap[ns];
+		for(var len = exts.length,i=0;i<len;i++){
+			extensionParser.addExtension(ns,exts[i])
+		}
 	}
 	context._nodeParsers = [parseTextLeaf,parseDefaultXMLNode,parseExtension];
 	context._textParsers = [extensionParser];
@@ -178,10 +177,10 @@ ParseContext.prototype = {
 		this._extensionParser.addExtension(ns,pkg);
 	},
 	getFeature:function(key){
-		this._featureMap[key];
+		return this._featureMap[key];
 	},
-	getFeatureMap:function(key){
-		this._featureMap;
+	getFeatureMap:function(){
+		return this._featureMap;
 	},
     getCurrentURI:function(){
     	return this._context._currentURI;

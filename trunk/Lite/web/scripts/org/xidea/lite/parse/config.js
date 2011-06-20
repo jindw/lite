@@ -72,12 +72,12 @@ ParseConfig.prototype = {
 		}
 		return result;
 	},
-	getExtensions:function(path){
+	getExtensionMap:function(path){
 		var g = findGroup(this._config,path,null);
 		if(g){
-			return g.extensions;
+			return g.extensionMap;
 		}
-		return [];
+		return {};
 		
 	}
 }
@@ -91,15 +91,12 @@ var defaultConfig = {
 			//必要属性（控制xml编译）
 			"http://www.xidea.org/lite/features/output-mime-type":"text/html"
 		},
-		"extensions":[
+		"extensionMap":{
+			////xhtml 编译不是自带的，需要自己定义
+			//"http://www.w3.org/1999/xhtml":["org.xidea.lite.xhtml"],
 			//core 自行编译
-			{//xhtml 编译不是自带的，需要自己定义
-   				"namespace":"http://www.w3.org/1999/xhtml",
-   				"package":"org.xidea.lite.xhtml"
-			},
-			{//xhtml 编译不是自带的，需要自己定义
-   				"namespace":"http://firekylin.my.baidu.com/ns/2010",
-   				"package":"org.xidea.lite.xhtml"
-			}
-		]
+			//"http://firekylin.my.baidu.com/ns/2010":["org.xidea.lite.xhtml"],
+			//"http://firekylin.my.baidu.com/ns/2010":["org.xidea.lite.xhtml"]
+			
+		}
 	}

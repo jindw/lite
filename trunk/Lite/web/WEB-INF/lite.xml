@@ -1,10 +1,10 @@
 <lite encoding="utf-8" mime-type="text/html" xmlns="">
 	<feature name="http://www.xidea.org/feature/lite/javascript-compressor"
 		value="org.jside.jsi.tools.JSACompressor" />
+	<!-- 
 	<extension namespace="http://www.w3c.org/1999/xhtml" package="org.xidea.lite.xhtml" />
+	-->
 	<group>
-		<extension namespace="http://www.xidea.org/lite/core"
-			package="org.xidea.lite.xhtml" />
 		<group layout="/example/layout.xhtml">
 			<include>/example/*.xhtml</include>
 			<exclude>/example/*.xhtml</exclude>

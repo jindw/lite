@@ -2,16 +2,18 @@
  * var tf = liteFunction("<c:if test='${test}'></c:if>",{type:'xml',extension:'/scripts/lite-extends.js'})
  * var tf = liteTemplate("<c:if test='${test}'></c:if>",{type:'xml',extension:'/scripts/lite-extends.js'})
  */
-function WebCompiler(urlbase){
+function WebCompiler(urlbase,config){
 	if(urlbase.charAt() == '/'){
 		urlbase = location.href.replace(/([^\/])\/[^\/].*$/,'$1'+urlbase);
 	}
 	this.base = urlbase;
-	this.config = new ParseConfig(urlbase);
+	config = parseConfig(config)
+	console.log(JSON.stringify(config))
+	this.config = new ParseConfig(urlbase,config);
 }
 WebCompiler.prototype.compile = function(path){
 	var t = +new Date();
-	var context = new ParseContext(this.config);
+	var context = new ParseContext(this.config,path);
 	this.litecode = '';
 	this.phpcode = '';
 	this.path = path;
@@ -87,7 +89,7 @@ function utf8Replacer(c){
     }
 }
 function encode(data){
-	data = data.replace(/[\u0080-\uFFFF]/g,utf8Replacer)
+	data = data && data.replace(/[\u0080-\uFFFF]/g,utf8Replacer)||''
 	data = window.btoa(data) ;
 	return encodeURIComponent(data);
 }

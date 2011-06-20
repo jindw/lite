@@ -6,45 +6,41 @@
 		<c:include path="#page" xpath="//xhtml:head/*" />
 		<link href="default.css" media="screen" rel="stylesheet"
 			type="text/css" />
-			
-		<c:extension>
-		<![CDATA[
+				
+		<c:extension namespace="http://www.w3.org/1999/xhtml">
+		//<![CDATA[
+    function parseA(node){//连接简写，没有文本的时候，直接使用href作为文本节点
+    	if(node.firstChild == null){
+    		node.appendChild(node.ownerDocument.createTextNode(node.getAttribute('href')));
+    	}
+    	this.next(node);
+    }
+    //]]>
+		</c:extension>
+		<c:extension namespace="http://www.xidea.org/lite/example">
+		//<![CDATA[
 var style = 'border: 1px solid #DFECF1;'
     			+'font-family:"Courier New",monospace;'
     			+'padding:4px;margin:4px;'
     			+'font-size:12px;overflow:auto;'
     			+'background-color:#EEE;border:1px solid #222;';
-context.addNodeParser(function(node,context,chain){
-    if(node.namespaceURI == "http://www.xidea.org/lite/example"
-    	 && node.localName == 'code'){
-    	//代码高亮组件
-    	var text = String(node.textContent);
-    	text = text.replace(/^\s+|\s+$/g,'');
-		context.append("<pre style='"+style+"'>"+text.replace(/[<>&]/g,xmlReplacer)+"</pre>");
-    }else if(node.namespaceURI == "http://www.w3.org/1999/xhtml"){
-    	if(node.localName == 'a'){//连接简写，没有文本的时候，直接使用href作为文本节点
-    		if(node.firstChild == null){
-    			node.appendChild(node.ownerDocument.createTextNode(node.getAttribute('href')));
-    		}
-    		chain.process(node);
-    	}else{
-    		chain.process(node);
-    	}
-    }else{
-    	chain.process(node);
-    }
-});
+function parseCode(node){
+    //代码高亮组件
+    var text = String(node.textContent);
+    text = text.replace(/^\s+|\s+$/g,'');
+	this.append("<pre style='"+style+"'>"+text.replace(/[<>&]/g,xmlReplacer)+"</pre>");
+};
 function xmlReplacer(c){
 	return "&#"+c.charCodeAt(0)+';'
 }
-]]>
+//]]>
 		</c:extension>
 	</head>
 	<body>
 		<div id="header">
 			
 			<div class="logo" onclick="location = 'index.xhtml'">
-			<c:for var="item" items="${
+			<c:for var="item" list="${
   [
     [0,0,19,100],
     [0,81,42,19],
@@ -91,10 +87,13 @@ function xmlReplacer(c){
 				<h3>特色篇</h3>
 				<ul>
 					<li>
-						<a href="feature-client.xhtml" title="满堂花醉三千客 一剑霜寒十四州">发挥前端模板的优势</a>
+						<a href="feature-xml.xhtml" title="...">XML约束与前端安全 </a>
 					</li>
 					<li>
 						<a href="feature-el.xhtml" title="蓬莱此去无多路 青鸟殷勤为探看">发挥表达式的优势 </a>
+					</li>
+					<li>
+						<a href="feature-client.xhtml" title="满堂花醉三千客 一剑霜寒十四州">发挥前端模板的优势</a>
 					</li>
 					<li>
 						<a href="feature-extension.xhtml" title="书山墨海群芳竞，画里乾坤日月新">发挥自定义语法的优势 </a>

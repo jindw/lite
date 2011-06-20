@@ -16,7 +16,7 @@ import org.xidea.lite.parse.ParseChain;
 import org.xidea.lite.parse.ParseContext;
 
 public class ExtensionParserImpl implements ExtensionParser {
-	private static Pattern pattern = Pattern.compile("^[\\w\\-]\\:|[\\-]");
+	private static Pattern NAME_FORMAT = Pattern.compile("^[\\w\\-]+\\:|[\\-]");
 	private static Pattern FN_SEEKER = Pattern
 			.compile("^(?:\\w*\\:)?\\w*[\\$\\{]");
 	private Object impl;
@@ -170,13 +170,22 @@ public class ExtensionParserImpl implements ExtensionParser {
 			return true;
 		}
 		
+		Element el = attr.getOwnerElement();
 		if ("http://www.w3.org/2000/xmlns/".equals(ns)) {
 			if ((Boolean) rt.invoke(impl, "parseNamespace", attr, context,
 					chain)) {
 				return true;
+			}else{
+				//xmlns
+				String info = el.getAttributeNS(ParseUtil.CORE_URI, ParseUtil.CORE_INFO);
+				if(info.length() ==0 || info.indexOf("|"+attr.getName()+"|")>0){
+					return false;
+				}else{
+					return true;//自动补全的xmlns 不处理!
+				}
 			}
 		} else if (ns == null) {
-			ns = attr.getOwnerElement().getNamespaceURI();
+			ns = el.getNamespaceURI();
 			if(ns == null){
 				ns = "";
 			}
@@ -199,7 +208,7 @@ public class ExtensionParserImpl implements ExtensionParser {
 	}
 
 	private String formatName(String name) {
-		return pattern.matcher(name).replaceAll("").toLowerCase();
+		return NAME_FORMAT.matcher(name).replaceAll("").toLowerCase();
 	}
 
 }
