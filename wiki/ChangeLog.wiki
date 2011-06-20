@@ -2,7 +2,7 @@
 该文档记录Lite自2.0开始的全部更新日志
 
 === 2.0 ===
-  目前2.0尚在开发阶段，当前最新版本[http://code.google.com/p/lite/downloads/list 2.0A5]
+  目前2.0尚在开发阶段，当前最新版本[http://code.google.com/p/lite/downloads/list 2.0A6]
   * 2.0A6
     # Lite*(New)*: 彻底重构前端模板,函数定义能前后端复用且自动整体优化前端代码(前端模板函数能够实现页内共享并能按需生成)
     # Lite*(New)*: 增加PHP翻译支持, PHP版本可以借助浏览器自动编译.
