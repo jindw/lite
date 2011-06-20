@@ -19,6 +19,7 @@ public class XMLNormalizeImpl {
 	private static final Log log = LogFactory.getLog(XMLNormalizeImpl.class);
 	protected static final String TAG_NAME = "[\\w_](?:[\\w_\\-\\.\\:]*[\\w_\\-\\.])?";
 
+	private static final String NS_CORE = "http://www.xidea.org/lite/core";
 	// key (= value)?
 	protected static final Pattern ELEMENT_ATTR_END = Pattern
 			.compile("(?:^|\\s+|\\b)("
@@ -36,7 +37,7 @@ public class XMLNormalizeImpl {
 		map.put("&nbsp;","&#160;");
 		DEFAULT_ENTRY_MAP = Collections.unmodifiableMap(map);
 		map.clear();
-		map.put("xmlns:c","http://www.xidea.org/lite/core");
+		map.put("xmlns:c",NS_CORE);
 		map.put("xmlns","http://www.w3.org/1999/xhtml");
 		DEFAULT_NS_MAP = Collections.unmodifiableMap(map);
 	}
@@ -76,10 +77,11 @@ public class XMLNormalizeImpl {
 
 		public void addAttr(String space, String name, String value) {
 			int len = name.length();
-			if(name.startsWith("XMLNS")){//format html xmlns
-				if(len == 5 || name.charAt(5) == ':'){
-					name = "xmlns"+name.substring(5);
-				}
+			if((len == 5 || len>5 && name.charAt(5) == ':') && name.startsWith("XMLNS")){//format html xmlns
+				name = "xmlns"+name.substring(5);
+			}
+			if("xmlns:c".equals(name) && "http://www.xidea.org/ns/lite/core".equals(value)){
+				value = NS_CORE;
 			}
 			int prefixIndex = name.indexOf(':');
 			if (prefixIndex >0 || name.equals("xmlns")) {
@@ -137,7 +139,7 @@ public class XMLNormalizeImpl {
 				if(ab.size()>0){
 					result.append('|');
 					for(String a : ab){
-						if(a.indexOf(':')>0 && !a.startsWith("xmlns:")){
+						if(a.indexOf(':')>0 || a.equals("xmlns")){
 							result.append(a);
 							result.append('|');
 						}
