@@ -33,9 +33,13 @@ public class ParseContextImpl extends ParseContextProxy implements ParseContext 
 	private NodeParser<? extends Object>[] nodeParsers;
 	private TextParser[] textParsers;
 	private Object currentNode = null;
-	private Object contextInfo = new Object(){
+	private Object contextInfo = new Object(){//移动到extensionParser?
 		public String toString(){
-			return currentNode+"@"+getCurrentURI();
+			String pos = ParseUtil.getNodePosition(currentNode instanceof Node?(Node)currentNode:extensionParser.getCurrentNode());
+			if(pos == null){
+				pos= String.valueOf(getCurrentURI());
+			}
+			return pos;
 		}
 	};
 	public ParseContextImpl(ParseConfig config, String path) {

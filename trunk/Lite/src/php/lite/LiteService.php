@@ -104,7 +104,7 @@ if(!($checkScript)){
 </script>";
 	}
 	private function compile($path){
-		if(true || $this->getFileModified($path)){
+		if( $this->getFileModified($path)){
 			$scriptBase = $_REQUEST['LITE_SERVICE_URL'];
 			$this->loadJavaScriptClass('org.xidea.lite.web:WebCompiler');
 			echo "<script>

@@ -2,7 +2,8 @@
  * @see extension.js
  */
 
-function ExtensionParser(){
+function ExtensionParser(impl){
+	this.impl = impl;
 	this.packageMap = {};
 	this.addExtension("http://www.xidea.org/lite/core",Core);
 	
@@ -26,14 +27,19 @@ function copyParserMap(mapClazz,p,p2,key){
 }
 
 function loadExtObject(source){
-	var p = /\b(?:document|xmlns|(?:on|parse|before|seek)\w*)\b/g;
-	var fn = new Function(source+"\n return function(){return eval(arguments[0])}");
-	var m,o;
-	var objectMap = {};
+	try{
+		var p = /\b(?:document|xmlns|(?:on|parse|before|seek)\w*)\b/g;
+		var fn = new Function(source+"\n return function(){return eval(arguments[0])}");
+		var m,o;
+		var objectMap = {};
+	}catch(e){
+		$log.error("扩展源码语法错误:",e,source)
+		throw e;
+	}
 	try{
 		fn = fn();
 	}catch(e){
-		$log.error("扩展脚本装载失败：",source);
+		$log.error("扩展脚本装载失败：",source,e);
 	}
 	while(m = p.exec(source)){
 		try{
@@ -74,11 +80,11 @@ ExtensionParser.prototype = {
 		return result
 	},
 	parseDocument:function(node,context,chain){
-		for(var p in this.packageMap){
-			p = this.packageMap[p];
+		for(var ns in this.packageMap){
+			//objectMap.namespaceURI = namespace
+			var p = this.packageMap[ns];
 			if(p.documentParser){
-				p.documentParser.call(chain,node);
-				return true;
+				return p.documentParser.call(chain,node,ns);
 			}
 		}
 		return false;
@@ -94,6 +100,9 @@ ExtensionParser.prototype = {
 			//$log.error(v,fp.namespaceParser);
 		}
 		return false;
+	},
+	parseComment:function(comm, context,chain){
+		return true;
 	},
 	parseElement:function(el, context,chain,ns, name){
 //		context.setAttribute(CURRENT_NODE_KEY,el)
@@ -113,38 +122,14 @@ ExtensionParser.prototype = {
 					var fn = ext.beforeMap[an];
 					if(fn && an in ext.beforeMap){
 						es = 2.1
-						try{
-							el.removeAttributeNode(attr);
-							fn.call(chain,attr);
-							es =2.2
-						}finally{
-							
-						}
+						el.removeAttributeNode(attr);
+						fn.call(chain,attr);
+						es =2.2
 						return;
-					}else{
-						an+='$';
-						if(an in ext.beforeMap){
-							exclusiveMap[an] = attr;
-						}else{
-							$log.error("未支持属性：",el.name,context.currentURI)
-						}
 					}
 				}
 			}
 			es = 4;
-			for(an in exclusiveMap){
-				var attr = exclusiveMap[an];
-				var ans = attr.namespaceURI;
-				var ext = this.packageMap[ans || ''];
-				try{
-					el.removeAttributeNode(attr);
-					ext.beforeMap[an].call(chain,attr);
-				}finally{
-					
-				}
-				
-				return;
-			}
 		}catch(e){
 			$log.error("元素扩展解析异常",es,attr.xml,ans,an,e)
 			throw e;
@@ -218,7 +203,7 @@ ExtensionParser.prototype = {
 			var es = 0;
 			if(match){
 				var matchLength = match[0].length;
-				var currentNode = this.currentNode;//getAttribute(CURRENT_NODE_KEY)
+				var currentNode = this.currentNode || this.impl && this.impl.currentNode;//getAttribute(CURRENT_NODE_KEY)
 				var prefix = match[1];
 				var fn = match[2]
 				if(prefix == null){
@@ -303,7 +288,7 @@ ExtensionParser.prototype = {
 		if(ext == null){
 			ext = this.packageMap[namespace||''] = new Extension();
 		}
-		ext.initialize(objectMap);
+		ext.initialize(objectMap,namespace||'');
 	},
 	priority:2,
 	getPriority:function() {

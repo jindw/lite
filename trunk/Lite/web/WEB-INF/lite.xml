@@ -1,15 +1,20 @@
-<lite encoding="utf-8" mime-type="text/html">
-	<feature key="http://www.xidea.org/feature/lite/javascript-compressor"
+<lite encoding="utf-8" mime-type="text/html" xmlns="">
+	<feature name="http://www.xidea.org/feature/lite/javascript-compressor"
 		value="org.jside.jsi.tools.JSACompressor" />
 	<extension namespace="http://www.w3c.org/1999/xhtml" package="org.xidea.lite.xhtml" />
-	<group layout="/guide/layout.xhtml">
+	<group>
 		<extension namespace="http://www.xidea.org/lite/core"
 			package="org.xidea.lite.xhtml" />
 		<group layout="/example/layout.xhtml">
 			<include>/example/*.xhtml</include>
 			<exclude>/example/*.xhtml</exclude>
 		</group>
-		<include>/book/*.xhtml</include>
+		<group layout="/doc/guide/layout.xhtml">
+			<include>/doc/guide/*.xhtml</include>
+		</group>
+		<group layout="/book/layout.xhtml">
+			<include>/book/*.xhtml</include>
+		</group>
 	</group>
 	<include>**.xhtml</include>
 </lite>

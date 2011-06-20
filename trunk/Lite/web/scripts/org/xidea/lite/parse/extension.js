@@ -24,25 +24,27 @@ Extension.prototype={
 //			$log.error("["+key+"]:"+o+"\n\n")
 			if(o instanceof Function){
 				var dest = null;
-				var match = key.match(/^(document|xmlns|on|before|parse|seek)(.*)/);
+				var match = key.match(/^(parse|seek|xmlns|on|before)(.*)/);
 				var prefix = match[1];
 				var fn = match[2];
-				if(prefix == "document"){//""?".."
-					this.documentParser = o;
-					continue;
-				}else if(prefix == "xmlns"){
-					this.namespaceParser = o;
+				if(prefix == "parse"){//""?".."
+					dest = this.parserMap ||(this.parserMap={});
+				}else if(prefix == "seek"){//""?".."
+					dest = this.seekMap ||(this.seekMap={});
 				}else if(prefix == "before"){
 					dest = this.beforeMap ||(this.beforeMap={});
 				}else if(prefix == "on"){
 					dest = this.onMap ||(this.onMap={});
-				}else if(prefix == "parse"){//""?".."
-					dest = this.parserMap ||(this.parserMap={});
-				}else if(prefix == "seek"){//""?".."
-					dest = this.seekMap ||(this.seekMap={});
+				}else if(prefix == "xmlns"){
+					this.namespaceParser = o;
+					continue;
 				}
 				if(dest){
-					dest[formatName(fn)] = o;
+					if(fn == "9"){//document
+						this.documentParser = o;
+					}else{
+						dest[formatName(fn)] = o;
+					}
 				}
 			}
 		}

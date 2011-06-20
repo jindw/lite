@@ -1,0 +1,21 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+	 xmlns:c="http://www.xidea.org/lite/core"
+	 c:extend="">
+	<head>
+
+	</head>
+	<body>
+		<c:var name="server">
+			<table border="1">
+				<c:for var="monthMax" list="${[31,28,31,30,31,30,31,31,30,31,30,31]}">
+					<tr>
+						<th>${for.index+1}月${monthMax>30?'大':'小'}</th>
+						<c:for var="date" list="${monthMax}">
+							<td>${date}</td>
+						</c:for>
+					</tr>
+				</c:for>
+			</table>
+		</c:var>
+	</body>
+</html>

@@ -17,7 +17,7 @@ function ParseContext(config,path){
 	this._featureMap = config.getFeatureMap(path);
     this._config = config;
     this._textType=0;
-	this._attributeMap = [[],[]]
+	this._attributeMap = [[],[],{}]
     this._result = new ResultContext();
 	this._context = this;
 	this._result._context = this;

@@ -171,7 +171,7 @@ function optimizeAllClient(templateList,defMap,pluginObjectList){
 			var po = pluginObjectList[i];
 			if(po[1] == cmd && po[0] instanceof ClientPlugin){
 				var p = pluginObjectList[i][0];
-				positionList.push(post32.replace(/\u0009./g,''));
+				positionList.push(post32);//.replace(/\u0009./g,''));
 				pluginList.push(p);
 				cmdList.push(cmd);
 				if(p.name){

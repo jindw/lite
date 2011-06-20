@@ -485,7 +485,7 @@ function beforeInclude(attr){
 	if(path){
 		var path2 = path.replace(/^[\$#]([\w\$_]+)$/,'$$$1');
 		if(path2.charAt() == '$') {
-			doc = this.getAttribute(path);
+			doc = this.getAttribute(path2);
 		}else{
 			var doc = this.loadXML(this.createURI(path))
 		}
@@ -536,14 +536,18 @@ function parseInclude(node){
 	try{
 		
 	    if(path!=null){
+	    	if(path.charAt() == '#'){
+	    		$log.error("装饰器命名节点改用${pageName}模式了:(");
+	    		path = '$'+path.substring(1);
+	    	}
 	    	if(path.charAt() == '$'){
 	    		doc = this.getAttribute(path);
 	    		setNodeURI(this,node);
 	    	}else{
-		        var url = this.createURI(path);
+		        var uri = this.createURI(path);
 	    		//$log.warn(path,this.currentURI+'',url+'')
-		        var doc = this.loadXML(url);
-		        this.currentURI = url;
+		        var doc = this.loadXML(uri);
+		        this.currentURI = uri;
 	    	}
 	    }else{
 	    	var doc = node.ownerDocument
@@ -588,19 +592,19 @@ function processExtends(node){
 	}
 	
 	this.setAttribute("#extends" ,extendsConfig);
-	var parentURL = getAttribute(node,"*path","value","parent");
+	var parentURI = getAttribute(node,"*path","value","parent");
 	//childNodes
-	var url = this.createURI(parentURL);
-	var parentNode = this.loadXML(url);
+	var uri = this.createURI(parentURI);
+	var parentNode = this.loadXML(uri);
 	if(!root){//元素继承
 		parentNode = parentNode.documentElement;
 	}
 	var i = this.mark();
-	 processChild(this,node);
+	processChild(this,node);
 	this.reset(i);
     var parentURI = this.currentURI;
 	try{
-		this.currentURI = url;
+		this.currentURI = uri;
 		extendsConfig.parse=true;
 		this.parse(parentNode);
 	}finally{
@@ -683,3 +687,34 @@ Core.xmlns = function(){};
 Core.parse = function(node){
 	$log.error("未支持标签：",node.tagName,node.ownerDocument && node.ownerDocument.documentURI)
 };
+Core.parse9 = function(doc,ns){
+	var isProcessed = this.getAttribute(DOCUMENT_LAYOUT_PROCESSED);
+	if(!isProcessed){
+		 this.setAttribute(DOCUMENT_LAYOUT_PROCESSED,true);
+		 var root = doc.documentElement;
+		 var ln = root.localName || root.nodeName.replace(/^w+\:/,'');
+		 if((ln == 'extends' || ln == 'extend') &&  root.namespaceURI == ns){
+		 	processExtends.call(this,root);
+		 	return true;
+		 }else{
+		 	var attr = root.getAttributeNodeNS(ns,"extends") || root.getAttributeNodeNS(ns,"extend");
+		 	if(attr != null){
+		 		processExtends.call(this,attr);
+		 		return true;
+		 	}
+		 	var layout = this.getFeature('http://www.xidea.org/lite/features/config-layout');
+		 	if(layout){
+		 		this.setAttribute('$page',doc);
+		 		var uri = this.createURI(layout);
+				//this.currentURI = uri;
+		 		//doc = this.loadXML(uri);
+		 		this.parse(uri);
+		 		return true;
+		 	}
+		 }
+		 return false;
+	}
+	return false;
+	
+}
+var DOCUMENT_LAYOUT_PROCESSED = "http://www.xidea.org/lite/layout-processed";

@@ -17,6 +17,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -40,13 +41,14 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.w3c.dom.UserDataHandler;
 import org.xidea.jsi.JSIRuntime;
 import org.xidea.jsi.impl.RuntimeSupport;
 import org.xidea.lite.impl.dtd.DefaultEntityResolver;
 import org.xidea.lite.parse.ParseContext;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
+
 
 public class ParseUtil {
 
@@ -57,6 +59,9 @@ public class ParseUtil {
 
 	static DocumentBuilder documentBuilder;
 	final static List<Charset> CHARSETS;
+	public static final String CORE_URI = "http://www.xidea.org/lite/core";
+	//c:__i="1,2|c:if|c:for|c:client|"
+	public static final String CORE_INFO = "__i";
 	static {
 		try {
 			DocumentBuilderFactory factory = DocumentBuilderFactory
@@ -215,13 +220,13 @@ public class ParseUtil {
 		InputSource in = new InputSource(new StringReader(text));
 		in.setSystemId(id);
 		Document xml;
-		try {
-			xml = documentBuilder.parse(in);
-		} catch (SAXParseException e) {
+		//try {
+		//	xml = documentBuilder.parse(in);
+		//} catch (SAXParseException e) {
 			text = new XMLNormalizeImpl().normalize(text,id);
 			in.setCharacterStream(new StringReader(text));
 			xml = documentBuilder.parse(in);
-		}
+		//}
 		if (ins != null) {
 			xml.insertBefore(xml.createProcessingInstruction("xml", ins), xml
 					.getFirstChild());
@@ -230,6 +235,83 @@ public class ParseUtil {
 
 	}
 
+	private static final String ORDERED_NODE_KEY = ParseUtil.class
+			.getName()
+			+ "#ORDERED_NODE_KEY";
+
+	private static final UserDataHandler VOID_HANDLER = new UserDataHandler() {
+		public void handle(short operation, String key, Object data,
+				Node src, Node dst) {
+		}
+	};
+	public static List<Attr> getOrderedNSAttrList(Element el) {
+		@SuppressWarnings("unchecked")
+		ArrayList<Attr> list = (ArrayList<Attr>) el.getUserData(ORDERED_NODE_KEY);
+		if (list == null) {
+			list = new ArrayList<Attr>();
+			final String info = el.getAttributeNS(ParseUtil.CORE_URI,
+					ParseUtil.CORE_INFO);
+			NamedNodeMap attrs = el.getAttributes();
+			int len = attrs.getLength();
+			for (int i = len - 1; i >= 0; i--) {
+				Attr attr = (Attr) attrs.item(i);
+				String ln = getLocalName(attr);
+				String ns = attr.getNamespaceURI();
+				if (ns != null && !(ParseUtil.CORE_INFO.equals(ln))
+						&& ParseUtil.CORE_URI.equals(ns)) {
+					list.add(attr);
+				}
+			}
+			if(info.length()>0){
+				Collections.sort(list, new Comparator<Attr>() {
+					//+ a positive integer as the first argument is less than(in order )
+					public int compare(Attr o1, Attr o2) {
+						int p1 = info.indexOf('|' + o1.getNodeName() + '|');
+						int p2 = info.indexOf('|' + o2.getNodeName() + '|');
+						if (p1 == -1 ||p2 == -1) {
+							return p1 - p2;//-1,-1=>0,-1,1=>-,1,-1=>+
+						}
+						return p2 - p1;
+					}
+				});
+			}
+			el.setUserData(ORDERED_NODE_KEY, list, VOID_HANDLER);
+		}
+		return list;
+	}
+	public static String getNodePosition(Node node) {
+		Element el = null;
+		switch(node.getNodeType()){
+		case Node.ELEMENT_NODE:
+			el = (Element)node;
+			break;
+		case Node.ATTRIBUTE_NODE:
+			el = ((Attr)node).getOwnerElement();
+			break;
+		case Node.DOCUMENT_NODE:
+			el = ((Document)node).getDocumentElement();
+		}
+		
+		if (el != null) {
+			Document doc = el.getOwnerDocument();
+			String pos = el.getAttributeNS(ParseUtil.CORE_URI, ParseUtil.CORE_INFO);
+			if(pos.length()>0){
+				int p = pos.indexOf('|');
+				if(p>0){
+					pos = pos.substring(0,p);
+				}
+				pos = "@"+node.getNodeName()+"["+pos+"]";
+			}
+			if(doc!=null){
+				String path = doc.getDocumentURI();
+				return path+pos;
+			}else{
+				return pos;
+			}
+			
+		}
+		return null;
+	}
 	private static String getXMLInstruction(String text) throws IOException {
 		String ins = null;
 		if (text.startsWith("<?xml")) {
@@ -241,6 +323,17 @@ public class ParseUtil {
 		return ins;
 	}
 
+	public static String getLocalName(Node node){
+		String ln = node.getLocalName();
+		if(ln == null){
+			ln = node.getNodeName();
+			int p= ln.indexOf(':');
+			if(p>0){
+				ln = ln.substring(p+1);
+			}
+		}
+		return ln;
+	}
 	private static Pattern TXT_HEADER = Pattern.compile("^#.*[\r\n]+");
 	private static Pattern TXT_CDATA_END = Pattern.compile("]]>");
 
@@ -398,7 +491,7 @@ class NamespaceContextImpl implements NamespaceContext {
 				}
 				prefixMap.put(prefix, value);
 			} else if ("xmlns".equals(attr.getPrefix())) {
-				prefixMap.put(attr.getLocalName(), value);
+				prefixMap.put(ParseUtil.getLocalName(attr), value);
 			}
 		}
 	}

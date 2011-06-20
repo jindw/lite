@@ -89,8 +89,8 @@ public class XMLNormalizeTest {
 		InputSource s = new InputSource(new StringReader(result));
 		s.setSystemId(path);
 		Document doc = DB.parse(s);
-		String uri = ((Document)doc.cloneNode(true)).getDocumentURI();
-		System.out.println(uri);
+//		String uri = ((Document)doc.cloneNode(true)).getDocumentURI();
+//		System.out.println(uri);
 		return result;
 	}
 

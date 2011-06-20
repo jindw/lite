@@ -1,0 +1,36 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:c="http://www.xidea.org/lite/core">
+	<head>
+
+		<c:client name="renderCalendar()" c:trim="true">
+			<c:include xpath="//c:var[@name='server']/node()" />
+		</c:client>
+	</head>
+	<body>
+		<c:var name="server">
+			<table border="1">
+				<c:for var="monthMax" list="${[31,28,31,30,31,30,31,31,30,31,30,31]}">
+					<tr>
+						<th>${for.index+1}月${monthMax>30?'大':'小'}</th>
+						<c:for var="date" list="${monthMax}">
+							<td>${date}</td>
+						</c:for>
+					</tr>
+				</c:for>
+			</table>
+		</c:var>
+	</body>
+	<script>
+	//<![CDATA[
+		var sc = ${JSON.stringify(server)};
+		var jc = renderCalendar();
+		
+		if(sc.replace(/\s+/g,' ') == jc.replace(/\s+/g,' ')){
+			document.write("<h2>测试成功!</h2>"+sc);
+		}else{
+			document.write("<h2>测试失败!</h2>");
+			document.write("<textarea>"+sc+"\n"+jc+"</textarea>");
+			
+		}
+		//]]>
+	</script>
+</html>

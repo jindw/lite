@@ -314,7 +314,7 @@ public class Template {
 					len = Math.max(((Number) list).intValue(), 0);
 					list = new Object[len];
 					for (int i = 0; i < len;) {
-						((Object[]) list)[i] = i++;
+						((Object[]) list)[i] = ++i;
 					}
 				} else {
 					len = Array.getLength(list);

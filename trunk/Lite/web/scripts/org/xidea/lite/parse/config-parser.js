@@ -48,7 +48,7 @@
  * 	}
  * ]
  */
-function parseConfig(doc){
+function parseConfigToJSON(doc){
 	var doc = doc.nodeType?doc:loadXML(doc);
 	var lites = doc.getElementsByTagName("lite");
 	var len = lites.length;
@@ -60,7 +60,10 @@ function parseConfig(doc){
 				root.children.push(new LiteGroup(lites[i],this));
 			}
 		}
-		return root.toJSON();
+		var json = root.toJSON();
+		var result = stringifyJSON(json);
+		return result;
+		
 	}
 	return "[]"
 }
@@ -68,7 +71,7 @@ function LiteGroup(node,parentConfig){
 	this.parentConfig = parentConfig || null
 	this.featureMap = {}
 	this.encoding= getAttribute(node,'encoding','charset');
-	this.mimeType = getAttribute(node,'mimeType','mimiType','metaType');
+	this.mimeType = getAttribute(node,'mime-type','mimeType','mimiType','metaType');
 	this.layout = getAttribute(node,'layout');
 	this.contentType = getAttribute(node,'contentType','contextType');
 	this.extensionMap = {};
@@ -78,14 +81,14 @@ function LiteGroup(node,parentConfig){
 	var child = node.firstChild;
 	while(child){
 		if(child.nodeType == 1){
-			switch(child.localName){
+			switch(child.nodeName){
 			case 'feature':
-				this.featureMap[getAttribute(node,'name','key','uri','url')] = 
-						getAttribute(node,'value','#text')
+				this.featureMap[getAttribute(child,'name','key','uri','url')] = 
+						getAttribute(child,'value','#text')
 				break;
 			case 'extension':
-				var ns = getAttribute(node,'namespace','name','key','uri','url');
-				var p = getAttribute(node,'package','impl','value','#text');
+				var ns = getAttribute(child,'namespace','name','key','uri','url');
+				var p = getAttribute(child,'package','impl','value','#text');
 				var ps = this.extensionMap[ns];
 				if(ps && ps instanceof Array){
 					appendAfter(ps,p);
@@ -94,14 +97,16 @@ function LiteGroup(node,parentConfig){
 				}
 				break;
 			case 'include':
-				this.includes.push(getAttribute(node,'value','#text','pattern'));
+				this.includes.push(getAttribute(child,'value','#text','pattern'));
 				break;
 			case 'exclude':
-				this.excludes.push(getAttribute(node,'value','#text','pattern'));
+				this.excludes.push(getAttribute(child,'value','#text','pattern'));
 				break;
 			case 'group':
 				this.children.push(new LiteGroup(child,this))
 				break;
+			default:
+				$log.warn("unknow nodeName:"+child.nodeName);
 			}
 		}
 		child = child.nextSibling;
@@ -113,7 +118,7 @@ LiteGroup.prototype.toJSON = function(){
 	var json = {}
 	this.initialize();
 	for(var i=0;i<len;i++){
-		result.push.apply(this.children[i].toJSON());
+		result.push.apply(result,this.children[i].toJSON());
 	}
 	json.includes = this.includes;
 	json.excludes = this.excludes;
@@ -172,7 +177,7 @@ LiteGroup.prototype.initialize = function(){
 	this.featureMap["http://www.xidea.org/lite/features/output-mime-type"] = this.mimeType;
 	if(this.layout != null){
 		if(!this.layout || this.layout.charAt() == '/'){
-			this.featureMap["http://www.xidea.org/lite/features/layout"] = this.layout;
+			this.featureMap["http://www.xidea.org/lite/features/config-layout"] = this.layout;
 		}else{
 			$log.error("layout 必须为绝对地址('/'开始),你的设置为："+this.layout);
 		}
@@ -220,29 +225,36 @@ function compilePatterns(ps){
 }
 
 function buildURIMatcher(pattern){
-	var matcher = /\*+|[^\*\\\/]+?|[\\\/]/;
+	var matcher = /\*+|[^\*\\\/]+?|[\\\/]/g;
 	var buf = ["^"];
-	pattern.lastIndex = 0;
-	while (matcher.exec(pattern)) {
-		var item = matcher[0];
+	var m
+	matcher.lastIndex = 0;
+	while (m = matcher.exec(pattern)) {
+		var item = m[0];
 		var len = item.length;
 		var c = item.charAt(0);
 		if (c == '*') {
-			if (length > 1) {
+			if (len > 1) {
 				buf.push(".*");
 			} else {
 				buf.push("[^\\\\/]+");
 			}
-		} else if(length == 1 && c == '/' || c == '\\') {
+		} else if(len == 1 && c == '/' || c == '\\') {
 			buf.push("[\\\\/]");
 		}else{
-			buf.push(item.replace(/[^w]/g,quteReqExp));
+			buf.push(item.replace(/[^\w]/g,quteReqExp));
 		}
 	}
 	buf.push("$");
 	return buf.join('');
 }
 function quteReqExp(x){
-	return '\\x'+(0x100 + x.charCodeAt()).toString(16).substring(1);
+	switch(x){
+	case '.':
+		return '\\.';
+	case '\\':
+		return '\\\\';
+	default:
+		return '\\x'+(0x100 + x.charCodeAt()).toString(16).substring(1);
+	}
 }
-    

@@ -1,6 +1,6 @@
-this.addScript('config-parser.js',['parseConfig']
+this.addScript('config-parser.js',['parseConfigToJSON']
 				,0
-				,['org.xidea.lite.util:loadXML',"org.xidea.lite.util:getAttribute"]);
+				,['org.xidea.lite.util:stringifyJSON','org.xidea.lite.util:loadXML',"org.xidea.lite.util:getAttribute"]);
 this.addScript('config.js','ParseConfig'
 				,0
 				,['org.xidea.lite.util:URI']);

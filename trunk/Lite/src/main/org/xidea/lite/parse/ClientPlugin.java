@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.impl.ParseUtil;
@@ -64,7 +63,7 @@ public class ClientPlugin implements OptimizePlugin, OptimizeScope {
 		this.children.clear();
 		this.children.add(script);
 	}
-	private static Pattern CAPTURE_REPLACER = Pattern.compile("[\\u0009].");
+	//private static Pattern CAPTURE_REPLACER = Pattern.compile("[\\u0009].");
 
 	private static void optimizeAll(final OptimizeContext context) {
 		Map<String, Set<String>> callMap = new HashMap<String, Set<String>>(
@@ -80,7 +79,7 @@ public class ClientPlugin implements OptimizePlugin, OptimizeScope {
 				OptimizePlugin p = context.getPlugin((List<Object>) parent.get(index));
 				if (p instanceof ClientPlugin) {
 					ClientPlugin plugin = (ClientPlugin) p;
-					positionList.add(CAPTURE_REPLACER.matcher(post32).replaceAll(""));
+					positionList.add(post32);//CAPTURE_REPLACER.matcher(post32).replaceAll(""));
 					pluginList.add(plugin);
 					if (plugin.name != null && plugin.name.length() > 0) {
 						namedClientCallMap.put(plugin.name, getCall(plugin));

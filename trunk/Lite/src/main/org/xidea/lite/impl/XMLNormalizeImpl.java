@@ -1,5 +1,7 @@
 package org.xidea.lite.impl;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -19,16 +21,29 @@ public class XMLNormalizeImpl {
 
 	// key (= value)?
 	protected static final Pattern ELEMENT_ATTR_END = Pattern
-			.compile("(?:^|\\s+)("
+			.compile("(?:^|\\s+|\\b)("
 					+ TAG_NAME
 					+ ")(?:\\s*=\\s*('[^']*'|\"[^\"]*\"|\\w+|\\$\\{[^}]+\\}))?|\\s*\\/?>");
 	protected static final Pattern XML_TEXT = Pattern
 			.compile("&\\w+;|&#\\d+;|&#x[\\da-fA-F]+;|([&\"\'<])");
 	protected static final Pattern LEAF_TAG = Pattern.compile(
 			"^(?:meta|link|img|br|hr|input)$", Pattern.CASE_INSENSITIVE);
+	public final static Map<String, String> DEFAULT_ENTRY_MAP;
+	public final static Map<String, String> DEFAULT_NS_MAP;
+	static{
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("&copy;","&#169;");
+		map.put("&nbsp;","&#160;");
+		DEFAULT_ENTRY_MAP = Collections.unmodifiableMap(map);
+		map.clear();
+		map.put("xmlns:c","http://www.xidea.org/lite/core");
+		map.put("xmlns","http://www.w3.org/1999/xhtml");
+		DEFAULT_NS_MAP = Collections.unmodifiableMap(map);
+	}
+	
 
-	protected Map<String, String> defaultNSMap = new HashMap<String, String>();
-	protected Map<String, String> defaultEntryMap = new HashMap<String, String>();
+	protected Map<String, String> defaultNSMap = DEFAULT_NS_MAP;
+	protected Map<String, String> defaultEntryMap = DEFAULT_ENTRY_MAP;
 	protected String documentStart = "<c:group xmlns:c='http://www.xidea.org/lite/core'>";
 	protected String documentEnd = "</c:group>";
 
@@ -36,47 +51,58 @@ public class XMLNormalizeImpl {
 	protected int rootCount;
 	protected String text;
 	private TextPosition textPosition;
-	protected Tag tag;
+	protected TagAttr tag;
 	protected StringBuilder result;
 	protected String uri;
+	protected ArrayList<String> ab = new ArrayList<String>();
 
-	public XMLNormalizeImpl() {
-		defaultEntryMap.put("&nbsp;", "&#160;");
-		defaultEntryMap.put("&copy;", "&#169;");
-		this.addDefaultNS("f", "http://firekylin.my.baidu.com/ns/2010");
-		this.addDefaultNS("c", "http://www.xidea.org/lite/core");
-		this.addDefaultNS("", "http://www.w3.org/1999/xhtml");
-		this.documentStart = "<c:block xmlns:c='http://www.xidea.org/lite/core' xmlns='http://www.w3.org/1999/xhtml'>";
-		this.documentEnd = "</c:block>";
+	public XMLNormalizeImpl(Map<String, String> defaultNSMap,Map<String, String> defaultEntryMap) {
+		this.defaultNSMap =defaultNSMap;
+		this.defaultEntryMap = defaultEntryMap;
 	}
+	public XMLNormalizeImpl(){}
 
-	protected class Tag {
+	protected class TagAttr {
 		String name;
 		Map<String, String> nsMap;
-		private Tag parentTag;
+		int start;
+		TagAttr parentTag;
 
-		public Tag() {
+		public TagAttr() {
+			this.start = XMLNormalizeImpl.this.start;
 			this.parentTag = tag;
+			ab.clear();
 		}
 
-		void remove() {
-			tag = parentTag;
-		}
-
-		void acceptNS(String name, String value) {
-			//
-			// int size = tags.size();
-			// size > 0?tags.get(size-1):null
-
-			if ("xmlns".equalsIgnoreCase(name) || name.indexOf(':') > 0) {
+		public void addAttr(String space, String name, String value) {
+			int len = name.length();
+			if(name.startsWith("XMLNS")){//format html xmlns
+				if(len == 5 || name.charAt(5) == ':'){
+					name = "xmlns"+name.substring(5);
+				}
+			}
+			int prefixIndex = name.indexOf(':');
+			if (prefixIndex >0 || name.equals("xmlns")) {
 				if (nsMap == null) {
 					nsMap = new HashMap<String, String>();
 				}
 				nsMap.put(name, value);
 			}
+			if(ab.contains(name)){
+				error("attribute "+name + "is existed!!");
+				return ;
+			}
+			ab.add(name);
+			result.append(space);
+			result.append(name);
+			result.append('=');
+			char qute = value.indexOf('"')==-1?'"':'\'';
+			result.append(qute);
+			result.append(value);
+			result.append(qute);
 		}
 
-		public void checkTagNS() {
+		public void compliteAttr() {
 			if (parentTag == null) {// first Node
 				if (nsMap == null) {
 					nsMap = new HashMap<String, String>();
@@ -102,7 +128,23 @@ public class XMLNormalizeImpl {
 					// check missed and init this
 					nsMap = toNSDecMap(nsMap,parentTag.nsMap);
 				}
+			}
+			if(nsMap.containsKey("xmlns:c")){
+				result.append(" c:");
+				result.append(ParseUtil.CORE_INFO);
+				result.append("='");
+				result.append( textPosition.getPosition(start));
+				if(ab.size()>0){
+					result.append('|');
+					for(String a : ab){
+						if(a.indexOf(':')>0 && !a.startsWith("xmlns:")){
+							result.append(a);
+							result.append('|');
+						}
+					}
+				}
 
+				result.append("'");
 			}
 		}
 
@@ -167,9 +209,6 @@ public class XMLNormalizeImpl {
 		return result.toString();
 	}
 
-	private void appendPos(int start) {
-		result.append(" c:__pos__=\'" + textPosition.getPosition(start) + "\'");
-	}
 
 	private boolean appendElementStart() {
 		final int start = this.start;
@@ -179,7 +218,7 @@ public class XMLNormalizeImpl {
 		if (tag == null) {
 			rootCount++;
 		}
-		this.tag = new Tag();
+		this.tag = new TagAttr();
 		while (m.find()) {
 			if (p != m.start()) {
 				break;
@@ -187,17 +226,15 @@ public class XMLNormalizeImpl {
 			String v = m.group();
 			this.start = start + 1 + m.end();
 			if (v.endsWith(">")) {
-				tag.checkTagNS();
+				tag.compliteAttr();
 				boolean closeTag = v.indexOf('/') >= 0;
 				if (closeTag || isLeaf(tag.name)) {
-					appendPos(start);
 					if (!closeTag) {
 						info("标签:" + tag.name + " 未关闭(已修复)");
 					}
 					result.append("/>");
-					tag.remove();
+					tag = tag.parentTag;
 				} else {
-					appendPos(start);
 					result.append('>');
 					// for script
 					if ("script".equalsIgnoreCase(tag.name)) {
@@ -208,9 +245,7 @@ public class XMLNormalizeImpl {
 			} else {
 				final String name = m.group(1);
 				String value = m.groupCount() > 1 ? m.group(2) : null;
-
-				tag.acceptNS(name, value);
-				if (p == 0) {
+				if (p == 0) {//process tagName
 					if (value != null) {
 						error("attribute value without name:" + v);
 					}
@@ -219,30 +254,23 @@ public class XMLNormalizeImpl {
 					result.append(name);
 					tag.name = name;
 				} else {
-					result.append(v.substring(0, m.start(1) - m.start()));
-					result.append(name);
-					result.append('=');
+					//append space
+					String space = v.substring(0, m.start(1) - m.start());
+
 					if (value == null) {
 						info("属性:" + name + " 未赋值(已修复)");
-						result.append('"');
-						result.append(name);
-						result.append('"');
+						value = name;
 					} else {
 						char f = value.charAt(0);
 						if (f == '"' || f == '\'') {
-							result.append(f);
 							String v1 = value.substring(1, value.length() - 1);
-							String v2 = formatXMLValue(v1, name, f);
-							result.append(v2);
-							result.append(f);
+							value = formatXMLValue(v1, name, f);
 						} else {
 							info("属性:" + name + " 未使用\"'(已修复)");
-							result.append('"');
-							String v2 = formatXMLValue(value, name, '"');
-							result.append(v2);
-							result.append('"');
+							value = formatXMLValue(value, name, '"');
 						}
 					}
+					tag.addAttr(space,name, value);
 
 				}
 
@@ -266,7 +294,7 @@ public class XMLNormalizeImpl {
 			result.append("</");
 			result.append(lastName);
 			result.append(">");
-			tag.remove();
+			tag = tag.parentTag;
 			if (!lastName.equalsIgnoreCase(name)) {
 				error("end tag(" + name + ") can not match the start("
 						+ lastName + ")!");
@@ -481,14 +509,14 @@ public class XMLNormalizeImpl {
 		return 0;
 	}
 
-	public String addDefaultEntity(String entry, String value) {
-		return defaultEntryMap.put(entry, value);
-	}
-
-	public String addDefaultNS(String prefix, String namespace) {
-		return defaultNSMap.put(prefix.length() > 0 ? "xmlns:" + prefix
-				: "xmlns", namespace);
-	}
+//	public String addDefaultEntity(String entry, String value) {
+//		return defaultEntryMap.put(entry, value);
+//	}
+//
+//	public String addDefaultNS(String prefix, String namespace) {
+//		return defaultNSMap.put(prefix.length() > 0 ? "xmlns:" + prefix
+//				: "xmlns", namespace);
+//	}
 
 	public void setDefaultRoot(String elementTag) {
 		this.documentStart = elementTag.replaceAll("^\\s+|\\/?>(?:\\s*<\\/"
