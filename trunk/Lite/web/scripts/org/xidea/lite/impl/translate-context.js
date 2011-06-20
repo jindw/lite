@@ -111,7 +111,7 @@ TranslateContext.prototype = {
                 	i = this.processElse(code,i);
     				break;
                 default:
-                    throw Error('无效指令：'+i+JSON.stringify(code))
+                    throw Error('无效指令：'+i+stringifyJSON(code))
                 }
     		}
     	}
