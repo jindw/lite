@@ -3,16 +3,20 @@
 
 === 2.0 ===
   目前2.0尚在开发阶段，当前最新版本[http://code.google.com/p/lite/downloads/list 2.0A5]
+  * 2.0A6
+    # Lite*(New)*: 彻底重构前端模板,函数定义能前后端复用且自动整体优化前端代码(前端模板函数能够实现页内共享并能按需生成)
+    # Lite*(New)*: 增加PHP翻译支持, PHP版本可以借助浏览器自动编译.
+    # Lite*(New)*: Java编译器支持XML语法自动修复,能修复大多数常见html类不严谨的书写习惯(目前PHP版本尚无此功能).
   * 2.0A5
-    # JSEL~~(BF)~~: [http://code.google.com/p/lite/issues/detail?id=18 JSON 编码工具多线程环境下调用失败]
+    # JSEL~~(Bug)~~: [http://code.google.com/p/lite/issues/detail?id=18 JSON 编码工具多线程环境下调用失败]
   * 2.0A4
-    # JSEL*(NF)*: [http://code.google.com/p/lite/issues/detail?id=16 支持日期的编码解码，采用W3C日期标准]
-    # JSEL~~(BF)~~: [http://code.google.com/p/lite/issues/detail?id=17 运算符二级优先级判断错误]  
-    # JSEL~~(BF)~~: [http://code.google.com/p/lite/issues/detail?id=15 表达式数组参数低级错误]
+    # JSEL*(New)*: [http://code.google.com/p/lite/issues/detail?id=16 支持日期的编码解码，采用W3C日期标准]
+    # JSEL~~(Bug)~~: [http://code.google.com/p/lite/issues/detail?id=17 运算符二级优先级判断错误]  
+    # JSEL~~(Bug)~~: [http://code.google.com/p/lite/issues/detail?id=15 表达式数组参数低级错误]
   * 2.0A3
-    # JSEL*(NF)*: [http://code.google.com/p/lite/wiki/JSON JSON编码/解析实现优化]
-    # JSEL*(NF)*: [http://code.google.com/p/lite/wiki/CPEL 命令行工具优化]
+    # JSEL*(New)*: [http://code.google.com/p/lite/wiki/JSON JSON编码/解析实现优化]
+    # JSEL*(New)*: [http://code.google.com/p/lite/wiki/CPEL 命令行工具优化]
   * 2.0A2
-    # JSEL*(NF)*: [http://code.google.com/p/lite/wiki/JSELExtension 表达式扩展支持]
+    # JSEL*(New)*: [http://code.google.com/p/lite/wiki/JSELExtension 表达式扩展支持]
   * 2.0A1
-    # Lite*(NF)*: 优化插件模型, 用javascript重构核心逻辑，方便前端工程师对语法设计的控制。
+    # Lite*(New)*: 优化插件模型, 用javascript重构核心逻辑，方便前端工程师对语法设计的控制。
