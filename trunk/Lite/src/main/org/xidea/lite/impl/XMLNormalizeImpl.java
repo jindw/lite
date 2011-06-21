@@ -20,6 +20,7 @@ public class XMLNormalizeImpl {
 	protected static final String TAG_NAME = "[\\w_](?:[\\w_\\-\\.\\:]*[\\w_\\-\\.])?";
 
 	private static final String NS_CORE = "http://www.xidea.org/lite/core";
+	private static final Pattern OLD_NS_CORE = Pattern.compile("^(?:http://www.xidea.org/ns/(?:lite|template)/core/?|http://firekylin.my.baidu.com/ns/2010)$");
 	// key (= value)?
 	protected static final Pattern ELEMENT_ATTR_END = Pattern
 			.compile("(?:^|\\s+|\\b)("
@@ -77,11 +78,15 @@ public class XMLNormalizeImpl {
 
 		public void addAttr(String space, String name, String value) {
 			int len = name.length();
-			if((len == 5 || len>5 && name.charAt(5) == ':') && name.startsWith("XMLNS")){//format html xmlns
-				name = "xmlns"+name.substring(5);
-			}
-			if("xmlns:c".equals(name) && "http://www.xidea.org/ns/lite/core".equals(value)){
-				value = NS_CORE;
+			if(len == 5 &&  name.equals("XMLNS")){//format html xmlns
+				name = "xmlns";
+			}else if(len>5 && name.charAt(5) == ':'){
+				if( name.startsWith("XMLNS")){//format html xmlns
+					name = "xmlns"+name.substring(5);
+				}
+				if(name.startsWith("xmlns") && OLD_NS_CORE.matcher(value).find()){
+					value = NS_CORE;
+				}
 			}
 			int prefixIndex = name.indexOf(':');
 			if (prefixIndex >0 || name.equals("xmlns")) {
