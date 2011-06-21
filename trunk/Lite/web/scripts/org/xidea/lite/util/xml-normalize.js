@@ -26,6 +26,7 @@ function normalizeXML0(text,uri){
 
 
 //form java
+//@see http://lite.googlecode.com/svn/trunk/Lite/src/main/org/xidea/lite/impl/XMLNormalizeImpl.java
 function normalizeXML(text,uri){
 	var start = 0;
 	var rootCount = 0;
