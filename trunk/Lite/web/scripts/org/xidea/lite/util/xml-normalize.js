@@ -18,6 +18,14 @@ var defaultEntryMap = {"&nbsp;": "&#160;","&copy;": "&#169;"};
 var documentStart = "<c:group xmlns:c='http://www.xidea.org/lite/core'>";
 var documentEnd = "</c:group>";
 
+//for test
+function normalizeXML0(text,uri){
+	//too simple!!!!!
+	return text.replace("&&","&amp;&amp;");
+}
+
+
+//form java
 function normalizeXML(text,uri){
 	var start = 0;
 	var rootCount = 0;
@@ -270,15 +278,15 @@ function normalizeXML(text,uri){
 	}
 
 	function error(msg) {
-		log.error(position(msg));
+		alert(position(msg));
 	}
 
 	function warn(msg) {
-		log.warn(position(msg));
+		alert(position(msg));
 	}
 
 	function info(msg) {
-		log.info(position(msg));
+		alert(position(msg));
 	}
 
 	/**
@@ -357,28 +365,6 @@ function normalizeXML(text,uri){
 		}
 		return 0;
 	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 	function Tag (){

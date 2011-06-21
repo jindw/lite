@@ -7,8 +7,7 @@ function WebCompiler(urlbase,config){
 		urlbase = location.href.replace(/([^\/])\/[^\/].*$/,'$1'+urlbase);
 	}
 	this.base = urlbase;
-	config = parseConfig(config)
-	console.log(JSON.stringify(config))
+	config = config && parseConfig(config) || null;
 	this.config = new ParseConfig(urlbase,config);
 }
 WebCompiler.prototype.compile = function(path){

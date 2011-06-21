@@ -106,7 +106,7 @@ class LiteService{
 			}
 			$config = json_encode($config);
 			echo "<script>"
-				,"var LITE_WC = window.LITE_WC || new WebCompiler('$scriptBase/',$config);\n"
+				,"var LITE_WC = window.LITE_WC || new WebCompiler('$scriptBase/',$config || null);\n"
 				,"try{\n"
 				,"	LITE_WC.compile('$path');\n"
 				,"}finally{\n"

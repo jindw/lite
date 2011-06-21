@@ -1,0 +1,16 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+		<script src="../../scripts/org/xidea/lite/util/xml-normalize.js"></script>
+	</head>
+	<body>
+		<script>
+		var xml1 = normalizeXML0('<c:if test="${a && b}" xmlns:c="http://www.xidea.org/lite/core">if content</c:if>')
+		alert(xml1);
+		
+		//这个是我们需要调试通过的.
+		var xml2 = normalizeXML('<c:if test="${a && b}" xmlns:c="http://www.xidea.org/lite/core">if content</c:if>')
+		alert(xml2);
+		</script>
+	</body>
+</html>
