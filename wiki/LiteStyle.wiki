@@ -22,7 +22,11 @@
 <tr><td>您的幸运数字是:${parseInt(Math.random())}</td>
 <td> 输出一个随机数</td>
 </tr>
-<tr><td><f:if test="${test>0}">...</f:if></td>
+<tr><td>
+{{{
+<f:if test="${test>0}">...</f:if>
+}}}
+</td>
 <td> 表达式用作if判断的条件(绝对不能写成${${test}>0})</td></tr></table></blockquote></blockquote></blockquote>
 
   === 模板语法 ===
