@@ -27,7 +27,7 @@ class LiteEngine{
 	 * B：172.16.0.0-172.31.255.255
 	 * C：192.168.0.0-192.168.255.255 
 	 */
-	public $debug = '127\.0\.0\.1|10\..+|172\.(?:1[6789]|2.|30|31)\..+|192\.168\..+';
+	public $debug = '/^(?:127\.0\.0\.1|10\..+|172\.(?:1[6789]|2.|30|31)\..+|192\.168\..+)$/';
 	/**
 	 * 当前执行的模板示例
 	 */
@@ -58,7 +58,7 @@ class LiteEngine{
 		$old = $lite__instance;
 		if($old == null){
 			if(is_string($this->debug)){
-				$this->debug = !!preg_match('/^(?:'.$this->debug.')$/',$_SERVER["REMOTE_ADDR"]);
+				$this->debug = !!preg_match($this->debug,$_SERVER["REMOTE_ADDR"]);
 			}
 		}
 	    $lite__instance = $this;
