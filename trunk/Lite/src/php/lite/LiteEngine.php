@@ -58,7 +58,7 @@ class LiteEngine{
 		$old = $lite__instance;
 		if($old == null){
 			if(is_string($this->debug)){
-				$this->debug = !!preg_match("/^(?:$this->debug)$/",$_SERVER["REMOTE_ADDR"]);
+				$this->debug = !!preg_match('/^(?:'.$this->debug.')$/',$_SERVER["REMOTE_ADDR"]);
 			}
 		}
 	    $lite__instance = $this;
@@ -71,10 +71,10 @@ class LiteEngine{
  * 装载模板函数
  * @return function name
  */
-function lite_load($path,$engine=null){
+function lite_load($path){
 	global $lite__instance;
 	$fn = 'lite_template'.str_replace(array('.','/','-','!','%'),'_',$path);
-    if($lite__instance->compiler && !$lite__instance->debug){
+    if($lite__instance->debug && $lite__instance->compiler ){
     	$_REQUEST['LITE_ACTION'] = 'compile';
     	$_REQUEST['LITE_PATH'] = $path;
     	$compiler =  $lite__instance->compiler;

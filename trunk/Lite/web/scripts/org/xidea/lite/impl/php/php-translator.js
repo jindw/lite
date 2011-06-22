@@ -153,8 +153,7 @@ PHPTranslateContext.prototype = new TCP({
 	    //this.append("return _$out.join('');");
 	},
 	appendStatic:function(value){
-		this.append("?>"+value+"<?php");
-		return;
+		//return this.append("?>"+value+"<?php");
 		var lines = value.match(/.+[\r\n]*|[\r\n]+/g);
 		for(var i=0; i<lines.length; i++) {
 			var line = lines[i];
