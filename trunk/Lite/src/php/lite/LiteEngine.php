@@ -46,7 +46,7 @@ class LiteEngine{
 		
 		$this->root = strtr(realpath($root),'\\','/').'/';
 		if($litecode){
-			$this->litecode = $litecode;
+			$this->litecode = $litecode.'/';
 		}else{
 			$this->litecode = $this->root.'WEB-INF/litecode/';
 		}

@@ -97,6 +97,22 @@ class LiteService{
 			,"<script>if(!($checkScript)){$importScript}</script>";
 	}
 	private function compile($path){
+		$litecode = $this->litecode;
+		if($litecode==null){
+			trigger_error("$litecode is not set.");
+		}else if(!file_exists($litecode)){
+			if(!file_exists(dirname($litecode))){
+				mkdir(dirname($litecached));
+			}
+			if(!mkdir($litecode)){
+				trigger_error("mkdir $litecode failed,please create it yourself,and set model 733.");
+			}
+			if(!is_writable($litecode)){//733 need
+				//linux 下还需要  is_executable($litecode)
+				trigger_error("$litecode is readonly,can not save compiled result");
+			}
+		}
+		
 		if( $this->getFileModified($path)){
 			$scriptBase = $_REQUEST['LITE_SERVICE_URL'];
 			$this->loadJavaScriptClass('org.xidea.lite.web:WebCompiler');
@@ -112,7 +128,7 @@ class LiteService{
 				,"}finally{\n"
 				,"	LITE_WC.save();\n"
 				,"}\n</script>";
-			$litefile = $this->litecode.'/'.strtr($path,'/','^');
+			$litefile = $litecode.'/'.strtr($path,'/','^');
     		$phpfile = $litefile.'.php';
 			if(file_exists($phpfile)){unlink($phpfile);}//.$phpfile.'<hr>';
 			for($i=0;$i<10240 && !file_exists($phpfile);$i++){
