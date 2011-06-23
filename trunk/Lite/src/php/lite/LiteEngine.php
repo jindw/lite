@@ -58,7 +58,15 @@ class LiteEngine{
 		$old = $lite__instance;
 		if($old == null){
 			if(is_string($this->debug)){
-				$this->debug = !!preg_match($this->debug,$_SERVER["REMOTE_ADDR"]);
+				if(preg_match($this->debug,$_SERVER["REMOTE_ADDR"])){
+					$this->debug = true;
+				}else{
+					$this->debug = false;
+					//check_exist?
+					if(!file_exists($this->litecode.strtr($path,'/','^').'.php')){
+						trigger_error("template can not be compiled!");
+					}
+				}
 			}
 		}
 	    $lite__instance = $this;
@@ -207,21 +215,15 @@ function lite__parseFloat($value) {
  * converts blank to %20 as ECMA-262 does, on the contrary urlencode convert blank to '+'
  * @return string
  */
-function lite__encodeURIComponent($item,$encoding="UTF-8"){
-	if (mb_internal_encoding() != $encoding) {
-		$item = iconv(mb_internal_encoding(), $encoding, $item);
-	}
+function lite__encodeURIComponent($item){
 	return rawurlencode($item);
 }
 
 /**
  * @return string
  */
-function lite__decodeURIComponent($item,$encoding="UTF-8"){
+function lite__decodeURIComponent($item){
 	$item = rawurldecode($item);
-	if (mb_internal_encoding() != $encoding) {
-		$item = iconv($encoding, mb_internal_encoding(), $item);
-	}
 	return $item;
 }
 

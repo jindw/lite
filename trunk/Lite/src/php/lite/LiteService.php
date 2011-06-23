@@ -56,9 +56,11 @@ class LiteService{
 				}else{
 					echo "not support";
 				}
-			}else{
+			}else if($lite_action){
 				echo "not support action [{$lite_action}]";
 				print_r($_REQUEST);
+			}else{
+				header("Location:./");
 			}
 		}
 	}

@@ -474,7 +474,7 @@ function seekDef(text){
 	}
 }
 
-function seekClient(node){
+function seekClient(text){
 	var end = findELEnd(text);
 	if(end>0){
 		var ns = text.substring(1,end);
