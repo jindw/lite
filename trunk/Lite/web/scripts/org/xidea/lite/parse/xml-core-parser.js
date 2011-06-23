@@ -6,6 +6,7 @@
  * @version $Id: template.js,v 1.4 2008/02/28 14:39:06 jindw Exp $
  */
 var Core = {
+	xmlns : function(){},
 	seek:function(text){
 		
 		var end = findELEnd(text,0);
@@ -89,6 +90,10 @@ var Core = {
 			return -1;
 		}
 	},
+	seekEnd : function(text){
+		this.appendEnd();
+		return 0;
+	},
 	parseExtension:function(node){
 		var ns = getAttribute(node,'*namespace','ns');
 		var file = getAttribute(node,'file');
@@ -101,16 +106,43 @@ var Core = {
 			var source = getAttribute(node,'#text')+'\n';
 		}
 		this.addExtension(ns,source);
-	}
-};
-function addParser(fn){
-	var i = arguments.length;
-	while(--i){
-		fn[0] && (Core['parse'+arguments[i]] = fn[0])
-		fn[1] && (Core['before'+arguments[i]] = fn[1])
-		fn[2] && (Core['seek'+arguments[i]] = fn[2])
+	},
+	parse9 : function(doc,ns){
+		var isProcessed = this.getAttribute(DOCUMENT_LAYOUT_PROCESSED);
+		if(!isProcessed){
+			 this.setAttribute(DOCUMENT_LAYOUT_PROCESSED,true);
+			 var root = doc.documentElement;
+			 var ln = root.localName || root.nodeName.replace(/^w+\:/,'');
+			 if((ln == 'extends' || ln == 'extend') &&  root.namespaceURI == ns){
+			 	processExtends.call(this,root);
+			 	return true;
+			 }else{
+			 	var attr = root.getAttributeNodeNS(ns,"extends") || root.getAttributeNodeNS(ns,"extend");
+			 	if(attr != null){
+			 		processExtends.call(this,attr);
+			 		return true;
+			 	}
+			 	var layout = this.getFeature('http://www.xidea.org/lite/features/config-layout');
+			 	if(layout){
+			 		this.setAttribute('$page',doc);
+			 		var uri = this.createURI(layout);
+					//this.currentURI = uri;
+			 		//doc = this.loadXML(uri);
+			 		this.parse(uri);
+			 		return true;
+			 	}
+			 }
+			 return false;
+		}
+		return false;
+	},
+	parse : function(node){
+		$log.error("未支持标签："+node.tagName)
 	}
 }
+var DOCUMENT_LAYOUT_PROCESSED = "http://www.xidea.org/lite/core/c:layout-processed";
+var CHOOSE_KEY = "http://www.xidea.org/lite/core/c:choose@value";
+var FOR_PATTERN = /\s*([\$\w_]+)\s*(?:,\s*([\w\$_]+))?\s*(?:\:|in)([\s\S]*)/;
 
 
 /**
@@ -119,7 +151,7 @@ function addParser(fn){
 function processIf(node){
 	var test = getAttributeEL(node,'*test','value');
     this.appendIf(test);
-    processChild(this,node);
+    parseChildRemoveAttr(this,node);
     this.appendEnd();
 }
 
@@ -130,12 +162,11 @@ function seekIf(text){
 		return end;
 	}
 }
-addParser([processIf,processIf,seekIf],'if')
 
 function processElse(node){
     var test = getAttributeEL(node,'test','value');
     this.appendElse(test || null);
-    processChild(this,node);
+    parseChildRemoveAttr(this,node);
     this.appendEnd();
 }
 function seekElse(text){
@@ -152,11 +183,10 @@ function seekElse(text){
 		}
 	}
 }
-addParser([processElse,processElse,seekElse],'else');
 function processElif(node){
     var test = getAttributeEL(node,'*test','value');
     this.appendElse(test || null);
-    processChild(this,node);
+    parseChildRemoveAttr(this,node);
     this.appendEnd();
 }
 function seekElif(text){
@@ -167,17 +197,15 @@ function seekElif(text){
 		return end;
 	}
 }
-addParser([processElif,processElif,seekElif],"elseif","elif");
-
 
 
 
 function processChoose(node){
 	var value = getAttributeEL(node,"value");
-	var oldStatus = this.getAttribute(processChoose);
+	var oldStatus = this.getAttribute(CHOOSE_KEY);
 	this.setAttribute(processChoose,{value:value,first:true});
-	processChild(this,node);
-	this.setAttribute(processChoose,oldStatus);
+	parseChildRemoveAttr(this,node);
+	this.setAttribute(CHOOSE_KEY,oldStatus);
 }
 //function seekChoose(text){
 //	if(text.charAt() != '$'){
@@ -193,13 +221,12 @@ function processChoose(node){
 //	}
 //	var oldStatus = this.getAttribute(processChoose);
 //	this.setAttribute(processChoose,{value:value,first:true});
-//	processChild(this,node);
+//	parseChildRemoveAttr(this,node);
 //	value && this.setAttribute(processChoose,oldStatus);
 //	return end;
 //}
-addParser([processChoose,processChoose],"choose");
 function processWhen(node){
-	var stat = this.getAttribute(processChoose);
+	var stat = this.getAttribute(CHOOSE_KEY);
 	var value = getAttributeEL(node,"*test","if");
 	if(stat.value){
 		value = stat.value + '=='+value;
@@ -210,27 +237,24 @@ function processWhen(node){
 	}else{
 		this.appendElse(value);
 	}
-	processChild(this,node);
+	parseChildRemoveAttr(this,node);
 	this.appendEnd();
 }
 
-addParser([processWhen,processWhen],"when");
 function processOtherwise(node){
 	this.appendElse(null);
-	processChild(this,node);
+	parseChildRemoveAttr(this,node);
 	this.appendEnd();
 }
-addParser([processOtherwise,processOtherwise],"otherwise");
 
-var FOR_PATTERN = /\s*([\$\w_]+)\s*(?:,\s*([\w\$_]+))?\s*(?:\:|in)([\s\S]*)/;
 function processFor(node){
 	if(node.nodeType == 1){
     	var value = getAttributeEL(node,'*list','values','items','value');
     	var var_ = getAttribute(node,'*var','name','id','item');
     	var status_ = getAttribute(node,'status');
 	}else{//attr
-		var value = getAttributeEL(node);
-		var match = value.match(FOR_PATTERN);
+		var value = getAttribute(node);
+		var match = value.replace(/^\$\{(.+)\}$/,'$1').match(FOR_PATTERN);
 		if(!match){
 			throw $log.error("非法 for 循环信息",value);
 		}
@@ -239,7 +263,7 @@ function processFor(node){
 		var value =match[3];
 	}
     startFor(this,var_,value,status_ || null);
-    processChild(this,node);
+    parseChildRemoveAttr(this,node);
     this.appendEnd();
 }
 function seekFor(text){
@@ -297,8 +321,6 @@ function startFor(context,key,list,status_){
 }
 
 
-addParser([processFor,processFor,seekFor],"for","foreach");
-
 function processVar(node){
     var name_ = getAttribute(node,'*name','id');
 	if(node.nodeType == 1){
@@ -320,7 +342,7 @@ function processVar(node){
 	    	}
 	    }else{
 	        this.appendCapture(name_);
-	        processChild(this,node);
+	        parseChildRemoveAttr(this,node);
 	        this.appendEnd();
 	    }
 	}else{
@@ -329,10 +351,10 @@ function processVar(node){
 			for(var n in map){
 				this.appendVar(n,map[n]);
 			}
-			processChild(this,node);
+			parseChildRemoveAttr(this,node);
 		}else{
 	        this.appendCapture(name_);
-	        processChild(this,node);
+	        parseChildRemoveAttr(this,node);
 	        this.appendEnd();
 		}
 	}
@@ -352,7 +374,6 @@ function seekVar(text){
     	return end;
 	}
 }
-addParser([processVar,processVar,seekVar],"var","set");
 
 
 function parseOut(node){
@@ -368,7 +389,6 @@ function seekOut(text){
     	return end;
 	}
 }
-addParser([parseOut,parseOut,seekOut],"out");
 
 function _parseDefName(name){
 	var n = name;
@@ -418,11 +438,13 @@ function _parseDefName(name){
 			
 		}
 		
+		return {"name":n,
+			"params":params,
+			"defaults":defaults,
+			};
+	}else{
+		return {"name":n}
 	}
-	return {"name":n,
-		"params":params,
-		"defaults":defaults,
-		};
 }
 function toid(n){
 	n = n.replace(/^\s+|\s+$/g,'');
@@ -438,7 +460,7 @@ function processDef(node){
     var ns = getAttribute(node,'*name');
     var config = _parseDefName(ns);
     this.appendPlugin(PLUGIN_DEFINE,stringifyJSON(config));
-    processChild(this,node);
+    parseChildRemoveAttr(this,node);
     this.appendEnd();
 }
 
@@ -452,23 +474,28 @@ function seekDef(text){
 	}
 }
 
+function seekClient(node){
+	var end = findELEnd(text);
+	if(end>0){
+		var ns = text.substring(1,end);
+	    var config = _parseDefName(ns);
+	    this.appendPlugin("org.xidea.lite.parse.ClientPlugin",stringifyJSON(config));
+    	return end;
+	}
+}
 
 function processClient(node){
 	var name_ = getAttribute(node,'*name','id');
-	if(/\(/.test(name_)){
-		var config = _parseDefName(name_);
-	}else{
-		config = {name:name_}
-	}
+	var config = _parseDefName(name_);
 	this.append("<script>//<![CDATA[\n");
 	this.appendPlugin("org.xidea.lite.parse.ClientPlugin",stringifyJSON(config));
-	processChild(this,node);
+	parseChildRemoveAttr(this,node);
 	this.appendEnd();
 	this.append("//]]></script>")
 	
 	
 //	var context2 = this.createNew();
-//	processChild(context2,node);
+//	parseChildRemoveAttr(context2,node);
 //	var translator = new JSTranslator(name_);
 //	var code = translator.translate(context2);
 //	this.append("<!--//--><script>//<![CDATA[\n"
@@ -476,7 +503,6 @@ function processClient(node){
 	
 }
 
-addParser([processDef,processDef,seekDef],"def",'macro');
 
 function beforeInclude(attr){
 	var match = attr.value.match(/^([^#]*)(?:#(.*))?$/);
@@ -600,7 +626,7 @@ function processExtends(node){
 		parentNode = parentNode.documentElement;
 	}
 	var i = this.mark();
-	processChild(this,node);
+	parseChildRemoveAttr(this,node);
 	this.reset(i);
     var parentURI = this.currentURI;
 	try{
@@ -648,11 +674,13 @@ function processBlock(node){
 
 
 
-function processChild(context,node){
+function parseChildRemoveAttr(context,node){
 	if(node.nodeType == 1){//child
 		context.parse(node.childNodes)
 	}else if(node.nodeType == 2){//attr
-		context.parse(node.ownerElement);//||node.selectSingleNode('parent::*'));
+		var el = node.ownerElement;
+		el.removeAttributeNode(node);
+		context.parse(el);//||node.selectSingleNode('parent::*'));
 	}else {//other
 		context.parse(node)
 	}
@@ -664,57 +692,38 @@ function processChild(context,node){
 
 
 
-//beforeset,parseout,parseforeach,parseInclude,parsemacro,parseset,parseelse,parseclient,parsechoose,parse,beforegroup,parseif,beforeelse,parseotherwise,beforeif,beforeotherwise,parseelif,beforeout,parsegroup,beforeforeach,parsewhen,beforeInclude,beforemacro,beforeelif,beforeclient,beforechoose,beforewhen,xmlns
- 
 
-
-
-
-
-
-
-addParser([parseInclude,beforeInclude],"include");
-addParser([processClient,processClient],"client");
-addParser([processBlock,processBlock],"block","group");
-addParser([processExtends,processExtends],"extends","extend");
-
-//addParsers(processXMLNS,"xmlns");
-Core.seekEnd = function(text){
-	this.appendEnd();
-	return 0;
-};
-Core.xmlns = function(){};
-Core.parse = function(node){
-	$log.error("未支持标签：",node.tagName,node.ownerDocument && node.ownerDocument.documentURI)
-};
-Core.parse9 = function(doc,ns){
-	var isProcessed = this.getAttribute(DOCUMENT_LAYOUT_PROCESSED);
-	if(!isProcessed){
-		 this.setAttribute(DOCUMENT_LAYOUT_PROCESSED,true);
-		 var root = doc.documentElement;
-		 var ln = root.localName || root.nodeName.replace(/^w+\:/,'');
-		 if((ln == 'extends' || ln == 'extend') &&  root.namespaceURI == ns){
-		 	processExtends.call(this,root);
-		 	return true;
-		 }else{
-		 	var attr = root.getAttributeNodeNS(ns,"extends") || root.getAttributeNodeNS(ns,"extend");
-		 	if(attr != null){
-		 		processExtends.call(this,attr);
-		 		return true;
-		 	}
-		 	var layout = this.getFeature('http://www.xidea.org/lite/features/config-layout');
-		 	if(layout){
-		 		this.setAttribute('$page',doc);
-		 		var uri = this.createURI(layout);
-				//this.currentURI = uri;
-		 		//doc = this.loadXML(uri);
-		 		this.parse(uri);
-		 		return true;
-		 	}
-		 }
-		 return false;
+function addParser(map,n){
+	for(var p in map){
+		Core[p+n] = map[p];
 	}
-	return false;
-	
 }
-var DOCUMENT_LAYOUT_PROCESSED = "http://www.xidea.org/lite/layout-processed";
+function addAll(pb,seeker){
+	var i = arguments.length;
+	while(--i>1){
+		var map = {parse:pb,before:pb};
+		if(seeker){
+			map.seek = seeker;
+		}
+		addParser(map,arguments[i])
+	}
+}
+
+addAll(processIf,seekIf,'if')
+addAll(processElse,seekElse,'else');
+addAll(processElif,seekElif,"elseif","elif");
+addAll(processFor,seekFor,"for","foreach");
+addAll(processVar,seekVar,"var","set");
+addAll(parseOut,seekOut,"out");
+addAll(processDef,seekDef,"def",'macro');
+addAll(processClient,seekClient,"client");
+
+//没有seeker
+addAll(processChoose,null,"choose");
+addAll(processWhen,null,"when");
+addAll(processOtherwise,null,"otherwise");
+addAll(processExtends,null,"extends","extend");
+addAll(processBlock,null,"block","group");
+
+//属性与标签语法差异太大,不能用统一函数处理.
+addParser({parse:parseInclude,before:beforeInclude},"include");

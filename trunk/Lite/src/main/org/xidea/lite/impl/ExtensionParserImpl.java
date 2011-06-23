@@ -140,7 +140,7 @@ public class ExtensionParserImpl implements ExtensionParser {
 				if (beforeMap != null) {
 					String name = formatName(attr.getName());
 					if (beforeMap.containsKey(name)) {
-						el.removeAttributeNode(attr);
+//						el.removeAttributeNode(attr);
 						rt.invoke(chain, beforeMap.get(name), attr);
 						return true;
 					}

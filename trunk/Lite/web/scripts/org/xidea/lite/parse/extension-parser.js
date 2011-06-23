@@ -8,7 +8,10 @@ function ExtensionParser(impl){
 	this.addExtension("http://www.xidea.org/lite/core",Core);
 	
 }
-
+//Extension.defaults = [];
+//Extension.addDefault = function(ns,object){
+//	this.defaults.push([ns,object])
+//}
 function formatName(el){
 	var tagName = el.localName|| el.nodeName ||''
 	tagName = tagName.replace(/[\-]|^\w+\:/g,"");
@@ -122,7 +125,7 @@ ExtensionParser.prototype = {
 					var fn = ext.beforeMap[an];
 					if(fn && an in ext.beforeMap){
 						es = 2.1
-						el.removeAttributeNode(attr);
+						//el.removeAttributeNode(attr);
 						fn.call(chain,attr);
 						es =2.2
 						return;

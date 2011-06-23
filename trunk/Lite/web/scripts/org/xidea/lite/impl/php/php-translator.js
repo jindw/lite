@@ -183,7 +183,7 @@ PHPTranslateContext.prototype = new TCP({
 	    		this.append(prefix,"'null';");
 	    		return;
 	    	}else if(type == TYPE_BOOLEAN){
-	    		this.append(prefix,text,"?'true'?'false';");
+	    		this.append(prefix,text,"?'true':'false';");
 	    		return;
 	    	}else if(type == TYPE_NUMBER){
 	    		this.append(prefix,text,";");

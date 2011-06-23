@@ -1,8 +1,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:c="http://www.xidea.org/lite/core"
-	xmlns:ex="http://www.xidea.org/lite/example">
+	xmlns:x="http://www.xidea.org/lite/example">
 	<head>
-		<title>前端编程我做主-- 基于模板的Web UI</title>
+		<title>Lite模板参考</title>
 		<c:include path="$page" xpath="//xhtml:head/*" />
 		<link href="default.css" media="screen" rel="stylesheet"
 			type="text/css" />
@@ -24,17 +24,35 @@ var style = 'border: 1px solid #DFECF1;'
     			+'padding:4px;margin:4px;'
     			+'font-size:12px;overflow:auto;'
     			+'background-color:#EEE;border:1px solid #222;';
-function parseCode(node,context,chain){
+function parseCode(node){
     //代码高亮组件
     var text = String(node.textContent);
-    text = text.replace(/^\s+|\s+$/g,'');
-	context.append("<pre style='"+style+"'>"+text.replace(/[<>&]/g,xmlReplacer)+"</pre>");
+    text = text.replace(/^\s*[\r\n]+|[\r\n]+\s*$/g,'');
+    while(/^(?:[\t ].*[\r\n]*)*$/.test(text)){
+    	text = text.replace(/^[\t ](.*)/mg,'$1');
+    }
+	this.append("<pre style='"+style+"'>"+text.replace(/[<>&]/g,function(c){return "&#"+c.charCodeAt(0)+';'})+"</pre>");
 };
-function xmlReplacer(c){
-	return "&#"+c.charCodeAt(0)+';'
-}
+
+
 //]]>
 		</c:extension>
+		<script>function showNext(thiz,n,show,hide){
+			
+				while(n = n.nextSibling){
+					if(n.nodeType == 1){
+						if(n.style.display=='none'){
+							
+							n.style.display = 'block';
+							thiz.innerHTML = hide;
+						}else{
+							n.style.display = 'none';
+							thiz.innerHTML = show;
+						}
+						break;
+					}
+				}
+			}</script>
 	</head>
 	<body>
 		<div id="header">
@@ -65,134 +83,63 @@ function xmlReplacer(c){
 				<c:include path="$page" xpath="//xhtml:body/node()" />
 			</div>
 			<div id="menu">
-				<h3>前言</h3>
+				<h3>入门</h3>
 				<ul>
 					<li>
-						<a href="preface-thinking.xhtml" title="兵马未动，粮草先行">模板的传奇</a>
+						<a href="index.xhtml#what">什么是模板</a>
 					</li>
 					<li>
-						<a href="preface-lite.xhtml" title="仁者无敌，王者无剑">Lite模板平台介绍</a>
+						<a href="index.xhtml#install">Lite模板如何安装</a>
 					</li>
 				</ul>
 
-				<h3>入门篇</h3>
-				<ul>
+				<h3>表达式参考</h3>
+				<ul> 
 					<li>
-						<a href="overview-hello.xhtml" title="小试一麾行促诏，暂留千骑且飞觞">Hello world</a>
+						<a href="el.xhtml#">什么是表达式</a>
 					</li>
 					<li>
-						<a href="overview-syntax.xhtml" title="春风得意马蹄疾 一日看尽长安花">基本语法纵览</a>
-					</li>
-				</ul>
-				<h3>特色篇</h3>
-				<ul>
-					<li>
-						<a href="feature-client.xhtml" title="满堂花醉三千客 一剑霜寒十四州">发挥前端模板的优势</a>
+						<a href="el.xhtml#var">值:变量/..</a>
 					</li>
 					<li>
-						<a href="feature-el.xhtml" title="蓬莱此去无多路 青鸟殷勤为探看">发挥表达式的优势 </a>
+						<a href="el.xhtml#op">操作符与函数</a>
 					</li>
 					<li>
-						<a href="feature-extension.xhtml" title="书山墨海群芳竞，画里乾坤日月新">发挥自定义语法的优势 </a>
+						<a href="el-function.xhtml">内置函数参考</a>
 					</li>
 				</ul>
-				<h3>深入篇</h3>
+				
+				<h3>模板语法参考</h3>
 				<ul>
 					<li>
-						<a href="#" title="九层之台 起于垒土">JSEL表达式详解 </a>
-					</li>
-					
-					<li>
-						<a href="#" title="好水好山看不足 马蹄催趁月明归">模板语法详解 </a>
-					</li>
-					
-					<li>
-						<a href="#" title="且放白鹿青崖间 须行即骑访名山">模板函数详解 </a>
-					</li>
-					
-					<li>
-						<a href="#" title="事了拂衣去，深藏身与名">编译扩展详解 </a>
-					</li>
-					
-					<li>
-						<a href="#" title="凡治众如治寡，分数是也">模板组织详解 </a>
-					</li>
-					
-					<li>
-						<a href="#" title="兵者，不祥之器">运行插件详解 </a>
-					</li>
-					
-					<li>
-						<a href="#" title="人过留名，雁过留声">运行时调试详解 </a>
-					</li>
-					
-				</ul>
-				<h3>环境篇</h3>
-				<ul>
-					<li>
-						<a href="#" title="见龙在田">*** 自定义首页 环境下创建自己的模块</a>
+						<a href="syntax-out.xhtml">输出语法[\${},\$!{}]</a>
 					</li>
 					<li>
-						<a href="#" title="或越在渊">JavaScript环境下的***</a>
+						<a href="syntax-if.xhtml">条件判断[c:if]</a>
 					</li>
 					<li>
-						<a href="#" title="龙战于野">Php环境下的***</a>
+						<a href="syntax-choose.xhtml">分支选择[c:choose]</a>
 					</li>
 					<li>
-						<a href="#" title="飞龙在天">Java环境下的***</a>
-					</li>
-
-				</ul>
-				<h3>实例篇</h3>
-				<ul>
-					<li>
-						<a href="#" title="模板也疯狂。">聚言堂运用实例 </a>
+						<a href="syntax-for.xhtml">三类循环[c:for]</a>
 					</li>
 					<li>
-						<a href="#" title="一百零八的神话。">精悍的Suggest运用 </a>
+						<a href="syntax-extends.xhtml">模板继承[c:extends]</a>
 					</li>
 					<li>
-						<a href="#" title="手机开发也精彩">基于Lite的Andriod手机文档系统</a>
-					</li>
-				</ul>
-				<h3>超越篇</h3>
-				<ul>
-					<li>
-						<a href="#" title="我的地盘我作主">实现自己的风格模板语法 </a>
+						<a href="syntax-include.xhtml">模板包含[c:include]</a>
 					</li>
 					<li>
-						<a href="#" title="我们无所不能">基于Lite XML 的web编程 </a>
-					</li>
-				</ul>
-
-				<h3>兼听偏</h3>
-				<ul>
-					<li>
-						<a href="#">CommenTemplate简明教程</a>
+						<a href="syntax-var.xhtml">变量申明[c:var]</a>
 					</li>
 					<li>
-						<a href="#">FreeMarker简明教程</a>
+						<a href="syntax-def.xhtml">模板函数申明[c:def]</a>
 					</li>
 					<li>
-						<a href="#">Smarty简明教程</a>
+						<a href="syntax-client.xhtml">前端模板函数申明[c:client]</a>
 					</li>
 					<li>
-						<a href="#">Google Closure Template 简明教程</a>
-					</li>
-				</ul>
-				<h3>参考</h3>
-				<ul>
-					<li>
-						<a href="preface-history.xhtml" title="小往大来，吉亨">模板语言的前身今世</a>
-					</li>
-					<li>
-						<a href="#">Lite XML语法参考</a>
-					</li>
-					<li>
-						<a href="#">FireKylin 引擎实现</a>
-					</li>
-					<li>
-						<a href="#">Lite2PHP翻译内幕</a>
+						<a href="syntax-extension.xhtml">自定义扩展[c:extension]</a>
 					</li>
 				</ul>
 			</div>

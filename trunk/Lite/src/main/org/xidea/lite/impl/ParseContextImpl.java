@@ -10,7 +10,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xidea.jsi.impl.RuntimeSupport;
 import org.xidea.lite.parse.ExtensionParser;
 import org.xidea.lite.parse.NodeParser;
 import org.xidea.lite.parse.ParseChain;
@@ -32,16 +31,16 @@ public class ParseContextImpl extends ParseContextProxy implements ParseContext 
 	//尾部优先原则
 	private NodeParser<? extends Object>[] nodeParsers;
 	private TextParser[] textParsers;
-	private Object currentNode = null;
-	private Object contextInfo = new Object(){//移动到extensionParser?
-		public String toString(){
-			String pos = ParseUtil.getNodePosition(currentNode instanceof Node?(Node)currentNode:extensionParser.getCurrentNode());
-			if(pos == null){
-				pos= String.valueOf(getCurrentURI());
-			}
-			return pos;
-		}
-	};
+//	private Object currentNode = null;
+//	private Object contextInfo = new Object(){//移动到extensionParser?
+//		public String toString(){
+//			String pos = ParseUtil.getNodePosition(currentNode instanceof Node?(Node)currentNode:extensionParser.getCurrentNode());
+//			if(pos == null){
+//				pos= String.valueOf(getCurrentURI());
+//			}
+//			return pos;
+//		}
+//	};
 	public ParseContextImpl(ParseConfig config, String path) {
 		super(config,config.getFeatureMap(path));
 		this.extensionParser = new ExtensionParserImpl();
@@ -105,7 +104,7 @@ public class ParseContextImpl extends ParseContextProxy implements ParseContext 
 	}
 
 	public void parse(Object node) {
-		currentNode = node;
+//		currentNode = node;
 		ParseChain topChain = getTopChain();
 		if (node instanceof Node || node instanceof String) {
 			topChain.next(node);
@@ -118,7 +117,6 @@ public class ParseContextImpl extends ParseContextProxy implements ParseContext 
 				}
 			}
 			if (node instanceof URI) {
-				Object oldInfo= RuntimeSupport.setTitle(contextInfo);
 				try {
 					URI uri = (URI) node;
 					this.setCurrentURI(uri);
@@ -136,10 +134,10 @@ public class ParseContextImpl extends ParseContextProxy implements ParseContext 
 					} else {
 						topChain.next(doc);
 					}
+				} catch (RuntimeException e) {
+					throw (RuntimeException)e;
 				} catch (Exception e) {
 					throw new RuntimeException(e);
-				} finally{
-					RuntimeSupport.setTitle(oldInfo);
 				}
 			} else if (node instanceof NodeList) {
 				NodeList list = (NodeList) node;

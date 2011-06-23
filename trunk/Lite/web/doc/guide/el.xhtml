@@ -1,0 +1,105 @@
+<html
+	xmlns:x="http://www.xidea.org/lite/example"
+	xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-CN" dir="ltr">
+	<head>
+		<title>什么是表达式</title>
+	</head>
+	<body>
+		<h3>什么是表达式</h3>
+		<p>
+		引表达式是由值(变量和常量)与 运算(操作符、括号、函数调用) 组成的语法单元。
+		</p>
+		<p>在Lite模板中，表达式通常用来输出内容或者给模板语法提供数据（如条件判断数据，循环数据）。在形式上，通过表达式括弧(<strong>\${...}</strong>)将表达式内容标记出来。</p>
+		<p>
+		示例：
+		<x:code>
+<![CDATA[
+<html>
+<body>
+	<!--   简单变量值 -->
+	<p>用户名：${user.name}</p> 
+	<!-- 比较表达式，给条件判断提供数据 -->
+	<c:if test="${user.age>=30}">
+		<p>已过而立之年！</p>
+	</c:if>
+	<c:else>
+		<p>还差{30-user.age}年就满30了。</p>
+	</c:else>
+	<!-- 三目运算，成员函数调用 -->
+	<p>个人说明：${user.description.length > 20?user.description.substring(0,20)+'...':user.description}</p>
+</body>
+</html>
+]]>
+		</x:code> 
+		</p>
+		<h3>什么是变量</h3>
+		<a name="var"/>
+		<p>和JavaScript中的变量类似：略</p>
+		<h3>Lite 支持哪些种类型</h3>
+		<p>原始类型与JavaScript类似，书写语法也完全一致。</p>
+		<ul>
+			<li>String
+			<p><i>字符串的申明方式有："字符串"，'字符串'</i></p>
+			</li>
+			<li>Number
+			<p><i>Number，可以以10，8，16进制等不同方式申明，默认按10进制输出，需要转换进制输出，可以调用函数，如：\${(0755).toString(16)}</i></p>
+			</li>
+			<li>Boolean
+			<p><i>模板中Boolean值的输出，与JavaScript中一致，直接输出true，false。</i></p>
+			</li>
+			<li>null<p><i>模板中null值的输出，与JavaScript一致，直接输出null，而不是大多数模板系统中的不输出。</i></p></li>
+		</ul>
+		<p>原始类型支持有序系列（数组）和健值集合，书写语法与JavaScript一致</p>
+		<ul>
+			<li>有序系列:
+			<p> 可以通过javascript数组语法申明有序系列：<x:code>${[1,2,3,4,5,'txt'].join('|')}</x:code>
+			<i>在JavaScript表现有数组，在Java中表现有数组，List，Collection等；PHP中表现有数组。</i></p>
+			</li>
+			<li>健值集合：
+			<p> 可以通过javascript对象语法申明有序系列：
+			<x:code>
+			<![CDATA[
+			<c:for var="key" list="${
+				{
+					key1:'value1',
+					key2:'value2'
+				}
+			}">
+			......
+			</c:for>
+			]]>
+			</x:code>
+			<i>在JavaScript表现有Object, 在Java中表现有Map，JavaBean；PHP中表现有关联数组。
+			</i></p>
+			</li>
+		</ul>
+		<h3>操作符</h3>
+		<a name="op"/>
+		<p>Lite 模板操作符语义与JavaScript保持一致。支持主要的JavaScript运算符，包括。</p>
+		<ul>
+			<li>取属性: . '[]'</li>
+			<li>正/负/非/按位取反运算: + -  ! ^</li>
+			<li>乘除法、取模：* / %</li>
+			<li>加减法、字符串连接：+ -</li>
+			<li>位运算：* / %</li>
+			<li>乘除法、取模：* / %</li>
+			<li>比较运算：&lt; &lt;= > >= </li>
+			<li>比较运算：== != === !== </li>
+			<li>&amp; 按位与 ,^ 按位异或 ,| 按位或 </li>
+			<li>&amp;&amp; 逻辑与 ,|| 逻辑或 </li>
+			<li>?: 三目条件运算</li> 
+		</ul>
+		<p>但是也有如下三类操作符不予支持</p>
+		<ul style="color:#CCC;text-decoration:line-through">
+			<li>不支持，移位运算（&lt;&lt; >>  >>>）。</li>
+			<li>不支持对模板值有影响的操作符号，如赋值(=)，自增，自减(++,--,*=3,%=2...)等;</li>
+			<li>以及所有以字符为运算标识的操作符(delete,new,in,typeof,instanceof,...)</li>
+		</ul>
+		<h3>函数调用</h3>
+		<p>Lite 模板支持成员方法和普通函数两种函数调用方式。</p>
+		<p>其中成员方法包括标准JavaScript对象的成员方法，如:"abc".substring(1,2),这些函数一般是模板系统内置。</p>
+		<p>普通函数包括部分内置的JavaScript标准全局函数，如：encodeURIComponent("汉字")，同时模板中自定义的函数，也属于这一类型，调用方法完全一致（查看<a href="syntax-def.xhtml">函数定义语法参考</a>）。</p>
+		<p>系统内置了JavaScript的大部分标准函数，详细情况请查看:<a href="el-function.xhtml"/>
+		</p>
+	</body>
+</html>

@@ -218,7 +218,7 @@ function getAttribute(el,key){
 			var v = el.getAttribute(an);//ie bug: no hasAttribute
 			if(v || (typeof el.hasAttribute != 'undefined') && el.hasAttribute(an)){//ie bug
 				if(i>1 && key.charAt(0) != '#'){
-					$log.warn("标准属性名为：",key ,'您采用的是：',an);
+					$log.warn("标准属性名为："+key +'; 您采用的是：'+an);
 				}
 				return v;
 			}

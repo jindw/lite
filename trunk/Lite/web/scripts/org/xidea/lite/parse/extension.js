@@ -16,6 +16,7 @@ function Extension(){
 	this.parserMap = null;
 	this.seekMap = null;
 }
+
 Extension.prototype={
 	initialize:function(objectMap){
 		
