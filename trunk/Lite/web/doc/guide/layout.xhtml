@@ -1,14 +1,12 @@
-<html xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:c="http://www.xidea.org/lite/core"
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:c="http://www.xidea.org/lite/core"
 	xmlns:x="http://www.xidea.org/lite/example">
 	<head>
 		<title>Lite模板参考</title>
 		<c:include path="$page" xpath="//xhtml:head/*" />
-		<link href="default.css" media="screen" rel="stylesheet"
-			type="text/css" />
-		
+		<link href="default.css" media="screen" rel="stylesheet" type="text/css" />
+
 		<c:extension namespace="http://www.w3.org/1999/xhtml">
-		//<![CDATA[
+			//<![CDATA[
     function parseA(node){//连接简写，没有文本的时候，直接使用href作为文本节点
     	if(node.firstChild == null){
     		node.appendChild(node.ownerDocument.createTextNode(node.getAttribute('href')));
@@ -18,7 +16,7 @@
     //]]>
 		</c:extension>
 		<c:extension namespace="http://www.xidea.org/lite/example">
-		//<![CDATA[
+			//<![CDATA[
 var style = 'border: 1px solid #DFECF1;'
     			+'font-family:"Courier New",monospace;'
     			+'padding:4px;margin:4px;'
@@ -38,27 +36,29 @@ function parseCode(node){
 //]]>
 		</c:extension>
 		<script>function showNext(thiz,n,show,hide){
-			
-				while(n = n.nextSibling){
-					if(n.nodeType == 1){
-						if(n.style.display=='none'){
-							
-							n.style.display = 'block';
-							thiz.innerHTML = hide;
-						}else{
-							n.style.display = 'none';
-							thiz.innerHTML = show;
-						}
-						break;
-					}
-				}
+
+			while(n = n.nextSibling){
+			if(n.nodeType == 1){
+			if(n.style.display=='none'){
+
+			n.style.display =
+			'block';
+			thiz.innerHTML = hide;
+			}else{
+			n.style.display = 'none';
+			thiz.innerHTML = show;
+			}
+			break;
+			}
+			}
 			}</script>
 	</head>
 	<body>
-		<div id="header">
-			
-			<div class="logo" onclick="location = 'index.xhtml'">
-			<c:for var="item" list="${
+		<div id="main">
+			<div id="header">
+				<div class="logo" onclick="location = 'index.xhtml'">
+					<c:for var="item"
+						list="${
   [
     [0,0,19,100],
     [0,81,42,19],
@@ -69,19 +69,19 @@ function parseCode(node){
     [69,81,19,19]
   ]
   }">
-			<div style='left:${item[0]}px;top:${item[1]}px;width:${item[2]}px;height:${item[3]}px;'>&#160;</div>
-			</c:for>
+						<div
+							style='left:${item[0]}px;top:${item[1]}px;width:${item[2]}px;height:${item[3]}px;'>&#160;</div>
+					</c:for>
+				</div>
+				<h1>
+					<c:include path="$page" xpath="//xhtml:title/text()" />
+				</h1>
+				<div class="line" />
 			</div>
-			<h1>
-				<c:include path="$page" xpath="//xhtml:title/text()" />
-			</h1>
-			
-			<div class="line"/>
-		</div>
-		<div id="body">
 			<div id="content">
 				<c:include path="$page" xpath="//xhtml:body/node()" />
 			</div>
+
 			<div id="menu">
 				<h3>入门</h3>
 				<ul>
@@ -94,7 +94,7 @@ function parseCode(node){
 				</ul>
 
 				<h3>表达式参考</h3>
-				<ul> 
+				<ul>
 					<li>
 						<a href="el.xhtml#">什么是表达式</a>
 					</li>
@@ -108,7 +108,7 @@ function parseCode(node){
 						<a href="el-function.xhtml">内置函数参考</a>
 					</li>
 				</ul>
-				
+
 				<h3>模板语法参考</h3>
 				<ul>
 					<li>
@@ -143,7 +143,7 @@ function parseCode(node){
 					</li>
 				</ul>
 			</div>
+			<div id="footer"></div>
 		</div>
-		<div id="footer"></div>
 	</body>
 </html>
