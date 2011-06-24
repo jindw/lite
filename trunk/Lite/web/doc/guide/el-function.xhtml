@@ -199,10 +199,6 @@ ${str.substring(1,2)}
 		<input id="name" oninput="showFilter(this.value)" onpropertychange="showFilter(this.value)"/>
 		<hr/>
 		<div id="functionTable"/>
-		
-		<div style="position:absolute;right:200px;top:150px;opacity:0.6">
-
-		</div>
 	</ul>
 	<script>//<![CDATA[
 	function showFilter(key){
@@ -221,7 +217,7 @@ ${str.substring(1,2)}
 					prefix = prefix[0];
 					impl = impl.substr(1);
 					title=prefix=='?'?"尚未实现":"副作用函数,不予实现!!!";
-					style ="text-decoration:line-through;background-color:"+ (prefix=='?'?'yellow;':'red;')
+					style ="text-decoration:line-through;background-color:"+ (prefix=='?'?'#cc6;':'#960;')
 				}
 				var n = impl.replace(/lite_member_(\w+).*/,'$1')
 				if(!key || tm || n.toLowerCase().indexOf(key)>=0){
@@ -238,7 +234,7 @@ ${str.substring(1,2)}
 				prefix = prefix[0];
 				impl = impl.substr(1);
 				title=prefix=='?'?"尚未实现":"副作用函数,不予实现!!!";
-				style ="text-decoration:line-through;background-color:"+ (prefix=='?'?'yellow;':'red;')
+				style ="text-decoration:line-through;background-color:"+ (prefix=='?'?'#cc6;':'#960;')
 			}
 			var n = impl.replace(/lite__(\w+).*/,'$1')
 			if(!key || n.toLowerCase().indexOf(key)>=0){
