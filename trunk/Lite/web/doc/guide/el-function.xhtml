@@ -139,7 +139,7 @@
 	</script>
 	
 	<c:client name="showFunctionTable">
-	<table><tr><td  valign="top">
+	<table cellpadding="5"><tr><td  valign="top">
 		<c:if test="${globals}">
 			<h4>全局函数列表</h4>
 			<table border='1'>
@@ -182,10 +182,9 @@
 			<x:code>
 <![CDATA[
 //表达式示例:
+${encodeURIComponent(text1)}
 ${JSON.stringify(object)}
 ${[a,b,c].concat(d,[e,f]).join('\n')}
-${[a,b,c,d].concat(array).length}
-${str.charAt(0)}
 ${str.substring(1,2)}
 ]]>
 			</x:code>
