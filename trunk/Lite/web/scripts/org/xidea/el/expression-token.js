@@ -8,6 +8,7 @@
 var BIT_PRIORITY= 60;
 var BIT_PRIORITY_SUB= 3840;
 var BIT_ARGS= 192;
+var POS_INC= 12;
 var VALUE_CONSTANTS= -1;
 var VALUE_VAR= -2;
 var VALUE_LIST= -3;
@@ -23,17 +24,21 @@ var OP_DIV= 89;
 var OP_MOD= 90;
 var OP_ADD= 84;
 var OP_SUB= 85;
-var OP_LT= 336;
-var OP_GT= 337;
-var OP_LTEQ= 338;
-var OP_GTEQ= 339;
-var OP_EQ= 80;
-var OP_NE= 81;
-var OP_EQ_STRICT= 82;
-var OP_NE_STRICT= 83;
-var OP_BIT_AND= 588;
-var OP_BIT_XOR= 332;
-var OP_BIT_OR= 76;
+var OP_LSH= 80;
+var OP_RSH= 81;
+var OP_URSH= 82;
+var OP_LT= 332;
+var OP_GT= 333;
+var OP_LTEQ= 334;
+var OP_GTEQ= 335;
+var OP_IN= 4428;
+var OP_EQ= 76;
+var OP_NE= 77;
+var OP_EQ_STRICT= 78;
+var OP_NE_STRICT= 79;
+var OP_BIT_AND= 1096;
+var OP_BIT_XOR= 840;
+var OP_BIT_OR= 584;
 var OP_AND= 328;
 var OP_OR= 72;
 var OP_QUESTION= 68;
@@ -52,42 +57,71 @@ function addToken(type,token){
 	TYPE_TOKEN_MAP[type] = token;
 	TOKEN_TYPE_MAP[token] = type;
 }
-//9
-addToken(OP_GET,".");
-//8
-addToken(OP_NOT,"!");
-addToken(OP_BIT_NOT,"~");
-addToken(OP_POS,"+");
-addToken(OP_NEG,"-");
-//7
-addToken(OP_MUL,"*");
-addToken(OP_DIV,"/");
-addToken(OP_MOD,"%");
-//6
-addToken(OP_ADD,"+");
-addToken(OP_SUB,"-");
-//5
-addToken(OP_LT,"<");
-addToken(OP_GT,">");
-addToken(OP_LTEQ,"<=");
-addToken(OP_GTEQ,">=");
-addToken(OP_EQ,"==");
-addToken(OP_EQ_STRICT,"===");
-addToken(OP_NE,"!=");
-addToken(OP_NE_STRICT,"!==");
-//4
-addToken(OP_BIT_AND,"&");
-addToken(OP_BIT_XOR,"^");
-addToken(OP_BIT_OR,"|");
-//3
-addToken(OP_AND,"&&");
-addToken(OP_OR,"||");
 
-//2
-addToken(OP_QUESTION,"?");
-addToken(OP_QUESTION_SELECT,":");//map 中的：被直接skip了
-//1
-addToken(OP_JOIN,",");
+addToken(VALUE_CONSTANTS ,"value");
+addToken(VALUE_VAR       ,"var");
+addToken(VALUE_LIST      ,"[]");
+addToken(VALUE_MAP       ,"{}");
+
+
+//九：（最高级别的运算符号）
+addToken(OP_GET      ,".[]");
+addToken(OP_INVOKE   ,"()");
+
+//八
+addToken(OP_NOT     ,"!");
+addToken(OP_BIT_NOT ,"~");
+addToken(OP_POS     ,"+");
+addToken(OP_NEG     ,"-");
+
+//七：
+addToken(OP_MUL ,"*");
+addToken(OP_DIV ,"/");
+addToken(OP_MOD ,"%");
+
+//六：
+//与正负符号共享了字面值
+addToken(OP_ADD ,"+");
+addToken(OP_SUB ,"-");
+
+//五:移位
+addToken(OP_LSH   ,"<<");
+addToken(OP_RSH   ,">>");
+addToken(OP_URSH   ,">>>");
+
+//四:比较
+addToken(OP_LT   ,"<");
+addToken(OP_GT   ,">");
+addToken(OP_LTEQ ,"<=");
+addToken(OP_GTEQ ,">=");
+addToken(OP_IN   ," in ");
+
+//四:等不等比较
+addToken(OP_EQ        ,"==");
+addToken(OP_NE        ,"!=");
+addToken(OP_EQ_STRICT ,"===");
+addToken(OP_NE_STRICT ,"!==");
+
+//三:按位与或
+addToken(OP_BIT_AND ,"&");
+addToken(OP_BIT_XOR ,"^");
+addToken(OP_BIT_OR  ,"|");
+//三:与或
+addToken(OP_AND ,"&&");
+addToken(OP_OR  ,"||");
+
+//二：
+//?;
+addToken(OP_QUESTION        ,"?");
+//:;
+addToken(OP_QUESTION_SELECT ,":");
+
+//一：
+//与Map Join 共享字面量（map join 会忽略）
+addToken(OP_JOIN   ,",");
+//与三元运算符共享字面值
+addToken(OP_PUT   ,":");
+
 
 
 function findTokenType(token) {

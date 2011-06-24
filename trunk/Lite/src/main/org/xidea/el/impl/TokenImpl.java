@@ -1,6 +1,5 @@
 package org.xidea.el.impl;
 
-import java.lang.reflect.Field;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -276,60 +275,78 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 	 */
 	private static final Map<String, Integer> TOKEN_MAP = new HashMap<String, Integer>();
 	private static final Map<Integer, String> LABEL_MAP = new HashMap<Integer, String>();
+	private static void addToken(int type,String op){
+		TOKEN_MAP.put(op, type);
+		LABEL_MAP.put(type,op);
+	}
 	static {
+//		public static final int ([\w_]+\s*)=[^/]+//(.*)
+		
+		addToken(VALUE_CONSTANTS ,"value");
+		addToken(VALUE_VAR       ,"var");
+		addToken(VALUE_LIST      ,"[]");
+		addToken(VALUE_MAP       ,"{}");
+		
+		
+		//九：（最高级别的运算符号）
+		addToken(OP_GET      ,".[]");
+		addToken(OP_INVOKE   ,"()");
+		
+		//八
+		addToken(OP_NOT     ,"!");
+		addToken(OP_BIT_NOT ,"~");
+		addToken(OP_POS     ,"+");
+		addToken(OP_NEG     ,"-");
+		
+		//七：
+		addToken(OP_MUL ,"*");
+		addToken(OP_DIV ,"/");
+		addToken(OP_MOD ,"%");
+		
+		//六：
+		//与正负符号共享了字面值
+		addToken(OP_ADD ,"+");
+		addToken(OP_SUB ,"-");
+		
+		//五:移位
+		addToken(OP_LSH   ,"<<");
+		addToken(OP_RSH   ,">>");
+		addToken(OP_URSH   ,">>>");
+		
+		//四:比较
+		addToken(OP_LT   ,"<");
+		addToken(OP_GT   ,">");
+		addToken(OP_LTEQ ,"<=");
+		addToken(OP_GTEQ ,">=");
+		addToken(OP_IN   ," in ");
+		
+		//四:等不等比较
+		addToken(OP_EQ        ,"==");
+		addToken(OP_NE        ,"!=");
+		addToken(OP_EQ_STRICT ,"===");
+		addToken(OP_NE_STRICT ,"!==");
+		
+		//三:按位与或
+		addToken(OP_BIT_AND ,"&");
+		addToken(OP_BIT_XOR ,"^");
+		addToken(OP_BIT_OR  ,"|");
+		//三:与或
+		addToken(OP_AND ,"&&");
+		addToken(OP_OR  ,"||");
 
-		for (Field f : ExpressionToken.class.getFields()) {
-			try {
-				Integer value = (Integer) f.get(null);
-				LABEL_MAP.put(value, f.getName());
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		// 9
-		TOKEN_MAP.put(".", OP_GET);
-		// 8
-		TOKEN_MAP.put("!", OP_NOT);
-		TOKEN_MAP.put("^", OP_BIT_NOT);
-		// TOKEN_MAP.put("+",OP_POS);
-		// TOKEN_MAP.put("-",OP_NEG);
-		// 7
-		TOKEN_MAP.put("*", OP_MUL);
-		TOKEN_MAP.put("/", OP_DIV);
-		TOKEN_MAP.put("%", OP_MOD);
-		// 6
-		// TOKEN_MAP.put("+",OP_ADD);
-		// TOKEN_MAP.put("-",OP_SUB);
-		// 5
-		TOKEN_MAP.put("<", OP_LT);
-		TOKEN_MAP.put(">", OP_GT);
-		TOKEN_MAP.put("<=", OP_LTEQ);
-		TOKEN_MAP.put(">=", OP_GTEQ);
-		TOKEN_MAP.put("==", OP_EQ);
-		TOKEN_MAP.put("!=", OP_NE);
-		TOKEN_MAP.put("===", OP_EQ_STRICT);
-		TOKEN_MAP.put("!==", OP_NE_STRICT);
-
-		// 4
-		TOKEN_MAP.put("&", OP_BIT_AND);
-		TOKEN_MAP.put("^", OP_BIT_XOR);
-		TOKEN_MAP.put("|", OP_BIT_OR);
-		// 3
-		TOKEN_MAP.put("&&", OP_AND);
-		TOKEN_MAP.put("||", OP_OR);
-		// 2
-		TOKEN_MAP.put("?", OP_QUESTION);
-		TOKEN_MAP.put(":", OP_QUESTION_SELECT);// map 中的：被直接skip了
-		// 1
-		TOKEN_MAP.put(",", OP_JOIN);
-		for (String key : TOKEN_MAP.keySet()) {
-			LABEL_MAP.put(TOKEN_MAP.get(key), key);
-		}
-		LABEL_MAP.put(BRACKET_BEGIN, "(");
-		LABEL_MAP.put(BRACKET_END, ")");
-
-		// OP_PUSH
-		// OP_INVOKE
+		//二：
+		//?;
+		addToken(OP_QUESTION        ,"?");
+		//:;
+		addToken(OP_QUESTION_SELECT ,":");
+		
+		//一：
+		//与Map Join 共享字面量（map join 会忽略）
+		addToken(OP_JOIN   ,",");
+		//与三元运算符共享字面值
+		addToken(OP_PUT   ,":");
+		addToken(BRACKET_BEGIN   ,"(");
+		addToken(BRACKET_END   ,")");
 	}
 
 	public static boolean isPrefix(int type) {

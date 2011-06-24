@@ -94,7 +94,7 @@ var fns = {
 			if(next == '='){
 				end++;
 				if(this.value.charAt(end) == '='){
-				    this.parseError("不支持=== 和!==操作符，请使用==,!=");
+					end++;
 				}
 			}else{
 				this.parseError("不支持赋值操作:");
@@ -104,7 +104,7 @@ var fns = {
 			if(next == '='){
 				end++;
 				if(this.value.charAt(end) == '='){
-				    this.parseError("不支持=== 和!==操作符，请使用==,!=");
+					end++;
 				}
 			}
 			break;
@@ -112,6 +112,10 @@ var fns = {
 		case '<':// <,<=
 			if (next == '=') {
 				end++;
+			}else if(next == c){
+				if(this.value.charAt(end) == c){
+					end++;
+				}
 			}
 			break;
 		case '&':// && / &

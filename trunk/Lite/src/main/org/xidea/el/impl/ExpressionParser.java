@@ -329,8 +329,8 @@ public class ExpressionParser extends JSONTokenizer {
 
 	private String findOperator() {// optimize json ,:[{}]
 		int end = start + 1;
-		char c = toLower(value.charAt(start));
-		char next = value.length() > end ? 
+		final char c = toLower(value.charAt(start));
+		final char next = value.length() > end ? 
 				toLower(value.charAt(end))
 				: 0;
 		
@@ -370,6 +370,12 @@ public class ExpressionParser extends JSONTokenizer {
 		case '<':// <,<=
 			if (next == '=') {
 				end++;
+			}else if(next == c){
+				end ++;
+				if (value.length() > end && toLower(value.charAt(end)) == c) {
+					end++;
+				}
+				
 			}
 			break;
 		case '&':// && / &

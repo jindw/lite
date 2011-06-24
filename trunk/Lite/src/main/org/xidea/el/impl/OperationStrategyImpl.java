@@ -90,9 +90,12 @@ public class OperationStrategyImpl implements OperationStrategy {
 			return true;
 		}
 		if (strict) {
-			return false;
-		} else if (arg1 instanceof String && arg2 instanceof String) {
-			return false;
+			if (arg1 instanceof String && arg2 instanceof String) {
+				return false;
+			}
+			if (arg1 instanceof Boolean && arg2 instanceof Boolean) {
+				return false;
+			}
 		}
 		arg1 = ECMA262Impl.ToPrimitive(arg1, Number.class);
 		arg2 = ECMA262Impl.ToPrimitive(arg2, Number.class);
@@ -203,7 +206,8 @@ public class OperationStrategyImpl implements OperationStrategy {
 		case ExpressionToken.OP_ADD:
 			Object p1 = ECMA262Impl.ToPrimitive(arg1, String.class);
 			Object p2 = ECMA262Impl.ToPrimitive(arg2, String.class);
-			if (p1 instanceof String || p2 instanceof String) {
+			if (p1 instanceof String || p1 instanceof Character
+					 || p2 instanceof String|| p2 instanceof Character) {
 				return String.valueOf(p1) + p2;
 			} else {
 				return na.add(ECMA262Impl.ToNumber(p1), ECMA262Impl
@@ -248,19 +252,52 @@ public class OperationStrategyImpl implements OperationStrategy {
 			return arg1;
 		case ExpressionToken.OP_IN:
 			return in(arg1, arg2);
-		}
-		Object impl = this.globalMap.get(type);
-		if (impl != null) {
-			Invocable method = (Invocable) impl;
-			try {
-				return method.invoke(null, arg1, arg2);
-			} catch (Exception e) {
-				if (log.isDebugEnabled()) {
-					log.debug("方法调用失败:" + arg1, e);
+		default:
+			int a1 = ECMA262Impl.ToNumber(arg1).intValue();
+			int a2 = ECMA262Impl.ToNumber(arg1).intValue();
+			switch(type){
+			case ExpressionToken.OP_BIT_AND:
+				return a1 & a2;
+			case ExpressionToken.OP_BIT_XOR:
+				return a1 ^ a2;
+			case ExpressionToken.OP_BIT_OR:
+				return a1 | a2;
+			case ExpressionToken.OP_LSH:
+				return a1<<a2;
+			case ExpressionToken.OP_RSH:
+				return a1>>a2;
+			case ExpressionToken.OP_URSH:
+				return a1>>>a2;
+			
+			}
+
+			Object impl = this.globalMap.get(type);
+			if (impl != null) {
+				Invocable method = (Invocable) impl;
+				try {
+					return method.invoke(null, arg1, arg2);
+				} catch (Exception e) {
+					if (log.isDebugEnabled()) {
+						log.debug("方法调用失败:" + arg1, e);
+					}
 				}
 			}
+			throw new RuntimeException("不支持的操作符" + item.getType());
+			
+			
+//			case ExpressionToken.VALUE_CONSTANTS:// = -0x01;//value
+//			case ExpressionToken.VALUE_VAR://       = -0x02;//var
+//			case ExpressionToken.VALUE_LIST://      = -0x03;//[]
+//			case ExpressionToken.VALUE_MAP://       = -0x04;//{}
+			
+			
+//			case ExpressionToken.OP_GET://      = 0<<12 | 0<<8 | 1<<6 | 8<<2 | 0;//.[]
+//			case ExpressionToken.OP_INVOKE://   = 0<<12 | 0<<8 | 1<<6 | 8<<2 | 1;//()
+//			case ExpressionToken.OP_AND:// = 0<<12 | 1<<8 | 1<<6 | 2<<2 | 0;//&&
+//			case ExpressionToken.OP_OR://  = 0<<12 | 0<<8 | 1<<6 | 2<<2 | 0;//||
+//			case ExpressionToken.OP_QUESTION://        = 0<<12 | 0<<8 | 1<<6 | 1<<2 | 0;//?
+//			case ExpressionToken.OP_QUESTION_SELECT:// = 0<<12 | 0<<8 | 1<<6 | 1<<2 | 1;//:
 		}
-		throw new RuntimeException("不支持的操作符" + item.getType());
 
 	}
 
