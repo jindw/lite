@@ -1,18 +1,47 @@
-<html
-	xmlns:x="http://www.xidea.org/lite/example"
-	xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-CN" dir="ltr">
+<html xmlns:x="http://www.xidea.org/lite/example" xmlns="http://www.w3.org/1999/xhtml"
+	xml:lang="zh-CN" dir="ltr">
 	<head>
 		<title>输出语法</title>
 	</head>
 	<body>
 		<h3>功能支持</h3>
 		<p>
-		Lite模板输出内容分如下三种情况：
-		<ul>
-			<li>条件属性输出。</li>
-			<li>安全的自动编码输出。</li>
-			<li>XSS风险自负直接输出。</li>
-		</ul>
+			Lite模板输出内容分如下三种情况：
+			<ul>
+				<li>XML属性语义输出。
+					<p>自动按xml属性的编码规则，编码XML属性内容并输出，如果属性值为<strong>null</strong>，则整个属性不输出。
+					<i>这点在html 定值boolean属性输出时非常有用。</i>
+					</p>
+					<x:code>
+					<![CDATA[
+					<!-- 如果${action.link} 为null， 则click属性不输出-->
+					<!-- 如果${action.disabled} 为false, 
+						则 ${action.disabled||null} 为null（js运算规则），
+						 则disabled属性不输出。input不被禁用-->
+					<input name="p1" onclick="${action.click}" disabled="${action.disabled||null}"/>
+					]]>
+					</x:code>
+				</li>
+				<li>安全的自动编码输出。
+					<p>为了确保代码安全性， xml保留字符(&lt;&和属性中的")都将被自动转义（转义方式更具输出语法出现的位置而定）。</p>
+					<x:code>
+					<![CDATA[
+					<!-- ${entry.title} 将按属性规则编码，确保不打破属性语义。 -->
+					<!-- ${entry.content} 将按属性xml文本编码，确保不被插入危险脚本。 -->
+					<p title="Tooltip:${entry.title}">${entry.content}</p>
+					]]>
+					</x:code>
+				</li>
+				<li>XSS风险自负直接输出。
+					<p>慎用。</p>
+					<x:code>
+					<![CDATA[
+					<!-- ${entry.html} 中的任何内容都将直接输出， 恶意脚本样式等都可以被任意插入。 -->
+					!{entry.html}
+					]]>
+					</x:code></li>
+			</ul>
 		</p>
+		<>
 	</body>
 </html>
