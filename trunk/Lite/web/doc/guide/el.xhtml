@@ -75,27 +75,31 @@
 		</ul>
 		<h3>操作符</h3>
 		<a name="op"/>
-		<p>Lite 模板操作符语义与JavaScript保持一致。支持主要的JavaScript运算符，包括。</p>
+		<p>Lite 模板操作符语义与JavaScript保持一致。支持主要的JavaScript运算符，包括:</p>
 		<ul>
 			<li>取属性: . []
-				<p>[] 一般用来取数组元素，如：\${array[0]}; </p>
-				<p>. 一般用来取对象属性，如：\${str.length}，这种情况也可以用下标语法\${str['length']}；两个运算符语义相同。</p>
+				<p><i>[] 一般用来取数组元素，如：\${array[0]}; </i></p>
+				<p><i>. 一般用来取对象属性，如：\${str.length}，这种情况也可以用下标语法\${str['length']}；两个运算符语义相同。</i></p>
 			</li>
 			<li>加(数值加和字符串连接)减乘除、取模：+ - * / %
-				<p>与JavaScript语义完全一致，+运算同时可以做数值加减和字符串连接，当操作数中有字符串时，采用字符连接语义。</p>
+				<p><i>与JavaScript语义完全一致，+运算同时可以做数值加减和字符串连接，当操作数中有字符串时，采用字符连接语义。</i></p>
 			</li>
 			<li>比较运算：&lt; &lt;= > >= == != === !== 
-				<p>与JavaScript语义完全一致！</p>
+				<p><i>与JavaScript语义完全一致！</i></p>
 			</li>
 			<li>正/负/非/ + -  !
-				<p>与JavaScript语义完全一致！</p>
+				<p><i>与JavaScript语义完全一致！</i></p>
 			</li>
 			<li>&amp;&amp; 逻辑与 ,|| 逻辑或 、?: 条件运算
-				<p>与JavaScript语义完全一致，&amp;&amp;||运算同时具有条件运算功能，比如 ${false||'str'} 的返回值是字符串'str'。 </p>
+				<p><i>与JavaScript语义完全一致，&amp;&amp;||运算同时具有条件运算功能，比如 ${false||'str'} 的返回值是字符串'str'。 </i></p>
 			</li> 
+		</ul>
+		<hr/>
+		<p title="一些不常用的JavaScript操作符">看在JavaScript的面子上，也支持位运算^_^</p>
+		<ul>
 			<li style="color:#CCC;" title="不常用">其他：&amp; 按位与 ,^ 按位异或 ,| 按位或, ~ 按位取反, 移位>>,>>>,&lt;&lt; </li>
 		</ul>
-		<p>但是也有如下两类操作符不予支持</p>
+		<p>但是还有如下两类操作符不予支持</p>
 		<ul style="color:#CCC;text-decoration:line-through">
 			<li>不支持对模板值有影响的操作符号，如赋值(=)，自增，自减(++,--,*=3,%=2...)等;</li>
 			<li>以及所有以字符为运算标识的操作符(delete,new,in,typeof,instanceof,...)</li>
