@@ -1,10 +1,13 @@
+<!doctype html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:c="http://www.xidea.org/lite/core"
 	xmlns:x="http://www.xidea.org/lite/example">
 	<head>
 		<title>Lite模板参考</title>
 		<c:include path="$page" xpath="//xhtml:head/*" />
-		<link href="default.css" media="screen" rel="stylesheet" type="text/css" />
-
+		<link href="default.css" rel="stylesheet" type="text/css" />
+		<link href="../codemirror/codemirror.css" rel="stylesheet" type="text/css" />
+		<link href="../codemirror/default.css" rel="stylesheet" type="text/css" />
+		<script src="../codemirror/codemirror.js"/>
 		<c:extension namespace="http://www.w3.org/1999/xhtml">
 			//<![CDATA[
     function parseA(node){//连接简写，没有文本的时候，直接使用href作为文本节点
@@ -29,29 +32,52 @@ function parseCode(node){
     while(/^(?:[\t ].*[\r\n]*)*$/.test(text)){
     	text = text.replace(/^[\t ](.*)/mg,'$1');
     }
-	this.append("<pre style='"+style+"'>"+text.replace(/[<>&]/g,function(c){return "&#"+c.charCodeAt(0)+';'})+"</pre>");
+    
+	//this.append("<pre style='"+style+"'>"+text.replace(/[<>&]/g,function(c){return "&#"+c.charCodeAt(0)+';'})+"</pre>");
+	this.append("<div class='code'><script>renderSource("+uneval(text)+");</script></div>")
 };
-
-
 //]]>
 		</c:extension>
-		<script>function showNext(thiz,n,show,hide){
-
+		<script>
+		var mirrors = [];
+		//<![CDATA[
+		function placeMirror(node){
+			var s = document.getElementsByTagName('script');
+			var s = s[s.length-1];
+			s.parentNode.insertBefore(node,s);
+		}
+		function renderSource(text){
+			var mirror =  CodeMirror(placeMirror, {
+  				value: text,
+  				//readOnly :true,
+  				mode:  {name:/^\s*</.test(text)?"xml":"javascript",json:true}
+			});
+			mirrors.push(mirror);
+			return mirror;
+		}
+		function updateMirror(){
+			var i= mirrors.length;
+			while(i--){
+				mirrors[i].refresh();
+			}
+		}
+		function showNext(thiz,n,show,hide){
 			while(n = n.nextSibling){
-			if(n.nodeType == 1){
-			if(n.style.display=='none'){
-
-			n.style.display =
-			'block';
-			thiz.innerHTML = hide;
-			}else{
-			n.style.display = 'none';
-			thiz.innerHTML = show;
+				if(n.nodeType == 1){
+					if(n.style.display=='none'){
+						n.style.display = 'block';
+						thiz.innerHTML = hide;
+						updateMirror();
+					}else{
+						n.style.display = 'none';
+						thiz.innerHTML = show;
+					}
+					break;
+				}
 			}
-			break;
-			}
-			}
-			}</script>
+		}
+		//]]>
+		</script>
 	</head>
 	<body>
 		<div id="main">

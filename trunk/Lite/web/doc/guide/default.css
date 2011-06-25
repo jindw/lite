@@ -2,17 +2,17 @@ html,body {
 	color: #000;
 	background: #FFF;
 	overflow:hidden;
+	width:100%;
+	height:100%;
 }
 
-body,div,dl,dt,dd,ol,h1,h2,h3,h4,h5,h6,
-pre,code,form,fieldset,legend,input,button,
-textarea,p,blockquote,th,td {
+body,div,dl,dt,dd,ol,h1,h2,h3,h4,h5,h6,pre,code,
+form,fieldset,legend,input,button,textarea,p,blockquote,th,td {
 	margin: 0;
 	padding: 0;
 }
 
 h1,h2,h3,h4,h5,h6 {
-	font-size: 100%;
 	font-weight: blod;
 	margin-top:4px;
 }
@@ -42,13 +42,11 @@ caption,th {
 	text-align: left;
 }
 
-q:before,
-q:after {
+q:before,q:after {
 	content: '';
 }
 
-abbr,
-acronym {
+abbr,acronym {
 	border: 0;
 	font-variant: normal;
 }
@@ -198,4 +196,8 @@ a:hover{
 }
 
 
+.code {
+  background-color: #EEEEEE;
+  border-radius: 6px 6px 6px 6px;
+}
 

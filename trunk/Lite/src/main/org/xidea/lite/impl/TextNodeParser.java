@@ -1,6 +1,5 @@
 package org.xidea.lite.impl;
 
-import java.io.StringWriter;
 
 import org.xidea.lite.Template;
 import org.xidea.lite.parse.NodeParser;
@@ -101,31 +100,31 @@ public class TextNodeParser implements NodeParser<String> {
 	}
 
 	private String encodeText(String text, int quteChar) {
-		StringWriter out = new StringWriter();
+		StringBuilder out = new StringBuilder();
 		for (int i = 0; i < text.length(); i++) {
 			int c = text.charAt(i);
 			switch (c) {
 			case '<':
-				out.write("&lt;");
+				out.append("&lt;");
 				break;
 			case '>':
-				out.write("&gt;");
+				out.append("&gt;");
 				break;
 			case '&':
-				out.write("&amp;");
+				out.append("&amp;");
 				break;
 			case '\'':
 			case '"':
 				if (quteChar == c) {
-					out.write("&#");
-					out.write(c);
-					out.write(';');
+					out.append("&#");
+					out.append(c);
+					out.append(';');
 				} else {
-					out.write((char)c);
+					out.append((char)c);
 				}
 				break;
 			default:
-				out.write(c);
+				out.append((char)c);
 			}
 		}
 		return out.toString();
