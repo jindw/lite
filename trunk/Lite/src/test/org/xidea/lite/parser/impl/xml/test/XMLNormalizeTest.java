@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.Collections;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -20,7 +21,7 @@ import org.xml.sax.SAXException;
 
 public class XMLNormalizeTest {
 	private static DocumentBuilder DB;
-	XMLNormalizeImpl impl = new XMLNormalizeImpl();
+	XMLNormalizeImpl impl = new XMLNormalizeImpl(Collections.EMPTY_MAP,XMLNormalizeImpl.DEFAULT_ENTRY_MAP);
 	static{
 		DocumentBuilder db = null;
 		try {
@@ -46,7 +47,7 @@ public class XMLNormalizeTest {
 	}
 	@Test
 	public void testRoot() throws FileNotFoundException, IOException, SAXException{
-		XMLNormalizeImpl impl = new XMLNormalizeImpl();
+		XMLNormalizeImpl impl = new XMLNormalizeImpl(Collections.EMPTY_MAP,Collections.EMPTY_MAP);
 		impl.setDefaultRoot("<root>");
 		Assert.assertEquals(impl.normalize("<br><img>", ""), "<root><br/><img/></root>");
 		impl.setDefaultRoot("<root/>");
@@ -73,7 +74,7 @@ public class XMLNormalizeTest {
 	}
 	@Test
 	public void testSpec() throws SAXException, IOException{
-		assertNorm("<a href='&copy;'></a>","<a href='&#169;'></a>");
+		assertNorm("<a href=\"&copy;\"></a>","<a href=\"&#169;\"></a>");
 		assertNorm("<a href='&nbsp;nbsp;'></a>","<a href='&#160;nbsp;'></a>");
 		assertNorm("<a href='a&b'></a>","<a href='a&amp;b'></a>");
 		assertNorm("<a href='a&amp,;'></a>","<a href='a&amp;amp,;'></a>");

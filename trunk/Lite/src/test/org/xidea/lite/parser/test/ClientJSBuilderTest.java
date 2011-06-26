@@ -70,9 +70,8 @@ public class ClientJSBuilderTest {
 
 		List<Object> clientLiteCode = context2.toList();
 		System.out.println("==JS Code==");
-		System.out.println(clientLiteCode);
-		String result = (String) clientLiteCode.get(0);
-		System.out.println(result);
+		System.out.println(clientLiteCode.toString());
+		String result = clientLiteCode.toString();
 		boolean isError = Pattern.compile("[\r\n]alert", Pattern.MULTILINE)
 		.matcher(result).find() || !Pattern.compile("\\.push\\(", Pattern.MULTILINE)
 		.matcher(result).find();
