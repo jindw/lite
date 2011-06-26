@@ -378,11 +378,12 @@ public class JSONTokenizer {
 				if (c == quoteChar) {
 					return (buf.toString());
 				}
+				break;
 			case '\r':
 			case '\n':
-				if(strict){
-					throw buildError("JSON 标准字符串不能换行");
-				}
+				//if(strict){
+				throw buildError("JSON 标准字符串不能换行");
+				//}
 			default:
 				buf.append(c);
 

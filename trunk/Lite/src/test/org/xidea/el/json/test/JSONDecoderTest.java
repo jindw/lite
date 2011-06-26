@@ -96,7 +96,7 @@ public class JSONDecoderTest {
 	@Test
 	public void testEncodeObject() throws IOException {
 		//非JSON标准,注释,多行
-		assertEquals("a\nb",JSONDecoder.decode("/**/\"a\nb\""));
+		assertEquals("a\nb",JSONDecoder.decode("/**/\"a\\nb\""));
 		assertEquals("\"a\\nb\"",JSONEncoder.encode("a\nb"));
 		assertEquals(-1,JSONDecoder.decode("-1"));
 		assertEquals(-1.1,JSONDecoder.decode("-1.1"));

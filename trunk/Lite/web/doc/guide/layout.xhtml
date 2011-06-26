@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:c="http://www.xidea.org/lite/core"
 	xmlns:x="http://www.xidea.org/lite/example">
 	<head>
@@ -7,7 +7,10 @@
 		<link href="default.css" rel="stylesheet" type="text/css" />
 		<link href="../codemirror/codemirror.css" rel="stylesheet" type="text/css" />
 		<link href="../codemirror/default.css" rel="stylesheet" type="text/css" />
-		<script src="../codemirror/codemirror.js"/>
+		<script src="../codemirror/codemirror.js" />
+		<script src="../codemirror/overlay.js" />
+		<script src="../codemirror/javascript.js" />
+		<script src="../codemirror/xml.js" />
 		<c:extension namespace="http://www.w3.org/1999/xhtml">
 			//<![CDATA[
     function parseA(node){//连接简写，没有文本的时候，直接使用href作为文本节点
@@ -38,19 +41,42 @@ function parseCode(node){
 };
 //]]>
 		</c:extension>
+		<style>
+			.cm-lite-el{ color:#d30;}
+			.cm-lite-tag{ color:#9933FF;font-weight:bold;}
+		</style>
 		<script>
+			//<![CDATA[
+		CodeMirror.defineMode("litexml", function(config, parserConfig) {
+		  var litexmlOverlay = {
+		    token: function(stream, state) {
+		      if (stream.match("c:")) {
+		        while ((ch = stream.next()) != null)
+		          if (!/\w/.test(ch)) break;
+		        return "lite-tag";
+		      }else if (stream.match(/^(?:\$\!?\{)/)) {
+		        while ((ch = stream.next()) != null)
+		          if (ch == "}") break;
+		        return "lite-el";
+		      }
+		      while (stream.next() != null && !stream.match(/^\$\!?\{/, false)) {}
+		      return null;
+		    }
+		  };
+		  return CodeMirror.overlayParser(CodeMirror.getMode(config, parserConfig.backdrop || "xml"), litexmlOverlay);
+		});
 		var mirrors = [];
-		//<![CDATA[
 		function placeMirror(node){
 			var s = document.getElementsByTagName('script');
 			var s = s[s.length-1];
 			s.parentNode.insertBefore(node,s);
 		}
+		
 		function renderSource(text){
 			var mirror =  CodeMirror(placeMirror, {
   				value: text,
   				//readOnly :true,
-  				mode:  {name:/^\s*</.test(text)?"xml":"javascript",json:true}
+  				mode:  {name:/^\s*</.test(text)?"litexml":"javascript",json:true}
 			});
 			mirrors.push(mirror);
 			return mirror;
@@ -107,69 +133,71 @@ function parseCode(node){
 			<div id="content">
 				<c:include path="$page" xpath="//xhtml:body/node()" />
 			</div>
-
-			<div id="menu">
-				<h3>入门</h3>
-				<ul>
-					<li>
-						<a href="index.xhtml#what">什么是模板</a>
-					</li>
-					<li>
-						<a href="index.xhtml#install">Lite模板如何安装</a>
-					</li>
-				</ul>
-
-				<h3>表达式参考</h3>
-				<ul>
-					<li>
-						<a href="el.xhtml#">什么是表达式</a>
-					</li>
-					<li>
-						<a href="el.xhtml#var">值:变量/..</a>
-					</li>
-					<li>
-						<a href="el.xhtml#op">操作符与函数</a>
-					</li>
-					<li>
-						<a href="el-function.xhtml">内置函数参考</a>
-					</li>
-				</ul>
-
-				<h3>模板语法参考</h3>
-				<ul>
-					<li>
-						<a href="syntax-out.xhtml">输出语法[\${},\$!{}]</a>
-					</li>
-					<li>
-						<a href="syntax-if.xhtml">条件判断[c:if]</a>
-					</li>
-					<li>
-						<a href="syntax-choose.xhtml">分支选择[c:choose]</a>
-					</li>
-					<li>
-						<a href="syntax-for.xhtml">三类循环[c:for]</a>
-					</li>
-					<li>
-						<a href="syntax-extends.xhtml">模板继承[c:extends]</a>
-					</li>
-					<li>
-						<a href="syntax-include.xhtml">模板包含[c:include]</a>
-					</li>
-					<li>
-						<a href="syntax-var.xhtml">变量申明[c:var]</a>
-					</li>
-					<li>
-						<a href="syntax-def.xhtml">模板函数申明[c:def]</a>
-					</li>
-					<li>
-						<a href="syntax-client.xhtml">前端模板函数申明[c:client]</a>
-					</li>
-					<li>
-						<a href="syntax-extension.xhtml">自定义扩展[c:extension]</a>
-					</li>
-				</ul>
-			</div>
 			<div id="footer"></div>
+		</div>
+		<div id="menu">
+			<h3>入门</h3>
+			<ul>
+				<li>
+					<a href="index.xhtml#what">什么是模板</a>
+				</li>
+				<li>
+					<a href="index.xhtml#install">Lite模板如何安装</a>
+				</li>
+			</ul>
+
+			<h3>表达式参考</h3>
+			<ul>
+				<li>
+					<a href="el.xhtml#">什么是表达式</a>
+				</li>
+				<li>
+					<a href="el.xhtml#var">值:变量/..</a>
+				</li>
+				<li>
+					<a href="el.xhtml#op">操作符与函数</a>
+				</li>
+				<li>
+					<a href="el-function.xhtml">内置函数参考</a>
+				</li>
+			</ul>
+
+			<h3>模板语法参考</h3>
+			<ul>
+				<li>
+					<a href="syntax.xhtml">模板语法概述</a>
+				</li>
+				<li>
+					<a href="syntax-out.xhtml">输出语法[\${},\$!{}]</a>
+				</li>
+				<li>
+					<a href="syntax-if.xhtml">条件判断[c:if]</a>
+				</li>
+				<li>
+					<a href="syntax-choose.xhtml">分支选择[c:choose]</a>
+				</li>
+				<li>
+					<a href="syntax-for.xhtml">三类循环[c:for]</a>
+				</li>
+				<li>
+					<a href="syntax-extends.xhtml">模板继承[c:extends]</a>
+				</li>
+				<li>
+					<a href="syntax-include.xhtml">模板包含[c:include]</a>
+				</li>
+				<li>
+					<a href="syntax-var.xhtml">变量申明[c:var]</a>
+				</li>
+				<li>
+					<a href="syntax-def.xhtml">模板函数申明[c:def]</a>
+				</li>
+				<li>
+					<a href="syntax-client.xhtml">前端模板函数申明[c:client]</a>
+				</li>
+				<li>
+					<a href="syntax-extension.xhtml">自定义扩展[c:extension]</a>
+				</li>
+			</ul>
 		</div>
 	</body>
 </html>

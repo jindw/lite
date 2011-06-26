@@ -109,7 +109,7 @@ public class DefaultXMLNodeParser implements NodeParser<Node> {
 				context.append(sysid);
 			}
 			context.append("\">");
-		} else if (sysid != null) {
+		} else if (sysid != null && sysid.length()>0 && !sysid.equals(".")) {
 			context.append("<!DOCTYPE ");
 			context.append(node.getNodeName());
 			context.append(" SYSTEM \"");

@@ -28,8 +28,8 @@ public abstract interface ExpressionToken {
 	public static final int VALUE_MAP       = -0x04;//{}
 	
 	
-	//九：（最高级别的运算符号）
-	public static final int OP_GET      = 0<<12 | 0<<8 | 1<<6 | 8<<2 | 0;//.[]
+	//九：（最高级别的运算符号） OP_GET,.[]
+	public static final int OP_GET      = 0<<12 | 0<<8 | 1<<6 | 8<<2 | 0;//.
 	public static final int OP_INVOKE   = 0<<12 | 0<<8 | 1<<6 | 8<<2 | 1;//()
 	
 	//八

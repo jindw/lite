@@ -93,7 +93,12 @@ ParseContext.prototype = {
 			if(typeof source != 'string'){
 				//NodeList
 				var len = source.length;
-				if(len >= 0 && typeof source.item != 'undefined'){//NodeList
+				var nodeType = source.nodeType;
+				
+				if(nodeType === undefined && typeof source.item != 'undefined'){//NodeList
+					if(len === 0){
+						return;
+					}
 					for(var i = 0;i<len;i++){
 						this._topChain.next(source.item(i));
 					}

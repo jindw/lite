@@ -37,7 +37,7 @@ public class XMLNormalizeImpl {
 		map.put("&copy;","&#169;");
 		map.put("&nbsp;","&#160;");
 		DEFAULT_ENTRY_MAP = Collections.unmodifiableMap(map);
-		map.clear();
+		map = new HashMap<String, String>();
 		map.put("xmlns:c",NS_CORE);
 		map.put("xmlns","http://www.w3.org/1999/xhtml");
 		DEFAULT_NS_MAP = Collections.unmodifiableMap(map);

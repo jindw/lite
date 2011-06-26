@@ -12,7 +12,7 @@ var INIT_SCRIPT = String(function(){
 	 * @public
 	 */
 	function lite__def(name,fn){
-		lite__g[name] = fn||this[name];
+		lite__g[name] = fn;
 	}
 	/**
 	 * @public
@@ -62,11 +62,12 @@ function JSTranslator(name,params,defaults){
     this.name = name;
     this.params = params;
     this.defaults = defaults;
+    this.liteDefined = false;
 }
 /**
  */
 JSTranslator.prototype = {
-	translate:function(list){
+	translate:function(list,rtf){
 		var result = [];
 	    try{
 	    	//var result =  stringifyJSON(context.toList())
@@ -74,15 +75,15 @@ JSTranslator.prototype = {
 		    var context = new JSTranslateContext(list,this.name,this.params,this.defaults);
 		    context.litePrefix = this.litePrefix || "lite__";
 		    context.parse();
-		    var code = context.toString();
-		    new Function("function x(){"+code+"\n}");
+		    if(rtf){
+		    	var code = context.header + "\nreturn "+ context.body;
+		    }else{
+		    	var code = context.toString();
+		    }
+		    new Function(code);
 	    }catch(e){
-	    	var buf = [];
-	    	for(var n in e){
-	    		buf.push(n+':'+e[n]);
-	    	}
-	    	$log.error(code,e);
-	        code = "return ('生成js代码失败：'+"+stringifyJSON(buf.join("\n"))+');';
+	    	var error = $log.error("生成js代码失败:",e,code);
+	        code = "return ("+stringifyJSON(error)+');';
 	    }
     	if(!this.litePrefix){
     		result.push("if(!window.lite__def){",INIT_SCRIPT,"}");

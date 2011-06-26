@@ -73,10 +73,10 @@ public class XMLNormalizeTest {
 	}
 	@Test
 	public void testSpec() throws SAXException, IOException{
+		assertNorm("<a href='&copy;'></a>","<a href='&#169;'></a>");
+		assertNorm("<a href='&nbsp;nbsp;'></a>","<a href='&#160;nbsp;'></a>");
 		assertNorm("<a href='a&b'></a>","<a href='a&amp;b'></a>");
 		assertNorm("<a href='a&amp,;'></a>","<a href='a&amp;amp,;'></a>");
-		assertNorm("<a href='&nbsp;nbsp;'></a>","<a href='&#160;nbsp;'></a>");
-		assertNorm("<a href='&copy;'></a>","<a href='&#169;'></a>");
 	}
 	private void assertNorm(String source, String expect) throws SAXException, IOException {
 		String result = norm(source);
@@ -86,6 +86,7 @@ public class XMLNormalizeTest {
 	private String norm(String source) throws SAXException, IOException {
 		String path = source.replaceAll("[\r\n][\\s\\S]*", "");
 		String result = impl.normalize(source,path);
+		System.out.println(result);
 		InputSource s = new InputSource(new StringReader(result));
 		s.setSystemId(path);
 		Document doc = DB.parse(s);

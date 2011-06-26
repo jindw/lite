@@ -99,21 +99,21 @@ public class XMLTest {
 	}
 
 	public void test(int index,String text, String result) throws Exception {
-
-		System.out.println(text+result);
 		String info = "第"+index+"个测试错误：";
 //		parseContext.getFeatureMap().put(HTMLNodeParser.AUTO_FORM_FEATURE_URI, HTMLNodeParser.AUTO_IN_FORM);
-		String source =
-		"<div xmlns:c=\"http://www.xidea.org/lite/core\">"
-		+ text + "</div>";
-		System.out.println(source);
-		List<Object> insts = LiteTestUtil.parse(source);
+		if(!text.startsWith("<?xml")){
+			text = text.startsWith("<?xml") ? text:
+				"<div xmlns:c=\"http://www.xidea.org/lite/core\">"
+				+ text + "</div>";
+			result = "<div>" + result + "</div>";
+		}
+		List<Object> insts = LiteTestUtil.parse(text);
 		checkElse(insts,info);
-		System.out.println(JSONEncoder.encode(insts));
+//		System.out.println(JSONEncoder.encode(insts));
 		Template t = new Template(insts);
 		Writer out = new StringWriter();
 		t.render(new HashMap(context), out);
-		assertXMLEquals(info+text+":\n"+result,"<div>" + result + "</div>", out.toString());
+		assertXMLEquals(info+text+":\n"+result,result, out.toString());
 		
 	}
 	
@@ -188,6 +188,7 @@ public class XMLTest {
 			Result outputTarget = new javax.xml.transform.stream.StreamResult(
 					out);
 			//transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+			System.out.println("\n\n"+xml);
 			transformer.transform(new StreamSource(new StringReader(xml)),
 					outputTarget);
 			return out.toString();

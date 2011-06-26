@@ -108,8 +108,8 @@
 			]]></string>
 		</void>
 		<void method='put'>
-			<string><![CDATA[<c:include path='classpath:///org/xidea/lite/parser/test/include-test.xslt'></c:include>]]></string>
-			<string><![CDATA[<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+			<string><![CDATA[<?xml version='1.0' encoding='UTF-8'?><c:include path='classpath:///org/xidea/lite/parser/test/include-test.xslt'></c:include>]]></string>
+			<string><![CDATA[<?xml version='1.0' encoding='UTF-8'?><xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 			<xsl:template match="/">
 			<div>
 			<xsl:apply-templates select="//meta"></xsl:apply-templates>

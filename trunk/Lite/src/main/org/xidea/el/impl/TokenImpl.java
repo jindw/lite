@@ -289,7 +289,7 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 		
 		
 		//九：（最高级别的运算符号）
-		addToken(OP_GET      ,".[]");
+		addToken(OP_GET      ,".");
 		addToken(OP_INVOKE   ,"()");
 		
 		//八
@@ -347,6 +347,7 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 		addToken(OP_PUT   ,":");
 		addToken(BRACKET_BEGIN   ,"(");
 		addToken(BRACKET_END   ,")");
+		//冲突符号：+-:
 	}
 
 	public static boolean isPrefix(int type) {

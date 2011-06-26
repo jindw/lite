@@ -1,11 +1,11 @@
 /**
  * @see extension.js
  */
-
+var CORE_URI = "http://www.xidea.org/lite/core"
 function ExtensionParser(impl){
 	this.impl = impl;
 	this.packageMap = {};
-	this.addExtension("http://www.xidea.org/lite/core",Core);
+	this.addExtension(CORE_URI,Core);
 	
 }
 //Extension.defaults = [];
@@ -179,12 +179,16 @@ ExtensionParser.prototype = {
 					es = 3;
 					var el = node.ownerElement;
 					//ie bug.no ownerElement
-					var ns = el && el.namespaceURI||'';
+					var ns = node.namespaceURI || el && el.namespaceURI||'';
 					var ext = this.packageMap[ns];
+					var n = formatName(node);
+					if(n == '__i' && ns == CORE_URI){
+						return true;
+					}
 					es=4;
 					if(ext && ext.onMap){
 						if(fn in ext.onMap){
-							var fn = ext.onMap[fn];
+							var fn = ext.onMap[n];
 							fn.call(chain,node);
 							return true;
 						}
@@ -224,7 +228,7 @@ ExtensionParser.prototype = {
 				}
 				
 				if(!ns && (prefix == 'c' || !prefix)){
-					ns = "http://www.xidea.org/lite/core"
+					ns = CORE_URI
 				}
 				if(ns == null){
 					$log.warn("文本解析时,查找名称空间失败,请检查是否缺少XML名称空间申明：[code:$"+match[0]+",prefix:"+prefix+",document:"+context.currentURI+"]")

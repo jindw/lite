@@ -6,9 +6,19 @@
 	<body>
 		<h3>功能支持</h3>
 		<p>
-			Lite模板输出内容分如下三种情况：
+			输出动态数据是模板最基本的功能，Lite可以将表达式的值，通过如下三种方式输出：
 			<ul>
-				<li>XML属性语义输出。
+				<li>安全的自动编码输出。
+					<p>为了确保代码安全性， xml保留字符(&lt;&amp;和属性中的")都将被自动转义（转义方式更具输出语法出现的位置而定）。</p>
+					<x:code>
+					<![CDATA[
+					<!-- ${entry.title} 将按属性规则编码，确保不打破属性语义。 -->
+					<!-- ${entry.content} 将按属性xml文本编码，确保不被插入危险脚本。 -->
+					<p title="Tooltip:${entry.title}">${entry.content}</p>
+					]]>
+					</x:code>
+				</li>
+				<li>XML属性语义输出(特色功能)。
 					<p>自动按xml属性的编码规则，编码XML属性内容并输出，如果属性值为<strong>null</strong>，则整个属性不输出。
 					<i>这点在html 定值boolean属性输出时非常有用。</i>
 					</p>
@@ -22,22 +32,12 @@
 					]]>
 					</x:code>
 				</li>
-				<li>安全的自动编码输出。
-					<p>为了确保代码安全性， xml保留字符(&lt;&amp;和属性中的")都将被自动转义（转义方式更具输出语法出现的位置而定）。</p>
-					<x:code>
-					<![CDATA[
-					<!-- ${entry.title} 将按属性规则编码，确保不打破属性语义。 -->
-					<!-- ${entry.content} 将按属性xml文本编码，确保不被插入危险脚本。 -->
-					<p title="Tooltip:${entry.title}">${entry.content}</p>
-					]]>
-					</x:code>
-				</li>
 				<li>XSS风险自负直接输出。
-					<p>慎用。</p>
+					<p>慎用！！！</p>
 					<x:code>
 					<![CDATA[
-					<!-- ${entry.html} 中的任何内容都将直接输出， 恶意脚本样式等都可以被任意插入。 -->
-					$!{entry.html}
+					<!-- $!{entry.html} 中的任何内容都将直接输出， 恶意脚本样式等都可以被任意插入。 -->
+					<p>$!{entry.html}</p>
 					]]>
 					</x:code></li>
 			</ul>

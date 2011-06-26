@@ -205,9 +205,15 @@ var fns = {
 						this.status == STATUS_EXPRESSION ? OP_SUB
 								: OP_NEG]);
 				break;
+			case ':':
+				this.addToken([OP_QUESTION_SELECT]);// map : is skipped
+				break;
 			case ',':// :(object_setter is skiped,',' should
 				// be skip)
-				if (!this.isMapMethod()) {
+				if (this.isMapMethod()) {
+					
+					this.status = STATUS_OPERATOR;
+				}else{
 					this.addToken([OP_JOIN]);
 
 				}

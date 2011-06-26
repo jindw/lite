@@ -24,10 +24,10 @@
 		<p>已过而立之年！</p>
 	</c:if>
 	<c:else>
-		<p>还差{30-user.age}年就满30了。</p>
+		<p>还差${30-user.age}年就满30了。</p>
 	</c:else>
 	<!-- 三目运算，成员函数调用 -->
-	<p>个人说明：${user.description.length > 20?user.description.substring(0,20)+'...':user.description}</p>
+	<p>个人说明：${user.description.length > 20 ?user.description.substring(0,20)+'...':user.description}</p>
 </body>
 </html>
 ]]>
@@ -99,7 +99,14 @@
 				${a ? a : b} 等价于： ${a || b}
 				${user ? user.name : '匆匆过客'} 等价于 ${user && user.name || '匆匆过客'} 
 				]]>
-				</x:code> </i></p>
+				</x:code> 
+				</i>
+				
+				</p>
+				<p>
+				这三个表达式中，有一个要点：Boolean规则，这点上，Lite语法设计与JavaScript完全一致。</p>
+				<p><strong>只有 false,null,0,'' 四个值是false</strong>，其他都是真（包括空数组，空对象都是真值）。
+				</p>
 			</li> 
 		</ul>
 		<hr/>

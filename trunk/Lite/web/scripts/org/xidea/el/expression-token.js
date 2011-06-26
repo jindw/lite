@@ -65,7 +65,7 @@ addToken(VALUE_MAP       ,"{}");
 
 
 //九：（最高级别的运算符号）
-addToken(OP_GET      ,".[]");
+addToken(OP_GET      ,".");
 addToken(OP_INVOKE   ,"()");
 
 //八

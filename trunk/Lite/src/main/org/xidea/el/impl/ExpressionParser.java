@@ -459,12 +459,15 @@ public class ExpressionParser extends JSONTokenizer {
 						status == ParseStatus.EXPRESSION ? OP_SUB : OP_NEG,
 						null));
 				break;
-			case ',':// :(object_setter is skiped,',' should
+			case ':':
+				addToken(new TokenImpl(OP_QUESTION_SELECT,null));// map : is skipped
+				break;
+			case ',':// :(object_setter is skipped,',' should
 				// be skip)
-				if (!isMapMethod()) {
-					addToken(new TokenImpl(OP_JOIN, null));
-				}else{
+				if (isMapMethod()) {
 					status = ParseStatus.OPERATOR;
+				}else{
+					addToken(new TokenImpl(OP_JOIN, null));
 				}
 				break;
 			case '/':

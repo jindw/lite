@@ -49,7 +49,7 @@ public class ResultContextImpl implements ResultContext {
 	}
 
 	static Pattern VAR_PATTERN = Pattern
-			.compile("^(break|case|catch|const|continue|default|do|else|false|finally|for|function|if|in|instanceof|new|null|return|switch|this|throw|true|try|var|void|while|with)|[a-zA-Z_][\\w_]*$");
+			.compile("^(?:(break|case|catch|const|continue|default|do|else|false|finally|for|function|if|in|instanceof|new|null|return|switch|this|throw|true|try|var|void|while|with)|[a-zA-Z_][\\w_]*)$");
 
 	private String checkVar(String var) {
 		Matcher matcher = VAR_PATTERN.matcher(var);

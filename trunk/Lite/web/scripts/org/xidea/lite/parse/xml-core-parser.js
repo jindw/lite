@@ -203,7 +203,7 @@ function seekElif(text){
 function processChoose(node){
 	var value = getAttributeEL(node,"value");
 	var oldStatus = this.getAttribute(CHOOSE_KEY);
-	this.setAttribute(processChoose,{value:value,first:true});
+	this.setAttribute(CHOOSE_KEY,{value:value,first:true});
 	parseChildRemoveAttr(this,node);
 	this.setAttribute(CHOOSE_KEY,oldStatus);
 }
@@ -406,8 +406,8 @@ function _parseDefName(name){
 				var arg = args.substring(0,i);
 				try{
 					new Function(arg);
-					i=0;
 					args = args.substring(i+1).replace(/^\s+|\s+$/g,'');
+					i=0;
 				}catch(e){
 					i++;
 					continue;
@@ -418,7 +418,7 @@ function _parseDefName(name){
 				try{
 					new Function(arg);
 				}catch(e){
-					$log.error("函数定义中参数表语法错误:"+arg,e);
+					$log.error("函数定义中参数表语法错误:"+arg+name,e);
 					throw e;
 				}
 			}

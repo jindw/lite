@@ -37,8 +37,8 @@
 			<string><![CDATA[
 			<c:var name="a" value="xxx"/>
 			<c:var name="b" value="yyy"/>
-			${test(1,2)}<c:def name="test()">${a}+${b}</c:def>]]></string>
-			<string><![CDATA[null+null]]></string>
+			${test(1,2)}<c:def name="test(a)">${a}+${b}</c:def>]]></string>
+			<string><![CDATA[1+null]]></string>
 		</void>
 		<!-- 可传递参数 -->
 		<void method="put">

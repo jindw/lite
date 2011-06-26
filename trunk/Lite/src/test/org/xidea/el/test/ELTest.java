@@ -90,10 +90,11 @@ public class ELTest {
 		ParseContext pc = createParserContext();
 		List<Object> tps = pc.parseText("${JSON.stringify("+source+")}", Template.EL_TYPE);
 		pc.appendAll(tps);
-		js.eval("$import('org.xidea.lite.impl:Translator')");
-		Object ts = js.eval("new Translator('')");
-		String code = (String)js.invoke(ts, "translate", pc);
-		String jsResult = (String)js.eval("("+code+")("+contextJSON+")");
+		js.eval("$import('org.xidea.lite.impl.js:JSTranslator')");
+		Object ts = js.eval("new JSTranslator('')");
+		String code = (String)js.invoke(ts, "translate", pc.toList(),true);
+		System.out.println(code);
+		String jsResult = (String)js.eval("(function(){"+code+"})()("+contextJSON+")");
 		return jsResult;
 	}
 	private static ParseContext createParserContext() {

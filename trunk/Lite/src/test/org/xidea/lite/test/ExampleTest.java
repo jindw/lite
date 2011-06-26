@@ -62,16 +62,18 @@ public class ExampleTest {
 	public void setup() throws Exception, ScriptException {
 
 		menuURL = new File(webRoot, "menu.xml").toURI();
-		eval("this['javax.script.filename']='<boot.js>'");
-		eval(JSIText.loadText(this.getClass().getResourceAsStream(
-				"/boot.js"), "utf-8"));
+		if((Boolean)eval("!window.$JSI")){
+			eval("this['javax.script.filename']='<boot.js>';");
+			eval(JSIText.loadText(this.getClass().getResourceAsStream(
+					"/boot.js"), "utf-8"));
+		}
+		
 		Context.enter().getWrapFactory().setJavaPrimitiveWrap(false);
 		//engine = new ScriptEngineManager().getEngineByExtension("js");
 		//engine.eval("evalFile.call(null,'print(this)',111)");
-		eval("$import('org.xidea.lite.impl:TemplateImpl');");
-		eval("$import('org.xidea.lite.impl:Translator');");
-		eval("$import('org.xidea.lite.parse:ParseContext');");
-		eval("$import('org.xidea.lite.parse:ParseConfig');");
+		eval("$import('org.xidea.lite.impl.js:*');");
+		eval("$import('org.xidea.lite.impl:*');");
+		eval("$import('org.xidea.lite.parse:*');");
 		eval("$import('org.xidea.el:findELEnd')");
 	}
 
@@ -96,7 +98,7 @@ public class ExampleTest {
 
 	@Test
 	public void testClasspath() throws Exception {
-		String obj = (String)eval("$import('org.xidea.lite.impl:TemplateImpl');new TemplateImpl('classpath:///org/xidea/lite/test/input.xml').render({})");
+		String obj = (String)eval("new TemplateImpl('classpath:///org/xidea/lite/test/input.xml').render({})");
 		Assert.assertTrue(obj.startsWith("<!DOCTYPE html PUBLIC"));
 		System.out.println(obj);
 	}

@@ -196,7 +196,7 @@ function processDocumentType(node,context,chain){
             context.append('">');
         }else{
         	context.append("<!DOCTYPE ");
-			context.append(node.getNodeName());
+			context.append(node.nodeName);
 			var sub = node.internalSubset;
             if(sub){
 				context.append(" [");

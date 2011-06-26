@@ -48,9 +48,9 @@ public class ClientJSBuilderTest {
 		// context2.setCompress(context.isCompress());
 		context2.parse(context2.loadXML(url));
 		JSIRuntime rt = RuntimeSupport.create();
-		proxy.eval("$import('org.xidea.lite.impl:Translator')");
-		Object ts = proxy.eval("new Translator('t1')");
-		String result = (String)proxy.invoke(ts, "translate", context2);
+		proxy.eval("$import('org.xidea.lite.impl.js:JSTranslator')");
+		Object ts = proxy.eval("new JSTranslator('t1')");
+		String result = (String)proxy.invoke(ts, "translate", context2.toList());
 
 		System.out.println("==JS Code==");
 		System.out.println(result);
@@ -72,6 +72,7 @@ public class ClientJSBuilderTest {
 		System.out.println("==JS Code==");
 		System.out.println(clientLiteCode);
 		String result = (String) clientLiteCode.get(0);
+		System.out.println(result);
 		boolean isError = Pattern.compile("[\r\n]alert", Pattern.MULTILINE)
 		.matcher(result).find() || !Pattern.compile("\\.push\\(", Pattern.MULTILINE)
 		.matcher(result).find();

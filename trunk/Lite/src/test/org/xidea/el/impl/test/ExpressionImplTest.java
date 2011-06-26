@@ -72,8 +72,12 @@ public class ExpressionImplTest {
 		test(null,"!!''.length",Boolean.class);
 	}
 	@Test
-	public void test3op() {	
-		test(null,"(0?1+4:+2)+1",Long.class);
+	public void test3op1() {	
+		test(null,"0?1:2",Long.class);
+	}
+	@Test
+	public void test3op2() {	
+			test(null,"(0?1+4:+2)+1",Long.class);
 
 		test(null,"0?1:2",Long.class);
 		test(null,"0?1+4:2*2",Long.class);
