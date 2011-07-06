@@ -1,0 +1,27 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:c='http://www.xidea.org/lite/core'>
+
+	<c:def name="def_add(a,b)">${a+b}</c:def>
+	<c:def name="def_add2(a,b)">${a+b}</c:def>
+	<c:def name="def_add3(a,b)">${a+b}</c:def>
+	<c:def name="def_sub(a,b)">${a-b}</c:def>
+	<c:def name="def_sub1(a,b)">${a-b}</c:def>
+	<c:def name="def_sub2(a,b)">${a-b}</c:def>
+	<c:client name="c1">
+		\${def_add(a,b)}:${def_add(a,b)}<hr/>
+	</c:client>
+	<c:if test="${false}">
+		<c:client name="c2">
+			\${def_add(a,b)}:${def_add(a,b)}<hr/>
+			\${def_add2(a,b)}:${def_add2(a,b)}<hr/>
+			\${def_sub(a,b)}:${def_sub(a,b)}<hr/>
+			\${def_sub2(a,b)}:${def_sub2(a,b)}<hr/>
+		</c:client>
+	</c:if>
+	<c:client name="c3(a,b)">
+		\${def_add(a,b)}:${def_add(a,b)}<hr/>
+		\${def_sub(a,b)}:${def_sub(a,b)}<hr/>
+	</c:client>
+	<body>
+		<script>document.write(c1({a:1,b:2})+'<br/>'+c3(1,2))</script>
+	</body>
+</html>

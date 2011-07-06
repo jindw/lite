@@ -50,9 +50,8 @@ function parseXMLByURL(url){
     xhr.send('');
     ////text/xml,application/xml...
     var xml = /\/xml/.test(xhr.getResponseHeader("Content-Type")) && xhr.responseXML;//chrome 在content-type 为apllication/xml+xhtml时，responseXML为空
-    if(xml){
-    	xml = addInst(xml,xhr.responseText);
-
+    if(xml && !getParserError(xml)){
+    	return addInst(xml,xhr.responseText);
     }else{
     	return parseXMLByText(xhr.responseText)
     }
@@ -70,13 +69,23 @@ function addInst(xml,s){
 	}
 	return xml;
 }
-function isParserError(root,depth){
+function getParserError(root,depth){
 	if(root){
+		if(depth === undefined){
+			if(root.nodeType == 9){
+				root = root.documentElement;
+			}
+			depth = 2;//webkit: html/body/parseerror
+		}
 		if(root.tagName == "parsererror"){
-			return true;
+			if(this.XMLSerializer){
+				return new XMLSerializer().serializeToString(root) || "xml error";
+			}else{
+				return root.xml || root.textContent || "xml error"
+			}
 		}
 		if(depth>0){
-			return isParserError(root.firstChild,depth-1)
+			return getParserError(root.firstChild,depth-1)
 		}
 	}
 	return false;
@@ -88,16 +97,32 @@ function parseXMLByText(text){
 	if(!/^[\s\ufeff]*</.test(text)){
 		text = txt2xml(text);
 	}
+	var errors = [];
 	try{
-		var error;
+		var xml = parseFromString(text,errors);
+		if(errors.length == 0 && xml){
+			return xml;
+		}
+    }catch(e){
+    	if(!text.match(/\sxmlns\:c\b/) && text.match(/\bc:\w+\b/)){
+    		var text2 = text.replace(/<[\w\-\:]+/,"$& xmlns:c='http://www.xidea.org/lite/core'");
+    		if(text2!=text){
+    			return parseFromString(text2);
+    		}
+    	}
+    	$log.error("解析xml失败:",e,text);
+    	throw e;
+    }
+}
+
+function parseFromString(text,errors){
+	try{
 		if(this.DOMParser){
 	        var doc = new DOMParser().parseFromString(text,"text/xml");
-	        var root = doc.documentElement;
-	        
-	        if(isParserError(root,2)){//http://www.mozilla.org/newlayout/xml/parsererror.xml
-	        	var s = new XMLSerializer();
-	        	error = s.serializeToString(root);
-	        	throw new Error("XML解析失败："+error);
+	        var error = getParserError(doc);
+	        if(error){//http://www.mozilla.org/newlayout/xml/parsererror.xml
+	        	errors && errors.push(error);
+	        	return null;
 	        }
 	    }else{
 	        //["Msxml2.DOMDocument.6.0", "Msxml2.DOMDocument.3.0", "MSXML2.DOMDocument", "MSXML.DOMDocument", "Microsoft.XMLDOM"];
@@ -106,22 +131,16 @@ function parseXMLByText(text){
 	        doc.loadXML(text);
 	        if (doc.parseError.errorCode!=0){
 	        	//todo....
-	        	error = doc.parseError.reason+";code:"+doc.parseError.errorCode;
+	        	var error = doc.parseError.reason+";code:"+doc.parseError.errorCode;
+	        	errors && errors.push(error);
 	        }
 	        doc.setProperty("SelectionLanguage", "XPath");
-	        doc.documentElement.tagName;
 	    }
-	    return addInst(doc,text);
     }catch(e){
-    	if(!text.match(/\sxmlns\:c\b/) && text.match(/\bc:\w+\b/)){
-    		var text2 = text.replace(/<[\w\-\:]+/,"$& xmlns:c='http://www.xidea.org/lite/core'");
-    		if(text2!=text){
-    			return parseXMLByText(text2);
-    		}
-    	}
-    	$log.error("解析xml失败:",error,e,text);
-    	throw e;
+    	errors && errors.push(e);
+    	return null;
     }
+    return addInst(doc,text);
 }
 /**
  * @private

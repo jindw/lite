@@ -2,8 +2,23 @@
  * @see extension.js
  */
 var CORE_URI = "http://www.xidea.org/lite/core"
-function ExtensionParser(impl){
-	this.impl = impl;
+var CORE_INFO = "__i";
+var currentExtension;
+var defaultNodeLocal={
+	get:function(){
+		return this.node
+	},
+	set:function(n){
+		this.node = n;
+	}
+}
+var nodeLocal = defaultNodeLocal;
+function ExtensionParser(newNodeLocal){
+	if(newNodeLocal){
+		nodeLocal = newNodeLocal;
+	}else{
+		nodeLocal = defaultNodeLocal;
+	}
 	this.packageMap = {};
 	this.addExtension(CORE_URI,Core);
 	
@@ -28,7 +43,50 @@ function copyParserMap(mapClazz,p,p2,key){
 		}
 	}
 }
-
+$log.filters.push(function(msg){
+	if(nodeLocal){
+		var currentNode = nodeLocal.get();
+		if(currentNode){
+			var p = getNodePosition(currentNode);
+			if(p){
+				msg = p+'\n'+msg;
+			}
+		}
+	}
+	return msg;
+});
+function getNodePosition(node){
+	switch(node.nodeType){
+	case 1://Node.ELEMENT_NODE:
+		el = node;
+		break;
+	case 2://Node.ATTRIBUTE_NODE:
+		el =node.ownerElement;
+		break;
+	case 9://Node.DOCUMENT_NODE:
+		el = node.documentElement;
+	}
+		
+	if (el != null) {
+		var doc = el.ownerDocument;
+		var pos = el.getAttributeNS(CORE_URI, CORE_INFO);
+		if(pos){
+			var p = pos.indexOf('|');
+			if(p>0){
+				pos = pos.substring(0,p);
+			}
+			pos = "@"+node.nodeName+"["+pos+"]";
+		}
+		if(doc!=null){
+			var path = doc.documentURI;
+			return path+pos;
+		}else{
+			return pos;
+		}
+		
+	}
+	return null;
+}
 function loadExtObject(source){
 	try{
 		var p = /\b(?:document|xmlns|(?:on|parse|before|seek)\w*)\b/g;
@@ -83,14 +141,20 @@ ExtensionParser.prototype = {
 		return result
 	},
 	parseDocument:function(node,context,chain){
-		for(var ns in this.packageMap){
-			//objectMap.namespaceURI = namespace
-			var p = this.packageMap[ns];
-			if(p.documentParser){
-				return p.documentParser.call(chain,node,ns);
+		var ce = currentExtension;
+		currentExtension = this;
+		try{
+			for(var ns in this.packageMap){
+				//objectMap.namespaceURI = namespace
+				var p = this.packageMap[ns];
+				if(p.documentParser){
+					return p.documentParser.call(chain,node,ns);
+				}
 			}
+			return false;
+		}finally{
+			currentExtension = ce;
 		}
-		return false;
 	},
 	parseNamespace:function(attr,context,chain){
 		if(/^xmlns(?:\:\w+)?/.test(attr.name)){
@@ -114,27 +178,27 @@ ExtensionParser.prototype = {
 		var len = attrs.length;
 		var exclusiveMap = {};
 		try{
-			var es = 0;
+//			var es = 0;
 			for (var i =  len- 1; i >= 0; i--) {
 				var attr = attrs.item(i);
 				var ans = attr.namespaceURI;
 				var ext = this.packageMap[ans || ''];
 				var an = formatName(attr);
-				es = 2
+//				es = 2
 				if (ext && ext.beforeMap) {
 					var fn = ext.beforeMap[an];
 					if(fn && an in ext.beforeMap){
-						es = 2.1
+//						es = 2.1
 						//el.removeAttributeNode(attr);
 						fn.call(chain,attr);
-						es =2.2
+//						es =2.2
 						return;
 					}
 				}
 			}
-			es = 4;
+//			es = 4;
 		}catch(e){
-			$log.error("元素扩展解析异常",es,attr.xml,ans,an,e)
+			$log.error("元素扩展解析异常",e)
 			throw e;
 		}finally{
 			
@@ -154,29 +218,28 @@ ExtensionParser.prototype = {
 	},
 	parse:function(node,context,chain){
 		try{
-			var es = 0;
+//			var es = 0;
 			var type = node.nodeType;
 			if(type === 1){
-				var old = this.currentNode;
-				this.currentNode = node;
+				var old = nodeLocal.get();
+				nodeLocal.set(node);
 				try{
 					if(!this.parseElement(node,context,chain)){
 						chain.next(node);
 					}
 				}finally{
-					this.currentNode = old;
+					nodeLocal.set(old);
 				}
-				return ;
 			} else if(type === 9){
-				if(this.parseDocument(node,context,chain)){
-					return ;
+				if(!this.parseDocument(node,context,chain)){
+					chain.next(node);
 				}
 			}else if(type === 2){//attribute
 				try{
 					if(this.parseNamespace(node,context,chain)){
 						return;
 					}
-					es = 3;
+//					es = 3;
 					var el = node.ownerElement;
 					//ie bug.no ownerElement
 					var ns = node.namespaceURI || el && el.namespaceURI||'';
@@ -185,7 +248,7 @@ ExtensionParser.prototype = {
 					if(n == '__i' && ns == CORE_URI){
 						return true;
 					}
-					es=4;
+//					es=4;
 					if(ext && ext.onMap){
 						if(fn in ext.onMap){
 							var fn = ext.onMap[n];
@@ -194,37 +257,39 @@ ExtensionParser.prototype = {
 						}
 					}
 				}catch(e){
-					$log.error("属性扩展解析异常：",node.xml,el==null,es,e)
+					$log.error("属性扩展解析异常：",e)
 				}
+				chain.next(node)
+			}else{
+//				es += 10;
+				chain.next(node)
 			}
-			es += 10;
-			chain.next(node)
 		}catch(e){
-			$log.error("扩展解析异常：",node.xml,es,e)
+			$log.error("扩展解析异常：",e)
 		}
 	},
 	parseText:function(text,start,context){
 		var text2 = text.substring(start+1);
 		var match = text2.match(/^(?:(\w*)\:)?([\w!#]*)[\$\{]/);
 		try{
-			var es = 0;
+//			var es = 0;
 			if(match){
 				var matchLength = match[0].length;
-				var currentNode = this.currentNode || this.impl && this.impl.currentNode;//getAttribute(CURRENT_NODE_KEY)
+				var node = nodeLocal.get();
 				var prefix = match[1];
 				var fn = match[2]
 				if(prefix == null){
 					var ns = ""
 				}else{
-					es = 1;
-					if(currentNode && currentNode.lookupNamespaceURI){
-						var ns = currentNode.lookupNamespaceURI(prefix);
+//					es = 1;
+					if(node && node.lookupNamespaceURI){
+						var ns = node.lookupNamespaceURI(prefix);
 						if (ns == null) {
-							var doc = currentNode.getOwnerDocument();
+							var doc = node.getOwnerDocument();
 							ns = doc && doc.documentElement.lookupNamespaceURI(prefix);
 						}
 					}
-					es =2
+//					es =2
 				}
 				
 				if(!ns && (prefix == 'c' || !prefix)){
@@ -247,7 +312,7 @@ ExtensionParser.prototype = {
 				}
 			}
 		}catch(e){
-			$log.error("文本解析异常：",es,e)
+			$log.error("文本解析异常：",e)
 		}
 		//seek
 		return -1;

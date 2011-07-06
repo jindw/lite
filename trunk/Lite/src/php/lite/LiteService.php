@@ -46,12 +46,12 @@ class LiteService{
 		}else{//prox
 			$pathinfo = @$_SERVER['PATH_INFO']?$_SERVER['PATH_INFO']:$_SERVER['ORIG_PATH_INFO'];
 			if(strncmp($pathinfo,'/scripts/',9) == 0){
-				header("Context-Type:text/javascript;charset=utf-8");
+				header("Content-Type:text/javascript;charset=utf-8");
 				//echo '!!'.substr($pathinfo,10);
 				readfile(dirname(__FILE__).substr($pathinfo,8));
 			}else if($pathinfo){
 				if(substr($pathinfo,-6) == '.xhtml' || substr($pathinfo,-4) == '.xml'){
-					header("Context-Type:text/xml;charset=utf-8");
+					header("Content-Type:text/xml;charset=utf-8");
 					readfile($this->root.$pathinfo);
 				}else{
 					echo "not support";
@@ -114,7 +114,6 @@ class LiteService{
 				trigger_error("$litecode is readonly,can not save compiled result");
 			}
 		}
-		
 		if( $this->getFileModified($path)){
 			$scriptBase = $_REQUEST['LITE_SERVICE_URL'];
 			$this->loadJavaScriptClass('org.xidea.lite.web:WebCompiler');
@@ -155,7 +154,7 @@ class LiteService{
 		if(!file_exists($litefile)){
 			return $litefile;
 		}
-		if(!file_exists($phpfile)){
+		if(!file_exists($phpfile) || filesize($phpfile) == 0){
 			return $phpfile;
 		}
 		$phptime = filemtime($phpfile);

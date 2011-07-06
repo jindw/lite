@@ -18,8 +18,8 @@ var defaultEntryMap = {"&nbsp;": "&#160;","&copy;": "&#169;"};
 var documentStart = "<c:group xmlns:c='http://www.xidea.org/lite/core'>";
 var documentEnd = "</c:group>";
 
-//for test
-function normalizeXML0(text,uri){
+//for test 这是一个简化版的 xml 兼容策略
+function normalizeXML(text,uri){
 	//too simple!!!!!
 	return text.replace("&&","&amp;&amp;");
 }
@@ -27,7 +27,7 @@ function normalizeXML0(text,uri){
 
 //form java
 //@see http://lite.googlecode.com/svn/trunk/Lite/src/main/org/xidea/lite/impl/XMLNormalizeImpl.java
-function normalizeXML(text,uri){
+function normalizeXML0(text,uri){
 	var start = 0;
 	var rootCount = 0;
 	var textPosition = [];
@@ -238,7 +238,7 @@ function normalizeXML(text,uri){
 	}
 
 	function appendIECComment(content) {
-		content = this.formatXMLValue(
+		content = formatXMLValue(
 				"$!{" + JSONEncoder.encode(content) + "}", null, '\0');
 		result.append(content);
 	}

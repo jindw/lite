@@ -19,24 +19,17 @@ public class ExtensionParserImpl implements ExtensionParser {
 	private static Pattern NAME_FORMAT = Pattern.compile("^[\\w\\-]+\\:|[\\-]");
 	private static Pattern FN_SEEKER = Pattern
 			.compile("^(?:\\w*\\:)?\\w*[\\$\\{]");
+	private static ThreadLocal<Node> CURRENT_LOCAL_NODE = new ThreadLocal<Node>();
 	private Object impl;
 	private final ExtensionParser proxy;
 	private JSIRuntime rt = ParseUtil.getJSIRuntime();
 	private Map<String, Map<String, Map<String, Object>>> packageMap;
-	private ThreadLocal<Node> currentNode = new ThreadLocal<Node>();
 
-	/**
-	 * for javascript
-	 * @return
-	 */
-	public Node getCurrentNode() {
-		return currentNode.get();
-	}
 
 	public ExtensionParserImpl() {
 		Object fn = rt
 				.eval("(function(){return new ($import('org.xidea.lite.parse:ExtensionParser',{}))(this)})");
-		impl = rt.invoke(this, fn);
+		impl = rt.invoke(CURRENT_LOCAL_NODE, fn);
 		proxy = rt.wrapToJava(impl, ExtensionParser.class);
 		reset();
 	}
@@ -78,10 +71,10 @@ public class ExtensionParserImpl implements ExtensionParser {
 	public void parse(Node node, ParseContext context, ParseChain chain) {
 		int type = node.getNodeType();
 		if (type == 1) {
-			Node old = currentNode.get();
-			currentNode.set(node);
+			Node old = CURRENT_LOCAL_NODE.get();
+			CURRENT_LOCAL_NODE.set(node);
 			boolean parsed = this.parseElement((Element) node, context, chain);
-			currentNode.set(old);
+			CURRENT_LOCAL_NODE.set(old);
 			if (parsed) {
 				return;
 			}

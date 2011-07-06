@@ -279,39 +279,39 @@ public class ParseUtil {
 		}
 		return list;
 	}
-	public static String getNodePosition(Node node) {
-		Element el = null;
-		switch(node.getNodeType()){
-		case Node.ELEMENT_NODE:
-			el = (Element)node;
-			break;
-		case Node.ATTRIBUTE_NODE:
-			el = ((Attr)node).getOwnerElement();
-			break;
-		case Node.DOCUMENT_NODE:
-			el = ((Document)node).getDocumentElement();
-		}
-		
-		if (el != null) {
-			Document doc = el.getOwnerDocument();
-			String pos = el.getAttributeNS(ParseUtil.CORE_URI, ParseUtil.CORE_INFO);
-			if(pos.length()>0){
-				int p = pos.indexOf('|');
-				if(p>0){
-					pos = pos.substring(0,p);
-				}
-				pos = "@"+node.getNodeName()+"["+pos+"]";
-			}
-			if(doc!=null){
-				String path = doc.getDocumentURI();
-				return path+pos;
-			}else{
-				return pos;
-			}
-			
-		}
-		return null;
-	}
+//	public static String getNodePosition(Node node) {
+//		Element el = null;
+//		switch(node.getNodeType()){
+//		case Node.ELEMENT_NODE:
+//			el = (Element)node;
+//			break;
+//		case Node.ATTRIBUTE_NODE:
+//			el = ((Attr)node).getOwnerElement();
+//			break;
+//		case Node.DOCUMENT_NODE:
+//			el = ((Document)node).getDocumentElement();
+//		}
+//		
+//		if (el != null) {
+//			Document doc = el.getOwnerDocument();
+//			String pos = el.getAttributeNS(ParseUtil.CORE_URI, ParseUtil.CORE_INFO);
+//			if(pos.length()>0){
+//				int p = pos.indexOf('|');
+//				if(p>0){
+//					pos = pos.substring(0,p);
+//				}
+//				pos = "@"+node.getNodeName()+"["+pos+"]";
+//			}
+//			if(doc!=null){
+//				String path = doc.getDocumentURI();
+//				return path+pos;
+//			}else{
+//				return pos;
+//			}
+//			
+//		}
+//		return null;
+//	}
 	private static String getXMLInstruction(String text) throws IOException {
 		String ins = null;
 		if (text.startsWith("<?xml")) {

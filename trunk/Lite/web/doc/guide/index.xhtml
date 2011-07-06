@@ -1,4 +1,5 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c2="http://www.xidea.org/lite/core"
 	xmlns:x="http://www.xidea.org/lite/example" xml:lang="zh-CN" dir="ltr">
 	<head>
 		<title>入门指南 </title>
@@ -23,6 +24,7 @@
 		</x:code>
 		</p>
 		<p>
+		<c:for var="a" items="${1}">${a}</c:for>
 		其中，姓名 "张三" 和城市 "北京" 需要从后端获取，于是，我们需要一个数据模型如下：
 		<x:code>
 		{
