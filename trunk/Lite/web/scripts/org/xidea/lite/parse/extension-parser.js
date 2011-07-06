@@ -58,7 +58,7 @@ $log.filters.push(function(msg){
 function getNodePosition(node){
 	switch(node.nodeType){
 	case 1://Node.ELEMENT_NODE:
-		el = node;
+		var el = node;
 		break;
 	case 2://Node.ATTRIBUTE_NODE:
 		el =node.ownerElement;

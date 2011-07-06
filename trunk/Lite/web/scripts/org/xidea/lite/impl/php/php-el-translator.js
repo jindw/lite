@@ -153,7 +153,7 @@ function stringifyINVOKE(el,context){
 			}
 		}
 		return "lite_member("+stringifyPHPEL(oel,context)+","+stringifyPHPEL(pel,context)+","+value2+")"
-		value1 = value1.replace(/.*?,([\s\S]+)\)/,'array($1)');
+		//value1 = value1.replace(/.*?,([\s\S]+)\)/,'array($1)');
 	}else if(type1 == VALUE_VAR){
 		var name = arg1[1];
 		return value2.replace('array',"lite__"+name)
@@ -276,7 +276,7 @@ function stringifyPrefix(el,context){
 	if(type == OP_NOT){//!
 		//return value1+'['+value2+']';
 		var rtv = php2jsBoolean(el1,value2);
-		if(!isSimpleEL(rtv)){
+		if(!isSimplePHPEL(rtv)){
 			rtv = '('+rtv+')';
 		}
 		return '!'+rtv;

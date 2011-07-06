@@ -90,7 +90,7 @@ function _stringifyPHPLineArgs(line){//.*[\r\n]*
 			}else if(a == "'"){
 				return "\\'";
 			}else{
-				$log.error("非法输出行!!"+JSON.stringify(line));
+				$log.error("非法输出行!!"+stringifyJSON(line));
 			}
 			return a == '\\'?'\\\\': "\\'";
 		}
