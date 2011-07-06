@@ -103,18 +103,28 @@ function parseXMLByText(text){
 		if(errors.length == 0 && xml){
 			return xml;
 		}
+	    var text2 = normalizeXML(text);
+	    if(text2){
+	    	var errors = [];
+	    	xml = parseFromString(text2,errors);
+	    	if(errors.length == 0 && xml){
+				return xml;
+			}
+	    }
+	    $log.error("解析xml失败:",errors.join('\n'),text);
     }catch(e){
-    	if(!text.match(/\sxmlns\:c\b/) && text.match(/\bc:\w+\b/)){
-    		var text2 = text.replace(/<[\w\-\:]+/,"$& xmlns:c='http://www.xidea.org/lite/core'");
-    		if(text2!=text){
-    			return parseFromString(text2);
-    		}
-    	}
     	$log.error("解析xml失败:",e,text);
-    	throw e;
+    }
+    
+}
+function normalizeXML(text){
+	if(!text.match(/\sxmlns\:c\b/) && text.match(/\bc:\w+\b/)){
+    	var text2 = text.replace(/<[\w\-\:]+/,"$& xmlns:c='http://www.xidea.org/lite/core'");
+    	if(text2!=text){
+    		return text2;
+    	}
     }
 }
-
 function parseFromString(text,errors){
 	try{
 		if(this.DOMParser){

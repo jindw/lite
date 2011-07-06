@@ -80,7 +80,11 @@ JSTranslator.prototype = {
 		    }else{
 		    	var code = context.toString();
 		    }
-		    new Function(code);
+		    if(!this.name && !rtf){
+		    	new Function('return '+code);
+		    }else{
+		    	new Function(code);
+		    }
 	    }catch(e){
 	    	var error = $log.error("生成js代码失败:",e,code);
 	        code = "return ("+stringifyJSON(error)+');';

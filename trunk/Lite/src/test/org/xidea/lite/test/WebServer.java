@@ -27,7 +27,7 @@ public class WebServer {
 		
 		File webroot = new File(new File(WebServer.class.getResource("/").toURI()),"../../").getCanonicalFile().getAbsoluteFile();
 		File targetClasses = new File(webroot,"../../FileServer/web/WEB-INF/classes").getCanonicalFile();
-		//webroot = new File("D:\\workspace\\TT\\web\\lite2php-smarty");
+		//webroot = new File("D:\\workspace\\Lite2\\build\\dest\\php-example-20110706");
 		
 		URLClassLoader cl = new URLClassLoader(new URL[]{targetClasses.toURI().toURL()});
 		Class<?> app = cl.loadClass("org.jside.webserver.test.WebServer");

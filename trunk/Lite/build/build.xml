@@ -3,7 +3,7 @@
 	<tstamp>
 		<format property="version" pattern="yyyyMMdd" />
 	</tstamp>
-	<available file="../JSA/build/dest/JSide.jar" property="JSAPath" value="web/WEB-INF/classes;../JSA/build/dest/JSide.jar;" />
+	<available file="../JSA/build/dest/JSide.jar" property="JSAPath" value="web/WEB-INF/lib/JSI.jar;web/WEB-INF/classes;../JSA/build/dest/JSide.jar;" />
 
 	<target name="init">
 		<delete dir="build/dest/jslite"/>
@@ -163,8 +163,7 @@
 			<arg value="-config.features" />
 			<arg value=":Debug" />
 			<arg value="-exports" />
-			<arg value="org.xidea.lite.web:liteTemplate" />
-			<arg value="org.xidea.lite.web:liteFunction" />
+			<arg value="org.xidea.lite.web:*" />
 
 			<arg value="-outputExported" />
 			<arg value="${basedir}/build/dest/lite-compiler.js" />
