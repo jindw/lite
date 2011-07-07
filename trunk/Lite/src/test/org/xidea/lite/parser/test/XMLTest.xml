@@ -61,5 +61,9 @@
 			<string><![CDATA[<xml attr="${''}-"/>]]></string>
 			<string><![CDATA[<xml attr="-"></xml>]]></string>
 		</void>
+		<void method='put'>
+			<string><![CDATA[<xml attr="${''}-"/>///]]></string>
+			<string><![CDATA[<xml attr="-"></xml>///]]></string>
+		</void>
 	</object>
 </java>

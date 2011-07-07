@@ -165,6 +165,12 @@ ExtensionParser.prototype = {
 				fp.namespaceParser.call(chain,attr);
 				return true;
 			}
+			var info = attr.ownerElement.getAttributeNS(CORE_URI,CORE_INFO)
+			if(info.length ==0 || info.indexOf("|"+attr.name+"|")>0){
+				return false;
+			}else{
+				return true;//自动补全的xmlns 不处理!
+			}
 			//$log.error(v,fp.namespaceParser);
 		}
 		return false;
@@ -225,11 +231,11 @@ ExtensionParser.prototype = {
 			if(type === 1){
 //				var es = 1.1;
 				var old = nodeLocal.get();
-				nodeLocal.set(node);
 //				var es = 1.2;
 				try{
-					if(!this.parseElement(node,context,chain)){
-						chain.next(node);
+					nodeLocal.set(node);
+					if(this.parseElement(node,context,chain)){
+						return;
 					}
 				}finally{
 					nodeLocal.set(old);
@@ -237,42 +243,45 @@ ExtensionParser.prototype = {
 //				var es = 1.3;
 			} else if(type === 9){
 //				var es = 9.1;
-				if(!this.parseDocument(node,context,chain)){
+				if(this.parseDocument(node,context,chain)){
 //				var es = 9.2;
-					chain.next(node);
+					return;
 				}
 			}else if(type === 2){//attribute
-				try{
-					if(this.parseNamespace(node,context,chain)){
-						return;
-					}
-//					var es = 3;
-					var el = node.ownerElement;
-					//ie bug.no ownerElement
-					var ns = node.namespaceURI || el && el.namespaceURI||'';
-					var ext = this.packageMap[ns];
-					var n = formatName(node);
-					if(n == '__i' && ns == CORE_URI){
-						return true;
-					}
-//					var es=4;
-					if(ext && ext.onMap){
-						if(fn in ext.onMap){
-							var fn = ext.onMap[n];
-							fn.call(chain,node);
-							return true;
-						}
-					}
-				}catch(e){
-					$log.error("属性扩展解析异常：",e)
+				if(this.parseAttribute(node,context,chain)){
+					return;
 				}
-				chain.next(node)
-			}else{
-//				var es = 10;
-				chain.next(node)
 			}
+//			var es = 10;
+			chain.next(node)
 		}catch(e){
 			$log.error("扩展解析异常：",e)
+		}
+	},
+	parseAttribute:function(node,context,chain){
+		try{
+			if(this.parseNamespace(node,context,chain)){
+				return true;
+			}
+//					var es = 3;
+			var el = node.ownerElement;
+			//ie bug.no ownerElement
+			var ns = node.namespaceURI || el && el.namespaceURI||'';
+			var ext = this.packageMap[ns];
+			var n = formatName(node);
+			if(n == '__i' && ns == CORE_URI){
+				return true;
+			}
+//					var es=4;
+			if(ext && ext.onMap){
+				if(fn in ext.onMap){
+					var fn = ext.onMap[n];
+					fn.call(chain,node);
+					return true;
+				}
+			}
+		}catch(e){
+			$log.error("属性扩展解析异常：",e)
 		}
 	},
 	parseText:function(text,start,context){

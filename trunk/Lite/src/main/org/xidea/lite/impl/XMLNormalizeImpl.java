@@ -17,7 +17,7 @@ import org.xidea.el.json.JSONEncoder;
  */
 public class XMLNormalizeImpl {
 	private static final Log log = LogFactory.getLog(XMLNormalizeImpl.class);
-	protected static final String TAG_NAME = "[\\w_](?:[\\w_\\-\\.\\:]*[\\w_\\-\\.])?";
+	protected static final String TAG_NAME = "[a-zA-Z_](?:[\\w_\\-\\.\\:]*[\\w_\\-\\.])?";
 
 	private static final String NS_CORE = "http://www.xidea.org/lite/core";
 	private static final Pattern OLD_NS_CORE = Pattern
@@ -118,7 +118,7 @@ public class XMLNormalizeImpl {
 				String value = entry.getValue();
 				if (!tag.nsMap.containsKey(key)) {
 					int p = key.indexOf(':');
-					if(p<0 || text.matches("[<\\s]"+key.substring(p+1)+':')){
+					if(p<0 || key.equals("xmlns:c")|| text.matches("[<\\s]"+key.substring(p+1)+':')){
 						tag.nsMap.put(key, value);
 						result.append(" ");
 						result.append(key);

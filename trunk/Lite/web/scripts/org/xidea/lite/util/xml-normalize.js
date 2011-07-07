@@ -19,11 +19,82 @@ var documentStart = "<c:group xmlns:c='http://www.xidea.org/lite/core'>";
 var documentEnd = "</c:group>";
 
 //for test 这是一个简化版的 xml 兼容策略
-function normalizeXML(text,uri){
-	//too simple!!!!!
-	return text.replace("&&","&amp;&amp;");
+var defaultEntryMap = {"&nbsp;": "&#160;","&copy;": "&#169;",'&':'&amp;','<':'&lt;'};
+var leaf = /<\/?(?:meta|link|img|br|hr|input)\b/i;
+function normalizeTag(tag,uri,pos){
+	var i = 0;
+	return tag.replace(/([<\s][a-zA-Z_][\w_\-\.]*(?:\:[\w_][\w_\-\.]+)?)(?:\s*=\s*('[^']*'|\"[^\"]*\"|\$\{[^}]+\}|[^\s>]+))?/g,function(a,n,v){
+		if(i==0){
+			i++;
+			return n+pos;
+		}else{
+			if(!v){
+				v = n.replace(/^\s/,'"')+'"'
+			}else{
+				v = v.replace(/&\w+;|&#\d+;|&#x[\da-fA-F]+;|[&<]/g,function(a){
+					if(a in defaultEntryMap){
+    					return defaultEntryMap[a];
+    				}else{
+    					return a;
+    				}
+				});
+				var c = v.charAt();
+				if(c != '"' && c != '\''){
+					v= '"'+v.replace(/"/g,'&#34;')+'"';
+				}
+			}
+			return n+'='+v
+		}
+	});
 }
-
+function normalizeXML(text,uri){
+	var lines = text.split(/\r\n?|\n/);
+	var text2 = lines.join('\n');
+	var lineIndex = 0;
+	var lineBase = 0;
+	function getPositionAttr(offset){
+		while(lineBase+ lines[lineIndex].length<=offset){
+			lineBase+= lines[lineIndex].length+1;
+			lineIndex++;
+		}
+		offset -= lineBase;
+		var pos = lineIndex+','+offset
+		return " c:__i='"+pos+"'";
+	}
+	//一个比较全面的容错。
+	text2 = text2.replace(
+    	//<\?\w+[\s\S]+?\?>|<!(?:[^>\[]+\[[\s\S]+\]>|[^>]+>)|<!\[CDATA\[[\s\S]+?\]\]>|<!--[\s\S]+?-->
+    	//
+    	///<[a-zA-Z_][\w_\-\.]*(?:\:[\w_][\w_\-\.]+)?(?:\s+[\w_](?:'[^']*'|\"[^\"]*\"|\$\{[^}]+\}|[^>'"$]+|[\$])*>|\s*\/?>)/,
+    	//
+    	//<\/[\w_][\w_\-\.]*(?:\:[\w_][\w_\-\.]+)?>
+    	//
+    	//&\w+;|&#\d+;|&#x[\da-fA-F]+;|[&<]
+    	/(<\?\w+[\s\S]+?\?>|<!(?:[^>\[]+\[[\s\S]+\]>|[^>]+>)|<!\[CDATA\[[\s\S]+?\]\]>|<!--[\s\S]+?-->)|(<[a-zA-Z_][\w_\-\.]*(?:\:[\w_][\w_\-\.]+)?(?:\s+[\w_](?:'[^']*'|\"[^\"]*\"|\$\{[^}]+\}|[^>'"$]+|\$)*>|\s*\/?>))|(<\/[\w_][\w_\-\.]*(?:\:[\w_][\w_\-\.]+)?>)|&\w+;|&#\d+;|&#x[\da-fA-F]+;|[&<]/g,
+    	function(a,notTag,startTag,endTag,offset){
+    		if(notTag){
+    			return a;
+    		}else if(startTag){
+    			if(leaf.test(startTag)){
+    				startTag = startTag.replace(/\/?>$/,'/>');
+    			}
+    			startTag = normalizeTag(startTag,uri,getPositionAttr(offset));
+    			return startTag;
+    		}else if(endTag){
+    			if(leaf.test(startTag)){
+    				return '';
+    			}
+    			return endTag;
+    		}else if(a in defaultEntryMap){
+    			return defaultEntryMap[a];
+    		}
+    		return a;
+    	});
+	if(!text2.match(/\sxmlns\:c\b/)){
+    	text2 = text2.replace(/<[\w\-\.\:]+/,"$& xmlns:c='http://www.xidea.org/lite/core'");
+	}
+    return text2;
+}
 
 //form java
 //@see http://lite.googlecode.com/svn/trunk/Lite/src/main/org/xidea/lite/impl/XMLNormalizeImpl.java

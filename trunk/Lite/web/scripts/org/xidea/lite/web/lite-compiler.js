@@ -16,7 +16,8 @@ function liteFunction(source,config){
 	var parseContext = new ParseContext();
 	if(typeof source == 'string'){
     	if(/^\s*</.test(source)){
-    		data = parseContext.createURI(source);
+    		data =  loadXML(source,parseContext._config._root)
+    		//parseContext.loadXML(source);
     	}else{
     		data = source;
     		//data = parseContext.createURI("<c:block>aaa<![CDATA["+source+"]]></c:block>");

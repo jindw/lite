@@ -82,13 +82,19 @@ var fns = {
 		case ')':
 		case '.':// prop
 		case '?':// 3op
-		case '+':// 5op
-		case '-':
 		case '~':
 		case '^':
+			break;
+		case '+':// 5op
+		case '-':
 		case '*':
 		case '/':
 		case '%':
+			if(next == '=' ){
+				this.parseError("不支持赋值操作:");
+			}else if(next == c){
+				this.parseError("不支持自增自减操作:");
+			}
 			break;
 		case '=':// ==
 			if(next == '='){

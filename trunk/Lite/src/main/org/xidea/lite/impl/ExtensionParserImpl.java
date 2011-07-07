@@ -72,11 +72,13 @@ public class ExtensionParserImpl implements ExtensionParser {
 		int type = node.getNodeType();
 		if (type == 1) {
 			Node old = CURRENT_LOCAL_NODE.get();
-			CURRENT_LOCAL_NODE.set(node);
-			boolean parsed = this.parseElement((Element) node, context, chain);
-			CURRENT_LOCAL_NODE.set(old);
-			if (parsed) {
-				return;
+			try{
+				CURRENT_LOCAL_NODE.set(node);
+				if(this.parseElement((Element) node, context, chain)){
+					return;
+				}
+			}finally{
+				CURRENT_LOCAL_NODE.set(old);
 			}
 		}else if (type == Node.DOCUMENT_NODE) {//9
 			if (this.parseDocument((Document)node, context, chain)) {
@@ -168,14 +170,6 @@ public class ExtensionParserImpl implements ExtensionParser {
 			if ((Boolean) rt.invoke(impl, "parseNamespace", attr, context,
 					chain)) {
 				return true;
-			}else{
-				//xmlns
-				String info = el.getAttributeNS(ParseUtil.CORE_URI, ParseUtil.CORE_INFO);
-				if(info.length() ==0 || info.indexOf("|"+attr.getName()+"|")>0){
-					return false;
-				}else{
-					return true;//自动补全的xmlns 不处理!
-				}
 			}
 		} else if (ns == null) {
 			ns = el.getNamespaceURI();

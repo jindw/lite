@@ -49,11 +49,11 @@ function parseXMLByURL(url){
     xhr.open("GET",url,false)
     xhr.send('');
     ////text/xml,application/xml...
-    var xml = /\/xml/.test(xhr.getResponseHeader("Content-Type")) && xhr.responseXML;//chrome 在content-type 为apllication/xml+xhtml时，responseXML为空
+    var xml = /\/x-lite-xml/.test(xhr.getResponseHeader("Content-Type")) && xhr.responseXML;//chrome 在content-type 为apllication/xml+xhtml时，responseXML为空
     if(xml && !getParserError(xml)){
     	return addInst(xml,xhr.responseText);
     }else{
-    	return parseXMLByText(xhr.responseText)
+    	return parseXMLByText(xhr.responseText,url)
     }
 }
 function addInst(xml,s){
@@ -93,12 +93,12 @@ function getParserError(root,depth){
 /**
  * @private
  */
-function parseXMLByText(text){
+function parseXMLByText(text,url){
 	if(!/^[\s\ufeff]*</.test(text)){
 		text = txt2xml(text);
 	}
 	try{
-	    var text2 = normalizeXML(text);
+	    var text2 = normalizeXML(text,url);
     	var errors = [];
     	var xml = parseFromString(text2,errors);
     	if(errors.length == 0 && xml){
@@ -116,65 +116,158 @@ function parseXMLByText(text){
     }
     
 }
-var defaultEntryMap = {"&nbsp;": "&#160;","&copy;": "&#169;"};
+
+var defaultEntryMap = {"&nbsp;": "&#160;","&copy;": "&#169;",'&':'&amp;','<':'&lt;'};
+var defaultNSMap = {
+	"xmlns:f": "http://www.xidea.org/lite/core",
+	"xmlns:c": "http://www.xidea.org/lite/core",
+	"xmlns": "http://www.w3.org/1999/xhtml"
+};
+function normalizeTag(source,tag,uri,pos){
+	var i = 0;
+	source = source.replace(/(\b[a-zA-Z_][\w_\-\.]*(?:\:[\w_][\w_\-\.]*)?)(?:\s*=\s*('[^']*'|\"[^\"]*\"|\$\{[^}]+\}|[^\s>]+))?/g,function(a,n,v){
+		if(i==0){
+			i++;
+			tag.name = n;
+			tag.attrMap = {};
+			tag.nsMap = {};
+			return n;
+		}else{
+			if(!v){
+				v = '"'+n+'"'
+			}else{
+				v = v.replace(/&\w+;|&#\d+;|&#x[\da-fA-F]+;|[&<]/g,function(a){
+					if(a in defaultEntryMap){
+    					return defaultEntryMap[a];
+    				}else{
+    					return a;
+    				}
+				});
+				var c = v.charAt();
+				if(c != '"' && c != '\''){
+					v= '"'+v.replace(/"/g,'&#34;')+'"';
+				}
+			}
+			tag.attrMap[n]=v;
+			if(/xmlns(?:\:.*)?/.test(n)){
+				tag.nsMap[n] = v;
+			}
+			return n+'='+v
+		}
+	});
+	for(var n in (tag.parentTag && tag.parentTag.nsMap || defaultNSMap)){
+		tag.nsMap[n] = 1;
+	}
+	for(var n in tag.attrMap){
+		if(/^xmlns\:/.test(n)){
+			tag.nsMap[n] = 1;
+		}
+	}
+	for(var n in tag.attrMap){
+		if(n == 'xmlns'){
+			pos += '|xmlns';
+		}else if(/^(?:xml|xmlns)\:$/.test(n)){
+			var n2 = n.replace(/^(.+)\:.+$/,"xmlns:$1");
+			if( n2 !=n){
+				pos += '|'+n;
+				if(!(n2 in tag.nsMap)){
+					$log.error("missed namespace:"+n2,source);
+				}
+			}
+		}
+	}
+	pos+='|';
+	var i = source.length-1;
+	if(source.charAt(i-1) == '/'){
+		i--;
+	}
+	var begin = source.substring(0,i);
+	var end = source.substring(i);
+	if(!tag.parentTag){
+		pos+='@'+uri;
+		for(var n in defaultNSMap){
+			if(!(n in tag.attrMap)){
+				begin = begin+' ' +n+'="'+defaultNSMap[n]+'"'
+			}
+		}
+	}
+	return begin+' c:__i="'+pos+'"'+end;
+}
 function normalizeXML(text,uri){
 	var lines = text.split(/\r\n?|\n/);
 	var text2 = lines.join('\n');
 	var lineIndex = 0;
 	var lineBase = 0;
-	var isFirst = true;
-	function addPosition(tag,offset){
+	var rootCount = 0;
+	var tag = null;
+	var leaf = {
+		'meta':1,'link':1,'img':1,'br':1,'hr':1,'input':1};
+	
+	function getPositionAttr(offset){
 		while(lineBase+ lines[lineIndex].length<=offset){
 			lineBase+= lines[lineIndex].length+1;
 			lineIndex++;
 		}
 		offset -= lineBase;
 		var pos = lineIndex+','+offset
-		if(isFirst){
-			
-		}
-		return tag.replace(/<[\w\-\.\:]+/,"$& c:__i='"+pos+"'");
+		return pos;
 	}
-	//一个比较全面的容错（没有行号数据）。
-    text2 = text2.replace(
-    	/(<!--[\s\S]+?-->|<!\[CDATA\[[\s\S]+?\]\]>)|(<\/?(?:meta|link|img|br|hr|input)\b[^>]*)>|(&\w+;|&#\d+;|&#x[\da-fA-F]+;|<\/|<[\w_][\w_\-\.]*(?:\:[\w_][\w_\-\.]+)?(?:\s+[\w_]|\s*\/?>))|[&<]/g
-    	,function(a,commcdata,leafTag,entryTag,offset){
-    		if(commcdata ){
+	//一个比较全面的容错。
+	text2 = text2.replace(
+    	//<\?\w+[\s\S]+?\?>|<!(?:[^>\[]+\[[\s\S]+\]>|[^>]+>)|<!\[CDATA\[[\s\S]+?\]\]>|<!--[\s\S]+?-->
+    	//
+    	///<[a-zA-Z_][\w_\-\.]*(?:\:[\w_][\w_\-\.]+)?(?:\s+[\w_](?:'[^']*'|\"[^\"]*\"|\$\{[^}]+\}|[^>'"$]+|[\$])*>|\s*\/?>)/,
+    	//
+    	//<\/[\w_][\w_\-\.]*(?:\:[\w_][\w_\-\.]+)?>
+    	//
+    	//&\w+;|&#\d+;|&#x[\da-fA-F]+;|[&<]
+    	/(<\?\w+[\s\S]+?\?>|<!(?:[^>\[]+\[[\s\S]+\]>|[^>\[]+>)|<!\[CDATA\[[\s\S]+?\]\]>|<!--[\s\S]+?-->)|<([a-zA-Z_][\w_\-\.]*(?:\:[\w_][\w_\-\.]+)?)(?:\s+[\w_](?:'[^']*'|\"[^\"]*\"|\$\{[^}]+\}|[^>'"$]+|\$)*>|\s*\/?>)|(<\/[\w_][\w_\-\.]*(?:\:[\w_][\w_\-\.]+)?>)|&\w+;|&#\d+;|&#x[\da-fA-F]+;|[&<]/g,
+    	function(a,notTag,startTag,endTag,offset){
+    		if(notTag){
     			return a;
-    		}else if(leafTag){
-    			if(leafTag.charAt(1) == '/'){
-    				return '';
+    		}else if(startTag){
+    			if(tag == null){
+    				rootCount++;
     			}
-    			leafTag = addPosition(leafTag,offset)
-    			if(leafTag.charAt(leafTag.length-1)=='/'){
-    				return leafTag+'>';
-    			}
-    			//close leafTag
-    			return leafTag+'/>';
-    		}else if(entryTag){
-    			if(entryTag in defaultEntryMap){
-    				return defaultEntryMap[entryTag];
+    			tag = {parentTag:tag};
+    			var isClosed = false;
+    			if(/\/>$/.test(a)){
+    				isClosed = true;
     			}else{
-    				if(entryTag.charAt() == '<'){
-    					var f = entryTag.charAt(1);
-    					if(f >= '0' && f <= '9'){
-    						return "&lt;"+entryTag.substring(1);
-    					}else if(f!='/'){
-    						//tag
-    						return addPosition(a,offset)
+    				if(startTag in leaf){//leaf
+    					if(text.indexOf('</'+startTag+'>',offset)<0){
+    						isClosed = true;
+    						a = a.replace(/>$/,'/>');
+    					}else{
+    						delete leaf[startTag];
     					}
     				}
-    				return a;
     			}
-    		}else if(a=='&'){
-    			return "&amp;"
-    		}else if(a=='<'){
-    			return "&lt;"
+    			a = normalizeTag(a,tag,uri,getPositionAttr(offset));
+    			if(isClosed){
+    				tag = tag.parentTag;
+    			}
+    			return a;
+    		}else if(endTag){
+    			if(a.replace(/^<\/|>$/g,'') in leaf){
+    				return '';
+    			}
+    			if(tag == null){
+    				$log.error("未开始标签:"+a,text)
+    			}else{
+    				tag = tag.parentTag
+    			}
+    			return a;
+    		}else if(a in defaultEntryMap){
+    			return defaultEntryMap[a];
     		}
+    		return a;
     	});
-    
-	if(!text2.match(/\sxmlns\:c\b/)){
-    	text2 = text2.replace(/<[\w\-\.\:]+/,"$& xmlns:c='http://www.xidea.org/lite/core'");
+	//if(!text2.match(/\sxmlns\:c\b/)){
+    //	text2 = text2.replace(/<[\w\-\.\:]+/,"$& xmlns:c='http://www.xidea.org/lite/core'");
+	//}
+	if(rootCount>1){
+		text2 = text2.replace(/<[\w][\s\S]+/,"<c:block xmlns:c='http://www.xidea.org/lite/core'>$&</c:block>")
 	}
     return text2;
 }
@@ -317,11 +410,16 @@ function getAttribute(el,key){
 function getAttributeEL(el){
 	el = getAttribute.apply(null,arguments);
 	if(el !== null){
-		var el2 = el.replace(/^\s*\$\{([\s\S]+)\}\s*$/,"$1")
+		var el2 = el.replace(/^\s*\$\{([\s\S]*)\}\s*$/,"$1")
 		if(el == el2){
-			$log.warn("缺少表达式括弧,文本将直接按表达式返回");
+			$log.warn("缺少表达式括弧,文本将直接按表达式返回",el);
+		}else{
+			el2 = el2.replace(/^\s+|\s+$/g,'');
+			if(!el2){
+				$log.warn("表达式内容为空:",el);
+			}
+			el = el2;
 		}
-		el = el2;
 	}
 	return el;
 }

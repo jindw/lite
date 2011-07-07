@@ -68,9 +68,11 @@ function URI(path){
 	if(path instanceof URI){
 		return path;
 	}
-	path = String(path).replace(uriChars,uriReplace)
-	if(/^(?:%3c|<|#|%23)/i.test(path)){
+	if(/^\s*[<]/i.test(path)){
+		path = String(path).replace(uriChars,decodeChar)
 		return new URI("data:text/xml,"+path);
+    }else{
+		path = String(path).replace(uriChars,uriReplace)
     }
     //normalize
 	path = path.replace(/\/\.\//g,'/');
@@ -102,7 +104,6 @@ function setupURI(uri,match){
 URI.prototype = {
 	resolve:function(path){
 		path = String(path);
-		
 		if( /^\s*[#<]/.test(path) ||absURIPattern.test(path)){
 			path = new URI(path.replace(/^\s+/,''));
 			return path;
