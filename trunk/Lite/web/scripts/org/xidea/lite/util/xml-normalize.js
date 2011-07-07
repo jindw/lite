@@ -1,4 +1,4 @@
-var TAG_NAME = new RegExp("[\\w_](?:[\\w_\\-\\.\\:]*[\\w_\\-\\.])?");
+var TAG_NAME = new RegExp("[\\w_][\\w_\\-\\.]*(?:\\:[\\w_\\-\\.]+)?");
 
 	// key (= value)?
 var ELEMENT_ATTR_END = new RegExp("(?:^|\\s+)("

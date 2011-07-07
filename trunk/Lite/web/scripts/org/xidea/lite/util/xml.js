@@ -97,33 +97,86 @@ function parseXMLByText(text){
 	if(!/^[\s\ufeff]*</.test(text)){
 		text = txt2xml(text);
 	}
-	var errors = [];
 	try{
-		var xml = parseFromString(text,errors);
-		if(errors.length == 0 && xml){
+	    var text2 = normalizeXML(text);
+    	var errors = [];
+    	var xml = parseFromString(text2,errors);
+    	if(errors.length == 0 && xml){
 			return xml;
 		}
-	    var text2 = normalizeXML(text);
-	    if(text2){
-	    	var errors = [];
-	    	xml = parseFromString(text2,errors);
-	    	if(errors.length == 0 && xml){
-				return xml;
-			}
-	    }
-	    $log.error("解析xml失败:",errors.join('\n'),text);
+		var errors0 = [];
+		var xml = parseFromString(text,errors0);
+		if(errors0.length == 0 && xml){
+			//report normalizeXML bug
+			return xml;
+		}
+	    $log.error("解析xml失败:",errors.join('\n'),text2);
     }catch(e){
     	$log.error("解析xml失败:",e,text);
     }
     
 }
-function normalizeXML(text){
-	if(!text.match(/\sxmlns\:c\b/) && text.match(/\bc:\w+\b/)){
-    	var text2 = text.replace(/<[\w\-\:]+/,"$& xmlns:c='http://www.xidea.org/lite/core'");
-    	if(text2!=text){
-    		return text2;
-    	}
-    }
+var defaultEntryMap = {"&nbsp;": "&#160;","&copy;": "&#169;"};
+function normalizeXML(text,uri){
+	var lines = text.split(/\r\n?|\n/);
+	var text2 = lines.join('\n');
+	var lineIndex = 0;
+	var lineBase = 0;
+	var isFirst = true;
+	function addPosition(tag,offset){
+		while(lineBase+ lines[lineIndex].length<=offset){
+			lineBase+= lines[lineIndex].length+1;
+			lineIndex++;
+		}
+		offset -= lineBase;
+		var pos = lineIndex+','+offset
+		if(isFirst){
+			
+		}
+		return tag.replace(/<[\w\-\.\:]+/,"$& c:__i='"+pos+"'");
+	}
+	//一个比较全面的容错（没有行号数据）。
+    text2 = text2.replace(
+    	/(<!--[\s\S]+?-->|<!\[CDATA\[[\s\S]+?\]\]>)|(<\/?(?:meta|link|img|br|hr|input)\b[^>]*)>|(&\w+;|&#\d+;|&#x[\da-fA-F]+;|<\/|<[\w_][\w_\-\.]*(?:\:[\w_][\w_\-\.]+)?(?:\s+[\w_]|\s*\/?>))|[&<]/g
+    	,function(a,commcdata,leafTag,entryTag,offset){
+    		if(commcdata ){
+    			return a;
+    		}else if(leafTag){
+    			if(leafTag.charAt(1) == '/'){
+    				return '';
+    			}
+    			leafTag = addPosition(leafTag,offset)
+    			if(leafTag.charAt(leafTag.length-1)=='/'){
+    				return leafTag+'>';
+    			}
+    			//close leafTag
+    			return leafTag+'/>';
+    		}else if(entryTag){
+    			if(entryTag in defaultEntryMap){
+    				return defaultEntryMap[entryTag];
+    			}else{
+    				if(entryTag.charAt() == '<'){
+    					var f = entryTag.charAt(1);
+    					if(f >= '0' && f <= '9'){
+    						return "&lt;"+entryTag.substring(1);
+    					}else if(f!='/'){
+    						//tag
+    						return addPosition(a,offset)
+    					}
+    				}
+    				return a;
+    			}
+    		}else if(a=='&'){
+    			return "&amp;"
+    		}else if(a=='<'){
+    			return "&lt;"
+    		}
+    	});
+    
+	if(!text2.match(/\sxmlns\:c\b/)){
+    	text2 = text2.replace(/<[\w\-\.\:]+/,"$& xmlns:c='http://www.xidea.org/lite/core'");
+	}
+    return text2;
 }
 function parseFromString(text,errors){
 	try{

@@ -78,7 +78,7 @@ JSTranslator.prototype = {
 		    if(rtf){
 		    	var code = context.header + "\nreturn "+ context.body;
 		    }else{
-		    	var code = context.toString();
+		    	var code = context.toSource();//context.header +  context.body;
 		    }
 		    if(!this.name && !rtf){
 		    	new Function('return '+code);
@@ -86,7 +86,7 @@ JSTranslator.prototype = {
 		    	new Function(code);
 		    }
 	    }catch(e){
-	    	var error = $log.error("生成js代码失败:",e,code);
+	    	var error = $log.error("生成js代码失败:",e,code,context.constructor);
 	        code = "return ("+stringifyJSON(error)+');';
 	    }
     	if(!this.litePrefix){
@@ -111,6 +111,7 @@ function($_context){
  */
 function JSTranslateContext(code,name,params,defaults){
     TranslateContext.call(this,code,name,params,defaults);
+    this.forStack = [];
     this.defaults = defaults;
 }
 var GLOBAL_VAR_MAP ={
@@ -182,7 +183,7 @@ function optimizeFunction(context,functionName,refMap,callMap,params,defaults){
 			text = "\treturn "+c+';';
 		}
 	}else{
-		text = "\tvar $_out=[]\n"+text+"\treturn $_out.join('');\n";
+		text = "\tvar $_out=[]\n"+text+"\n\treturn $_out.join('');\n";
 	}
 	if(functionName){
     	try{
@@ -201,6 +202,8 @@ function PT(pt){
 		this[n]=pt[n];
 	}
 }
+
+
 PT.prototype = TranslateContext.prototype
 JSTranslateContext.prototype = new PT({
 	_appendOutput:function(){
@@ -218,7 +221,7 @@ JSTranslateContext.prototype = new PT({
     	this._lastOut = data
     },
 	stringifyEL:function (el){
-		return el?stringifyJSEL(el):null;
+		return el?stringifyJSEL(el,this):null;
 	},
 	parse:function(){
 		var code = this.code;
@@ -330,47 +333,64 @@ JSTranslateContext.prototype = new PT({
         }
         return i;
     },
+    getForName:function(){
+    	var f = this.forStack[0];
+    	return f && f[0];
+    },
+    getForAttribute:function(forName,forAttribute){
+    	var f = this.forStack[0];
+    	if(f && f[0] == forName){
+			if(forAttribute == 'index'){
+				return f[1];
+			}else if(forAttribute == 'lastIndex'){
+				return f[2];
+			}
+		}
+    },
     processFor:function(code,i){
         var item = code[i];
         var indexId = this.allocateId();
+        var lastIndexId = this.allocateId();
         var itemsId = this.allocateId();
         var itemsEL = this.stringifyEL(item[2]);
         var varNameId = item[3]; 
         //var statusNameId = item[4]; 
         var childCode = item[1];
         var forInfo = this.findForStatus(item)
-        if(forInfo.depth){
-            var previousForValueId = this.allocateId();
-        }
         //初始化 items 开始
-        this.append("var ",indexId,"=0;")
         this.append("var ",itemsId,'=',this.litePrefix,"list(",itemsEL,")");
+        this.append("var ",indexId,"=0;")
+        this.append("var ",lastIndexId," = ",itemsId,".length-1;");
         
         //初始化 for状态
-        var needForStatus = forInfo.ref || forInfo.index || forInfo.lastIndex;
-        if(needForStatus){
-            if(forInfo.depth){
-                this.append("var ",previousForValueId ,"=",FOR_STATUS_KEY,";");
-            }
-            this.append(FOR_STATUS_KEY," = {lastIndex:",itemsId,".length-1};");
+        var forRef = forInfo.ref ;
+        var forAttr = forInfo.index || forInfo.lastIndex;
+        if(forRef){
+       		var statusId = this.allocateId();
+            this.forStack.unshift([statusId,indexId,lastIndexId]);
+            this.append(statusId," = {lastIndex:",lastIndexId,"};");
+        }else if(forAttr){
+            this.forStack.unshift(['for',indexId,lastIndexId]);
         }
-        this.append("for(;",indexId,"<",itemsId,".length;",indexId,"++){");
+        this.append("for(;",indexId,"<=",lastIndexId,";",indexId,"++){");
         this.depth++;
-        if(needForStatus){
-            this.append(FOR_STATUS_KEY,".index=",indexId,";");
+        if(forRef){
+            this.append(statusId,".index=",indexId,";");
         }
         this.append("var ",varNameId,"=",itemsId,"[",indexId,"];");
         this.appendCode(childCode);
         this.depth--;
         this.append("}");
         
-        if(needForStatus && forInfo.depth){
-           this.append(FOR_STATUS_KEY,"=",previousForValueId);
-        }
+    	if(forRef){
+    		this.freeId(statusId);
+    		this.forStack.shift();
+    	}else if(forAttr){
+    		this.forStack.shift();
+    	}
+        
+        this.freeId(lastIndexId);
         this.freeId(itemsId);;
-        if(forInfo.depth){
-            this.freeId(previousForValueId);
-        }
         var nextElse = code[i+1];
         var notEnd = true;
         var elseIndex = 0;
@@ -396,7 +416,7 @@ JSTranslateContext.prototype = new PT({
         this.freeId(indexId);
         return i;
     },
-    toString:function(){
+    toSource:function(){
     	return this.header+this.body
     }
 });

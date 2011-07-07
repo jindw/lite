@@ -14,31 +14,33 @@ var NUMBER_CALL = /^(\d+)(\.\w+)$/;
 /**
  * 将某一个token转化为表达式
  */
-function stringifyJSEL(el){
+function stringifyJSEL(el,context){
 	var type = el[0];
 	if(type<=0){//value
-		return stringifyValue(el)
+		return stringifyValue(el,context)
 	}else if(getTokenParamIndex(type) ==3){//两个操作数
-		return stringifyInfix(el);
+		return stringifyInfix(el,context);
 	}else{
-		return stringifyPrefix(el);
+		return stringifyPrefix(el,context);
 	}
 	
 }
 /**
  * 翻译常量字面量
  */
-function stringifyValue(el){
+function stringifyValue(el,context){
 	var param = el[1];
 	switch(el[0]){
     case VALUE_CONSTANTS:
         return (param && param['class']=='RegExp' && param.source) || stringifyJSON(param);
     case VALUE_VAR:
     	if(param == 'for'){
-    		return FOR_STATUS_KEY;
-    	}else{
-    		return param;
+    		var f = context && context.getForName();
+    		if(f){
+    			return f;
+    		}
     	}
+    	return param;
     case VALUE_LIST:
     	return "[]";
     case VALUE_MAP:
@@ -48,11 +50,11 @@ function stringifyValue(el){
 /**
  * 翻译中缀运算符
  */
-function stringifyInfix(el){
+function stringifyInfix(el,context){
 	var type = el[0];
 	var opc = findTokenText(el[0]);
-	var value1 = stringifyJSEL(el[1]);
-	var value2 = stringifyJSEL(el[2]);
+	var value1 = stringifyJSEL(el[1],context);
+	var value2 = stringifyJSEL(el[2],context);
 	//value1 = addELQute(el,el[1],value1);
 	switch(type){
 	case OP_INVOKE:
@@ -65,6 +67,12 @@ function stringifyInfix(el){
 		if(el[2][0] == VALUE_CONSTANTS){
 			var p = getTokenParam(el[2])
 			if(typeof p == 'string'){
+				if(context && (p == 'index' || p == 'lastIndex')){
+					var forAttr = context.getForAttribute(value1,p);
+					if(forAttr){
+						return forAttr;
+					}
+				}
 				if(ID_PATTERN.test(p)){
 					return value1+'.'+p;
 				}
@@ -99,8 +107,8 @@ function stringifyInfix(el){
      */
      	//?:已经是最低优先级了,无需qute,而且javascript 递归?: 也无需优先级控制
      	var el1 = el[1];
-    	var test = stringifyJSEL(el1[1]);
-    	var value1 = stringifyJSEL(el1[2]);
+    	var test = stringifyJSEL(el1[1],context);
+    	var value1 = stringifyJSEL(el1[2],context);
     	return test+'?'+value1+":"+value2;
 	}
 	value1 = addELQute(el,el[1],value1)
@@ -110,10 +118,10 @@ function stringifyInfix(el){
 /**
  * 翻译前缀运算符
  */
-function stringifyPrefix(el){
+function stringifyPrefix(el,context){
 	var type = el[0];
 	var el1 = el[1];
-	var value = stringifyJSEL(el1);
+	var value = stringifyJSEL(el1,context);
 	var param = getTokenParam(el);
 	value = addELQute(el,el1,null,value)
     var opc = findTokenText(type);

@@ -117,7 +117,19 @@ var Core = {
 			 	processExtends.call(this,root);
 			 	return true;
 			 }else{
-			 	var attr = root.getAttributeNodeNS(ns,"extends") || root.getAttributeNodeNS(ns,"extend");
+			 	try{
+			 		var attr = root.getAttributeNodeNS(ns,"extends") || root.getAttributeNodeNS(ns,"extend");
+			 	}catch(e){
+			 		var attrs = root.attributes;
+			 		var i = attrs.length-1;
+			 		while(i-->0){
+			 			var a = attrs.item(i);
+			 			if(a.namespaceURI == ns && /^(?:w+\:)?extends?$/.test(a.nodeName)){
+			 				attr = a;
+			 				break;
+			 			}
+			 		}
+			 	}
 			 	if(attr != null){
 			 		processExtends.call(this,attr);
 			 		return true;
@@ -438,10 +450,7 @@ function _parseDefName(name){
 			
 		}
 		
-		return {"name":n,
-			"params":params,
-			"defaults":defaults,
-			};
+		return {"name":n,"params":params,"defaults":defaults};
 	}else{
 		return {"name":n}
 	}

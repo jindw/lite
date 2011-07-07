@@ -50,6 +50,11 @@
 		
 		<void method='put'>
 			<!-- test for optimize -->
+			<string><![CDATA[<c:for var='a' list='${[1,2]}'><c:for var='a2' list='${[1]}'>${for.index}</c:for></c:for>]]></string>
+			<string><![CDATA[00]]></string>
+		</void>
+		<void method='put'>
+			<!-- test for optimize -->
 			<string><![CDATA[
 			<c:for var="value00" list="${[0]}">
 				<c:for var="value10" list="${[1,2]}">

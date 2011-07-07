@@ -66,7 +66,6 @@ function getNodePosition(node){
 	case 9://Node.DOCUMENT_NODE:
 		el = node.documentElement;
 	}
-		
 	if (el != null) {
 		var doc = el.ownerDocument;
 		var pos = el.getAttributeNS(CORE_URI, CORE_INFO);
@@ -76,6 +75,8 @@ function getNodePosition(node){
 				pos = pos.substring(0,p);
 			}
 			pos = "@"+node.nodeName+"["+pos+"]";
+		}else{
+			pos = "@"+node.nodeName;
 		}
 		if(doc!=null){
 			var path = doc.documentURI;
@@ -220,9 +221,12 @@ ExtensionParser.prototype = {
 		try{
 //			var es = 0;
 			var type = node.nodeType;
+//			var es = 1;
 			if(type === 1){
+//				var es = 1.1;
 				var old = nodeLocal.get();
 				nodeLocal.set(node);
+//				var es = 1.2;
 				try{
 					if(!this.parseElement(node,context,chain)){
 						chain.next(node);
@@ -230,8 +234,11 @@ ExtensionParser.prototype = {
 				}finally{
 					nodeLocal.set(old);
 				}
+//				var es = 1.3;
 			} else if(type === 9){
+//				var es = 9.1;
 				if(!this.parseDocument(node,context,chain)){
+//				var es = 9.2;
 					chain.next(node);
 				}
 			}else if(type === 2){//attribute
@@ -239,7 +246,7 @@ ExtensionParser.prototype = {
 					if(this.parseNamespace(node,context,chain)){
 						return;
 					}
-//					es = 3;
+//					var es = 3;
 					var el = node.ownerElement;
 					//ie bug.no ownerElement
 					var ns = node.namespaceURI || el && el.namespaceURI||'';
@@ -248,7 +255,7 @@ ExtensionParser.prototype = {
 					if(n == '__i' && ns == CORE_URI){
 						return true;
 					}
-//					es=4;
+//					var es=4;
 					if(ext && ext.onMap){
 						if(fn in ext.onMap){
 							var fn = ext.onMap[n];
@@ -261,7 +268,7 @@ ExtensionParser.prototype = {
 				}
 				chain.next(node)
 			}else{
-//				es += 10;
+//				var es = 10;
 				chain.next(node)
 			}
 		}catch(e){

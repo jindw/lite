@@ -46,7 +46,7 @@ PHPTranslator.prototype = {
 		context.encoding = "UTF-8";
 	    context.htmlspecialcharsEncoding = context.encoding ;
 		context.parse();
-		var code = context.toString();
+		var code = context.toSource();
 	    return '<?php'+code ;
 		
 	}
@@ -365,7 +365,7 @@ PHPTranslateContext.prototype = new TCP({
         this.freeId(indexAutoId);
         return i;
     },
-    toString:function(){
+    toSource:function(){
     	return this.out.join('');
     }
 });
