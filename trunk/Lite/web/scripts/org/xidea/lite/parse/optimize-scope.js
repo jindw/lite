@@ -124,6 +124,7 @@ function vistLite(context,code){
 				break;
 			case FOR_TYPE:
 			    enterFor(context,item);
+			    addVar(context,item[3]);
 				vistLite(context,item[1]);
 				exitFor(context);
 				break;

@@ -266,8 +266,11 @@ class OptimizeUtil {
 					break;
 				case IF_TYPE:
 				case ELSE_TYPE:
+					walkEL(bi, TokenImpl.toToken((List<Object>) item.get(2)));
+					break;
 				case FOR_TYPE:
 					walkEL(bi, TokenImpl.toToken((List<Object>) item.get(2)));
+					bi.addVar((String) item.get(3));
 					break;
 				// case PLUGIN_TYPE:
 				// case BREAK_TYPE:

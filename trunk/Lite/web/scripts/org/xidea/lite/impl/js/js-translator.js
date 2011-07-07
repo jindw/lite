@@ -17,8 +17,11 @@ var INIT_SCRIPT = String(function(){
 	/**
 	 * @public
 	 */
-	function lite__init(n,$_context){
-		return $_context && n in $_context?$_context[n]:n in lite__g?lite__g[n]:this[n]
+	function lite__init(n,c){
+		if(n in c)return c[n];
+		if(n in lite__g)return lite__g[n];
+		return this[n];
+		//return n in c ? c[n]:n in lite__g?lite__g[n]:this[n]
 	}
 	/**
 	 * @public
