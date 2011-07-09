@@ -321,7 +321,7 @@ JSONTokenizer.prototype = {
 	skipSpace:function(nextChar) {
 		while (this.start < this.end) {
 			var c = this.value.charAt(this.start);
-			if (c == ' ' || c =='\t') {
+			if (c == ' ' || c =='\t' || c == '\r' || c == '\n') {
 			      this.start++;
 			}else{
 			    break;

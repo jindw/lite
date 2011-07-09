@@ -89,6 +89,6 @@ function utf8Replacer(c){
 }
 function encode(data){
 	data = data && data.replace(/[\u0080-\uFFFF]/g,utf8Replacer)||''
-	data = window.btoa(data) ;
+	data = btoa(data) ;
 	return encodeURIComponent(data);
 }

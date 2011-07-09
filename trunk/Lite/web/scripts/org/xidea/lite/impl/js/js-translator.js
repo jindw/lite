@@ -5,32 +5,20 @@
  * @author jindw
  * @version $Id: template.js,v 1.4 2008/02/28 14:39:06 jindw Exp $
  */
-
+//lite__def/lite__g/
+//lite__list
+//lite__encode
+//lite__init(0,name,fn);//set
+//lite__init(1,name,context);//get
+//lite__init(2,obj);//encode
+//lite__init(3,list);//tolist
 var FOR_STATUS_KEY = '$__for';
 var INIT_SCRIPT = String(function(){
-	/**
-	 * @public
-	 */
-	function lite__def(name,fn){
-		lite__g[name] = fn;
-	}
-	/**
-	 * @public
-	 */
-	function lite__init(n,c){
-		if(n in c)return c[n];
-		if(n in lite__g)return lite__g[n];
-		return this[n];
-		//return n in c ? c[n]:n in lite__g?lite__g[n]:this[n]
-	}
-	/**
-	 * @public
-	 */
-	function lite__list(source,result,type) {
-		if (result){
-			if(type == "number" && source>0){
-				while(source--){
-					result[source] = source+1;
+	var lite__impl = function(g){
+		function toList(source,result,type) {
+			if(type == "number"){
+				while(source >0){
+					result[--source] = source+1;
 				}
 			}else{
 				for(type in source){
@@ -38,25 +26,29 @@ var INIT_SCRIPT = String(function(){
  				}
 			}
 			return result;
+    	}
+		function replacer(c,a){return a || "&#"+c.charCodeAt(0)+";"}
+		return function(type,arg1,arg2){
+			if(type==3){
+				//list
+				return arg1 instanceof Array ? arg1
+					: toList(arg1,[],typeof arg1);
+			}else if(type ==2){
+				//encode
+				return String(arg1).replace(arg2||/[<&"]/g,replacer);
+			}else if(type){
+				//get
+				return (arg2 && arg1 in arg2 ? arg2:arg1 in g?g:this)[arg1];
+			}else{
+				//set
+				g[arg1]=arg2;
+			}
 		}
-		return source instanceof Array ? source
-				: lite__list(source, [],typeof source);
-    }
-	/**
-	 * lite_encode(v1)
-	 * lite_encode(v1,/<&/g)
-	 * lite_encode(v1,/[<&"]|(&(?:[a-z]+|#\d+);)/ig)
-	 * @public
-	 */
-	function lite__encode(text,exp){
-		return String(text).replace(exp||/[<&"]/g,lite__r);
+	}({});
+	with({}){
+		alert(lite__impl);
 	}
-	function lite__r(c,a){return a || "&#"+c.charCodeAt(0)+";"}
-	var lite__g = {};
-	//避免被压缩
-	with(""){
-		alert([lite__def,lite__init,lite__list,lite__encode,lite__g,lite__r])
-	}
+
 }).replace(/^[^{]+\{\s*|\bwith\b[\s\S]*$/g,'').replace(/\s*([^\w_$\s]+)\s*/g,'$1')
 /**
  * JS原生代码翻译器实现
@@ -76,7 +68,7 @@ JSTranslator.prototype = {
 	    	//var result =  stringifyJSON(context.toList())
 	        //var list = context.toList();
 		    var context = new JSTranslateContext(list,this.name,this.params,this.defaults);
-		    context.litePrefix = this.litePrefix || "lite__";
+		    context.liteImpl = this.liteImpl || "lite__impl";
 		    context.parse();
 		    if(rtf){
 		    	var code = context.header + "\nreturn "+ context.body;
@@ -92,8 +84,8 @@ JSTranslator.prototype = {
 	    	var error = $log.error("生成js代码失败:",e,code,context.constructor);
 	        code = "return ("+stringifyJSON(error)+');';
 	    }
-    	if(!this.litePrefix){
-    		result.push("if(!window.lite__def){",INIT_SCRIPT,"}");
+    	if(!this.liteImpl){
+    		result.push("if(!window.",context.liteImpl,"){",INIT_SCRIPT,"}");
     	}
 	    result.push(code.replace(/<\/script>/g,'<\\/script>'));
 	    return result.join("\n");
@@ -149,7 +141,7 @@ function optimizeFunction(context,functionName,refMap,callMap,params,defaults){
 	copy(callMap,map);
 	for(var n in map){
 		if(!((n in GLOBAL_VAR_MAP) ||( n in GLOBAL_DEF_MAP))){
-			result.push('\tvar ',n,'=',context.litePrefix,'init("',n,'"',(params?'':',$_context'),');\n');
+			result.push('\tvar ',n,'=',context.liteImpl,'(1,"',n,'"',(params?'':',$_context'),');\n');
 		}
 	}
 	//(a,b,c=3,d=4)
@@ -243,7 +235,7 @@ JSTranslateContext.prototype = new PT({
 	        this.appendCode(def.code);
 	        var content = optimizeFunction(this,'',refMap,callMap,def.params,def.defaults);
 	        this.depth--;
-	        fs.push(this.litePrefix,"def('",n,"',",content,");\n");
+	        fs.push(this.liteImpl,"(0,'",n,"',",content,");\n");
 	    }
 	    this.header = fs.join('');
 	    
@@ -268,7 +260,7 @@ JSTranslateContext.prototype = new PT({
     	this._appendOutput(this.stringifyEL(item[1]))
     },
     appendXT:function(item){
-        this._appendOutput(this.litePrefix,"encode(",this.stringifyEL(item[1]),")")
+        this._appendOutput(this.liteImpl,"(2,",this.stringifyEL(item[1]),")")
     },
     appendXA:function(item){
         //[7,[[0,"value"]],"attribute"]
@@ -282,12 +274,12 @@ JSTranslateContext.prototype = new PT({
         if(attributeName){
             this.append("if(",testId,"!=null){");
             this.depth++;
-            this._appendOutput("' ",attributeName,"=\"',",this.litePrefix,"encode("+testId+"),'\"'");
+            this._appendOutput("' ",attributeName,"=\"',",this.liteImpl,"(2,"+testId+"),'\"'");
             this.depth--;
             this.append("}");
             this.freeId(testId);
         }else{
-        	this._appendOutput(this.litePrefix,"encode(",value,")")
+        	this._appendOutput(this.liteImpl,"(2,",value,")")
         }
     },
     appendVar:function(item){
@@ -303,7 +295,7 @@ JSTranslateContext.prototype = new PT({
         this.freeId(bufbak);
     },
     appendEncodePlugin:function(item){
-        this._appendOutput(this.litePrefix,'encode(',this.stringifyEL(item[1]),',/[<&"]|(&(?:[a-z]+|#\d+);)/ig);')
+        this._appendOutput(this.liteImpl,'(2,',this.stringifyEL(item[1]),',/(&(?:[a-z]+|#\d+);)|[<&"]/ig);')
     },
     processIf:function(code,i){
         var item = code[i];
@@ -361,7 +353,7 @@ JSTranslateContext.prototype = new PT({
         var childCode = item[1];
         var forInfo = this.findForStatus(item)
         //初始化 items 开始
-        this.append("var ",itemsId,'=',this.litePrefix,"list(",itemsEL,")");
+        this.append("var ",itemsId,'=',this.liteImpl,"(3,",itemsEL,")");
         this.append("var ",indexId,"=0;")
         this.append("var ",lastIndexId," = ",itemsId,".length-1;");
         

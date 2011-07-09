@@ -1,4 +1,4 @@
-this.addScript("xml.js",['loadXML','selectNodes'
+this.addScript("xml.js",['loadXML','selectNodes','getOwnerElement'
 					,'getAttribute','getAttributeEL']
 				,["URI",'org.xidea.jsidoc.util:XMLHttpRequest'])
 this.addScript('el.js','findParamMap')

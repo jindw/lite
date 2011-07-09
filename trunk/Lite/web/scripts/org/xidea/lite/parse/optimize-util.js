@@ -128,7 +128,7 @@ ClientPlugin.prototype = {
 			}
 		}
 		if(!this.first){
-			jst.litePrefix = jst.litePrefix || 'lite__';
+			jst.liteImpl = jst.liteImpl || 'lite__impl';
 		}
 		var result = jst.translate(result.concat(this.children));
 		this.children.length = 0;

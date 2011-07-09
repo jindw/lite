@@ -21,50 +21,6 @@ var FOR_KEY = "for";
 var PLUGIN_DEFINE = "org.xidea.lite.DefinePlugin";
 
 /**
- * @public
- */
-function lite__def(name,fn){
-	lite__g[name] = fn||this[name];
-}
-/**
- * @public
- */
-function lite__init(n,$_context){
-	return $_context && n in $_context?$_context[n]:n in lite__g?lite__g[n]:this[n]
-}
-/**
- * @public
- */
-function lite__list(source,result,type) {
-	if (result){
-		if(type == "number" && source>0){
-			while(source--){
-				result[source] = source+1;
-			}
-		}else{
-			for(type in source){
-				result.push(type);
-			}
-		}
-		return result;
-	}
-	return source instanceof Array ? source
-			: lite__list(source, [],typeof source);
-}
-/**
- * lite_encode(v1)
- * lite_encode(v1,/<&/g)
- * lite_encode(v1,/[<&"]|(&(?:[a-z]+|#\d+);)/ig)
- * @public
- */
-function lite__encode(text,exp){
-	return String(text).replace(exp||/[<&"]/g,function (c,a){
-			return a || "&#"+c.charCodeAt(0)+";"
-		});
-}
-
-var lite__g = {};
-/**
  * 如果传入的是json 数组 或者是函数对象，直接作为编译结果初始化，否则，作为源代码编译。
  * @param data 模板源代码或者编译结果
  * @param parser 解析器对象，或者类名（通过jsi导入），可选
@@ -92,9 +48,9 @@ function TemplateImpl(data,parseContext,runAsLiteCode){
         }else{
 	        try{
 		    	var translator = new JSTranslator("");
-		    	translator.litePrefix = "lite__"
+		    	translator.liteImpl = "lite__impl"
 		    	var code = translator.translate(parseContext.toList(),true);
-		    	var fcode = "function(lite__def,lite__init,lite__list,lite__encode){"+code+"}"
+		    	var fcode = "function(lite__impl){"+code+"}"
 	            data =  window.eval("["+(fcode||null)+"][0]");
 	            data.toString=function(){//_$1 encodeXML
 	                return code;
@@ -103,7 +59,7 @@ function TemplateImpl(data,parseContext,runAsLiteCode){
 	        	$log.error("翻译结果错误：",e,code)
 	            throw e;
 	        }
-    		this.data = data(lite__def,lite__init,lite__list,lite__encode);
+    		this.data = data(lite__impl);
         }
         this.compileData = data;
     }

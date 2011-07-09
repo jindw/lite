@@ -2,7 +2,7 @@
 	xmlns:x="http://www.xidea.org/lite/example"
 	xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-CN" dir="ltr">
 	<head>
-		<title>函数支持清单</title>
+		<title>内置函数清单（PHP/Java）</title>
 	</head>
 	<body>
 	
@@ -91,6 +91,16 @@
 			"lite_member_reverse($obj)"
 
 		],
+		"Date":[
+			"lite_member_getFullYear($d)",
+			"lite_member_getYear($d)",
+			"lite_member_getMonth($d)",
+			"lite_member_getDay($d)",
+			"lite_member_getDate($d)",
+			"lite_member_getHours($d)",
+			"lite_member_getMinutes($d)",
+			"lite_member_getSeconds($d)"
+		],
 		"Number":[
 			"lite_member_toFixed($obj, $digits=0)",
 			"lite_member_toString($obj, $radix=10)",
@@ -102,16 +112,6 @@
 		"JSON":[
 			"lite_member_stringify($obj, $arg, $from_enc=NULL)",
 			"lite_member_parse($obj,$arg,$from_enc=NULL){"
-		],
-		"Date":[
-			"lite_member_getFullYear($d)",
-			"lite_member_getYear($d)",
-			"lite_member_getMonth($d)",
-			"lite_member_getDay($d)",
-			"lite_member_getDate($d)",
-			"lite_member_getHours($d)",
-			"lite_member_getMinutes($d)",
-			"lite_member_getSeconds($d)"
 		],
 		"Math":[
 			"lite_member_max($obj)",
@@ -163,7 +163,7 @@
 				<tr><th>方法名</th><th>参考标准</th></tr>
 				<c:for var="item" list="${memberMap[ownerName]}">
 				<tr style="${item.style}" title="${item.title}">
-					<td><a title="${item.impl}" href0="el-function-source.html#lite_member_${item.name}">${item.name}</a></td>
+					<td><a title="${item.title || item.impl}" href0="el-function-source.html#lite_member_${item.name}">${item.name}</a></td>
 					<!--
 					<td><a style="${item.style}" title="${item.title}" href="http://www.xidea.org/project/jsidoc/js1.5/${globalsRefMap[item.type]}">${item.type}</a></td>
 					-->
@@ -180,12 +180,18 @@
 			</div>
 		</c:for>
 	</c:client>
-	<ul>
-		<label for="name">
+	<ul style="clean:both">
+		<label for="name" style="float:left">
 			<strong>输入过滤条件：</strong>
+			<input id="name" oninput="showFilter(this.value)" onpropertychange="showFilter(this.value)"/>
 		</label>
-		<input id="name" oninput="showFilter(this.value)" onpropertychange="showFilter(this.value)"/>
-		<div style="opacity:0.3;float:right;position2:absolute;top:-20">
+		
+		<table border="1" style="float:left;">
+		<tr><td>图例：</td><td style="text-decoration:line-through;background-color:#960;" title="影响上下文函数">不支持！</td>
+		<td style="text-decoration:line-through;background-color:#cc6;" title="不常用函数">暂不支持。</td></tr></table>
+		<div style="float:right;">
+			<p>Lite 按照JavaScript语法规则，<br/>在PHP，Java等其他环境下实现的内置模板函数。</p>
+		<div  style="opacity:0.3;">
 			<x:code>
 <![CDATA[
 //函数调用表达式示例:
@@ -194,12 +200,12 @@ ${JSON.stringify(object)}
 ${[a,b,c].concat(d,[e,f]).join('\n')}
 ${str.substring(1,2)}
 ]]>
-			</x:code>
+			</x:code></div>
 			</div>
 		<hr/>
-		<div id="functionTable"/>
+		
 	</ul>
-
+	<div id="functionTable"/>
 	<script>//<![CDATA[
 	function showFilter(key){
 		var memberMap2 = {};
@@ -215,13 +221,16 @@ ${str.substring(1,2)}
 				var impl = ms[i];
 				var prefix = impl.match(/^[?\-]/);
 				var style = null,title = null;
+				var n = impl.replace(/lite_member_(\w+).*/,'$1')
 				if(prefix){
 					prefix = prefix[0];
 					impl = impl.substr(1);
 					title=prefix=='?'?"尚未实现":"副作用函数,不予实现!!!";
 					style ="text-decoration:line-through;background-color:"+ (prefix=='?'?'#cc6;':'#960;')
+				}else if(n == 'reverse'){
+					title="可控副作用函数,需要先调用concat复制本身，例如：concat().reverse()!!!";
+					style ="background-color:yellow;"
 				}
-				var n = impl.replace(/lite_member_(\w+).*/,'$1')
 				if(!key || tm || n.toLowerCase().indexOf(key)>=0){
 					_members.push({style:style,title:title,'type':m,name:n,impl:impl});
 				}
@@ -232,13 +241,14 @@ ${str.substring(1,2)}
 			var impl = globals[i];
 			var prefix = impl.match(/^[?\-]/);
 			var style = null,title = null;
+			var n = impl.replace(/lite__(\w+).*/,'$1')
 			if(prefix){
 				prefix = prefix[0];
 				impl = impl.substr(1);
 				title=prefix=='?'?"尚未实现":"副作用函数,不予实现!!!";
 				style ="text-decoration:line-through;background-color:"+ (prefix=='?'?'#cc6;':'#960;')
 			}
-			var n = impl.replace(/lite__(\w+).*/,'$1')
+			
 			if(!key || n.toLowerCase().indexOf(key)>=0){
 				_globals.push({style:style,title:title,name:n,impl:impl});
 			}

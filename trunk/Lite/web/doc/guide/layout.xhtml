@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:c="http://www.xidea.org/lite/core"
 	xmlns:x="http://www.xidea.org/lite/example">
 	<head>
@@ -14,8 +14,9 @@
 		<c:extension namespace="http://www.w3.org/1999/xhtml">
 			//<![CDATA[
     function parseA(node){//连接简写，没有文本的时候，直接使用href作为文本节点
-    	if(node.firstChild == null){
-    		node.appendChild(node.ownerDocument.createTextNode(node.getAttribute('href')));
+    	var href = node.getAttribute('href');
+    	if(href && node.firstChild == null){
+    		node.appendChild(node.ownerDocument.createTextNode(href));
     	}
     	this.next(node);
     }
@@ -30,14 +31,17 @@ var style = 'border: 1px solid #DFECF1;'
     			+'background-color:#EEE;border:1px solid #222;';
 function parseCode(node){
     //代码高亮组件
-    var text = String(node.textContent);
+    var text = String(node.textContent || node.text);
     text = text.replace(/^\s*[\r\n]+|[\r\n]+\s*$/g,'');
     while(/^(?:[\t ].*[\r\n]*)*$/.test(text)){
     	text = text.replace(/^[\t ](.*)/mg,'$1');
     }
     
 	//this.append("<pre style='"+style+"'>"+text.replace(/[<>&]/g,function(c){return "&#"+c.charCodeAt(0)+';'})+"</pre>");
-	this.append("<div class='code'><script>renderSource("+uneval(text)+");</script></div>")
+	text = text.replace(/[\\"\r\n]/g,function(a){
+		return (0x10000 + a.charCodeAt()).toString(16).replace('1','\\u')
+	})
+	this.append("<div class='code'><script>renderSource(\""+(text)+"\");<\/script></div>")
 };
 //]]>
 		</c:extension>

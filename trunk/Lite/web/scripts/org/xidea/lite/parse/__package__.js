@@ -6,7 +6,7 @@ this.addScript('config.js','ParseConfig'
 				,['org.xidea.lite.util:URI']);
 this.addScript('extension-parser.js','ExtensionParser'
 				,0
-				,['Extension','Core']);
+				,['Extension','Core','org.xidea.lite.util:getOwnerElement']);
 this.addScript('extension.js','Extension'
 				,0
 				,[

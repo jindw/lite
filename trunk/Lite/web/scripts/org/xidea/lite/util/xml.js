@@ -41,6 +41,7 @@ function txt2xml(source){
 			source.replace(/^\ufeff?#.*[\r\n]*/, "").replace(/]]>/, "]]]]><![CDATA[>")+
 			"]]></out>";
 }
+
 /**
  * @private
  */
@@ -224,6 +225,9 @@ function normalizeXML(text,uri){
     	/(<\?\w+[\s\S]+?\?>|<!(?:[^>\[\-]+\[[\s\S]+\]>|[^>\[\-]+>)|<!\[CDATA\[[\s\S]+?\]\]>|<!--[\s\S]+?-->)|<([a-zA-Z_][\w_\-\.]*(?:\:[\w_][\w_\-\.]+)?)(?:\s+[\w_](?:'[^']*'|\"[^\"]*\"|\$\{[^}]+\}|[^>'"$]+|\$)*>|\s*\/?>)|(<\/[\w_][\w_\-\.]*(?:\:[\w_][\w_\-\.]+)?>)|&\w+;|&#\d+;|&#x[\da-fA-F]+;|[&<]/g,
     	function(a,notTag,startTag,endTag,offset){
     		if(notTag){
+    			if(a.charAt(2) == 'd'){
+    				a = a.replace(/^<!doctype\b/,'<!DOCTYPE');
+    			}
     			return a;
     		}else if(startTag){
     			if(tag == null){
@@ -282,8 +286,9 @@ function parseFromString(text,errors){
 	        }
 	    }else{
 	        //["Msxml2.DOMDocument.6.0", "Msxml2.DOMDocument.3.0", "MSXML2.DOMDocument", "MSXML.DOMDocument", "Microsoft.XMLDOM"];
-	        var doc = new ActiveXObject("Msxml2.DOMDocument.3.0");
+	        var doc = new ActiveXObject("Msxml2.DOMDocument");
 	        //var doc = new ActiveXObject("Microsoft.XMLDOM");
+	        doc.validateOnParse = false;
 	        doc.loadXML(text);
 	        if (doc.parseError.errorCode!=0){
 	        	//todo....
@@ -422,4 +427,17 @@ function getAttributeEL(el){
 		}
 	}
 	return el;
+}
+function getOwnerElement(attr){
+	try{
+		if(attr.ownerElement){
+			return attr.ownerElement;
+		}
+		var es = attr.selectNodes("..");
+		if(es.length == 1){
+			return es.item(0);
+		}
+	}catch(e){
+		return null;
+	}
 }

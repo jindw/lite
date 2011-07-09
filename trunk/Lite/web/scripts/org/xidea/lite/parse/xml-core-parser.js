@@ -531,7 +531,7 @@ function beforeInclude(attr){
 		this.append("<strong style='color:red'>没找到包含节点："+this.currentURI+ attr.value+"</strong>");
 	}else{
 		var attrs = this.selectNodes(doc, xpath);
-		var element = attr.ownerElement;
+		var element = attr.ownerElement || getOwnerElement(attr);
 		//element.removeAttributeNode(attr)
 		for(var i = attrs.length;i--;){
 			var a = attrs.item(i);
@@ -607,7 +607,7 @@ function parseInclude(node){
 
 function processExtends(node){
 	var oldConfig = this.getAttribute("#extends");
-	var el = node.nodeType == 1?node:node.ownerElement;
+	var el = node.nodeType == 1?node:node.ownerElement|| getOwnerElement(node);
 	var root = el == el.ownerDocument.documentElement;
 	var extendsConfig = {blockMap:{},parse:false,root:root};
 	if(oldConfig){
@@ -651,7 +651,7 @@ function processExtends(node){
 function processBlock(node){
 	var extendsConfig = this.getAttribute("#extends");
 	var value = getAttribute(node,"name","id");
-	var childNodes = node.nodeType == 1?node.childNodes:node.ownerElement;
+	var childNodes = node.nodeType == 1?node.childNodes:node.ownerElement||getOwnerElement(node);
 		
 	if(extendsConfig){//
 		var blockMap = extendsConfig.blockMap;
@@ -687,7 +687,7 @@ function parseChildRemoveAttr(context,node){
 	if(node.nodeType == 1){//child
 		context.parse(node.childNodes)
 	}else if(node.nodeType == 2){//attr
-		var el = node.ownerElement;
+		var el = node.ownerElement||getOwnerElement(attr);
 		el.removeAttributeNode(node);
 		context.parse(el);//||node.selectSingleNode('parent::*'));
 	}else {//other

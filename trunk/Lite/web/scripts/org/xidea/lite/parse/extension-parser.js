@@ -55,20 +55,27 @@ $log.filters.push(function(msg){
 	}
 	return msg;
 });
+function getNodeInfo(el){
+	try{
+		return el.getAttributeNS(CORE_URI, CORE_INFO);
+	}catch(e){
+		return el.getAttribute("c:"+CORE_INFO);
+	}
+}
 function getNodePosition(node){
 	switch(node.nodeType){
 	case 1://Node.ELEMENT_NODE:
 		var el = node;
 		break;
 	case 2://Node.ATTRIBUTE_NODE:
-		el =node.ownerElement;
+		el =node.ownerElement|| getOwnerElement(node);
 		break;
 	case 9://Node.DOCUMENT_NODE:
 		el = node.documentElement;
 	}
 	if (el != null) {
+		var pos = getNodeInfo(node);
 		var doc = el.ownerDocument;
-		var pos = el.getAttributeNS(CORE_URI, CORE_INFO);
 		if(pos){
 			var p = pos.indexOf('|');
 			if(p>0){
@@ -157,24 +164,6 @@ ExtensionParser.prototype = {
 			currentExtension = ce;
 		}
 	},
-	parseNamespace:function(attr,context,chain){
-		if(/^xmlns(?:\:\w+)?/.test(attr.name)){
-			var v = attr.value;
-			var fp = this.packageMap[v||''];
-			if(fp && fp.namespaceParser){
-				fp.namespaceParser.call(chain,attr);
-				return true;
-			}
-			var info = attr.ownerElement.getAttributeNS(CORE_URI,CORE_INFO)
-			if(info.length ==0 || info.indexOf("|"+attr.name+"|")>0){
-				return false;
-			}else{
-				return true;//自动补全的xmlns 不处理!
-			}
-			//$log.error(v,fp.namespaceParser);
-		}
-		return false;
-	},
 	parseComment:function(comm, context,chain){
 		return true;
 	},
@@ -259,12 +248,12 @@ ExtensionParser.prototype = {
 		}
 	},
 	parseAttribute:function(node,context,chain){
+		if(this.parseNamespace(node,context,chain)){
+			return true;
+		}
 		try{
-			if(this.parseNamespace(node,context,chain)){
-				return true;
-			}
-//					var es = 3;
-			var el = node.ownerElement;
+//			var es = 3;
+			var el = node.ownerElement|| getOwnerElement(node);
 			//ie bug.no ownerElement
 			var ns = node.namespaceURI || el && el.namespaceURI||'';
 			var ext = this.packageMap[ns];
@@ -272,7 +261,7 @@ ExtensionParser.prototype = {
 			if(n == '__i' && ns == CORE_URI){
 				return true;
 			}
-//					var es=4;
+//			var es=4;
 			if(ext && ext.onMap){
 				if(fn in ext.onMap){
 					var fn = ext.onMap[n];
@@ -283,6 +272,33 @@ ExtensionParser.prototype = {
 		}catch(e){
 			$log.error("属性扩展解析异常：",e)
 		}
+	},
+	parseNamespace:function(attr,context,chain){
+		try{
+			var es = 0;
+			if(/^xmlns(?:\:\w+)?/.test(attr.name)){
+				var v = attr.value;
+				var fp = this.packageMap[v||''];
+				if(fp && fp.namespaceParser){
+					fp.namespaceParser.call(chain,attr);
+					return true;
+				}
+				var es = 1;
+				var el = attr.ownerElement|| getOwnerElement(attr);
+				var es = 2;
+				var info = getNodeInfo(el);
+				var es  = 3;
+				if(info.length ==0 || info.indexOf("|"+attr.name+"|")>0){
+					return false;
+				}else{
+					return true;//自动补全的xmlns 不处理!
+				}
+				//$log.error(v,fp.namespaceParser);
+			}
+		}catch(e){
+			$log.error("名称空间解析异常：",es,e)
+		}
+		return false;
 	},
 	parseText:function(text,start,context){
 		var text2 = text.substring(start+1);
@@ -301,7 +317,7 @@ ExtensionParser.prototype = {
 					if(node && node.lookupNamespaceURI){
 						var ns = node.lookupNamespaceURI(prefix);
 						if (ns == null) {
-							var doc = node.getOwnerDocument();
+							var doc = node.ownerDocument;
 							ns = doc && doc.documentElement.lookupNamespaceURI(prefix);
 						}
 					}
