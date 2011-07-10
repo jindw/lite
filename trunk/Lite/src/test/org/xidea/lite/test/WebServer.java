@@ -26,10 +26,16 @@ public class WebServer {
 		
 		
 		File webroot = new File(new File(WebServer.class.getResource("/").toURI()),"../../").getCanonicalFile().getAbsoluteFile();
+		File jsiClasses = new File(webroot,"../../JSI2/web/WEB-INF/classes").getCanonicalFile();
+		File jsaClasses = new File(webroot,"../../JSA/classes").getCanonicalFile();
 		File targetClasses = new File(webroot,"../../FileServer/web/WEB-INF/classes").getCanonicalFile();
 		//webroot = new File("D:\\workspace\\Lite2\\build\\dest\\php-example-20110706");
 		
-		URLClassLoader cl = new URLClassLoader(new URL[]{targetClasses.toURI().toURL()});
+		URLClassLoader cl = new URLClassLoader(new URL[]{
+				jsiClasses.toURI().toURL(),
+				jsaClasses.toURI().toURL(),
+				targetClasses.toURI().toURL()},
+				ClassLoader.getSystemClassLoader());
 		Class<?> app = cl.loadClass("org.jside.webserver.test.WebServer");
 		Method method = app.getMethod("main", String[].class);
 		method.invoke(null, (Object)(new String[]{webroot.toString()}));
