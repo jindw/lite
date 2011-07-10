@@ -269,7 +269,7 @@ JSTranslateContext.prototype = new PT({
         var attributeName = item.length>2 && item[2];
         var testId = this.allocateId(value);
         if(testId != value){
-            this.append(testId,"=",value);
+            this.append("var ",testId,"=",value);
         }
         if(attributeName){
             this.append("if(",testId,"!=null){");
@@ -363,7 +363,7 @@ JSTranslateContext.prototype = new PT({
         if(forRef){
        		var statusId = this.allocateId();
             this.forStack.unshift([statusId,indexId,lastIndexId]);
-            this.append(statusId," = {lastIndex:",lastIndexId,"};");
+            this.append("var ",statusId," = {lastIndex:",lastIndexId,"};");
         }else if(forAttr){
             this.forStack.unshift(['for',indexId,lastIndexId]);
         }

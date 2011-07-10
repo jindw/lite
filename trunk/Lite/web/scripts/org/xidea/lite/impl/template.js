@@ -39,7 +39,19 @@ function TemplateImpl(data,parseContext,runAsLiteCode){
 //        	if(data!=data2){
 //        		data = data2;
 //        	}else{
-        	data = parseContext.createURI(data);
+			if(/^(?:\w+?\:\/\/|\/).*$/.test(data)){
+	    	    var pos = data.indexOf('#');
+	    	    if(pos>0){
+	    	    	var path = data.substring(0,pos);
+	    	    	var xpath = data.substring(pos+1)
+        			data = parseContext.loadXML(path);
+        			data = selectNodes(data,xpath);
+	    	    }else{
+	    	    	data = parseContext.loadXML(data);
+	    	    }
+			}else{
+				data = parseContext.loadXML(data);
+			}
 //        	}
         }
         parseContext.parse(data);
@@ -53,12 +65,13 @@ function TemplateImpl(data,parseContext,runAsLiteCode){
 		    	var fcode = "function(lite__impl){"+code+"}"
 	            data =  window.eval("["+(fcode||null)+"][0]");
 	            data.toString=function(){//_$1 encodeXML
-	                return code;
+	                return fcode;
 	            }
 	        }catch(e){
 	        	$log.error("翻译结果错误：",e,code)
 	            throw e;
 	        }
+	        $log.warn(data+'')
     		this.data = data(lite__impl);
         }
         this.compileData = data;

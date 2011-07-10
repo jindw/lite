@@ -17,7 +17,7 @@ function loadXML(uri,root){
     	    //alert([data,doc.documentElement.tagName])
     	}else{
     		//print(url)
-    		if(/^(?:https?\:\/\/|\/).*$/.test(uri)){
+    		if(/^(?:\w+?\:\/\/|\/).*$/.test(uri)){
 	    	    var pos = uri.indexOf('#')+1;
 	    	    var xpath = pos && uri.substr(pos);
 	    	    var uri = pos?uri.substr(0,pos-1):uri;
@@ -362,13 +362,13 @@ if(!(window.DOMParser && window.XMLHttpRequest || window.ActiveXObject)){
     var pu = Packages.org.xidea.lite.impl.ParseUtil;
     parseXMLByURL = parseXMLByText = function(url){
     	//TODO:data for text
-    	url = $JSI.loadText&&$JSI.loadText(url) || url;
         if(/^[\s\ufeff]*</.test(url)){
         	return pu.loadXML(url);
         }else{
         	var pos = url.indexOf('#');
         	var xpath = pos>0 && url.substr(pos+1);
         	var url = pos>0?url.substr(0,pos):url;
+    		url = $JSI.loadText&&$JSI.loadText(url) || url;
         	var doc = pu.loadXML(url);
         	if(xpath){
 		        doc = selectNodes(doc,xpath);

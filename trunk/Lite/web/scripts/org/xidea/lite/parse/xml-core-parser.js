@@ -687,7 +687,7 @@ function parseChildRemoveAttr(context,node){
 	if(node.nodeType == 1){//child
 		context.parse(node.childNodes)
 	}else if(node.nodeType == 2){//attr
-		var el = node.ownerElement||getOwnerElement(attr);
+		var el = node.ownerElement||getOwnerElement(node);
 		el.removeAttributeNode(node);
 		context.parse(el);//||node.selectSingleNode('parent::*'));
 	}else {//other

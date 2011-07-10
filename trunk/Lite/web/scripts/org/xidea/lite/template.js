@@ -22,8 +22,8 @@ function replacer(c,a){return a || "&#"+c.charCodeAt(0)+";"}
 function lite__impl(type,arg1,arg2){
 	if(type==3){
 		//list
-		return source instanceof Array ? source
-			: toList(source,[],typeof source);
+		return arg1 instanceof Array ? arg1
+			: toList(arg1,[],typeof arg1);
 	}else if(type ==2){
 		//encode
 		return String(arg1).replace(arg2||/[<&"]/g,replacer);
@@ -43,7 +43,7 @@ function lite__impl(type,arg1,arg2){
  * @public
  */
 function Template(data,parseContext,runAsLiteCode){
-    if(":debug"){
+    if(!(data instanceof Function)){
     	var impl = $import("org.xidea.lite.impl:TemplateImpl",{});
         return new impl(data,parseContext,runAsLiteCode)
     }else{
