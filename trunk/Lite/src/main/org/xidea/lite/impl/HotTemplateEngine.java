@@ -84,7 +84,7 @@ public class HotTemplateEngine extends TemplateEngine {
 		try {
 			if(buildFromCode(path) != null){
 				URI uri = toCompiedURI(path);
-				return loadText(ParseUtil.openStream(uri));
+				return ParseUtil.loadTextAndClose(ParseUtil.openStream(uri));
 			}
 			ParseContext context = createParseContext(path);
 			List<Object> items = parse(path, context);
@@ -146,7 +146,7 @@ public class HotTemplateEngine extends TemplateEngine {
 		if(in == null){
 			return null;
 		}
-		String litecode = loadText(in);
+		String litecode = ParseUtil.loadTextAndClose(in);
 		try {
 			ArrayList<File> files = new ArrayList<File>();
 			List<Object> list = JSONDecoder.decode(litecode);

@@ -116,7 +116,9 @@ public class ParseConfigImpl implements ParseConfig {
 	protected void reset() {
 		if (lastModified != this.lastModified()) {
 			if (config != null) {
-				reset(new InputSource(config.toString()));
+				if(checkFile == null || checkFile.exists()){
+					reset(new InputSource(config.toString()));
+				}
 			}
 			this.lastModified = this.lastModified();
 		}

@@ -66,7 +66,7 @@ public class TemplateEngine {
 
 	}
 
-	protected String loadText(InputStream in)
+	private String loadText(InputStream in)
 			throws IOException {
 		try {
 			InputStreamReader reader = new InputStreamReader(in,"UTF-8");
