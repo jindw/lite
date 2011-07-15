@@ -8,7 +8,6 @@
 var Core = {
 	xmlns : function(){},
 	seek:function(text){
-		
 		var end = findELEnd(text,0);
 		if(end>0){
 			try{
@@ -530,7 +529,7 @@ function beforeInclude(attr){
 	if(doc==null){
 		this.append("<strong style='color:red'>没找到包含节点："+this.currentURI+ attr.value+"</strong>");
 	}else{
-		var attrs = this.selectNodes(doc, xpath);
+		var attrs = selectByXPath(doc, xpath);
 		var element = attr.ownerElement || getOwnerElement(attr);
 		//element.removeAttributeNode(attr)
 		for(var i = attrs.length;i--;){
@@ -592,7 +591,7 @@ function parseInclude(node){
 		}else{
 		    if(xpath!=null){
 		    	var d = doc;
-		        doc = selectNodes(doc,xpath);
+		        doc = selectByXPath(doc,xpath);
 		        //alert([url,xpath,new XMLSerializer().serializeToString(d),doc.length])
 		    }
 		    if(selector != null){

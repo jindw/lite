@@ -36,9 +36,9 @@ public class XMLParserTest {
 		ParseContext context =LiteTestUtil.buildParseContext(url); 
 		org.w3c.dom.Document doc = ParseUtil.parse(url, context);
 		
-		NodeList node = ParseUtil.selectNodes(doc,"//xhtml:body");
+		NodeList node = ParseUtil.selectByXPath(doc,"//xhtml:body");
 		Assert.assertTrue(node.getLength()==1);
 	}
-
-
+	
+	
 }

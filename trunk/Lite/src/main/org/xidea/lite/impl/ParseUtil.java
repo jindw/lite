@@ -139,7 +139,7 @@ public class ParseUtil {
 	}
 
 
-	public static InputStream openStream(URI uri) {
+	public static InputStream openStream(URI uri) throws IOException{
 		try {
 			if ("data".equalsIgnoreCase(uri.getScheme())) {
 				String data = uri.getRawSchemeSpecificPart();
@@ -340,7 +340,7 @@ public class ParseUtil {
 
 
 
-	public static NodeList selectNodes(Node currentNode, String xpath)
+	public static NodeList selectByXPath(Node currentNode, String xpath)
 			throws XPathExpressionException {
 		Document doc;
 		if (currentNode instanceof Document) {

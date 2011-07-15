@@ -44,7 +44,7 @@ public class ExampleTest {
 
 	public String getText(Node doc, String xpath)
 			throws XPathExpressionException {
-		NodeList node = ParseUtil.selectNodes(doc, xpath);
+		NodeList node = ParseUtil.selectByXPath(doc, xpath);
 		if(node == null || node.getLength()<1){
 			return null;
 		}
@@ -108,7 +108,7 @@ public class ExampleTest {
 		Document doc = context.loadXML(menuURL);
 		String defaultContext = getText(doc, "/root/context");
 
-		NodeList nodes = ParseUtil.selectNodes(doc, "/root/entry");
+		NodeList nodes = ParseUtil.selectByXPath(doc, "/root/entry");
 		System.out.println(nodes);
 		for (int i = 0;i<nodes.getLength();i++) {
 			Element child = (Element) nodes.item(i);

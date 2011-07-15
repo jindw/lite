@@ -1,4 +1,4 @@
-package org.xidea.lite.tools;
+package org.xidea.lite.tools.util;
 
 import java.util.ArrayList;
 import java.util.HashMap;

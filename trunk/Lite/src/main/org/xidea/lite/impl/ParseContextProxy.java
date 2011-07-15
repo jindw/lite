@@ -104,7 +104,7 @@ abstract public class ParseContextProxy implements ParseContext {
 		}
 	}
 
-	public final InputStream openStream(URI uri) {
+	public final InputStream openStream(URI uri) throws IOException {
 		if("lite".equals(uri.getScheme())){
 			String path = uri.getPath();
 			if(path.startsWith("/")){

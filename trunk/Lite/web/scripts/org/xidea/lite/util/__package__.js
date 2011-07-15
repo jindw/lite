@@ -1,7 +1,10 @@
-this.addScript("xml.js",['loadXML','selectNodes','getOwnerElement'
+this.addScript("xml.js",['loadXML','selectByXPath','getOwnerElement'
 					,'getAttribute','getAttributeEL']
-				,["URI",'org.xidea.jsidoc.util:XMLHttpRequest'])
-this.addScript('el.js','findParamMap')
+				,['normalizeXML',"URI",'org.xidea.jsidoc.util:XMLHttpRequest'])
+this.addScript('el.js','findParamMap');
+this.addScript('xml-normalize.js','normalizeXML');
+
+
 this.addScript('json.js',["stringifyJSON","parseJSON"]);
 
 this.addScript('kv.js',["setByKey","getByKey","removeByKey"]);

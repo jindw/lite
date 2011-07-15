@@ -94,7 +94,7 @@ public interface ParseContext extends ResultContext, ParseConfig, ParserHolder {
 	 */
 	public URI createURI(String file);
 
-	public InputStream openStream(URI url);
+	public InputStream openStream(URI url) throws IOException;
 
 	/**
 	 * 装载指定XML文档。

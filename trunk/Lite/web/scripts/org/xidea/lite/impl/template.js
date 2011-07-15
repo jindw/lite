@@ -45,7 +45,7 @@ function TemplateImpl(data,parseContext,runAsLiteCode){
 	    	    	var path = data.substring(0,pos);
 	    	    	var xpath = data.substring(pos+1)
         			data = parseContext.loadXML(path);
-        			data = selectNodes(data,xpath);
+        			data = selectByXPath(data,xpath);
 	    	    }else{
 	    	    	data = parseContext.loadXML(data);
 	    	    }

@@ -4,6 +4,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringReader;
+import java.lang.reflect.Field;
+import java.net.URI;
 import java.util.Collections;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -14,6 +16,12 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.xidea.el.json.JSONEncoder;
+import org.xidea.jsi.JSIRuntime;
+import org.xidea.jsi.impl.RuntimeSupport;
+import org.xidea.lite.impl.HotTemplateEngine;
+import org.xidea.lite.impl.ParseConfigImpl;
+import org.xidea.lite.impl.ParseContextImpl;
 import org.xidea.lite.impl.ParseUtil;
 import org.xidea.lite.impl.XMLNormalizeImpl;
 import org.xml.sax.InputSource;
@@ -96,4 +104,51 @@ public class XMLNormalizeTest {
 		return result;
 	}
 
+	@Test
+	public void testXMLTime() throws SAXException, Exception{
+		String source = ParseUtil.loadTextAndClose(XMLNormalizeTest.class.getResourceAsStream("index.xhtml"));
+		Field f = RuntimeSupport.class.getDeclaredField("testRhino");
+		f.setAccessible(true);
+		f.set(null,false);
+		JSIRuntime rs = RuntimeSupport.create();
+		Object rtv = null;
+		System.out.println(rs);
+		rs.eval("$import('org.xidea.lite.util:normalizeXML')");
+		rs.eval("this.xml = ("+JSONEncoder.encode(source)+")");
+		//String code = "normalizeXML("+JSONEncoder.encode(source)+",'')";
+		String code = "normalizeXML(this.xml,'')";
+		long java=0,js=0;
+		int i = 0;
+		while(i-->0){
+		long l1 = System.currentTimeMillis();
+		String result = impl.normalize(source,"index.xhtml");
+		long l2 = System.currentTimeMillis();
+		rtv = rs.eval(code);
+		long l3 = System.currentTimeMillis();
+
+		System.out.println(java+=l2-l1);
+		System.out.println(js+=l3-l2);
+		}
+		System.out.println();
+		System.out.println(java);
+		System.out.println(js);
+		ParseConfigImpl config = new ParseConfigImpl(URI.create("classpath:///org/xidea/lite/parser/impl/xml/test/"), null);
+
+		ParseContextImpl p = new ParseContextImpl(config, "/index.xhtml");
+		p.parse(p.createURI("/index.xml"));
+		p = new ParseContextImpl(config, "/index.xhtml");
+		p.parse(p.createURI("/index.xhtml"));
+
+		p = new ParseContextImpl(config, "/index.xhtml");
+		p.parse(p.createURI("/index.xhtml"));
+		p = new ParseContextImpl(config, "/index.xhtml");
+		p.parse(p.createURI("/index.xhtml"));
+		p = new ParseContextImpl(config, "/index.xhtml");
+		p.parse(p.createURI("/index.xhtml"));
+		long l1 = System.currentTimeMillis();
+		rs.eval(JSONEncoder.encode(source));
+		long l2 = System.currentTimeMillis();
+		System.out.println(l2-l1);
+		//System.out.println(rtv);
+	}
 }

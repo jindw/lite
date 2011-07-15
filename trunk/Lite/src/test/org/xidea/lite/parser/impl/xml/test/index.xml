@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+	<!--STATUS OK-->
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:f="http://firekylin.my.baidu.com/ns/2010">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+		<title>FireKylin首页</title>
+		<link rel="stylesheet" href="./styles/firekylin.css" />
+		<script src="/scripts/=com.baidu.firekylin.web:WebStart" />
+	</head>
+	<body>
+	<script>
+	var z= {
+$xx : 'xx'
+}
+	
+	</script>
+		<f:strip value="true">
+			<h2
+				style="display:none;position:absolute;top:0;left:35%;
+				z-index:99999;
+				width:300px;height:20px;display:inline;padding:10px;
+				-moz-border-radius: 6px;background:yellow;color:red">
+				模板技术交流HI群：1177519
+			</h2>
+		</f:strip>
+		<div id="wrapper">
+			<div style="z-index:2;position:absolute;right:0;top:0;display:none">
+				<select
+					onchange="document.cookie='locale='+this.options[this.selectedIndex].value;location.reload();">
+					<f:var name="langMap"
+						value='${
+							{
+								"zh_CN":"简体中文",
+								"zh_TW":"繁体中文",
+								"en":"English"
+							}
+						}' />
+					<option f:for="key:langMap" value="${key}">${langMap[key]}
+					</option>
+				</select>
+			</div>
+			<img id="logo" src="/images/logo.png" alt="logo" />
+			<ul id="navigator">
+				<c:for items="${navigator.concat().reverse()}" var="single">
+					<c:if test="${for.index==for.lastIndex}">
+						<li>
+							<a class="current" href="${single.link}">${single.text}</a>
+						</li>
+					</c:if>
+					<c:else>
+						<li>
+							<a href="${single.link}" title="${single.title}">${single.text}</a>
+						</li>
+					</c:else>
+				</c:for>
+			</ul>
+			<div id="focus">
+				<div id="preface">
+					<c:out value="${preface}" />
+					<div style="position:absolute;bottom:0;right:40px">
+						<a href="/blog/?page_id=68">更多...</a>
+					</div>
+				</div>
+				<span id='startIEContainer'></span>
+				<div id="serverDev" title="最新测试版">
+					<a onclick="return startup()" href="/webstart/ds-dev.jnlp">
+						<span>启动调试服务器</span>
+					</a>
+				</div>
+				<div id="server" title="Alpha 版">
+					<a onclick="return startup()" href="/webstart/ds-alpha.jnlp">
+						<span>启动调试服务器</span>
+					</a>
+				</div>
+				<f:client name="downloadJava">
+					<div id="downloadJava">
+						<a
+							href='http://jdl.sun.com/webapps/getjava/BrowserRedirect?locale=zh&amp;host=java.com'>
+							<span>下载Java6</span>
+						</a>
+					</div>
+				</f:client>
+				<f:client name="startIE">
+					<object
+						codeBase="http://java.sun.com/update/1.5.0/jinstall-1_5_0_05-windows-i586.cab"
+						classid="clsid:5852F5ED-8BF4-11D4-A245-0080C6F74284" height="0"
+						width="0">
+						<param name="app" value="/webstart/ds.jnlp" />
+						<param name="back" value="false" />
+					</object>
+				</f:client>
+				<script>
+<![CDATA[
+var supportJava5 = WebStart.checkVersion("1.5");
+var startup = function(){
+	 return true;
+}
+
+if(supportJava5){//支持
+}else if(supportJava5 === null){//可能支持
+}else{//不支持
+	var server = document.getElementById('server');
+	server.title = "您的机器好像并不支持Java5+";
+	server.style.opacity = "0.3";
+	server.style.filter = "alpha(opacity=30)";
+	
+	var startup = function(){
+		document.write(downloadJava({}));
+		if(WebStart.checkVersion("1.5")!==false){
+			startIE('','startIEContainer'); 
+			return true;
+		}else{
+			if(confirm("您的机器好像并不支持Java5+，是否开始Java WebStart安装？\n")){
+				startIE('','startIEContainer'); 
+				return true;
+			}else{
+				return false;
+			}
+    	}
+    }
+}
+]]>
+				</script>
+			</div>
+			<div class="item">
+				<h3>平台功能</h3>
+				<ul>
+					<li><a>支持本地调试服务器开发</a></li>
+					<li><a>支持自动文件同步、增量编译、整站编译</a></li>
+					<li><a>支持自定义静态文件编译扩展</a></li>
+					<li><a>支持自定义模板语法扩展</a></li>
+				<!--
+					<c:for items="${article}" var="single">
+						<li>
+							<a title="${single.title}" href="${single.link}">${single.title}</a>
+						</li>
+					</c:for>-->
+				</ul>
+			</div>
+			<div class="item">
+				<h3>模板功能</h3>
+				<ul>
+					<li><a>前端模板与后端模板集成统一</a> </li>
+					<li><a>语法严谨，从编码的源头控制安全问题。</a>  </li>
+					<li><a>语法更智能、安全、自动化  </a></li>
+					<li><a>不作恶，基于大家熟悉的已有标准  </a></li>
+					<li><a>更高的性能，有利于语法优化的设计。</a>  </li>
+				<!--  
+					<c:for items="${update}" var="single">
+						<li>
+							<a title="${single.title}" href="${single.link}">${single.title}</a>
+							<span class="time">${single.date||''}</span>
+						</li>
+					</c:for>
+					-->
+				</ul>
+				<!--  
+				<div align="right">
+					<a href="/svn/trunk/FireKylin/log/changelog.txt">more...</a>
+				</div>-->
+			</div>
+			<div class="item" style="margin-right:0;">
+				<h3>工具功能</h3>
+				<ul>
+					<li><a>自动JS/CSS 合并压缩、JS语法检查</a> </li>
+					<li><a>自动静态资源MD5散列</a> </li>
+					<li><a>自动资源地址替换</a> </li>
+					<li><a>自动CSS Sprite</a> </li>
+				<!-- 
+					<c:for items="${roadmap}" var="single">
+						<li>
+							<a title="${single.title}" href="/trac/firekylin/milestone/${single.link}">${single.title}</a>
+							<span class="time">${single.date||''}</span>
+						</li>
+					</c:for>
+					-->
+				</ul>
+			</div>
+
+			<div id="productshow">
+				<c:for items="${customer}" var="single">
+					<a title="${single.title}" href="${single.link}" target="_blank">
+						<img src="${single.icon||'/images/unknow-logo.gif'}" />
+					</a>
+				</c:for>
+			</div>
+			<div id="members">
+				联系方式：
+				<c:for items="${member}" var="single">
+					<a href="mailto:${single.email}">${single.name}</a>
+				</c:for>
+			</div>
+			<div id="copyright">&copy;2010
+				FireKylin
+			</div>
+		</div>
+	</body>
+</html>

@@ -50,6 +50,8 @@ public class ParseConfigImpl implements ParseConfig {
 	protected File checkFile;
 	private List<Group> groups = new ArrayList<Group>();
 
+	private transient Map<String, Group> cached = new java.util.WeakHashMap<String, Group>();
+
 	public ParseConfigImpl(URI root, URI config) {
 		this.root = root;
 		this.config = config;
@@ -60,55 +62,44 @@ public class ParseConfigImpl implements ParseConfig {
 		}
 	}
 
-
 	public URI getRoot() {
 		return root;
 	}
+
 	public final Collection<URI> getResources() {
 		Collection<URI> result = new ArrayList<URI>();
-		if(config!=null){
+		if (config != null) {
 			result.add(config);
 		}
 		return result;
 	}
 
 	private Group find(String path, boolean defaultRoot) {
-		for (Group f : this.groups) {
-			if (f.match(path)) {
-				return f;
+		this.reset();
+		Group g = cached.get(path);
+		if (g == null) {
+			for (Group f : this.groups) {
+				if (f.match(path)) {
+					g = f;
+					break;
+				}
 			}
+			if (g == null && defaultRoot) {
+				g = this.groups.get(this.groups.size() - 1);
+			}
+			cached.put(path, g);
 		}
-		if (defaultRoot) {
-			return this.groups.get(this.groups.size() - 1);
-		} else {
-			return null;
-		}
+		return g;
 	}
 
 	public Map<String, List<String>> getExtensions(String path) {
-		this.reset();
 		return find(path, true).extensionMap;
 	}
 
 	public Map<String, String> getFeatureMap(String path) {
-		this.reset();
 		return find(path, true).featureMap;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.xidea.lite.parser.DecoratorMapperI#getDecotatorPage(java.lang.String)
-	 */
-//	public String getDecotatorPage(String path) {
-//		this.reset();
-//		Group g = find(path, false);
-//		if (g != null) {
-//			return g.featureMap.get(ParseContext.FEATURE_CONFIG_LAYOUT);
-//		}
-//		return null;
-//	}
 	private long lastModified() {
 		return checkFile == null ? 0 : checkFile.lastModified();
 	}
@@ -116,7 +107,7 @@ public class ParseConfigImpl implements ParseConfig {
 	protected void reset() {
 		if (lastModified != this.lastModified()) {
 			if (config != null) {
-				if(checkFile == null || checkFile.exists()){
+				if (checkFile == null || checkFile.exists()) {
 					reset(new InputSource(config.toString()));
 				}
 			}
@@ -130,18 +121,17 @@ public class ParseConfigImpl implements ParseConfig {
 					.newDocumentBuilder().parse(source);
 			reset(doc);
 		} catch (Exception e) {
-			log.fatal("装饰配置解析失败:" , e);
+			log.fatal("装饰配置解析失败:", e);
 			reset((Document) null);
 		}
 	}
 
 	protected void reset(Document doc) {
 		JSIRuntime rt = ParseUtil.getJSIRuntime();
-		Object parseConfig = rt
-				.eval("(function(doc){var om = {};" +
-						"$import('org.xidea.lite.parse:parseConfig',om);"+
-						"$import('org.xidea.lite.util.stringifyJSON',om);"+
-						"return om.stringifyJSON(om.parseConfig(doc));})");
+		Object parseConfig = rt.eval("(function(doc){var om = {};"
+				+ "$import('org.xidea.lite.parse:parseConfig',om);"
+				+ "$import('org.xidea.lite.util.stringifyJSON',om);"
+				+ "return om.stringifyJSON(om.parseConfig(doc));})");
 		String json = (String) rt.invoke(null, parseConfig, doc);
 		List<Map<String, Object>> groups = JSONDecoder.decode(json);
 		List<Group> groups2 = new ArrayList<Group>();
@@ -187,7 +177,7 @@ public class ParseConfigImpl implements ParseConfig {
 		}
 
 		private Pattern buildMatch(String includes) {
-			return Pattern.compile(includes == null?"^$":includes);
+			return Pattern.compile(includes == null ? "^$" : includes);
 		}
 
 	}
