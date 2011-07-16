@@ -1,11 +1,12 @@
 package org.xidea.lite.impl;
 
-import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -24,6 +25,7 @@ import org.xidea.lite.parse.TextParser;
  */
 public class ParseContextImpl extends ParseContextProxy implements ParseContext {
 	private static final long serialVersionUID = 1L;
+	private static final Log log = LogFactory.getLog(ParseContextImpl.class);
 	private static NodeParser<?>[] DEFAULT_PARSER_LIST = { new TextNodeParser(),new DefaultXMLNodeParser(),null};
 	
 	private ParseChain topChain;
@@ -122,15 +124,7 @@ public class ParseContextImpl extends ParseContextProxy implements ParseContext 
 					this.setCurrentURI(uri);
 					Document doc = this.loadXML(uri);
 					if (doc == null) {
-						InputStream in = this.openStream(uri);
-						try {
-							topChain.next(in);
-						} finally {
-							try {
-								in.close();
-							} catch (Exception e) {
-							}
-						}
+						log.error("文档装载失败！");
 					} else {
 						topChain.next(doc);
 					}

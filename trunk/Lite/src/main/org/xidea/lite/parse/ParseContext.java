@@ -1,7 +1,6 @@
 package org.xidea.lite.parse;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
@@ -15,7 +14,7 @@ import org.xml.sax.SAXException;
 /**
  * @see ParseContextImpl
  */
-public interface ParseContext extends ResultContext, ParseConfig, ParserHolder {
+public interface ParseContext extends ResultContext, ParserHolder {
 	public String NS_CORE = "http://www.xidea.org/lite/core";
 	// 默认值：link|input|meta|img|br|hr
 //	public String FEATURE_HTML_LEAF = "http://www.xidea.org/lite/features/html-leaf";
@@ -71,7 +70,6 @@ public interface ParseContext extends ResultContext, ParseConfig, ParserHolder {
 	 * @return
 	 */
 	public int getTextType();
-//	public void setTextType(int textType);
 	/**
 	 * 是否保留空白（默认为false）
 	 * @return
@@ -94,11 +92,10 @@ public interface ParseContext extends ResultContext, ParseConfig, ParserHolder {
 	 */
 	public URI createURI(String file);
 
-	public InputStream openStream(URI url) throws IOException;
-
 	/**
 	 * 装载指定XML文档。
-	 * 
+	 * loadXML 一般不会设计为采用{@link ParseContext#loadText(URI)} 的结果，
+	 * 因为xml的编码有自己的规范。
 	 * @param uri
 	 * @return
 	 * @throws SAXException
@@ -113,19 +110,15 @@ public interface ParseContext extends ResultContext, ParseConfig, ParserHolder {
 	 * @throws IOException
 	 */
 	public String loadText(URI uri) throws IOException;
-
-	
-	public ParseContext createNew();
 	/**
 	 * 记录一下编译上下文特征变量，该对象不可被修改
 	 * 
-	 * @param features
-	 *            {url,value}
 	 */
 	public String getFeature(String key);
 
 	/**
 	 * 只读，外部不允许修改
+	 * @return featureMap {url,value}
 	 */
 	public Map<String, String> getFeatureMap();
 }

@@ -1,6 +1,8 @@
 package org.xidea.lite.impl;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,6 +22,7 @@ import org.xidea.jsi.JSIRuntime;
 import org.xidea.lite.parse.ParseConfig;
 import org.xidea.lite.parse.ParseContext;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 /**
  * <pre>
@@ -182,4 +185,47 @@ public class ParseConfigImpl implements ParseConfig {
 
 	}
 
+	/**
+	 * 如果file相于根目录（/path/...），以base作为根目录处理 否则以parentURI，或者base作为parent直接new
+	 * URL处理。
+	 * 
+	 * @param file
+	 * @param parentURI
+	 * @see org.xidea.lite.impl.ParseContextImpl#createURI
+	 * @return
+	 */
+	protected final InputStream openStream(URI uri) throws IOException {
+		if("lite".equals(uri.getScheme())){
+			String path = uri.getPath();
+			if(path.startsWith("/")){
+				path = path.substring(1);
+			}
+			uri = this.getRoot().resolve(path);
+		}
+		return ParseUtil.openStream(uri);
+	}
+
+
+	public final String loadText(URI uri) throws IOException {
+		return ParseUtil.loadTextAndClose(this.openStream(uri),null);
+	}
+
+	public final Document loadXML(URI uri) throws SAXException, IOException {
+		try{
+
+			String text = ParseUtil.loadXMLTextAndClose(this.openStream(uri));
+			String id = uri.toString();
+			text = ParseUtil.normalize(text, id);
+			return ParseUtil.loadXMLBySource(text, id);
+		}catch (SAXException e) {
+			log.error("XML 解析失败："+uri,e);
+			throw e;
+		}catch (IOException e) {
+			log.error("模板读取失败："+uri,e);
+			throw e;
+		}catch (RuntimeException e) {
+			log.error("XML装载失败："+uri,e);
+			throw e;
+		}
+	}
 }

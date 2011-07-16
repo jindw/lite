@@ -47,7 +47,7 @@ public class XMLNormalizeTest {
 	}
 	@Test
 	public void testFile() throws FileNotFoundException, IOException, SAXException{
-		String s = norm(ParseUtil.loadTextAndClose(new FileInputStream("D:\\workspace\\FireSite\\web\\index.xhtml")));
+		String s = norm(ParseUtil.loadTextAndClose(new FileInputStream("D:\\workspace\\FireSite\\web\\index.xhtml"),null));
 		s = norm("<html xmlns:f=\"http://firekylin.my.baidu.com/ns/2010\"><head>\n"+
 "<title f:block=\"title\">for</title></head><body><f:include path=\"i18n-test-inc.xhtml\"/></body></html>"
 );
@@ -106,7 +106,7 @@ public class XMLNormalizeTest {
 
 	@Test
 	public void testXMLTime() throws SAXException, Exception{
-		String source = ParseUtil.loadTextAndClose(XMLNormalizeTest.class.getResourceAsStream("index.xhtml"));
+		String source = ParseUtil.loadTextAndClose(XMLNormalizeTest.class.getResourceAsStream("index.xhtml"),null);
 		Field f = RuntimeSupport.class.getDeclaredField("testRhino");
 		f.setAccessible(true);
 		f.set(null,false);

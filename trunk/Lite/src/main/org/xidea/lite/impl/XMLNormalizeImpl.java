@@ -3,7 +3,9 @@ package org.xidea.lite.impl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,8 +31,8 @@ public class XMLNormalizeImpl {
 					+ ")(?:\\s*=\\s*('[^']*'|\"[^\"]*\"|\\w+|\\$\\{[^}]+\\}))?|\\s*\\/?>");
 	protected static final Pattern XML_TEXT = Pattern
 			.compile("&\\w+;|&#\\d+;|&#x[\\da-fA-F]+;|([&\"\'<])");
-	protected static final Pattern LEAF_TAG = Pattern.compile(
-			"^(?:meta|link|img|br|hr|input)$", Pattern.CASE_INSENSITIVE);
+	protected static final Set<String> DEFAULT_LEAF_SET ;
+		
 	public final static Map<String, String> DEFAULT_ENTRY_MAP;
 	public final static Map<String, String> DEFAULT_NS_MAP;
 	static {
@@ -42,10 +44,19 @@ public class XMLNormalizeImpl {
 		map.put("xmlns:c", NS_CORE);
 		map.put("xmlns", "http://www.w3.org/1999/xhtml");
 		DEFAULT_NS_MAP = Collections.unmodifiableMap(map);
+		Set<String> set = new HashSet<String>();
+		set.add("meta");
+		set.add("link");
+		set.add("img");
+		set.add("br");
+		set.add("hr");
+		set.add("input");
+		DEFAULT_LEAF_SET = Collections.unmodifiableSet(set);
 	}
 
 	protected Map<String, String> defaultNSMap = DEFAULT_NS_MAP;
 	protected Map<String, String> defaultEntryMap = DEFAULT_ENTRY_MAP;
+	protected Set<String> defaultLeafSet;
 	protected String documentStart = "<c:group xmlns:c='http://www.xidea.org/lite/core'>";
 	protected String documentEnd = "</c:group>";
 
@@ -61,9 +72,11 @@ public class XMLNormalizeImpl {
 			Map<String, String> defaultEntryMap) {
 		this.defaultNSMap = defaultNSMap;
 		this.defaultEntryMap = defaultEntryMap;
+		defaultLeafSet = new HashSet<String>(DEFAULT_LEAF_SET);
 	}
 
 	public XMLNormalizeImpl() {
+		defaultLeafSet = new HashSet<String>(DEFAULT_LEAF_SET);
 	}
 
 	protected class TagAttr {
@@ -317,7 +330,15 @@ public class XMLNormalizeImpl {
 	}
 
 	protected boolean isLeaf(String name) {
-		return LEAF_TAG.matcher(name).find();
+		name = name.toLowerCase();
+		if(defaultLeafSet.contains(name)){
+			if(this.text.indexOf("</"+name+'>',this.start)>0){
+				defaultLeafSet.remove(name);
+				return false;
+			}
+			return true;
+		}
+		return false;
 	}
 
 	private void appendElement() {

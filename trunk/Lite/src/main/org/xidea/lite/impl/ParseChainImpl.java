@@ -131,8 +131,8 @@ public class ParseChainImpl extends ParseContextProxy implements ParseChain {
 	public ParseChain getTopChain() {
 		return context.getTopChain();
 	}
-	public ParseContext createNew() {
-		return context.createNew();
-	}
+//	public ParseContext createNew() {
+//		return context.createNew();
+//	}
 
 }

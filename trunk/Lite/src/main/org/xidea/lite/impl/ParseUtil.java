@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
@@ -45,10 +46,8 @@ import org.w3c.dom.UserDataHandler;
 import org.xidea.jsi.JSIRuntime;
 import org.xidea.jsi.impl.RuntimeSupport;
 import org.xidea.lite.impl.dtd.DefaultEntityResolver;
-import org.xidea.lite.parse.ParseContext;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-
 
 public class ParseUtil {
 
@@ -58,9 +57,9 @@ public class ParseUtil {
 	static XPathFactory xpathFactory;
 
 	static DocumentBuilder documentBuilder;
-	final static List<Charset> CHARSETS;
+	final static String[] CHARSETS;
 	public static final String CORE_URI = "http://www.xidea.org/lite/core";
-	//c:__i="1,2|c:if|c:for|c:client|"
+	// c:__i="1,2|c:if|c:for|c:client|"
 	public static final String CORE_INFO = "__i";
 	static {
 		try {
@@ -76,12 +75,14 @@ public class ParseUtil {
 		} catch (ParserConfigurationException e) {
 			throw new RuntimeException(e);
 		}
-		LinkedHashSet<Charset> cs = new LinkedHashSet<Charset>();
-		cs.add(Charset.forName("UTF-8"));
-		cs.add(Charset.defaultCharset());
-		cs.add(Charset.forName("GBK"));
-		cs.addAll(Charset.availableCharsets().values());
-		CHARSETS = Collections.unmodifiableList(new ArrayList<Charset>(cs));
+		LinkedHashSet<String> cs = new LinkedHashSet<String>();
+		cs.add("UTF-8");
+		cs.add(Charset.defaultCharset().name());
+		cs.add("GBK");
+		for(Charset c : Charset.availableCharsets().values()){
+			cs.add(c.name());
+		}
+		CHARSETS =cs.toArray(new String[cs.size()]);
 
 	}
 
@@ -138,8 +139,7 @@ public class ParseUtil {
 		return String.valueOf(s1);
 	}
 
-
-	public static InputStream openStream(URI uri) throws IOException{
+	public static InputStream openStream(URI uri) throws IOException {
 		try {
 			if ("data".equalsIgnoreCase(uri.getScheme())) {
 				String data = uri.getRawSchemeSpecificPart();
@@ -185,16 +185,16 @@ public class ParseUtil {
 		}
 	}
 
+	//
+	// public static Document parse(URI uri, ParseContext context) throws
+	// SAXException, IOException {
+	// String id = uri.toString();
+	// String text = loadText(uri, context);
+	// return loadXMLBySource(text, id);
+	// }
 
-	public static Document parse(URI uri, ParseContext context) throws SAXException, IOException {
-		String id = uri.toString();
-		String text = loadText(uri, context);
-		return loadXMLBySource(text, id);
-	}
-
-	public static Document loadXML(String path)
-			throws SAXException, IOException {
-		URI uri;
+	public static Document loadXML(String path) throws SAXException,
+			IOException {
 		if (path.startsWith("#")) {
 			path = "<out xmlns='http://www.xidea.org/lite/core'><![CDATA["
 					+ TXT_CDATA_END.matcher(
@@ -202,31 +202,30 @@ public class ParseUtil {
 							.replaceAll("]]]]><![CDATA[>") + "]]></out>";
 		}
 		if (path.startsWith("<")) {
-			return loadXMLBySource(path,path);
+			path = normalize(path, path);
+			return loadXMLBySource(path, path);
 		} else {
-			uri = URI.create(path);
+			String id = path;
+			String text = path;
+			try {
+				URI uri = URI.create(path);
+				text = loadTextAndClose(openStream(uri), null);
+				id = uri.toString();
+			} catch (Exception e) {
+			}
+			path = normalize(text, id);
+			return loadXMLBySource(text, id);
 		}
-		String id = uri.toString();
-		String text = loadText(uri, null);
-		return loadXMLBySource(text, id);
+
 	}
 
 	public static Document loadXMLBySource(String text, String id)
 			throws IOException, SAXException {
-		if (!text.startsWith("<")) {
-			return null;
-		}
 		String ins = getXMLInstruction(text);
 		InputSource in = new InputSource(new StringReader(text));
 		in.setSystemId(id);
-		Document xml;
-		//try {
-		//	xml = documentBuilder.parse(in);
-		//} catch (SAXParseException e) {
-			text = new XMLNormalizeImpl().normalize(text,id);
-			in.setCharacterStream(new StringReader(text));
-			xml = documentBuilder.parse(in);
-		//}
+		in.setCharacterStream(new StringReader(text));
+		Document xml = documentBuilder.parse(in);
 		if (ins != null) {
 			xml.insertBefore(xml.createProcessingInstruction("xml", ins), xml
 					.getFirstChild());
@@ -235,18 +234,31 @@ public class ParseUtil {
 
 	}
 
-	private static final String ORDERED_NODE_KEY = ParseUtil.class
-			.getName()
+	public static String normalize(String text, String id) throws IOException,
+			SAXException {
+		if (!text.startsWith("<")) {
+			return "<out xmlns='http://www.xidea.org/lite/core'><![CDATA["
+					+ TXT_CDATA_END.matcher(
+							TXT_HEADER.matcher(text).replaceAll(""))
+							.replaceAll("]]]]><![CDATA[>") + "]]></out>";
+		}
+		text = new XMLNormalizeImpl().normalize(text, id);
+		return text;
+	}
+
+	private static final String ORDERED_NODE_KEY = ParseUtil.class.getName()
 			+ "#ORDERED_NODE_KEY";
 
 	private static final UserDataHandler VOID_HANDLER = new UserDataHandler() {
-		public void handle(short operation, String key, Object data,
-				Node src, Node dst) {
+		public void handle(short operation, String key, Object data, Node src,
+				Node dst) {
 		}
 	};
-	public static List<Attr> getOrderedNSAttrList(Element el) {
+
+	static List<Attr> getOrderedNSAttrList(Element el) {
 		@SuppressWarnings("unchecked")
-		ArrayList<Attr> list = (ArrayList<Attr>) el.getUserData(ORDERED_NODE_KEY);
+		ArrayList<Attr> list = (ArrayList<Attr>) el
+				.getUserData(ORDERED_NODE_KEY);
 		if (list == null) {
 			list = new ArrayList<Attr>();
 			final String info = el.getAttributeNS(ParseUtil.CORE_URI,
@@ -262,14 +274,15 @@ public class ParseUtil {
 					list.add(attr);
 				}
 			}
-			if(info.length()>0){
+			if (info.length() > 0) {
 				Collections.sort(list, new Comparator<Attr>() {
-					//+ a positive integer as the first argument is less than(in order )
+					// + a positive integer as the first argument is less
+					// than(in order )
 					public int compare(Attr o1, Attr o2) {
 						int p1 = info.indexOf('|' + o1.getNodeName() + '|');
 						int p2 = info.indexOf('|' + o2.getNodeName() + '|');
-						if (p1 == -1 ||p2 == -1) {
-							return p1 - p2;//-1,-1=>0,-1,1=>-,1,-1=>+
+						if (p1 == -1 || p2 == -1) {
+							return p1 - p2;// -1,-1=>0,-1,1=>-,1,-1=>+
 						}
 						return p2 - p1;
 					}
@@ -279,66 +292,65 @@ public class ParseUtil {
 		}
 		return list;
 	}
-//	public static String getNodePosition(Node node) {
-//		Element el = null;
-//		switch(node.getNodeType()){
-//		case Node.ELEMENT_NODE:
-//			el = (Element)node;
-//			break;
-//		case Node.ATTRIBUTE_NODE:
-//			el = ((Attr)node).getOwnerElement();
-//			break;
-//		case Node.DOCUMENT_NODE:
-//			el = ((Document)node).getDocumentElement();
-//		}
-//		
-//		if (el != null) {
-//			Document doc = el.getOwnerDocument();
-//			String pos = el.getAttributeNS(ParseUtil.CORE_URI, ParseUtil.CORE_INFO);
-//			if(pos.length()>0){
-//				int p = pos.indexOf('|');
-//				if(p>0){
-//					pos = pos.substring(0,p);
-//				}
-//				pos = "@"+node.getNodeName()+"["+pos+"]";
-//			}
-//			if(doc!=null){
-//				String path = doc.getDocumentURI();
-//				return path+pos;
-//			}else{
-//				return pos;
-//			}
-//			
-//		}
-//		return null;
-//	}
+
+	// public static String getNodePosition(Node node) {
+	// Element el = null;
+	// switch(node.getNodeType()){
+	// case Node.ELEMENT_NODE:
+	// el = (Element)node;
+	// break;
+	// case Node.ATTRIBUTE_NODE:
+	// el = ((Attr)node).getOwnerElement();
+	// break;
+	// case Node.DOCUMENT_NODE:
+	// el = ((Document)node).getDocumentElement();
+	// }
+	//		
+	// if (el != null) {
+	// Document doc = el.getOwnerDocument();
+	// String pos = el.getAttributeNS(ParseUtil.CORE_URI, ParseUtil.CORE_INFO);
+	// if(pos.length()>0){
+	// int p = pos.indexOf('|');
+	// if(p>0){
+	// pos = pos.substring(0,p);
+	// }
+	// pos = "@"+node.getNodeName()+"["+pos+"]";
+	// }
+	// if(doc!=null){
+	// String path = doc.getDocumentURI();
+	// return path+pos;
+	// }else{
+	// return pos;
+	// }
+	//			
+	// }
+	// return null;
+	// }
 	private static String getXMLInstruction(String text) throws IOException {
 		String ins = null;
 		if (text.startsWith("<?xml")) {
 			int end = text.indexOf("?>");
-			if (end>0) {
+			if (end > 0) {
 				ins = text.substring(6, end);
 			}
 		}
 		return ins;
 	}
 
-	public static String getLocalName(Node node){
+	public static String getLocalName(Node node) {
 		String ln = node.getLocalName();
-		if(ln == null){
+		if (ln == null) {
 			ln = node.getNodeName();
-			int p= ln.indexOf(':');
-			if(p>0){
-				ln = ln.substring(p+1);
+			int p = ln.indexOf(':');
+			if (p > 0) {
+				ln = ln.substring(p + 1);
 			}
 		}
 		return ln;
 	}
+
 	private static Pattern TXT_HEADER = Pattern.compile("^#.*[\r\n]+");
 	private static Pattern TXT_CDATA_END = Pattern.compile("]]>");
-
-
-
 
 	public static NodeList selectByXPath(Node currentNode, String xpath)
 			throws XPathExpressionException {
@@ -352,7 +364,6 @@ public class ParseUtil {
 		xpathEvaluator.setNamespaceContext(new NamespaceContextImpl(doc));
 		NodeList nodes = (NodeList) xpathEvaluator.evaluate(xpath, currentNode,
 				XPathConstants.NODESET);
-
 		return nodes;
 	}
 
@@ -385,9 +396,45 @@ public class ParseUtil {
 		return xpathFactory.newXPath();
 	}
 
-	static String loadText(URI uri, ParseContext context)
+	public static String loadXMLTextAndClose(InputStream in) throws IOException {
+		if(!in.markSupported()){
+			in = new BufferedInputStream(in);
+		}
+		String charset = getXMLCharset(in);
+		return loadTextAndClose(in,charset);
+	}
+
+	private static String getXMLCharset(InputStream bin)
 			throws IOException {
-		return loadTextAndClose(context == null?openStream(uri):context.openStream(uri));
+		InputStreamReader cin = getBOMReader(bin);
+		bin.mark(128);
+		String charset = "utf-8";
+		if(cin == null){
+			cin = new InputStreamReader(bin);
+			if(cin.read() == '<' && cin.read() == '?'){
+				StringBuilder buf = new StringBuilder();
+				int len = 32-2;
+				while(len-->0){
+					int c = cin.read();
+					if(c == '>' || c<0){
+						String line = buf.toString().replace('\'', '"');
+						if(line.startsWith("xml")){
+							int p0 = line.indexOf("charset");
+							if(p0>0){
+								int p1 = line.indexOf('"',p0);
+								int p2 = line.indexOf('"',p1);
+								if(p1>0 && p2>0){
+									charset = line.substring(p1+1,p2);
+								}
+							}
+						}
+						break;
+					}
+				}
+			}
+		}
+		bin.reset();
+		return charset;
 	}
 
 	/**
@@ -397,40 +444,63 @@ public class ParseUtil {
 	 * @return
 	 * @throws IOException
 	 */
-	public static String loadTextAndClose(InputStream in) throws IOException {
-		BufferedInputStream bin = new BufferedInputStream(in, 3);
+	public static String loadTextAndClose(InputStream in, String defaultCharset)
+			throws IOException {
+		if(!in.markSupported()){
+			in = new BufferedInputStream(in);
+		}
+		in.mark(3);
+		Reader cin = getBOMReader(in);
+		if (cin != null) {
+			return loadTextAndClose(cin);
+		}
 
-		bin.mark(3);
-		// //\ufeff %EF%BB%BF
-		if (bin.read() == 0xEF && bin.read() == 0xBB && bin.read() == 0xBF) {
-			// readUTF8;
-			return loadTextAndClose(new InputStreamReader(bin, "utf-8"));
-		}
-		bin.reset();
-		if (bin.read() == 0xFE && bin.read() == 0xFF) {
-			return loadTextAndClose(new InputStreamReader(bin, "UTF16BE"));
-		}
-		bin.reset();
-		if (bin.read() == 0xFF && bin.read() == 0xFE) {
-			return loadTextAndClose(new InputStreamReader(bin, "UTF16LE"));
-		}
-		bin.reset();
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		try{
-			write(bin, out);
-		}finally{
-			bin.close();
+		try {
+			write(in, out);
+		} finally {
+			in.close();
 		}
 		byte[] data = out.toByteArray();
-		for (Charset c : CHARSETS) {
-			String t = new String(data, c.name());
-			byte[] data2 = t.getBytes(c.name());
+		if (defaultCharset != null) {
+			String t = getText(data, defaultCharset);
+			if (t != null) {
+				return t;
+			}
+		}
+		return getText(data, CHARSETS);
+
+	}
+
+	private static String getText(byte[] data, String... charsets)
+			throws UnsupportedEncodingException {
+		for (String c : charsets) {
+			String t = new String(data, c);
+			byte[] data2 = t.getBytes(c);
 			if (Arrays.equals(data, data2)) {
 				return t;
 			}
 		}
 		return null;
+	}
 
+	private static InputStreamReader getBOMReader(InputStream bin)
+			throws IOException {
+		// //\ufeff %EF%BB%BF
+		if (bin.read() == 0xEF && bin.read() == 0xBB && bin.read() == 0xBF) {
+			// readUTF8;
+			return new InputStreamReader(bin, "utf-8");
+		}
+		bin.reset();
+		if (bin.read() == 0xFE && bin.read() == 0xFF) {
+			return new InputStreamReader(bin, "UTF16BE");
+		}
+		bin.reset();
+		if (bin.read() == 0xFF && bin.read() == 0xFE) {
+			return new InputStreamReader(bin, "UTF16LE");
+		}
+		bin.reset();
+		return null;
 	}
 
 	private static String loadTextAndClose(Reader in) throws IOException {

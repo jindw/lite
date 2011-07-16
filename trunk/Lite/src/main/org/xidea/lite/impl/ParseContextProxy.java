@@ -1,7 +1,6 @@
 package org.xidea.lite.impl;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -55,7 +54,7 @@ abstract public class ParseContextProxy implements ParseContext {
 
 	ParseContextProxy(ParseContextProxy parent) {
 		// 需要重设 ParseChain 的context
-		this.config = parent;
+		this.config = parent.config;
 		this.featureMap =  parent.getFeatureMap();
 		this.resultContext = parent;
 		this.resources = parent.resources;
@@ -104,54 +103,13 @@ abstract public class ParseContextProxy implements ParseContext {
 		}
 	}
 
-	public final InputStream openStream(URI uri) throws IOException {
-		if("lite".equals(uri.getScheme())){
-			String path = uri.getPath();
-			if(path.startsWith("/")){
-				path = path.substring(1);
-			}
-			uri = config.getRoot().resolve(path);
-		}
-		return ParseUtil.openStream(uri);
-	}
-
-
 	public final String loadText(URI uri) throws IOException {
-		return ParseUtil.loadText(uri, (ParseContext) this);
+		return config.loadText(uri);
 	}
 
 	public final Document loadXML(URI uri) throws SAXException, IOException {
-		try{
-			return ParseUtil.parse(uri, (ParseContext) this);
-		}catch (SAXException e) {
-			log.error("XML 解析失败："+uri,e);
-			throw e;
-		}catch (IOException e) {
-			log.error("模板读取失败："+uri,e);
-			throw e;
-		}catch (RuntimeException e) {
-			log.error("XML装载失败："+uri,e);
-			throw e;
-		}
+		return config.loadXML(uri);
 	}
-
-//	public final String getDecotatorPage(String path) {
-//		return config.getDecotatorPage(path);
-//	}
-
-	public final Map<String, String> getFeatureMap(String path) {
-		return config.getFeatureMap(path);
-	}
-
-
-	public final URI getRoot() {
-		return config.getRoot();
-	}
-
-	public Map<String, List<String>> getExtensions(String path) {
-		return config.getExtensions(path);
-	}
-
 
 	public final String allocateId() {
 		return resultContext.allocateId();
@@ -247,7 +205,9 @@ abstract public class ParseContextProxy implements ParseContext {
 
 
 	public void addResource(URI resource) {
-		resources.add(resource);
+		if(!resources.contains(resource)){
+			resources.add(resource);
+		}
 	}
 
 	public void setCurrentURI(URI currentURI) {
@@ -258,8 +218,8 @@ abstract public class ParseContextProxy implements ParseContext {
 	}
 
 	public final Collection<URI> getResources() {
-		Collection<URI> result = new ArrayList<URI>(resources);
-		result.addAll(config.getResources());
+		ArrayList<URI> result = new ArrayList<URI>(config.getResources());
+		result.addAll(resources);
 		return result;
 	}
 }

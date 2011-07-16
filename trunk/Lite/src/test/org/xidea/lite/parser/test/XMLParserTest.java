@@ -33,8 +33,10 @@ public class XMLParserTest {
 	@Test
 	public void testSelect() throws Exception {
 		URI url = this.getClass().getResource("include-test.xml").toURI();
-		ParseContext context =LiteTestUtil.buildParseContext(url); 
-		org.w3c.dom.Document doc = ParseUtil.parse(url, context);
+		org.w3c.dom.Document doc = ParseUtil.loadXMLBySource(
+				ParseUtil.loadTextAndClose(ParseUtil.openStream(url), null)
+				,url.toASCIIString());
+		
 		
 		NodeList node = ParseUtil.selectByXPath(doc,"//xhtml:body");
 		Assert.assertTrue(node.getLength()==1);
