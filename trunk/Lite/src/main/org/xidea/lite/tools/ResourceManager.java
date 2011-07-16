@@ -40,19 +40,22 @@ public interface ResourceManager {
 	 * @throws SAXException
 	 */
 	public Document getFilteredDocument(String path) throws IOException, SAXException;
+
+	public String getContentHash(String path);
 	/**
 	 * 获取文件编码信息
 	 * @return
 	 */
 	public String getEncoding(String path);
 	public File getRoot();
+
 	
 	/**
 	 * 
 	 */
-	public void addByteFilter(FilterPlugin<byte[]> filter);
-	public void addStringFilter(FilterPlugin<String> filter);
-	public void addDocumentFilter(FilterPlugin<Document> filter);
+	public void addByteFilter(String pattern,FilterPlugin<byte[]> filter);
+	public void addStringFilter(String pattern,FilterPlugin<String> filter);
+	public void addDocumentFilter(String pattern,FilterPlugin<Document> filter);
 //	/**
 //	 * 列出资源搜索结果
 //	 * @param includes
