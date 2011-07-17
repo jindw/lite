@@ -18,15 +18,12 @@ package org.jside.webserver.action;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.jside.webserver.CGIEnvironment;
 import org.jside.webserver.CGIRunner;
 import org.jside.webserver.RequestContext;
-import org.jside.webserver.RequestContextImpl;
 import org.jside.webserver.RequestUtil;
-import org.jside.webserver.WebServer;
 
 /**
  * 
@@ -37,11 +34,9 @@ import org.jside.webserver.WebServer;
  * @since Tomcat 4.0
  */
 public final class CGIAdaptor {
-	private WebServer server;
 	private File workDir;
 
-	public CGIAdaptor(WebServer server) {
-		this.server = server;
+	public CGIAdaptor() {
 	}
 
 	public File getWorkDir() {
@@ -54,8 +49,7 @@ public final class CGIAdaptor {
 
 	public void execute() throws IOException {
 		RequestContext req = RequestUtil.get();
-		CGIEnvironment cgiEnv = new CGIEnvironment(
-				(RequestContextImpl) req);
+		CGIEnvironment cgiEnv = new CGIEnvironment(req);
 		String filename = cgiEnv.scriptFilename;
 		if (filename != null) {
 			File file = new File(filename);

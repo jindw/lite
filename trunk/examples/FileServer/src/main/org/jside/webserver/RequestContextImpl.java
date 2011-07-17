@@ -132,7 +132,8 @@ public class RequestContextImpl implements RequestContext {
 			if(data == null){
 				data = getPost();
 			}else{
-				data= data + getPost();
+				data= data +'&'+ getPost();
+				
 			}
 			paramsMap = new ParamsMap(data,this.getEncoding());
 		}
@@ -223,7 +224,14 @@ public class RequestContextImpl implements RequestContext {
 		if (path.startsWith("/")) {
 			path = path.substring(1);
 		}
-		return server.getWebBase().resolve(path);
+		
+		URI root = server.getWebBase();
+		try{
+			return root.resolve(path);
+		}catch (IllegalArgumentException e) {
+			///%5B%5D%2F []/
+			return root.resolve(path.replace("[", "%5B").replace("]", "%5D"));
+		}
 	}
 	@Override
 	public InputStream openStream(URI url){

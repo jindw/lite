@@ -26,8 +26,8 @@ class ResponseOutputStream extends FilterOutputStream {
 		headers.add("Connection:close");
 	}
 
-	void setMimeType(String contentType) {
-		setHeader(CONTENT_TYPE + ':' + contentType);
+	void setMimeType(String mimeType) {
+		setHeader(CONTENT_TYPE + ':' + mimeType+";charset="+context.getEncoding());
 	}
 
 	public void addHeader(String value) {

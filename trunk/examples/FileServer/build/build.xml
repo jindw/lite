@@ -47,4 +47,22 @@
 			<arg value="${basedir}/build/dest/lite" />
 		</java>
 	</target>
+	<target name="compile-jdk4">
+		<delete dir="build/tmp"/>
+		<delete dir="build/tmp2"/>
+		<mkdir dir="build/tmp"/> 
+		<mkdir dir="build/tmp2"/> 
+		<copy todir="build/tmp">
+			<fileset dir="src/main">
+				<include name="org/jside/webserver/*.*" />
+			</fileset>
+		</copy>
+		<javac srcdir="build/tmp" fork="true" source="1.5" target="1.4" debug="true" destdir="build/tmp2" encoding="UTF-8">
+			<classpath>
+				<fileset dir="web/WEB-INF/lib">
+					<include name="**/*.jar" />
+				</fileset>
+			</classpath>
+		</javac>
+	</target>
 </project>

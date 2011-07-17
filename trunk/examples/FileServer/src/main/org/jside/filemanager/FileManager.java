@@ -174,7 +174,7 @@ public class FileManager {
 		System.out.println(root);
 		ActionWebServer aws = new ActionWebServer(root.toURI());
 		
-		aws.addAction("/cgi/**", new CGIAdaptor(aws));
+		aws.addAction("/cgi/**", new CGIAdaptor());
 		aws.addAction("/fs/**", new FileManager(root, "/fs"));
 		aws.addAction("/**",new Object(){
 			@SuppressWarnings("unused")

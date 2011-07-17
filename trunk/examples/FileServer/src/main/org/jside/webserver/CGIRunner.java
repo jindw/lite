@@ -167,11 +167,13 @@ public class CGIRunner {
 //		cmdAndArgs = commands;
 		try {
 			rt = Runtime.getRuntime();
-			proc = rt.exec(cmdAndArgs.toArray(new String[cmdAndArgs.size()]), hashToStringArray(env), wd);
+			proc = rt.exec(
+					cmdAndArgs.toArray(new String[cmdAndArgs.size()]), hashToStringArray(env), wd);
 			String sContentLength = (String) env.get("CONTENT_LENGTH");
 			if (!"".equals(sContentLength)) {
+//				System.out.println(sContentLength);
 				commandsStdIn = new BufferedOutputStream(proc.getOutputStream());
-				flow(response.getInputStream(), commandsStdIn);
+				flow(response.getInputStream(), commandsStdIn,Integer.parseInt(sContentLength));
 				commandsStdIn.flush();
 				commandsStdIn.close();
 			}
@@ -256,7 +258,7 @@ public class CGIRunner {
 				}
 			} // replacement for Process.waitFor()
 		} catch (IOException e) {
-			log.error("Caught exception " + e);
+			log.error("Caught exception " , e);
 			throw e;
 		} finally {
 			// Close the output stream if used
@@ -348,6 +350,8 @@ public class CGIRunner {
 		int lineCount = 0;
 		try {
 			while ((line = rdr.readLine()) != null) {
+				String cs= response.getEncoding();
+				response.getOutputStream().write(line.getBytes(cs == null?"UTF-8":cs));
 				Matcher m = ERROR.matcher(line);
 				if (m.find()) {
 					int c = m.groupCount();
@@ -463,11 +467,12 @@ public class CGIRunner {
 		}
 	}
 
-	public static void flow(InputStream is, OutputStream os) throws IOException {
-		byte[] buf = new byte[1024];
-
+	public static void flow(InputStream is, OutputStream os,int length) throws IOException {
+		byte[] buf = new byte[Math.min(1024, length)];
 		int numRead;
-		while ((numRead = is.read(buf)) >= 0) {
+		while (length >0 && (numRead = is.read(buf)) >= 0) {
+			length -= numRead;
+//			System.out.println(length);
 			os.write(buf, 0, numRead);
 		}
 	}
