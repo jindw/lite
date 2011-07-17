@@ -194,7 +194,7 @@ public class ParseConfigImpl implements ParseConfig {
 	 * @see org.xidea.lite.impl.ParseContextImpl#createURI
 	 * @return
 	 */
-	protected final InputStream openStream(URI uri) throws IOException {
+	protected InputStream openStream(URI uri) throws IOException {
 		if("lite".equals(uri.getScheme())){
 			String path = uri.getPath();
 			if(path.startsWith("/")){
@@ -206,11 +206,11 @@ public class ParseConfigImpl implements ParseConfig {
 	}
 
 
-	public final String loadText(URI uri) throws IOException {
+	public String loadText(URI uri) throws IOException {
 		return ParseUtil.loadTextAndClose(this.openStream(uri),null);
 	}
 
-	public final Document loadXML(URI uri) throws SAXException, IOException {
+	public Document loadXML(URI uri) throws SAXException, IOException {
 		try{
 
 			String text = ParseUtil.loadXMLTextAndClose(this.openStream(uri));

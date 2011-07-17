@@ -1,0 +1,9 @@
+@import url("2.css");
+body{
+background:red;
+}
+
+body{
+background:blue;
+}
+@import url("2.css");

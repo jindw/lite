@@ -173,11 +173,14 @@ function walkEL(thiz,el){
 	if(op<=0){
 		if(op == VALUE_VAR){
 			var varName = el[1];
-			if(varName == 'for'){setForStatus(thiz,'*')}
-			if(!(varName in thiz.varMap || varName in thiz.paramMap)){
-				thiz.externalRefs.push(varName);
+			if(varName == 'for'){
+				setForStatus(thiz,'*');
+			}else{
+				if(!(varName in thiz.varMap || varName in thiz.paramMap)){
+					thiz.externalRefs.push(varName);
+				}
+				thiz.refs.push(varName);
 			}
-			thiz.refs.push(varName);
 		}
 		return;
 	}else{

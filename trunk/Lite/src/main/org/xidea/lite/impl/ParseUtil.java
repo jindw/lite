@@ -487,6 +487,7 @@ public class ParseUtil {
 	private static InputStreamReader getBOMReader(InputStream bin)
 			throws IOException {
 		// //\ufeff %EF%BB%BF
+		bin.mark(3);
 		if (bin.read() == 0xEF && bin.read() == 0xBB && bin.read() == 0xBF) {
 			// readUTF8;
 			return new InputStreamReader(bin, "utf-8");

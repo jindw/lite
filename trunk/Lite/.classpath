@@ -12,6 +12,6 @@
 	<classpathentry kind="lib" path="web/WEB-INF/lib/JSI.jar"/>
 	<classpathentry kind="lib" path="web/WEB-INF/lib/commons-logging-1.1.1.jar"/>
 	<classpathentry kind="lib" path="web/WEB-INF/lib/servlet-api.jar"/>
-	<classpathentry kind="lib" path="web/WEB-INF/lib/JSide.jar"/>
+	<classpathentry kind="lib" path="web/WEB-INF/lib/JSide.jar" sourcepath="/FileServer/src/main"/>
 	<classpathentry kind="output" path="web/WEB-INF/classes"/>
 </classpath>
