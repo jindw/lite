@@ -1,11 +1,11 @@
 function textFilterXHTML(path,text){
 	//在模板domFilter中精准处理
 	//text = replacePath(text);
-	return text;
+	return Packages.org.xidea.lite.impl.ParseUtil.normalize(text,path);
 }
 function domFilterXHTML(path,dom){
-	var xpath="//*[local-name()='script' || local-name()='style']|//@*[starts-with(local-name(),'on') or local-name()='style' or local-name()='href' or local-name()='src' or local-name()='action'  ]";
-	var nodes = selectNodeByXPath(dom,xpath);
+	var xpath="//*[local-name()='script' or local-name()='style'] | //@*[starts-with(local-name(),'on') or local-name()='style' or local-name()='href' or local-name()='src' or local-name()='action'  ]";
+	var nodes = selectByXPath(dom,xpath);
 	var hash = true;
 	var contextPath= null;
 	for(var i=0,len = nodes.length;i<len;i++){
@@ -21,7 +21,15 @@ function domFilterXHTML(path,dom){
 			}else{
 				$log.warn('unknow tag:'+tagName);
 			}
-			item.textContent = value;
+			//TODO:add cdata
+			while(item.firstChild){
+				item.removeChild(item.firstChild);
+			}
+			var doc = item.ownerDocument;
+			var cdata = doc.createCDATASection("*/"+value+'\n/*');
+			item.appendChild(doc.createTextNode("/*"))
+			item.appendChild(cdata);
+			item.appendChild(doc.createTextNode("*/"))
 		}else{
 			var attrName = item.localName;
 			var value = item.value;

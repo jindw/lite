@@ -135,6 +135,13 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 			SAXException {
 		return getFilteredContent(path, Document.class, null).dom;// ,streamFilters,stringFilters,documentFilters);
 	}
+	public Document loadXML(URI uri) throws IOException, SAXException{
+		if("lite".equals(uri.getScheme())){
+			return getFilteredDocument(uri.getPath());
+		}else{
+			return super.loadXML(uri);
+		}
+	}
 
 	public Object getFilteredContent(String path) throws IOException {
 		try {

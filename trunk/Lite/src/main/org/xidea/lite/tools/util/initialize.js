@@ -48,7 +48,7 @@ function addHashData(path){
 		return path;//not add hash on hash url
 	}
 	//TODO:use result md5 is better?
-	//manager.getContentHash(path);
+	//resourceManager.getContentHash(path)
 	return path+'?@='+(+new Date()).toString(32)
 }
 /**
