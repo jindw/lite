@@ -22,7 +22,7 @@ import org.xidea.jsi.impl.RuntimeSupport;
 import org.xidea.lite.impl.ParseConfigImpl;
 import org.xidea.lite.impl.ParseUtil;
 import org.xidea.lite.parse.ParseContext;
-import org.xidea.lite.tools.FilterPlugin;
+import org.xidea.lite.tools.ResourceFilter;
 import org.xidea.lite.tools.ResourceManager;
 import org.xml.sax.SAXException;
 
@@ -36,7 +36,7 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 	private ArrayList<MatcherFilter<Document>> documentFilters = new ArrayList<MatcherFilter<Document>>();
 	private final Map<String, ResourceItem> cached = new HashMap<String, ResourceItem>();
 	private ThreadLocal<ResourceItem> currentItem = new ThreadLocal<ResourceItem>();
-	private RuntimeSupport jsr = (RuntimeSupport)RuntimeSupport.create();
+	private JSIRuntime jsr = RuntimeSupport.create();
 	private URI currentScript;
 
 	public ResourceManagerImpl(URI root, URI config) throws IOException {
@@ -46,13 +46,16 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 		this.jsr.eval("var resourceManager=1;");
 		Object initfn = this.jsr.eval("(function(rm){resourceManager = rm;})");
 		this.jsr.invoke(this, initfn, this);
-		this.jsr.eval(ResourceManagerImpl.class.getResource("env.js"));
-		String defaultInit = "/WEB-INF/initialize.js";
+		this.jsr.eval(ResourceManagerImpl.class.getResource("env.s.js"));
+		this.initialize();
+	}
+	protected void initialize() throws IOException {
+		String defaultInit = "/WEB-INF/initialize.s.js";
 		File initFile = new File(this.root,defaultInit);
 		if(initFile.exists()){
 			include(defaultInit);
 		}else{
-			include("classpath:///org/xidea/lite/tools/util/initialize.js");
+			include("classpath:///org/xidea/lite/tools/util/initialize.s.js");
 		}
 	}
 	public void include(String path) throws IOException{
@@ -71,15 +74,15 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 		}
 	}
 
-	public void addBytesFilter(String pattern, FilterPlugin<byte[]> filter) {
+	public void addBytesFilter(String pattern, ResourceFilter<byte[]> filter) {
 		streamFilters.add(new MatcherFilter<byte[]>(pattern, filter));
 	}
 
-	public void addTextFilter(String pattern, FilterPlugin<String> filter) {
+	public void addTextFilter(String pattern, ResourceFilter<String> filter) {
 		stringFilters.add(new MatcherFilter<String>(pattern, filter));
 	}
 
-	public void addDocumentFilter(String pattern, FilterPlugin<Document> filter) {
+	public void addDocumentFilter(String pattern, ResourceFilter<Document> filter) {
 		documentFilters.add(new MatcherFilter<Document>(pattern, filter));
 	}
 
@@ -125,10 +128,8 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 	}
 
 	private String loadText(ResourceItem item) throws IOException {
-		String text;
-		text = ParseUtil.loadTextAndClose(new ByteArrayInputStream(
+		return ParseUtil.loadTextAndClose(new ByteArrayInputStream(
 				item.data), getEncoding(item.path));
-		return text;
 	}
 
 	public Document getFilteredDocument(String path) throws IOException,
@@ -157,12 +158,19 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 		}
 	}
 
-	public Object loadChainContent(String path) throws IOException {
+	public String loadChainText(String path) throws IOException {
 		ResourceItem item = currentItem.get();
 		if (item != null) {
 			try {
 				ResourceItem item2 = getFilteredContent(path, String.class, item.currentFilter);
-				return item2.currentData;
+				Object data = item2.currentData;
+				if(data instanceof byte[]){
+					return ParseUtil.loadTextAndClose(
+								new ByteArrayInputStream((byte[])data), 
+								getEncoding(item2.path));
+				}else{
+					return (String)data;
+				}
 			} catch (SAXException e) {
 				throw new RuntimeException(e);
 			}
@@ -254,7 +262,7 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 						// 没有默认的xml正规化
 						Document doc = ParseUtil.loadXMLBySource(text,
 								"lite:///" + path);
-						for (FilterPlugin<Document> filter : documentFilters) {
+						for (ResourceFilter<Document> filter : documentFilters) {
 							doc = filter.doFilter(path, doc);
 						}
 						res.dom = doc;
@@ -303,11 +311,11 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 		return out.toByteArray();
 	}
 
-	private class MatcherFilter<T> implements FilterPlugin<T> {
-		FilterPlugin<T> base;
+	private class MatcherFilter<T> implements ResourceFilter<T> {
+		ResourceFilter<T> base;
 		private URLMatcher matcher;
 
-		MatcherFilter(String pattern, FilterPlugin<T> base) {
+		MatcherFilter(String pattern, ResourceFilter<T> base) {
 			this.matcher = URLMatcher.createMatcher(pattern);
 			this.base = base;
 		}
@@ -380,7 +388,7 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 		return hash;
 	}
 
-	public void saveText(String path, Object content, String encoding)
+	public void saveText(String path, Object content)
 			throws IOException {
 		File dest = new File(this.root, path);
 		FileOutputStream out = new FileOutputStream(dest);
@@ -389,11 +397,11 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 		} else if (content instanceof InputStream) {
 			out.write(loadAndClose((InputStream) content));
 		} else {
-			out.write(String.valueOf(content).getBytes(encoding));
+			out.write(String.valueOf(content).getBytes(getEncoding(path)));
 		}
 		out.close();
 	}
 	public Object createFilterProxy(Object object){
-		return jsr.wrapToJava(object, FilterPlugin.class);
+		return jsr.wrapToJava(object, ResourceFilter.class);
 	}
 }

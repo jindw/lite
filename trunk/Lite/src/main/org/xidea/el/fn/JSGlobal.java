@@ -342,7 +342,7 @@ class JSGlobal implements Invocable {
 		}
 	}
 	/*================URL Encoder====================*/
-	private static final Pattern URL_SPLIT = Pattern.compile("[\\/\\:&\\?=]");
+	private static final Pattern URL_SPLIT = Pattern.compile("[/:?&=,;+!@]");
 
 	protected Object edscode(boolean encode,boolean split,final String text, String charset)
 			throws UnsupportedEncodingException {

@@ -28,7 +28,7 @@ public interface ResourceManager {
 	public byte[] getFilteredBytes(String path) throws IOException;
 	public String getFilteredText(String path) throws IOException;
 	public Object getFilteredContent(String path) throws IOException;
-	public Object loadChainContent(String path) throws IOException;
+	public String loadChainText(String path) throws IOException;
 	
 	/**
 	 * 
@@ -43,6 +43,7 @@ public interface ResourceManager {
 	 */
 	public Document getFilteredDocument(String path) throws IOException, SAXException;
 
+	//public ImageInfo = getFilteredImage(String path);
 	public String getContentHash(String path);
 	/**
 	 * 获取文件编码信息
@@ -51,13 +52,13 @@ public interface ResourceManager {
 	public String getEncoding(String path);
 	public URI getRoot();
 
-	public void saveText(String path,Object content,String encoding) throws IOException ;
+	public void saveText(String path,Object content) throws IOException ;
 	/**
 	 * 
 	 */
-	public void addBytesFilter(String pattern,FilterPlugin<byte[]> filter);
-	public void addTextFilter(String pattern,FilterPlugin<String> filter);
-	public void addDocumentFilter(String pattern,FilterPlugin<Document> filter);
+	public void addBytesFilter(String pattern,ResourceFilter<byte[]> filter);
+	public void addTextFilter(String pattern,ResourceFilter<String> filter);
+	public void addDocumentFilter(String pattern,ResourceFilter<Document> filter);
 	
 //	/**
 //	 * 列出资源搜索结果

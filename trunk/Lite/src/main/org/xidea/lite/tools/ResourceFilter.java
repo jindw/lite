@@ -1,6 +1,6 @@
 package org.xidea.lite.tools;
 
-public interface FilterPlugin<T> {
+public interface ResourceFilter<T> {
 	//public ResourceManager getFactory();
 	public T doFilter(String path,T in);
 }

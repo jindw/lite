@@ -9,7 +9,7 @@ function include(path){
 	return resourceManager.include(path);
 }
 /**
- * 装载指定路径下文本
+ * 装载未经过处理的指定路径下文本
  * @public
  * @param path 文件路径（相对网站根目录）
  * @param encoding 文件编码
@@ -24,18 +24,23 @@ function loadRawText(path,encoding){
 			new java.io.ByteArrayInputStream(data), encoding);
 	return text;
 }
+/**
+ * 用于在插件运行过程中，装载指定路径下内容，并经过当前以执行的过滤器处理后的文本。
+ * @public
+ * @param path 文件路径（相对网站根目录）
+ * @return String 文件内容文本
+ */
 function loadChainText(path){
-	return resourceManager.loadChainContent(path);
+	return resourceManager.loadChainText(path);
 }
 /**
- * 保存指定文本到指定路径下文件
+ * 采用系统默认编码，保存指定数据到指定路径下的文件中。
  * @public
  * @param path 文件路径（相对网站根目录）
  * @param content 文件文本内容
- * @param encoding 文件编码
  */
-function saveText(path,content,encoding){
-	resourceManager.saveText(path,content,encoding);
+function saveText(path,content){
+	resourceManager.saveText(path,content);
 }
 
 /**
@@ -56,8 +61,4 @@ function addDocumentFilter(pattern,impl){
 }
 function selectByXPath(node,xpath){
 	return Packages.org.xidea.lite.impl.ParseUtil.selectByXPath(node,xpath);
-}
-
-function getNodePosition(node){
-	return resourceManager.getNodePosition(node);
 }

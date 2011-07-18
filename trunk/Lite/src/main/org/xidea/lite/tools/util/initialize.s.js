@@ -1,17 +1,34 @@
-include("merge.js");
-include("xhtml.js");
-
+include("merge.s.js");
+include("xhtml.s.js");
+function getSourceLoader(path,text){
+	return function(path0){
+		if(path0 == path){
+			return text;
+		}else{
+			return loadChainText(path0)
+		}
+	}
+}
 function textFilterJS(path,text){
-	text = processJS(text);
-	return "//!test\n"+text;
+	var map = mergeJS(path,getSourceLoader(path,text));
+	var buf = [];
+	for(var n in map){
+		buf.push(map[n])
+	}
+	text = processJS(buf.join('\n'));
+	return text;
 }
 function textFilterCSS(path,text){
-	text = processCSS(text);
+	var map = mergeCSS(path,getSourceLoader(path,text));
+	var buf = [];
+	for(var n in map){
+		buf.push(map[n])
+	}
+	text = processCSS(buf.join('\n'));
 	return text;
 }
 
 function processJS(text){
-	//TODO:merge...
 	//replace js:	encodeURI("/module/static/img/a/_/8.png")
 	text = replacePath(text);
 	//TODO:autoEncodeScript
@@ -21,7 +38,6 @@ function processJS(text){
 	return text.replace(/(\\(?:\r\n?|\n).)|^\s+/gm,'$1')
 }
 function processCSS(text){
-	//TODO:merge,absolute uri
 	//replace css:	url("/module/static/img/a/_/8.png")
 	text = replacePath(text);
 	//compress 
