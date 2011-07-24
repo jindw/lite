@@ -37,7 +37,9 @@ function domFilterXHTML(path,dom){
 			var tagName = node.tagName;
 			switch(attrName){
 			case 'style':
-				item.value = processCSS(value);
+				value =  processCSS('style{'+value+'}');
+				value = value.substring(value.indexOf('{')+1,value.lastIndexOf('}'))
+				item.value = value;
 				continue;
 			case 'href':
 				if(tagName=='link'){
@@ -74,7 +76,8 @@ function domFilterXHTML(path,dom){
 				break;
 			default://on
 				if(/^on.+/.test(attrName)){
-					value = processJS(value);
+					value = processJS('function(){'+value+'}');
+					value = value.substring(value.indexOf('{')+1,value.lastIndexOf('}'))
 					item.value = value;
 				}else{
 					

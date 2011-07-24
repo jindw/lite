@@ -62,7 +62,7 @@ function _evaluate(item,context){
         var arg2=realValue(_evaluate(item[2],context));
     }
     if(type == OP_INVOKE){
-    	if(arg1 instanceof Function){
+    	if(typeof arg1 == 'function'){
             return arg1.apply(context,arg2);
     	}else if(arg1 instanceof PropertyValue){
     		var thiz = arg1[0];

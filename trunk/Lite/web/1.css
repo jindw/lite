@@ -1,9 +1,8 @@
 @import url("2.css");
 body{
-background:red;
+background:url(red.gif);
 }
 
 body{
-background:blue;
+			background:  blue;
 }
-@import url("2.css");

@@ -1,4 +1,4 @@
-package org.xidea.lite.tools.util;
+package org.xidea.lite.tools;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -11,6 +11,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -22,8 +23,6 @@ import org.xidea.jsi.impl.RuntimeSupport;
 import org.xidea.lite.impl.ParseConfigImpl;
 import org.xidea.lite.impl.ParseUtil;
 import org.xidea.lite.parse.ParseContext;
-import org.xidea.lite.tools.ResourceFilter;
-import org.xidea.lite.tools.ResourceManager;
 import org.xml.sax.SAXException;
 
 public class ResourceManagerImpl extends ParseConfigImpl implements
@@ -38,6 +37,7 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 	private ThreadLocal<ResourceItem> currentItem = new ThreadLocal<ResourceItem>();
 	private JSIRuntime jsr = RuntimeSupport.create();
 	private URI currentScript;
+	private List<File> scripts = new ArrayList<File>();
 
 	public ResourceManagerImpl(URI root, URI config) throws IOException {
 		super(root, config);
@@ -55,7 +55,13 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 		if(initFile.exists()){
 			include(defaultInit);
 		}else{
-			include("classpath:///org/xidea/lite/tools/util/initialize.s.js");
+			defaultInit = "/initialize.s.js";
+			initFile = new File(this.root,defaultInit);
+			if(initFile.exists()){
+				include(defaultInit);
+			}else{
+				include("classpath:///org/xidea/lite/tools/initialize.s.js");
+			}
 		}
 	}
 	public void include(String path) throws IOException{
@@ -63,7 +69,13 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 		if(path.startsWith("classpath:")){
 			u = URI.create(path);
 		}else{
+			if(path.charAt(0) == '/'){
+				path = path.substring(1);
+			}
 			u = this.currentScript.resolve(path);
+			if("file".equals(u.getScheme())){
+				this.scripts .add(new File(u));
+			}
 		}
 		URI oldScript = this.currentScript;
 		try{
@@ -74,6 +86,9 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 		}
 	}
 
+	public List<File> getScriptFileList(){
+		return scripts;
+	}
 	public void addBytesFilter(String pattern, ResourceFilter<byte[]> filter) {
 		streamFilters.add(new MatcherFilter<byte[]>(pattern, filter));
 	}
@@ -118,7 +133,7 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 			ResourceItem item = getFilteredContent(path, String.class, null);
 			String text = item.text;// ,streamFilters,stringFilters,documentFilters);
 			if (text == null) {
-				text = loadText(item);
+				text = loadText(item.path,item.data);
 			}
 			item.text = text;
 			return text;
@@ -127,9 +142,9 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 		}
 	}
 
-	private String loadText(ResourceItem item) throws IOException {
+	private String loadText(String path,byte[] data) throws IOException {
 		return ParseUtil.loadTextAndClose(new ByteArrayInputStream(
-				item.data), getEncoding(item.path));
+				data), getEncoding(path));
 	}
 
 	public Document getFilteredDocument(String path) throws IOException,
@@ -165,9 +180,7 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 				ResourceItem item2 = getFilteredContent(path, String.class, item.currentFilter);
 				Object data = item2.currentData;
 				if(data instanceof byte[]){
-					return ParseUtil.loadTextAndClose(
-								new ByteArrayInputStream((byte[])data), 
-								getEncoding(item2.path));
+					return loadText(item2.path,(byte[])data);
 				}else{
 					return (String)data;
 				}
@@ -202,8 +215,9 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 			res.currentData = null;
 			try {
 				currentItem.set(res);
+				byte[] data = null;
 				if (res.data == null || endFilter !=null) {// byte[]
-					byte[] data = getRawBytes(path);
+					data = getRawBytes(path);
 					for (MatcherFilter<byte[]> filter : streamFilters) {
 						if(endFilter == filter){
 							res.currentData = data;
@@ -219,6 +233,8 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 				}
 				if (type == byte[].class && endFilter == null) {
 					return res;
+				}else if(data == null){
+					data = res.data;
 				}
 
 				if (type == String.class) {
@@ -230,7 +246,7 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 							}
 							if (filter.match(path)) {
 								if (text == null) {
-									text = loadText(res);
+									text = loadText(res.path,res.data);
 								}
 								text = filter.doFilter(path, text);
 							}
@@ -239,7 +255,7 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 							res.text = text;
 						}else{
 							if (text == null) {
-								text = loadText(res);
+								text = loadText(res.path,data);
 							}
 							res.currentData = text;
 						}
@@ -288,7 +304,7 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 				}
 				lastModified = Math.max(lastModified, f.lastModified());
 			}
-			if (lastModified > item.lastModified) {
+			if (item != null && lastModified > item.lastModified) {
 				item = null;
 			}
 		}

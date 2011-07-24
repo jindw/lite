@@ -1,29 +1,40 @@
-function mergeJS(path,sourceLoader){
+function mergeJS(path,fileList,sourceLoader){
 	sourceLoader = sourceLoader || loadChainText;
 	var fileMap = {};
-	findRelation(path,sourceLoader,jsRelationFinder,fileMap,false);
+	findRelation(path,sourceLoader,jsRelationFinder,fileMap,fileList,true);
 	return fileMap;
 }
-function mergeCSS(path,sourceLoader){
+function mergeCSS(path,fileList,sourceLoader){
 	sourceLoader = sourceLoader || loadChainText;
 	var fileMap = {};
-	findRelation(path,sourceLoader,jsRelationFinder,fileMap,true);
+	findRelation(path,sourceLoader,cssRelationFinder,fileMap,fileList,false);
 	return fileMap;
 }
-
-function findRelation(path,sourceLoader,relationFinder,fileMap,importFirst){
+function toAbsolutePath(path,base){
+	if(!path || path.match(/^(?:[\/\\]|classpath\:)/)){
+		return path;
+	}
+	path =base.replace(/[^\/\\]+$/,'')+path
+	path = path.replace(/[\/\\]\.[\/\\]/g,'/');
+	while(path != (path = path.replace(/[^\/\\]+[\/\\]\.\.[\/\\]/,'/')));
+	return path;
+}
+function findRelation(path,sourceLoader,relationFinder,fileMap,fileList,importFirst){
 	var relations = [];
 	var source = relationFinder(path,sourceLoader,relations);
 	fileMap[path] = source;
+	
+	if(importFirst){
+		fileList.push(path);
+	}
 	for(var i=0,len = relations.length;i<len;i++){
-		var relation = relations[i];
+		var relation = toAbsolutePath(relations[i],path);
 		if(!(relation in fileMap)){
-			findRelation(relation,sourceLoader,relationFinder,fileMap,importFirst);
+			findRelation(relation,sourceLoader,relationFinder,fileMap,fileList,importFirst);
 		}
 	}
-	if(importFirst){
-		delete fileMap[path];
-		fileMap[path] = source;
+	if(!importFirst){
+		fileList.push(path);
 	}
 }
 //css import 的内容先装载

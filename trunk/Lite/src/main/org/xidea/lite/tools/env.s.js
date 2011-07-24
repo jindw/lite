@@ -8,6 +8,7 @@ $import("org.xidea.jsi:$log");
 function include(path){
 	return resourceManager.include(path);
 }
+
 /**
  * 装载未经过处理的指定路径下文本
  * @public

@@ -10,18 +10,24 @@ function getSourceLoader(path,text){
 	}
 }
 function textFilterJS(path,text){
-	var map = mergeJS(path,getSourceLoader(path,text));
+	var fileList = [];
+	var map = mergeJS(path,fileList,getSourceLoader(path,text));
 	var buf = [];
-	for(var n in map){
+	for(var i = 0;i<fileList.length;i++){
+		var n  = fileList[i];
+		addRelation(n);
 		buf.push(map[n])
 	}
 	text = processJS(buf.join('\n'));
 	return text;
 }
 function textFilterCSS(path,text){
-	var map = mergeCSS(path,getSourceLoader(path,text));
+	var fileList = [];
+	var map = mergeCSS(path,fileList,getSourceLoader(path,text));
 	var buf = [];
-	for(var n in map){
+	for(var i = 0;i<fileList.length;i++){
+		var n  = fileList[i];
+		addRelation(n);
 		buf.push(map[n])
 	}
 	text = processCSS(buf.join('\n'));
@@ -30,7 +36,11 @@ function textFilterCSS(path,text){
 
 function processJS(text){
 	//replace js:	encodeURI("/module/static/img/a/_/8.png")
-	text = replacePath(text);
+	text = text.replace(/\bencodeURI\s*\(\s*(['"])(.*?)\1\s*\)/g,function(a,qute,content){
+		content = window.eval(qute+content+qute);
+		content = replacePath(content);
+		return JSON.stringify(content);
+	})
 	//TODO:autoEncodeScript
 	//${..} == > ${JSON.stringify(..)} ==> /$(tghjk)/
 	//compress
@@ -39,7 +49,13 @@ function processJS(text){
 }
 function processCSS(text){
 	//replace css:	url("/module/static/img/a/_/8.png")
-	text = replacePath(text);
+	text = text.replace(/\:\s*url\s*\(\s*(['"]|)(.*?)\1\s*\)/g,function(a,qute,content){
+		if(qute){
+			content = window.eval(qute+content+qute);
+		}
+		content = replacePath(content);
+		return ":url("+JSON.stringify(content)+')';
+	})
 	//compress 
 	//manager.compressCSS(value);
 	return text.replace(/(\\(?:\r\n?|\n).)|^\s+/gm,'$1')

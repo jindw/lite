@@ -17,18 +17,15 @@ import org.jside.webserver.CGIRunner;
 import org.jside.webserver.MutiThreadWebServer;
 import org.jside.webserver.RequestContext;
 import org.jside.webserver.RequestUtil;
-import org.w3c.dom.Document;
 import org.xidea.el.ExpressionFactory;
 import org.xidea.jsi.impl.RuntimeSupport;
 import org.xidea.jsi.web.JSIService;
 import org.xidea.lite.impl.HotTemplateEngine;
-import org.xidea.lite.impl.ParseConfigImpl;
 import org.xidea.lite.impl.ParseUtil;
 import org.xidea.lite.parse.ParseConfig;
 import org.xidea.lite.parse.ParseContext;
 import org.xidea.lite.tools.ResourceManager;
-import org.xidea.lite.tools.util.ResourceManagerImpl;
-import org.xml.sax.SAXException;
+import org.xidea.lite.tools.ResourceManagerImpl;
 
 public class WebServer {
 	public static void main(String[] args) throws Exception {

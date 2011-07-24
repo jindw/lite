@@ -223,8 +223,21 @@ function lite__encodeURIComponent($item){
  * @return string
  */
 function lite__decodeURIComponent($item){
-	$item = rawurldecode($item);
-	return $item;
+	return rawurldecode($item);
+}
+
+function lite__encodeURI($uri){
+	return preg_replace('/[^;/?:@&=+$,#]+/',rawurlencode,$uri);
+}
+function lite__decodeURI($uri){
+	if(preg_match('/^%[0-9A-F]{2}$/i',uri)){
+		if(preg_match('/^(?:%3B|%2F|%3F|%3A|%40|%26|%3D|%2B|%24|%2C|%23)$/i',$uri)){
+			return $uri;
+		}else{
+			return rawurldecode($uri);
+		}
+	}
+	return preg_replace('/%[0-9A-F]{2}/i',lite__decodeURI,$uri);
 }
 
 /* ===================== 成员函数调用 ======================*/
