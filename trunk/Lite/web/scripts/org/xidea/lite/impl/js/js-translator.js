@@ -294,8 +294,8 @@ JSTranslateContext.prototype = new PT({
         this.append("var ",varName,"=$_out.join('');$_out=",bufbak,";");
         this.freeId(bufbak);
     },
-    appendEncodePlugin:function(item){
-        this._appendOutput(this.liteImpl,'(2,',this.stringifyEL(item[1]),',/(&(?:[a-z]+|#\d+);)|[<&"]/ig);')
+    appendEncodePlugin:function(item){//&#233;&#0xDDS;
+        this._appendOutput(this.liteImpl,'(2,',this.stringifyEL(item[1]),',/(&(?:[a-z]+|#\d+|#0x[\da-f]+);)|[<&"]/ig);')
     },
     processIf:function(code,i){
         var item = code[i];

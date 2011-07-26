@@ -6,8 +6,6 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.w3c.dom.Attr;
-import org.w3c.dom.Comment;
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xidea.jsi.JSIRuntime;
@@ -80,17 +78,21 @@ public class ExtensionParserImpl implements ExtensionParser {
 			}finally{
 				CURRENT_LOCAL_NODE.set(old);
 			}
-		}else if (type == Node.DOCUMENT_NODE) {//9
-			if (this.parseDocument((Document)node, context, chain)) {
-				return;
-			}
-		} else if (type == Node.ATTRIBUTE_NODE) { //2
+		}else if (type == Node.ATTRIBUTE_NODE) { //2
 			if (this.parseAttribute((Attr)node, context, chain)) {
 				return;
 			}
-		} else if (type == Node.COMMENT_NODE) {//8
-			if (this.parseComment((Comment)node, context, chain)) {
-				return;
+		} else if (type == Node.DOCUMENT_NODE || type == Node.COMMENT_NODE) {//9
+			//rt.invoke(impl, "parse", node, context, chain);
+			for(String pkg : packageMap.keySet()){
+				Map<String, Map<String, Object>>v = packageMap.get(pkg);
+				//objectMap.namespaceURI = namespace
+				Map<String, Object> p = v.get("parserMap");
+				Object fns = p.get(String.valueOf(type));
+				if(fns!=null){
+					doParse(node,fns,chain,pkg);
+					return;
+				}
 			}
 		} 
 		chain.next(node);
@@ -108,11 +110,12 @@ public class ExtensionParserImpl implements ExtensionParser {
 			if (parserMap != null) {
 				String name = el.getNodeName();
 				name = formatName(name);
-				if (parserMap.containsKey(name)) {
-					rt.invoke(chain, parserMap.get(name), el);
-					return true;
-				} else if (parserMap.containsKey("")) {
-					rt.invoke(chain, parserMap.get(""), el);
+				Object fns = parserMap.get(name);
+				if(fns == null){
+					fns = parserMap.get("");
+				}
+				if (fns !=null) {
+					doParse(el, fns, chain,nns);
 					return true;
 				} else {
 					// System.out.println(el.getTagName());
@@ -120,6 +123,10 @@ public class ExtensionParserImpl implements ExtensionParser {
 			}
 		}
 		return false;
+	}
+
+	private void doParse(Node el, Object fns, ParseChain chain,String pkg) {
+		rt.invoke(impl,"doParse", el, fns,chain,pkg);
 	}
 
 
@@ -135,7 +142,6 @@ public class ExtensionParserImpl implements ExtensionParser {
 				if (beforeMap != null) {
 					String name = formatName(attr.getName());
 					if (beforeMap.containsKey(name)) {
-//						el.removeAttributeNode(attr);
 						rt.invoke(chain, beforeMap.get(name), attr);
 						return true;
 					}
@@ -147,15 +153,6 @@ public class ExtensionParserImpl implements ExtensionParser {
 	}
 
 
-	private boolean parseDocument(Document node, ParseContext context,
-			ParseChain chain) {
-		return (Boolean) rt.invoke(impl, "parseDocument", node, context, chain);
-	}
-
-	private boolean parseComment(Comment node, ParseContext context,
-			ParseChain chain) {
-		return (Boolean) rt.invoke(impl, "parseComment", node, context, chain);
-	}
 
 	private boolean parseAttribute(Attr attr, ParseContext context,
 			ParseChain chain) {
@@ -179,15 +176,13 @@ public class ExtensionParserImpl implements ExtensionParser {
 		}
 		Map<String, Map<String, Object>> packageInfo = this.packageMap.get(ns);
 		if (packageInfo != null) {
-			Map<String, Object> onMap = packageInfo.get("onMap");
-			if (onMap != null) {
+			Map<String, Object> parserMap = packageInfo.get("parsersMap");
+			if (parserMap != null) {
 				String name = formatName(attr.getName());
-				if (onMap.containsKey(name)) {
-					rt.invoke(chain, onMap.get(name), attr);
-					return true;
-				} else if (onMap.containsKey("")) {
-					rt.invoke(chain, onMap.get(""), attr);
-					return true;
+				Object fns = parserMap.get('2'+name);
+				if(fns != null){
+					doParse(attr, fns, chain,ns);
+					//rt.invoke(impl,"doParse",el,fns,  chain);
 				}
 			}
 		}

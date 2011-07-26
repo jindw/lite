@@ -11,8 +11,8 @@ var Core = {
 		var end = findELEnd(text,0);
 		if(end>0){
 			try{
-				var el = text.substring(1,end);
-				el = this.parseEL(el);
+				var els = text.substring(1,end);
+				var el = this.parseEL(els);
 	            switch(this.getTextType()){
 	            case XT_TYPE:
 	            	this.appendXT(el);
@@ -25,11 +25,11 @@ var Core = {
 	            }
 	            return end;
 			}catch(e){
-				$log.error("表达式解析异常，请检查是否手误：[fileName:"+this.currentURI+",el:"+el+"]",e)
+				$log.error("表达式解析异常，请检查是否手误：[fileName:"+this.currentURI+",el:"+els+"]",e)
 				return -1;
 			}
 		}else{
-			$log.warn("表达式解析异常，请检查是否手误：[fileName:"+this.currentURI+",el:"+el+"]")
+			$log.warn("表达式解析异常，请检查是否手误：[fileName:"+this.currentURI+",text:"+text+"]")
 			return -1;
 		}
 	},
@@ -39,6 +39,24 @@ var Core = {
 			try{
 				var el = text.substring(1,end);
 	            this.appendEL(el);
+	            return end;
+			}catch(e){
+				$log.error("表达式解析异常，请检查是否手误：[fileName:"+this.currentURI+",el:"+el+"]",e)
+				return -1;
+			}
+		}else{
+			$log.warn("表达式解析异常，请检查是否手误：[fileName:"+this.currentURI+",el:"+el+"]")
+			return -1;
+		}
+	},
+	"seek#":function(text){
+		var end = findELEnd(text,0);
+		if(end>0){
+			try{
+				var el = text.substring(1,end);
+	            this.appendPlugin("org.xidea.lite.EncodePlugin",{});
+	            this.appendEL(el);
+	            this.appendEnd()
 	            return end;
 			}catch(e){
 				$log.error("表达式解析异常，请检查是否手误：[fileName:"+this.currentURI+",el:"+el+"]",e)
@@ -114,7 +132,7 @@ var Core = {
 			 var ln = root.localName || root.nodeName.replace(/^w+\:/,'');
 			 if((ln == 'extends' || ln == 'extend') &&  root.namespaceURI == ns){
 			 	processExtends.call(this,root);
-			 	return true;
+			 	return ;
 			 }else{
 			 	try{
 			 		var attr = root.getAttributeNodeNS(ns,"extends") || root.getAttributeNodeNS(ns,"extend");
@@ -131,7 +149,7 @@ var Core = {
 			 	}
 			 	if(attr != null){
 			 		processExtends.call(this,attr);
-			 		return true;
+			 		return ;
 			 	}
 			 	var layout = this.getFeature('http://www.xidea.org/lite/features/config-layout');
 			 	if(layout){
@@ -140,12 +158,12 @@ var Core = {
 					//this.currentURI = uri;
 			 		//doc = this.loadXML(uri);
 			 		this.parse(uri);
-			 		return true;
+			 		return ;
 			 	}
 			 }
-			 return false;
 		}
-		return false;
+		this.next(doc);
+//		$log.error('aaa',ns);
 	},
 	parse : function(node){
 		$log.error("未支持标签："+node.tagName)

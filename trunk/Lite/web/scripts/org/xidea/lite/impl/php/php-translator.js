@@ -105,7 +105,7 @@ function _stringifyPHPLineArgs(line){//.*[\r\n]*
 function _encodeEL(text,model,encoding){
 	//TODO: check el type
 	if(model == -1){
-		var encode = "htmlspecialchars("+text+",ENT_COMPAT"+encoding+",false)";
+		var encode = "htmlspecialchars("+text+",ENT_COMPAT,"+encoding+",false)";
 		//this.append(prefix,"strtr(",el,",array('<'=>'&lt;','\"'=>'&#34;'));");
 	}else if(model == XA_TYPE){
 		var encode = "htmlspecialchars("+text+",ENT_COMPAT,"+encoding+')';

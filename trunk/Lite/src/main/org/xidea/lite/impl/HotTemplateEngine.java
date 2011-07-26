@@ -125,7 +125,7 @@ public class HotTemplateEngine extends TemplateEngine {
 			out.write(buildLiteCode(context, items));
 			out.close();
 		}
-		log.info("文件关联："+path+":\t"+files);
+		log.info("中间代码编译成功，关联文件："+path+":\t"+files);
 		Info entry = new Info(files);
 		infoMap.put(path, entry);
 		return template;

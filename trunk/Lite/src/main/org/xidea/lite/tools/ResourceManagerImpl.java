@@ -117,6 +117,9 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 	public byte[] getRawBytes(String path) throws IOException {
 		InputStream in = ParseUtil.openStream(this.getRoot().resolve(
 				path.substring(1)));
+		if(in == null){
+			log.warn("Unknow file:"+path);
+		}
 		return loadAndClose(in);
 	}
 
@@ -153,7 +156,10 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 	}
 	public Document loadXML(URI uri) throws IOException, SAXException{
 		if("lite".equals(uri.getScheme())){
-			return getFilteredDocument(uri.getPath());
+			Document doc = getFilteredDocument(uri.getPath());
+			Document doc2 = (Document) doc.cloneNode(true);
+			doc2.setDocumentURI(doc.getDocumentURI());
+			return doc2;
 		}else{
 			return super.loadXML(uri);
 		}

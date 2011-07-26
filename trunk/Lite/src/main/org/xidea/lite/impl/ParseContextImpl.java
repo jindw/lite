@@ -74,7 +74,7 @@ public class ParseContextImpl extends ParseContextProxy implements ParseContext 
 //	}
 	public final ParseChain getTopChain() {
 		if(topChain == null){//nodeParsers != topChain.getNodeParsers()
-			topChain = new ParseChainImpl(this, nodeParsers, nodeParsers.length-1);
+			topChain = ParseChainImpl.createTop(this, nodeParsers);
 		}
 		return topChain;
 	}

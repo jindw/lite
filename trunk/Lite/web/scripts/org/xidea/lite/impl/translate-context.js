@@ -90,11 +90,11 @@ TranslateContext.prototype = {
                     break;
     			case PLUGIN_TYPE://not support
     				var pn = item[2]['class']
-    				if(/^(?:baidu\.)?org\.xidea\.lite\.EncodePlugin$/.test(pn)){
+    				if(/^org\.xidea\.lite\.EncodePlugin$/.test(pn)){
     					this.appendEncodePlugin(item[1][0]);
-    				}else if(/^(?:baidu\.)?org\.xidea\.lite\.DefinePlugin$/.test(pn)){
+    				}else if(/^org\.xidea\.lite\.DefinePlugin$/.test(pn)){
     					//continue;
-    				}else if(/^(?:baidu\.)?org\.xidea\.lite\.parse\.ClientPlugin$/.test(pn)){
+    				}else if(/^org\.xidea\.lite\.parse\.ClientPlugin$/.test(pn)){
     					$log.error("程序bug(插件需要预处理):"+pn,item[2]);
     					//continue;
     				}else{

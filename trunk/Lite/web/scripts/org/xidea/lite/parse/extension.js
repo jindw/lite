@@ -9,55 +9,39 @@
  *            所有 seek<Function Name> 为当前名称空间前缀的文本函数解释器
  */
 function Extension(){
-	this.documentParser = null;
 	this.namespaceParser = null;
 	this.beforeMap = null;
-	this.onMap = null;
 	this.parserMap = null;
 	this.seekMap = null;
 }
 
 Extension.prototype={
 	initialize:function(objectMap){
-		
 		for(var key in objectMap){
 			var o = objectMap[key];
 //			$log.error("["+key+"]:"+o+"\n\n")
 			if(o instanceof Function){
 				var dest = null;
-				var match = key.match(/^(parse|seek|xmlns|on|before)(.*)/);
+				var match = key.match(/^(parse|seek|before|xmlns)(.*)/);
 				var prefix = match[1];
-				var fn = match[2];
+				var fn = formatName(match[2]);
 				if(prefix == "parse"){//""?".."
 					dest = this.parserMap ||(this.parserMap={});
-				}else if(prefix == "seek"){//""?".."
-					dest = this.seekMap ||(this.seekMap={});
-				}else if(prefix == "before"){
-					dest = this.beforeMap ||(this.beforeMap={});
-				}else if(prefix == "on"){
-					dest = this.onMap ||(this.onMap={});
+					if(fn in dest){
+						dest[fn].push(o);
+					}else{
+						dest[fn] = [o];
+					}
 				}else if(prefix == "xmlns"){
 					this.namespaceParser = o;
-					continue;
-				}
-				if(dest){
-					if(fn == "9"){//document
-						this.documentParser = o;
-					}else{
-						dest[formatName(fn)] = o;
-					}
+				}else if(prefix == "before"){
+					dest = this.beforeMap ||(this.beforeMap={});
+					dest[fn] = o;
+				}else if(prefix == "seek"){//""?".."
+					dest = this.seekMap ||(this.seekMap={});
+					dest[fn] = o;
 				}
 			}
-		}
-	},
-	seek:function(text,fn,context){
-		if(fn in this.seekMap){
-			fn = this.seekMap[fn];
-			var rtv = fn.call(context,text);
-			return rtv == null?-1:rtv;
-		}else{
-			$log.warn("文本解析时,找不到相关的解析函数,请检查模板源码,是否手误：[function:"+fn+",document:"+(context && context.currentURI)+"]")
-			return -1;
 		}
 	}
 	

@@ -11,33 +11,59 @@
 function buildTopChain(context){
 	function TopChain(){
 	}
-	addChainAddon(TopChain,context);
-	return new TopChain();
-}
-function addChainAddon(TopChain,context){
 	TopChain.prototype = context;
 	var pt = TopChain.prototype = new TopChain();
-	pt.index = context._nodeParsers.length-1;
+	pt.index = context._nodeParsers.length;
+	pt.subIndex = -1;
+	pt.getSubChain = getSubChain;
 	pt.next = doNext;
-	pt.buildNext = buildNext;
 	pt.constructor = TopChain;
+	return new TopChain();
 }
+
 function doNext(node){
 	//$log.info(typeof node,node&& node.tagName)
+	if (this.subIndex > 0) {
+		var next = this.getSubChain(this.subIndex - 1);
+	} else {
+		next = this.nextChain||buildNext(this,this.index-1);
+	}
+	doParse(node,next);
+}
+function doParse(node,chain){
 	try{
-		var parser = this._nodeParsers[this.index];
-		var n = this.nextChain||this.buildNext();
-		parser(node,this,n);
+		var parser = chain._nodeParsers[chain.index];
+		if(parser == null){
+			$log.error(parser,chain.index,chain._nodeParsers);
+		}
+		parser(node,chain,chain);
 	}catch(e){
 		$log.error("解析器执行异常："+parser,e)
 	}
 }
-function buildNext(){
-	var index = this.index-1;
+function getSubChain(subIndex){
+	if (this.subChains == null) {
+		this.subChains =[];
+	}
+	var i = this.subChains.length;
+	for (;i <= subIndex; i++) {
+		var subChain = new this.constructor();
+		subChain.index = this.index
+		//subChain.nodeType = this.nodeType;
+		subChain.subIndex = i;
+		subChain.subChains = this.subChains;
+		this.subChains.push(subChain);
+	}
+	if (subChain == null) {
+		subChain = this.subChains[subIndex];
+	}
+	return subChain;
+}
+function buildNext(thiz,index){
 	if(index>=0){
-		var n = new this.constructor();
+		var n = new thiz.constructor();
 		n.index = index
-		return this.nextChain = n;
+		return thiz.nextChain = n;
 	}
 	return null;
 }

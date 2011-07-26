@@ -1,0 +1,31 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:c='http://www.xidea.org/lite/core'>
+<body>
+		<c:extension namespace="http://www.w3.org/1999/xhtml">
+    function parseA(node){
+    	var href = node.getAttribute('href');
+    	node.appendChild(node.ownerDocument.createTextNode("#@@@"));
+    	//$log.error(node.childNodes.length,node.textContent);
+    	this.next(node);
+    }
+		</c:extension>
+		<c:extension namespace="http://www.w3.org/1999/xhtml">
+    function parseA(node){
+    	var href = node.getAttribute('href');
+    	node.appendChild(node.ownerDocument.createTextNode("#ccc"));
+    	this.next(node);
+    }
+		</c:extension>
+		<c:extension namespace="http://www.w3.org/1999/xhtml">
+			//<![CDATA[
+    function parseA(node){//连接简写，没有文本的时候，直接使用href作为文本节点
+    	var href = node.getAttribute('href');
+    	if(href && node.firstChild == null){
+    		node.appendChild(node.ownerDocument.createTextNode(href));
+    	}
+    	this.next(node);
+    }
+    //]]>
+		</c:extension>
+		<a href="cccbba.xhtml"/>
+</body>
+</html>

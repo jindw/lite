@@ -33,16 +33,6 @@ function formatName(el){
 	return tagName.toLowerCase();
 }
 
-function copyParserMap(mapClazz,p,p2,key){
-	var map = p[key];
-	if(map){
-		var result = mapClazz.newInstance();
-		p2[key] = result;
-		for(var n in map){
-			result[n]= map[n];
-		}
-	}
-}
 $log.filters.push(function(msg){
 	if(nodeLocal){
 		var currentNode = nodeLocal.get();
@@ -97,8 +87,8 @@ function getNodePosition(node){
 }
 function loadExtObject(source){
 	try{
-		var p = /\b(?:document|xmlns|(?:on|parse|before|seek)\w*)\b/g;
-		var fn = new Function(source+"\n return function(){return eval(arguments[0])}");
+		var p = /\b(?:document|xmlns|(?:parse|before|seek)\w*)\b/g;
+		var fn = new Function("$log",source+"\n return function(){return eval(arguments[0])}");
 		var m,o;
 		var objectMap = {};
 	}catch(e){
@@ -106,7 +96,7 @@ function loadExtObject(source){
 		throw e;
 	}
 	try{
-		fn = fn();
+		fn = fn($log);
 	}catch(e){
 		$log.error("扩展脚本装载失败：",source,e);
 	}
@@ -121,6 +111,18 @@ function loadExtObject(source){
 	}
 	return objectMap;
 }
+
+function copyParserMap(mapClazz,p,p2,key){
+	var map = p[key];
+	if(map){
+		var result = mapClazz.newInstance();
+		p2[key] = result;
+		for(var n in map){
+			result.put(n, map[n]);
+		}
+	}
+}
+
 
 /**
  * 
@@ -142,32 +144,27 @@ ExtensionParser.prototype = {
 			p.documentParser && (p2.documentParser = p.documentParser);
 			p.namespaceParser && (p2.namespaceParser = p.namespaceParser);
 			copyParserMap(mapClazz,p,p2,"beforeMap")
-			copyParserMap(mapClazz,p,p2,"onMap")
 			copyParserMap(mapClazz,p,p2,"parserMap")
 			copyParserMap(mapClazz,p,p2,"seekMap")
 		}
 		return result
 	},
-	parseDocument:function(node,context,chain){
-		var ce = currentExtension;
-		currentExtension = this;
-		try{
-			for(var ns in this.packageMap){
-				//objectMap.namespaceURI = namespace
-				var p = this.packageMap[ns];
-				if(p.documentParser){
-					return p.documentParser.call(chain,node,ns);
-				}
+	doParse:function (node,fns,chain,ns){
+		var last = fns.length-1;
+		if(last>0){
+			var subIndex = chain.subIndex;
+			if(subIndex <0){
+				subIndex = last;
+				chain = chain.getSubChain(last);
 			}
-			return false;
-		}finally{
-			currentExtension = ce;
+//			$log.info("##",subIndex,String(fns[subIndex]));
+			fns[subIndex].call(chain,node);
+		}else{
+			fns[0].call(chain,node,ns);
 		}
-	},
-	parseComment:function(comm, context,chain){
 		return true;
 	},
-	parseElement:function(el, context,chain,ns, name){
+	parseElement:function(el, context,chain){
 //		context.setAttribute(CURRENT_NODE_KEY,el)
 		var nns = el.namespaceURI;
 		var attrs = el.attributes;
@@ -202,11 +199,11 @@ ExtensionParser.prototype = {
 		var ext = this.packageMap[nns||''];
 		var nn = formatName(el);
 		if(ext && ext.parserMap){
-			var fn = ext.parserMap[nn];
-			if(fn && (nn in ext.parserMap)
-				 || (fn = ext.parserMap[''])){
-				fn.call(chain,el);
-				return true;
+			if(nn in ext.parserMap){
+				var fns = ext.parserMap[nn];
+				return this.doParse(el,fns,chain);
+			}else if(fns = ext.parserMap['']){
+				return this.doParse(el,fns,chain);
 			}else if(nns && nns != 'http://www.w3.org/1999/xhtml'){
 				$log.error("未支持标签：",el.tagName,context.currentURI)
 			}
@@ -230,15 +227,20 @@ ExtensionParser.prototype = {
 					nodeLocal.set(old);
 				}
 //				var es = 1.3;
-			} else if(type === 9){
-//				var es = 9.1;
-				if(this.parseDocument(node,context,chain)){
-//				var es = 9.2;
-					return;
-				}
 			}else if(type === 2){//attribute
 				if(this.parseAttribute(node,context,chain)){
 					return;
+				}
+			} else{
+				if(type == 9 || type == 8){//NODE_DOCUMENT,NODE_COMMENT
+					for(var ns in this.packageMap){
+						//objectMap.namespaceURI = namespace
+						var p = this.packageMap[ns];
+						var fns = p.parserMap[type];
+						if(fns){
+							return this.doParse(node,fns,chain,ns);
+						}
+					}
 				}
 			}
 //			var es = 10;
@@ -262,11 +264,10 @@ ExtensionParser.prototype = {
 				return true;
 			}
 //			var es=4;
-			if(ext && ext.onMap){
-				if(fn in ext.onMap){
-					var fn = ext.onMap[n];
-					fn.call(chain,node);
-					return true;
+			if(ext && ext.parserMap){
+				var key = 2+n;
+				if(key in ext.parserMap){
+					return this.doParse(node,ext.parserMap[key],chain);
 				}
 			}
 		}catch(e){
@@ -334,9 +335,16 @@ ExtensionParser.prototype = {
 					if(fp){
 						//{开始的位置，el内容
 						var text3 = text2.substring(matchLength-1);
-						var p = fp.seek(text3,fn,context);
-						if(p>=0){
-							return start+matchLength+p+1
+						var seekMap = fp.seekMap;
+						if(fn in seekMap){
+							fn = seekMap[fn];
+							var rtv = fn.call(context,text3);
+							if(rtv>0 || rtv === 0){
+								return start+matchLength+rtv+1
+							}
+						}else{
+							$log.warn("文本解析时,找不到相关的解析函数,请检查模板源码,是否手误：[function:"+fn+",document:"+(context && context.currentURI)+"]")
+							//return -1;
 						}
 					}else{
 						$log.warn("文本解析时,名称空间未注册实现程序,请检查lite.xml是否缺少语言扩展定义：[code:$"+match[0]+",namespace:"+ns+",prefix:"+prefix+",document:"+context.currentURI+"]")
@@ -394,11 +402,10 @@ ExtensionParser.prototype = {
 		}
 		ext.initialize(objectMap,namespace||'');
 	},
-	priority:2,
 	getPriority:function() {
 		//${ =>2
 		//$!{ =>3
 		//$end$ =>5
-		return this.priority;
+		return 2;
 	}
 }
