@@ -52,7 +52,7 @@ public class ECMA262FunctionTest {
 		Map<String, String> encodeMap = new LinkedHashMap<String, String>();
 		// encodeMap.put("+", "%2B");
 		encodeMap.put("http://www.xidea.org/金+大+为",
-				"http://www.xidea.org/%E9%87%91%2B%E5%A4%A7%2B%E4%B8%BA");
+				"http://www.xidea.org/%E9%87%91+%E5%A4%A7+%E4%B8%BA");
 		encodeMap.put("http://www.xidea.org/a?金=大&为=2",
 				"http://www.xidea.org/a?%E9%87%91=%E5%A4%A7&%E4%B8%BA=2"
 						.replace("%20", "+"));

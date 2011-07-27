@@ -6,7 +6,20 @@
  * @version $Id: template.js,v 1.4 2008/02/28 14:39:06 jindw Exp $
  */
 var g = {};
-function toList(source,result,type) {
+function lite__impl_def(n,fn){
+	g[n]=fn;
+}
+function lite__impl_get(n,c){
+	return (c && n in c ? c:n in g?g:this)[n];
+}
+function replacer(c,a){return a || "&#"+c.charCodeAt(0)+";"}
+function lite__impl_encode(txt,pattern){
+	return String(txt).replace(pattern||/[<&"]/g,replacer);
+}
+function lite__impl_list(source,result,type) {
+	if(source instanceof Array){
+		return source;
+	}
 	if(type == "number"){
 		while(source >0){
 			result[--source] = source+1;
@@ -18,23 +31,6 @@ function toList(source,result,type) {
 	}
 	return result;
 }
-function replacer(c,a){return a || "&#"+c.charCodeAt(0)+";"}
-function lite__impl(type,arg1,arg2){
-	if(type==3){
-		//list
-		return arg1 instanceof Array ? arg1
-			: toList(arg1,[],typeof arg1);
-	}else if(type ==2){
-		//encode
-		return String(arg1).replace(arg2||/[<&"]/g,replacer);
-	}else if(type){
-		//get
-		return (arg2 && arg1 in arg2 ? arg2:arg1 in g?g:this)[arg1];
-	}else{
-		//set
-		g[arg1]=arg2;
-	}
-}
 /**
  * 如果传入的是json 数组 或者是函数对象，直接作为编译结果初始化，否则，作为源代码编译。
  * @param data 模板源代码或者编译结果
@@ -43,16 +39,16 @@ function lite__impl(type,arg1,arg2){
  * @public
  */
 function Template(data,parseContext,runAsLiteCode){
-    if(!(data instanceof Function)){
-    	var impl = $import("org.xidea.lite.impl:TemplateImpl",{});
-        return new impl(data,parseContext,runAsLiteCode)
-    }else{
+    if(typeof data == 'function'){
 	    /**
 	     * 模板数据
 	     * @private
 	     * @tyoeof string
 	     */
-    	this.render = data(lite__impl);
+    	this.render = data(lite__impl_def,lite__impl_get,lite__impl_encode,lite__impl_list);
+    }else{
+    	var impl = $import("org.xidea.lite.impl:TemplateImpl",{});
+        return new impl(data,parseContext,runAsLiteCode)
     }
 }
 //Template.prototype.render = function(context){

@@ -27,7 +27,7 @@ function liteFunction(source,config){
     }
     parseContext.parse(data);
 	var translator = new JSTranslator(config.name,args);
-	translator.liteImpl = "lite__impl"
+	translator.liteImpl = "lite__impl_"
 	var code = translator.translate(parseContext.toList());
 	data =  window.eval("["+(code||null)+"][0]");
     data.toString=function(){//_$1 encodeXML

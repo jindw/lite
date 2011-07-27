@@ -123,7 +123,15 @@ function copyParserMap(mapClazz,p,p2,key){
 	}
 }
 
-
+function getParser(map,key){
+	var buf = [];
+	for(var n in map){
+		if(new RegExp('^'+n.replace(/\*/g,'.*')+'$').test(key)){
+			buf.push(map[n]);
+		}
+	}
+	return buf.length ? buf:null;
+}
 /**
  * 
 	public boolean parseElement(Element el, ParseContext context,
@@ -141,10 +149,14 @@ ExtensionParser.prototype = {
 			var p = this.packageMap[n];
 			var p2 = mapClazz.newInstance();
 			result[n]=p2;
-			p.documentParser && (p2.documentParser = p.documentParser);
 			p.namespaceParser && (p2.namespaceParser = p.namespaceParser);
 			copyParserMap(mapClazz,p,p2,"beforeMap")
-			copyParserMap(mapClazz,p,p2,"parserMap")
+			
+			copyParserMap(mapClazz,p,p2,"typeMap")
+			copyParserMap(mapClazz,p,p2,"tagMap")
+			copyParserMap(mapClazz,p,p2,"patternTagMap")
+			copyParserMap(mapClazz,p,p2,"attributeMap")
+			copyParserMap(mapClazz,p,p2,"patternAttributeMap")
 			copyParserMap(mapClazz,p,p2,"seekMap")
 		}
 		return result
@@ -198,11 +210,11 @@ ExtensionParser.prototype = {
 		}
 		var ext = this.packageMap[nns||''];
 		var nn = formatName(el);
-		if(ext && ext.parserMap){
-			if(nn in ext.parserMap){
-				var fns = ext.parserMap[nn];
+		if(ext && ext.tagMap){
+			if(nn in ext.tagMap){
+				var fns = ext.tagMap[nn];
 				return this.doParse(el,fns,chain);
-			}else if(fns = ext.parserMap['']){
+			}else if(fns = getParser(ext.patternTagMap,nn)){
 				return this.doParse(el,fns,chain);
 			}else if(nns && nns != 'http://www.w3.org/1999/xhtml'){
 				$log.error("未支持标签：",el.tagName,context.currentURI)
@@ -236,7 +248,7 @@ ExtensionParser.prototype = {
 					for(var ns in this.packageMap){
 						//objectMap.namespaceURI = namespace
 						var p = this.packageMap[ns];
-						var fns = p.parserMap[type];
+						var fns = p.typeMap[type];
 						if(fns){
 							return this.doParse(node,fns,chain,ns);
 						}
@@ -264,10 +276,14 @@ ExtensionParser.prototype = {
 				return true;
 			}
 //			var es=4;
-			if(ext && ext.parserMap){
-				var key = 2+n;
-				if(key in ext.parserMap){
-					return this.doParse(node,ext.parserMap[key],chain);
+			if(ext && ext.attributeMap){
+				if(n in ext.attributeMap){
+					return this.doParse(node,ext.attributeMap[n],chain);
+				}else{
+					var fns = getParser(ext.patternTagMap,nn);
+					if(fns){
+						return this.doParse(el,fns,chain);
+					}
 				}
 			}
 		}catch(e){

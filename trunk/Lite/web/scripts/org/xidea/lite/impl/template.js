@@ -60,9 +60,9 @@ function TemplateImpl(data,parseContext,runAsLiteCode){
         }else{
 	        try{
 		    	var translator = new JSTranslator("");
-		    	translator.liteImpl = "lite__impl"
+		    	translator.liteImpl = "lite__impl_"
 		    	var code = translator.translate(parseContext.toList(),true);
-		    	var fcode = "function(lite__impl){"+code+"}"
+		    	var fcode = "function(lite__impl_def,lite__impl_get,lite__impl_encode,lite__impl_list){"+code+"}"
 	            data =  window.eval("["+(fcode||null)+"][0]");
 	            data.toString=function(){//_$1 encodeXML
 	                return fcode;
@@ -71,8 +71,10 @@ function TemplateImpl(data,parseContext,runAsLiteCode){
 	        	$log.error("翻译结果错误：",e,code)
 	            throw e;
 	        }
-	        $log.warn(data+'')
-    		this.data = data(lite__impl);
+	        //$log.warn(data+'')
+	        var rtv = new Template(data);
+	        rtv.compileData = data;
+	        return rtv;
         }
         this.compileData = data;
     }

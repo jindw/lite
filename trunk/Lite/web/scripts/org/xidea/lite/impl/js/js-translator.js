@@ -14,8 +14,24 @@
 //lite__init(3,list);//tolist
 var FOR_STATUS_KEY = '$__for';
 var INIT_SCRIPT = String(function(){
-	var lite__impl = function(g){
-		function toList(source,result,type) {
+	var lite__impl_def;
+	var lite__impl_get;
+	var lite__impl_encode;
+	var lite__impl_list = function(g){
+		lite__impl_def = function(n,fn){
+    		g[n]=fn;
+    	}
+    	lite__impl_get = function(n,c){
+			return (c && n in c ? c:n in g?g:this)[n];
+		}
+		function replacer(c,a){return a || "&#"+c.charCodeAt(0)+";"}
+		lite__impl_encode = function(txt,pattern){
+			return String(txt).replace(pattern||/[<&"]/g,replacer);
+		}
+		return function(source,result,type) {
+			if(source instanceof Array){
+				return source;
+			}
 			if(type == "number"){
 				while(source >0){
 					result[--source] = source+1;
@@ -27,26 +43,9 @@ var INIT_SCRIPT = String(function(){
 			}
 			return result;
     	}
-		function replacer(c,a){return a || "&#"+c.charCodeAt(0)+";"}
-		return function(type,arg1,arg2){
-			if(type==3){
-				//list
-				return arg1 instanceof Array ? arg1
-					: toList(arg1,[],typeof arg1);
-			}else if(type ==2){
-				//encode
-				return String(arg1).replace(arg2||/[<&"]/g,replacer);
-			}else if(type){
-				//get
-				return (arg2 && arg1 in arg2 ? arg2:arg1 in g?g:this)[arg1];
-			}else{
-				//set
-				g[arg1]=arg2;
-			}
-		}
 	}({});
 	with({}){
-		alert(lite__impl);
+		alert(lite__impl_def,lite__impl_get,lite__impl_encode,lite__impl_list);
 	}
 
 }).replace(/^[^{]+\{\s*|\bwith\b[\s\S]*$/g,'').replace(/\s*([^\w_$\s]+)\s*/g,'$1')
@@ -63,12 +62,11 @@ function JSTranslator(name,params,defaults){
  */
 JSTranslator.prototype = {
 	translate:function(list,rtf){
-		var result = [];
 	    try{
 	    	//var result =  stringifyJSON(context.toList())
 	        //var list = context.toList();
 		    var context = new JSTranslateContext(list,this.name,this.params,this.defaults);
-		    context.liteImpl = this.liteImpl || "lite__impl";
+		    context.liteImpl = this.liteImpl || "lite__impl_";
 		    context.parse();
 		    if(rtf){
 		    	var code = context.header + "\nreturn "+ context.body;
@@ -84,11 +82,12 @@ JSTranslator.prototype = {
 	    	var error = $log.error("生成js代码失败:",e,code,context.constructor);
 	        code = "return ("+stringifyJSON(error)+');';
 	    }
+		var result = [];
     	if(!this.liteImpl){
-    		result.push("if(!window.",context.liteImpl,"){",INIT_SCRIPT,"}");
+    		result.push("if(!window.",context.liteImpl,"def){",INIT_SCRIPT,"}");
     	}
-	    result.push(code.replace(/<\/script>/g,'<\\/script>'));
-	    return result.join("\n");
+	    result.push('\n',code.replace(/<\/script>/g,'<\\/script>'));
+	    return result.join("");
 	}
 }
 /**
@@ -141,7 +140,7 @@ function optimizeFunction(context,functionName,refMap,callMap,params,defaults){
 	copy(callMap,map);
 	for(var n in map){
 		if(!((n in GLOBAL_VAR_MAP) ||( n in GLOBAL_DEF_MAP))){
-			result.push('\tvar ',n,'=',context.liteImpl,'(1,"',n,'"',(params?'':',$_context'),');\n');
+			result.push('\tvar ',n,'=',context.liteImpl,'get("',n,'"',(params?'':',$_context'),');\n');
 		}
 	}
 	//(a,b,c=3,d=4)
@@ -235,7 +234,7 @@ JSTranslateContext.prototype = new PT({
 	        this.appendCode(def.code);
 	        var content = optimizeFunction(this,'',refMap,callMap,def.params,def.defaults);
 	        this.depth--;
-	        fs.push(this.liteImpl,"(0,'",n,"',",content,");\n");
+	        fs.push(this.liteImpl,"def('",n,"',",content,");\n");
 	    }
 	    this.header = fs.join('');
 	    
@@ -260,7 +259,7 @@ JSTranslateContext.prototype = new PT({
     	this._appendOutput(this.stringifyEL(item[1]))
     },
     appendXT:function(item){
-        this._appendOutput(this.liteImpl,"(2,",this.stringifyEL(item[1]),")")
+        this._appendOutput(this.liteImpl,"encode(",this.stringifyEL(item[1]),")")
     },
     appendXA:function(item){
         //[7,[[0,"value"]],"attribute"]
@@ -274,12 +273,12 @@ JSTranslateContext.prototype = new PT({
         if(attributeName){
             this.append("if(",testId,"!=null){");
             this.depth++;
-            this._appendOutput("' ",attributeName,"=\"',",this.liteImpl,"(2,"+testId+"),'\"'");
+            this._appendOutput("' ",attributeName,"=\"',",this.liteImpl,"encode("+testId+"),'\"'");
             this.depth--;
             this.append("}");
             this.freeId(testId);
         }else{
-        	this._appendOutput(this.liteImpl,"(2,",value,")")
+        	this._appendOutput(this.liteImpl,"encode(",value,")")
         }
     },
     appendVar:function(item){
@@ -295,7 +294,7 @@ JSTranslateContext.prototype = new PT({
         this.freeId(bufbak);
     },
     appendEncodePlugin:function(item){//&#233;&#0xDDS;
-        this._appendOutput(this.liteImpl,'(2,',this.stringifyEL(item[1]),',/(&(?:[a-z]+|#\d+|#0x[\da-f]+);)|[<&"]/ig);')
+        this._appendOutput(this.liteImpl,'encode(',this.stringifyEL(item[1]),',/(&(?:[a-z]+|#\d+|#0x[\da-f]+);)|[<&"]/ig);')
     },
     processIf:function(code,i){
         var item = code[i];
@@ -353,7 +352,7 @@ JSTranslateContext.prototype = new PT({
         var childCode = item[1];
         var forInfo = this.findForStatus(item)
         //初始化 items 开始
-        this.append("var ",itemsId,'=',this.liteImpl,"(3,",itemsEL,")");
+        this.append("var ",itemsId,'=',this.liteImpl,"list(",itemsEL,")");
         this.append("var ",indexId,"=0;")
         this.append("var ",lastIndexId," = ",itemsId,".length-1;");
         

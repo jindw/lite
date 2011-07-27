@@ -1,1 +1,1 @@
-this.addScript('template.js',["Template","lite__impl"]);
+this.addScript('template.js',["Template"]);

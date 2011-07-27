@@ -11,8 +11,47 @@
 function Extension(){
 	this.namespaceParser = null;
 	this.beforeMap = null;
-	this.parserMap = null;
+	this.typeMap = null;
+	this.tagMap = null;
+	this.patternTagMap = null;
+	this.attributeMap = null;
+	this.patternAttributeMap = null;
 	this.seekMap = null;
+}
+function add(m,fn,o){
+	if(fn in m){
+		m[fn].push(o);
+	}else{
+		m[fn] = [o];
+	}
+}
+function appendParser(ext,key,patternKey,fn,o){
+	var m = ext[key];
+	if(fn.indexOf('*')>=0){//is pattern parser 
+		var pm = ext[patternKey];
+		pm && add(pm,fn,o);//添加 patternParser
+		if(m){//扫描已有 parser 添加 patternParser
+			var p = new RegExp('^'+fn.replace(/\*/g,'.*')+'$');
+			for(n in m){
+				if(p.test(n)){
+					add(m,n,o);
+				}
+			}
+		}
+	}else{//普通parser
+		if(!m){//创建时，自动扫描已有pattern Parser
+			ext[key] = m = {};
+			var pm = ext[patternKey];
+			if(pm){
+				for(k in pm){
+					if(new RegExp('^'+k.replace(/\*/g,'.*')+'$').test(fn)){
+						add(m,fn,pm[k]);
+					}
+				}
+			}
+		}
+		m && add(m,n,o);
+	}
 }
 
 Extension.prototype={
@@ -26,11 +65,17 @@ Extension.prototype={
 				var prefix = match[1];
 				var fn = formatName(match[2]);
 				if(prefix == "parse"){//""?".."
-					dest = this.parserMap ||(this.parserMap={});
-					if(fn in dest){
-						dest[fn].push(o);
+					var c = fn.charAt(0);
+					fn = fn.replace(/^[12]/,'');
+					if(c == '2'){
+						appendParser(this,"attributeMap","patternAttributeMap",fn,o);
+					}else if(c <'0' || c > '9' || c == '1'){
+						appendParser(this,"tagMap","patternTagMap",fn,o);
 					}else{
-						dest[fn] = [o];
+						if(!this.typeMap){
+							this.typeMap = {};
+						}
+						add(this.typeMap,fn,o);
 					}
 				}else if(prefix == "xmlns"){
 					this.namespaceParser = o;
