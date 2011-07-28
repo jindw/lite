@@ -59,18 +59,19 @@ public class ParseChainImpl extends ParseContextProxy implements ParseChain {
 		} else {
 			next = getNext();
 		}
-		next.doParse(node);
+		if (next != null) {
+			next.doParse(node);
+		} else {
+			log.warn("找不到相关解析器:" + node);
+		}
 	}
 	@SuppressWarnings("unchecked")
 	public void doParse(Object node){
 		if (nodeType.isInstance(node)) {
 			parser.parse(node, context, this);
 		} else {
-			if (next != null) {
-				next.next(node);
-			} else {
-				log.warn("找不到相关解析器:" + node);
-			}
+			next(node);
+			
 		}
 	}
 	public int getSubIndex() {

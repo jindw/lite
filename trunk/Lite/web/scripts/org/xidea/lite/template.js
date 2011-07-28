@@ -20,16 +20,19 @@ function lite__impl_list(source,result,type) {
 	if(source instanceof Array){
 		return source;
 	}
-	if(type == "number"){
-		while(source >0){
-			result[--source] = source+1;
+	if(result){
+		if(type == "number"){
+			while(source >0){
+				result[--source] = source+1;
+			}
+		}else{
+			for(type in source){
+				result.push(type);
+			}
 		}
-	}else{
-		for(type in source){
-			result.push(type);
-		}
+		return result;
 	}
-	return result;
+	return lite__impl_list(source,[],typeof source);
 }
 /**
  * 如果传入的是json 数组 或者是函数对象，直接作为编译结果初始化，否则，作为源代码编译。

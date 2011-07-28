@@ -243,6 +243,7 @@ public class XMLNormalizeImpl {
 		this.tag = new TagAttr();
 		while (m.find()) {
 			if (p != m.start()) {
+				tag = tag.parentTag;
 				break;
 			}
 			String v = m.group();

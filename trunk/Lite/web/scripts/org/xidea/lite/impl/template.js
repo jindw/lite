@@ -67,14 +67,16 @@ function TemplateImpl(data,parseContext,runAsLiteCode){
 	            data.toString=function(){//_$1 encodeXML
 	                return fcode;
 	            }
+	            $log.error(data)
+	            //escape template compile
+	        	var rtv = new (Template)(data);
+	        	rtv.compileData = data;
+	        	return rtv;
 	        }catch(e){
 	        	$log.error("翻译结果错误：",e,code)
 	            throw e;
 	        }
 	        //$log.warn(data+'')
-	        var rtv = new Template(data);
-	        rtv.compileData = data;
-	        return rtv;
         }
         this.compileData = data;
     }

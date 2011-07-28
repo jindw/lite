@@ -178,7 +178,7 @@ ExtensionParser.prototype = {
 	},
 	parseElement:function(el, context,chain){
 //		context.setAttribute(CURRENT_NODE_KEY,el)
-		var nns = el.namespaceURI;
+		var ns = el.namespaceURI;
 		var attrs = el.attributes;
 		var len = attrs.length;
 		var exclusiveMap = {};
@@ -208,16 +208,14 @@ ExtensionParser.prototype = {
 		}finally{
 			
 		}
-		var ext = this.packageMap[nns||''];
-		var nn = formatName(el);
+		var ext = this.packageMap[ns||''];
+		var n = formatName(el);
 		if(ext && ext.tagMap){
-			if(nn in ext.tagMap){
-				var fns = ext.tagMap[nn];
+			if(n in ext.tagMap){
+				var fns = ext.tagMap[n];
 				return this.doParse(el,fns,chain);
-			}else if(fns = getParser(ext.patternTagMap,nn)){
+			}else if(fns = getParser(ext.patternTagMap,n)){
 				return this.doParse(el,fns,chain);
-			}else if(nns && nns != 'http://www.w3.org/1999/xhtml'){
-				$log.error("未支持标签：",el.tagName,context.currentURI)
 			}
 		}
 	},
@@ -280,7 +278,7 @@ ExtensionParser.prototype = {
 				if(n in ext.attributeMap){
 					return this.doParse(node,ext.attributeMap[n],chain);
 				}else{
-					var fns = getParser(ext.patternTagMap,nn);
+					var fns = getParser(ext.patternTagMap,n);
 					if(fns){
 						return this.doParse(el,fns,chain);
 					}
@@ -347,7 +345,7 @@ ExtensionParser.prototype = {
 				if(ns == null){
 					$log.warn("文本解析时,查找名称空间失败,请检查是否缺少XML名称空间申明：[code:$"+match[0]+",prefix:"+prefix+",document:"+context.currentURI+"]")
 				}else{
-					var fp = this.packageMap[ns||''];
+					var fp = this.packageMap[ns];
 					if(fp){
 						//{开始的位置，el内容
 						var text3 = text2.substring(matchLength-1);

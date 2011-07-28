@@ -32,7 +32,7 @@ function appendParser(ext,key,patternKey,fn,o){
 		pm && add(pm,fn,o);//添加 patternParser
 		if(m){//扫描已有 parser 添加 patternParser
 			var p = new RegExp('^'+fn.replace(/\*/g,'.*')+'$');
-			for(n in m){
+			for(var n in m){
 				if(p.test(n)){
 					add(m,n,o);
 				}
@@ -43,14 +43,14 @@ function appendParser(ext,key,patternKey,fn,o){
 			ext[key] = m = {};
 			var pm = ext[patternKey];
 			if(pm){
-				for(k in pm){
-					if(new RegExp('^'+k.replace(/\*/g,'.*')+'$').test(fn)){
-						add(m,fn,pm[k]);
+				for(var p in pm){
+					if(new RegExp('^'+p.replace(/\*/g,'.*')+'$').test(fn)){
+						add(m,fn,pm[p]);
 					}
 				}
 			}
 		}
-		m && add(m,n,o);
+		m && add(m,fn,o);
 	}
 }
 

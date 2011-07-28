@@ -25,7 +25,7 @@ public class URLURITest {
 	@Test
 	public void testResourceContext() throws Exception{
 		String base = "http://lh:8080/test";
-		String base2 = "lite:///";
+		String base2 = "lite:/";
 		ParseContext rc =LiteTestUtil.buildParseContext(new URI(base));
 		Assert.assertEquals(base2+"test.xml", rc.createURI("test.xml").toString());
 		Assert.assertEquals(base2+"test.xml", rc.createURI("./test.xml").toString());

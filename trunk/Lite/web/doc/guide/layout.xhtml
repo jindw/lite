@@ -18,6 +18,16 @@
     	if(href && node.firstChild == null){
     		node.appendChild(node.ownerDocument.createTextNode(href));
     	}
+    	if(/\.xhtml/.test(href)){
+    		var uri = this.createURI(href);
+    		var root = this.config && this.config.root;
+    		var file = root && new java.io.File(new java.io.File(root),uri.path);
+    		if(root && uri.scheme == 'lite' && !file.exists()){
+    			var style = node.getAttribute('style');
+    			style += (style? ';':'')+'color:#333';
+    			node.setAttribute('style',style);
+    		}
+    	}
     	this.next(node);
     }
     //]]>
@@ -200,6 +210,27 @@ function parseCode(node){
 				</li>
 				<li>
 					<a href="syntax-extension.xhtml">自定义扩展[c:extension]</a>
+				</li>
+			</ul>
+			<h3>常见问题</h3>
+			<ul>
+				<li>
+					<a href="newer.xhtml">致初学者</a>
+				</li>
+				<li>
+					<a href="badcase.xhtml">Bad Case(XML)</a>
+				</li>
+			</ul>
+			<h3>二次开发参考</h3>
+			<ul>
+				<li>
+					<a href="dev-extension.xhtml">语法扩展</a>
+				</li>
+				<li>
+					<a href="dev-function.xhtml">函数扩展(PHP)</a>
+				</li>
+				<li>
+					<a href="dev-function.xhtml">函数扩展(Java)</a>
 				</li>
 			</ul>
 		</div>

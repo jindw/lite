@@ -3,7 +3,7 @@
  * var tf = liteTemplate("<c:if test='${test}'></c:if>",{type:'xml',extension:'/scripts/lite-extends.js'})
  */
 function liteTemplate(source,config){
-	var jsTemplate = new TemplateImpl(source);
+	var jsTemplate = new (Template)(source);
 	return jsTemplate;
 }
 function liteFunction(source,config){
@@ -14,7 +14,10 @@ function liteFunction(source,config){
 	}
 	var args = config.params;
 	var parseContext = new ParseContext();
-	if(typeof source == 'string'){
+	switch(typeof source){
+	case 'xml':
+		source = source.toXMLString();
+	case 'string':
     	if(/^\s*</.test(source)){
     		data =  loadXML(source,parseContext._config._root)
     		//parseContext.loadXML(source);
@@ -22,16 +25,18 @@ function liteFunction(source,config){
     		data = source;
     		//data = parseContext.createURI("<c:block>aaa<![CDATA["+source+"]]></c:block>");
     	}
-    }else{
+    	break;
+    default:
         var data = parseContext.createURI(source);
     }
     parseContext.parse(data);
 	var translator = new JSTranslator(config.name,args);
+	//不让重复生成lite__impl_
 	translator.liteImpl = "lite__impl_"
-	var code = translator.translate(parseContext.toList());
-	data =  window.eval("["+(code||null)+"][0]");
-    data.toString=function(){//_$1 encodeXML
-        return code;
-    }
+	var code = translator.translate(parseContext.toList(),true);
+	
+	var rtv = new (Template)(data);
+	data =  window.eval("(function(lite__impl_def,lite__impl_get,lite__impl_encode,lite__impl_list){"+(code||null)+"})");
+	data = data(lite__impl_def,lite__impl_get,lite__impl_encode,lite__impl_list);
     return data;
 }

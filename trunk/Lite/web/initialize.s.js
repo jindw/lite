@@ -8,4 +8,4 @@ include('classpath:///org/xidea/lite/tools/initialize.s.js');
 function filteCSSText(path,text){
 	return text.replace(/background/g,'background333-color');
 }
-addTextFilter("**.css",filteCSSText);
+//addTextFilter("**.css",filteCSSText);

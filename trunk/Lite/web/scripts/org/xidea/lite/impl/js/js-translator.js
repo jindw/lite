@@ -18,37 +18,41 @@ var INIT_SCRIPT = String(function(){
 	var lite__impl_get;
 	var lite__impl_encode;
 	var lite__impl_list = function(g){
+		function replacer(c,a){return a || "&#"+c.charCodeAt(0)+";"}
 		lite__impl_def = function(n,fn){
     		g[n]=fn;
-    	}
+    	};
     	lite__impl_get = function(n,c){
 			return (c && n in c ? c:n in g?g:this)[n];
-		}
-		function replacer(c,a){return a || "&#"+c.charCodeAt(0)+";"}
+		};
 		lite__impl_encode = function(txt,pattern){
 			return String(txt).replace(pattern||/[<&"]/g,replacer);
+		};
+		function lite__impl_keys(source){
+			var result = [];
+			for(source in source){
+				result.push(source);
+ 			}
+ 			return result;
 		}
 		return function(source,result,type) {
 			if(source instanceof Array){
 				return source;
 			}
-			if(type == "number"){
+			if(result){
 				while(source >0){
 					result[--source] = source+1;
 				}
-			}else{
-				for(type in source){
-					result.push(type);
- 				}
+				return result;
 			}
-			return result;
+			return lite__impl_list(source,[],typeof source);
     	}
 	}({});
 	with({}){
 		alert(lite__impl_def,lite__impl_get,lite__impl_encode,lite__impl_list);
 	}
 
-}).replace(/^[^{]+\{\s*|\bwith\b[\s\S]*$/g,'').replace(/\s*([^\w_$\s]+)\s*/g,'$1')
+}).replace(/^[^{]+\{\s*|\bwith\b[\s\S]*$/g,'');//.replace(/\s*([^\w_$\s]+)\s*/g,'$1')
 /**
  * JS原生代码翻译器实现
  */

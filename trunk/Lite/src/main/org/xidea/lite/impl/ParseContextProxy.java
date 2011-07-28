@@ -60,6 +60,9 @@ abstract public class ParseContextProxy implements ParseContext {
 		this.resources = parent.resources;
 	}
 
+	public ParseConfig getConfig(){
+		return this.config;
+	}
 
 	public String getFeature(String key) {
 		return featureMap.get(key);

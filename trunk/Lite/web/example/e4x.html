@@ -1,0 +1,30 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+<title>E4X 示例</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<script src="/scripts/?path=boot.js"></script>
+<script>$import("org.xidea.lite.web:*",true)</script>
+</head>
+<body>
+<script>
+/*
+	var tpl = liteFunction(function(color,text){
+		return <div style="color:${color}">
+			测试模板//表达式有问题，无法escape。
+			方法1：{"${text}"}
+			方法2：$&#123;text}
+		</div>}
+		);*/
+	var tpl = liteFunction(
+		<div style="color:${color}">
+			测试模板//表达式有问题，无法escape。
+			方法1：{"${text}"}
+			方法2：$&#123;text}
+			方法3：<![CDATA[${text}]]>
+		</div>,
+		'color','text');
+	alert(tpl('red','text')+<><![CDATA[a${123}aaa ]]></>.toXMLString())
+</script>
+</body>
+</html>

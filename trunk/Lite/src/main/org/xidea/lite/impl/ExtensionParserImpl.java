@@ -1,5 +1,6 @@
 package org.xidea.lite.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,27 +55,35 @@ public class ExtensionParserImpl implements ExtensionParser {
 		for (String namespace : packageMap.keySet()) {
 			Map<String, Map<String, Object>> parserMap = packageMap
 					.get(namespace);
-			this.init(namespace, tagMap, parserMap.get("tagMap"));
-			this.init(namespace, attributeMap, parserMap.get("attributeMap"));
-			this.init2(namespace, patternTagMap, parserMap.get("patternTagMap"));
-			this.init2(namespace, patternAttributeMap, parserMap
+			this.initParser(namespace, tagMap, parserMap.get("tagMap"));
+			this.initParser(namespace, attributeMap, parserMap
+					.get("attributeMap"));
+			this.initPatternParser(namespace, patternTagMap, parserMap
+					.get("patternTagMap"));
+			this.initPatternParser(namespace, patternAttributeMap, parserMap
 					.get("patternAttributeMap"));
-			this.init(namespace, typeMap, parserMap.get("typeMap"));
-			this.init(namespace, beforeMap, parserMap.get("beforeMap"));
+			this.initParser(namespace, typeMap, parserMap.get("typeMap"));
+			this.initParser(namespace, beforeMap, parserMap.get("beforeMap"));
 		}
 	}
 
-	private void init(String namespace, Map<String, Map<String, Object>> dest,
-			Map<String, Object> parserMap) {
+	private void initParser(String namespace,
+			Map<String, Map<String, Object>> dest, Map<String, Object> parserMap) {
 		if (parserMap != null) {
 			dest.put(namespace, parserMap);
 		}
 	}
 
-	private void init2(String namespace, Map<String, Map<Pattern, Object>> dest,
+	private void initPatternParser(String namespace,
+			Map<String, Map<Pattern, Object>> dest,
 			Map<String, Object> parserMap) {
 		if (parserMap != null) {
-			//dest.put(namespace, parserMap);
+			Map<Pattern, Object> p = new HashMap<Pattern, Object>();
+			for (String key : parserMap.keySet()) {
+				p.put(Pattern.compile("^" + key.replaceAll("[*]", ".*") + "$"),
+						parserMap.get(key));
+			}
+			dest.put(namespace, p);
 		}
 	}
 
@@ -134,30 +143,54 @@ public class ExtensionParserImpl implements ExtensionParser {
 
 	private boolean parseElement(Element el, ParseContext context,
 			ParseChain chain) {
-		String nns = el.getNamespaceURI();
 		if (parseBefore(el, context, chain)) {
 			return true;
 		}
-		Map<String, Object> parserMap = this.tagMap.get(nns == null ? "" : nns);
+		String ns = el.getNamespaceURI();
+		ns = ns == null ? "" : ns;
+		Map<String, Object> parserMap = this.tagMap.get(ns);
 		if (parserMap != null) {
 			String name = formatName(el.getNodeName());
 			Object fns = parserMap.get(name);
 			if (fns != null) {
-				doParse(el, fns, chain, nns);
+				doParse(el, fns, chain, ns);
 				return true;
 			} else {
-				this.patternTagMap.get(nns == null ? "" : nns);
+				return doPatternParse(el, this.patternTagMap, name, chain, ns);
 				// System.out.println(el.getTagName());
+			}
+		} else {
+			return doPatternParse(el, this.patternTagMap, formatName(el.getNodeName()), chain, ns);
+		}
+	}
+
+	private final boolean doPatternParse(Node el,
+			Map<String, Map<Pattern, Object>> patternMap, String name,
+			ParseChain chain, String nns) {
+		Map<Pattern, Object> pm = patternMap.get(nns);
+		if (pm != null) {
+			ArrayList<Object> fns = null;
+			for (Pattern p : pm.keySet()) {
+				if (p.matcher(name).find()) {
+					if(fns == null){
+						fns = new ArrayList<Object>();
+					}
+					fns.add(p);
+				}
+			}
+			if (fns != null) {
+				doParse(el, fns, chain, nns);
+				return true;
 			}
 		}
 		return false;
 	}
 
-	private void doParse(Node el, Object fns, ParseChain chain, String pkg) {
+	private final void doParse(Node el, Object fns, ParseChain chain, String pkg) {
 		rt.invoke(impl, "doParse", el, fns, chain, pkg);
 	}
 
-	private boolean parseBefore(Element el, ParseContext context,
+	private final boolean parseBefore(Element el, ParseContext context,
 			ParseChain chain) {
 		List<Attr> list = ParseUtil.getOrderedNSAttrList(el);
 		while (list.size() > 0) {
@@ -200,15 +233,15 @@ public class ExtensionParserImpl implements ExtensionParser {
 		if (attributeMap != null) {
 			String name = formatName(attr.getName());
 			Object fns = attributeMap.get(name);
-			if (name.startsWith("on")) {
-				Object fns2 = attributeMap.get("2on*");
-			}
 			if (fns != null) {
 				doParse(attr, fns, chain, ns);
 				// rt.invoke(impl,"doParse",el,fns, chain);
+				return true;
+			}else{
+				return doPatternParse(attr, this.patternAttributeMap, name, chain, ns);
 			}
 		}
-		return false;
+		return doPatternParse(attr, this.patternAttributeMap, formatName(attr.getName()), chain, ns);
 	}
 
 	private String formatName(String name) {

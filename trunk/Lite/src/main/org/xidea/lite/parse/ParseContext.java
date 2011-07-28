@@ -33,6 +33,8 @@ public interface ParseContext extends ResultContext, ParserHolder {
 	 * 给出文件内容或url，解析模版源文件
 	 */
 	public void parse(Object source);
+	
+	public ParseConfig getConfig();
 
 	/**
 	 * 获取当前正在解析的模版URI
@@ -110,6 +112,7 @@ public interface ParseContext extends ResultContext, ParserHolder {
 	 * @throws IOException
 	 */
 	public String loadText(URI uri) throws IOException;
+	
 	/**
 	 * 记录一下编译上下文特征变量，该对象不可被修改
 	 * 

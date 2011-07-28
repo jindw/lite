@@ -83,7 +83,9 @@ public class ResultContextImpl implements ResultContext {
 				text = ((Collection<?>) text).toArray();
 			}
 			Object[] item = (Object[]) text;
-			item[0] = ((Number)item[0]).intValue();
+			if(item.length>0){
+				item[0] = ((Number)item[0]).intValue();
+			}
 			result.add(item);
 		}
 	}

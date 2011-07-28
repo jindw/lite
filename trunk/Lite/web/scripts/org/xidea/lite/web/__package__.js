@@ -11,6 +11,7 @@ this.addScript('lite-compiler.js',["liteFunction","liteTemplate","lite__*"]
                ,[
                    "org.xidea.lite.impl.js:JSTranslator",
                    "org.xidea.lite.impl.*",
+                   "org.xidea.lite.*",
                    "org.xidea.lite.parse.*",
                    "org.xidea.lite.util.*",
                    "org.xidea.jsi:$log"

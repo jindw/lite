@@ -106,6 +106,7 @@ public class HotTemplateEngine extends TemplateEngine {
 	}
 
 	private Template buildFromSource(final String path) throws IOException {
+		long begin = System.currentTimeMillis();
 		ArrayList<File> files = new ArrayList<File>();
 		ParseContext context = createParseContext(path);
 		List<Object> items = parse(path, context);
@@ -125,7 +126,8 @@ public class HotTemplateEngine extends TemplateEngine {
 			out.write(buildLiteCode(context, items));
 			out.close();
 		}
-		log.info("中间代码编译成功，关联文件："+path+":\t"+files);
+		long end = System.currentTimeMillis();
+		log.info("lite compile success;\t time used: "+(end - begin)+"ms;\t resource dependence："+path+":\t"+files);
 		Info entry = new Info(files);
 		infoMap.put(path, entry);
 		return template;

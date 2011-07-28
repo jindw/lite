@@ -1,11 +1,14 @@
 package org.xidea.lite.test;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.URI;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Filter;
 import java.util.logging.Handler;
@@ -43,6 +46,16 @@ public class WebServer {
 				.toURI()), "../../").getCanonicalFile().getAbsoluteFile();
 		startServer(webroot);
 	}
+	private static long lastModified(List<File> list){
+		long t = 0;
+		for (File f :list) {
+			if(!f.exists()){
+				return -1;
+			}
+			t = Math.max(t,f.lastModified());
+		}
+		return t;
+	}
 
 	private static void startServer(final File root) throws IOException {
 		final URI base = root.toURI();
@@ -56,10 +69,14 @@ public class WebServer {
 		js.addLib(new File(root, "WEB-INF/lib"));
 		js.addSource(new File(root, "scripts"));
 		js.addSource(new File(root, "WEB-INF/classes"));
-		final ResourceManager manager = new ResourceManagerImpl(base, base.resolve("WEB-INF/lite.xml"));
-		final HotTemplateEngine ht = new HotTemplateEngine((ParseConfig)manager);
+		
 		MutiThreadWebServer mtws = new MutiThreadWebServer(base) {
+			private long lastModified = 0;
+			ResourceManagerImpl manager;
+			HotTemplateEngine ht;
+			
 			public void processRequest(RequestContext context) throws Exception {
+				init(base);
 				final String uri = context.getRequestURI();
 				String rp = CGIEnvironment.toRealPath(base, uri);
 				if (rp.endsWith(".php")) {
@@ -97,6 +114,32 @@ public class WebServer {
 							RequestUtil.printResource(result,null);
 						}
 					}
+				}
+			}
+
+			private void init(final URI base) throws IOException {
+				long time = manager == null? -1:lastModified(manager.getScriptFileList());
+				if(time <0 || lastModified != time){
+					manager = new ResourceManagerImpl(base, base.resolve("WEB-INF/lite.xml"));
+					ht = new HotTemplateEngine((ParseConfig)manager);
+					final List<File> scriptFileList = manager.getScriptFileList();
+					new File(new File(base),"WEB-INF").listFiles(new FileFilter() {
+						public boolean accept(File file) {
+							String name = file.getName();
+							if (file.isDirectory()) {
+								if (!name.startsWith(".")) {
+									file.listFiles(this);
+								}
+							} else {
+								if(name.endsWith(".js")){
+									scriptFileList.add(file);
+								}
+							}
+							return false;
+						}
+
+					});
+					lastModified = lastModified(scriptFileList);
 				}
 			}
 		};
