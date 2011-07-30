@@ -49,6 +49,26 @@ var Core = {
 			return -1;
 		}
 	},
+	/**
+	 * TODO:...
+	 * ${a,b=>x*b}
+	 * ${list.sort({a=>a.length-b.length})}
+	 *
+	"seek:":function(text){
+		var sp = text.indexOf(':');
+		var end = sp>0 && findELEnd(text,sp);
+		if(end){
+			var args = text.substring(1,sp);
+			var el = text.substring(sp+1,end);
+	    	var config = _parseDefName('('+ns+')');
+	    	this.appendPlugin(PLUGIN_DEFINE,stringifyJSON(config));
+	        this.appendEL(el);
+	        return end;
+		}else{
+			$log.warn("Lambda 表达式解析异常，请检查是否手误：[fileName:"+this.currentURI+",el:"+el+"]")
+			return -1;
+		}
+	},*/
 	"seek#":function(text){
 		var end = findELEnd(text,0);
 		if(end>0){
@@ -310,39 +330,55 @@ function seekFor(text){
     	return end;
 	}
 }
-function findForStart(list){
-	var value = list;
-	var dd=0;
-	while(true){
-		try{
-			new Function("return "+value.replace(/\.\./g,'./.'));
-			return dd;
-		}catch(e){
+function splitList(list){
+	try{
+		new Function("return "+list.replace(/\.\./g,'.%%.'));//for x4e
+		return [list];
+	}catch(e){
+		var dd= 0
+		while(true){
 			dd = list.indexOf('..',dd+1);
 			if(dd>0){
-				value = list.substring(0,dd)+'-'+list.substring(dd+2)
+				try{
+					var begin = list.substring(0,dd);
+					var end = list.substring(dd+2);
+					new Function("return "+begin+'-'+end);//for x4e
+					
+					var begin2 = begin.replace(/^\s*\[/,'');
+					
+					if(begin2 != begin){
+						try{
+							new Function("return "+begin);
+							begin2 = begin;
+						}catch(e){
+						}
+					}
+					if(begin2 != begin){
+						end = end.replace(/\]\s*$/,'');
+						$log.info("[start,last] 语法 不是通用表达式，只能在for循环中使用。",list);
+						return [begin2,end];
+					}else{
+						$log.warn("range for 表达式(非通用表达式)推荐模式为：[start,last]，您提供的表达式为"+list);
+						return [begin,end];
+					}
+				}catch(e){
+				}
+				//value = list.substring(0,dd)+'-'+list.substring(dd+2)
 			}else{
-				return dd;
+				return [];
 			}
 		}
 	}
 }
 function startFor(context,key,list,status_){
-	var dd = findForStart(list);
-	if(dd>0){
-		var begin = list.substring(0,dd);
-		var end = list.substring(dd+2);
-		if(findForStart(begin) !== 0){
-			begin = begin.replace(/^\s*\[/,'');
-			end = end.replace(/\]\s*$/,'');
-			$log.info("range for 为非通用表达式，只能在for循环中使用");
-		}else{
-			$log.error("range for 表达式(非通用表达式)推荐模式为：[start,last]，您提供的表达式为"+list);
-		}
+	var be = splitList(list);
+	if(be.length==2){
+		var begin = be[0];//list.substring(0,dd);
+		var end = be[1];//list.substring(dd+2);
 		list = "Math.abs("+begin+'-'+end+")+1";
 		context.appendFor(key,list,status_||null);
 		context.appendVar(key,key+'+'+begin+"-1");
-	}else if(dd ==0){
+	}else if(be.length ==1){
 		context.appendFor(key,list,status_);
 	}else{
 		$log.error("for表达式无效："+list);

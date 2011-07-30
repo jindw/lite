@@ -6,15 +6,68 @@
 	<body>
 		<h3>功能支持</h3>
 		<p>
-			Lite模板循环控制分三种情况：
+			Lite模板循环控制分四种情况：
 			<ul>
 				<li>对数组的循环。</li>
-				<li>对健值集合的循环。</li>
-				<li>固定循环次数数的循环。</li>
+				<li>对健值集合的键集循环（类似javascript 的for in 语法）。</li>
+				<li>指定循环次数的循环。</li>
+				<li>指定循环区间的循环。</li>
 			</ul>
 			此外，Lite循环还有一个特色，
 			<strong>循环的空处理</strong>
 			（c:else 语法）：
 		</p>
+		<p>
+			如果您希望得到循环状态信息，有一个for关键字可以帮你。
+		</p>
+		<h3>示例1（四种循环类型）</h3>
+		<ul>
+		
+		<x:code>
+		<![CDATA[
+			<label>时间：</label>
+			<!-- 最常见的是对数组循环(属性模式简单一点) -->
+			<select name="year">
+				<option c:for="${year:[1981,1982,1983]}">${year}</option>
+			</select>年
+			<!-- 您还可以指定区间循环-->
+			<select name="month">
+				<option c:for="${month:[1..12]}">${month}</option>
+			</select>月
+			<!-- 您也可以对数字循环，数字循环的时候，var变量从1开始 -->
+			<select name="date">
+				<c:for var="date" list="${31}">
+					<option>${date}</option>
+				</c:for>
+			</select>日
+			<!-- 您还可以对对象key循环 -->
+			<c:var name="apMap" value="${ {'AM':'上午','PM':'下午'} }"/>
+			<select name="ap">
+				<c:for var="ap" list="${apMap}">
+					<option value='${ap}'>${apMap[ap]}</option>
+				</c:for>
+			</select>
+		]]>
+		</x:code>
+		</ul>
+		<h3>示例2（循环空处理和for状态字）</h3>
+		<ul>
+		<x:code>
+		<![CDATA[
+		<c:for var="data" list="${result}" status="dataFor">
+			<!-- 这里 ${dataFor.dataFor} 等价于 ${for.index} -->
+			<div>第${dataFor.index}条数据属性值为：<div>
+			<div>
+				<p c:for="${p:user}">
+					属性${p}：值为：${user[p]}
+				</p>
+			</div>
+		</c:for>
+		<c:else>
+			<p>没有数据</p>
+		</c:else>
+		]]>
+		</x:code>
+		</ul>
 	</body>
 </html>
