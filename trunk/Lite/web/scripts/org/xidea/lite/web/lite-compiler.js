@@ -3,7 +3,7 @@
  * var tf = liteTemplate("<c:if test='${test}'></c:if>",{type:'xml',extension:'/scripts/lite-extends.js'})
  */
 function liteTemplate(source,config){
-	var jsTemplate = new (Template)(source);
+	var jsTemplate = new TemplateImpl(source);
 	return jsTemplate;
 }
 function liteFunction(source,config){
