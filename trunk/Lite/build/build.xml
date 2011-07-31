@@ -164,6 +164,10 @@
 			<arg value="-config.features" />
 			<arg value=":Debug" />
 			<arg value="-exports" />
+			<arg value="org.xidea.lite.parse:*" />
+			<arg value="org.xidea.lite.impl.js:*" />
+			<arg value="org.xidea.lite.impl.php:*" />
+			<arg value="org.xidea.lite.util:*" />
 			<arg value="org.xidea.lite.web:*" />
 
 			<arg value="-outputExported" />
@@ -177,6 +181,11 @@
 			<arg value=":Debug" />
 			<arg value="-exports" />
 			<arg value="org.xidea.lite.web:WebCompiler" />
+			<arg value="org.xidea.lite.parse:*" />
+			<arg value="org.xidea.lite.impl.js:*" />
+			<arg value="org.xidea.lite.impl.php:*" />
+			<arg value="org.xidea.lite.util:*" />
+			<arg value="org.xidea.lite.web:*" />
 			<arg value="-outputExported" />
 			<arg value="${basedir}/build/dest/boot.js" />
 		</java>

@@ -306,7 +306,7 @@ function parseCode(node){
 			exampleRunner.parentNode.style.display = 'block';
 			exampleResult.style.display = 'none';
 			if(typeof json != 'string'){
-				json = stringifyJSON(json);
+				json = JSON.stringify(json);
 			}
 			jsonEditor.setValue(json);
 			templateEditor.setValue(template);
@@ -400,6 +400,8 @@ function parseCode(node){
 				</div>
 			</div>
 		</div>
+		<script src="lite-compiler.js"/>
+		<!--  
 		<script src="/scripts/boot.js"/>
 		<script>
 		$import('org.xidea.lite.web:*',true);
@@ -407,8 +409,7 @@ function parseCode(node){
 		$import('org.xidea.lite.impl.php:*',true);
 		$import('org.xidea.lite.parse:*',true);
 		$import('org.xidea.lite.util:stringifyJSON',true);
-		
-		
 		</script>
+		-->
 	</body>
 </html>
