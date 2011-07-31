@@ -20,6 +20,8 @@ if(realpath("..".$path)){
 		}
 		readfile("..".$path);
 	}
+}else if($path == '/doc/boot.js'){
+	readfile("../WEB-INF/classes/lite/boot.js");
 }else{
     echo '<h3>找不到文件:'.$path.'</h3>';
 }

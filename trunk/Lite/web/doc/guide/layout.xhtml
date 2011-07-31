@@ -277,18 +277,18 @@ function parseCode(node){
 				</div>
 				<div class="templateSource">
 					<h5>模板代码</h5>
-					<script><![CDATA[
+					<script>//<![CDATA[
 		var templateEditor = CodeMirror(placeMirror, {
 			value: '',
 			lineNumbers: true,
 			mode: {name:"litexml"}
 		});
-					]]>
+					//]]>
 					</script>
 				</div>
 				<div class="resultSource" id="exampleResult">
 					<h5>结果输出</h5>
-					<script><![CDATA[
+					<script>//<![CDATA[
 		var resultEditor = CodeMirror(placeMirror, {
 			value: '',
 			readOnly:true,
@@ -389,7 +389,7 @@ function parseCode(node){
 			showResult(litecode);
 		}
 		
-		]]>
+		//]]>
 					</script>
 				</div>
 				<div class="toolbar">
@@ -400,16 +400,19 @@ function parseCode(node){
 				</div>
 			</div>
 		</div>
-		<script src="lite-compiler.js"/>
+		<script src="../boot.js"/>
 		<!--  
 		<script src="/scripts/boot.js"/>
-		<script>
-		$import('org.xidea.lite.web:*',true);
-		$import('org.xidea.lite.impl.js:*',true);
-		$import('org.xidea.lite.impl.php:*',true);
-		$import('org.xidea.lite.parse:*',true);
-		$import('org.xidea.lite.util:stringifyJSON',true);
-		</script>
 		-->
+		<script>
+		if(!this.ParseContext){
+			$import('org.xidea.lite.web:*',true);
+			$import('org.xidea.lite.impl.js:*',true);
+			$import('org.xidea.lite.impl.php:*',true);
+			$import('org.xidea.lite.parse:*',true);
+			$import('org.xidea.lite.util:stringifyJSON',true);
+		}
+		</script>
+		
 	</body>
 </html>

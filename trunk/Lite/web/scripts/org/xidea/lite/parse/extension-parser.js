@@ -246,9 +246,11 @@ ExtensionParser.prototype = {
 					for(var ns in this.packageMap){
 						//objectMap.namespaceURI = namespace
 						var p = this.packageMap[ns];
-						var fns = p.typeMap[type];
-						if(fns){
-							return this.doParse(node,fns,chain,ns);
+						if(p && p.typeMap){
+							var fns = p.typeMap[type];
+							if(fns){
+								return this.doParse(node,fns,chain,ns);
+							}
 						}
 					}
 				}
