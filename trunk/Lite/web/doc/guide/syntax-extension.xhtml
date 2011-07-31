@@ -89,6 +89,7 @@
 					var varId = this.allocateId();
 					//生成内容
 					this.appendCapture(varId)
+					//以不编码的方式捕捉内容
 					var list = this.parseText(text,0);
 					this.appendAll(list);
 					this.appendEnd();
