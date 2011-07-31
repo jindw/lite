@@ -17,6 +17,25 @@
 
 			本文，我们将重点介绍标签语法的扩展方法。
 		</p>
+		<h3>API结构</h3>
+		<p>Lite 一共有9中中间代码，一个通用的结束指令，一个批量条件接口，一个静态文本添加接口，共有12个中间指令操作接口。
+			他们分别是：
+			<ul>
+				<li>append(text)<p></p></li>
+				<li>appendEL(el)<p></p></li>
+				<li>appendIf(el)<p></p></li>
+				<li>appendElse(el)<p></p></li>
+				<li>appendEnd()<p></p></li>
+				<li>appendFor(varName, el, status)<p></p></li>
+				<li>appendXA(attrName, el)<p></p></li>
+				<li>appendXT(el)<p></p></li>
+				<li>appendVar(varName, el)<p></p></li>
+				<li>appendCapture(varName)<p></p></li>
+				<li>appendPlugin(pluginClass, pluginConfig)<p></p></li>
+				<li>appendAll(list)<p></p></li>
+			</ul>
+		</p>
+		<p></p>
 		<h3>示例1</h3>
 		<ul>
 			<p>有没有为javascript多行字符串申明苦恼过？我们可以写一个模板扩展，让这个事情顺利一点。</p>
@@ -48,6 +67,46 @@
 				</html>
 				]]>]]<![CDATA[>
 				</x:string>
+			</body>
+			</html>
+			]]>
+			</x:code>
+		</ul>
+		<h3>示例2</h3>
+		<ul>
+			<p>有时候，我们需要吧一些有换行的文本显示成换行，但是，有希望代码是编码安全的。通常，这种功能只能通过内置函数实现。
+			现在，我们尝试用一个插件解决这个问题。
+			</p>
+			<x:code model="{text:'abc\ndef\nghi\n<script>该编码的还是的编码<\/script>'}">
+			<![CDATA[
+			<html xmlns:x="http://www.xidea.org/lite/example">
+			<head>
+			<title>==测试==</title>
+			<c:extension namespace="http://www.xidea.org/lite/example">
+				<![CDATA[
+				function parseNL2BR(node){
+					var text = String(node.textContent || node.text);
+					var varId = this.allocateId();
+					//生成内容
+					this.appendCapture(varId)
+					var list = this.parseText(text,0);
+					this.appendAll(list);
+					this.appendEnd();
+					
+					//将生成内容按行劈成数组，循环安全输出
+					var forId = this.allocateId();
+					this.appendFor(forId,varId+".split('\\n')",null);
+					this.appendXT(forId);
+					this.append("<br/>");
+					this.appendEnd();
+				}
+				]]>]]<![CDATA[>
+			</c:extension>
+			</head>
+			<body>
+				<x:nl2br>随便写点什么，
+				变量也行${text}
+				</x:nl2br>
 			</body>
 			</html>
 			]]>

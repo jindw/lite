@@ -111,6 +111,14 @@ ResultContext.prototype = {
 		config['class'] = clazz;
 		this.result.push([PLUGIN_TYPE,config]);
 	},
+	allocateId:function(){
+		if(this.inc){
+			this.inc++;
+		}else{
+			this.inc = 1;
+		}
+		return 'gid_'+this.inc.toString(32);
+	},
 	mark:function(){
 		return this.result.length;
 	},

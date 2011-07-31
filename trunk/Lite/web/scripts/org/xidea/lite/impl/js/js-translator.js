@@ -36,8 +36,8 @@ var INIT_SCRIPT = String(function(){
 			}
 			return result;
     	};
-		//function replacer0(c){return "&#"+c.charCodeAt(0)+";"}
-		function replacer(c,a){return a || "&#"+c.charCodeAt(0)+";"}
+		var map = {'"':'&#34;','<':'&lt;','&':'&#38;'};
+		function replacer(c){return map[c]||c}
 		//xt:0,xa:1,xp:2
 		g[0] = function(txt,type){
 //			if(type){

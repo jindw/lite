@@ -27,12 +27,12 @@ g[1] = function(source,result,type) {
 	return result;
 };
 //function replacer0(c){return "&#"+c.charCodeAt(0)+";"}
-function replacer(c,a){return a || "&#"+c.charCodeAt(0)+";"}
+var map = {'"':'&#34;','<':'&lt;','&':'&#38;'}
+function replacer(c){return map[c]||c}
 g[0] = function(txt,type){
 	return String(txt).replace(
 		type==1?/[<&"]/g:type?/(&(?:[a-z]+|#\d+|#0x[\da-f]+);)|[<&"]/ig:/[<&]/g
 		,replacer);
-	return String(txt).replace(/[<&"]/g,replacer0);
 };
 
 function lite__impl_def(n,fn){
