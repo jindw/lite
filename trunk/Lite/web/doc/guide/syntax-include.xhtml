@@ -1,0 +1,28 @@
+<html xmlns:x="http://www.xidea.org/lite/example" xmlns="http://www.w3.org/1999/xhtml"
+	xml:lang="zh-CN" dir="ltr">
+	<head>
+		<title>模板包含</title>
+	</head>
+	<body>
+		<h3>功能支持</h3>
+		<p>
+			<ul>
+				<li>包含某个完全的页面。</li>
+				<li>通过xpath,只包含某个完整页面的部分选中的内容。</li>
+			</ul>
+		</p>
+		<h3>功能限制</h3>
+		<p>受xml完整性约束的限制,我们不能把一个完整的元素拆成<strong>不完整</strong>两半分别放在不同的备包含文件中(常见的不完整的head,foot模式的包含,不能支持).</p>
+		<p>该功能运用并不广泛,更多场景我们建议采用模板继承的思想实现:<a href="syntax-extends.xhtml"/></p>
+		<h3>用法示例</h3>
+		<ul>
+		<x:code>
+		<![CDATA[
+		<c:include path="menu.xhtml"/>
+		<c:include path="controls.xhtml" xpath="//*[@id='pageList']"/>
+		<c:include path="${page}" xpath="//xhtml:body"/>
+		]]>
+		</x:code>
+		</ul>
+	</body>
+</html>

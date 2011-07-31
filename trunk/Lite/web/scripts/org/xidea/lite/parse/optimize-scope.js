@@ -75,6 +75,7 @@ function vistDef(context,item){
 	def.name = config.name;
 	def.params = config.params;
 	def.defaults = config.defaults;
+	context.fors = context.fors.concat(def.fors)
 	context.defs.push(def);
 }
 function vistLite(context,code){

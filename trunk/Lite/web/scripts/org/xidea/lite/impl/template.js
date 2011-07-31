@@ -67,7 +67,6 @@ function TemplateImpl(data,parseContext,runAsLiteCode){
 	            data.toString=function(){//_$1 encodeXML
 	                return fcode;
 	            }
-	            $log.error(data)
 	            //escape template compile
 	        	var rtv = new (Template)(data);
 	        	rtv.compileData = data;

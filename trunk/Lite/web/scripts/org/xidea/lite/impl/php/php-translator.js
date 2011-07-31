@@ -314,6 +314,7 @@ PHPTranslateContext.prototype = new TCP({
         }
         
         this.append(indexAutoId,"=-1;")
+        this.append(isKeyAutoId,'=false;')
         this.append("foreach(",itemsAutoId," as ",keyAutoId,"=>",varName,"){");
         this.depth++;
 	    this.append("if(++",indexAutoId," === 0){");

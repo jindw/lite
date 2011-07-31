@@ -36,7 +36,7 @@ function liteFunction(source,config){
 	var code = translator.translate(parseContext.toList(),true);
 	
 	var rtv = new (Template)(data);
-	data =  window.eval("(function(lite__impl_def,lite__impl_get,lite__impl_encode,lite__impl_list){"+(code||null)+"})");
-	data = data(lite__impl_def,lite__impl_get,lite__impl_encode,lite__impl_list);
+	data =  window.eval("(function(lite__impl_def,lite__impl_get){"+(code||null)+"})");
+	data = data(lite__impl_def,lite__impl_get);
     return data;
 }

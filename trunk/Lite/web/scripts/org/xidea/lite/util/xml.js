@@ -13,6 +13,7 @@ function loadXML(uri,root){
 	    	}
 		}
         if(/^[\s\ufeff]*[<#]/.test(uri)){
+        	//$log.info(uri)
     	    var doc =parseXMLByText(uri.replace(/^[\s\ufeff]*/,''))
     	    //alert([data,doc.documentElement.tagName])
     	}else{

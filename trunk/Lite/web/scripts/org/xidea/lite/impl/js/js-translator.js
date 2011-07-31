@@ -14,42 +14,48 @@
 //lite__init(3,list);//tolist
 var FOR_STATUS_KEY = '$__for';
 var INIT_SCRIPT = String(function(){
-	var lite__impl_def;
 	var lite__impl_get;
-	var lite__impl_encode;
-	var lite__impl_list = function(g){
-		function replacer(c,a){return a || "&#"+c.charCodeAt(0)+";"}
-		lite__impl_def = function(n,fn){
-    		g[n]=fn;
-    	};
+	var lite__impl_def = function(g,p){
     	lite__impl_get = function(n,c){
 			return (c && n in c ? c:n in g?g:this)[n];
 		};
-		lite__impl_encode = function(txt,pattern){
-			return String(txt).replace(pattern||/[<&"]/g,replacer);
-		};
-		function lite__impl_keys(source){
-			var result = [];
-			for(source in source){
-				result.push(source);
- 			}
- 			return result;
-		}
-		return function(source,result,type) {
+		g[1] = function(source,result,type) {
 			if(source instanceof Array){
 				return source;
 			}
-			if(result){
+			var result = [];
+			if(typeof source == 'number'){
+				source = parseInt(source);
 				while(source >0){
 					result[--source] = source+1;
 				}
-				return result;
+			}else{
+				for(source in source){
+					result.push(source);
+ 				}
 			}
-			return lite__impl_list(source,[],typeof source);
-    	}
+			return result;
+    	};
+		//function replacer0(c){return "&#"+c.charCodeAt(0)+";"}
+		function replacer(c,a){return a || "&#"+c.charCodeAt(0)+";"}
+		//xt:0,xa:1,xp:2
+		g[0] = function(txt,type){
+//			if(type){
+//				type = type == 1?/[<&]/g:/(&(?:[a-z]+|#\d+|#0x[\da-f]+);)|[<&"]/ig;
+//			}else{
+//				type = /[<&"]/g;
+//			}
+//			type = ;
+			return String(txt).replace(
+				type==1?/[<&"]/g:type?/(&(?:[a-z]+|#\d+|#0x[\da-f]+);)|[<&"]/ig:/[<&]/g
+				,replacer);
+		};
+		return function(n,fn){
+    		g[n]=fn;
+    	};
 	}({});
 	with({}){
-		alert(lite__impl_def,lite__impl_get,lite__impl_encode,lite__impl_list);
+		alert(lite__impl_def,lite__impl_get);
 	}
 
 }).replace(/^[^{]+\{\s*|\bwith\b[\s\S]*$/g,'');//.replace(/\s*([^\w_$\s]+)\s*/g,'$1')
@@ -83,7 +89,7 @@ JSTranslator.prototype = {
 		    	new Function(code);
 		    }
 	    }catch(e){
-	    	var error = $log.error("生成js代码失败:",e,code,context.constructor);
+	    	var error = $log.error("生成js代码失败:",e,code);
 	        code = "return ("+stringifyJSON(error)+');';
 	    }
 		var result = [];
@@ -111,6 +117,7 @@ function JSTranslateContext(code,name,params,defaults){
     TranslateContext.call(this,code,name,params,defaults);
     this.forStack = [];
     this.defaults = defaults;
+    this.impl_counter = {list:0,x:0};
 }
 var GLOBAL_VAR_MAP ={
 	"JSON":1,
@@ -126,26 +133,18 @@ var GLOBAL_DEF_MAP ={
 	"isFinite":1, 	
 	"isNaN":1
 };
+
 function copy(source,target){
 	for(var n in source){
 		target[n] = source[n];
 	}
 }
 
-function optimizeFunction(context,functionName,refMap,callMap,params,defaults){
+function optimizeFunction(context,functionName,params,defaults,result){
 	var text = context.reset();
-	var result = [];
 	var args = '$_context';
 	if(params){
 		args = params.join(',');
-	}
-	var map = {};
-	copy(refMap,map);
-	copy(callMap,map);
-	for(var n in map){
-		if(!((n in GLOBAL_VAR_MAP) ||( n in GLOBAL_DEF_MAP))){
-			result.push('\tvar ',n,'=',context.liteImpl,'get("',n,'"',(params?'':',$_context'),');\n');
-		}
 	}
 	//(a,b,c=3,d=4)
 	//switch(arguments.length){
@@ -157,8 +156,6 @@ function optimizeFunction(context,functionName,refMap,callMap,params,defaults){
 	//		d=4
 	//	case 4
 	//	default
-	//
-	//
 	//}
 	if(defaults && defaults.length){
 		result.push('\tswitch(arguments.length){\n');
@@ -194,6 +191,24 @@ function optimizeFunction(context,functionName,refMap,callMap,params,defaults){
     	functionName = "function";
     }
     return functionName+"("+args+'){\n'+result.join('')+text.replace(/^[\r\n]+/,'')+'\n}';
+}
+function buildVars(context,refMap,callMap,params){
+	var result = [];
+	var map = {};
+	copy(refMap,map);
+	copy(callMap,map);
+	for(var n in map){
+		if(!((n in GLOBAL_VAR_MAP) ||( n in GLOBAL_DEF_MAP))){
+			result.push('\tvar ',n,'=',context.liteImpl,'get("',n,'"',(params?'':',$_context'),');\n');
+		}
+	}
+	if(context.impl_counter.list){
+		result.push('\tvar ',context.liteImpl,'list=',context.liteImpl,'get(1);\n');
+	}
+	if(context.impl_counter.x){
+		result.push('\tvar ',context.liteImpl,'x=',context.liteImpl,'get(0);\n');
+	}
+	return result;
 }
 function PT(pt){
 	for(var n in pt){
@@ -236,9 +251,11 @@ JSTranslateContext.prototype = new PT({
 	        var callMap = def.callMap;
 	        this.depth++;
 	        this.appendCode(def.code);
-	        var content = optimizeFunction(this,'',refMap,callMap,def.params,def.defaults);
+	        var vars = buildVars(this,refMap,callMap,def.params);
+	        var content = optimizeFunction(this,'',def.params,def.defaults,vars);
 	        this.depth--;
 	        fs.push(this.liteImpl,"def('",n,"',",content,");\n");
+	        this.impl_counter = {list:0,x:0};
 	    }
 	    this.header = fs.join('');
 	    
@@ -252,7 +269,9 @@ JSTranslateContext.prototype = new PT({
 	    }
 	    var refMap = this.scope.externalRefMap;
 	    var callMap =this.scope.callMap;
-	    this.body = optimizeFunction(this,this.name,refMap,callMap,this.params,this.defaults);
+	    
+	    var vars = buildVars(this,refMap,callMap,this.params);
+	    this.body = optimizeFunction(this,this.name,this.params,this.defaults,vars);
 	    //this.append("return $_out.join('');");
 	},
 	
@@ -263,9 +282,11 @@ JSTranslateContext.prototype = new PT({
     	this._appendOutput(this.stringifyEL(item[1]))
     },
     appendXT:function(item){
-        this._appendOutput(this.liteImpl,"encode(",this.stringifyEL(item[1]),")")
+    	this.impl_counter.x++;
+        this._appendOutput(this.liteImpl,"x(",this.stringifyEL(item[1]),")")
     },
     appendXA:function(item){
+    	this.impl_counter.x++;
         //[7,[[0,"value"]],"attribute"]
         var el = item[1];
         var value = this.stringifyEL(el);
@@ -277,12 +298,12 @@ JSTranslateContext.prototype = new PT({
         if(attributeName){
             this.append("if(",testId,"!=null){");
             this.depth++;
-            this._appendOutput("' ",attributeName,"=\"',",this.liteImpl,"encode("+testId+"),'\"'");
+            this._appendOutput("' ",attributeName,"=\"',",this.liteImpl,"x("+testId+",1),'\"'");
             this.depth--;
             this.append("}");
             this.freeId(testId);
         }else{
-        	this._appendOutput(this.liteImpl,"encode(",value,")")
+        	this._appendOutput(this.liteImpl,"x(",value,",1)")
         }
     },
     appendVar:function(item){
@@ -298,7 +319,8 @@ JSTranslateContext.prototype = new PT({
         this.freeId(bufbak);
     },
     appendEncodePlugin:function(item){//&#233;&#0xDDS;
-        this._appendOutput(this.liteImpl,'encode(',this.stringifyEL(item[1]),',/(&(?:[a-z]+|#\d+|#0x[\da-f]+);)|[<&"]/ig);')
+    	this.impl_counter.x++;
+        this._appendOutput(this.liteImpl,'x(',this.stringifyEL(item[1]),',2)')
     },
     processIf:function(code,i){
         var item = code[i];
@@ -346,6 +368,7 @@ JSTranslateContext.prototype = new PT({
 		}
     },
     processFor:function(code,i){
+    	this.impl_counter.list++;
         var item = code[i];
         var indexId = this.allocateId();
         var lastIndexId = this.allocateId();

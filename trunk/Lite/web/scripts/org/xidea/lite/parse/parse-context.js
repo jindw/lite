@@ -145,11 +145,16 @@ ParseContext.prototype = {
 	    return xhr.responseText;
     },
     loadXML:function(path){
-    	if(!(path instanceof URI)){
-    		path = new URI(path)
+    	var t1 = +new Date();
+    	if(path instanceof URI){
+    	}else{
+    		if(/^\s*</.test(path)){
+    			return loadXML(path,this._config._root)
+    		}else{
+    			path = new URI(path)
+    		}
     	}
     	this.setCurrentURI(path);
-    	var t1 = +new Date();
     	return loadXML(path,this._config._root)
     	this._context._loadTime+=(new Date()-t1)
     },

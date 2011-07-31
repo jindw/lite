@@ -1,0 +1,104 @@
+<html xmlns:x="http://www.xidea.org/lite/example" xmlns="http://www.w3.org/1999/xhtml"
+	xml:lang="zh-CN" dir="ltr">
+	<head>
+		<title>模板编译扩展</title>
+	</head>
+	<body>
+		<h3>功能支持</h3>
+		<p>
+			Lite 是一个模板平台，而不仅仅是一个模板系统，我们可以在这个平台上自己设计模板语法。
+
+			在现有基础上，我们可以通过如下三种形式扩展模板语法。
+			<ul>
+				<li>扩展名称空间标签语法。</li>
+				<li>扩展名称空间属性语法。</li>
+				<li>扩展文本语法。</li>
+			</ul>
+
+			本文，我们将重点介绍标签语法的扩展方法。
+		</p>
+		<h3>示例1</h3>
+		<ul>
+			<p>有没有为javascript多行字符串申明苦恼过？我们可以写一个模板扩展，让这个事情顺利一点。</p>
+			<x:code model="{}">
+			<![CDATA[
+			<html xmlns:x="http://www.xidea.org/lite/example">
+			<head>
+			<title>==测试==</title>
+			<c:extension namespace="http://www.xidea.org/lite/example">
+				<![CDATA[
+				function parseString(node){
+					var text = String(node.textContent || node.text);
+					text = text.replace(/^\s*[\r\n]+|[\r\n]+\s*$/g,'');
+					var varName = node.getAttribute('var');
+					this.append("<script>var "
+						+varName+'='+JSON.stringify(text)
+						+";<\/script>");
+				}
+				]]>]]<![CDATA[>
+			</c:extension>
+			</head>
+			<body>
+				<x:string var="source">
+				<![CDATA[
+				<html>
+				<body>
+					随便写点什么
+				</body>
+				</html>
+				]]>]]<![CDATA[>
+				</x:string>
+			</body>
+			</html>
+			]]>
+			</x:code>
+		</ul>
+		<h3>真实运用示例</h3>
+		<ul>
+			<p>该文档系统中，有个常用的模板语法扩展:代码着色语法，该语法的书写形式如：。</p>
+			<x:code><![CDATA[
+			<!-- modelVar 属性用来指定一个模板数据模型，如果存在，她会生成一个运行按钮 -->
+			<x:code model="modelVar"><![CDATA[
+				...这里你可以任意书写源码了,系统会自动作色...
+			]]>]]&gt;&lt;/x:code>
+			</x:code>
+			<p>这个插件的实现在吗在layout.xhtml 中。片段如下。</p>
+			<x:code>
+				<![CDATA[
+<c:extension namespace="http://www.xidea.org/lite/example">
+	<![CDATA[
+		var style = 'border: 1px solid #DFECF1;'
+    			+'font-family:"Courier New",monospace;'
+    			+'padding:4px;margin:4px;'
+    			+'font-size:12px;overflow:auto;'
+    			+'background-color:#EEE;border:1px solid #222;';
+		//代码高亮标签解析器
+		function parseCode(node){
+			var text = String(node.textContent || node.text);
+			//清理相同的前置缩进
+			text = text.replace(/^\s*[\r\n]+|[\r\n]+\s*$/g,'');
+			while(/^(?:[\t ].*[\r\n]*)*$/.test(text)){
+				text = text.replace(/^[\t ](.*)/mg,'$1');
+			}
+			text = JSON.stringify(text);
+			//用于申明多行字符串
+			var varName = node.getAttribute("var");
+			if(varName){
+				this.append("<script>" + varName+'=' +text+";<\/script>")
+			}else{
+				var model = node.getAttribute("model");
+				if(model){
+					if(/^\s*\{$/.test(model)){
+						model = JSON.stringify(text)
+					}
+					model = ','+model+'';
+				}
+				this.append("<div class='code'><script>renderSource("+text+model+");<\/script></div>")
+			}
+		};
+]]>	]]&gt;
+&lt;/c:extension>
+			</x:code>
+		</ul>
+	</body>
+</html>

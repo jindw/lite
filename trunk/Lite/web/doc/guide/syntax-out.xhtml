@@ -10,11 +10,21 @@
 			<ul>
 				<li>安全的自动编码输出。
 					<p>为了确保代码安全性， xml保留字符(&lt;&amp;和属性中的")都将被自动转义（转义方式更具输出语法出现的位置而定）。</p>
-					<x:code>
+					<x:code var="blogModel">
+					{
+						blog:{
+							'title':'特殊字符\'&<>',
+							'content':'lite应该怎么自动编码这些特殊字符呢？'+
+									'XML特殊字符有两个:&<，加上属性括弧"\','+
+									'一共三个（LiteXML属性括弧一律自动转化为"）。'
+						}
+					}
+					</x:code>
+					<x:code model="blogModel">
 					<![CDATA[
-					<!-- ${entry.title} 将按属性规则编码，确保不打破属性语义。 -->
-					<!-- ${entry.content} 将按属性xml文本编码，确保不被插入危险脚本。 -->
-					<p title="Tooltip:${entry.title}">${entry.content}</p>
+					<!-- ${blog.title} 将按属性规则编码，确保不打破属性语义。 -->
+					<!-- ${blog.content} 将按属性xml文本编码，确保不被插入危险脚本。 -->
+					<p title="Tooltip:${blog.title}">${blog.content}</p>
 					]]>
 					</x:code>
 				</li>
@@ -22,7 +32,7 @@
 					<p>自动按xml属性的编码规则，编码XML属性内容并输出，如果属性值为<strong>null</strong>，则整个属性不输出。
 					<i>这点在html 定值boolean属性输出时非常有用。</i>
 					</p>
-					<x:code>
+					<x:code model="{action:{disabled:'disabled'}}">
 					<![CDATA[
 					<!-- 如果${action.link} 为null， 则click属性不输出-->
 					<!-- 如果${action.disabled} 为false, 
@@ -35,20 +45,39 @@
 				
 				<li>避免过度转义的编码输出。
 					<p>有的时候，特别是老的GBK中文环境下，我们数据库中存储有字符实体，在这些数据的输出展现的时候，不能直接用完全编码输出的方式。</p>
-					<x:code>
+					<x:code var="textModel">
+					{
+						text:'有的时候，特别是老的GBK中文环境下，我们数据库中存储有字符实体，比如：&#0x7C21;&#0x7E41;&#0x6F22;&#0x5B57;。'
+					}
+					</x:code>
+					
+					<x:code model="textModel">
 					<![CDATA[
-					<!-- $#{entry.content} 将按属性xml文本编码，确保不被插入危险脚本,
+					<!-- 对于一些存储有字符实体的老数据， 默认的自动编码实现可能存在过度转义的地方。 -->
+					<p>${text}</p>
+					<!-- $#{text} 将按属性xml文本编码，确保不被插入危险脚本,
 						同时,确保已转义的实体不再重复转义。 -->
-					<p>$#{entry.content}</p>
+					<p>$#{text}</p>
 					]]>
 					</x:code>
 				</li>
 				<li>XSS风险自负直接输出。
 					<p>慎用！！！</p>
-					<x:code>
+					<x:code var="scriptTextModel">
 					<![CDATA[
-					<!-- $!{entry.html} 中的任何内容都将直接输出， 恶意脚本样式等都可以被任意插入。 -->
-					<p>$!{entry.html}</p>
+					{
+						data:{
+							"title":'test" onclick="alert(\'做坏事其实很简单\')',
+							text:'<script>alert("你说我做点什么坏事合适呢？")</script>。'
+						}
+					}
+					]]></x:code>
+					<x:code model="scriptTextModel">
+					<![CDATA[
+					
+					<!-- $!{data.title} 可以打破属性规则，添加恶意代码。 -->
+					<!-- $!{data.text} 中的任何内容都将直接输出， 恶意脚本样式等都可以被任意插入。 -->
+					<p title="$!{data.title}">$!{data.text}</p>
 					]]>
 					</x:code></li>
 			</ul>

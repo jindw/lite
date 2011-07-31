@@ -181,23 +181,24 @@ ExtensionParser.prototype = {
 		var ns = el.namespaceURI;
 		var attrs = el.attributes;
 		var len = attrs.length;
-		var exclusiveMap = {};
 		try{
 //			var es = 0;
 			for (var i =  len- 1; i >= 0; i--) {
 				var attr = attrs.item(i);
 				var ans = attr.namespaceURI;
-				var ext = this.packageMap[ans || ''];
-				var an = formatName(attr);
-//				es = 2
-				if (ext && ext.beforeMap) {
-					var fn = ext.beforeMap[an];
-					if(fn && an in ext.beforeMap){
-//						es = 2.1
-						//el.removeAttributeNode(attr);
-						fn.call(chain,attr);
-//						es =2.2
-						return;
+				if(ans){
+					var ext = this.packageMap[ans];
+					var an = formatName(attr);
+	//				es = 2
+					if (ext && ext.beforeMap) {
+						var fn = ext.beforeMap[an];
+						if(fn && an in ext.beforeMap){
+	//						es = 2.1
+							//el.removeAttributeNode(attr);
+							fn.call(chain,attr);
+	//						es =2.2
+							return true;
+						}
 					}
 				}
 			}
@@ -206,7 +207,6 @@ ExtensionParser.prototype = {
 			$log.error("元素扩展解析异常",e)
 			throw e;
 		}finally{
-			
 		}
 		var ext = this.packageMap[ns||''];
 		var n = formatName(el);

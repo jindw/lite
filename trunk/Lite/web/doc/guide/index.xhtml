@@ -34,7 +34,8 @@
 		</x:code>
 		</p>
 		<p>为了实现上述内容的动态展示，我们需要编写一个简单的模板：
-		<x:code>
+		<script>var testModel = mirrors[mirrors.length-1].getValue();</script>
+		<x:code model="testModel">
 		<![CDATA[
 		<html>
 			<title>模板测试</title>
@@ -54,18 +55,29 @@
 		<p> 与这些流行的模板系统不同， Lite有如下三大特点：</p>
 		<ul>
 		<li>基于 JavaScript的表达式，方便前端工程师学习。
-			<x:code>
+			<x:code var="elModel">
+			<![CDATA[
+			{
+				"object":{"key":"value"},
+				"a":1,"b":2,"c":3,"d":4,"e":5,"f":6,
+				"array":[1,2,3,4],
+				"str":"testString"
+			}]]>
+			</x:code>
+			<x:code model="elModel">
 <![CDATA[
+<textarea>
 //表达式示例:
 ${JSON.stringify(object)}
-${[a,b,c].concat(d,[e,f]).join('\n')}
+${[a,b,c].concat(d,[e,f]).join(',')}
 ${[a,b,c,d].concat(array).length}
 ${str.charAt(0)}
 ${str.substring(1,2)}
+</textarea>
 ]]>
 			</x:code></li>
 		<li>基于 XML的语法，便于前端语法的优化。
-			<x:code>
+			<x:code model='{"disabled":null}'>
 <![CDATA[
 <!-- 若 disabled 变量为null， 则disabled 属性不输出 -->
 

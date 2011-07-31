@@ -184,9 +184,9 @@ var Core = {
 		}
 		this.next(doc);
 //		$log.error('aaa',ns);
-	},
-	parse : function(node){
-		$log.error("未支持标签："+node.tagName)
+	//},
+	//"parse*" : function(node){
+	//	$log.error("未支持标签："+node.tagName)
 	}
 }
 var DOCUMENT_LAYOUT_PROCESSED = "http://www.xidea.org/lite/core/c:layout-processed";
@@ -250,7 +250,7 @@ function seekElif(text){
 
 
 function processChoose(node){
-	var value = getAttributeEL(node,"value");
+	var value = getAttributeEL(node,"value","test");
 	var oldStatus = this.getAttribute(CHOOSE_KEY);
 	this.setAttribute(CHOOSE_KEY,{value:value,first:true});
 	parseChildRemoveAttr(this,node);
@@ -276,7 +276,7 @@ function processChoose(node){
 //}
 function processWhen(node){
 	var stat = this.getAttribute(CHOOSE_KEY);
-	var value = getAttributeEL(node,"*test","if");
+	var value = getAttributeEL(node,"*test","if","value");
 	if(stat.value){
 		value = stat.value + '=='+value;
 	}
@@ -355,7 +355,7 @@ function splitList(list){
 					}
 					if(begin2 != begin){
 						end = end.replace(/\]\s*$/,'');
-						$log.info("[start,last] 语法 不是通用表达式，只能在for循环中使用。",list);
+						$log.debug("[start,last] 语法 不是通用表达式，只能在for循环中使用。",list);
 						return [begin2,end];
 					}else{
 						$log.warn("range for 表达式(非通用表达式)推荐模式为：[start,last]，您提供的表达式为"+list);
