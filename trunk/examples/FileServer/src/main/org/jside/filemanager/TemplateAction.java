@@ -1,4 +1,4 @@
-package org.jside.webserver.action;
+package org.jside.filemanager;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,7 +17,7 @@ import org.xidea.lite.TemplateEngine;
 import org.xidea.lite.impl.ParseUtil;
 
 @SuppressWarnings("unchecked")
-public class TemplateAction {
+class TemplateAction {
 	private static Log log = LogFactory.getLog(TemplateAction.class);
 	private static Constructor<TemplateEngine> DEFAULT_HOT_ENGINE;
 	protected Constructor<TemplateEngine> hotEngine = DEFAULT_HOT_ENGINE;
@@ -102,7 +102,7 @@ public class TemplateAction {
 				File df = new File(root, jsonpath);
 				if (df.exists()) {
 					String source = ParseUtil.loadTextAndClose(ParseUtil
-							.openStream(df.toURI()));
+							.openStream(df.toURI()),null);
 					data = ExpressionFactory.getInstance().create(source)
 							.evaluate(data);
 				}

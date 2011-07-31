@@ -16,7 +16,6 @@ import org.jside.webserver.RequestUtil;
 import org.jside.webserver.RequestContext;
 import org.jside.webserver.action.ActionWebServer;
 import org.jside.webserver.action.CGIAdaptor;
-import org.jside.webserver.action.TemplateAction;
 
 public class FileManager {
 	private String contextPath;

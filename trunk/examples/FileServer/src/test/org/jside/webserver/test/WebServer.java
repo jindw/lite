@@ -85,7 +85,7 @@ public class WebServer {
 		if(jsonpath.endsWith(".json")){
 			File df = new File(root,jsonpath);
 			if(df.exists()){
-				String source = ParseUtil.loadTextAndClose(new FileInputStream(df));
+				String source = ParseUtil.loadTextAndClose(new FileInputStream(df),null);
 				data = ExpressionFactory.getInstance().create(source).evaluate(data);
 			}
 		}
