@@ -52,10 +52,12 @@ function parseDefaultXMLNode(node,context,chain){
 }
 
 var htmlLeaf = /^(?:meta|link|img|br|hr|input)$/i;
+var htmlReserved = /^(?:script|style|pre|textarea)$/i
 var scriptTag = /^script$/i
 function processElement(node,context,chain){
     var attributes = node.attributes;
-    context.append('<'+node.tagName);
+    var tagName = node.tagName;
+    context.append('<'+tagName);
     for (var i=0; i<attributes.length; i++) {
         try{
             //htmlunit bug...
@@ -65,13 +67,16 @@ function processElement(node,context,chain){
         }
         context.parse(attr)
     }
-    if(htmlLeaf.test(node.tagName)){
+    if(htmlLeaf.test(tagName)){
         context.append('/>')
         return ;
     }
     context.append('>')
     var child = node.firstChild
     if(child){
+    	///if(htmlReserved.test(tagName)){
+    	//	context.setReservedSpace(true)
+    	//}
         do{
             context.parse(child)
         }while(child = child.nextSibling)

@@ -1,4 +1,5 @@
 <?php
+phpinfo();
 // Copyright (C) 2008 Alain COUTHURES
 //
 // This program is free software; you can redistribute it and/or

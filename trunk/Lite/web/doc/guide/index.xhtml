@@ -1,18 +1,26 @@
-<html xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:c2="http://www.xidea.org/lite/core"
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:c2="http://www.xidea.org/lite/core"
 	xmlns:x="http://www.xidea.org/lite/example" xml:lang="zh-CN" dir="ltr">
 	<head>
 		<title>入门指南 </title>
 	</head>
 	<body>
-		<a name="what"/>
+		<a name="what" />
 		<h3>什么是模板?</h3>
-		<p>数据+<strong>模板</strong> => 视图，这就是模板的价值和定位。</p>
-		<p>在Web开发中，前端工程师通常使用模板，将后端数据转化/拼装为一个前端可读的HTML内容
-		[<a onclick='showNext(this,this.parentNode,"展开","隐藏");return false'>展开</a>示例]。</p>
+		<p>
+			数据+
+			<strong>模板</strong>
+			=> 视图，这就是模板的价值和定位。
+		</p>
+		<p>
+			在Web开发中，前端工程师通常使用模板，将后端数据转化/拼装为一个前端可读的HTML内容
+			[
+			<a onclick='showNext(this,this.parentNode,"展开","隐藏");return false'>展开</a>
+			示例]。
+		</p>
 		<div style="display:none">
-		<p>比如,我们需要显示一个简单的个人信息，形式如：
-		<x:code>
+			<p>
+				比如,我们需要显示一个简单的个人信息，形式如：
+				<x:code>
 		<![CDATA[
 		<html>
 			<title>模板测试</title>
@@ -21,21 +29,23 @@
 			</body>
 		</html>
 		]]>
+				</x:code>
+			</p>
+			<p>
+				<c:for var="a" list="${1}">${a}</c:for>
+				其中，姓名 "张三" 和城市 "北京" 需要从后端获取，于是，我们需要一个数据模型如下：
+				<x:code>
+					{
+					"name": "张三",
+					"city":"北京"
+					}
 		</x:code>
-		</p>
-		<p>
-		<c:for var="a" items="${1}">${a}</c:for>
-		其中，姓名 "张三" 和城市 "北京" 需要从后端获取，于是，我们需要一个数据模型如下：
-		<x:code>
-		{
-			"name": "张三",
-			"city":"北京"
-		}
-		</x:code>
-		</p>
-		<p>为了实现上述内容的动态展示，我们需要编写一个简单的模板：
-		<script>var testModel = mirrors[mirrors.length-1].getValue();</script>
-		<x:code model="testModel">
+			</p>
+			<p>
+				为了实现上述内容的动态展示，我们需要编写一个简单的模板：
+				<script>var testModel = mirrors[mirrors.length-1].getValue();
+				</script>
+				<x:code model="testModel">
 		<![CDATA[
 		<html>
 			<title>模板测试</title>
@@ -44,18 +54,53 @@
 			</body>
 		</html>
 		]]>
-		</x:code>
-		</p>
+				</x:code>
+			</p>
 		</div>
-		<a name="style"/>
+		<a name="style" />
 		<h3>Lite 模板风格 </h3>
-		<p>在Lite出现之前，已经有很多广泛运用的模板系统，Java中，Velocity，FreeMarker 算是先驱， PHP中Smarty出现较早， 前端JavaScript模板， 太杂，成熟的不多，这里就不多说。</p>
-		
+		<p>在Lite出现之前，已经有很多广泛运用的模板系统，Java中，Velocity，FreeMarker 算是先驱，
+			PHP中Smarty出现较早， 前端JavaScript模板， 太杂，成熟的不多，这里就不多说。</p>
+
 		<p>那么Lite存在的价值又在那里呢？</p>
 		<p> 与这些流行的模板系统不同， Lite有如下三大特点：</p>
 		<ul>
-		<li>基于 JavaScript的表达式，方便前端工程师学习。
-			<x:code var="elModel">
+			<li>
+				功能完备，强大，集各大模板系统的优点于一身
+				<p>
+					<ul>
+						<li>编码安全</li>
+						<li>模板继承</li>
+						<li>表达式</li>
+						<li>逻辑控制</li>
+					</ul>
+				</p>
+			</li>
+			<li>
+				懂HTML/XML的语法。
+				<p>
+					便于前端语法的优化
+					<x:code model='{"disabled":null}'>
+					<![CDATA[
+					<!-- html/xml 条件属性
+						若 disabled 变量为null， 则disabled 属性不输出 -->
+					<input type="submit" disabled="${disabled}" value=""/>
+					<!-- javascript自动编码 -->
+					<div onclick="alert(${data})">...
+					<!-- URL 自动编码 -->
+					<a href="/test?p1=${data.p1}&p2=${data.p2}">...
+					]]>
+					</x:code>
+				</p>
+			</li>
+			<li>
+				他基于JavaScript实现。
+				<p>可用JavaScript扩展，方便前端工程师二次开发</p>
+
+			</li>
+			<li>
+				他基于 JavaScript的表达式，方便前端工程师学习。
+				<x:code var="elModel">
 			<![CDATA[
 			{
 				"object":{"key":"value"},
@@ -63,8 +108,8 @@
 				"array":[1,2,3,4],
 				"str":"testString"
 			}]]>
-			</x:code>
-			<x:code model="elModel">
+				</x:code>
+				<x:code model="elModel">
 <![CDATA[
 <textarea>
 //表达式示例:
@@ -75,37 +120,34 @@ ${str.charAt(0)}
 ${str.substring(1,2)}
 </textarea>
 ]]>
-			</x:code></li>
-		<li>基于 XML的语法，便于前端语法的优化。
-			<x:code model='{"disabled":null}'>
-<![CDATA[
-<!-- 若 disabled 变量为null， 则disabled 属性不输出 -->
+				</x:code>
+			</li>
 
-<input type="submit" disabled="${disabled}" value=""/>
-]]>
-			</x:code>
-		</li>
-		<li>前后端统一，跨平台的实现。
-		<p>Lite 目前拥有功能强大且成熟的Java，PHP版本，并且在前端JavaScript模板上，完全拥有与后端模板同样完备的功能。你可以在PHP，Java，乃至浏览器JavaScript中随意切换。</p>
-		<p>而且，因为他中间代码的设计方法，非常方便迁移到其他平台。</p>
-		</li>
+			<li>
+				前后端统一，跨平台的实现。
+				<p>Lite
+					目前拥有功能强大且成熟的Java，PHP版本，并且在前端JavaScript模板上，完全拥有与后端模板同样完备的功能。你可以在PHP，Java，乃至浏览器JavaScript中随意切换。
+				</p>
+				<p>而且，因为他中间代码的设计方法，非常方便迁移到其他平台。</p>
+			</li>
 		</ul>
-		<a name="install"/>
+		<a name="install" />
 		<h3>Lite模板如何安装</h3>
 		<p>为了简化环境搭建，Lite有一个模板测试专用服务器，直接通过webstart启动。</p>
 		<p>
-			WebStart地址：<a href="http://www.xidea.org/webstart/JSide.jnlp"/>
+			WebStart地址：
+			<a href="http://www.xidea.org/webstart/JSide.jnlp" />
 		</p>
 		<i>
 			这是一个Java WebStart 程序，需要Java5+。安装了Java5的同学可以直接点击链接运行，否则先安装JRE吧：
 		</i>
 		<h3>调试环境如何使用</h3>
 		<p>
-		启动测试服务器后，窗口半透明最前端显示在桌面右侧，您可以选择需要测试的网站目录。选中目录后直接拖放至调试服务器上端。测试服务器自动更新网站目录。
+			启动测试服务器后，窗口半透明最前端显示在桌面右侧，您可以选择需要测试的网站目录。选中目录后直接拖放至调试服务器上端。测试服务器自动更新网站目录。
 		</p>
 		<p>
-		点击部署测试模板，系统将自动将本书的测试用例拷贝到您的网站目录下。
-		浏览修改吧。。。。
+			点击部署测试模板，系统将自动将本书的测试用例拷贝到您的网站目录下。
+			浏览修改吧。。。。
 		</p>
 
 	</body>
