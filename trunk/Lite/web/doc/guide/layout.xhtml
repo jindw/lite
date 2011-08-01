@@ -71,6 +71,8 @@ function parseCode(node){
 				model = '"'+model.replace(/[\\"\r\n<]/g,encodeString)+'"'
 			}
 			model = ','+model+'';
+		}else{
+			model='';
 		}
 		this.append("<div class='code'><script>renderSource("+text+model+");<\/script></div>")
 	}

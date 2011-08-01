@@ -21,18 +21,53 @@
 		<p>Lite 一共有9中中间代码，一个通用的结束指令，一个批量条件接口，一个静态文本添加接口，共有12个中间指令操作接口。
 			他们分别是：
 			<ul>
-				<li>append(text)<p></p></li>
-				<li>appendEL(el)<p></p></li>
-				<li>appendIf(el)<p></p></li>
-				<li>appendElse(el)<p></p></li>
-				<li>appendEnd()<p></p></li>
-				<li>appendFor(varName, el, status)<p></p></li>
-				<li>appendXA(attrName, el)<p></p></li>
-				<li>appendXT(el)<p></p></li>
-				<li>appendVar(varName, el)<p></p></li>
-				<li>appendCapture(varName)<p></p></li>
-				<li>appendPlugin(pluginClass, pluginConfig)<p></p></li>
-				<li>appendAll(list)<p></p></li>
+				<li>append(text)
+					<p>
+						用于添加静态文本。例如：
+						<x:code>
+						<![CDATA[
+							<c:extenson package="http://www.w3.org/1999/xhtml">
+								//我需要一个插件，让所有a标签都加上一个中括弧([]),实现代码如下。
+								parseA(node){
+									this.append('[');
+									//让下一个解析器实现最终解析
+									this.next(node);
+									this.append(']');
+									
+								}
+							</c:extenson>
+						]]>
+						</x:code>
+					</p></li>
+				<li>appendEL(el)
+					<p>用于添加一段表达式输出（不编码）
+						
+					</p></li>
+				<li>appendIf(el)
+					<p>用于开始一个条件判断（结束用appendEnd()）
+					<x:code>
+					<![CDATA[
+						function parseIf(node){
+							var el = node.getAttribute('test');
+							el = el.replace(/^\$\{([\s\S]+)\}$/,'$1');
+							this.appendIf(el);
+							this.parse(el.childNodes);
+							this.appendEnd();
+						}
+					]]>
+					</x:code>
+					</p>
+				</li>
+				<li>appendElse(el)
+					<p>用于开始一个条件判断（结束用appendEnd()）</p></li>
+				<li>appendEnd()<p>通用的结束符（用于结束一个if语法，for循环，plugin等等...）</p></li>
+				<li>appendFor(varName, el, status)<p>开始一个for循环</p></li>
+				<li>appendXA(attrName, el)<p>添加一个XML 属性，当attrName 为空时，只做属性编码输出，不做属性语法输出（输出判断+属性名=".."）。</p></li>
+				<li>appendXT(el)<p>添加一个XML文本输出</p></li>
+				<li>appendVar(varName, el)<p>申明一个模板变量</p></li>
+				<li>appendCapture(varName)<p>捕捉一段输出，将结果申明为指定变量名</p></li>
+				<li>appendPlugin(pluginClass, pluginConfig)<p>添加一个编译插件</p></li>
+				<li>appendAll(list)<p>将一组中间代码，批量添加进来。</p></li>
 			</ul>
 		</p>
 		<p></p>
