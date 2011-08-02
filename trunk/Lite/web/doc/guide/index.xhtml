@@ -72,19 +72,30 @@
 				<p>
 					<x:code model='{
 								title:"特殊字符\"&&lt;",
-								content:"危险代码&lt;script>alert(\"做点什么坏事呢？\") &lt;\/script>",
+								user:{name:"金大为",city:"杭州",married:true},
+								content:"危险代码&lt;script>alert(\"想做点坏事，能得逞吗？\") &lt;\/script>",
 								"disabled":null,
 								data:{p1:"属性1",p2:"属性2"}}'>
 					<![CDATA[
 					<!-- html/xml 条件属性
 						若 disabled 变量为null， 则disabled 属性不输出 -->
 					<input type="submit" disabled="${disabled}" value=""/>
+					<!-- 自动表单填充 -->
+					<form h:autoform="true">
+						大名：<input name="user.name" type="text"/>
+						城市：<select name="user.city">
+							<option c:for="${city:cities}">${city}</option>
+						</select>
+						已婚？<input name="user.married" type="checkbox" value="true"/>
+					</form>
 					<!-- javascript自动编码(JSON.stringify) -->
 					<div onclick="alert(${content})">...</div>
 					<!-- URL 自动编码(encodeURIComponent) -->
 					<a href="/test?p1=${data.p1}&p2=${data.p2}&p3=${'中文自动编码'}">...</a>
-					
-					<!-- 自动编码  -->
+					<!-- 自动Hash戳（用于设置服务器永久缓存）和资源文件缺失检查【这些功能只在上线编译时触发】 -->
+					<link href="/styles/default.css" type="text/css" rel="stylesheet"/>
+					<script src="/scripts/boot.js"/>
+					<!-- html自动编码  -->
 					<p title="${title}">${content}</p>
 					<script>
 					<![CDATA[
@@ -95,6 +106,7 @@
 						alert(${content})
 					]]]]><![CDATA[>
 					</script>
+					
 					]]>
 					</x:code>
 				</p>
