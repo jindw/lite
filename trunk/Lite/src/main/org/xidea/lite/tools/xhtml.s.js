@@ -27,7 +27,7 @@ function domFilterXHTML(path,dom){
 			}
 			//TODO:add cdata
 			var doc = item.ownerDocument;
-			if(value.indexOf('<')>=0 && value.indexOf("<![CDATA[")<0){
+			if(/[<>&]/.test(value) && value.indexOf("<![CDATA[")<0){
 				var cdata = doc.createCDATASection("*/"+value+'\n/*');
 				item.appendChild(doc.createTextNode("/*"))
 				item.appendChild(cdata);
