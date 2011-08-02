@@ -10,11 +10,12 @@ var HTML = {
 	
 	parseScript:function(node){
 		if(!node.hasAttribute('src')){
-			var text = node.textContent;
-			if(text!=null){
-				node.textContent = processJS(text);
-			}else{
-				node.text = processJS(node.text);
+			var child = node.firstChild;
+			while(child){
+				if(child.nodeType==3 || child.nodeType == 4){
+					child.data = processJS(child.data);
+				}
+				child = child.nextSibling;
 			}
 		}
 		this.next(node);
@@ -30,16 +31,16 @@ var HTML = {
 
 }
 function processJS(value){
-	return autoEncode(value,/^\s*JSON\s*\.*/,replaceJSON);
+	return autoEncode(value,/^\s*JSON\s*\.*/g,replaceJSON);
 }
 function replaceJSON(v){
 	return "JSON.stringify("+v+")";
 }
 function replaceURI(v){
-	return "encodeURI("+v+")";
+	return "encodeURIComponent("+v+")";
 }
 function forceURIParse(attr){
-	attr.value = autoEncode(attr.value,/^\s*encodeURI*/,replaceURI);
+	attr.value = autoEncode(attr.value,/^\s*encodeURI*/g,replaceURI);
 	this.next(attr);
 }
 
