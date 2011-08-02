@@ -68,16 +68,33 @@
 		<ul>
 			<li>
 				<strong>懂HTML/XML的语法</strong>
+				<p>因为Lite XML语法本身是基于标记去扩展的，他对文档中所有动态的和静态的内容，都有感知，并可以据此设计一些漂亮的语法特征，并能合理的自动优化。</p>
 				<p>
-					<x:code model='{"disabled":null,data:{p1:"属性1",p2:"属性2"}}'>
+					<x:code model='{
+								title:"特殊字符\"&&lt;",
+								content:"危险代码&lt;script>alert(\"做点什么坏事呢？\") &lt;/script>",
+								"disabled":null,
+								data:{p1:"属性1",p2:"属性2"}}'>
 					<![CDATA[
 					<!-- html/xml 条件属性
 						若 disabled 变量为null， 则disabled 属性不输出 -->
 					<input type="submit" disabled="${disabled}" value=""/>
 					<!-- javascript自动编码(JSON.stringify) -->
-					<div onclick="alert(${data})">...</div>
+					<div onclick="alert(${content})">...</div>
 					<!-- URL 自动编码(encodeURIComponent) -->
 					<a href="/test?p1=${data.p1}&p2=${data.p2}&p3=${'中文自动编码'}">...</a>
+					
+					<!-- 自动编码  -->
+					<p title="${title}">${content}</p>
+					<script>
+					<![CDATA[
+						//不做自动编码
+						if(content.length<10){
+							alert(content.length);
+						}
+						alert(${content})
+					]]]]><![CDATA[>
+					</script>
 					]]>
 					</x:code>
 				</p>
@@ -111,7 +128,9 @@ ${str.substring(1,2)}
 				</p>
 				<p>
 					基于JavaScript的扩展机制，可以轻松扩展模板语法，方便前端工程师二次开发。
-					<a href="syntax-extension.xhtml"/>
+				</p>
+				<p>
+					<i>关于扩展的话题，本指南有一些简单介绍：<a href="syntax-extension.xhtml"/></i>
 				</p>
 			</li>
 			<!-- 
