@@ -1,6 +1,6 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:c2="http://www.xidea.org/lite/core"
 	xmlns:x="http://www.xidea.org/lite/example" xml:lang="zh-CN" dir="ltr">
-	
+
 	<head>
 		<title>入门指南 </title>
 	</head>
@@ -67,21 +67,9 @@
 		<p> 与这些流行的模板系统不同， Lite有如下三大特点：</p>
 		<ul>
 			<li>
-				功能完备，强大，集各大模板系统的优点于一身
+				<strong>懂HTML/XML的语法</strong>
 				<p>
-					<ul>
-						<li>编码安全</li>
-						<li>模板继承</li>
-						<li>表达式</li>
-						<li>逻辑控制</li>
-					</ul>
-				</p>
-			</li>
-			<li>
-				懂HTML/XML的语法。
-				<p>
-					便于前端语法的优化
-					<x:code model='{"disabled":null}'>
+					<x:code model='{"disabled":null,data:{p1:"属性1",p2:"属性2"}}'>
 					<![CDATA[
 					<!-- html/xml 条件属性
 						若 disabled 变量为null， 则disabled 属性不输出 -->
@@ -94,14 +82,12 @@
 					</x:code>
 				</p>
 			</li>
-			<li>
-				他基于JavaScript实现。
-				<p>可用JavaScript扩展，方便前端工程师二次开发</p>
 
-			</li>
 			<li>
-				他基于 JavaScript的表达式，方便前端工程师学习。
-				<x:code var="elModel">
+				<strong>基于 JavaScript</strong>
+				<p>
+					兼容JavaScript的表达式和函数库，方便前端工程师学习。
+					<x:code var="elModel">
 			<![CDATA[
 			{
 				"object":{"key":"value"},
@@ -109,8 +95,8 @@
 				"array":[1,2,3,4],
 				"str":"testString"
 			}]]>
-				</x:code>
-				<x:code model="elModel">
+					</x:code>
+					<x:code model="elModel">
 <![CDATA[
 <textarea>
 //表达式示例:
@@ -121,13 +107,30 @@ ${str.charAt(0)}
 ${str.substring(1,2)}
 </textarea>
 ]]>
-				</x:code>
+					</x:code>
+				</p>
+				<p>
+					基于JavaScript的扩展机制，可以轻松扩展模板语法，方便前端工程师二次开发。
+					<a href="syntax-extension.xhtml"/>
+				</p>
 			</li>
-
+			<!-- 
 			<li>
-				前后端统一，跨平台的实现。
+				强大，集各大模板系统的优点于一身
+				<p>
+					<ul>
+						<li>编码安全</li>
+						<li>模板继承</li>
+						<li>表达式</li>
+						<li>逻辑控制</li>
+					</ul>
+				</p>
+			</li>
+			 -->
+			<li>
+				<strong>功能完备，前后端统一，跨平台的实现</strong>
 				<p>Lite
-					目前拥有功能强大且成熟的Java，PHP版本，并且在前端JavaScript模板上，完全拥有与后端模板同样完备的功能。你可以在PHP，Java，乃至浏览器JavaScript中随意切换。
+					目前拥有功能强大且成熟的Java，PHP版本，支持目前主流和一些超前的模板编程方法，并且在前端JavaScript模板上，完全拥有与后端模板同样完备的功能。你可以在PHP，Java，乃至浏览器JavaScript中随意切换。
 				</p>
 				<p>而且，因为他中间代码的设计方法，非常方便迁移到其他平台。</p>
 			</li>
@@ -142,14 +145,34 @@ ${str.substring(1,2)}
 		<i>
 			这是一个Java WebStart 程序，需要Java5+。安装了Java5的同学可以直接点击链接运行，否则先安装JRE吧：
 		</i>
-		<h3>调试环境如何使用</h3>
 		<p>
-			启动测试服务器后，窗口半透明最前端显示在桌面右侧，您可以选择需要测试的网站目录。选中目录后直接拖放至调试服务器上端。测试服务器自动更新网站目录。
+			当能如果你有新自己搭建Apache +PHP 或者Tomcat,这也是允许的。
+			搭建Java环境后，你可以下载Lite.jar
+			并在web.xml中配置。
+			<ul>
+				<li>
+					php环境搭建
+					<p>你可以下载php-example部署。</p>
+				</li>
+				<li>
+					Java环境搭建
+					<p>你可以下载Lite.jar 并在web.xml中配置。</p>
+				</li>
+				<li>
+					下载地址：
+					<p>
+						<a href="http://code.google.com/p/lite/downloads/list" />
+					</p>
+				</li>
+			</ul>
+			<h3>调试环境如何使用</h3>
+			<p>
+				启动测试服务器后，窗口半透明最前端显示在桌面右侧，您可以选择需要测试的网站目录。选中目录后直接拖放至调试服务器上端。测试服务器自动更新网站目录。
+			</p>
+			<p>
+				点击部署测试模板，系统将自动将本书的测试用例拷贝到您的网站目录下。
+				浏览修改吧。。。。
+			</p>
 		</p>
-		<p>
-			点击部署测试模板，系统将自动将本书的测试用例拷贝到您的网站目录下。
-			浏览修改吧。。。。
-		</p>
-
 	</body>
 </html>
