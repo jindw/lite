@@ -74,10 +74,10 @@
 					<!-- html/xml 条件属性
 						若 disabled 变量为null， 则disabled 属性不输出 -->
 					<input type="submit" disabled="${disabled}" value=""/>
-					<!-- javascript自动编码 -->
+					<!-- javascript自动编码(JSON.stringify) -->
 					<div onclick="alert(${data})">...</div>
-					<!-- URL 自动编码 -->
-					<a href="/test?p1=${data.p1}&p2=${data.p2}">...</a>
+					<!-- URL 自动编码(encodeURIComponent) -->
+					<a href="/test?p1=${data.p1}&p2=${data.p2}&p3=${'中文自动编码'}">...</a>
 					]]>
 					</x:code>
 				</p>
