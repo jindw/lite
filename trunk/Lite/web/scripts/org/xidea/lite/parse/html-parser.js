@@ -20,7 +20,8 @@ var HTML = {
 		this.next(node);
 	},
 	"parse2on*":function(attr){
-		attr.value = processJS(attr.value)
+		attr.value = processJS(attr.value);
+		this.next(attr);
 	},
 	//parseStyle : function(node){
 	//},
@@ -29,7 +30,7 @@ var HTML = {
 
 }
 function processJS(value){
-	return autoEncode(attr.value,/^\s*JSON\s*\.*/,replaceJSON);
+	return autoEncode(value,/^\s*JSON\s*\.*/,replaceJSON);
 }
 function replaceJSON(v){
 	return "JSON.stringify("+v+")";
@@ -39,6 +40,7 @@ function replaceURI(v){
 }
 function forceURIParse(attr){
 	attr.value = autoEncode(attr.value,/^\s*encodeURI*/,replaceURI);
+	this.next(attr);
 }
 
 //if(tagName=='link'){
@@ -89,3 +91,4 @@ function countEescape(text, p$) {
 	return 0;
 }
 //autoEncode("${a}",/^encodeURI*/,function(a){return 'encodeURI('+a+')'})
+/**/

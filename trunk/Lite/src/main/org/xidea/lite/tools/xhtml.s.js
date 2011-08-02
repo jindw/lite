@@ -21,15 +21,20 @@ function domFilterXHTML(path,dom){
 			}else{
 				$log.warn('unknow tag:'+tagName);
 			}
-			//TODO:add cdata
+			
 			while(item.firstChild){
 				item.removeChild(item.firstChild);
 			}
+			//TODO:add cdata
 			var doc = item.ownerDocument;
-			var cdata = doc.createCDATASection("*/"+value+'\n/*');
-			item.appendChild(doc.createTextNode("/*"))
-			item.appendChild(cdata);
-			item.appendChild(doc.createTextNode("*/"))
+			if(value.indexOf('<')>=0 && value.indexOf("<![CDATA[")<0){
+				var cdata = doc.createCDATASection("*/"+value+'\n/*');
+				item.appendChild(doc.createTextNode("/*"))
+				item.appendChild(cdata);
+				item.appendChild(doc.createTextNode("*/"))
+			}else{
+				item.appendChild(doc.createTextNode(value));
+			}
 		}else{
 			var attrName = item.localName;
 			var value = item.value;

@@ -29,7 +29,11 @@ function appendParser(ext,key,patternKey,fn,o){
 	var m = ext[key];
 	if(fn.indexOf('*')>=0){//is pattern parser 
 		var pm = ext[patternKey];
-		pm && add(pm,fn,o);//添加 patternParser
+		if(!pm){
+			ext[patternKey] = pm = {};
+		}
+		add(pm,fn,o);//添加 patternParser
+		//$log.info(patternKey,fn,pm)
 		if(m){//扫描已有 parser 添加 patternParser
 			var p = new RegExp('^'+fn.replace(/\*/g,'.*')+'$');
 			for(var n in m){
@@ -50,7 +54,7 @@ function appendParser(ext,key,patternKey,fn,o){
 				}
 			}
 		}
-		m && add(m,fn,o);
+		add(m,fn,o);
 	}
 }
 

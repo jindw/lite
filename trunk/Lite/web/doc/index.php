@@ -10,7 +10,9 @@ if($path){
     echo "<script>document.location='index.php/guide/index.xhtml'</script>";
     exit();
 }
-if(realpath("..".$path)){
+if($path == '/doc/boot.js'){
+	readfile("../WEB-INF/classes/lite/boot.js");
+}else if(realpath("..".$path)){
 	if(strpos($path,".xhtml")>0){
 		header("Content-type: text/html;charset=UTF-8");
 		$engine->render($path,$data);
@@ -20,8 +22,6 @@ if(realpath("..".$path)){
 		}
 		readfile("..".$path);
 	}
-}else if($path == '/doc/boot.js'){
-	readfile("../WEB-INF/classes/lite/boot.js");
 }else{
     echo '<h3>找不到文件:'.$path.'</h3>';
 }

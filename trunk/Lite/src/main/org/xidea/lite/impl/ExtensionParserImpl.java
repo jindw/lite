@@ -1,6 +1,5 @@
 package org.xidea.lite.impl;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -169,13 +168,20 @@ public class ExtensionParserImpl implements ExtensionParser {
 			ParseChain chain, String nns) {
 		Map<Pattern, Object> pm = patternMap.get(nns);
 		if (pm != null) {
-			ArrayList<Object> fns = null;
+			//javascript array
+			Object fns = null;
 			for (Pattern p : pm.keySet()) {
 				if (p.matcher(name).find()) {
+					Object fns1 = pm.get(p);
 					if(fns == null){
-						fns = new ArrayList<Object>();
+						//test
+//						Object a1 = rt.eval("([1,2])");
+//						a1=rt.invoke(a1, "concat", a1);
+//						System.err.println(rt.invoke(null, "uneval", a1));
+						fns = fns1;
+					}else{
+						fns = rt.invoke(fns, "concat", fns1);
 					}
-					fns.add(p);
 				}
 			}
 			if (fns != null) {

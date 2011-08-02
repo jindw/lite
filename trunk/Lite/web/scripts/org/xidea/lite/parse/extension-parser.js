@@ -129,7 +129,7 @@ function getParser(map,key){
 	var buf = [];
 	for(var n in map){
 		if(new RegExp('^'+n.replace(/\*/g,'.*')+'$').test(key)){
-			buf.push(map[n]);
+			buf.push.apply(buf,map[n]);
 		}
 	}
 	return buf.length ? buf:null;
@@ -172,8 +172,11 @@ ExtensionParser.prototype = {
 				chain = chain.getSubChain(last);
 			}
 //			$log.info("##",subIndex,String(fns[subIndex]));
-			fns[subIndex].call(chain,node);
+			fns[subIndex].call(chain,node,ns);
 		}else{
+			//if(node.name == 'onclick'){
+			//	$log.error(node.name,typeof fns[0],fns[0].call,fns[0])
+			//}
 			fns[0].call(chain,node,ns);
 		}
 		return true;
@@ -282,9 +285,9 @@ ExtensionParser.prototype = {
 				if(n in ext.attributeMap){
 					return this.doParse(node,ext.attributeMap[n],chain);
 				}else{
-					var fns = getParser(ext.patternTagMap,n);
+					var fns = getParser(ext.patternAttributeMap,n);
 					if(fns){
-						return this.doParse(el,fns,chain);
+						return this.doParse(node,fns,chain);
 					}
 				}
 			}
