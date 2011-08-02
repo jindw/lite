@@ -31,8 +31,9 @@ public class XMLNormalizeImpl {
 					+ ")(?:\\s*=\\s*('[^']*'|\"[^\"]*\"|\\w+|\\$\\{[^}]+\\}))?|\\s*\\/?>");
 	protected static final Pattern XML_TEXT = Pattern
 			.compile("&\\w+;|&#\\d+;|&#x[\\da-fA-F]+;|([&\"\'<])");
-	protected static final Set<String> DEFAULT_LEAF_SET ;
-		
+	protected static final Pattern XML_TEXT_RESERED = Pattern.compile("[<>&]");
+	protected static final Set<String> DEFAULT_LEAF_SET;
+
 	public final static Map<String, String> DEFAULT_ENTRY_MAP;
 	public final static Map<String, String> DEFAULT_NS_MAP;
 	static {
@@ -80,15 +81,15 @@ public class XMLNormalizeImpl {
 	}
 
 	protected class TagAttr {
-		int start =  XMLNormalizeImpl.this.start;
+		int start = XMLNormalizeImpl.this.start;
 		String name;
 		Map<String, String> nsMap;
 		TagAttr parentTag = tag;
 		ArrayList<String> attrs = new ArrayList<String>();
 	}
 
-	private void addAttr(String space, String name, String value,char qute) {
-		if(tag.name == null){
+	private void addAttr(String space, String name, String value, char qute) {
+		if (tag.name == null) {
 			error("tagName is required");
 		}
 		int prefixIndex = name.indexOf(':');
@@ -131,7 +132,10 @@ public class XMLNormalizeImpl {
 				String value = entry.getValue();
 				if (!tag.nsMap.containsKey(key)) {
 					int p = key.indexOf(':');
-					if(p<0 || key.equals("xmlns:c")|| text.matches("[<\\s]"+key.substring(p+1)+':')){
+					if (p < 0
+							|| key.equals("xmlns:c")
+							|| text.matches("[<\\s]" + key.substring(p + 1)
+									+ ':')) {
 						tag.nsMap.put(key, value);
 						result.append(" ");
 						result.append(key);
@@ -261,7 +265,21 @@ public class XMLNormalizeImpl {
 					result.append('>');
 					// for script
 					if ("script".equalsIgnoreCase(tag.name)) {
-
+						// </script > 如何？
+						int end = findScriptEnd();
+						if (end > start) {
+							int end2 = text.lastIndexOf('<',end-9);
+							String content = text.substring(this.start, end2);
+							if (XML_TEXT_RESERED.matcher(content).find()
+									&& content.indexOf("<![CDATA[") < 0) {
+								result.append("/*<![CDATA[*/");
+								result.append(content);
+								result.append("/*]]>*/");
+							} else {
+								result.append(content);
+							}
+							this.start = end2;
+						}
 					}
 				}
 				return true;
@@ -295,7 +313,7 @@ public class XMLNormalizeImpl {
 							value = formatXMLValue(value, name, qute);
 						}
 					}
-					addAttr(space, name, value,qute);
+					addAttr(space, name, value, qute);
 
 				}
 
@@ -306,6 +324,31 @@ public class XMLNormalizeImpl {
 		this.start = start;
 		result.setLength(len);
 		return false;
+	}
+
+	private int findScriptEnd() {
+		int start = this.start;
+		int len = text.length();
+		while (true) {
+			int end1 = text.indexOf("</" + tag.name, start);
+			if (end1 > 0) {
+				int end = end1 + 3 + 6;
+				while(end < len){
+					char c = text.charAt(end);
+					if(c == '>'){
+						return end+1;
+					}else if(Character.isWhitespace(c)){
+						end++;
+						continue;
+					}
+					start = end;
+					break;
+				}
+				return end;
+			} else {
+				return -1;
+			}
+		}
 	}
 
 	protected void appendElementEnd() {
@@ -332,8 +375,8 @@ public class XMLNormalizeImpl {
 
 	protected boolean isLeaf(String name) {
 		name = name.toLowerCase();
-		if(defaultLeafSet.contains(name)){
-			if(this.text.indexOf("</"+name+'>',this.start)>0){
+		if (defaultLeafSet.contains(name)) {
+			if (this.text.indexOf("</" + name + '>', this.start) > 0) {
 				defaultLeafSet.remove(name);
 				return false;
 			}

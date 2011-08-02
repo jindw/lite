@@ -81,6 +81,15 @@ public class XMLNormalizeTest {
 		//System.out.println(impl.normalize("<hr>"));
 	}
 	@Test
+	public void testScript() throws SAXException, IOException{
+		assertNorm("<script></script>","<script></script>");
+		assertNorm(" <script>1>1</script>","<script>/*<![CDATA[*/1>1/*]]>*/</script>");
+		assertNorm(" <script>1&1</script>","<script>/*<![CDATA[*/1&1/*]]>*/</script>");
+		assertNorm(" <script>1&&1</script>","<script>/*<![CDATA[*/1&&1/*]]>*/</script>");
+		assertNorm(" <script>1&lt;1</script>","<script>/*<![CDATA[*/1&lt;1/*]]>*/</script>");
+		assertNorm("  <script>1+2</script>  ","<script>1+2</script>");
+	}
+	@Test
 	public void testSpec() throws SAXException, IOException{
 		assertNorm("<a href=\"&copy;\"></a>","<a href=\"&#169;\"></a>");
 		assertNorm("<a href='&nbsp;nbsp;'></a>","<a href='&#160;nbsp;'></a>");

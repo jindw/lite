@@ -31,7 +31,7 @@ var HTML = {
 
 }
 function processJS(value){
-	return autoEncode(value,/^\s*JSON\s*\.*/g,replaceJSON);
+	return autoEncode(value,/^\s*JSON\s*\.*/,replaceJSON);
 }
 function replaceJSON(v){
 	return "JSON.stringify("+v+")";
@@ -40,7 +40,7 @@ function replaceURI(v){
 	return "encodeURIComponent("+v+")";
 }
 function forceURIParse(attr){
-	attr.value = autoEncode(attr.value,/^\s*encodeURI*/g,replaceURI);
+	attr.value = autoEncode(attr.value,/^\s*encodeURI*/,replaceURI);
 	this.next(attr);
 }
 
@@ -67,6 +67,7 @@ function autoEncode(value,pattern,replacer){
 					}
 					result.push(value.substring(0,p+2),el,'}');
 					value = value.substring(p2+1)
+					p=-1;
 				}else{
 					p++;
 				}

@@ -291,11 +291,11 @@ JSTranslateContext.prototype = new PT({
         var el = item[1];
         var value = this.stringifyEL(el);
         var attributeName = item.length>2 && item[2];
-        var testId = this.allocateId(value);
-        if(testId != value){
-            this.append("var ",testId,"=",value);
-        }
         if(attributeName){
+        	var testId = this.allocateId(value);
+        	if(testId != value){
+            	this.append("var ",testId,"=",value);
+        	}
             this.append("if(",testId,"!=null){");
             this.depth++;
             this._appendOutput("' ",attributeName,"=\"',",this.liteImpl,"x("+testId+",1),'\"'");

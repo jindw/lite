@@ -75,6 +75,36 @@ function normalizeTag(source,tag,uri,pos){
 	}
 	return begin+' c:__i="'+pos+'"'+end;
 }
+
+/*
+ * /(<\?\w+[\s\S]+?\?>|
+ * <!(?:[^>\[\-]+\[[\s\S]+\]>|[^>\[\-]+>)
+ * |<!\[CDATA\[[\s\S]+?\]\]>|<!--[\s\S]+?-->)|
+ * 
+ * 
+ * <([a-zA-Z_][\w_\-\.]*(?:\:[\w_][\w_\-\.]+)?)
+ * (?:\s+[\w_](?:'[^']*'|\"[^\"]*\"|\$\{[^}]+\}|[^>'"$]+|\$)*>|\s*\/?>)
+ * |
+ * (<\/[\w_][\w_\-\.]*(?:\:[\w_][\w_\-\.]+)?>)
+ * |
+ * &\w+;|&#\d+;|&#x[\da-fA-F]+;|[&<]/g,
+ */
+//<\?\w+[\s\S]+?\?>
+var INS = "<\\?\\w+[\\s\\S]+?\\?>"
+//<!--[\s\S]+?-->
+var COMM = "<!--[\\s\\S]+?-->"
+//<!\[CDATA\[[\s\S]+?\]\]>
+//<!(?:[^>\[\-]+\[[\s\S]+\]>
+var CDATA = "<!\\[CDATA\\[[\\s\\S]+?\\]\\]>|<!(?:[^>\\[\\-]+\\[[\\s\\S]+\\]>|[^>\\[\\-]+>)"
+var TAG = "[a-zA-Z_][\\w_\\-\\.]*(?:\\:[\\w_][\\w_\\-\\.]+)?"
+var ATTR = "(?:\\s+[\\w_](?:'[^']*'|\\\"[^\\\"]*\\\"|\$\{[^}]+\}|[^>'\"\/$]+|\\$)*|\\s*)"
+var pattern = "("+INS+'|'+COMM+'|'+CDATA+')'+
+			"|(<"+'(?:script|SCRIPT)\\b'+ATTR+'\\s*>)[\\s\\S]*?<\/(?:script|SCRIPT)\\s*>'+
+			"|<("+TAG+')\\b'+ATTR+'\\/?>'+
+			"|"+'<\\/('+TAG+')\s*>'+
+			'|&\\w+;|&#\\d+;|&#x[\\da-fA-F]+;|[&<]';
+			
+pattern = new RegExp(pattern,'g');
 function normalizeXML(text,uri){
 	var lines = text.split(/\r\n?|\n/);
 	var text2 = lines.join('\n');
@@ -95,22 +125,24 @@ function normalizeXML(text,uri){
 		return pos;
 	}
 	//一个比较全面的容错。
-	text2 = text2.replace(
-    	//<\?\w+[\s\S]+?\?>|<!(?:[^>\[]+\[[\s\S]+\]>|[^>]+>)|<!\[CDATA\[[\s\S]+?\]\]>|<!--[\s\S]+?-->
-    	//
-    	///<[a-zA-Z_][\w_\-\.]*(?:\:[\w_][\w_\-\.]+)?
-    	// (?:\s+[\w_](?:'[^']*'|\"[^\"]*\"|\$\{[^}]+\}|[^>'"$]+|[\$])*>|\s*\/?>)/,
-    	//
-    	//<\/[\w_][\w_\-\.]*(?:\:[\w_][\w_\-\.]+)?>
-    	//
-    	//&\w+;|&#\d+;|&#x[\da-fA-F]+;|[&<]
-    	/(<\?\w+[\s\S]+?\?>|<!(?:[^>\[\-]+\[[\s\S]+\]>|[^>\[\-]+>)|<!\[CDATA\[[\s\S]+?\]\]>|<!--[\s\S]+?-->)|<([a-zA-Z_][\w_\-\.]*(?:\:[\w_][\w_\-\.]+)?)(?:\s+[\w_](?:'[^']*'|\"[^\"]*\"|\$\{[^}]+\}|[^>'"$]+|\$)*>|\s*\/?>)|(<\/[\w_][\w_\-\.]*(?:\:[\w_][\w_\-\.]+)?>)|&\w+;|&#\d+;|&#x[\da-fA-F]+;|[&<]/g,
-    	function(a,notTag,startTag,endTag,offset){
+	text2 = text2.replace(pattern,
+    	function(a,notTag,scriptTag,startTag,endTag,offset){
     		if(notTag){
     			if(a.charAt(2) == 'd'){
     				a = a.replace(/^<!doctype\b/,'<!DOCTYPE');
     			}
     			return a;
+    		}else if(scriptTag){
+    			tag = {parentTag:tag};
+    			var content = a.substring(scriptTag.length);
+    			scriptTag = normalizeTag(scriptTag,tag,uri,getPositionAttr(offset));
+    			var end = content.lastIndexOf('<');
+    			var script = content.substring(0,end);
+    			if(/[<>&]/.test(script) && script.indexOf('<![CDATA[')<0){
+    				script ="/*<![CDATA[*/"+script+"/*]]>*/"
+    			}
+    			tag = tag.parentTag;
+    			return scriptTag + script+content.substring(end);
     		}else if(startTag){
     			if(tag == null){
     				rootCount++;
@@ -135,7 +167,7 @@ function normalizeXML(text,uri){
     			}
     			return a;
     		}else if(endTag){
-    			if(a.replace(/^<\/|>$/g,'') in leaf){
+    			if(endTag in leaf){
     				return '';
     			}
     			if(tag == null){
