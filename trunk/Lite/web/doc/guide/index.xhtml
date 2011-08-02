@@ -77,9 +77,6 @@
 								"disabled":null,
 								data:{p1:"属性1",p2:"属性2"}}'>
 					<![CDATA[
-					<!-- html/xml 条件属性
-						若 disabled 变量为null， 则disabled 属性不输出 -->
-					<input type="submit" disabled="${disabled}" value=""/>
 					<!-- 自动表单填充 -->
 					<form h:autoform="true">
 						大名：<input name="user.name" type="text"/>
@@ -88,6 +85,13 @@
 						</select>
 						已婚？<input name="user.married" type="checkbox" value="true"/>
 					</form>
+					
+					....
+					<!-- html/xml 条件属性
+							若 disabled 变量为null， 则disabled 属性不输出 -->
+					<input type="submit" disabled="${disabled}" value=""/>
+					
+					....
 					<!-- javascript自动编码(JSON.stringify) -->
 					<div onclick="alert(${content})">...</div>
 					<!-- URL 自动编码(encodeURIComponent) -->
@@ -95,17 +99,15 @@
 					<!-- html自动编码  -->
 					<p title="${title}">${content}</p>
 					<script>
-					<![CDATA[
-						//不做自动编码
+						//script <![CDATA 中的内容不做自动编码
 						if(content.length<10){
 							alert(content.length);
 						}
 						alert(${content})
-					]]]]><![CDATA[>
 					</script>
 					
-					...
 					
+					...
 					<!-- 自动Hash戳（用于设置服务器永久缓存）和文件缺失检查【该功能只在上线编译时启用】 -->
 					<link href="/styles/default.css" type="text/css" rel="stylesheet"/>
 					<script src="/scripts/boot.js"/>
