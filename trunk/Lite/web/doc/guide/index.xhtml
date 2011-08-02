@@ -92,9 +92,6 @@
 					<div onclick="alert(${content})">...</div>
 					<!-- URL 自动编码(encodeURIComponent) -->
 					<a href="/test?p1=${data.p1}&p2=${data.p2}&p3=${'中文自动编码'}">...</a>
-					<!-- 自动Hash戳（用于设置服务器永久缓存）和资源文件缺失检查【这些功能只在上线编译时触发】 -->
-					<link href="/styles/default.css" type="text/css" rel="stylesheet"/>
-					<script src="/scripts/boot.js"/>
 					<!-- html自动编码  -->
 					<p title="${title}">${content}</p>
 					<script>
@@ -107,6 +104,13 @@
 					]]]]><![CDATA[>
 					</script>
 					
+					...
+					
+					<!-- 自动Hash戳（用于设置服务器永久缓存）和文件缺失检查【该功能只在上线编译时启用】 -->
+					<link href="/styles/default.css" type="text/css" rel="stylesheet"/>
+					<script src="/scripts/boot.js"/>
+					<!-- 自动图片文件信息补全(width,height) 【该功能只在上线编译时启用】-->
+					<img src="/images/logo.png"/>
 					]]>
 					</x:code>
 				</p>
