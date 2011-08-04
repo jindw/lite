@@ -171,7 +171,7 @@ function buildCheck2select(context,el,name_,checkName){
 		context.next(el)
 	context.appendEnd();
 }
-function preservedParse(){
+function preservedParse(node){
 	var oldSpace = this.getAttribute(XML_SPACE_TRIM);
 	this.setAttribute(XML_SPACE_TRIM,false);
 	try{
