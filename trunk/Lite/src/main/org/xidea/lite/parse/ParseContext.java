@@ -20,8 +20,8 @@ public interface ParseContext extends ResultContext, ParserHolder {
 //	public String FEATURE_HTML_LEAF = "http://www.xidea.org/lite/features/html-leaf";
 	// 默认值为空
 	public String FEATURE_HTML_TRIM = "http://www.xidea.org/lite/features/html-trim";
-	// 默认值为空
-	public String FEATURE_HTML_JAVASCRIPT_COMPRESSOR = "http://www.xidea.org/lite/features/html-javascript-compressor";
+//	 默认值为空
+//	public String FEATURE_HTML_JAVASCRIPT_COMPRESSOR = "http://www.xidea.org/lite/features/html-javascript-compressor";
 	// 默认值为utf-8
 	public String FEATURE_ENCODING = "http://www.xidea.org/lite/features/output-encoding";
 	// 默认值为 text/html
@@ -72,12 +72,12 @@ public interface ParseContext extends ResultContext, ParserHolder {
 	 * @return
 	 */
 	public int getTextType();
-	/**
-	 * 是否保留空白（默认为false）
-	 * @return
-	 */
-	public boolean isReserveSpace();
-	public void setReserveSpace(boolean keepSpace);
+//	/**
+//	 * 是否保留空白（默认为false）
+//	 * @return
+//	 */
+//	public boolean isReserveSpace();
+//	public void setReserveSpace(boolean keepSpace);
 	/**
 	 * 给出文件内容或url，解析模版源文件
 	 */

@@ -111,8 +111,10 @@ a:hover{
   width:100%;
   height:100%;
   background:#F1F6F8;;
+  filter:alpha(opacity=50);
   opacity:0.6;
 }
+
 #exampleRunner{
     position:absolute;
 	left:50%;
@@ -289,4 +291,37 @@ a:hover{
 	border-radius: 3px 3px 3px 3px;
 	cursor:pointer;
 }
+.api .runner{
+	background-color: #330;
+	color:#FFF;
+	padding:0 5px 0 5px;
+	border-radius: 3px 3px 3px 3px;
+	cursor:pointer;
+}
+.api .runner:after {
+	content:"示例...";
+}
 
+#post{
+	padding-top:18px;
+}
+#post legend{
+	font-weight:bold;
+}
+#post input{
+	width:200px;
+}
+#post textarea{
+	margin-top:12px;
+	width:600px;
+	height:80px;
+}
+#messages .message-0,#messages .message-1{
+	border-radius: 3px 3px 3px 3px;
+	background-color:#eec;
+	margin:12px;
+	padding:8px;
+}
+#messages .message-0{
+	background-color:#eee;
+}

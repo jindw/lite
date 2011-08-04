@@ -5,6 +5,7 @@
  * @author jindw
  * @version $Id: template.js,v 1.4 2008/02/28 14:39:06 jindw Exp $
  */
+var PLUGIN_NATIVE = "org.xidea.lite.NativePlugin"
 var Core = {
 	xmlns : function(){},
 	seek:function(text){
@@ -187,7 +188,20 @@ var Core = {
 	//},
 	//"parse*" : function(node){
 	//	$log.error("未支持标签："+node.tagName)
-	}
+	},
+	parsePHP:function(node){
+    	var value = node.textContent || node.text;
+    	this.appendPlugin(PLUGIN_NATIVE,{"type":"php"});
+    	parseChildRemoveAttr(this,node);
+    	this.appendEnd();
+	},
+	parseJS:function(node){
+    	var value = node.textContent || node.text;
+    	this.appendPlugin(PLUGIN_NATIVE,{"type":"js"});
+    	parseChildRemoveAttr(this,node);
+    	this.appendEnd();
+	},
+	parseComment:function(){}
 }
 var DOCUMENT_LAYOUT_PROCESSED = "http://www.xidea.org/lite/core/c:layout-processed";
 var CHOOSE_KEY = "http://www.xidea.org/lite/core/c:choose@value";
@@ -525,7 +539,6 @@ function processDef(node){
     parseChildRemoveAttr(this,node);
     this.appendEnd();
 }
-
 function seekDef(text){
     var end = findELEnd(text);
 	if(end>0){

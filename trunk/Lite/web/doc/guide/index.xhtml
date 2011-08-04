@@ -70,18 +70,25 @@
 				<strong>懂HTML/XML的语法</strong>
 				<p>因为Lite XML语法本身是基于标记去扩展的，他对文档中所有动态的和静态的内容，都有感知，并可以据此设计一些漂亮的语法特征，并能合理的自动优化。</p>
 				<p>
-					<x:code model='{
-								title:"特殊字符\"&&lt;",
-								user:{name:"金大为",city:"杭州",married:true},
-								content:"危险代码&lt;script>alert(\"想做点坏事，能得逞吗？\") &lt;\/script>",
-								"disabled":null,
-								data:{p1:"属性1",p2:"属性2"}}'>
+					<x:code var="htmlxmlModel">
+					<![CDATA[
+					{
+						cityList:["北京","杭州","上海"]
+						title:"特殊字符\"&&lt;",
+						user:{name:"金大为",city:"杭州",married:true},
+						content:"危险代码&lt;script>alert(\"想做点坏事，能得逞吗？\") &lt;\/script>",
+						"disabled":null,
+						data:{p1:"属性1",p2:"属性2"}
+					}
+					]]>
+					</x:code>
+					<x:code model='htmlxmlModel'>
 					<![CDATA[
 					<!-- 自动表单填充 -->
 					<form h:autoform="true">
 						大名：<input name="user.name" type="text"/>
 						城市：<select name="user.city">
-							<option c:for="${city:cities}">${city}</option>
+							<option c:for="${city:cityList}">${city}</option>
 						</select>
 						已婚？<input name="user.married" type="checkbox" value="true"/>
 					</form>

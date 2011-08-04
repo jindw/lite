@@ -22,6 +22,7 @@ public class XMLNormalizeImpl {
 	protected static final String TAG_NAME = "[a-zA-Z_](?:[\\w_\\-\\.\\:]*[\\w_\\-\\.])?";
 
 	private static final String NS_CORE = "http://www.xidea.org/lite/core";
+	private static final String NS_HTML_EXT = "http://www.xidea.org/lite/html-ext";
 	private static final Pattern OLD_NS_CORE = Pattern
 			.compile("^(?:http://www.xidea.org/ns/(?:lite|template)/core/?|http://firekylin.my.baidu.com/ns/2010)$");
 	// key (= value)?
@@ -43,6 +44,7 @@ public class XMLNormalizeImpl {
 		DEFAULT_ENTRY_MAP = Collections.unmodifiableMap(map);
 		map = new HashMap<String, String>();
 		map.put("xmlns:c", NS_CORE);
+		map.put("xmlns:h", NS_HTML_EXT);
 		map.put("xmlns", "http://www.w3.org/1999/xhtml");
 		DEFAULT_NS_MAP = Collections.unmodifiableMap(map);
 		Set<String> set = new HashSet<String>();

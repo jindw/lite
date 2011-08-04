@@ -7,7 +7,7 @@ this.addScript('lite-demo-util.js',["TestCase"]
                    "org.xidea.jsi:$log"
                ]
                ,"org.xidea.jsidoc.util:XMLHttpRequest");
-this.addScript('lite-compiler.js',["liteFunction","liteTemplate","lite__*"]
+this.addScript('lite-compiler.js',["liteFunction","liteTemplate"]
                ,[
                    "org.xidea.lite.impl.js:JSTranslator",
                    "org.xidea.lite.impl.*",

@@ -2,6 +2,7 @@
  * @see extension.js
  */
 var CORE_URI = "http://www.xidea.org/lite/core"
+var HTML_EXT_URI = "http://www.xidea.org/lite/html-ext"
 var HTML_URI = "http://www.w3.org/1999/xhtml"
 var CORE_INFO = "__i";
 var currentExtension;
@@ -23,6 +24,7 @@ function ExtensionParser(newNodeLocal){
 	this.packageMap = {};
 	this.addExtension(CORE_URI,Core);
 	this.addExtension(HTML_URI,HTML)
+	this.addExtension(HTML_EXT_URI,HTML_EXT)
 	
 }
 //Extension.defaults = [];

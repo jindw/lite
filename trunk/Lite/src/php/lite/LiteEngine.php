@@ -156,6 +156,29 @@ function lite_op__get($obj, $key) {
 	}
 	return @$obj[$key];
 }
+/* ===================== 成员函数调用 ======================*/
+/**
+ * 全局函数和成员函数调用入口
+ */
+function lite_op__invoke($obj,$method,$args){
+	if(is_string($obj)){
+		if($method === null){
+			call_user_func_array('lite__'.$obj,$args);
+		}else{
+		}
+	}else if(is_array($obj)){
+		
+	}else if(method_exists($obj,$method)){
+		return call_user_func_array(array($obj,$method),$args);
+	}
+	$method = 'lite_member_'.$method;
+	if(function_exists($method)){
+		array_unshift($args,$obj);
+		return call_user_func_array($method,$args);
+	}else{
+		trigger_error("method not existed:".$method);
+	}
+}
 /* ================ 全局函数调用 =================*/
 
 /**
@@ -240,22 +263,7 @@ function lite__decodeURI($uri){
 	return preg_replace('/%[0-9A-F]{2}/i',lite__decodeURI,$uri);
 }
 
-/* ===================== 成员函数调用 ======================*/
-/**
- * 成员函数调用入口
- */
-function lite_member__($obj,$method,$args){
-	if(is_object( $obj ) && method_exists($obj,$method)){
-		return call_user_func_array(array($obj,$method),$args);
-	}
-	$method = 'lite_member_'.$method;
-	if(function_exists($method)){
-		array_unshift($args,$obj);
-		return call_user_func_array($method,$args);
-	}else{
-		trigger_error("method not existed:".$method);
-	}
-}
+
 /*============ 标准函数库 ==============*/
 
 /**

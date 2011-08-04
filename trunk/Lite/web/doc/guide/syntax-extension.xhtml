@@ -18,56 +18,206 @@
 			本文，我们将重点介绍标签语法的扩展方法。
 		</p>
 		<h3>API结构</h3>
-		<p>Lite 一共有9中中间代码，一个通用的结束指令，一个批量条件接口，一个静态文本添加接口，共有12个中间指令操作接口。
+		<p>
+			Lite 一共有9中中间代码，一个通用的结束指令，一个批量条件接口，一个静态文本添加接口，共有12个中间指令操作接口。
 			他们分别是：
-			<ul>
-				<li>append(text)
+			<ul class="api">
+				<li>
+					append(text)
 					<p>
-						用于添加静态文本。例如：
-						<x:code>
+						用于添加静态文本。
+						<x:code model="{}" var="api_append">
 						<![CDATA[
-							<c:extenson package="http://www.w3.org/1999/xhtml">
-								//我需要一个插件，让所有a标签都加上一个中括弧([]),实现代码如下。
-								parseA(node){
-									this.append('[');
-									//让下一个解析器实现最终解析
-									this.next(node);
-									this.append(']');
-									
-								}
-							</c:extenson>
+						<!-- 扩展html 语法 -->
+						<c:extension namespace="http://www.w3.org/1999/xhtml">
+							//我需要一个插件，让所有a标签都加上一个中括弧([]),实现代码如下。
+							function parseA(node){
+								this.append('[');
+								//让下一个解析器实现最终解析
+								this.next(node);
+								this.append(']');
+							}
+						</c:extension>
+						<a href="#1"/><a href="#2"/>
 						]]>
 						</x:code>
-					</p></li>
-				<li>appendEL(el)
-					<p>用于添加一段表达式输出（不编码）
-						
-					</p></li>
-				<li>appendIf(el)
-					<p>用于开始一个条件判断（结束用appendEnd()）
-					<x:code>
+					</p>
+				</li>
+				<li>
+					appendEL(el)
+					<p>
+						用于添加一段表达式输出（不编码）
+
+						<x:code model="{action:'敲代码',result:'&lt;script>出个xss漏洞也算正常^_^'}" var="api_appendEL">
 					<![CDATA[
+					<!-- 扩展Example 语法 -->
+					<div xmlns:x="http://www.xidea.org/lite/example">
+						<c:extension namespace="http://www.xidea.org/lite/example">
+							/* 扩展content属性(为了简单，没有做IE兼容) */
+							function parseEL(node){
+								var value = node.textContent;
+								this.appendEL(value);
+							}
+						</c:extension>
+						<x:el>'一年有'+24*365 +'小时在'+action</x:el>
+						<x:el>result</x:el>
+					</div>
+					]]>
+						</x:code>
+
+						<c:comment>
+							<x:code model="{}" var="api_appendEL">
+					<![CDATA[
+					<!-- 扩展Example 语法 -->
+					<div xmlns:x="http://www.xidea.org/lite/example">
+						<c:extension namespace="http://www.xidea.org/lite/example">
+							/* 扩展content属性(为了简单，没有做IE兼容) */
+							function parse2content(attr){
+								var value = attr.value;
+								var el = attr.ownerElement;
+								el.removeAttributeNode(attr);
+								el.textContent = value;
+							}
+						</c:extension>
+						<div x:content="${1>2}">这里的内容会自动被x:content 中的定义代替</div>
+					</div>
+					]]>
+							</x:code>
+						</c:comment>
+					</p>
+				</li>
+				<li>
+					appendIf(el)
+					<p>
+						用于开始一个条件判断（结束用appendEnd()）
+						<x:code model="{}" var="api_appendIf">
+					<![CDATA[
+					<!-- 扩展html 语法 -->
+					<c:extension namespace="http://www.w3.org/1999/xhtml">
 						function parseIf(node){
 							var el = node.getAttribute('test');
 							el = el.replace(/^\$\{([\s\S]+)\}$/,'$1');
 							this.appendIf(el);
-							this.parse(el.childNodes);
+							this.parse(node.childNodes);
 							this.appendEnd();
 						}
+					</c:extension>
+					<if test="${1<2}"><div>1<2</div></if>
+					<if test="${1>2}"><div>1>2</div></if>
 					]]>
-					</x:code>
+						</x:code>
 					</p>
 				</li>
-				<li>appendElse(el)
-					<p>用于开始一个条件判断（结束用appendEnd()）</p></li>
-				<li>appendEnd()<p>通用的结束符（用于结束一个if语法，for循环，plugin等等...）</p></li>
-				<li>appendFor(varName, el, status)<p>开始一个for循环</p></li>
-				<li>appendXA(attrName, el)<p>添加一个XML 属性，当attrName 为空时，只做属性编码输出，不做属性语法输出（输出判断+属性名=".."）。</p></li>
-				<li>appendXT(el)<p>添加一个XML文本输出</p></li>
-				<li>appendVar(varName, el)<p>申明一个模板变量</p></li>
-				<li>appendCapture(varName)<p>捕捉一段输出，将结果申明为指定变量名</p></li>
-				<li>appendPlugin(pluginClass, pluginConfig)<p>添加插件</p></li>
-				<li>appendAll(list)<p>将一组中间代码，批量添加进来。</p></li>
+				<li>
+					appendElse(el)
+					<p>用于开始一个条件判断（结束用appendEnd()）
+					<x:code model="{}" var="api_appendElse">
+					<![CDATA[
+					<!-- 扩展html 语法 -->
+					<c:extension namespace="http://www.w3.org/1999/xhtml">
+						function parseIf(node){
+							var el = node.getAttribute('test');
+							el = el.replace(/^\$\{([\s\S]+)\}$/,'$1');
+							this.appendIf(el);
+							this.parse(node.childNodes);
+							this.appendEnd();
+						}
+						function parseElse(node){
+							var el = node.getAttribute('test');
+							el = el.replace(/^\$\{([\s\S]+)\}$/,'$1');
+							this.appendElse(el || null);
+							this.parse(node.childNodes);
+							this.appendEnd();
+						}
+					</c:extension>
+					<if test="${1>2}"><div>if: 1>2</div></if>
+					<else test="${1<2}"><div>else if : 1<2</div></else>
+					<else><div>else </div></else>
+					]]>
+						</x:code>
+					
+					</p>
+				</li>
+				<li>
+					appendEnd()
+					<p>通用的结束符（用于结束一个if语法，for循环，plugin等等...）</p>
+				</li>
+				<li>
+					appendFor(varName, el, status)
+					<p>开始一个for循环,el表达式需要是一个符合javascript语法规则的表达式（不允许Core:for 标签中的 .. 语法）</p>
+					<p>el值类型只能有 list(Array),number(循环次数),map（Object，循环key 相当于 JavaScript的 for in 语法）
+						<x:code model="{list:[1,2,3,4]}" var="api_appendFor">
+					<![CDATA[
+					<!-- 扩展html 语法 -->
+					<c:extension namespace="http://www.w3.org/1999/xhtml">
+						function parseFor(node){
+							var varName = node.getAttribute('var');
+							var el = node.getAttribute('list');
+							var status = node.getAttribute('status');
+							el = el.replace(/^\$\{([\s\S]+)\}$/,'$1');
+							this.appendFor(varName,el,status);
+							this.parse(node.childNodes);
+							this.appendEnd();
+						}
+					</c:extension>
+					<for var="item" list="${list}" status="status"><div>${item}/${status.index}</div></for>
+					]]>
+						</x:code>
+					
+					</p>
+				</li>
+				<li>
+					appendXA(attrName, el)
+					<p>添加一个XML 属性，当attrName 为空时，只做属性编码输出，不做属性语法输出（输出判断+属性名=".."）。
+					
+						<x:code model="{list:[1,2,3,4]}" var="api_appendXA">
+					<![CDATA[
+					<!-- 扩展html 语法 -->
+					<c:extension namespace="http://www.w3.org/1999/xhtml">
+						/**
+						 * 重新定义 input 解析规则。
+						 * 让属性： readonly autofocus checked disabled required 不用带值，标签也可以省去关闭语法
+						 */
+						function parseInput(node){
+							var attributes = node.attributes;
+							this.append('<'+node.tagName);
+							for (var i=0; i<attributes.length; i++) {
+							    var attr = attributes.item(i);
+							    if(/readonly|autofocus|checked|disabled|required/.test(attr.name)){
+							    	this.append(" "+attr.name)
+							    }else{
+							    	this.parse(attr);
+							    }
+							}
+							this.append('>')
+						}
+					</c:extension>
+					<input checked disabled  value="test"/>
+					]]>
+						</x:code>
+					
+					</p>
+				</li>
+				<li>
+					appendXT(el)
+					<p>添加一个XML文本输出</p>
+				</li>
+				<li>
+					appendVar(varName, el)
+					<p>申明一个模板变量</p>
+				</li>
+				<li>
+					appendCapture(varName)
+					<p>捕捉一段输出，将结果申明为指定变量名</p>
+				</li>
+				<li>
+					appendPlugin(pluginClass, pluginConfig)
+					<p>添加插件</p>
+				</li>
+				<li>
+					appendAll(list)
+					<p>将一组中间代码，批量添加进来。</p>
+				</li>
 			</ul>
 		</p>
 		<p></p>
@@ -110,9 +260,11 @@
 		<h3>示例2</h3>
 		<ul>
 			<p>有时候，我们需要吧一些有换行的文本显示成换行，但是，有希望代码是编码安全的。通常，这种功能只能通过内置函数实现。
-			现在，我们尝试用一个插件解决这个问题。
+				现在，我们尝试用一个插件解决这个问题。
 			</p>
-			<x:code model="{text:'abc\ndef\nghi\n<script>该编码的还是的编码<\/script>'}">
+			<x:code model="{text: ' abc \ ndef \ nghi \ n
+				<script>
+					该编码的还是的编码<\/script>'}">
 			<![CDATA[
 			<html xmlns:x="http://www.xidea.org/lite/example">
 			<head>
@@ -191,8 +343,9 @@
 				this.append("<div class='code'><script>renderSource("+text+model+");<\/script></div>")
 			}
 		};
-]]>	]]&gt;
-&lt;/c:extension>
+]]>
+				]]&gt;
+				&lt;/c:extension>
 			</x:code>
 		</ul>
 	</body>

@@ -138,7 +138,10 @@ public class ParseUtil {
 		}
 		return String.valueOf(s1);
 	}
-
+	private static Pattern forcePattern = Pattern.compile("^\\s+|\\s+$|(\\s)\\s+");
+	static String forceTrim(String text) {
+		return forcePattern.matcher(text).replaceAll("$1");
+	}
 	public static InputStream openStream(URI uri) throws IOException {
 		try {
 			if ("data".equalsIgnoreCase(uri.getScheme())) {
@@ -534,6 +537,7 @@ public class ParseUtil {
 	static boolean isFile(URI uri) {
 		return "file".equals(uri.getScheme());
 	}
+
 
 }
 

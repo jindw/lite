@@ -20,10 +20,12 @@ import org.xidea.lite.parse.ParseChain;
 import org.xidea.lite.parse.ParseContext;
 
 public class DefaultXMLNodeParser implements NodeParser<Node> {
+	private static final String XML_SPACE_TRIM = "http://www.xidea.org/lite/attribute/h:trim-space";
 	protected static final Pattern HTML_LEAF = Pattern.compile(
 			"^(?:link|input|meta|img|br|hr)$", Pattern.CASE_INSENSITIVE);
-	protected static final Pattern PRE_LEAF = Pattern.compile(
-			"^(?:script|style|pre|textarea)$", Pattern.CASE_INSENSITIVE);
+
+	// protected static final Pattern PRE_LEAF = Pattern.compile(
+	// "^(?:script|style|pre|textarea)$", Pattern.CASE_INSENSITIVE);
 	// public static final Pattern SCRIPT_TAG = Pattern.compile("^script$",
 	// Pattern.CASE_INSENSITIVE);
 
@@ -109,7 +111,7 @@ public class DefaultXMLNodeParser implements NodeParser<Node> {
 				context.append(sysid);
 			}
 			context.append("\">");
-		} else if (sysid != null && sysid.length()>0 && !sysid.equals(".")) {
+		} else if (sysid != null && sysid.length() > 0 && !sysid.equals(".")) {
 			context.append("<!DOCTYPE ");
 			context.append(node.getNodeName());
 			context.append(" SYSTEM \"");
@@ -151,8 +153,11 @@ public class DefaultXMLNodeParser implements NodeParser<Node> {
 
 	private void parseTextNode(Node node, ParseContext context) {
 		String text = ((Text) node).getData();
-		if (!context.isReserveSpace()) {
+		Boolean trim = context.getAttribute(XML_SPACE_TRIM);
+		if (trim == null) {
 			text = ParseUtil.safeTrim(text);
+		} else if (true == trim) {
+			text = ParseUtil.forceTrim(text);
 		}
 		if (text.length() > 0) {
 			context.appendAll(context.parseText(text, Template.XT_TYPE));
@@ -195,8 +200,7 @@ public class DefaultXMLNodeParser implements NodeParser<Node> {
 			context.append(" " + name + "=\"");
 			if (name.startsWith("xmlns")) {
 				if (buf.size() == 1
-						&& "http://www.xidea.org/lite/xhtml".equals(buf
-								.get(0))) {
+						&& "http://www.xidea.org/lite/xhtml".equals(buf.get(0))) {
 					buf.set(0, "http://www.w3.org/1999/xhtml");
 				}
 			}
@@ -224,21 +228,17 @@ public class DefaultXMLNodeParser implements NodeParser<Node> {
 			if (child != null) {
 
 				context.append(">");
-				boolean reserveSpace = PRE_LEAF.matcher(tagName).find();
-				boolean oldReserveSpace = context.isReserveSpace();
-				context.setReserveSpace(oldReserveSpace || reserveSpace);
-				try {
-					while (true) {
-						context.parse(child);
-						Node next = child.getNextSibling();
-						if (next == null) {
-							break;
-						} else {
-							child = next;
-						}
+
+				// Boolean trim = context.getAttribute(XML_SPACE_TRIM);
+
+				while (true) {
+					context.parse(child);
+					Node next = child.getNextSibling();
+					if (next == null) {
+						break;
+					} else {
+						child = next;
 					}
-				} finally {
-					context.setReserveSpace(oldReserveSpace);
 				}
 
 				closeTag = "</" + tagName + '>';
@@ -246,7 +246,7 @@ public class DefaultXMLNodeParser implements NodeParser<Node> {
 
 				if (HTML_LEAF.matcher(tagName).find()) {
 					closeTag = "/>";
-				}else{
+				} else {
 					closeTag = "></" + tagName + '>';
 				}
 			}

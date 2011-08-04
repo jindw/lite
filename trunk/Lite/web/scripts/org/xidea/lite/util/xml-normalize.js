@@ -3,6 +3,7 @@ var defaultEntryMap = {"&nbsp;": "&#160;","&copy;": "&#169;",'&':'&amp;','<':'&l
 var defaultNSMap = {
 	"xmlns:f": "http://www.xidea.org/lite/core",
 	"xmlns:c": "http://www.xidea.org/lite/core",
+	"xmlns:h": "http://www.xidea.org/lite/html-ext",
 	"xmlns": "http://www.w3.org/1999/xhtml"
 }
 function normalizeTag(source,tag,uri,pos){

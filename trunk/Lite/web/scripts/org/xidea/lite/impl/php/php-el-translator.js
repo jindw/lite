@@ -152,11 +152,13 @@ function stringifyINVOKE(el,context){
 				}
 			}
 		}
-		return "lite_member("+stringifyPHPEL(oel,context)+","+stringifyPHPEL(pel,context)+","+value2+")"
+		return "lite_op__invoke("+stringifyPHPEL(oel,context)+","+stringifyPHPEL(pel,context)+","+value2+")"
 		//value1 = value1.replace(/.*?,([\s\S]+)\)/,'array($1)');
 	}else if(type1 == VALUE_VAR){
 		var name = arg1[1];
-		return value2.replace('array',"lite__"+name)
+		var fn = "is_set('$"+name+"')?$"+name+":'"+name+"'"
+		return 'lite_op__invoke('+fn+',null,'+value2+')';
+		//return value2.replace('array',"lite__"+name)
 	}else{
 		throw new Error("Invalid Invoke EL");
 	}
