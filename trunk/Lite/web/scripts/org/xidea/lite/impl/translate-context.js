@@ -89,21 +89,7 @@ TranslateContext.prototype = {
                     this.appendCapture(item);
                     break;
     			case PLUGIN_TYPE://not support
-    				var pn = item[2]['class']
-    				if(/^org\.xidea\.lite\.EncodePlugin$/.test(pn)){
-    					this.appendEncodePlugin(item[1][0]);
-    				//}else if(/^org\.xidea\.lite\.(?:Encode|Native|Define)Plugin$/.test(pn)){
-    				}else if(/^org\.xidea\.lite\.NativePlugin$/.test(pn)){
-    					this.appendNativePlugin(item);
-    				}else if(/^org\.xidea\.lite\.(?:Encode|Native|Define)Plugin$/.test(pn)){
-    					//continue;
-    					this.processPlugin(item);
-    				}else if(/^org\.xidea\.lite\.parse\.ClientPlugin$/.test(pn)){
-    					$log.error("程序bug(插件需要预处理):"+pn,item[2]);
-    					//continue;
-    				}else{
-    					$log.error("程序bug(插件类型尚未支持):"+pn,item[2]);
-    				}
+    				this.processPlugin(item);
     				break;
                 case IF_TYPE:
                     i = this.processIf(code,i);
@@ -121,7 +107,21 @@ TranslateContext.prototype = {
     	}
     },
     processPlugin:function(item){
-    	this.appendEncodePlugin(item[1][0]);
+    	var pn = item[2]['class']
+    	if(/^org\.xidea\.lite\.EncodePlugin$/.test(pn)){
+			this.appendEncodePlugin(item[1][0]);
+		//}else if(/^org\.xidea\.lite\.(?:Encode|Native|Define)Plugin$/.test(pn)){
+		}else if(/^org\.xidea\.lite\.NativePlugin$/.test(pn)){
+			this.appendNativePlugin(item);
+		//}else if(/^org\.xidea\.lite\.(?:Encode|Native|Define)Plugin$/.test(pn)){
+		//	//continue;
+		//	this.processPlugin(item);
+		}else if(/^org\.xidea\.lite\.parse\.ClientPlugin$/.test(pn)){
+			$log.error("程序bug(插件需要预处理):"+pn,item[2]);
+			//continue;
+		}else{
+			$log.error("程序bug(插件类型尚未支持):"+pn,item[2]);
+		}
     },
     processElse:function(code,i){
     	throw Error('问题指令(无主else,else 指令必须紧跟if或者for)：'+code,i);

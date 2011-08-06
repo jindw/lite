@@ -7,6 +7,7 @@
  */
 
 
+var XML_SPACE_TRIM = "http://www.xidea.org/lite/attribute/h:trim-space" 
 function parseDefaultXMLNode(node,context,chain){
     switch(node.nodeType){
         case 1: //NODE_ELEMENT 
@@ -131,8 +132,14 @@ function processAttribute(node,context,chain){
 function processTextNode(node,context,chain){
     var data = String(node.data);
     //context.appendAll(context.parseText(data.replace(/^\s*([\r\n])\s*|\s*([\r\n])\s*$|^(\s)+|(\s)+$/g,"$1$2$3$4"),XT_TYPE))
+    
+	var space = context.getAttribute(XML_SPACE_TRIM);
     //不用回车js序列化后更短
-    data = data.replace(/^\s*([\r\n])\s*|\s*([\r\n])\s*$|^(\s)+|(\s)+$/g,"$1$2$3$4");
+    if(space == true){
+    	data = data.replace(/^\s*|\s*$|(\s)\s+/g,"$1");
+    }else if(space != false){
+   		data = data.replace(/^\s*([\r\n])\s*|\s*([\r\n])\s*$|^(\s)+|(\s)+$/g,"$1$2$3$4");
+    }
     context.appendAll(context.parseText(data,XT_TYPE))
 }
 

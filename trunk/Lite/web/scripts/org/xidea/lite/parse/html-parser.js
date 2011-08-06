@@ -13,11 +13,44 @@
  * null:default trim muti-space to only one,(and trim first,last space)?
  * none: 
  */
-var XML_SPACE_TRIM = "http://www.xidea.org/lite/attribute/h:trim-space" 
 var AUTO_FORM_PREFIX = "http://www.xidea.org/lite/attribute/h:autofrom" 
 var AUTO_FORM_SELETED = "http://www.xidea.org/lite/attribute/h:autofrom#selected" 
 var HTML = {
 	xmlns : function(){},
+	/**
+	 * <!--[if IE]><p>11</p><![endif]-->
+	 * 
+	 * <!--[if IE 8]><!-->
+	 *   <p>aa</p>
+	 * <!--<![endif]-->
+	 */
+	parse8:function(comm){//comment
+		var text = comm.textContent;
+		var match = text.match(/^\[if\s[^\]]+\]>|<!\[endif\]$/ig);
+		if(match){
+			if(match.length == 1){
+//				match = match[0];
+//				if(match.charAt() == '['){//start
+//					this.append('<!--'+match);
+				this.append('<!--'+text+'-->')
+			}else{
+				var len1 = match[0].length;
+				var len2 = match[1].length
+				var content = text.substring(len1,text.length - len2);
+				try{
+					if(/^\s*</.test(content)){
+						content = loadXML(content,null);
+					}
+					//xml = this.xml.documentElement;
+				}catch(e){
+				}
+				this.append('<!--'+match[0]);
+				this.parse(content);
+				this.append(match[1]+'-->');
+			}
+		}
+		
+	},
 	parseScript:function(el){
 		var oldSpace = this.getAttribute(XML_SPACE_TRIM);
 		this.setAttribute(XML_SPACE_TRIM,false);
@@ -49,7 +82,7 @@ var HTML = {
 				if(type && !/^(?:reset|button|submit)$/i.test(type)){
 					if(/^(?:checkbox|radio)$/i.test(type)){
 						if(!el.hasAttribute('checked')){
-							buildCheck2select(this,el,name_,'checked');
+							buildCheck2select(this,el,name_,'checked',/checkbox/i.test(type));
 							return ;
 						}
 					}else if(!el.hasAttribute('value')){
@@ -72,20 +105,20 @@ var HTML = {
 		this.next(el);
 	},
 	parseSelect:function(el){
-		this.setAttribute(AUTO_FORM_SELETED,el.getAttribute('name'));//不清理也无妨
+		var multiple = el.hasAttribute('multiple');
+		this.setAttribute(AUTO_FORM_SELETED,[el.getAttribute('name'),multiple]);//不清理也无妨
 		this.next(el);
 	},
 	parseOption:function(el){
 		var autoform = this.getAttribute(AUTO_FORM_PREFIX);
 		if(autoform!=null){
-			var name_ = this.getAttribute(AUTO_FORM_SELETED);
-			if(name_){
-				buildCheck2select(this,el,name_,'selected');
+			var name_multiple = this.getAttribute(AUTO_FORM_SELETED);
+			if(name_multiple){
+				buildCheck2select(this,el,name_multiple[0],'selected',name_multiple[1]);
 				return;
 			}
 		}
 		this.next(el);
-		
 	}
 }
 var HTML_EXT = {
@@ -94,6 +127,9 @@ var HTML_EXT = {
 		var oldAutoform = this.getAttribute(AUTO_FORM_PREFIX);
 		try{
 			var prefix = getAttribute(node,'*value');
+			if(prefix == 'true'){
+				prefix = '';
+			}
 			this.setAttribute(AUTO_FORM_PREFIX,prefix);
     		parseChildRemoveAttr(this,node);
     	}finally{
@@ -144,7 +180,7 @@ function toelv(value){
 	}
 	return elv;
 }
-function buildCheck2select(context,el,name_,checkName){
+function buildCheck2select(context,el,name_,checkName,multiple){
 	var value = el.getAttribute('value');
 	if(!value && checkName == 'selected'){
 		value = el.textContent;
@@ -157,19 +193,30 @@ function buildCheck2select(context,el,name_,checkName){
 	}
 	var forId = context.allocateId();
 	var flag = context.allocateId();
-	
-	context.appendVar(flag,'true');
-	context.appendFor(forId,"[].concat("+name_+')',null);
-		context.appendIf(flag +'&&'+ forId+'+""===""+'+elv);
-			el.setAttribute(checkName,checkName);
-			context.appendVar(flag,'false');
+	if(multiple){
+		context.appendVar(flag,'true');
+		context.appendFor(forId,"[].concat("+name_+')',null);
+			context.appendIf(flag +'&&'+ forId+'+""===""+'+elv);
+				el.setAttribute(checkName,checkName);
+				context.appendVar(flag,'false');
+				context.next(el)
+			context.appendEnd();
+		context.appendEnd();
+		context.appendIf(flag);
+			el.removeAttribute(checkName);
 			context.next(el)
 		context.appendEnd();
-	context.appendEnd();
-	context.appendIf(flag);
+	}else{
+		context.appendIf(name_+'+""===""+'+elv);
+		el.setAttribute(checkName,checkName);
+		context.next(el);
+		context.appendEnd();
+		context.appendElse(null);
 		el.removeAttribute(checkName);
-		context.next(el)
-	context.appendEnd();
+		context.next(el);
+		context.appendEnd();
+	}
+	
 }
 function preservedParse(node){
 	var oldSpace = this.getAttribute(XML_SPACE_TRIM);

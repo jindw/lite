@@ -131,6 +131,11 @@ function normalizeXML(text,uri){
     		if(notTag){
     			if(a.charAt(2) == 'd'){
     				a = a.replace(/^<!doctype\b/,'<!DOCTYPE');
+//    			}else{
+//    				/<![endif]-->/.test(a);
+//    				if(/^<!--\s*[/.test(a)){
+//    					return a;
+//    				}
     			}
     			return a;
     		}else if(scriptTag){

@@ -2,8 +2,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:c="http://www.xidea.org/lite/core"
 	xmlns:x="http://www.xidea.org/lite/example">
 	<head>
-		<title>Lite模板参考</title>
 		<c:include path="$page" xpath="//xhtml:head/*" />
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
 		<link href="default.css" rel="stylesheet" type="text/css" />
 		<link href="../codemirror/codemirror.css" rel="stylesheet" type="text/css" />
 		<link href="../codemirror/default.css" rel="stylesheet" type="text/css" />
@@ -13,6 +13,7 @@
 		<script src="../codemirror/xml.js" />
 		<c:extension namespace="http://www.w3.org/1999/xhtml">
 			//<![CDATA[
+	var PATH_KEY = "http://www.xidea.org/lite/doc/guide/layout.xhtml#currentPathh";
     function parseA(node){//连接简写，没有文本的时候，直接使用href作为文本节点
     	var href = node.getAttribute('href');
     	if(href && node.firstChild == null){
@@ -21,12 +22,30 @@
     	if(/\.xhtml/.test(href)){
     		var uri = this.createURI(href);
     		var root = this.config && this.config.root;
+    		var styleClass = node.getAttribute('class')||'';
     		var file = root && new java.io.File(new java.io.File(root),uri.path);
-    		if(root && uri.scheme == 'lite' && !file.exists()){
-    			var style = node.getAttribute('style');
-    			style += (style? ';':'')+'color:#333';
-    			node.setAttribute('style',style);
-    		}
+    		try{
+    			var path = this.getAttribute(PATH_KEY);
+    			if(!path){
+    				var paths = this.getResources();
+    				for(var i =0;i<paths.length;i++){
+    					var path = paths[i];
+    					if(/\.xhtml$/.test(path+'')){
+    						break;
+    					}
+    				}
+    				this.setAttribute(PATH_KEY,path);
+    			}
+    			if((path+'').replace(/#.*/,'') === (uri+'').replace(/#.*/,'')){
+    				styleClass += ' current'
+    			}else{
+    				if(root && uri.scheme == 'lite' && !file.exists()){
+    					styleClass += ' missed';
+    				}
+    			}
+    		}finally{
+	    		node.setAttribute('class',styleClass);
+	    	}
     	}
     	this.next(node);
     }

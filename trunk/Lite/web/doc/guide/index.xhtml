@@ -70,58 +70,11 @@
 				<strong>懂HTML/XML的语法</strong>
 				<p>因为Lite XML语法本身是基于标记去扩展的，他对文档中所有动态的和静态的内容，都有感知，并可以据此设计一些漂亮的语法特征，并能合理的自动优化。</p>
 				<p>
-					<x:code var="htmlxmlModel">
-					<![CDATA[
-					{
-						cityList:["北京","杭州","上海"]
-						title:"特殊字符\"&&lt;",
-						user:{name:"金大为",city:"杭州",married:true},
-						content:"危险代码&lt;script>alert(\"想做点坏事，能得逞吗？\") &lt;\/script>",
-						"disabled":null,
-						data:{p1:"属性1",p2:"属性2"}
-					}
-					]]>
-					</x:code>
-					<x:code model='htmlxmlModel'>
-					<![CDATA[
-					<!-- 自动表单填充 -->
-					<form h:autoform="true">
-						大名：<input name="user.name" type="text"/>
-						城市：<select name="user.city">
-							<option c:for="${city:cityList}">${city}</option>
-						</select>
-						已婚？<input name="user.married" type="checkbox" value="true"/>
-					</form>
-					
-					....
-					<!-- html/xml 条件属性
-							若 disabled 变量为null， 则disabled 属性不输出 -->
-					<input type="submit" disabled="${disabled}" value=""/>
-					
-					....
-					<!-- javascript自动编码(JSON.stringify) -->
-					<div onclick="alert(${content})">...</div>
-					<!-- URL 自动编码(encodeURIComponent) -->
-					<a href="/test?p1=${data.p1}&p2=${data.p2}&p3=${'中文自动编码'}">...</a>
-					<!-- html自动编码  -->
-					<p title="${title}">${content}</p>
-					<script>
-						//script <![CDATA 中的内容不做自动编码
-						if(content.length<10){
-							alert(content.length);
-						}
-						alert(${content})
-					</script>
-					
-					
-					...
-					<!-- 自动Hash戳（用于设置服务器永久缓存）和文件缺失检查【该功能只在上线编译时启用】 -->
-					<link href="/styles/default.css" type="text/css" rel="stylesheet"/>
-					<script src="/scripts/boot.js"/>
-					<!-- 自动图片文件信息补全(width,height) 【该功能只在上线编译时启用】-->
-					<img src="/images/logo.png"/>
-					]]>
-					</x:code>
+					<a href="syntax-autoform.xhtml">自动表单填充</a>
+					<a href="syntax-xml.xhtml">自动编码</a>
+					<a href="syntax-xml.xhtml">条件属性</a>
+					<a href="syntax-trim.xhtml">标签空格控制</a>
+					<a href="syntax-xml.xhtml">自动HTML标签补全</a>
 				</p>
 			</li>
 
@@ -179,44 +132,5 @@ ${str.substring(1,2)}
 				<p>而且，因为他中间代码的设计方法，非常方便迁移到其他平台。</p>
 			</li>
 		</ul>
-		<a name="install" />
-		<h3>Lite模板如何安装</h3>
-		<p>为了简化环境搭建，Lite有一个模板测试专用服务器，直接通过webstart启动。</p>
-		<p>
-			WebStart地址：
-			<a href="http://www.xidea.org/webstart/JSide.jnlp" />
-		</p>
-		<i>
-			这是一个Java WebStart 程序，需要Java5+。安装了Java5的同学可以直接点击链接运行，否则先安装JRE吧：
-		</i>
-		<p>
-			当能如果你有新自己搭建Apache +PHP 或者Tomcat,这也是允许的。
-			搭建Java环境后，你可以下载Lite.jar
-			并在web.xml中配置。
-			<ul>
-				<li>
-					php环境搭建
-					<p>你可以下载php-example部署。</p>
-				</li>
-				<li>
-					Java环境搭建
-					<p>你可以下载Lite.jar 并在web.xml中配置。</p>
-				</li>
-				<li>
-					下载地址：
-					<p>
-						<a href="http://code.google.com/p/lite/downloads/list" />
-					</p>
-				</li>
-			</ul>
-			<h3>调试环境如何使用</h3>
-			<p>
-				启动测试服务器后，窗口半透明最前端显示在桌面右侧，您可以选择需要测试的网站目录。选中目录后直接拖放至调试服务器上端。测试服务器自动更新网站目录。
-			</p>
-			<p>
-				点击部署测试模板，系统将自动将本书的测试用例拷贝到您的网站目录下。
-				浏览修改吧。。。。
-			</p>
-		</p>
 	</body>
 </html>
