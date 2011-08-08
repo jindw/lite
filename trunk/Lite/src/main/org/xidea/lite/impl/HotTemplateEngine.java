@@ -140,7 +140,7 @@ public class HotTemplateEngine extends TemplateEngine {
 
 	@SuppressWarnings("unchecked")
 	private Template buildFromCode(String path) throws IOException {
-		if(this.compiledBase != null){
+		if(this.compiledBase == null){
 			return null;
 		}
 		URI uri = toCompiedURI(path);

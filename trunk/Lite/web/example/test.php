@@ -6,5 +6,5 @@ $context = array(
 	"int1"=>1,
 	"text1"=>'1'
 );
-$engine->render("/example/test.xhtml",$context);
+$engine->render("/example/extends-page.xhtml",$context);
 ?>

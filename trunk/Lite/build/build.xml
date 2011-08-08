@@ -255,6 +255,18 @@
 	<target name="build" depends="compress,package,php-example">
 		<copy tofile="../TT/web/WEB-INF/lib/Lite-${version}.jar" file="build/dest/Lite.jar" />
 	</target>
+	<target name="publish">
+		<java classpath="build/dest/Lite.jar">
+			<arg value="-root"/>
+			<arg value="~/xidea/lite/"/>
+			<arg value="-translators"/>
+			<arg value="php"/>
+			<arg value="-output"/>
+			<arg value="~/xidea/lite/"/>
+			<arg value="-includes"/>
+			<arg value="/doc/guide/*.xhtml"/>
+		</java>
+	</target>
 
 	<target name="php-example" depends="compress">
 		<zip comment="前端编译" file="build/dest/php-example-${version}.zip" encoding="GBK">

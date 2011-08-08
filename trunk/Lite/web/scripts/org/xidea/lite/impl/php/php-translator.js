@@ -26,6 +26,9 @@
 
 var FOR_STATUS_KEY = '$__for';
 var VAR_LITE_TEMP="$__tmp";
+var ENCODING_KEY = 'http://www.xidea.org/lite/features/output-encoding';
+var MIME_TYPE_KEY = 'http://www.xidea.org/lite/features/output-mime-type';
+
 //function checkEL(el){
 //    new Function("return "+el)
 //}
@@ -33,18 +36,25 @@ var VAR_LITE_TEMP="$__tmp";
 /**
  * JS原生代码翻译器实现
  */
-function PHPTranslator(id){
-    this.id = id;
+function PHPTranslator(id,data){
+    this.id = id.replace(/[\/\-\$\.!%]/g,'_');
+    this.resource=data[0]
+    this.code = data[1];
+    this.featureMap = data[2];
 }
 
 PHPTranslator.prototype = {
 	translate:function(list){
 	    //var result =  stringifyJSON(context.toList())
-		var context = new PHPTranslateContext(list,this.id);
+		var context = new PHPTranslateContext(list||this.code,this.id);
 		context.elPrefix = //'';//:
 							'@';//*/
-		context.encoding = "UTF-8";
+		
+		context.encoding = this.featureMap && this.featureMap[ENCODING_KEY] ||"UTF-8";
 	    context.htmlspecialcharsEncoding = context.encoding ;
+	    var mimeType = this.featureMap && this.featureMap[MIME_TYPE_KEY];
+	    context.contentType = mimeType?mimeType+';charset='+context.encoding:null;
+	    
 		context.parse();
 		var code = context.toSource();
 	    return '<?php'+code ;
@@ -143,6 +153,9 @@ PHPTranslateContext.prototype = new TCP({
 	        this.append("function lite_template",this.id,'($__context__){')
 	        this.depth++;
 			this.append("extract($__context__,EXTR_SKIP);");
+			if(this.contentType){
+				this.append("if(!headers_sent())header('ContentType:"+this.contentType+"');")
+			}
 	        this.appendCode(code);
 	        this.depth--;
 	        this.append("}");

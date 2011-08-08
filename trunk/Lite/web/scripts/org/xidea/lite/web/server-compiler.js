@@ -25,10 +25,11 @@ WebCompiler.prototype.compile = function(path){
 		res[i] = res[i].path
 	}
 	var litecode = context.toList();
-	this.litecode = stringifyJSON([res,litecode,featureMap])
+	litecode = [res,litecode,featureMap];
+	this.litecode = stringifyJSON()
 	var t = +new Date();
-	var pt = new PHPTranslator(path.replace(/[\/\-\$\.!%]/g,'_'));//'.','/','-','!','%'
-	this.phpcode = pt.translate(context.toList());
+	var pt = new PHPTranslator(path,litecode);//'.','/','-','!','%'
+	this.phpcode = pt.translate(litecode[1]);
 	this.translateTime = (new Date() - t )
 }
 

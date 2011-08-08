@@ -5,14 +5,15 @@ import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
+import java.io.UnsupportedEncodingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.el.impl.CommandParser;
 import org.xidea.el.json.JSONEncoder;
+import org.xidea.jsi.JSIRuntime;
 import org.xidea.lite.impl.HotTemplateEngine;
+import org.xidea.lite.impl.ParseUtil;
 
 public class LiteCompiler {
 	private static final Log log = LogFactory.getLog(LiteCompiler.class);
@@ -23,6 +24,7 @@ public class LiteCompiler {
 	private String[] includes;
 	private String[] excludes;
 	private HotTemplateEngine engine;
+	private String[] translators;
 	private ResourceManagerImpl resourceManager;
 	
 
@@ -38,7 +40,10 @@ public class LiteCompiler {
 					// "-root","D:\\workspace\\FileServer/src/main/org/jside/filemanager/","-litecode","D:\\workspace\\FileServer/build/dest/lite","-nodeParsers","org.xidea.lite.parser.impl.HTMLNodeParser"
 					"-root",
 					"D:\\workspace\\FileServer/src/main/org/jside/filemanager/",
-					"-litecode", "D:\\workspace\\FileServer/build/dest/lite" };
+					"-output",
+					"D:\\workspace\\FileServer/build/dest/lite",
+					"-translators","php"
+					};
 		}
 		new LiteCompiler(args).execute();
 	}
@@ -80,10 +85,18 @@ public class LiteCompiler {
 		log.info("处理文件：" + path);
 		if (resourceManager.isTemplate(path)) {
 			try {
-				String path2 = "/WEB-INF/litecode/" + path.replace('/', '^');
+				String path2 = translatePath(path);
 				String result = engine.getLiteCode(path);
 				String encoding = resourceManager.getEncoding(path);
 				this.write(path2, result.getBytes("utf-8"));
+				if(this.translators != null){
+					for(String translator : translators){
+						if("php".equals(translator)){
+							this.buildPHP(path,result,encoding);
+						}
+					}
+				}
+				
 				return true;
 			} catch (Exception e) {
 				// JOptionPane.showConfirmDialog(null, e);
@@ -101,6 +114,17 @@ public class LiteCompiler {
 			}
 			return true;
 		}
+	}
+
+	private String translatePath(final String path) {
+		return "/WEB-INF/litecode/" + path.replace('/', '^');
+	}
+
+	private void buildPHP(String path,String litecode,String encoding) throws IOException {
+		JSIRuntime runtime = ParseUtil.getJSIRuntime();
+		Object translator = runtime.eval("new ($import('org.xidea.lite.impl.php:PHPTranslator',{}))('"+path+"',"+litecode+")");
+		String result = (String)runtime.invoke(translator, "translate");
+		this.write(translatePath(path)+".php", result.getBytes(encoding));
 	}
 
 	private void write(String path2, byte[] data)
@@ -169,4 +193,17 @@ public class LiteCompiler {
 	public void setPath(String path) {
 		this.path = path;
 	}
+
+	public void setIncludes(String[] includes) {
+		this.includes = includes;
+	}
+
+	public void setExcludes(String[] excludes) {
+		this.excludes = excludes;
+	}
+
+	public void setTranslators(String[] translators) {
+		this.translators = translators;
+	}
+	
 }
