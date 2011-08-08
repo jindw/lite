@@ -256,7 +256,7 @@
 		<copy tofile="../TT/web/WEB-INF/lib/Lite-${version}.jar" file="build/dest/Lite.jar" />
 	</target>
 	<target name="publish">
-		<java jar="build/dest/Lite.jar">
+		<java jar="build/dest/Lite.jar" fork="true">
 			<arg value="-root"/>
 			<arg value="~/xidea/lite/"/>
 			<arg value="-translators"/>
