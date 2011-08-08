@@ -14,6 +14,7 @@ import org.xidea.el.json.JSONEncoder;
 import org.xidea.jsi.JSIRuntime;
 import org.xidea.lite.impl.HotTemplateEngine;
 import org.xidea.lite.impl.ParseUtil;
+import org.xidea.lite.parse.ParseContext;
 
 public class LiteCompiler {
 	private static final Log log = LogFactory.getLog(LiteCompiler.class);
@@ -39,9 +40,11 @@ public class LiteCompiler {
 			args = new String[] {
 					// "-root","D:\\workspace\\FileServer/src/main/org/jside/filemanager/","-litecode","D:\\workspace\\FileServer/build/dest/lite","-nodeParsers","org.xidea.lite.parser.impl.HTMLNodeParser"
 					"-root",
-					"D:\\workspace\\FileServer/src/main/org/jside/filemanager/",
+					"D:\\workspace\\Lite2/web/",
 					"-output",
-					"D:\\workspace\\FileServer/build/dest/lite",
+					"D:\\workspace\\Lite2/build/dest/web",
+					"-includes",
+					"/doc/guide/*.xhtml",
 					"-translators","php"
 					};
 		}
@@ -87,6 +90,10 @@ public class LiteCompiler {
 			try {
 				String path2 = translatePath(path);
 				String result = engine.getLiteCode(path);
+				String layout = resourceManager.getFeatureMap(path).get(ParseContext.FEATURE_LAYOUT);
+				if(path.equals(layout)){
+					return false;
+				}
 				String encoding = resourceManager.getEncoding(path);
 				this.write(path2, result.getBytes("utf-8"));
 				if(this.translators != null){
@@ -148,7 +155,7 @@ public class LiteCompiler {
 	}
 
 	public void processDir(final File dir, final String path) {
-		log.info("处理目录：" + dir + path);
+		log.info("处理目录：" + dir.getAbsolutePath());
 		final PathMatcher includes = PathMatcher.createMatcher(this.includes);
 		final PathMatcher excludes = PathMatcher.createMatcher(this.excludes);
 

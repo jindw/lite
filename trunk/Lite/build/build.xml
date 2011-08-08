@@ -259,13 +259,15 @@
 	<target name="publish">
 		<java jar="build/dest/Lite.jar" fork="true">
 			<arg value="-root"/>
-			<arg value="~/xidea/lite/"/>
+			<arg value="web"/>
 			<arg value="-translators"/>
 			<arg value="php"/>
 			<arg value="-output"/>
-			<arg value="~/xidea/lite/"/>
+			<arg value="/build/dest/web"/>
 			<arg value="-includes"/>
-			<arg value="/doc/guide/*.xhtml"/>
+			<arg value="/doc/guide/**"/>
+			<arg value="-excludes"/>
+			<arg value="/doc/guide/layout.xhtml"/>
 		</java>
 	</target>
 
