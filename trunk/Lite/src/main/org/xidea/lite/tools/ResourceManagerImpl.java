@@ -16,7 +16,6 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jside.webserver.action.URLMatcher;
 import org.w3c.dom.Document;
 import org.xidea.jsi.JSIRuntime;
 import org.xidea.jsi.impl.RuntimeSupport;
@@ -343,10 +342,10 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 
 	private class MatcherFilter<T> implements ResourceFilter<T> {
 		ResourceFilter<T> base;
-		private URLMatcher matcher;
+		private PathMatcher matcher;
 
 		MatcherFilter(String pattern, ResourceFilter<T> base) {
-			this.matcher = URLMatcher.createMatcher(pattern);
+			this.matcher = PathMatcher.createMatcher(pattern);
 			this.base = base;
 		}
 
