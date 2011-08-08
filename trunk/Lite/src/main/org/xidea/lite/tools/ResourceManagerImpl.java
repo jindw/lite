@@ -22,7 +22,6 @@ import org.xidea.jsi.JSIRuntime;
 import org.xidea.jsi.impl.RuntimeSupport;
 import org.xidea.lite.impl.ParseConfigImpl;
 import org.xidea.lite.impl.ParseUtil;
-import org.xidea.lite.parse.ParseContext;
 import org.xml.sax.SAXException;
 
 public class ResourceManagerImpl extends ParseConfigImpl implements
@@ -111,7 +110,12 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 	}
 
 	public String getEncoding(String path) {
-		return this.getFeatureMap(path).get(ParseContext.FEATURE_ENCODING);
+//		Group group = this.find(path, false);
+//		String encoding = this.getFeatureMap(path).get(ParseContext.FEATURE_ENCODING);
+//		if(group != null){
+//			return encoding;
+//		}
+		return resource(path).encoding;
 	}
 
 	public byte[] getRawBytes(String path) throws IOException {
@@ -136,7 +140,7 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 			ResourceItem item = getFilteredContent(path, String.class, null);
 			String text = item.text;// ,streamFilters,stringFilters,documentFilters);
 			if (text == null) {
-				text = loadText(item.path,item.data);
+				text = loadText(item,item.data);
 			}
 			item.text = text;
 			return text;
@@ -145,9 +149,12 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 		}
 	}
 
-	private String loadText(String path,byte[] data) throws IOException {
-		return ParseUtil.loadTextAndClose(new ByteArrayInputStream(
-				data), getEncoding(path));
+	private String loadText(ResourceItem item,byte[] data) throws IOException {
+		String[] rtCharset = new String[1];
+		String text = ParseUtil.loadTextAndClose(new ByteArrayInputStream(
+				data),rtCharset,item.encoding);
+		item.encoding = rtCharset[0];
+		return text;
 	}
 
 	public Document getFilteredDocument(String path) throws IOException,
@@ -186,7 +193,7 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 				ResourceItem item2 = getFilteredContent(path, String.class, item.currentFilter);
 				Object data = item2.currentData;
 				if(data instanceof byte[]){
-					return loadText(item2.path,(byte[])data);
+					return loadText(item2,(byte[])data);
 				}else{
 					return (String)data;
 				}
@@ -252,7 +259,7 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 							}
 							if (filter.match(path)) {
 								if (text == null) {
-									text = loadText(res.path,res.data);
+									text = loadText(res,res.data);
 								}
 								text = filter.doFilter(path, text);
 							}
@@ -261,7 +268,7 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 							res.text = text;
 						}else{
 							if (text == null) {
-								text = loadText(res.path,data);
+								text = loadText(res,data);
 							}
 							res.currentData = text;
 						}
@@ -367,6 +374,7 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 		// List<FilterPlugin<Document>> documentFilters = new
 		// ArrayList<FilterPlugin<Document>>();
 		String path;
+		String encoding;
 		byte[] data;
 		String text;
 		Document dom;

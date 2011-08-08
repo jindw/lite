@@ -77,7 +77,7 @@ public class ParseConfigImpl implements ParseConfig {
 		return result;
 	}
 
-	private Group find(String path, boolean defaultRoot) {
+	protected Group find(String path, boolean defaultRoot) {
 		this.reset();
 		Group g = cached.get(path);
 		if (g == null) {
@@ -93,6 +93,9 @@ public class ParseConfigImpl implements ParseConfig {
 			cached.put(path, g);
 		}
 		return g;
+	}
+	public boolean isTemplate(String path){
+		return find(path, false) != null;
 	}
 
 	public Map<String, List<String>> getExtensions(String path) {
@@ -148,8 +151,8 @@ public class ParseConfigImpl implements ParseConfig {
 		this.groups = groups2;
 	}
 
-	private static class Group {
-		private Map<String, String> featureMap = Collections.emptyMap();
+	protected static class Group {
+		protected Map<String, String> featureMap = Collections.emptyMap();
 		private Map<String, List<String>> extensionMap = Collections.emptyMap();
 		private Pattern includes;
 		private Pattern excludes;

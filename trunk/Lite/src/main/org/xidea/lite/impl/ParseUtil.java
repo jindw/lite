@@ -440,6 +440,10 @@ public class ParseUtil {
 		return charset;
 	}
 
+	public static String loadTextAndClose(InputStream in, String defaultCharset)
+			throws IOException {
+		return loadTextAndClose(in,null,defaultCharset);
+	}
 	/**
 	 * FE FF UTF-16, big-endian FF FE UTF-16, little-endian EF BB BF UTF-8
 	 * 
@@ -447,14 +451,17 @@ public class ParseUtil {
 	 * @return
 	 * @throws IOException
 	 */
-	public static String loadTextAndClose(InputStream in, String defaultCharset)
+	public static String loadTextAndClose(InputStream in, String[] rtCharset,String defaultCharset)
 			throws IOException {
 		if(!in.markSupported()){
 			in = new BufferedInputStream(in);
 		}
 		in.mark(3);
-		Reader cin = getBOMReader(in);
+		InputStreamReader cin = getBOMReader(in);
 		if (cin != null) {
+			if(rtCharset!=null){
+				rtCharset[0] = cin.getEncoding();
+			}
 			return loadTextAndClose(cin);
 		}
 
@@ -465,22 +472,25 @@ public class ParseUtil {
 			in.close();
 		}
 		byte[] data = out.toByteArray();
-		if (defaultCharset != null) {
-			String t = getText(data, defaultCharset);
+		if (defaultCharset != null ) {
+			String t = getText(data,rtCharset, defaultCharset);
 			if (t != null) {
 				return t;
 			}
 		}
-		return getText(data, CHARSETS);
+		return getText(data, rtCharset,CHARSETS);
 
 	}
 
-	private static String getText(byte[] data, String... charsets)
+	private static String getText(byte[] data,String[] rtCharset, String... charsets)
 			throws UnsupportedEncodingException {
 		for (String c : charsets) {
 			String t = new String(data, c);
 			byte[] data2 = t.getBytes(c);
 			if (Arrays.equals(data, data2)) {
+				if(rtCharset!=null){
+					rtCharset[0] = c;
+				}
 				return t;
 			}
 		}
