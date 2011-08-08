@@ -263,7 +263,7 @@
 			<arg value="-translators"/>
 			<arg value="php"/>
 			<arg value="-output"/>
-			<arg value="/build/dest/web"/>
+			<arg value="${basedir}/build/dest/web"/>
 			<arg value="-includes"/>
 			<arg value="/doc/guide/**"/>
 			<arg value="-excludes"/>
