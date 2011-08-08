@@ -5,7 +5,6 @@ import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -45,6 +44,8 @@ public class LiteCompiler {
 					"D:\\workspace\\Lite2/build/dest/web",
 					"-includes",
 					"/doc/guide/*.xhtml",
+					"-excludes",
+					"/doc/guide/layout.xhtml",
 					"-translators","php"
 					};
 		}
@@ -162,17 +163,17 @@ public class LiteCompiler {
 		dir.listFiles(new FileFilter() {
 			public boolean accept(File file) {
 				if (!file.equals(output)) {
+					String path2 = path + file.getName();
 					if (file.isDirectory()) {
 						if (file.getName().startsWith(".")) {
 							log.warn("跳过目录：" + file);
 						} else {
 							if (excludes == null || !excludes.must(path)) {
-								processDir(file, path + file.getName() + '/');
+								processDir(file, path2 + '/');
 							}
 						}
-					} else if ((includes == null || includes.match(path))
-							&& (excludes == null || !excludes.match(path))) {
-						String path2 = path + file.getName();
+					} else if ((includes == null || includes.match(path2))
+							&& (excludes == null || !excludes.match(path2))) {
 						try {
 							processFile(path2);
 						} catch (IOException e) {
