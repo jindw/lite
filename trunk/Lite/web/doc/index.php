@@ -25,11 +25,15 @@ if($path){
 			}
 		}
 	}
-
-	$log =  lite_exec("svn up");
-	echo htmlspecialchars($log);
-	$log = lite_exec("java -jar ../WEB-INF/lib/Lite.jar -includes /doc/guide/*.xhtml -root ../ -output ../ -translators php");
-	echo htmlspecialchars($log);
+	if(array_key_exists($_GET,'svn')){
+		$log =  lite_exec("svn up");
+		echo htmlspecialchars($log);
+	}
+	if(array_key_exists($_GET,'java')){
+		$log = lite_exec("java -jar ../WEB-INF/lib/Lite.jar -includes /doc/guide/*.xhtml -root ../ -output ../ -translators php");
+		echo htmlspecialchars($log);
+	}
+	
     
     
     echo "\n\n<script>setTimeout(function(){
