@@ -26,11 +26,15 @@ if($path){
 		}
 	}
 
-	echo lite_exec("svn up");
-	 echo lite_exec("java -jar ../WEB-INF/lib/Lite.jar -includes /doc/guide/*.xhtml -root ../ -output ../ -translators php");
+	$log =  lite_exec("svn up");
+	echo htmlspecialchars($log);
+	$log = lite_exec("java -jar ../WEB-INF/lib/Lite.jar -includes /doc/guide/*.xhtml -root ../ -output ../ -translators php");
+	echo htmlspecialchars($log);
     
     
-    echo "<script>document.location = ('index.php/guide/index.xhtml')</script>";
+    echo "\n\n<script>setTimeout(function(){
+    	document.location = ('index.php/guide/index.xhtml')
+    },3000);</script>";
     exit();
 }
 if($path == '/doc/boot.js'){
