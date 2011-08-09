@@ -246,19 +246,22 @@ function lite__encodeURIComponent($item){
 function lite__decodeURIComponent($item){
 	return rawurldecode($item);
 }
-
+function lite__encodeURI__callback($match){
+	return rawurlencode($match[0]);
+}
 function lite__encodeURI($uri){
-	return preg_replace('/[^;\/?:@&=+$,#]+/',rawurlencode,$uri);
+	return preg_replace_callback('/[^;\/?:@&=+$,#]+/','lite__encodeURI__callback',$uri);
+}
+function lite__decodeURI__callback($match){
+	$uri = $match[0];
+	if(preg_match('/^(?:%3B|%2F|%3F|%3A|%40|%26|%3D|%2B|%24|%2C|%23)$/i',$uri)){
+		return $uri;
+	}else{
+		return rawurldecode($uri);
+	}
 }
 function lite__decodeURI($uri){
-	if(preg_match('/^%[0-9A-F]{2}$/i',uri)){
-		if(preg_match('/^(?:%3B|%2F|%3F|%3A|%40|%26|%3D|%2B|%24|%2C|%23)$/i',$uri)){
-			return $uri;
-		}else{
-			return rawurldecode($uri);
-		}
-	}
-	return preg_replace('/%[0-9A-F]{2}/i',lite__decodeURI,$uri);
+	return preg_replace_callback('/%[0-9A-F]{2}/i','lite__decodeURI__callback',$uri);
 }
 
 
