@@ -33,6 +33,12 @@ function normalizeTag(source,tag,uri,pos){
 			}
 			tag.attrMap[n]=v;
 			if(/xmlns(?:\:.*)?/.test(n)){
+				if(n == 'xmlns:c'){
+					//老名称空间容错
+					if(/^['"]http\:\/\/www.xidea.org\/ns\/(?:template|lite)\/core\/?['"]$/.test(v)){
+						v = '"http://www.xidea.org/lite/core"';
+					}
+				}
 				tag.nsMap[n] = v;
 			}
 			return n+'='+v
