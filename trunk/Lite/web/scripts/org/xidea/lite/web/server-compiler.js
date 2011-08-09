@@ -26,7 +26,7 @@ WebCompiler.prototype.compile = function(path){
 	}
 	var litecode = context.toList();
 	litecode = [res,litecode,featureMap];
-	this.litecode = stringifyJSON()
+	this.litecode = stringifyJSON(litecode)
 	var t = +new Date();
 	var pt = new PHPTranslator(path,litecode);//'.','/','-','!','%'
 	this.phpcode = pt.translate(litecode[1]);

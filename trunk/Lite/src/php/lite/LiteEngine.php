@@ -160,18 +160,16 @@ function lite_op__get($obj, $key) {
 /**
  * 全局函数和成员函数调用入口
  */
-function lite_op__invoke($obj,$method,$args){
-	if(is_string($obj)){
-		if($method === null){
-			call_user_func_array('lite__'.$obj,$args);
-		}else{
-		}
-	}else if(is_array($obj)){
-		
-	}else if(method_exists($obj,$method)){
-		return call_user_func_array(array($obj,$method),$args);
+function lite_op__invoke($obj,$member,$args){
+	if($member === null){
+		return call_user_func_array('lite__'.$obj,$args);
 	}
-	$method = 'lite_member_'.$method;
+	if(is_string($obj)){
+	//}else if(is_array($obj)){
+	}else if(method_exists($obj,$member)){
+		return call_user_func_array(array($obj,$member),$args);
+	}
+	$method = 'lite_member_'.$member;
 	if(function_exists($method)){
 		array_unshift($args,$obj);
 		return call_user_func_array($method,$args);

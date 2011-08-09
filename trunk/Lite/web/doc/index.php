@@ -6,6 +6,8 @@ $path = @$_SERVER['PATH_INFO'] ;
 if($path){
 	$path = '/doc'.$path;
 }else{
+	exec("svn up");
+	exec("java -jar ../WEB-INF/lib/Lite.jar -include /doc/guide/*.xhtml -translators php");
     echo "<script>document.location = ('index.php/guide/index.xhtml')</script>";
     exit();
 }
