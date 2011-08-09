@@ -40,6 +40,7 @@
     			if((path+'').replace(/#.*|([\/])+/g,'$1') === (uri+'').replace(/#.*|([\/])+/g,'$1')){
     				styleClass += ' current'
     			}else{
+    				$log.error((path+'').replace(/#.*|([\/])+/g,'$1'),(uri+'').replace(/#.*|([\/])+/g,'$1'));
     				if(root && uri.scheme == 'lite' && !file.exists()){
     					styleClass += ' missed';
     				}
