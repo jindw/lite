@@ -248,7 +248,7 @@ function lite__decodeURIComponent($item){
 }
 
 function lite__encodeURI($uri){
-	return preg_replace('/[^;/?:@&=+$,#]+/',rawurlencode,$uri);
+	return preg_replace('/[^;\/?:@&=+$,#]+/',rawurlencode,$uri);
 }
 function lite__decodeURI($uri){
 	if(preg_match('/^%[0-9A-F]{2}$/i',uri)){
