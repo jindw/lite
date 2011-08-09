@@ -28,7 +28,7 @@ abstract public class ParseContextProxy implements ParseContext {
 	 * createNew 共享
 	 */
 	private final Map<String, String> featureMap;
-	private HashSet<URI> resources = new HashSet<URI>();
+	private ArrayList<URI> resources = new ArrayList<URI>();
 	private HashMap<Object, Object> attributeMap = new HashMap<Object, Object>();
 	
 	protected ParseConfig config;
