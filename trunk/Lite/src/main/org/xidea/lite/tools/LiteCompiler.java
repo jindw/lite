@@ -90,12 +90,13 @@ public class LiteCompiler {
 		log.info("处理文件：" + path);
 		if (resourceManager.isTemplate(path)) {
 			try {
-				String path2 = translatePath(path);
-				String result = engine.getLiteCode(path);
 				String layout = resourceManager.getFeatureMap(path).get(ParseContext.FEATURE_LAYOUT);
 				if(path.equals(layout)){
 					return false;
 				}
+				String path2 = translatePath(path);
+				String result = engine.getLiteCode(path);
+				
 				String encoding = resourceManager.getEncoding(path);
 				this.write(path2, result.getBytes("utf-8"));
 				if(this.translators != null){

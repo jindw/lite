@@ -6,8 +6,30 @@ $path = @$_SERVER['PATH_INFO'] ;
 if($path){
 	$path = '/doc'.$path;
 }else{
-	exec("svn up");
-	exec("java -jar ../WEB-INF/lib/Lite.jar -include /doc/guide/*.xhtml -translators php");
+
+	function lite_exec($cmd,$descriptorspec = array(array("pipe", "r"), array("pipe", "w"), array("pipe", "w") )){
+		if(!function_exists('proc_open') ){
+			trigger_error("Compile Error","ERROR:Missed php function: proc_open");
+		}else if(!function_exists('stream_get_contents')){
+			trigger_error("Compile Error","ERROR:Missed php function: stream_get_contents");
+		}else{
+			$process = proc_open($cmd, $descriptorspec, $pipes);
+			if (is_resource($process)) {
+			    $content= stream_get_contents($pipes[2]).stream_get_contents($pipes[1]);
+			    if(function_exists('proc_close')){
+			    	proc_close($process);
+			    }
+			    return $content;
+			}else{
+				trigger_error("Compile Error","ERROR: command execution failed, can not find the executable program:".$cmd);
+			}
+		}
+	}
+
+	echo lite_exec("svn up");
+	echo lite_exec("java -jar ../WEB-INF/lib/Lite.jar -include /doc/guide/*.xhtml -root ../ -output ../ -translators php");
+    
+    
     echo "<script>document.location = ('index.php/guide/index.xhtml')</script>";
     exit();
 }
