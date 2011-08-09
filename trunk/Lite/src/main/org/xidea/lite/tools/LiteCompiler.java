@@ -42,6 +42,7 @@ public class LiteCompiler {
 					"D:\\workspace\\Lite2/web/",
 					"-output",
 					"D:\\workspace\\Lite2/build/dest/web",
+					"-path","/doc/guide/index.xhtml",
 					"-includes",
 					"/doc/guide/*.xhtml",
 					"-excludes",

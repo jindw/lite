@@ -36,7 +36,8 @@
     				}
     				this.setAttribute(PATH_KEY,path);
     			}
-    			if((path+'').replace(/#.*/,'') === (uri+'').replace(/#.*/,'')){
+    			//$log.error(path+'',uri+'');
+    			if((path+'').replace(/#.*|([\/])+/g,'$1') === (uri+'').replace(/#.*|([\/])+/g,'$1')){
     				styleClass += ' current'
     			}else{
     				if(root && uri.scheme == 'lite' && !file.exists()){
