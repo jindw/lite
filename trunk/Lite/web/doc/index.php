@@ -25,11 +25,11 @@ if($path){
 			}
 		}
 	}
-	if(array_key_exists($_GET,'svn')){
+	if(array_key_exists('svn',$_GET)){
 		$log =  lite_exec("svn up");
 		echo htmlspecialchars($log);
 	}
-	if(array_key_exists($_GET,'java')){
+	if(array_key_exists('java',$_GET)){
 		$log = lite_exec("java -jar ../WEB-INF/lib/Lite.jar -includes /doc/guide/*.xhtml -root ../ -output ../ -translators php");
 		echo htmlspecialchars($log);
 	}
