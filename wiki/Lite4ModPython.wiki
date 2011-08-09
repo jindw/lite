@@ -1,4 +1,4 @@
-#labels Featured,Phase-Implementation
+#labels Deprecated,Phase-Implementation
 == 安装软件 ==
   ===  安装Python2.5 ===
     * 目前mod_python 最高只支持2.5,这点比较郁闷
