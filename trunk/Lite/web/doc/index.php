@@ -27,7 +27,7 @@ if($path){
 	}
 
 	echo lite_exec("svn up");
-	echo lite_exec("java -jar ../WEB-INF/lib/Lite.jar -include /doc/guide/*.xhtml -root ../ -output ../ -translators php");
+	 echo lite_exec("java -jar ../WEB-INF/lib/Lite.jar -includes /doc/guide/*.xhtml -root ../ -output ../ -translators php");
     
     
     echo "<script>document.location = ('index.php/guide/index.xhtml')</script>";
