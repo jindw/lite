@@ -1,5 +1,16 @@
-#labels Featured,Phase-Design
+#labels Phase-Design
 == OS SiteMesh? ==
+
+=文档已过期=
+
+
+
+
+
+
+
+
+
 对，XML 模板引擎的SiteMesh的设计就是来自于OS 的[http://www.opensymphony.com/sitemesh/download.action SiteMesh]。配置方式也类似。有些简化。但与OS [http://www.opensymphony.com/sitemesh/download.action SiteMesh]不同，Lite XML 的SiteMesh是在模板编译期间实现的。
 
 == 基本语法及用法 ==
