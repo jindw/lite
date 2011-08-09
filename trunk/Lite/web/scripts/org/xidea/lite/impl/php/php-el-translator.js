@@ -156,7 +156,7 @@ function stringifyINVOKE(el,context){
 		//value1 = value1.replace(/.*?,([\s\S]+)\)/,'array($1)');
 	}else if(type1 == VALUE_VAR){
 		var name = arg1[1];
-		var fn = "isset('$"+name+"')?$"+name+":'"+name+"'"
+		var fn = "isset($"+name+")?$"+name+":'"+name+"'"
 		return 'lite_op__invoke('+fn+',null,'+value2+')';
 		//return value2.replace('array',"lite__"+name)
 	}else{
