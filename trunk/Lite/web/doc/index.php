@@ -3,10 +3,15 @@ require_once("../WEB-INF/classes/lite/LiteEngine.php");
 $engine = new LiteEngine();
 //初始化Lite Logo 的点阵数据 
 $path = @$_SERVER['PATH_INFO'] ;
+
+
+if(array_key_exists('@',$_GET)){
+	header("Expires: ".gmdate("D, d M Y H:i:s", time()+315360000)." GMT");
+	header("Cache-Control: max-age=315360000");
+}
 if($path){
 	$path = '/doc'.$path;
 }else{
-
 	function lite_exec($cmd,$descriptorspec = array(array("pipe", "r"), array("pipe", "w"), array("pipe", "w") )){
 		if(!function_exists('proc_open') ){
 			trigger_error("Compile Error","ERROR:Missed php function: proc_open");
@@ -90,10 +95,6 @@ if($path == '/doc/boot.js'){
 	}
 	$engine->render($path2?$path2:$path,$context);
 }else if(realpath("..".$path)){
-	if(array_key_exists('@',$_GET)){
-		header("Expires: ".gmdate("D, d M Y H:i:s", time()+315360000)." GMT");
-		header("Cache-Control: max-age=315360000");
-	}
 	if(strpos($path,".css")>0){
 		header("Content-type: text/css;charset=UTF-8");
 	}
