@@ -25,17 +25,18 @@ if($path){
 			}
 		}
 	}
+    echo "<a href='index.php/guide/index.xhtml'>跳转到文档首页</a>"
 	if(array_key_exists('svn',$_GET)){
+    	echo "<p>正在执行svn更新</p>";
 		$log =  lite_exec("svn up");
-		echo htmlspecialchars($log);
+		echo '<p>'.htmlspecialchars($log).'</p>';
 	}
 	if(array_key_exists('java',$_GET)){
+    	echo "<p>正在执行svn更新</p>";
 		$log = lite_exec("java -jar ../WEB-INF/lib/Lite.jar -includes /doc/guide/*.xhtml -root ../ -output ../ -translators php");
-		echo htmlspecialchars($log);
+		echo '<p>'.htmlspecialchars($log).'</p>';
 	}
 	
-    
-    
     echo "\n\n<script>setTimeout(function(){
     	document.location = ('index.php/guide/index.xhtml')
     },3000);</script>";
