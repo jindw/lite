@@ -136,7 +136,6 @@
 
 	</target>
 	<target name="test">
-
 		<java failonerror="true" classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
 			<arg value="-scriptBase" />
 			<arg value="${basedir}/web/scripts" />
@@ -158,22 +157,6 @@
 	</target>
 
 	<target name="compress" depends="init">
-		<echo>压缩JS普通版本</echo>
-		<java fork="true" classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
-			<arg value="-scriptBase" />
-			<arg value="${basedir}/web/scripts" />
-			<arg value="-config.features" />
-			<arg value=":Debug" />
-			<arg value="-exports" />
-			<arg value="org.xidea.lite.parse:*" />
-			<arg value="org.xidea.lite.impl.js:*" />
-			<arg value="org.xidea.lite.impl.php:*" />
-			<arg value="org.xidea.lite.util:*" />
-			<arg value="org.xidea.lite.web:*" />
-
-			<arg value="-outputExported" />
-			<arg value="${basedir}/build/dest/lite-compiler.js" />
-		</java>
 		<echo>压缩PHP目标代码 JS编译程序</echo>
 		<java fork="true" classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
 			<arg value="-scriptBase" />
@@ -212,7 +195,7 @@
 			<arg value="${basedir}/build/dest/jslite/lite/impl/impl.js" />
 		</java>
 
-		<!-- export lite uril -->
+		<!-- export lite util -->
 		<java fork="true" failonerror="true" classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
 			<arg value="-scriptBase" />
 			<arg value="${basedir}/web/scripts" />
@@ -227,31 +210,6 @@
 			<arg value="-outputExported" />
 			<arg value="${basedir}/build/dest/jslite/lite/util/impl.js" />
 		</java>
-		
-		<echo>压缩JS在线演示实现</echo>
-		<java fork="true" classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
-			<arg value="-scriptBase" />
-			<arg value="${basedir}/web/scripts" />
-			<arg value="-config.features" />
-			<arg value=":Debug" />
-			<arg value="-exports" />
-			<arg value="org.xidea.lite.web:TestCase" />
-
-			<arg value="-outputExported" />
-			<arg value="${basedir}/build/dest/jslite/demo.js" />
-		</java>
-		<copy tofile="${basedir}/build/dest/jslite/demo-prefix.html" file="${basedir}/web/demo.html"/>
-		<replaceregexp replace="&lt;script>" match='&lt;script src="scripts/\?path=boot.js".*([\s\S]+)$' file="${basedir}/build/dest/jslite/demo-prefix.html" encoding="utf-8">
-		</replaceregexp>
-		<copy tofile="${basedir}/build/dest/jslite/demo-postfix.html" file="${basedir}/web/demo.html"/>
-		<replaceregexp replace="&lt;/script>" match='^([\s\S]+)&lt;script src="scripts/\?path=boot.js".*' file="${basedir}/build/dest/jslite/demo-postfix.html" encoding="utf-8">
-		</replaceregexp>
-		<concat destfile="${basedir}/build/dest/jslite/demo.html" encoding="utf-8">
-			<path path="${basedir}/build/dest/jslite/demo-prefix.html"></path>
-			<path path="${basedir}/build/dest/jslite/demo.js"></path>
-			<path path="${basedir}/build/dest/jslite/demo-postfix.html"></path>
-		</concat>
-
 	</target>
 	<target name="build" depends="compress,package,php-example">
 		<copy tofile="../TT/web/WEB-INF/lib/Lite-${version}.jar" file="build/dest/Lite.jar" />
@@ -272,6 +230,11 @@
 	</target>
 
 	<target name="php-example" depends="compress">
+		<delete>
+			<fileset dir="build/dest/">
+				<include name="php-example-*.zip" />
+			</fileset>
+		</delete>
 		<zip comment="前端编译" file="build/dest/php-example-${version}.zip" encoding="GBK">
 			<fileset dir="web">
 				<include name="lite-service.php"/>
