@@ -46,7 +46,9 @@
     				}
     			}
     		}finally{
-	    		node.setAttribute('class',styleClass);
+    			if(styleClass){
+	    			node.setAttribute('class',styleClass);
+	    		}
 	    	}
     	}
     	this.next(node);
