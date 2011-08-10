@@ -37,7 +37,7 @@ if($path){
 		$log = lite_exec("java -jar ../WEB-INF/lib/Lite.jar -includes /doc/guide/*.xhtml -root ../ -output ../ -translators php");
 		echo '<p>'.htmlspecialchars($log).'</p>';
 	}
-	
+	echo "<p>文档三秒钟后跳转!</p>";
     echo "\n\n<script>setTimeout(function(){
     	document.location = ('index.php/guide/index.xhtml')
     },3000);</script>";
@@ -90,6 +90,10 @@ if($path == '/doc/boot.js'){
 	}
 	$engine->render($path2?$path2:$path,$context);
 }else if(realpath("..".$path)){
+	if(array_key_exists('@',$_GET)){
+		header("Expires: ".gmdate("D, d M Y H:i:s", time()+315360000)." GMT");
+		header("Cache-Control: max-age=315360000");
+	}
 	if(strpos($path,".css")>0){
 		header("Content-type: text/css;charset=UTF-8");
 	}
