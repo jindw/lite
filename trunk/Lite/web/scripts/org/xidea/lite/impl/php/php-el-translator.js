@@ -87,7 +87,7 @@ function stringifyEQ(el,context,opc){
 	var value2 = stringifyPHPEL(el[2],context);
 	opc = opc || '==';
 	if(t1 ==  TYPE_STRING ||  t2 == TYPE_STRING){//0 == 'ttt'=>false
-        return "strcmp($lop,$rop) "+opc+"0";
+        return "strcmp("+value1+","+value2+") "+opc+"0";
     }
     
     if(t1 === TYPE_NULL || t2 === TYPE_NULL){

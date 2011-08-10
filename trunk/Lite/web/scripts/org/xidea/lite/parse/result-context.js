@@ -29,7 +29,7 @@ ResultContext.prototype = {
 	        new Function("return ("+el.replace(/\bfor\b/g,"f")+')');
 	        return new ExpressionTokenizer(el).getResult();
 	    }catch(e){
-	        $log.info("表达式解析失败[fileName:"+this._context.getCurrentURI()+"]",el,e.message)
+	        $log.info("表达式解析失败[fileName:"+this._context.currentURI+"]",el,e.message)
 	        throw new Error();
 	    }
     },

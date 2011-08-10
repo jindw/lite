@@ -1,10 +1,22 @@
 
+var CORE_URI = "http://www.xidea.org/lite/core"
+var CORE_INFO = "__i";
 var defaultEntryMap = {"&nbsp;": "&#160;","&copy;": "&#169;",'&':'&amp;','<':'&lt;'};
 var defaultNSMap = {
-	"xmlns:f": "http://www.xidea.org/lite/core",
-	"xmlns:c": "http://www.xidea.org/lite/core",
+	"xmlns:f": CORE_URI,
+	"xmlns:c": CORE_URI,
 	"xmlns:h": "http://www.xidea.org/lite/html-ext",
 	"xmlns": "http://www.w3.org/1999/xhtml"
+}
+/**
+ * row,col|nsattr1|nsattr2|@path
+ */
+function getLiteTagInfo(el){
+	try{
+		return el.getAttributeNS(CORE_URI, CORE_INFO);
+	}catch(e){
+		return el.getAttribute("c:"+CORE_INFO);
+	}
 }
 function normalizeTag(source,tag,uri,pos){
 	var i = 0;
@@ -113,7 +125,7 @@ var pattern = "("+INS+'|'+COMM+'|'+CDATA+'|'+DTD+')'+
 			'|&\\w+;|&#\\d+;|&#x[\\da-fA-F]+;|[&<]';
 			
 pattern = new RegExp(pattern,'g');
-function normalizeXML(text,uri){
+function normalizeLiteXML(text,uri){
 	var lines = text.split(/\r\n?|\n/);
 	var text2 = lines.join('\n');
 	var lineIndex = 0;

@@ -9,7 +9,7 @@
  * for extension text parser
  */
 function parseText(text,context,textParsers){
-	switch(context.getTextType()){
+	switch(context.textType){
     case XA_TYPE :
         var qute = '"';
     case XT_TYPE :
@@ -17,7 +17,7 @@ function parseText(text,context,textParsers){
     case EL_TYPE:
         break;
     default:
-    	$log.error("未知编码模式："+context.getTextType()+text)
+    	$log.error("未知编码模式："+context.textType+text)
     	return;
     }
 	var len = text.length;

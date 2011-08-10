@@ -4,7 +4,6 @@
 var CORE_URI = "http://www.xidea.org/lite/core"
 var HTML_EXT_URI = "http://www.xidea.org/lite/html-ext"
 var HTML_URI = "http://www.w3.org/1999/xhtml"
-var CORE_INFO = "__i";
 var currentExtension;
 var defaultNodeLocal={
 	get:function(){
@@ -41,7 +40,7 @@ $log.filters.push(function(msg){
 	if(nodeLocal){
 		var currentNode = nodeLocal.get();
 		if(currentNode){
-			var p = getNodePosition(currentNode);
+			var p = getLiteTagPosition(currentNode);
 			if(p){
 				msg = p+'\n'+msg;
 			}
@@ -49,45 +48,26 @@ $log.filters.push(function(msg){
 	}
 	return msg;
 });
-function getNodeInfo(el){
-	try{
-		return el.getAttributeNS(CORE_URI, CORE_INFO);
-	}catch(e){
-		return el.getAttribute("c:"+CORE_INFO);
-	}
-}
-function getNodePosition(node){
-	switch(node.nodeType){
-	case 1://Node.ELEMENT_NODE:
-		var el = node;
-		break;
-	case 2://Node.ATTRIBUTE_NODE:
-		el =node.ownerElement|| getOwnerElement(node);
-		break;
-	case 9://Node.DOCUMENT_NODE:
-		el = node.documentElement;
-	}
-	if (el != null) {
-		var pos = getNodeInfo(node);
-		var doc = el.ownerDocument;
-		if(pos){
-			var p = pos.indexOf('|');
-			if(p>0){
-				pos = pos.substring(0,p);
-			}
-			pos = "@"+node.nodeName+"["+pos+"]";
-		}else{
-			pos = "@"+node.nodeName;
+
+function getLiteTagPosition(el){
+	var pos = getLiteTagInfo(el);
+	var doc = el.ownerDocument;
+	if(pos){
+		var p = pos.indexOf('|');
+		if(p>0){
+			pos = pos.substring(0,p);
 		}
-		if(doc!=null){
-			var path = doc.documentURI;
-			return path+pos;
-		}else{
-			return pos;
-		}
+		pos = "@"+el.nodeName+"["+pos+"]";
+	}else{
+		pos = "@"+el.nodeName;
+	}
+	if(doc!=null){
+		var path = doc.documentURI;
+		return path+pos;
+	}else{
+		return pos;
+	}
 		
-	}
-	return null;
 }
 function loadExtObject(source){
 	try{
@@ -274,7 +254,7 @@ ExtensionParser.prototype = {
 		}
 		try{
 //			var es = 3;
-			var el = node.ownerElement|| getOwnerElement(node);
+			var el = node.ownerElement || node.selectSingleNode("..");//ie bug
 			//ie bug.no ownerElement
 			var ns = node.namespaceURI || el && el.namespaceURI||'';
 			var ext = this.packageMap[ns];
@@ -308,7 +288,7 @@ ExtensionParser.prototype = {
 					return true;
 				}
 				var es = 1;
-				var el = attr.ownerElement|| getOwnerElement(attr);
+				var el = attr.ownerElement ||  attr.selectSingleNode("..");//ie bug
 				var es = 2;
 				var info = getNodeInfo(el);
 				var es  = 3;

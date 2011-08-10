@@ -5,6 +5,7 @@
  * @author jindw
  * @version $Id: template.js,v 1.4 2008/02/28 14:39:06 jindw Exp $
  */
+var CORE_URI = "http://www.xidea.org/lite/core"
 var PLUGIN_NATIVE = "org.xidea.lite.NativePlugin"
 var Core = {
 	xmlns : function(){},
@@ -14,7 +15,7 @@ var Core = {
 			try{
 				var els = text.substring(1,end);
 				var el = this.parseEL(els);
-	            switch(this.getTextType()){
+	            switch(this.textType){
 	            case XT_TYPE:
 	            	this.appendXT(el);
 	            	break;
@@ -95,7 +96,7 @@ var Core = {
 			try{
 				var el = text.substring(1,end);
 				if(/^\s*([\w\-]+|"[^"]+"|'[^']+')\s*\:/.test(el)){
-					var map = findParamMap(el);
+					var map = findLiteParamMap(el);
 					for(var n in map){
 						this.appendXA(n,map[n]);
 					}
@@ -133,15 +134,15 @@ var Core = {
 		return 0;
 	},
 	parseExtension:function(node){
-		var ns = getAttribute(node,'*namespace','ns');
-		var file = getAttribute(node,'file');
-		var pkg = getAttribute(node,'package');
+		var ns = findXMLAttribute(node,'*namespace','ns');
+		var file = findXMLAttribute(node,'file');
+		var pkg = findXMLAttribute(node,'package');
 		if(pkg){
 			source = pkg;
 		}else if(file){
 			var source = this.loadText(this.createURI(file))+'\n';
 		}else{
-			var source = getAttribute(node,'#text')+'\n';
+			var source = findXMLAttribute(node,'#text')+'\n';
 		}
 		this.addExtension(ns,source);
 	},
@@ -212,7 +213,7 @@ var FOR_PATTERN = /\s*([\$\w_]+)\s*(?:,\s*([\w\$_]+))?\s*(?:\:|in)([\s\S]*)/;
  * node,attribute
  */
 function processIf(node){
-	var test = getAttributeEL(node,'*test','value');
+	var test = findXMLAttributeAsEL(node,'*test','value');
     this.appendIf(test);
     parseChildRemoveAttr(this,node);
     this.appendEnd();
@@ -227,7 +228,7 @@ function seekIf(text){
 }
 
 function processElse(node){
-    var test = getAttributeEL(node,'test','value');
+    var test = findXMLAttributeAsEL(node,'test','value');
     this.appendElse(test || null);
     parseChildRemoveAttr(this,node);
     this.appendEnd();
@@ -247,7 +248,7 @@ function seekElse(text){
 	}
 }
 function processElif(node){
-    var test = getAttributeEL(node,'*test','value');
+    var test = findXMLAttributeAsEL(node,'*test','value');
     this.appendElse(test || null);
     parseChildRemoveAttr(this,node);
     this.appendEnd();
@@ -264,7 +265,7 @@ function seekElif(text){
 
 
 function processChoose(node){
-	var value = getAttributeEL(node,"value","test");
+	var value = findXMLAttributeAsEL(node,"value","test");
 	var oldStatus = this.getAttribute(CHOOSE_KEY);
 	this.setAttribute(CHOOSE_KEY,{value:value,first:true});
 	parseChildRemoveAttr(this,node);
@@ -290,7 +291,7 @@ function processChoose(node){
 //}
 function processWhen(node){
 	var stat = this.getAttribute(CHOOSE_KEY);
-	var value = getAttributeEL(node,"*test","if","value");
+	var value = findXMLAttributeAsEL(node,"*test","if","value");
 	if(stat.value){
 		value = stat.value + '=='+value;
 	}
@@ -312,11 +313,11 @@ function processOtherwise(node){
 
 function processFor(node){
 	if(node.nodeType == 1){
-    	var value = getAttributeEL(node,'*list','values','items','value');
-    	var var_ = getAttribute(node,'*var','name','id','item');
-    	var status_ = getAttribute(node,'status');
+    	var value = findXMLAttributeAsEL(node,'*list','values','items','value');
+    	var var_ = findXMLAttribute(node,'*var','name','id','item');
+    	var status_ = findXMLAttribute(node,'status');
 	}else{//attr
-		var value = getAttribute(node);
+		var value = findXMLAttribute(node);
 		var match = value.replace(/^\$\{(.+)\}$/,'$1').match(FOR_PATTERN);
 		if(!match){
 			throw $log.error("非法 for 循环信息",value);
@@ -401,9 +402,9 @@ function startFor(context,key,list,status_){
 
 
 function processVar(node){
-    var name_ = getAttribute(node,'*name','id');
+    var name_ = findXMLAttribute(node,'*name','id');
 	if(node.nodeType == 1){
-		var value = getAttribute(node,'value');
+		var value = findXMLAttribute(node,'value');
 	    if(value){
 	    	var code = this.parseText(value,0);
 	    	if(code.length == 1){
@@ -425,7 +426,7 @@ function processVar(node){
 	        this.appendEnd();
 	    }
 	}else{
-		var map = findParamMap(name_);
+		var map = findLiteParamMap(name_);
 		if(map){
 			for(var n in map){
 				this.appendVar(n,map[n]);
@@ -445,7 +446,7 @@ function seekVar(text){
 		if(/^\s*(?:\w+|['"][^"]+['"])\s*$/.test(value)){
 	        this.appendCapture(value.replace(/['"]/g,''));
 		}else{
-			var map = findParamMap(value);
+			var map = findLiteParamMap(value);
 			for(var n in map){
 				this.appendVar(n,map[n]);
 			}
@@ -456,7 +457,7 @@ function seekVar(text){
 
 
 function parseOut(node){
-    var value = getAttribute(node,"value","#text");
+    var value = findXMLAttribute(node,"value","#text");
     value = this.parseText(value,EL_TYPE);
     this.appendAll(value);
 }
@@ -533,7 +534,7 @@ function toid(n){
 	return n;
 }
 function processDef(node){
-    var ns = getAttribute(node,'*name');
+    var ns = findXMLAttribute(node,'*name');
     var config = _parseDefName(ns);
     this.appendPlugin(PLUGIN_DEFINE,stringifyJSON(config));
     parseChildRemoveAttr(this,node);
@@ -560,7 +561,7 @@ function seekClient(text){
 }
 
 function processClient(node){
-	var name_ = getAttribute(node,'*name','id');
+	var name_ = findXMLAttribute(node,'*name','id');
 	var config = _parseDefName(name_);
 	this.append("<script>//<![CDATA[\n");
 	this.appendPlugin("org.xidea.lite.parse.ClientPlugin",stringifyJSON(config));
@@ -597,7 +598,7 @@ function beforeInclude(attr){
 		this.append("<strong style='color:red'>没找到包含节点："+this.currentURI+ attr.value+"</strong>");
 	}else{
 		var attrs = selectByXPath(doc, xpath);
-		var element = attr.ownerElement || getOwnerElement(attr);
+		var element = attr.ownerElement || attr.selectSingleNode('..');
 		//element.removeAttributeNode(attr)
 		for(var i = attrs.length;i--;){
 			var a = attrs.item(i);
@@ -624,15 +625,25 @@ function setNodeURI(context,node){
 		}
 	}
 	var doc = node.nodeType == 9?node:node.ownerDocument;
-	var uri = doc && doc.documentURI
-	if(uri){
-		context.currentURI = context.createURI(uri);
+	if(doc){
+		var uri = doc.documentURI
+		if(/^lite:\//.test(uri)){
+			context.setCurrentURI(context.createURI(uri));
+		}else{
+			var info = getLiteTagInfo(doc.documentElement)
+			var i = info.indexOf('|@');
+			if(i>0){
+				uri = info.substring(i+2);
+			}
+			context.setCurrentURI(context.createURI(uri));
+			//$log.error(uri,info)
+		}
 	}
 }
 function parseInclude(node){
-    var path = getAttribute(node,'path');
-    var xpath = getAttribute(node,'xpath');
-    var selector = getAttribute(node,'selector');
+    var path = findXMLAttribute(node,'path');
+    var xpath = findXMLAttribute(node,'xpath');
+    var selector = findXMLAttribute(node,'selector');
     var parentURI = this.currentURI;
 	try{
 		
@@ -648,9 +659,10 @@ function parseInclude(node){
 		        var uri = this.createURI(path);
 	    		//$log.warn(path,this.currentURI+'',url+'')
 		        var doc = this.loadXML(uri);
-		        this.currentURI = uri;
+		        this.setCurrentURI(uri);
 	    	}
 	    }else{
+	    	var doc = this.loadXML(this.currentURI);
 	    	var doc = node.ownerDocument
 	    }
 		if(doc==null){
@@ -667,13 +679,13 @@ function parseInclude(node){
 		    this.parse(doc)
 		}
     }finally{
-        this.currentURI = parentURI;
+        this.setCurrentURI(parentURI);
     }
 }
 
 function processExtends(node){
 	var oldConfig = this.getAttribute("#extends");
-	var el = node.nodeType == 1?node:node.ownerElement|| getOwnerElement(node);
+	var el = node.nodeType == 1?node:node.ownerElement|| node.selectSingleNode('..');
 	var root = el == el.ownerDocument.documentElement;
 	var extendsConfig = {blockMap:{},parse:false,root:root};
 	if(oldConfig){
@@ -693,7 +705,7 @@ function processExtends(node){
 	}
 	
 	this.setAttribute("#extends" ,extendsConfig);
-	var parentURI = getAttribute(node,"*path","value","parent");
+	var parentURI = findXMLAttribute(node,"*path","value","parent");
 	//childNodes
 	var uri = this.createURI(parentURI);
 	var parentNode = this.loadXML(uri);
@@ -705,19 +717,19 @@ function processExtends(node){
 	this.reset(i);
     var parentURI = this.currentURI;
 	try{
-		this.currentURI = uri;
+		this.setCurrentURI(uri);
 		extendsConfig.parse=true;
 		this.parse(parentNode);
 	}finally{
-        this.currentURI = parentURI;
+        this.setCurrentURI(parentURI);
 	}
 	this.setAttribute("#extends" ,oldConfig);
 }
 
 function processBlock(node){
 	var extendsConfig = this.getAttribute("#extends");
-	var value = getAttribute(node,"name","id");
-	var childNodes = node.nodeType == 1?node.childNodes:node.ownerElement||getOwnerElement(node);
+	var value = findXMLAttribute(node,"name","id");
+	var childNodes = node.nodeType == 1?node.childNodes:node.ownerElement||node.selectSingleNode('..');
 		
 	if(extendsConfig){//
 		var blockMap = extendsConfig.blockMap;
@@ -731,7 +743,7 @@ function processBlock(node){
 					extendsConfig.parse=true;
 					this.parse(cached);
 				}finally{
-	        		this.currentURI = parentURI;
+	        		this.setCurrentURI(parentURI);
 				}
 			}else{
 				this.parse(childNodes);
@@ -753,7 +765,7 @@ function parseChildRemoveAttr(context,node){
 	if(node.nodeType == 1){//child
 		context.parse(node.childNodes)
 	}else if(node.nodeType == 2){//attr
-		var el = node.ownerElement||getOwnerElement(node);
+		var el = node.ownerElement||node.selectSingleNode('..');
 		el.removeAttributeNode(node);
 		context.parse(el);//||node.selectSingleNode('parent::*'));
 	}else {//other

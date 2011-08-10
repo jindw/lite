@@ -12,11 +12,11 @@ var defaultBase = new URI("lite:///");
  */
 function ParseContext(config,path){
 	config = config || new ParseConfig();
+	this.currentURI = defaultBase;
+	this.featureMap = config.getFeatureMap(path);
+    this.textType=0;
 	this._path = path;
-	this._currentURI = defaultBase;
-	this._featureMap = config.getFeatureMap(path);
     this._config = config;
-    this._textType=0;
 	this._attributeMap = [[],[],{}]
     this._result = new ResultContext();
 	this._context = this;
@@ -65,10 +65,10 @@ ParseContext.prototype = {
 		}
 		
 		var mark = this.mark();
-		var oldType = this.getTextType();
-		this._context._textType = textType;
+		var oldType = this.textType;
+		this._context.textType = textType;
 		parseTextLeaf(source,this);
-		this._context._textType = oldType;
+		this._context.textType = oldType;
 		var result = this.reset(mark);
 		return result;
 	},
@@ -116,7 +116,7 @@ ParseContext.prototype = {
     	if(path.indexOf(base) ==0){
     		path = path.substring(base.length-1);
     	}
-    	var cu = this.getCurrentURI();
+    	var cu = this.currentURI;
     	if(cu){
     		//if(cu.scheme == 'data'){
     		//	return new URI(cu);
@@ -149,14 +149,15 @@ ParseContext.prototype = {
     	if(path instanceof URI){
     	}else{
     		if(/^\s*</.test(path)){
-    			return loadXML(path,this._config._root)
+    			return loadLiteXML(path,this._config._root)
     		}else{
     			path = new URI(path)
     		}
     	}
     	this.setCurrentURI(path);
-    	return loadXML(path,this._config._root)
-    	this._context._loadTime+=(new Date()-t1)
+    	var doc = loadLiteXML(path,this._config._root);
+    	this._context._loadTime+=(new Date()-t1);
+    	return doc;
     },
     openStream:function(uri){
 //    	//only for java
@@ -168,9 +169,9 @@ ParseContext.prototype = {
 //    	return Packages.org.xidea.lite.impl.ParseUtil.openStream(uri)
 		throw new Error("only for java");
     },
-	getTextType:function(){
-		return this._context._textType;
-	},
+//	getTextType:function(){
+//		return this._context.textType;
+//	},
 	setAttribute:function(key,value){
 		setByKey(this._context._attributeMap,key,value)
 	},
@@ -187,17 +188,14 @@ ParseContext.prototype = {
 		this._extensionParser.addExtension(ns,pkg);
 	},
 	getFeature:function(key){
-		return this._featureMap[key];
+		return this.featureMap[key];
 	},
 	getFeatureMap:function(){
-		return this._featureMap;
+		return this.featureMap;
 	},
-    getCurrentURI:function(){
-    	return this._context._currentURI;
-    },
     setCurrentURI:function(uri){
     	this._context.addResource(uri=new URI(uri));
-    	this._context._currentURI = uri;
+    	this._context.currentURI = uri;
     },
     addResource:function(uri){
     	for(var rs = this._resources, i=0;i<rs.length;i++){
@@ -211,8 +209,8 @@ ParseContext.prototype = {
     	return this._resources;
     },
     createNew:function(){
-    	var nc = new ParseContext(this._config,this.getCurrentURI());
-    	nc._featureMap = this._featureMap;
+    	var nc = new ParseContext(this._config,this.currentURI);
+    	nc.featureMap = this.featureMap;
     	nc._resources = this._resources;
     	return nc;
     },

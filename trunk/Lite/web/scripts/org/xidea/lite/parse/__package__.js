@@ -1,21 +1,18 @@
 this.addScript('config-parser.js',['parseConfig']
 				,0
-				,['org.xidea.lite.util:stringifyJSON','org.xidea.lite.util:loadXML',"org.xidea.lite.util:getAttribute"]);
+				,['org.xidea.lite.util:stringifyJSON','org.xidea.lite.util:loadLiteXML',"org.xidea.lite.util:findXMLAttribute"]);
 this.addScript('config.js','ParseConfig'
 				,0
 				,['org.xidea.lite.util:URI']);
 this.addScript('extension-parser.js','ExtensionParser'
 				,0
-				,['Extension','Core','HTML','HTML_EXT','org.xidea.lite.util:getOwnerElement']);
-this.addScript('extension.js','Extension'
-				,0
-				,[
-					'org.xidea.lite.util:removeByKey','org.xidea.lite.util:getByKey','org.xidea.lite.util:setByKey']);
+				,['org.xidea.lite.util:getLiteTagInfo','Extension','Core','HTML','HTML_EXT']);
+this.addScript('extension.js','Extension');
 
 
            
 this.addScript('parse-context.js','ParseContext'
-                ,['ResultContext','ParseConfig','org.xidea.lite.util:URI','org.xidea.lite.util:loadXML','org.xidea.lite.util:selectByXPath']
+                ,['ResultContext','ParseConfig','org.xidea.lite.util:URI','org.xidea.lite.util:loadLiteXML','org.xidea.lite.util:selectByXPath']
                 ,['buildTopChain','ExtensionParser','Extension','parseDefaultXMLNode','parseText','org.xidea.lite.util:getByKey','org.xidea.lite.util:setByKey']);
 
 this.addScript('result-context.js','ResultContext'

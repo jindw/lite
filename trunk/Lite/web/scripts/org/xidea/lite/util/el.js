@@ -1,5 +1,5 @@
 
-function findParamMap(value){
+function findLiteParamMap(value){
 	var result = {};
 	while(value){
 		var match = value.match(/^\s*([\w\$\_]+|'[^']*'|"[^"]*")\s*(?:[\:=]\s*([\s\S]+))\s*$/);

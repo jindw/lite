@@ -3,6 +3,7 @@ package org.xidea.lite.test;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -111,8 +112,13 @@ public class WebServer {
 						if(file.isDirectory()){
 							RequestUtil.printResource();
 						}else{
-							Object result = manager.getFilteredContent(uri);
-							RequestUtil.printResource(result,null);
+							try{
+								Object result = manager.getFilteredContent(uri);
+								RequestUtil.printResource(result,null);
+							}catch (FileNotFoundException e) {
+								context.setStatus(404, e.toString());
+								RequestUtil.printResource(e.toString(), "text/html");
+							}
 						}
 					}
 				}

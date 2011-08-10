@@ -39,7 +39,7 @@ var HTML = {
 				var content = text.substring(len1,text.length - len2);
 				try{
 					if(/^\s*</.test(content)){
-						content = loadXML(content,null);
+						content = loadLiteXML(content,null);
 					}
 					//xml = this.xml.documentElement;
 				}catch(e){
@@ -126,7 +126,7 @@ var HTML_EXT = {
 	beforeAutoform:function(node){
 		var oldAutoform = this.getAttribute(AUTO_FORM_PREFIX);
 		try{
-			var prefix = getAttribute(node,'*value');
+			var prefix = findXMLAttribute(node,'*value');
 			if(prefix == 'true'){
 				prefix = '';
 			}
@@ -144,7 +144,7 @@ var HTML_EXT = {
 	beforeTrim:function(node){
 		var oldSpace = this.getAttribute(XML_SPACE_TRIM);
 		try{
-			var value = getAttribute(node,'*value');
+			var value = findXMLAttribute(node,'*value');
 			this.setAttribute(XML_SPACE_TRIM,value == 'true'?true:value == 'false'?false:null);
     		parseChildRemoveAttr(this,node);
     	}finally{

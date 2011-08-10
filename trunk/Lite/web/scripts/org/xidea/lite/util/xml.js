@@ -1,6 +1,6 @@
-function loadXML(uri,root){
+function loadLiteXML(uri,root){
 	try{
-		if(uri instanceof URI){
+		if(uri instanceof URI){ 
 			if(uri.source){
 				uri = uri.source;
 			}else if(uri.scheme == 'lite'){
@@ -100,7 +100,7 @@ function parseXMLByText(text,url){
 		text = txt2xml(text);
 	}
 	try{
-	    var text2 = normalizeXML(text,url);
+	    var text2 = normalizeLiteXML(text,url);
     	var errors = [];
     	var xml = parseFromString(text2,errors);
     	if(errors.length == 0 && xml){
@@ -109,7 +109,7 @@ function parseXMLByText(text,url){
 		var errors0 = [];
 		var xml = parseFromString(text,errors0);
 		if(errors0.length == 0 && xml){
-			//report normalizeXML bug
+			//report normalizeLiteXML bug
 			return xml;
 		}
 	    $log.error("解析xml失败:",errors.join('\n'),text2);
@@ -224,7 +224,7 @@ if(!(window.DOMParser && window.XMLHttpRequest || window.ActiveXObject)){
         return pu.selectByXPath(node,path);
     }
 }
-function getAttribute(el,key){
+function findXMLAttribute(el,key){
 	if(el.nodeType == 2){
 		return el.value;
 	}
@@ -256,8 +256,8 @@ function getAttribute(el,key){
 	}
 	return null;
 }
-function getAttributeEL(el){
-	el = getAttribute.apply(null,arguments);
+function findXMLAttributeAsEL(el){
+	el = findXMLAttribute.apply(null,arguments);
 	if(el !== null){
 		var el2 = el.replace(/^\s*\$\{([\s\S]*)\}\s*$/,"$1")
 		if(el == el2){
@@ -272,16 +272,13 @@ function getAttributeEL(el){
 	}
 	return el;
 }
-function getOwnerElement(attr){
-	try{
-		if(attr.ownerElement){
-			return attr.ownerElement;
-		}
-		var es = attr.selectNodes("..");
-		if(es.length == 1){
-			return es.item(0);
-		}
-	}catch(e){
-		return null;
-	}
-}
+//function getLiteOwnerElement(attr){
+//	try{
+//		if(attr.ownerElement){
+//			return attr.ownerElement;
+//		}
+//		return attr.selectSingleNode("..");
+//	}catch(e){
+//		return null;
+//	}
+//}

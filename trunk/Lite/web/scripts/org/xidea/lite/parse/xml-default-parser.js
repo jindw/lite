@@ -9,47 +9,51 @@
 
 var XML_SPACE_TRIM = "http://www.xidea.org/lite/attribute/h:trim-space" 
 function parseDefaultXMLNode(node,context,chain){
-    switch(node.nodeType){
-        case 1: //NODE_ELEMENT 
-            processElement(node,context,chain)
-            break;
-        case 2: //NODE_ATTRIBUTE                             
-            processAttribute(node,context,chain)
-            break;
-        case 3: //NODE_TEXT                                        
-            processTextNode(node,context,chain)
-            break;
-        case 4: //NODE_CDATA_SECTION                     
-            processCDATA(node,context,chain)
-            break;
-        case 5: //NODE_ENTITY_REFERENCE                
-            processEntityReference(node,context,chain)
-            break;
-        case 6: //NODE_ENTITY            
-            processEntity(node,context,chain)
-            break;
-        case 7: //NODE_PROCESSING_INSTRUCTION    
-            processProcessingInstruction(node,context,chain)
-            break;
-        case 8: //NODE_COMMENT                                 
-            processComment(node,context,chain)
-            break;
-        case 9: //NODE_DOCUMENT                                
-        case 11://NODE_DOCUMENT_FRAGMENT             
-            processDocument(node,context,chain)
-            break;
-        case 10://NODE_DOCUMENT_TYPE                     
-            processDocumentType(node,context,chain)
-//        case 11://NODE_DOCUMENT_FRAGMENT             
-//            processDocumentFragment(node,context,chain)
-            break;
-        case 12://NODE_NOTATION 
-            processNotation(node,context,chain);
-            break;
-        default://文本节点
-        	chain.next(node);
-            //this.println("<!-- ERROR： UNKNOW nodeType:"+node.nodeType+"-->")
-    }
+	try{
+	    switch(node.nodeType){
+	        case 1: //NODE_ELEMENT 
+	            processElement(node,context,chain)
+	            break;
+	        case 2: //NODE_ATTRIBUTE                             
+	            processAttribute(node,context,chain)
+	            break;
+	        case 3: //NODE_TEXT                                        
+	            processTextNode(node,context,chain)
+	            break;
+	        case 4: //NODE_CDATA_SECTION                     
+	            processCDATA(node,context,chain)
+	            break;
+	        case 5: //NODE_ENTITY_REFERENCE                
+	            processEntityReference(node,context,chain)
+	            break;
+	        case 6: //NODE_ENTITY            
+	            processEntity(node,context,chain)
+	            break;
+	        case 7: //NODE_PROCESSING_INSTRUCTION    
+	            processProcessingInstruction(node,context,chain)
+	            break;
+	        case 8: //NODE_COMMENT                                 
+	            processComment(node,context,chain)
+	            break;
+	        case 9: //NODE_DOCUMENT                                
+	        case 11://NODE_DOCUMENT_FRAGMENT             
+	            processDocument(node,context,chain)
+	            break;
+	        case 10://NODE_DOCUMENT_TYPE                     
+	            processDocumentType(node,context,chain)
+	//        case 11://NODE_DOCUMENT_FRAGMENT             
+	//            processDocumentFragment(node,context,chain)
+	            break;
+	        case 12://NODE_NOTATION 
+	            processNotation(node,context,chain);
+	            break;
+	        default://文本节点
+	        	chain.next(node);
+	            //this.println("<!-- ERROR： UNKNOW nodeType:"+node.nodeType+"-->")
+	    }
+	}catch(e){
+		$log.error('!!'+e);
+	}
 }
 
 var htmlLeaf = /^(?:meta|link|img|br|hr|input)$/i;

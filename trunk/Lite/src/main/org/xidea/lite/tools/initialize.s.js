@@ -80,8 +80,8 @@ function addHashData(path){
 		return path;//not add hash on hash url
 	}
 	//TODO:use result md5 is better?
-	//resourceManager.getContentHash(path)
-	return path+'?@='+(+new Date()).toString(32)
+	var hash = resourceManager.getContentHash(path)
+	return path+'?@='+hash
 }
 /**
  * 这个工作比较难啊，模板要定位所有资源路径。

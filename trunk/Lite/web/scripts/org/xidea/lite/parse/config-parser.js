@@ -53,7 +53,7 @@
 //	return result;
 //}
 function parseConfig(doc){
-	var doc = doc.nodeType?doc:loadXML(doc);
+	var doc = doc.nodeType?doc:loadLiteXML(doc);
 	var lites = doc.getElementsByTagName("lite");
 	var len = lites.length;
 	if(len >= 1){
@@ -73,10 +73,10 @@ function parseConfig(doc){
 function LiteGroup(node,parentConfig){
 	this.parentConfig = parentConfig || null
 	this.featureMap = {}
-	this.encoding= getAttribute(node,'encoding','charset');
-	this.mimeType = getAttribute(node,'mime-type','mimeType','mimiType','metaType');
-	this.layout = getAttribute(node,'layout');
-	this.contentType = getAttribute(node,'contentType','contextType');
+	this.encoding= findXMLAttribute(node,'encoding','charset');
+	this.mimeType = findXMLAttribute(node,'mime-type','mimeType','mimiType','metaType');
+	this.layout = findXMLAttribute(node,'layout');
+	this.contentType = findXMLAttribute(node,'contentType','contextType');
 	this.extensionMap = {};
 	this.children = [];
 	this.includes = [];
@@ -86,12 +86,12 @@ function LiteGroup(node,parentConfig){
 		if(child.nodeType == 1){
 			switch(child.nodeName){
 			case 'feature':
-				this.featureMap[getAttribute(child,'name','key','uri','url')] = 
-						getAttribute(child,'value','#text')
+				this.featureMap[findXMLAttribute(child,'name','key','uri','url')] = 
+						findXMLAttribute(child,'value','#text')
 				break;
 			case 'extension':
-				var ns = getAttribute(child,'namespace','name','key','uri','url');
-				var p = getAttribute(child,'package','impl','value','#text');
+				var ns = findXMLAttribute(child,'namespace','name','key','uri','url');
+				var p = findXMLAttribute(child,'package','impl','value','#text');
 				var ps = this.extensionMap[ns];
 				if(ps && ps instanceof Array){
 					appendAfter(ps,p);
@@ -100,10 +100,10 @@ function LiteGroup(node,parentConfig){
 				}
 				break;
 			case 'include':
-				this.includes.push(getAttribute(child,'value','#text','pattern'));
+				this.includes.push(findXMLAttribute(child,'value','#text','pattern'));
 				break;
 			case 'exclude':
-				this.excludes.push(getAttribute(child,'value','#text','pattern'));
+				this.excludes.push(findXMLAttribute(child,'value','#text','pattern'));
 				break;
 			case 'group':
 				this.children.push(new LiteGroup(child,this))

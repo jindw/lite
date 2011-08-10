@@ -1,8 +1,8 @@
-this.addScript("xml.js",['loadXML','selectByXPath','getOwnerElement'
-					,'getAttribute','getAttributeEL']
-				,['normalizeXML',"URI",'org.xidea.jsidoc.util:XMLHttpRequest'])
-this.addScript('el.js','findParamMap');
-this.addScript('xml-normalize.js','normalizeXML');
+this.addScript("xml.js",['loadLiteXML','selectByXPath'
+					,'findXMLAttribute','findXMLAttributeAsEL']
+				,['normalizeLiteXML',"URI",'org.xidea.jsidoc.util:XMLHttpRequest'])
+this.addScript('el.js','findLiteParamMap');
+this.addScript('xml-normalize.js',['getLiteTagInfo','normalizeLiteXML']);
 
 
 this.addScript('json.js',["stringifyJSON","parseJSON"]);
