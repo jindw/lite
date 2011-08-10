@@ -72,7 +72,7 @@ function replacePath(path){
 	//resourceManager.replacePath(path);
 	return path;
 }
-function addHashData(path){
+function addHashData(path,realpath){
 	if(path.indexOf('?')>=0){
 		return path;//not add hash on dynamic
 	}
@@ -80,8 +80,12 @@ function addHashData(path){
 		return path;//not add hash on hash url
 	}
 	//TODO:use result md5 is better?
-	var hash = resourceManager.getContentHash(path)
-	return path+'?@='+hash
+	var hash = resourceManager.getContentHash(realpath||path)
+	if(hash){
+		return path+'?@='+hash
+	}else{
+		return path;
+	}
 }
 /**
  * 这个工作比较难啊，模板要定位所有资源路径。
