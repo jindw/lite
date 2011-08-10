@@ -25,6 +25,7 @@ if($path){
 			}
 		}
 	}
+	header("Content-Type:text/html;charset=utf-8");
     echo "<a href='index.php/guide/index.xhtml'>跳转到文档首页</a>";
 	if(array_key_exists('svn',$_GET)){
     	echo "<p>正在执行svn更新...</p>";
