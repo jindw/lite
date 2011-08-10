@@ -92,7 +92,7 @@ function domFilterXHTML(path,dom){
 			//这里会一起处理replacePath
 			value = processURI(value)
 			if(hash){
-				value = addHashData(value);
+				value = addHashData(toAbsolutePath(value,path));
 			}
 			if(contextPath){
 				value = addContextPath(value,contextPath);
