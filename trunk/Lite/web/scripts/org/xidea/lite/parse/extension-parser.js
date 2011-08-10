@@ -290,7 +290,7 @@ ExtensionParser.prototype = {
 				var es = 1;
 				var el = attr.ownerElement ||  attr.selectSingleNode("..");//ie bug
 				var es = 2;
-				var info = getNodeInfo(el);
+				var info = getNodeTagInfo(el);
 				var es  = 3;
 				if(info.length ==0 || info.indexOf("|"+attr.name+"|")>0){
 					return false;
