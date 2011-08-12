@@ -99,7 +99,14 @@ if(strpos($path,".xhtml")>0){
 	$boot = $path == '/doc/boot.js'?realpath('../WEB-INF/classes/lite/boot.js'):null;
 	if(array_key_exists('@',$_GET)){
 		if($boot){
-			header("ETag:".filemtime($boot).filesize($boot));
+			$old_etag = @$_SERVER('HTTP_IF_NONE_MATCH');
+			$etag = filemtime($boot).'-'.filesize($boot);
+			if($old_etag == $etag){
+				header('HTTP/1.1 304 Not Modfied');  
+				exit();
+			}else{
+				header("ETag:".etag);
+			}
 		}else{
 			header("Expires: ".gmdate("D, d M Y H:i:s", time()+315360000)." GMT");
 			header("Cache-Control: max-age=315360000");
