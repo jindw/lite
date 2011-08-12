@@ -103,11 +103,11 @@ if(strpos($path,".xhtml")>0){
 			$etag = filemtime($boot).'-'.filesize($boot);
 			if($old_etag && $old_etag == $etag ){
 				header('HTTP/1.1 304 Not Modfied');  
-				header('X-INFO-OLD:'.$old_etag);
-				header('X-INFO:'.$etag);
-				//exit();
+				//header('X-INFO-OLD:'.$old_etag);
+				//header('X-INFO:'.$etag);
+				exit();
 			}else{
-				header("ETag:".etag);
+				header("ETag:".$etag);
 			}
 		}else{
 			header("Expires: ".gmdate("D, d M Y H:i:s", time()+315360000)." GMT");
