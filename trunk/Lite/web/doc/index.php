@@ -105,7 +105,7 @@ if(strpos($path,".xhtml")>0){
 				header('HTTP/1.1 304 Not Modfied');  
 				header('X-INFO-OLD:'.$old_etag);
 				header('X-INFO:'.$etag);
-				exit();
+				//exit();
 			}else{
 				header("ETag:".etag);
 			}
