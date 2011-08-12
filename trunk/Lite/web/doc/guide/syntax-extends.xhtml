@@ -61,7 +61,7 @@
 					然而，有了模板继承思想，一切都很方便了。
 				</p>
 				<p>首先，我们只需要定义一个公共的父页面：</p>
-				<x:code>
+				<x:code path="/parent.xhtml">
 			<![CDATA[
 			<html>
 			<head>
@@ -79,7 +79,7 @@
 				</x:code>
 				<p>然后，每个具体模板可以如此：</p>
 
-				<x:code>
+				<x:code model="{}">
 			<![CDATA[
 			<c:extends path="parent.xhtml">
 			    <c:block name="title">标题1</c:block>

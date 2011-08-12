@@ -84,8 +84,7 @@ function parseCode(node){
 	text = text.replace(/[\\"'\r\n<]/g,encodeString)
 	text = '"'+text+'"';
 	var varName = node.getAttribute("var");
-	
-	
+	var path = node.getAttribute("path");
 	var model = node.getAttribute("model");
 	if(model){
 		if(/^\s*\{/.test(model)){
@@ -100,7 +99,7 @@ function parseCode(node){
 			this.append("<span class='runner' onclick='runExample("+model+','+varName+")'>执行</span>");
 		}
 	}else{
-		this.append("<div class='code'><script>renderSource("+text+','+(model||null)+");<\/script></div>")
+		this.append("<div class='code'><script>renderSource("+text+','+(model||null)+",'"+path+"');<\/script></div>")
 	}
 };
 function seekFormat(value){
@@ -137,6 +136,7 @@ function parseNL2BR(node){
 		</style>
 		<script>
 			//<![CDATA[
+var xmlSourceMap = {};
 		
 function formatDate(value,format){
 	value = new Date(value);
@@ -170,7 +170,7 @@ function formatDate(value,format){
 			var s = s[s.length-1];
 			s.parentNode.appendChild(node);
 		}
-		function renderSource(text,json){
+		function renderSource(text,json,path){
 			if(json){
 				document.write("<div class='runner' onclick='runExample(jsons["+jsons.length+"],mirrors["+mirrors.length+"].getValue())'>执行</div>");
 				jsons.push(json);
@@ -181,6 +181,9 @@ function formatDate(value,format){
   				mode:  {name:/^\s*</.test(text)?"litexml":"javascript",json:true}
 			});
 			mirrors.push(mirror);
+			if(path){
+				xmlSourceMap[path] = mirror;
+			}
 			return mirror;
 		}
 		function updateMirror(){
@@ -358,29 +361,6 @@ function formatDate(value,format){
 			jsonEditor.setValue(json);
 			templateEditor.setValue(template);
 		}
-		function runTemplate(){
-			try{
-				var js = jsonEditor.getValue();
-				var data = window.eval('('+js+')');
-			}catch(e){
-				alert("测试失败：模拟数据异常："+e);
-				return;
-			}
-			try{
-				var ts = templateEditor.getValue();
-				var tpl = liteTemplate(ts);
-			}catch(e){
-				alert("测试失败：模板编译异常："+e);
-				return;
-			}
-			try{
-				var result = tpl.render(data);
-			}catch(e){
-				alert("测试失败：模板运行异常："+tpl.render+e);
-				return;
-			}
-			showResult(result);
-		}
 		function showResult(result){
 			exampleResult.style.display = 'block';
 			resultEditor.setValue(result);
@@ -392,45 +372,86 @@ function formatDate(value,format){
 				}
 			},100)
 		}
+		function runTemplate(){
+			try{
+				var js = jsonEditor.getValue();
+				var data = window.eval('('+js+')');
+			}catch(e){
+				$log.error("测试失败：模拟数据异常："+e);
+				return;
+			}
+			try{
+				var context = buildContext();
+				var translator = new JSTranslator();//'.','/','-','!','%'
+				translator.liteImpl = "lite__impl_"
+				var code = translator.translate(context.toList(),true);
+				var tpl =  window.eval("(function(lite__impl_def,lite__impl_get){"+(code||null)+"})");
+				tpl = new Template(tpl);
+			}catch(e){
+				$log.error("测试失败：模板编译异常："+e);
+				return;
+			}
+			try{
+				var result = tpl.render(data);
+			}catch(e){
+				$log.error("测试失败：模板运行异常："+tpl.render+e);
+				return;
+			}
+			showResult(result);
+		}
+		function buildContext(){
+			var context = new ParseContext();
+			var cached = {};
+			for(var path in xmlSourceMap){
+				cached[path] = xmlSourceMap[path].getValue();
+			}
+			cached["/source.xhtml"] = templateEditor.getValue();
+			var baseXMLLoader = context.loadXML;
+			context.loadXML = function(uri){
+				if(uri.path){
+					if(uri.path in cached){
+						uri = cached[uri.path];
+					}else{
+						$log.warn("未知文件路径",uri.path)
+					}
+				}
+				return baseXMLLoader.call(context,uri);
+			}
+			context.parse(context.createURI('/source.xhtml'));
+			return context;
+		}
 		function compileToJS(){
 			try{
-				
-				var context = new ParseContext();
-				var ts = templateEditor.getValue();
-				context.parse(context.loadXML(ts));
+				var context = buildContext();
 				var litecode = context.toList();
-				var pt = new JSTranslator();//'.','/','-','!','%'
-				pt.liteImpl = 'lite__impl_';//avoid inline jslib 
-				var jscode = pt.translate(litecode);
+				var translator = new JSTranslator();//'.','/','-','!','%'
+				translator.liteImpl = 'lite__impl_';//avoid inline jslib 
+				var jscode = translator.translate(litecode);
 			}catch(e){
-				alert("测试失败：模板编译异常："+e);
+				$log.error("测试失败：模板编译异常：",e);
 				return;
 			}
 			showResult(jscode);
 		}
 		function compileToPHP(){
 			try{
-				var context = new ParseContext();
-				var ts = templateEditor.getValue();
-				context.parse(context.loadXML(ts));
+				var context = buildContext();
 				var litecode = context.toList();
 				var pt = new PHPTranslator("/test.xhtml".replace(/[\/\-\$\.!%]/g,'_'));//'.','/','-','!','%'
 				var phpcode = pt.translate(litecode);
 			}catch(e){
-				alert("测试失败：模板编译异常："+e);
+				$log.error("测试失败：模板编译异常：",e);
 				return;
 			}
 			showResult(phpcode);
 		}
 		function compileToLite(){
 			try{
-				var context = new ParseContext();
-				var ts = templateEditor.getValue();
-				context.parse(context.loadXML(ts));
+				var context = buildContext();
 				var litecode = context.toList();
 				var litecode = stringifyJSON(litecode);
 			}catch(e){
-				alert("测试失败：模板编译异常："+e);
+				$log.error("测试失败：模板编译异常：",e);
 				return;
 			}
 			showResult(litecode);
@@ -455,10 +476,21 @@ function formatDate(value,format){
 		<script>
 			if(!this.ParseContext && this.$import){
 			$import('org.xidea.lite.web:*',true);
+			$import('org.xidea.jsi:$log',true);
+			$import('org.xidea.lite:Template',true);
 			$import('org.xidea.lite.impl.js:*',true);
 			$import('org.xidea.lite.impl.php:*',true);
 			$import('org.xidea.lite.parse:*',true);
 			$import('org.xidea.lite.util:stringifyJSON',true);
+			}
+			var as = document.getElementsByTagName('a');
+			for(var i = as.length;i--;){
+				var a = as.item(i);
+				if(/\bcurrent\b/.test(a.className)){
+					if(typeof a.parentNode.scrollIntoView == 'function'){
+						a.parentNode.scrollIntoView();
+					}
+				} 
 			}
 		</script>
 	</body>

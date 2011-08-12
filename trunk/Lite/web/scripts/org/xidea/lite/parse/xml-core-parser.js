@@ -293,7 +293,7 @@ function processWhen(node){
 	var stat = this.getAttribute(CHOOSE_KEY);
 	var value = findXMLAttributeAsEL(node,"*test","if","value");
 	if(stat.value){
-		value = stat.value + '=='+value;
+		value = stat.value + '==('+value+')';
 	}
 	if(stat.first){
 		stat.first = false;

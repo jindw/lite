@@ -38,9 +38,11 @@ var MIME_TYPE_KEY = 'http://www.xidea.org/lite/features/output-mime-type';
  */
 function PHPTranslator(id,data){
     this.id = id.replace(/[\/\-\$\.!%]/g,'_');
-    this.resource=data[0]
-    this.code = data[1];
-    this.featureMap = data[2];
+    if(data){
+    	this.resource=data[0]
+    	this.code = data[1];
+    	this.featureMap = data[2];
+    }
 }
 
 PHPTranslator.prototype = {
