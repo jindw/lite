@@ -5,10 +5,7 @@ $engine = new LiteEngine();
 $path = @$_SERVER['PATH_INFO'] ;
 
 
-if(array_key_exists('@',$_GET)){
-	header("Expires: ".gmdate("D, d M Y H:i:s", time()+315360000)." GMT");
-	header("Cache-Control: max-age=315360000");
-}
+
 if($path){
 	$path = '/doc'.$path;
 }else{
@@ -48,9 +45,7 @@ if($path){
     },3000);</script>";
     exit();
 }
-if($path == '/doc/boot.js'){
-	readfile("../WEB-INF/classes/lite/boot.js");
-}else if(strpos($path,".xhtml")>0){
+if(strpos($path,".xhtml")>0){
 	if(!file_exists("..".$path)){
 		$path2 = preg_replace('/[^\/]+$/','notfound.xhtml',$path);
 		if(!file_exists('..'.$path2)){
@@ -94,12 +89,25 @@ if($path == '/doc/boot.js'){
 		$context = array();
 	}
 	$engine->render($path2?$path2:$path,$context);
-}else if(realpath("..".$path)){
-	if(strpos($path,".css")>0){
-		header("Content-type: text/css;charset=UTF-8");
-	}
-	readfile("..".$path);
 }else{
-    echo '<h3>找不到文件:'.$path.'</h3>';
+	$boot = $path == '/doc/boot.js'?realpath('../WEB-INF/classes/lite/boot.js'):null;
+	if(array_key_exists('@',$_GET)){
+		if($boot){
+			header("ETag:".filemtime($boot).filesize($boot))
+		}else{
+			header("Expires: ".gmdate("D, d M Y H:i:s", time()+315360000)." GMT");
+			header("Cache-Control: max-age=315360000");
+		}
+	}
+	if($boot){
+		readfile($boot);
+	}else if(realpath("..".$path)){
+		if(strpos($path,".css")>0){
+			header("Content-type: text/css;charset=UTF-8");
+		}
+		readfile("..".$path);
+	}else{
+	    echo '<h3>找不到文件:'.$path.'</h3>';
+	}
 }
 ?>
