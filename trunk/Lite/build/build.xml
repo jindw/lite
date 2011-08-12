@@ -165,6 +165,7 @@
 			<arg value=":Debug" />
 			<arg value="-exports" />
 			<arg value="org.xidea.jsi:$log" />
+			<arg value="org.xidea.lite:Template" />
 			<arg value="org.xidea.lite.web:WebCompiler" />
 			<arg value="org.xidea.lite.parse:*" />
 			<arg value="org.xidea.lite.impl.js:*" />
