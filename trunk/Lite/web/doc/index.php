@@ -29,20 +29,23 @@ if($path){
 	}
 	header("Content-Type:text/html;charset=utf-8");
     echo "<a href='index.php/guide/index.xhtml'>跳转到文档首页</a>";
+    $wait = 0;
 	if(array_key_exists('svn',$_GET)){
+		$wait = 3000;
     	echo "<p>正在执行svn更新...</p>";
 		$log =  lite_exec("svn up");
 		echo '<p>'.htmlspecialchars($log).'</p>';
 	}
 	if(array_key_exists('java',$_GET)){
+		$wait = 3000;
     	echo "<p>正在执行文档编译...</p>";
 		$log = lite_exec("java -jar ../WEB-INF/lib/Lite.jar -includes /doc/guide/*.xhtml -root ../ -output ../ -translators php");
 		echo '<p>'.htmlspecialchars($log).'</p>';
 	}
-	echo "<p>文档三秒钟后跳转!</p>";
+	echo "<p>文档$wait毫秒后跳转!</p>";
     echo "\n\n<script>setTimeout(function(){
     	document.location = ('index.php/guide/index.xhtml')
-    },3000);</script>";
+    },$wait);</script>";
     exit();
 }
 if(strpos($path,".xhtml")>0){
@@ -56,6 +59,9 @@ if(strpos($path,".xhtml")>0){
 	
 	//处理留言需求
 	$content = @$_POST["content"];
+	if(get_magic_quotes_gpc()){
+		$content = stripslashes($content);
+	}
 	$json = "..".preg_replace('/\.xhtml$/','.json',$path);
 	if($content){
 		$username = $_POST["username"];
@@ -93,7 +99,7 @@ if(strpos($path,".xhtml")>0){
 	$boot = $path == '/doc/boot.js'?realpath('../WEB-INF/classes/lite/boot.js'):null;
 	if(array_key_exists('@',$_GET)){
 		if($boot){
-			header("ETag:".filemtime($boot).filesize($boot))
+			header("ETag:".filemtime($boot).filesize($boot));
 		}else{
 			header("Expires: ".gmdate("D, d M Y H:i:s", time()+315360000)." GMT");
 			header("Cache-Control: max-age=315360000");
