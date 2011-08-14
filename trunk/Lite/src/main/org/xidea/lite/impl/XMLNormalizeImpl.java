@@ -60,7 +60,7 @@ public class XMLNormalizeImpl {
 	protected Map<String, String> defaultNSMap = DEFAULT_NS_MAP;
 	protected Map<String, String> defaultEntryMap = DEFAULT_ENTRY_MAP;
 	protected Set<String> defaultLeafSet;
-	protected String documentStart = "<c:group xmlns:c='http://www.xidea.org/lite/core'>";
+	protected String documentStart = "<c:group xmlns:c='"+NS_CORE+"' xmlns:h='"+NS_HTML_EXT+"'>";
 	protected String documentEnd = "</c:group>";
 
 	protected int start;
