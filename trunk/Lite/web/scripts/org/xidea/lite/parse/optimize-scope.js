@@ -114,6 +114,9 @@ function vistLite(context,code){
 				}else if(className == 'org.xidea.lite.parse.ClientPlugin'){
 					//doFindClient(item);
 					break;
+				}else if(className == 'org.xidea.lite.EncodePlugin'){
+					//doFindClient(item);
+					break;
 				}else{
 					$log.info(item[2])
 				}
