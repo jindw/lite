@@ -118,10 +118,11 @@ function processAttribute(node,context,chain){
             //TODO:....
             throw new Error("属性内只能有单一EL表达式！！");
         }else{//只考虑单一EL表达式的情况
-            buf = buf[0];
-            //buf[1] 是一个表达式对象
-	        context.appendXA(name,buf[1]);
-	        return null;
+            if(buf[0][0] == XA_TYPE){
+            	//buf[0][1] 是一个表达式对象
+	        	context.appendXA(name,buf[0][1]);
+	        	return null;
+            }
         }
     }
     context.append(" "+name+'="');

@@ -195,20 +195,21 @@ public class DefaultXMLNodeParser implements NodeParser<Node> {
 			// throw new RuntimeException("只能有单个EL表达式");
 			// } else {// 只考虑单一EL表达式的情况
 			Object[] el = (Object[]) buf.get(0);
-			context.appendXA(name, el[1]);
-			// }
-		} else {
-			context.append(" " + name + "=\"");
-			if (name.startsWith("xmlns")) {
-				if (buf.size() == 1
-						&& "http://www.xidea.org/lite/xhtml".equals(buf.get(0))) {
-					buf.set(0, "http://www.w3.org/1999/xhtml");
-				}
+			if(Template.XA_TYPE == ((Number)el[0]).intValue()){
+				context.appendXA(name, el[1]);
+				return;
 			}
-			context.appendAll(buf);
-			context.append("\"");
+			// }
+		} 
+		context.append(" " + name + "=\"");
+		if (name.startsWith("xmlns")) {
+			if (buf.size() == 1
+					&& "http://www.xidea.org/lite/xhtml".equals(buf.get(0))) {
+				buf.set(0, "http://www.w3.org/1999/xhtml");
+			}
 		}
-		return;
+		context.appendAll(buf);
+		context.append("\"");
 	}
 
 	private List<Object> parseAttributeValue(ParseContext context, String value) {
