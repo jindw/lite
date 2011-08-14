@@ -20,20 +20,11 @@
 				<![CDATA[
 				<span>
 				您好：
-					<c:if test="${username}">>
-						${username}
-					</c:if>
-					<c:else>
-						匆匆过客
-					</c:else>
-					；
+					<c:if test="${username}">${username}</c:if>
+					<c:else>匆匆过客</c:else>；
 				今天是：
-					<c:if test="${day>5}">>
-						休息
-					</c:if>
-					<c:else>
-						工作
-					</c:else>日
+					<c:if test="${day>5}">休息</c:if>
+					<c:else>工作</c:else>日
 				</span>
 				]]>
 					</x:code>
@@ -51,7 +42,7 @@
 
 			</li>
 			<li>
-				<strong>for 循环的空处理</strong>
+				<strong>for 循环中的else 语法</strong>
 				<p>
 					else 语法可以直接接for循环，用来处理空循环分支
 					<x:code model="{result:[]}">
@@ -71,6 +62,17 @@
 						<a href="syntax-for.xhtml" />
 					</i>
 				</p>
+			</li>
+		</ul>
+		<h3>相关参考</h3>
+		<ul>
+			<li>
+				if/else 的变种：choose/when 
+				<p><a href="syntax-choose.xhtml" /></p>
+			</li>
+			<li>
+				else 也可以用在for上
+				<p><a href="syntax-for.xhtml" /></p>
 			</li>
 		</ul>
 	</body>

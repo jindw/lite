@@ -15,26 +15,53 @@
 			这是一个Java WebStart 程序，需要Java5+。安装了Java5的同学可以直接点击链接运行，否则先安装JRE吧：
 		</i>
 		<p>
-			当能如果你有心自己搭建Apache +PHP 或者Tomcat,这也是允许的。
-			<ul>
-				<li>
-					php环境搭建
-					<p>你可以下载php-example部署。直接解压到能运行PHP的网站目录中即可运行</p>
-				</li>
+			当能如果你有心自己搭建Apache +PHP 或者Tomcat,这也是允许的
+			[
+			<a href="#" onclick='showNext(this,this.parentNode,"展开安装说明","隐藏安装说明");return false'>展开安装说明</a>
+			]。
+			<ul style="display:none">
 				<li>
 					Java环境搭建
-					<p>你可以下载Lite.jar 并在web.xml中配置Servlet。</p>
+					<p>
+						下载<a href="http://code.google.com/p/lite/downloads/list">Lite-YYYYMMDD.jar</a> 将其存放在WEB-INF/lib中。
+						在WEB-INF/web.xml中增加配置 <strong title="class name=org.xidea.lite.servlet.TemplateServlet">servlet</strong>
+						和  <strong title="一般配置为*.xhtml">servlet-mapping</strong>。</p>
+					<p>
+					<x:code>
+					<![CDATA[
+<web-app xmlns="http://java.sun.com/xml/ns/j2ee" version="2.4">
+	<!-- base info  略.... -->
+	<!-- servlet info -->
+	<servlet>
+		<servlet-name>LiteXML</servlet-name>
+		<servlet-class>org.xidea.lite.servlet.TemplateServlet</servlet-class>
+		<init-param>
+			<param-name>contentType</param-name>
+			<param-value>text/html;charset=UTF-8</param-value>
+		</init-param>
+	</servlet>
+	<!-- servlet mapping info -->
+	<servlet-mapping>
+		<servlet-name>LiteXML</servlet-name>
+		<url-pattern>*.xhtml</url-pattern>
+	</servlet-mapping>
+	<!-- other info 略.... -->
+	
+</web-app>
+					]]>
+					</x:code>
+					<p></p>
+					</p>
 				</li>
 				<li>
-					下载地址：
-					<p>
-						<a href="http://code.google.com/p/lite/downloads/list" />
-					</p>
+					php环境搭建
+					<p>下载<a href="http://code.google.com/p/lite/downloads/list"> php-example-YYYYMMDD.zip</a>。
+					直接解压到能运行PHP的网站目录中即可运行(浏览example目录下的test.php文件，如果服务器超时时间太短，第一次可能无法正确输出，刷新就好了)</p>
 				</li>
 			</ul>
 			<h3>调试环境如何使用</h3>
 			<p>
-				启动测试服务器后，有一个Lite Logo 半透明最前端显示在桌面右下角（可以移动），您可以选择需要测试的网站目录。选中目录后直接拖放至Logo窗口上。测试服务器自动切换网站目录，一个新的测试网站就搭建起来了。
+				启动测试服务器后，有一个Lite Logo 半透明最前端显示在桌面右下角（允许拖拽），您可以选择需要测试的网站目录。选中目录后直接拖放至Logo窗口上。测试服务器自动切换网站目录，一个新的测试网站就搭建起来了。
 			</p>
 			<p>
 				从窗口上右键菜单中点击浏览网站，在文件列表上方有一个工具栏，从中选择部署Lite示例，系统将自动部署一批比较典型的Lite模板示例。

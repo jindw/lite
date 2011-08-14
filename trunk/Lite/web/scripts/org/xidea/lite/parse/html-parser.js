@@ -146,6 +146,9 @@ var HTML_EXT = {
 		try{
 			var value = findXMLAttribute(node,'*value');
 			this.setAttribute(XML_SPACE_TRIM,value == 'true'?true:value == 'false'?false:null);
+    		
+//			$log.error(this.getClass(),XML_SPACE_TRIM,this.getAttribute(XML_SPACE_TRIM));
+    		
     		parseChildRemoveAttr(this,node);
     	}finally{
 			this.setAttribute(XML_SPACE_TRIM,oldSpace);

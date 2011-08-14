@@ -20,7 +20,7 @@ import org.xidea.lite.parse.ParseChain;
 import org.xidea.lite.parse.ParseContext;
 
 public class DefaultXMLNodeParser implements NodeParser<Node> {
-	private static final String XML_SPACE_TRIM = "http://www.xidea.org/lite/attribute/h:trim-space";
+	static final String XML_SPACE_TRIM = "http://www.xidea.org/lite/attribute/h:trim-space";
 	protected static final Pattern HTML_LEAF = Pattern.compile(
 			"^(?:link|input|meta|img|br|hr)$", Pattern.CASE_INSENSITIVE);
 
@@ -154,6 +154,7 @@ public class DefaultXMLNodeParser implements NodeParser<Node> {
 	private void parseTextNode(Node node, ParseContext context) {
 		String text = ((Text) node).getData();
 		Boolean trim = context.getAttribute(XML_SPACE_TRIM);
+//		System.out.println(trim);
 		if (trim == null) {
 			text = ParseUtil.safeTrim(text);
 		} else if (true == trim) {

@@ -27,20 +27,15 @@ abstract public class ParseContextProxy implements ParseContext {
 	 * createNew 共享
 	 */
 	private final Map<String, String> featureMap;
-	private ArrayList<URI> resources = new ArrayList<URI>();
-	private HashMap<Object, Object> attributeMap = new HashMap<Object, Object>();
-	
-	protected ParseConfig config;
-	protected ResultContext resultContext;
+	private final ArrayList<URI> resources;
+	private final HashMap<Object, Object> attributeMap ;
 	/**
 	 * createNew 复制
 	 */
 	private URI currentURI = URI.create("lite:///");
-	/**
-	 * createNew 重置
-	 */
-	protected int textType = 0;
-	private boolean preserveSpace;
+	
+	protected ParseConfig config;
+	protected ResultContext resultContext;
 	
 	
 
@@ -48,6 +43,8 @@ abstract public class ParseContextProxy implements ParseContext {
 	protected ParseContextProxy(ParseConfig config,Map<String, String> featureMap) {
 		this.config = config;
 		this.featureMap = featureMap;
+		this.attributeMap = new HashMap<Object, Object>();
+		this.resources = new ArrayList<URI>();
 		this.resultContext = new ResultContextImpl();
 	}
 
@@ -56,6 +53,7 @@ abstract public class ParseContextProxy implements ParseContext {
 		this.config = parent.config;
 		this.featureMap =  parent.getFeatureMap();
 		this.resultContext = parent;
+		this.attributeMap = parent.attributeMap;
 		this.resources = parent.resources;
 	}
 
@@ -79,21 +77,18 @@ abstract public class ParseContextProxy implements ParseContext {
 		return (T)this.attributeMap.get(key);
 	}
 
-	public int getTextType() {
-		return textType;
-	}
 
 //	public void setTextType(int textType) {
 //		this.textType = textType;
 //	}
-
-	public boolean isReserveSpace() {
-		return preserveSpace;
-	}
-
-	public void setReserveSpace(boolean keepSpace) {
-		this.preserveSpace = keepSpace;
-	}
+//
+//	public boolean isReserveSpace() {
+//		return preserveSpace;
+//	}
+//
+//	public void setReserveSpace(boolean keepSpace) {
+//		this.preserveSpace = keepSpace;
+//	}
 	public final URI createURI(String path) {
 		try {
 			// TODO

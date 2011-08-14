@@ -143,9 +143,18 @@ public class JSONEncoder {
 
 	protected void printString(String text, Appendable out) throws IOException {
 		out.append('"');
-		for (int i = 0; i < text.length(); i++) {
+		final int len = text.length();
+		for (int i = 0; i < len; i++) {
 			char c = text.charAt(i);
 			switch (c) {
+			case '/'://escape HTML </script> </script >
+				if(i>0 && text.charAt(i-1) == '<'
+					&& text.regionMatches(true, i-1, "</script", 0, 8)
+				){
+					out.append('\\');
+				}
+				out.append(c);
+				break;
 			case '\\':
 			case '"':
 			// case '\'':

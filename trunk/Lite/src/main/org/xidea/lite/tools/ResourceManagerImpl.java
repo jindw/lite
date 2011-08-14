@@ -44,6 +44,7 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 		this.root = new File(root);
 		this.currentScript = root;
 		this.jsr.eval("var resourceManager=1;");
+		this .jsr.eval("$import('org.xidea.jsidoc.util:JSON');");
 		Object initfn = this.jsr.eval("(function(rm){resourceManager = rm;})");
 		this.jsr.invoke(this, initfn, this);
 		this.jsr.eval(ResourceManagerImpl.class.getResource("env.s.js"));

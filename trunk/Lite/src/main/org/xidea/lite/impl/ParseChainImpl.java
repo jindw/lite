@@ -118,25 +118,24 @@ public class ParseChainImpl extends ParseContextProxy implements ParseChain {
 		return context.getCurrentURI();
 	}
 
-	@Override
 	public int getTextType() {
 		return context.getTextType();
 	}
 
-	@Override
-	public boolean isReserveSpace() {
-		return context.isReserveSpace();
-	}
+//	@Override
+//	public boolean isReserveSpace() {
+//		return context.isReserveSpace();
+//	}
 
 	@Override
 	public void setCurrentURI(URI currentURI) {
 		context.setCurrentURI(currentURI);
 	}
 
-	@Override
-	public void setReserveSpace(boolean keepSpace) {
-		context.setReserveSpace(keepSpace);
-	}
+//	@Override
+//	public void setReserveSpace(boolean keepSpace) {
+//		context.setReserveSpace(keepSpace);
+//	}
 
 	// @Override
 	// public void setTextType(int textType) {

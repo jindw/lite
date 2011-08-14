@@ -45,7 +45,11 @@ function processJS(text){
 	//${..} == > ${JSON.stringify(..)} ==> /$(tghjk)/
 	//compress
 	//manager.compressJS(value);
-	return text.replace(/(\\(?:\r\n?|\n).)|^\s+/gm,'$1')
+	
+	text = text.replace(/(\\(?:\r\n?|\n).)|^\s+/gm,'$1');
+	text = text.replace(/^(?:\/(?:\*[\s\S]*\*\/|\/.*)|\s+)+/g,'');//trim left
+	text = text.replace( /(?:\/(?:\*[\s\S]*\*\/|\/.*)|\s+)+$/g,'');//trim right
+	return text;
 }
 function processCSS(text){
 	//replace css:	url("/module/static/img/a/_/8.png")

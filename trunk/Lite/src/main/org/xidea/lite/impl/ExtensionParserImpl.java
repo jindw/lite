@@ -201,8 +201,8 @@ public class ExtensionParserImpl implements ExtensionParser {
 		List<Attr> list = ParseUtil.getOrderedNSAttrList(el);
 		while (list.size() > 0) {
 			Attr attr = list.remove(0);
-			Map<String, Object> beforeMap = this.beforeMap.get(attr
-					.getNamespaceURI());
+			String ns = attr.getNamespaceURI();
+			Map<String, Object> beforeMap = this.beforeMap.get(ns);
 			if (beforeMap != null) {
 				String name = formatName(attr.getName());
 				if (beforeMap.containsKey(name)) {

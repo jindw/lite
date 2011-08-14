@@ -33,16 +33,10 @@ public class ParseContextImpl extends ParseContextProxy implements ParseContext 
 	//尾部优先原则
 	private NodeParser<? extends Object>[] nodeParsers;
 	private TextParser[] textParsers;
-//	private Object currentNode = null;
-//	private Object contextInfo = new Object(){//移动到extensionParser?
-//		public String toString(){
-//			String pos = ParseUtil.getNodePosition(currentNode instanceof Node?(Node)currentNode:extensionParser.getCurrentNode());
-//			if(pos == null){
-//				pos= String.valueOf(getCurrentURI());
-//			}
-//			return pos;
-//		}
-//	};
+	/**
+	 * createNew 重置
+	 */
+	private int textType = 0;
 	public ParseContextImpl(ParseConfig config, String path) {
 		super(config,config.getFeatureMap(path));
 		this.extensionParser = new ExtensionParserImpl();
@@ -166,4 +160,7 @@ public class ParseContextImpl extends ParseContextProxy implements ParseContext 
 		return result;
 	}
 
+	public int getTextType() {
+		return textType;
+	}
 }

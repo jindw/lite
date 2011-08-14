@@ -273,7 +273,8 @@ public class ParseUtil {
 				String ln = getLocalName(attr);
 				String ns = attr.getNamespaceURI();
 				if (ns != null && !(ParseUtil.CORE_INFO.equals(ln))
-						&& ParseUtil.CORE_URI.equals(ns)) {
+						//&& ParseUtil.CORE_URI.equals(ns)
+						) {
 					list.add(attr);
 				}
 			}
