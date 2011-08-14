@@ -3,6 +3,11 @@
 
 === 2.0 ===
   目前2.0尚在开发阶段，当前最新版本[http://code.google.com/p/lite/downloads/list 2.0A6]
+  * 2.0A9
+    # Lite*(New)*: 增加html-ext语法支持。
+    # Lite*(New)*: 自动编码功能增加html支持（资源地址自动encodeURIComponent,脚本自动JSON.stringify）。
+    # Lite*(New)*: 增加网站打包支持。
+    # JSEL*(New)*: JSONEncode添加</script>的特殊处理，</script 被输出为： <\/script，以确保网页脚本中带</script 的 json数据的输出不打破html语法结构。
   * 2.0A6
     # Lite*(New)*: 彻底重构前端模板,函数定义能前后端复用且自动整体优化前端代码(前端模板函数能够实现页内共享并能按需生成)
     # Lite*(New)*: 增加PHP翻译支持, PHP版本可以借助浏览器自动编译.
