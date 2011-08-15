@@ -39,7 +39,7 @@ var INIT_SCRIPT = String(function(){
 		var map = {'"':'&#34;','<':'&lt;','&':'&#38;'};
 		function replacer(c){return map[c]||c}
 		//xt:0,xa:1,xp:2
-		g[0] = function(txt,type){
+		g[0] = function(txt,attr){
 //			if(type){
 //				type = type == 1?/[<&]/g:/(&(?:[a-z]+|#\d+|#0x[\da-f]+);)|[<&"]/ig;
 //			}else{
@@ -47,7 +47,7 @@ var INIT_SCRIPT = String(function(){
 //			}
 //			type = ;
 			return String(txt).replace(
-				type==1?/[<&"]/g:type?/(&(?:[a-z]+|#\d+|#0x[\da-f]+);)|[<&"]/ig:/[<&]/g
+				attr?/&(?:\w+|#\d+|#x[\da-f]+);|[<&"]/ig:/&(?:\w+|#\d+|#0x[\da-f]+);|[<&]/ig
 				,replacer);
 		};
 		return function(n,fn){

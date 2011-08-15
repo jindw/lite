@@ -15,7 +15,7 @@
 		<p>
 			在Web开发中，前端工程师通常使用模板，将后端数据转化/拼装为一个前端可读的HTML内容
 			[
-			<a onclick='showNext(this,this.parentNode,"展开示例","隐藏示例");return false'>展开示例</a>
+			<a onclick='showNext(this,this.parentNode,"展开示例","隐藏示例");return false' href="#">展开示例</a>
 			]。
 		</p>
 		<div style="display:none">
@@ -35,8 +35,7 @@
 					</x:code>
 				</p>
 				<p>
-					<c:for var="a" list="${1}">${a}</c:for>
-					其中，姓名 "张三" 和城市 "北京" 需要从后端获取，于是，我们需要一个数据模型如下：
+					其中，姓名 "张三" 和城市 "北京" 需要从后端获取，后端数据模型如下：
 					<x:code>
 						{
 						"name": "张三",

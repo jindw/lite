@@ -21,6 +21,7 @@ import org.xidea.el.impl.ReflectUtil;
 
 public class Template {
 	private static Log log = LogFactory.getLog(Template.class);
+	
 	public static final int EL_TYPE = 0; // [0,<el>]
 	public static final int IF_TYPE = 1; // [1,[...],<test el>]
 	public static final int BREAK_TYPE = 2; // [2,depth]
@@ -372,18 +373,20 @@ public class Template {
 
 	protected void printXA(String text, Writer out)
 			throws IOException {
-		for (int i = 0; i < text.length(); i++) {
+		for (int i = 0,len=text.length(); i < len; i++) {
 			int c = text.charAt(i);
 			switch (c) {
 			case '<':
 				out.write("&lt;");
 				break;
-			case '&':
-				out.write("&amp;");
-				break;
 			case '"':// 34
 				out.write("&#34;");
 				break;
+			case '&':
+				if(notEntity(text,i,len)){
+					out.write("&amp;");
+					break;
+				}
 			default:
 				out.write(c);
 			}
@@ -391,19 +394,78 @@ public class Template {
 	}
 
 	protected void printXT(String text, Writer out) throws IOException {
-		for (int i = 0; i < text.length(); i++) {
+		for (int i = 0,len=text.length(); i < len; i++) {
 			int c = text.charAt(i);
 			switch (c) {
 			case '<':
 				out.write("&lt;");
 				break;
 			case '&':
-				out.write("&amp;");
-				break;
+				if(notEntity(text,i,len)){
+					out.write("&amp;");
+					break;
+				}
 			default:
 				out.write(c);
 			}
 		}
+	}
+
+	private boolean notEntity(String text, int i,int len) {
+		int status = 0;
+		while (++i < len) {
+			int c = text.charAt(i);
+			switch(status){
+			case 0:
+				if(c == '#'){
+					//&#0x12df;
+					//&#12343;
+					status = 2;
+				}else if(Character.isJavaIdentifierStart(c)&& c !='$'){
+					status = 1;
+				}else{
+					return true;
+				}
+				break;
+			case 1://实体有值&a
+				if(!Character.isJavaIdentifierPart(c) && c !='$' || c == '.' || c == '-'){//有改进空间（xml entity支持 '.'）
+					return c != ';';
+				}
+				break;
+			case 2://字符引用&#
+				if(c == 'x'){
+					status = 21;
+				}else if(c>='0' && c<='9'){
+					status = 20;
+				}else{
+					return true;
+				}
+				break;
+			case 20://十进制字符实体有值:&#1  &#01
+				if(c>='0' && c<='9'){
+				}else{
+					return c != ';';
+				}
+				break;
+			case 21://十六进制字符引用 &#x
+				if(c>='0' && c<='9' || c>='a' && c<= 'f' || c>='A' && c<= 'F'){
+					status = 22;
+				}else{
+					return true;
+				}
+				break;
+			case 22://十六进制字符引用 &#xa
+				if(c>='0' && c<='9' || c>='a' && c<= 'f' || c>='A' && c<= 'F'){
+				}else{
+					return c != ';';
+				}
+				break;
+			default:
+				return true;
+			}
+			
+		}
+		return true;
 	}
 
 	protected boolean toBoolean(Object test) {
