@@ -2,7 +2,6 @@ package org.xidea.lite;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -17,7 +16,6 @@ import org.xidea.el.ValueStack;
  */
 public class EncodePlugin implements RuntimePlugin {
 	private static Log log = LogFactory.getLog(EncodePlugin.class);
-	private static Pattern ENTRY = Pattern.compile("^&(?:#x[a-f\\d]+|#\\d+|[a-z]\\w*);$",Pattern.CASE_INSENSITIVE);//&#37329;&#x5927;&#X4e3a;
 	private Expression el;
 
 	public void initialize(Template template, Object[] children) {
@@ -35,7 +33,7 @@ public class EncodePlugin implements RuntimePlugin {
 			}
 			final String text = String.valueOf(value);
 			
-			outer:for (int i = 0, len = text.length(); i < len; i++) {
+			for (int i = 0, len = text.length(); i < len; i++) {
 				int c = text.charAt(i);
 				switch (c) {
 				case '<':
@@ -48,23 +46,10 @@ public class EncodePlugin implements RuntimePlugin {
 					out.write("&#39;");
 					break;
 				case '&':// 38
-					int begin = i;
-					int last = Math.min(len-1, i+10);//MAX_CODE_POINT:0x10ffff=>1114111//8
-					while(begin++<last){
-						c = text.charAt(begin);
-						if(c == ';'){
-							String e = text.substring(i,begin+1);
-							if(ENTRY.matcher(e).find()){
-								out.write('&');
-								continue outer;
-							}else{
-								System.out.println(e);
-								break;
-							}
-						}
+					if(notEntity(text,i,len)){
+						out.write("&amp;");
+						break;
 					}
-					out.write("&#38;");
-					break;
 				default:
 					out.write(c);
 				}
@@ -73,5 +58,60 @@ public class EncodePlugin implements RuntimePlugin {
 			log.error(e);
 		}
 	}
-
+	private boolean notEntity(String text, int i,int len) {
+		int status = 0;
+		while (++i < len) {
+			int c = text.charAt(i);
+			switch(status){
+			case 0:
+				if(c == '#'){
+					//&#0x12df;
+					//&#12343;
+					status = 2;
+				}else if(Character.isJavaIdentifierStart(c)&& c !='$'){
+					status = 1;
+				}else{
+					return true;
+				}
+				break;
+			case 1://实体有值&a
+				if(!Character.isJavaIdentifierPart(c) && c !='$' || c == '.' || c == '-'){//有改进空间（xml entity支持 '.'）
+					return c != ';';
+				}
+				break;
+			case 2://字符引用&#
+				if(c == 'x'){
+					status = 21;
+				}else if(c>='0' && c<='9'){
+					status = 20;
+				}else{
+					return true;
+				}
+				break;
+			case 20://十进制字符实体有值:&#1  &#01
+				if(c>='0' && c<='9'){
+				}else{
+					return c != ';';
+				}
+				break;
+			case 21://十六进制字符引用 &#x
+				if(c>='0' && c<='9' || c>='a' && c<= 'f' || c>='A' && c<= 'F'){
+					status = 22;
+				}else{
+					return true;
+				}
+				break;
+			case 22://十六进制字符引用 &#xa
+				if(c>='0' && c<='9' || c>='a' && c<= 'f' || c>='A' && c<= 'F'){
+				}else{
+					return c != ';';
+				}
+				break;
+			default:
+				return true;
+			}
+			
+		}
+		return true;
+	}
 }

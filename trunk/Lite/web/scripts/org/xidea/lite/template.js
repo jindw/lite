@@ -31,7 +31,8 @@ var map = {'"':'&#34;','<':'&lt;','&':'&#38;'}
 function replacer(c){return map[c]||c}
 g[0] = function(txt,type){
 	return String(txt).replace(
-		type?/&(?:\w+|#\d+|#x[\da-f]+);|[<&"]/ig:/&(?:\w+|#\d+|#0x[\da-f]+);|[<&]/ig
+		type==1?/[<&"]/g:
+			type?/&(?:\w+|#\d+|#x[\da-f]+);|[<&"]/ig:/[<&]/g
 		,replacer);
 };
 

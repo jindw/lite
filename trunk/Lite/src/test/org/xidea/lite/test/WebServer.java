@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.URI;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Filter;
@@ -28,7 +27,6 @@ import org.xidea.lite.impl.HotTemplateEngine;
 import org.xidea.lite.impl.ParseUtil;
 import org.xidea.lite.parse.ParseConfig;
 import org.xidea.lite.parse.ParseContext;
-import org.xidea.lite.tools.ResourceManager;
 import org.xidea.lite.tools.ResourceManagerImpl;
 
 public class WebServer {
@@ -105,7 +103,12 @@ public class WebServer {
 						OutputStreamWriter out = new OutputStreamWriter(os,
 								encoding);
 						Object data = loadData(root, uri);
+						try{
 						ht.render(uri, data, out);
+						}catch (Exception e) {
+							RequestUtil.printResource(e, RequestUtil.PLAIN_TEXT);
+							throw e;
+						}
 						out.flush();
 					} else {
 						File file = new File(root,uri);

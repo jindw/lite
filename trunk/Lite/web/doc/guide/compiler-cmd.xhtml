@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:x="http://www.xidea.org/lite/example" xmlns="http://www.w3.org/1999/xhtml"
+	xml:lang="zh-CN" dir="ltr">
+	<head>
+		<title>编译命令</title>
+	</head>
+	<body>
+		<h3>为什么需要编译</h3>
+		<p>Lite模板是JavaScript编写的，也可以通过内置JavaScript引擎跑在Java环境下。</p>
+		<ul>
+			<li>如果是Java后端环境，虽然可以即时编译，但也建议在上线前批量编译以提高运行效率。</li>
+			<li>如果是PHP环境，则必须编译后才能上线（调试期间的浏览器编译模式不能在线上采用）。</li>
+		</ul>
+		<p>此外，Lite编译器不仅是编译模板，也可以做静态资源的编译优化。所以，上线编译是非常必要的。</p>
+		<h3>编译器默认做那些工作</h3>
+		<ul>
+			<li>模板编译。
+				<p>默认执行lite模板的编译工作，如果没有指定lite.xml配置，将自动编译所有-includes参数能匹配的全部模板。</p>
+			</li>
+			<li>
+				脚本合并压缩。
+				<p>通过
+					!document.write("&lt;script src='/static/js/absolute-path.js'>&lt;/script>");
+					
+					方式聚合脚本，默认采用JSA压缩
+					<a href="compiler-spec.xhtml#js">更多信息</a>
+					。
+				</p>
+			</li>
+			<li>CSS合并压缩 与图片合并。
+				<p>通过
+					!import url('/static/css/absolute-path.css');
+					方式聚合CSS,先聚合再压缩。
+					<a href="compiler-spec.xhtml#css">更多信息</a>
+					。
+				</p>
+			</li>
+			<li>模板HTML规范检查。
+				<p>检查HTML5规范之外的标签，属性，主要用于发现书写错误，改良编码习惯。</p>
+			</li>
+			<li title="模板/css/js">资源地址有效性检查和线上地址替换。
+				<p>我们推荐源码中都采用相对网站源码根目录的绝对地址方式书写资源地址。
+					然后，我们可以自动检测这些地址对应的静态文件是否存在，如有必要，根据自定义的规则自动替换成线上(如：CDN地址。
+				</p>
+				<p><i>如果在模板中，系统可以自动发现资源地址，如果在CSS中，建议都加上url(),如果在js中，都加上encodeURI()，以方便实现程序查找。</i></p>
+			</li>
+		</ul>
+		<h3>如何执行编译</h3>
+		<ul>
+			<p>
+				<strong>示例</strong>
+			</p>
+			<x:code><![CDATA[
+			java -jar WEB-INF/lib/Lite.jar -root ./ -output ../output -includes /**.js /**.xhtml -excludes /WEB-INF/** -translator php
+			]]></x:code>
+
+			<p
+				title="这是一个java执行命令，命令模式是: java -jar &lt;JARPATH> -arg value -args value1 value2">
+				在这个编译程序中，-jar 用于指定jar库（编译程序）的地址，必须放在最开始的位置；
+				其他参数紧随其后，无顺序。</p>
+		</ul>
+		<h3>参数说明</h3>
+		<ul>
+			<li>
+				<strong>-root</strong>
+				<p>网站根目录（源代码）。</p>
+			</li>
+			<li>
+				<strong>-output</strong>
+				<p>编译目标目录（目标代码）。</p>
+			</li>
+			<li>
+				<strong>-includes</strong>
+				<p>
+					包含文件匹配模式集。
+					可同时接受多个模式，通过空格分割，模式规则为：* 代表某个目录下的任意文件，** 代表任意文件和任意级子目录下的任意文件。
+					<x:code>
+				<![CDATA[
+				//目录module 下的任意xhtml扩展名的文件
+				/module/*.xhtml
+				
+				//目录module 下的任意文件和任意级任意子目录的任意文件
+				/module/**
+				
+				//任意一个js文件
+				/**.js
+				
+				//任意一个test目录下的文件
+				**/test/*
+				
+				//任意一个包含test文字的目录下的文件
+				**/*test*/*
+				]]>
+					</x:code>
+				</p>
+			</li>
+			<li>
+				<strong>-excludes</strong>
+				<p>剔除文件匹配模式集（用法类似-include）。</p>
+			</li>
+			<li>
+				<strong>-translator</strong>
+				<p>翻译目标代码（目前只支持php，java不需要翻译成目标代码，只需要有中间代码即可）。</p>
+			</li>
+		</ul>
+	</body>
+</html>

@@ -6,21 +6,46 @@
 	<body>
 		<h3>功能支持</h3>
 		<p>
-			输出动态数据是模板最基本的功能，Lite可以将表达式的值，通过如下四种方式输出：
+			输出动态数据是模板最基本的功能，Lite可以将表达式的值，通过如下三种方式输出：
 			<ul>
-				<li><strong>HTML/XML自动编码输出。</strong>
-					<p>在HTML/XML文本中，为了确保代码安全性， XML保留字符(&lt;&amp;)都将被自动转义，脚本/资源地址中的表达式，将自动加上JSON.stringify和encodeURIComponent。</p>
-				</li>
-				<li><strong>HTML/XML属性输出(特色功能)。</strong>
-					<p>在XML 属性中，如果属性值为单一表达式且运行时表达式值为<strong>null</strong>，则整个属性不输出，否则自动按xml属性的编码规则(&lt;&amp;和<strong>"</strong>)，编码XML属性内容并输出。
-						<i>这点在html 定值属性（如：disabled/checked/selected/...）输出时非常有用。</i>
+				<li>
+					<strong>HTML/XML自动编码输出（\${...}）。</strong>
+					<p>
+						在HTML/XML文本中，为了确保代码安全性， XML保留字符
+						<strong>(&lt;&amp;)</strong>
+						和属性中的
+						<strong>(")</strong>
+						都将被自动转义；
 					</p>
+					<p>
+						脚本/资源地址中的表达式，将自动加上JSON.stringify和encodeURIComponent。
+					</p>
+					<p>
+						关于自动编码的详细介绍，请参考：
+						<a href="feature-autoencode.xhtml">自动编码特性介绍</a>
+					</p>
+					<p>
+						自动编码的表达式，如果是属性的单一值，他还具备一个隐含的特设功能：条件属性输出！
+						<i>
+							<p>
+								在XML 属性中，如果属性值为单一表达式且运行时表达式值为
+								<strong>null</strong>，则整个属性不输出，否则自动按xml属性的编码规则(&lt;&amp;和
+								<strong>"</strong>
+								)，编码XML属性内容并输出。
+
+								这点在html 定值属性（如：disabled/checked/selected/...）输出时非常有用。
+						</i>
+					</p>
+
 				</li>
-				<li><strong>避免过度转义的安全输出。</strong>
+			</li>
+				<li>
+					<strong>避免过度转义的安全输出（\$#{...}）。</strong>
 					<p>有的时候，特别是老的GBK中文环境下，我们数据库中存储有字符实体(如：&amp;#0x7C21;&amp;#0x7E41;);
-					        默认的自动编码输出，在这些数据的输出展现的时候，不能直接用完全编码输出的方式。</p>
+						默认的自动编码输出，在这些数据的输出展现的时候，不能直接用完全编码输出的方式。</p>
 				</li>
-				<li><strong>XSS风险自负的直接输出。</strong>
+				<li>
+					<strong>XSS风险自负的直接输出（\$!{...}）。</strong>
 					<p>慎用！！！</p>
 				</li>
 			</ul>
@@ -33,6 +58,7 @@
 						author:{
 							//百度曾碰到过的严重xss漏洞。用户名带有关键字，导致该用户去哪哪瘫痪！
 							username:'危险分子 <script>',
+							//打破属性规则，插入危险代码
 							title:'坏蛋！ " onclick="alert(\'插入危险代码成功!!\')',
 							disabled:false
 						},
@@ -48,7 +74,7 @@
 					}
 			]]>
 			</x:code>
-			
+
 			<x:code model="blogModel">
 			<![CDATA[
 			<!-- 自动编码，免遭一劫 -->
@@ -63,8 +89,7 @@
 			<!-- ${blog.title} 将按属性规则编码，确保不打破属性语义。 -->
 			<!-- ${blog.content} 将按属性xml文本编码，确保不被插入危险标签。 -->
 			<p title="${blog.title}">${blog.content}</p>
-			<!-- 上面的例子虽然自动编码了，但是存在过度转义；
-				所以，如果是存在大量字符实体的老系统（如百度百科），可以用避免过度转义的安全输出$#{...} 语法！-->
+			<!-- 避免过度转义： 网开一面的$#{...} 语法！-->
 			<p title="${blog.title}">$#{blog.content}</p>
 			
 			<!-- 不建议的危险代码 ,用户可以为所欲为，插入任意代码了！-->

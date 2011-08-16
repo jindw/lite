@@ -24,14 +24,14 @@
 				<p>
 					以显示一个简单的个人信息为例，形式如：
 					<x:code>
-		<![CDATA[
-		<html>
-		<title>模板测试</title>
-		<body>
-		我是：张三,来自：北京
-		</body>
-		</html>
-		]]>
+					<![CDATA[
+					<html>
+					<title>模板测试</title>
+					<body>
+					我是：张三,来自：北京
+					</body>
+					</html>
+					]]>
 					</x:code>
 				</p>
 				<p>
@@ -41,21 +41,21 @@
 						"name": "张三",
 						"city":"北京"
 						}
-		</x:code>
+					</x:code>
 				</p>
 				<p>
 					为了实现上述内容的动态展示，我们需要编写一个简单的模板：
 					<script>var testModel = mirrors[mirrors.length-1].getValue();
 					</script>
 					<x:code model="testModel">
-		<![CDATA[
-		<html>
-			<title>模板测试</title>
-			<body>
-				我是：${name},来自：${city}
-			</body>
-		</html>
-		]]>
+					<![CDATA[
+					<html>
+						<title>模板测试</title>
+						<body>
+							我是：${name},来自：${city}
+						</body>
+					</html>
+					]]>
 					</x:code>
 				</p>
 			</ul>

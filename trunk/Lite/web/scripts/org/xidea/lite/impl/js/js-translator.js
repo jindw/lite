@@ -15,7 +15,7 @@
 var FOR_STATUS_KEY = '$__for';
 var INIT_SCRIPT = String(function(){
 	var lite__impl_get;
-	var lite__impl_def = function(g,p){
+	var lite__impl_def = function(g,map){
     	lite__impl_get = function(n,c){
 			return (c && n in c ? c:n in g?g:this)[n];
 		};
@@ -36,10 +36,9 @@ var INIT_SCRIPT = String(function(){
 			}
 			return result;
     	};
-		var map = {'"':'&#34;','<':'&lt;','&':'&#38;'};
 		function replacer(c){return map[c]||c}
 		//xt:0,xa:1,xp:2
-		g[0] = function(txt,attr){
+		g[0] = function(txt,type){
 //			if(type){
 //				type = type == 1?/[<&]/g:/(&(?:[a-z]+|#\d+|#0x[\da-f]+);)|[<&"]/ig;
 //			}else{
@@ -47,14 +46,15 @@ var INIT_SCRIPT = String(function(){
 //			}
 //			type = ;
 			return String(txt).replace(
-				attr?/&(?:\w+|#\d+|#x[\da-f]+);|[<&"]/ig:/&(?:\w+|#\d+|#0x[\da-f]+);|[<&]/ig
+				type==1?/[<&"]/g:
+					type?/&(?:\w+|#\d+|#x[\da-f]+);|[<&"]/ig:/[<&]/g
 				,replacer);
 		};
 		return function(n,fn){
     		g[n]=fn;
     	};
 	}({});
-	with({}){
+	with({},{'"':'&#34;','<':'&lt;','&':'&#38;'}){
 		alert(lite__impl_def,lite__impl_get);
 	}
 

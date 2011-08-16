@@ -24,7 +24,7 @@ public class LiteCompiler {
 	private String[] includes;
 	private String[] excludes;
 	private HotTemplateEngine engine;
-	private String[] translators;
+	private String translator;
 	private ResourceManagerImpl resourceManager;
 	
 
@@ -99,11 +99,9 @@ public class LiteCompiler {
 				
 				String encoding = resourceManager.getEncoding(path);
 				this.write(path2, result.getBytes("utf-8"));
-				if(this.translators != null){
-					for(String translator : translators){
-						if("php".equals(translator)){
-							this.buildPHP(path,result,encoding);
-						}
+				if(this.translator != null){
+					if("php".equals(translator)){
+						this.buildPHP(path,result,encoding);
 					}
 				}
 				
@@ -212,8 +210,8 @@ public class LiteCompiler {
 		this.excludes = excludes;
 	}
 
-	public void setTranslators(String[] translators) {
-		this.translators = translators;
+	public void setTranslator(String translator) {
+		this.translator = translator;
 	}
 	
 }
