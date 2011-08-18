@@ -19,6 +19,15 @@ var INIT_SCRIPT = String(function(){
     	lite__impl_get = function(n,c){
 			return (c && n in c ? c:n in g?g:this)[n];
 		};
+		function replacer(c){return map[c]||c}
+		//xt:0,xa:1,xp:2
+		g[0] = function(txt,type){
+			return String(txt).replace(
+				type==1?/[<&"]/g:
+					type?/&(?:\w+|#\d+|#x[\da-f]+);|[<&"]/ig:/[<&]/g
+				,replacer);
+		};
+		
 		g[1] = function(source,result,type) {
 			if(source instanceof Array){
 				return source;
@@ -36,20 +45,42 @@ var INIT_SCRIPT = String(function(){
 			}
 			return result;
     	};
-		function replacer(c){return map[c]||c}
-		//xt:0,xa:1,xp:2
-		g[0] = function(txt,type){
-//			if(type){
-//				type = type == 1?/[<&]/g:/(&(?:[a-z]+|#\d+|#0x[\da-f]+);)|[<&"]/ig;
-//			}else{
-//				type = /[<&"]/g;
-//			}
-//			type = ;
-			return String(txt).replace(
-				type==1?/[<&"]/g:
-					type?/&(?:\w+|#\d+|#x[\da-f]+);|[<&"]/ig:/[<&]/g
-				,replacer);
-		};
+		function dl(date,format){//3
+            format = format.length;
+            return format == 1?date : ("000"+date).slice(-format);
+        }
+        function tz(offset){
+        	offset = offset;
+        	return offset?(offset>0?'-':offset*=-1||'+')+dl(offset/60,'00')+':'+dl(offset%60,'00'):'Z'
+        }
+		function format(pattern,date){
+			//TODO:未考虑国际化偏移
+			date = new Date(date);
+	        return pattern.replace(/([YMDhsm])\1*|\.s|TZD/g,function(format){
+	            switch(format.charAt()){
+	            case 'Y' :
+	                return dl(date.getFullYear(),format);
+	            case 'M' :
+	                return dl(date.getMonth()+1,format);
+	            case 'D' :
+	                return dl(date.getDate(),format);
+//	            case 'w' :
+//	                return date.getDay()+1;
+	            case 'h' :
+	                return dl(date.getHours(),format);
+	            case 'm' :
+	                return dl(date.getMinutes(),format);
+	            case 's' :
+	                return dl(date.getSeconds(),format);
+	            case '.':
+	            	return '.'+dl(date.getMilliseconds(),'000');
+	            case 'T'://tzd
+	            	//国际化另当别论
+	            	return tz(date.getTimezoneOffset());
+	            }
+	        });
+		}
+  
 		return function(n,fn){
     		g[n]=fn;
     	};

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:x="http://www.xidea.org/lite/example" xmlns="http://www.w3.org/1999/xhtml"
+	xml:lang="zh-CN" dir="ltr">
+	<head>
+		<title>编译规范</title>
+	</head>
+	<body>
+		<a name="js"/>
+		<h3>JS处理规范</h3>
+		<ul>
+			<li>合并规范</li>
+			<li>压缩规范</li>
+			<li>
+				脚本合并压缩。
+				<p>通过
+					!document.write("&lt;script
+					src='/static/js/absolute-path.js'>&lt;/script>");
+
+					方式聚合脚本，默认采用JSA压缩。
+				</p>
+			</li>
+			<li>行内JS与外链JS</li>
+		</ul>
+		<a name="css"/>
+		<h3>CSS处理规范</h3>
+		<ul>
+			<li>合并规范</li>
+			<li>压缩规范</li>
+			<li>图片合并规范</li>
+		</ul>
+		<a name="resource"/>
+		<h3>资源地址书写规范</h3>
+		<ul>
+			<li>模板中的资源地址</li>
+			<li>CSS中的资源地址</li>
+			<li>JavaScript中的资源地址</li>
+		</ul>
+		<h3>模板HTML规范检查</h3>
+		<ul>
+			<li>
+				。
+				<p>
+					检查HTML5规范之外的标签，属性，主要用于发现书写错误，改良编码习惯。
+					<a href="compiler-api.xhtml#htmlValidate">更多信息</a>。
+				</p>
+			</li>
+		</ul>
+		
+	</body>
+</html>

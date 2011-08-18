@@ -2,6 +2,7 @@ package org.xidea.lite.tools;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.List;
 
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -45,6 +46,8 @@ public interface ResourceManager {
 
 	//public ImageInfo = getFilteredImage(String path);
 	public String getContentHash(String path);
+	public List<String> getLinkedResources();
+	public void addLinkedResource(String path);
 	/**
 	 * 获取文件编码信息
 	 * @return

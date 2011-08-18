@@ -90,6 +90,7 @@ public class ParseUtil {
 		JSIRuntime rt = jsi.get();
 		if (rt == null) {
 			jsi.set(rt = RuntimeSupport.create());
+			//((RuntimeSupport)rt).setOptimizationLevel(-1);
 		}
 		return rt;
 	}

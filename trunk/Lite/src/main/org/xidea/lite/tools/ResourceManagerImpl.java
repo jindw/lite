@@ -11,6 +11,7 @@ import java.net.URI;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,9 +31,10 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 	private static Log log = LogFactory.getLog(ResourceManagerImpl.class);
 	private final File root;
 	private ArrayList<MatcherFilter<byte[]>> streamFilters = new ArrayList<MatcherFilter<byte[]>>();
-
 	private ArrayList<MatcherFilter<String>> stringFilters = new ArrayList<MatcherFilter<String>>();
 	private ArrayList<MatcherFilter<Document>> documentFilters = new ArrayList<MatcherFilter<Document>>();
+	private ArrayList<String> linkedResources = new ArrayList<String>();
+	
 	private final Map<String, ResourceItem> cached = new HashMap<String, ResourceItem>();
 	private ThreadLocal<ResourceItem> currentItem = new ThreadLocal<ResourceItem>();
 	private JSIRuntime jsr = RuntimeSupport.create();
@@ -304,7 +306,7 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 						}
 						// 没有默认的xml正规化
 						Document doc = ParseUtil.loadXMLBySource(text,
-								"lite:///" + path);
+								"lite:" + path);
 						for (ResourceFilter<Document> filter : documentFilters) {
 							doc = filter.doFilter(path, doc);
 						}
@@ -410,6 +412,8 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 					item.hash = hash(text.getBytes());
 				}
 			}
+			//需要hash的资源地址，一般都是需要打包的静态资源
+			addLinkedResource(path);
 			return item.hash;
 		} catch (Exception e) {
 			log.warn("计算hash值失败：" + path);
@@ -448,5 +452,20 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 
 	public Object createFilterProxy(Object object) {
 		return jsr.wrapToJava(object, ResourceFilter.class);
+	}
+
+	public void addLinkedResource(String path) {
+		if(path.startsWith("/")){
+			if(!linkedResources.contains(path)){
+				linkedResources.add(path);
+			}
+		}else{
+			log.warn("关联资源只能通过绝对地址添加!!您添加的地址是："+path);
+		}
+		
+	}
+
+	public List<String> getLinkedResources() {
+		return Collections.unmodifiableList(linkedResources);
 	}
 }

@@ -11,6 +11,7 @@ import java.net.URLStreamHandlerFactory;
 
 import org.junit.Test;
 import org.xidea.el.impl.ReflectUtil;
+import org.xidea.el.json.JSONEncoder;
 
 public class URIReserverTest {
 	@Test
@@ -29,6 +30,18 @@ public class URIReserverTest {
 	}
 	private void cl() {
 		System.out.println(Thread.currentThread().getContextClassLoader());
+	}
+	@Test
+	public void testURIBean(){
+		test(URI.create("lite:/").resolve("/"));
+		test(URI.create("lite:///").resolve("/"));
+		test(URI.create("lite:///1/2/").resolve("/a"));
+		test(URI.create("lite:///1/2/").resolve("a"));
+		test(URI.create("lite:///1/2/").resolve("//a"));
+	}
+	private void test(URI uri){
+		System.out.println(uri);
+		System.out.println(JSONEncoder.encode(uri));
 	}
 	@Test
 	public void testURI() throws Exception{

@@ -63,3 +63,7 @@ function addDocumentFilter(pattern,impl){
 function selectByXPath(node,xpath){
 	return Packages.org.xidea.lite.impl.ParseUtil.selectByXPath(node,xpath);
 }
+function getNodePosition(el){
+	var info = el.getAttributeNS("http://www.xidea.org/lite/core", "__i");
+	return el.ownerDocument.documentURI + '@'+(info && info.replace(/\|[\s\S]*$/,''));
+}
