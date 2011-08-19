@@ -30,7 +30,7 @@ public interface ResourceManager {
 	public String getFilteredText(String path) throws IOException;
 	public Object getFilteredContent(String path) throws IOException;
 	public String loadChainText(String path) throws IOException;
-	
+	public long getLastModified(String path);
 	/**
 	 * 
 	 * 将指定绝对路径的资源经过过滤处理后，做xml容错，并加上lite 附加资源信息，做为org.w3c.Document 对象返回。
@@ -52,7 +52,7 @@ public interface ResourceManager {
 	 * 获取文件编码信息
 	 * @return
 	 */
-	public String getEncoding(String path);
+//	public String getEncoding(String path);
 	public URI getRoot();
 
 	public void saveText(String path,Object content) throws IOException ;

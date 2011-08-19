@@ -3,6 +3,7 @@ package org.xidea.lite.tools;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -34,7 +35,7 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 	private ArrayList<MatcherFilter<String>> stringFilters = new ArrayList<MatcherFilter<String>>();
 	private ArrayList<MatcherFilter<Document>> documentFilters = new ArrayList<MatcherFilter<Document>>();
 	private ArrayList<String> linkedResources = new ArrayList<String>();
-	
+
 	private final Map<String, ResourceItem> cached = new HashMap<String, ResourceItem>();
 	private ThreadLocal<ResourceItem> currentItem = new ThreadLocal<ResourceItem>();
 	private JSIRuntime jsr = RuntimeSupport.create();
@@ -46,7 +47,7 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 		this.root = new File(root);
 		this.currentScript = root;
 		this.jsr.eval("var resourceManager=1;");
-		this .jsr.eval("$import('org.xidea.jsidoc.util:JSON');");
+		this.jsr.eval("$import('org.xidea.jsidoc.util:JSON');");
 		Object initfn = this.jsr.eval("(function(rm){resourceManager = rm;})");
 		this.jsr.invoke(this, initfn, this);
 		this.jsr.eval(ResourceManagerImpl.class.getResource("env.s.js"));
@@ -118,27 +119,45 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 		}
 	}
 
-	public String getEncoding(String path) {
-		Group group = this.find(path, false);
-		if (group != null) {
-			String encoding = this.getFeatureMap(path).get(
-					ParseContext.FEATURE_ENCODING);
-			return encoding;
+	public String getSourceEncoding(String path) {
+		File file = getFile(path);
+		String encoding = null;
+		if (file.exists()) {
+			try {
+				getFilteredContent(path);
+			} catch (IOException e) {
+			}
+			encoding = resource(path).encoding;
 		}
-		return resource(path).encoding;
+		if (encoding != null) {
+			Group group = this.find(path, false);
+			if (group != null) {
+				encoding = this.getFeatureMap(path).get(
+						ParseContext.FEATURE_ENCODING);
+				return encoding;
+			}
+		}
+		return encoding;
+	}
+
+	private File getFile(String path) {
+		if (path.charAt(0) == '/') {
+			return new File(root, path.substring(1));
+		} else {
+			throw new IllegalArgumentException(
+					"resource path must be start with '/'");
+		}
 	}
 
 	public byte[] getRawBytes(String path) throws IOException {
-		URI file = this.getRoot().resolve(path.substring(1));
-		if (!"file".equals(file.getScheme()) || new File(file).exists()) {
-			InputStream in = ParseUtil.openStream(file);
-			if (in == null) {
-				log.warn("Unknow file:" + path);
-			}
-			return loadAndClose(in);
+		File file = getFile(path);
+		if (file.exists()) {
+			return loadAndClose(new FileInputStream(file));
 		} else {
-			throw new FileNotFoundException(file+"  Not Found");
+			log.warn("Unknow file:" + path);
+			throw new FileNotFoundException(file + "  Not Found");
 		}
+
 	}
 
 	public byte[] getFilteredBytes(String path) throws IOException {
@@ -301,12 +320,9 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 								text = filter.doFilter(path, text);
 							}
 						}
-						if (res.text == null) {
-							res.text = text;
-						}
 						// 没有默认的xml正规化
-						Document doc = ParseUtil.loadXMLBySource(text,
-								"lite:" + path);
+						Document doc = ParseUtil.loadXMLBySource(text, "lite:"
+								+ path);
 						for (ResourceFilter<Document> filter : documentFilters) {
 							doc = filter.doFilter(path, doc);
 						}
@@ -324,17 +340,11 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 	private ResourceItem resource(String path) {
 		ResourceItem item = cached.get(path);
 		if (item != null) {
-			long lastModified = new File(root, path).lastModified();
-			for (String path2 : item.relations) {
-				File f = new File(root, path2);
-				if (!f.exists()) {
+			if (item.lastModified > 0) {
+				long lastModified = getLastModified(path);
+				if (lastModified < 0 || lastModified > item.lastModified) {
 					item = null;
-					break;
 				}
-				lastModified = Math.max(lastModified, f.lastModified());
-			}
-			if (item != null && lastModified > item.lastModified) {
-				item = null;
 			}
 		}
 		if (item == null) {
@@ -343,6 +353,26 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 			cached.put(path, item);
 		}
 		return item;
+	}
+
+	public long getLastModified(String path) {
+		ResourceItem item = cached.get(path);
+		if (item == null) {
+			return -1;
+		}
+		File f = new File(root, path);
+		if (!f.exists()) {
+			return -1;
+		}
+		long lastModified = f.lastModified();
+		for (String path2 : item.relations) {
+			f = new File(root, path2);
+			if (!f.exists()) {
+				return -1;
+			}
+			lastModified = Math.max(lastModified, f.lastModified());
+		}
+		return lastModified;
 	}
 
 	private byte[] loadAndClose(InputStream in) throws IOException {
@@ -391,11 +421,13 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 		// ArrayList<FilterPlugin<Document>>();
 		@SuppressWarnings("unused")
 		String path;
-		String encoding;
 		byte[] data;
+		/* 人工确保！ 当text 有值时，encoding一定有值 */
+		String encoding;
+		/* 人工确保！document 装载时不能设置该值 */
 		String text;
 		Document dom;
-		long lastModified;
+		long lastModified = -1;
 		String hash;
 		transient Object currentData;
 	}
@@ -404,15 +436,15 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 		try {
 			ResourceItem item = getFilteredContent(path, String.class, null);
 			if (item.hash == null) {
-				hash(item.data);
+				// hash(item.data);
 				String text = item.text;
 				if (text == null) {
 					item.hash = hash(item.data);
 				} else {
-					item.hash = hash(text.getBytes());
+					item.hash = hash(text.getBytes(item.encoding));
 				}
 			}
-			//需要hash的资源地址，一般都是需要打包的静态资源
+			// 需要hash的资源地址，一般都是需要打包的静态资源
 			addLinkedResource(path);
 			return item.hash;
 		} catch (Exception e) {
@@ -445,7 +477,9 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 		} else if (content instanceof InputStream) {
 			out.write(loadAndClose((InputStream) content));
 		} else {
-			out.write(String.valueOf(content).getBytes(getEncoding(path)));
+			out
+					.write(String.valueOf(content).getBytes(
+							getSourceEncoding(path)));
 		}
 		out.close();
 	}
@@ -455,14 +489,14 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 	}
 
 	public void addLinkedResource(String path) {
-		if(path.startsWith("/")){
-			if(!linkedResources.contains(path)){
+		if (path.startsWith("/")) {
+			if (!linkedResources.contains(path)) {
 				linkedResources.add(path);
 			}
-		}else{
-			log.warn("关联资源只能通过绝对地址添加!!您添加的地址是："+path);
+		} else {
+			log.warn("关联资源只能通过绝对地址添加!!您添加的地址是：" + path);
 		}
-		
+
 	}
 
 	public List<String> getLinkedResources() {

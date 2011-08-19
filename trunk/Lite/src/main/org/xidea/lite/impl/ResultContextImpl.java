@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.el.ExpressionFactory;
 import org.xidea.el.impl.ExpressionFactoryImpl;
+import org.xidea.el.json.JSONDecoder;
 import org.xidea.lite.RuntimePlugin;
 import org.xidea.lite.Template;
 import org.xidea.lite.parse.IllegalEndException;
@@ -162,8 +163,9 @@ public class ResultContextImpl implements ResultContext {
 	}
 
 
-	public final void appendPlugin(String pluginClazz, Map<String, Object> config) {
+	public final void appendPlugin(String pluginClazz, String mapEl) {
 		try {
+			Map<String, Object> config = JSONDecoder.decode(mapEl);
 			Class<?> clazz = Class.forName(pluginClazz);
 			if (RuntimePlugin.class.isAssignableFrom(clazz)
 					|| OptimizePlugin.class.isAssignableFrom(clazz)) {

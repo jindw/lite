@@ -53,7 +53,7 @@ var INIT_SCRIPT = String(function(){
         	offset = offset;
         	return offset?(offset>0?'-':offset*=-1||'+')+dl(offset/60,'00')+':'+dl(offset%60,'00'):'Z'
         }
-		function format(pattern,date){
+		g[2] = function(date,pattern){
 			//TODO:未考虑国际化偏移
 			date = new Date(date);
 	        return pattern.replace(/([YMDhsm])\1*|\.s|TZD/g,function(format){
@@ -148,7 +148,7 @@ function JSTranslateContext(code,name,params,defaults){
     TranslateContext.call(this,code,name,params,defaults);
     this.forStack = [];
     this.defaults = defaults;
-    this.impl_counter = {list:0,x:0};
+    this.impl_counter = {d:0,l:0,x:0};
 }
 var GLOBAL_VAR_MAP ={
 	"JSON":1,
@@ -233,11 +233,14 @@ function buildVars(context,refMap,callMap,params){
 			result.push('\tvar ',n,'=',context.liteImpl,'get("',n,'"',(params?'':',$_context'),');\n');
 		}
 	}
-	if(context.impl_counter.list){
-		result.push('\tvar ',context.liteImpl,'list=',context.liteImpl,'get(1);\n');
+	if(context.impl_counter.l){
+		result.push('\tvar ',context.liteImpl,'l=',context.liteImpl,'get(1);\n');
 	}
 	if(context.impl_counter.x){
 		result.push('\tvar ',context.liteImpl,'x=',context.liteImpl,'get(0);\n');
+	}
+	if(context.impl_counter.d){
+		result.push('\tvar ',context.liteImpl,'d=',context.liteImpl,'get(2);\n');
 	}
 	return result;
 }
@@ -286,7 +289,7 @@ JSTranslateContext.prototype = new PT({
 	        var content = optimizeFunction(this,'',def.params,def.defaults,vars);
 	        this.depth--;
 	        fs.push(this.liteImpl,"def('",n,"',",content,");\n");
-	        this.impl_counter = {list:0,x:0};
+	        this.impl_counter = {d:0,l:0,x:0};
 	    }
 	    this.header = fs.join('');
 	    
@@ -353,6 +356,10 @@ JSTranslateContext.prototype = new PT({
     	this.impl_counter.x++;
         this._appendOutput(this.liteImpl,'x(',this.stringifyEL(item[1]),',2)')
     },
+    appendDateFormatPlugin:function(item){//&#233;&#0xDDS;
+    	this.impl_counter.d++;
+        this._appendOutput(this.liteImpl,'d(',this.stringifyEL(item[1]),',2)')
+    },
     processIf:function(code,i){
         var item = code[i];
         var childCode = item[1];
@@ -399,7 +406,7 @@ JSTranslateContext.prototype = new PT({
 		}
     },
     processFor:function(code,i){
-    	this.impl_counter.list++;
+    	this.impl_counter.l++;
         var item = code[i];
         var indexId = this.allocateId();
         var lastIndexId = this.allocateId();
@@ -410,7 +417,7 @@ JSTranslateContext.prototype = new PT({
         var childCode = item[1];
         var forInfo = this.findForStatus(item)
         //初始化 items 开始
-        this.append("var ",itemsId,'=',this.liteImpl,"list(",itemsEL,")");
+        this.append("var ",itemsId,'=',this.liteImpl,"l(",itemsEL,")");
         this.append("var ",indexId,"=0;")
         this.append("var ",lastIndexId," = ",itemsId,".length-1;");
         

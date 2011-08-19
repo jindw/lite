@@ -1,7 +1,6 @@
 package org.xidea.lite.parse;
 
 import java.util.List;
-import java.util.Map;
 
 import org.xidea.el.ExpressionFactory;
 
@@ -77,7 +76,7 @@ public interface ResultContext {
 
 	public void appendCapture(String varName);
 
-	public void appendPlugin(String pluginClass,  Map<String, Object> config);
+	public void appendPlugin(String pluginClass,  String mapEl);
 
 	public String allocateId();
 	/**

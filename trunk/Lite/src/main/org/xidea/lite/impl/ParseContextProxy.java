@@ -13,7 +13,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
 import org.xidea.el.ExpressionFactory;
-import org.xidea.el.json.JSONDecoder;
 import org.xidea.lite.parse.ParseConfig;
 import org.xidea.lite.parse.ParseContext;
 import org.xidea.lite.parse.ResultContext;
@@ -161,12 +160,8 @@ abstract public class ParseContextProxy implements ParseContext {
 	}
 
 
-	public final void appendPlugin(String pluginClazz,  Map<String, Object> config) {
-		resultContext.appendPlugin(pluginClazz, config);
-	}
 	public final void appendPlugin(String pluginClazz,  String config) {
-		Map<String, Object> map = JSONDecoder.decode(config);
-		resultContext.appendPlugin(pluginClazz, map);
+		resultContext.appendPlugin(pluginClazz, config);
 	}
 
 	public final int mark() {

@@ -5,6 +5,8 @@ import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetEncoder;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -175,11 +177,13 @@ public class LiteCompiler {
 				String path2 = translatePath(path);
 				String result = engine.getLiteCode(path);
 
-				String encoding = resourceManager.getEncoding(path);
-				this.resultMap.put(path2, result.getBytes("utf-8"));
+				String encoding = resourceManager.getFeatureMap(path).get(
+						ParseContext.FEATURE_ENCODING);
+				//中间代码永远是UTF-8；但是静态文本中大大字符还是要确保安全。
+				this.resultMap.put(path2, replaceBigChar(result,encoding).getBytes("utf-8"));
 				if (this.translator != null) {
 					if ("php".equals(translator)) {
-						this.buildPHP(path, result, encoding);
+						this.buildPHP(path, replaceBigChar(result,encoding), encoding);
 					}
 				}
 
@@ -195,7 +199,8 @@ public class LiteCompiler {
 				this.resultMap.put(path, (byte[]) data);
 			} else {
 				String text = resourceManager.getFilteredText(path);
-				String encoding = resourceManager.getEncoding(path);
+				String encoding = resourceManager.getFeatureMap(path).get(
+						ParseContext.FEATURE_ENCODING);
 				this.resultMap.put(path, text.getBytes(encoding));
 			}
 			return true;
@@ -204,6 +209,26 @@ public class LiteCompiler {
 
 	private String translatePath(final String path) {
 		return "/WEB-INF/litecode/" + path.replace('/', '^');
+	}
+
+	public static String replaceBigChar(String text, String encoding) {
+		if (encoding == null || encoding.length() == 0) {
+			encoding = "GBK";
+		}else if(encoding.equalsIgnoreCase("utf-8")){
+			return text;
+		}
+		Charset charset = Charset.forName(encoding);
+		CharsetEncoder encoder = charset.newEncoder();
+		StringBuilder buf = new StringBuilder();
+		for (char c : text.toCharArray()) {
+			if (encoder.canEncode(c)) {
+				buf.append(c);
+			} else {
+				buf.append("&#" + ((int) c) + ';');
+			}
+		}
+		text = buf.toString();
+		return text;
 	}
 
 	private void buildPHP(String path, String litecode, String encoding)

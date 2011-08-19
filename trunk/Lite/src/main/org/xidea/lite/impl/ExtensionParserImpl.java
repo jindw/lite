@@ -16,10 +16,10 @@ import org.xidea.lite.parse.ParseContext;
 public class ExtensionParserImpl implements ExtensionParser {
 	private static Pattern NAME_FORMAT = Pattern.compile("^[\\w\\-]+\\:|[\\-]");
 	private static Pattern FN_SEEKER = Pattern
-			.compile("^(?:\\w*\\:)?\\w*[\\$\\{]");
+			.compile("^(?:(?:\\w*\\:)?\\w*|[#!])[\\$\\{]");
 	private static ThreadLocal<Node> CURRENT_LOCAL_NODE = new ThreadLocal<Node>();
 	private Object impl;
-	private final ExtensionParser proxy;
+//	private final ExtensionParser proxy;
 	private JSIRuntime rt = ParseUtil.getJSIRuntime();
 	private Map<String, Map<String, Object>> tagMap = new HashMap<String, Map<String, Object>>();
 	private Map<String, Map<String, Object>> beforeMap = new HashMap<String, Map<String, Object>>();
@@ -32,12 +32,13 @@ public class ExtensionParserImpl implements ExtensionParser {
 		Object fn = rt
 				.eval("(function(){return new ($import('org.xidea.lite.parse:ExtensionParser',{}))(this)})");
 		impl = rt.invoke(CURRENT_LOCAL_NODE, fn);
-		proxy = rt.wrapToJava(impl, ExtensionParser.class);
+//		proxy = rt.wrapToJava(impl, ExtensionParser.class);
 		reset();
 	}
 
 	public void addExtension(String namespace, Object parserMap) {
-		proxy.addExtension(namespace, parserMap);
+		rt.invoke(impl, "addExtension", namespace, parserMap);
+//		proxy.addExtension(namespace, parserMap);
 		reset();
 	}
 
@@ -87,7 +88,9 @@ public class ExtensionParserImpl implements ExtensionParser {
 	}
 
 	public int parseText(String text, int start, ParseContext context) {
-		return proxy.parseText(text, start, context);
+		Number rtv = (Number) rt.invoke(impl, "parseText", text, start, context);
+		return rtv.intValue();
+		//return proxy.parseText(text, start, context);
 	}
 
 	public int getPriority() {

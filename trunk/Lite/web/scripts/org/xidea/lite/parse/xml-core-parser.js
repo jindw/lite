@@ -76,7 +76,7 @@ var Core = {
 		if(end>0){
 			try{
 				var el = text.substring(1,end);
-	            this.appendPlugin("org.xidea.lite.EncodePlugin",{});
+	            this.appendPlugin("org.xidea.lite.EncodePlugin","{}");
 	            this.appendEL(el);
 	            this.appendEnd()
 	            return end;
@@ -192,13 +192,13 @@ var Core = {
 	},
 	parsePHP:function(node){
     	var value = node.textContent || node.text;
-    	this.appendPlugin(PLUGIN_NATIVE,{"type":"php"});
+    	this.appendPlugin(PLUGIN_NATIVE,'{"type":"php"}');
     	parseChildRemoveAttr(this,node);
     	this.appendEnd();
 	},
 	parseJS:function(node){
     	var value = node.textContent || node.text;
-    	this.appendPlugin(PLUGIN_NATIVE,{"type":"js"});
+    	this.appendPlugin(PLUGIN_NATIVE,'{"type":"js"}');
     	parseChildRemoveAttr(this,node);
     	this.appendEnd();
 	},
