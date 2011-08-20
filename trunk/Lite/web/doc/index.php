@@ -12,6 +12,7 @@ if($path){
 	echo "<p><a href='index.php/guide/index.xhtml'>跳转到文档首页</a>!</p>";
     echo "\n\n<script>setTimeout(function(){
     	document.location = ('index.php/guide/index.xhtml')
+    },$wait);</script>";
     exit();
 }
 if(strpos($path,".xhtml")>0){

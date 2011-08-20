@@ -1,5 +1,4 @@
-<php
-
+<?php
 	function lite_exec($cmd,$descriptorspec = array(array("pipe", "r"), array("pipe", "w"), array("pipe", "w") )){
 		if(!function_exists('proc_open') ){
 			trigger_error("Compile Error","ERROR:Missed php function: proc_open");
