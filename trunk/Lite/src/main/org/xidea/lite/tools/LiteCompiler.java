@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -55,6 +56,7 @@ public class LiteCompiler {
 	public void execute() {
 		try {
 			initialize();
+			this.resultMap = new HashMap<String, byte[]>();
 			if (path == null) {
 				this.processDir(root, "/");
 				for (String path : this.resourceManager.getLinkedResources()) {
