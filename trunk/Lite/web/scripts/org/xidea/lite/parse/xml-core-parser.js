@@ -568,18 +568,27 @@ function processClient(node){
 	parseChildRemoveAttr(this,node);
 	this.appendEnd();
 	this.append("//]]></script>")
-	
-	
-//	var context2 = this.createNew();
-//	parseChildRemoveAttr(context2,node);
-//	var translator = new JSTranslator(name_);
-//	var code = translator.translate(context2);
-//	this.append("<!--//--><script>//<![CDATA[\n"
-//				+code.replace(/<\/script>/ig,'<\\/script>')+"//]]></script>\n");
-	
 }
-
-
+/**
+ * <c:date-format pattern="" >
+ */
+function dateFormat(node){
+	var value =  findXMLAttributeAsEL(node,'value') || 'null';
+	var pattern = findXMLAttribute(node,'pattern');
+	if(pattern){
+		var pattern2 = pattern.replace(/^\s*\$\{([\s\S]+)\}\s*$/,'$1')
+		if(pattern2 == pattern){
+			pattern2 = stringifyJSON(pattern);
+		}
+	}else{
+		pattern2 = '"YYYY-MM-DD"';
+	}
+	this.appendPlugin("org.xidea.lite.DatePlugin","{}");
+	this.appendEL(value);
+	this.appendEL(pattern2);
+	this.appendEnd();
+}
+Core.parseDateFormat = dateFormat
 function beforeInclude(attr){
 	var match = attr.value.match(/^([^#]*)(?:#(.*))?$/);
 	var path = match[1];

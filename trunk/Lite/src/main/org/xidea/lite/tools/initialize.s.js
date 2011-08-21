@@ -47,8 +47,8 @@ function processJS(text){
 	//manager.compressJS(value);
 	
 	text = text.replace(/(\\(?:\r\n?|\n).)|^\s+/gm,'$1');
-	text = text.replace(/^(?:\/(?:\*[\s\S]*\*\/|\/.*)|\s+)+/g,'');//trim left
-	text = text.replace( /(?:\/(?:\*[\s\S]*\*\/|\/.*)|\s+)+$/g,'');//trim right
+	text = text.replace(/^(?:\/(?:\*[\s\S]*?\*\/|\/.*)|\s+)+/g,'');//trim left
+	text = text.replace( /(?:\/(?:\*[\s\S]*?\*\/|\/.*)|\s+)+$/g,'');//trim right
 	return text;
 }
 function processCSS(text){

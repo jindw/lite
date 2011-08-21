@@ -35,7 +35,42 @@ g[0] = function(txt,type){
 			type?/&(?:\w+|#\d+|#x[\da-f]+);|[<&"]/ig:/[<&]/g
 		,replacer);
 };
-
+function dl(date,format){//3
+    format = format.length;
+    return format == 1?date : ("000"+date).slice(-format);
+}
+function tz(offset){
+	offset = offset;
+	return offset?(offset>0?'-':offset*=-1||'+')+dl(offset/60,'00')+':'+dl(offset%60,'00'):'Z'
+}
+g[2] = function(date,pattern){
+	//TODO:未考虑国际化偏移
+	date = date?new Date(date):new Date();
+    return pattern.replace(/([YMDhms])\1*|\.s|TZD/g,function(format){
+        switch(format.charAt()){
+        case 'Y' :
+            return dl(date.getFullYear(),format);
+        case 'M' :
+            return dl(date.getMonth()+1,format);
+        case 'D' :
+            return dl(date.getDate(),format);
+//	            case 'w' :
+//	                return date.getDay()+1;
+        case 'h' :
+            return dl(date.getHours(),format);
+        case 'm' :
+            return dl(date.getMinutes(),format);
+        case 's' :
+            return dl(date.getSeconds(),format);
+        case '.':
+        	return '.'+dl(date.getMilliseconds(),'000');
+        case 'T'://tzd
+        	//国际化另当别论
+	            	return tz(date.getTimezoneOffset());
+	            }
+	        });
+		}
+  
 function lite__impl_def(n,fn){
 	g[n]=fn;
 };

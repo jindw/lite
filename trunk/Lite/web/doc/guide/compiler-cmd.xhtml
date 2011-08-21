@@ -68,7 +68,8 @@
 				模板HTML规范检查。
 				<p>
 					检查HTML5规范之外的标签，属性，主要用于发现书写错误，改良编码习惯。
-					<a href="compiler-api.xhtml#htmlValidate">更多信息</a>。
+					<a href="compiler-api.xhtml#htmlValidate">更多信息</a>
+					。
 				</p>
 			</li>
 		</ul>
@@ -78,34 +79,30 @@
 				<strong>示例</strong>
 			</p>
 			<x:code><![CDATA[
-			java -jar WEB-INF/lib/Lite.jar -root ./ -output ../output -includes /**.js /**.xhtml -excludes /WEB-INF/** -translator php
+			java -jar WEB-INF/lib/Lite.jar -output ../output -includes /**.js /**.xhtml -linked true -excludes /WEB-INF/** -translator php
 			]]></x:code>
 
 			<p
 				title="这是一个java执行命令，命令模式是: java -jar &lt;JARPATH> -arg value -args value1 value2">
 				在这个编译程序中，-jar 用于指定jar库（编译程序）的地址，必须放在最开始的位置；
 				其他参数紧随其后，无顺序。</p>
-			<p>一般来说，你只需要include你的模板文件即可，静态资源会通过模板的关联自动间接包含进去！
-			</p>
 			<p>
-				比如 -includes /module/index.xhtml.
-				因为index.xhtml 中存在：&lt;script
-				src="/static/js/a.js" 和&lt;link src="/static/css/a.css"
-				a.css
-				中存在：background:url('/static/img/a.png')。
-				那么，系统会分析到他们之间的关联，自动间接包含：
-				a.js,a.css,a.png 三个文件。
+				一般来说，你只需要include你的模板文件即可，静态资源可以通过指定
+				<a href="#linked">linked</a>
+				参数，通过模板对静态资源的关联(或者其他形式的文件关联，如css中的图片引用)自动间接包含进去！
 			</p>
+
 		</ul>
 		<h3>参数说明</h3>
 		<ul>
 			<li>
 				<strong>-root</strong>
-				<p>网站根目录（源代码）。</p>
+				<p>网站根目录（源代码）。可以是绝对地址或者相对于当前目录的相对地址。</p>
+				<p><i>在未指定该参数的时候，默认以当前目录为网站目录。</i></p>
 			</li>
 			<li>
 				<strong>-output</strong>
-				<p>编译目标目录（目标代码）。</p>
+				<p>编译目标目录（目标代码）。可以是绝对地址或者相对于当前目录的相对地址（当前目录<strong>不是</strong>指-root参数指定的目录）</p>
 			</li>
 			<li>
 				<strong>-includes</strong>
@@ -113,12 +110,12 @@
 					我们打包的文件中有两类：
 					<ul>
 						<li>
-							<strong>直接包含文件集</strong>
-							：编译命令指定的包含文件集
+							<strong>直接包含文件集：</strong>
+							编译命令指定的包含文件集
 						</li>
 						<li>
-							<strong>间接包含文件集</strong>
-							：文件编译过程分析得到的关联文件集
+							<strong>间接包含文件集：</strong>
+							文件编译过程分析得到的关联文件集（只有指定-linked参数为true的时候，间接包含生效）
 						</li>
 					</ul>
 				</p>
@@ -149,6 +146,54 @@
 				<p>
 					直接包含的文件不一定能被打包，因为他可能被excludes 排除。
 					间接包含文件也不一定能被打包，因为间接包含也可以被excludes排除。
+				</p>
+			</li>
+			<li>
+				<strong>-linked</strong>
+				<a name="linked" />
+				<p>
+					该参数用来指定是否启用间接包含，间接包含是指自动将关联的静态资源做为间接包含文件一起打包。
+				</p>
+				<p>
+					<ul>
+						比如
+						<x:code><![CDATA[java -jar WEB-INF/lib/Lite.jar -includes /index.xhtml -linked true]]></x:code>
+						<br />
+						<x:code>
+				<![CDATA[
+				<!-- file:index.xhtml -->
+				...
+				<html>
+				<head>
+				<script src="/static/js/a.js"></script>
+				<link src="/static/css/a.css"></link>
+				</head>
+				<body>
+				....
+				]]>
+						</x:code>
+						<br />
+						<x:code>
+				<![CDATA[
+				/* file: /static/css/a.css*/
+				....
+				body{
+					background:url('/static/img/a.png');
+				}
+				....
+				]]>
+						</x:code>
+						<p>因为文件/index.xhtml 中存在：/static/js/a.js 和 /static/css/a.css 的引用;
+							/static/css/a.css 中存在图片：/static/img/a.png的引用。
+							系统会分析到他们之间的关联，自动间接包含：
+							/static/js/a.js,/static/css/a.css,/static/img/a.png 三个文件。
+				</p>
+					</ul>
+				</p>
+				<p>
+					<i>
+						该参数默认为false，如果需要自动打包关联文件，需要开启他：-linked true 。
+					</i>
 				</p>
 			</li>
 			<li>

@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.StringWriter;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
@@ -15,11 +16,16 @@ import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
 import org.jside.webserver.CGIEnvironment;
 import org.jside.webserver.CGIRunner;
 import org.jside.webserver.MutiThreadWebServer;
 import org.jside.webserver.RequestContext;
 import org.jside.webserver.RequestUtil;
+import org.w3c.dom.Document;
 import org.xidea.el.ExpressionFactory;
 import org.xidea.jsi.impl.RuntimeSupport;
 import org.xidea.jsi.web.JSIService;
@@ -104,7 +110,15 @@ public class WebServer {
 								encoding);
 						Object data = loadData(root, uri);
 						try{
-						ht.render(uri, data, out);
+							if(context.getParam().containsKey("@source")){
+								Document dom = manager.getFilteredDocument(uri);
+								TransformerFactory trans = javax.xml.transform.TransformerFactory.newInstance();
+//								StringWriter so = new StringWriter();
+								trans.newTransformer().transform(new DOMSource(dom),
+										new StreamResult(out));
+							}else{
+								ht.render(uri, data, out);
+							}
 						}catch (Exception e) {
 							RequestUtil.printResource(e, RequestUtil.PLAIN_TEXT);
 							throw e;

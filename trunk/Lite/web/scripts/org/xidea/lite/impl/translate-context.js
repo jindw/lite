@@ -107,21 +107,23 @@ TranslateContext.prototype = {
     	}
     },
     processPlugin:function(item){
-    	var pn = item[2]['class']
-    	if(/^org\.xidea\.lite\.EncodePlugin$/.test(pn)){
-			this.appendEncodePlugin(item[1][0]);
-		//}else if(/^org\.xidea\.lite\.(?:Encode|Native|Define)Plugin$/.test(pn)){
-		}else if(/^org\.xidea\.lite\.NativePlugin$/.test(pn)){
-			this.appendNativePlugin(item);
-		//}else if(/^org\.xidea\.lite\.(?:Encode|Native|Define)Plugin$/.test(pn)){
-		//	//continue;
-		//	this.processPlugin(item);
-		}else if(/^org\.xidea\.lite\.parse\.ClientPlugin$/.test(pn)){
+    	var pn = item[2]['class'];
+    	switch(pn.replace(/^org\.xidea\.lite\.(?:parse\.)?/,'')){
+    	case 'EncodePlugin':
+    		this.appendEncodePlugin(item[1][0]);
+    		break;
+    	case 'DatePlugin':
+    		this.appendDatePlugin(item[1][0],item[1][1]);
+    		break;
+    	case 'NativePlugin':
+    		this.appendNativePlugin(item);
+    		break;
+    	case 'DefinePlugin':
+    		break;
+    	case 'ClientPlugin':
+    	default:
 			$log.error("程序bug(插件需要预处理):"+pn,item[2]);
-			//continue;
-		}else{
-			$log.error("程序bug(插件类型尚未支持):"+pn,item[2]);
-		}
+    	}
     },
     processElse:function(code,i){
     	throw Error('问题指令(无主else,else 指令必须紧跟if或者for)：'+code,i);

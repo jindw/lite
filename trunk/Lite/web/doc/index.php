@@ -9,13 +9,15 @@ $path = @$_SERVER['PATH_INFO'] ;
 if($path){
 	$path = '/doc'.$path;
 }else{
+	header("Content-Type:text/html;charset=utf-8");
 	echo "<p><a href='index.php/guide/index.xhtml'>跳转到文档首页</a>!</p>";
-    echo "\n\n<script>setTimeout(function(){
+    echo "\n\n<script>
     	document.location = ('index.php/guide/index.xhtml')
-    },$wait);</script>";
+    	</script>";
     exit();
 }
 if(strpos($path,".xhtml")>0){
+	$path2 = $path;
 	if(!file_exists("..".$path)){
 		$path2 = preg_replace('/[^\/]+$/','notfound.xhtml',$path);
 		if(!file_exists('..'.$path2)){
@@ -61,7 +63,7 @@ if(strpos($path,".xhtml")>0){
 	if(!is_array($context)){
 		$context = array();
 	}
-	$engine->render($path2?$path2:$path,$context);
+	$engine->render($path2,$context);
 }else{
 	$boot = $path == '/doc/boot.js'?realpath('../WEB-INF/classes/lite/boot.js'):null;
 	if(array_key_exists('@',$_GET)){

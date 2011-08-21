@@ -26,7 +26,7 @@ import org.xidea.lite.parse.TextParser;
 public class ParseContextImpl extends ParseContextProxy implements ParseContext {
 	private static final long serialVersionUID = 1L;
 	private static final Log log = LogFactory.getLog(ParseContextImpl.class);
-	private static NodeParser<?>[] DEFAULT_PARSER_LIST = { new TextNodeParser(),new DefaultXMLNodeParser(),null};
+	private static final NodeParser<?>[] DEFAULT_PARSER_LIST = { new TextNodeParser(),new DefaultXMLNodeParser(),null};
 	
 	private ParseChain topChain;
 	private final ExtensionParser  extensionParser;
@@ -34,9 +34,11 @@ public class ParseContextImpl extends ParseContextProxy implements ParseContext 
 	private NodeParser<? extends Object>[] nodeParsers;
 	private TextParser[] textParsers;
 	/**
-	 * createNew 重置
+	 * createNew 复制
 	 */
+	private URI currentURI = URI.create("lite:///");
 	private int textType = 0;
+	
 	public ParseContextImpl(ParseConfig config, String path) {
 		super(config,config.getFeatureMap(path));
 		this.extensionParser = new ExtensionParserImpl();
@@ -45,24 +47,24 @@ public class ParseContextImpl extends ParseContextProxy implements ParseContext 
 		textParsers = new TextParser[]{extensionParser};
 	}
 
-	public ParseContext createNew() {
-		return new ParseContextImpl(this);
-	}
-	private ParseContextImpl(ParseContextProxy parent) {
-		super(parent);
-		this.setCurrentURI(parent.getCurrentURI());
-		this.resultContext = new ResultContextImpl();
-		// 需要重设 ParseChain 的context
-		this.textParsers = parent.getTextParsers();
-		this.nodeParsers = parent.getTopChain().getNodeParsers();
-		ExtensionParser ep = null;
-		for(NodeParser<?> n :nodeParsers){
-			if(n instanceof ExtensionParser){
-				ep = (ExtensionParser)n;
-			}
-		}
-		this.extensionParser = ep;
-	}
+//	public ParseContext createNew() {
+//		return new ParseContextImpl(this);
+//	}
+//	private ParseContextImpl(ParseContextProxy parent) {
+//		super(parent);
+//		this.setCurrentURI(parent.getCurrentURI());
+//		this.resultContext = new ResultContextImpl();
+//		// 需要重设 ParseChain 的context
+//		this.textParsers = parent.getTextParsers();
+//		this.nodeParsers = parent.getTopChain().getNodeParsers();
+//		ExtensionParser ep = null;
+//		for(NodeParser<?> n :nodeParsers){
+//			if(n instanceof ExtensionParser){
+//				ep = (ExtensionParser)n;
+//			}
+//		}
+//		this.extensionParser = ep;
+//	}
 //	public ParseContext create(ParseContext parent){
 //		return new ParseContextImpl(parent);
 //	}
@@ -99,6 +101,17 @@ public class ParseContextImpl extends ParseContextProxy implements ParseContext 
 		this.textParsers = ips2;
 	}
 
+
+	public URI getCurrentURI() {
+		return currentURI;
+	}
+
+	public void setCurrentURI(URI currentURI) {
+		if (currentURI != null) {
+			this.addResource(currentURI);
+			this.currentURI = currentURI;
+		}
+	}
 	public void parse(Object node) {
 //		currentNode = node;
 		ParseChain topChain = getTopChain();

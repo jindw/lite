@@ -177,6 +177,28 @@ function lite_op__invoke($obj,$member,$args){
 		trigger_error("method not existed:".$method);
 	}
 }
+/* ================ 内部函数 ==================*/
+function lite__2($date,$pattern,$replaced){
+	$pattern = strtr(
+	
+		$pattern,
+		array('YYYY'=>'Y','YY'=>'y','MM'=>'m','M'=>'n','DD'=>'d','D'=>'j',
+			'hh'=>'H','h'=>'G','mm'=>'i','m'=>'i','ss'=>'s','s'=>'s','.s'=>'.0',
+			'TZD'=>'P','T'=>'\T'
+		)
+	);
+	
+	if($date == null){
+		$date = time(true) * 1000;
+	}else{
+		if($date < 0xFFFFFFFF){
+			//$date *= 1000;//还是不容错吧
+		}
+	}
+	
+	print_r(array($date,$pattern));
+	return date($pattern,$date/1000);
+}
 /* ================ 全局函数调用 =================*/
 
 /**

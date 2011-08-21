@@ -15,6 +15,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
+import java.nio.charset.CharsetEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -550,7 +551,27 @@ public class ParseUtil {
 		return "file".equals(uri.getScheme());
 	}
 
+	static final String replaceBigChar(String text, String encoding) {
+		if (encoding == null || encoding.length() == 0) {
+			encoding = "GBK";
+		} else if (encoding.equalsIgnoreCase("utf-8")) {
+			return text;
+		}
+		Charset charset = Charset.forName(encoding);
+		CharsetEncoder encoder = charset.newEncoder();
+		StringBuilder buf = new StringBuilder();
+		for (char c : text.toCharArray()) {
+			if (encoder.canEncode(c)) {
+				buf.append(c);
+			} else {
+				buf.append("&#" + ((int) c) + ';');
+			}
+		}
+		text = buf.toString();
+		return text;
+	}
 
+	
 }
 
 class NamespaceContextImpl implements NamespaceContext {

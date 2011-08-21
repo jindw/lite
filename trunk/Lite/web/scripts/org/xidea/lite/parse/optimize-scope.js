@@ -110,17 +110,15 @@ function vistLite(context,code){
 				var className = item[2]['class'];
 				if(className == 'org.xidea.lite.DefinePlugin'){
 					vistDef(context,item);
-					break;
 				}else if(className == 'org.xidea.lite.parse.ClientPlugin'){
 					//doFindClient(item);
-					break;
-				}else if(className == 'org.xidea.lite.EncodePlugin'){
-					//doFindClient(item);
-					break;
+				}else if(className == 'org.xidea.lite.EncodePlugin' 
+					||className =='org.xidea.lite.DatePlugin'){
+					vistLite(context,item[1]);
 				}else{
 					$log.info(item[2])
 				}
-				
+				break;
 			case CAPTURE_TYPE:
 			case IF_TYPE:
 			case ELSE_TYPE:

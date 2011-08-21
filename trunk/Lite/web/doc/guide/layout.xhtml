@@ -477,21 +477,31 @@ function formatDate(value,format){
 		-->
 		<script>
 			if(!this.ParseContext && this.$import){
-			$import('org.xidea.lite.web:*',true);
-			$import('org.xidea.jsi:$log',true);
-			$import('org.xidea.lite:Template',true);
-			$import('org.xidea.lite.impl.js:*',true);
-			$import('org.xidea.lite.impl.php:*',true);
-			$import('org.xidea.lite.parse:*',true);
-			$import('org.xidea.lite.util:stringifyJSON',true);
+				$import('org.xidea.lite.web:*',true);
+				$import('org.xidea.jsi:$log',true);
+				$import('org.xidea.lite:Template',true);
+				$import('org.xidea.lite.impl.js:*',true);
+				$import('org.xidea.lite.impl.php:*',true);
+				$import('org.xidea.lite.parse:*',true);
+				$import('org.xidea.lite.util:stringifyJSON',true);
 			}
-			var as = document.getElementsByTagName('a');
+			</script>
+		<script>
+			var menu = document.getElementById('menu');
+			var menuContent = menu.firstChild;
+			menuContent = menuContent.nodeType==1 ?menuContent:menuContent.nextSibling;
+			var as = document.body.getElementsByTagName('a');
+			var height = menu.scrollHeight;
 			for(var i = as.length;i--;){
 				var a = as.item(i);
 				if(/\bcurrent\b/.test(a.className)){
-					if(typeof a.parentNode.scrollIntoView == 'function'){
-						a.parentNode.scrollIntoView();
+					var t= a.offsetTop;
+					var bt = height - t;
+					//alert([height,t,bt])
+					if(bt<120){
+						menuContent.scrollTop = -bt+Math.min(150,height/3)+15
 					}
+					//a.parentNode.scrollIntoView();
 				} 
 			}
 		</script>

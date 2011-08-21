@@ -112,8 +112,7 @@ public class ParseChainImpl extends ParseContextProxy implements ParseChain {
 	}
 
 
-	/* 覆盖代理 */
-	@Override
+	/* 支持代理 */
 	public URI getCurrentURI() {
 		return context.getCurrentURI();
 	}
@@ -122,26 +121,10 @@ public class ParseChainImpl extends ParseContextProxy implements ParseChain {
 		return context.getTextType();
 	}
 
-//	@Override
-//	public boolean isReserveSpace() {
-//		return context.isReserveSpace();
-//	}
-
-	@Override
 	public void setCurrentURI(URI currentURI) {
 		context.setCurrentURI(currentURI);
 	}
 
-//	@Override
-//	public void setReserveSpace(boolean keepSpace) {
-//		context.setReserveSpace(keepSpace);
-//	}
-
-	// @Override
-	// public void setTextType(int textType) {
-	// context.setTextType(textType);
-	// }
-	/* 支持代理 */
 	public void parse(Object source) {
 		context.parse(source);
 	}
@@ -175,8 +158,5 @@ public class ParseChainImpl extends ParseContextProxy implements ParseChain {
 	public ParseChain getTopChain() {
 		return context.getTopChain();
 	}
-	// public ParseContext createNew() {
-	// return context.createNew();
-	// }
 
 }

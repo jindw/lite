@@ -38,6 +38,12 @@ public class ResultContextImpl implements ResultContext {
 
 	private final ArrayList<Object> result = new ArrayList<Object>();
 
+	private String encoding;
+
+	public ResultContextImpl(String encoding) {
+		this.encoding = encoding;
+	}
+
 	public Object parseEL(String expression) {
 		return expressionFactory.parse(expression);
 	}
@@ -63,7 +69,7 @@ public class ResultContextImpl implements ResultContext {
 
 	public void append(String text) {
 		if (text != null && text.length() > 0) {
-			result.add(text);
+			result.add(ParseUtil.replaceBigChar(text, encoding));
 		}
 	}
 
@@ -78,7 +84,9 @@ public class ResultContextImpl implements ResultContext {
 	public final void appendAll(List<Object> items) {
 		for (Object text : items) {
 			if (text instanceof String) {
-				this.append((String) text);
+				//一般无需在此替换大字符集，因为appendAll 一般都是前面append 出来的，
+				//但是安全起见，多检查以此也无妨：）
+				this.append(ParseUtil.replaceBigChar((String) text, encoding));
 				continue;
 			} else if (text instanceof Collection<?>) {
 				text = ((Collection<?>) text).toArray();

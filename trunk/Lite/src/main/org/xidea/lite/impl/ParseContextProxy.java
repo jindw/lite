@@ -20,31 +20,24 @@ import org.xml.sax.SAXException;
 
 abstract public class ParseContextProxy implements ParseContext {
 	private static Log log = LogFactory.getLog(ParseContextProxy.class);
-	
 
 	/**
-	 * createNew 共享
+	 * 多实例（如：ParseChain...） 共享
 	 */
 	private final Map<String, String> featureMap;
 	private final ArrayList<URI> resources;
 	private final HashMap<Object, Object> attributeMap ;
-	/**
-	 * createNew 复制
-	 */
-	private URI currentURI = URI.create("lite:///");
 	
 	protected ParseConfig config;
 	protected ResultContext resultContext;
-	
-	
-
 	
 	protected ParseContextProxy(ParseConfig config,Map<String, String> featureMap) {
 		this.config = config;
 		this.featureMap = featureMap;
 		this.attributeMap = new HashMap<Object, Object>();
 		this.resources = new ArrayList<URI>();
-		this.resultContext = new ResultContextImpl();
+		String encoding = featureMap.get(ParseContext.FEATURE_ENCODING);
+		this.resultContext = new ResultContextImpl(encoding);
 	}
 
 	ParseContextProxy(ParseContextProxy parent) {
@@ -76,26 +69,9 @@ abstract public class ParseContextProxy implements ParseContext {
 		return (T)this.attributeMap.get(key);
 	}
 
-
-//	public void setTextType(int textType) {
-//		this.textType = textType;
-//	}
-//
-//	public boolean isReserveSpace() {
-//		return preserveSpace;
-//	}
-//
-//	public void setReserveSpace(boolean keepSpace) {
-//		this.preserveSpace = keepSpace;
-//	}
 	public final URI createURI(String path) {
 		try {
-			// TODO
 			URI parent = this.getCurrentURI();
-//			System.out.println("1"+parent);
-//			System.out.println("2"+path);
-//			System.out.println("3"+parent.resolve(path));
-			//new RuntimeException().printStackTrace();
 			return parent.resolve(path);
 		} catch (Exception e) {
 			log.error("uri 创建异常."+path,e);
@@ -194,22 +170,9 @@ abstract public class ParseContextProxy implements ParseContext {
 		return resultContext.parseEL(eltext);
 	}
 
-
-	public URI getCurrentURI() {
-		return currentURI;
-	}
-
-
 	public void addResource(URI resource) {
 		if(!resources.contains(resource)){
 			resources.add(resource);
-		}
-	}
-
-	public void setCurrentURI(URI currentURI) {
-		if (currentURI != null) {
-			this.addResource(currentURI);
-			this.currentURI = currentURI;
 		}
 	}
 

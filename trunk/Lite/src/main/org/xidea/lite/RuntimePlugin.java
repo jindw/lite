@@ -1,6 +1,7 @@
 package org.xidea.lite;
 
 
+import java.io.IOException;
 import java.io.Writer;
 
 import org.xidea.el.ValueStack;
@@ -13,5 +14,5 @@ import org.xidea.el.ValueStack;
  */
 public interface RuntimePlugin {
 	public void initialize(Template template,Object[] children);
-	public void execute(ValueStack context,Writer out);
+	public void execute(ValueStack context,Writer out) throws IOException;
 }

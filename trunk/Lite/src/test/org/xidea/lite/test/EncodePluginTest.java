@@ -1,5 +1,6 @@
 package org.xidea.lite.test;
 
+import java.io.IOException;
 import java.io.StringWriter;
 import java.util.regex.Pattern;
 
@@ -22,7 +23,7 @@ public class EncodePluginTest implements ValueStack {
 	}
 
 	@Test
-	public void testSimple() {
+	public void testSimple() throws IOException {
 
 		test("123<", "123&lt;");
 		test("123\"", "123&#34;");
@@ -33,7 +34,7 @@ public class EncodePluginTest implements ValueStack {
 	}
 
 	@Test
-	public void testEntry() {
+	public void testEntry() throws IOException {
 
 		test("123&\"", "123&#38;&#34;");
 		test("123&xx;&", "123&xx;&#38;");
@@ -44,7 +45,7 @@ public class EncodePluginTest implements ValueStack {
 		test("123&x124", "123&#38;x124");
 	}
 
-	private void test(String source, String dest) {
+	private void test(String source, String dest) throws IOException {
 		StringWriter out = new StringWriter();
 		value = source;
 		plugin.execute(this, out);

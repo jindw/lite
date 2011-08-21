@@ -1,0 +1,36 @@
+<html xmlns:x="http://www.xidea.org/lite/example" xmlns="http://www.w3.org/1999/xhtml"
+	xml:lang="zh-CN" dir="ltr">
+	<head>
+		<title>日期格式化</title>
+	</head>
+	<body>
+		<p>日期格式化本应是表达式中函数的功能，但是js函数中，我们无据可依，为了坚持我们一贯不作恶的风格，我们不打算随意添加新的内置函数，所以，我们专门设计了一个日期格式化标签语法。</p>
+		<ul>
+			<strong>示例：</strong>
+			<x:code model="{date:new Date()}">
+				<![CDATA[
+				<div> 
+				  今天是：<c:date-format pattern="YYYY-MM-DD" value="${date}"/>
+				  现在是：<c:date-format pattern="hh:mm:ss" value="${date}"/>
+				</div>
+				]]>
+			</x:code>
+		</ul>
+		<p>
+			<p>
+				<i>
+					小技巧1：我们可以通过自定义模板函数，实现日期格式化的函数支持：
+					<ul>
+					<x:code model="{date:new Date()}">
+				<![CDATA[
+				<c:def name="dateFormat(date)"><c:date-format pattern="YYYY-MM-DDThh:mm:ss" value="${date}"/></c:def>
+				<div>
+				今天是：${dateFormat(date)}
+				</div>
+				]]>
+					</x:code></ul>
+				</i>
+			</p>
+		</p>
+	</body>
+</html>

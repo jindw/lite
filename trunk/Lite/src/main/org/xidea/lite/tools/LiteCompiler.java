@@ -5,9 +5,8 @@ import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetEncoder;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -30,6 +29,7 @@ public class LiteCompiler {
 	private File output;
 	private String[] includes;
 	private String[] excludes;
+	private boolean linked;
 	private HotTemplateEngine engine;
 	private String translator;
 	private ResourceManagerImpl resourceManager;
@@ -45,40 +45,49 @@ public class LiteCompiler {
 			args = new String[] {
 					// "-root","D:\\workspace\\FileServer/src/main/org/jside/filemanager/","-litecode","D:\\workspace\\FileServer/build/dest/lite","-nodeParsers","org.xidea.lite.parser.impl.HTMLNodeParser"
 					"-root", "D:\\workspace\\Lite2/web/", "-output",
-					"D:\\workspace\\Lite2/build/dest/web", "-path",
-					"/doc/guide/index.xhtml", "-includes",
-					"/doc/guide/*.xhtml", "-excludes",
-					"/doc/guide/layout.xhtml", "-translators", "php" };
+					"D:\\workspace\\Lite2/build/dest/web",
+					//"-path","/doc/guide/index.xhtml",
+					"-includes","/doc/guide/*.xhtml",
+					"-excludes","/doc/guide/layout.xhtml", "-translators", "php" };
 		}
 		new LiteCompiler(args).execute();
 	}
 
 	public void execute() {
 		try {
+			if(root == null || output == null){
+				log.error("必须指定 -root 和 -output 参数！！");
+				return;
+			}
 			initialize();
-			this.resultMap = new HashMap<String, byte[]>();
+			this.resultMap = new LinkedHashMap<String, byte[]>();
 			if (path == null) {
 				this.processDir(root, "/");
 				for (String path : this.resourceManager.getLinkedResources()) {
 					this.processFile(path);
 				}
+				if (linked) {
+					List<String> lrs = this.resourceManager.getLinkedResources();
+					for (String rp : lrs) {
+						this.processFile(rp);
+					}
+				}
+				if (!output.exists()) {
+					if (output.getName().endsWith(".zip")) {
+						output.getParentFile().mkdir();
+						output.createNewFile();
+					} else {
+						output.mkdir();
+					}
+				}
+				if (output.getName().endsWith(".zip")) {
+					this.writeZipResult();
+				} else {
+					this.writeDirResult();
+				}
 			} else {
 				this.processFile(path);
 			}
-			if (!output.exists()) {
-				if (output.getName().endsWith(".zip")) {
-					output.getParentFile().mkdir();
-					output.createNewFile();
-				} else {
-					output.mkdir();
-				}
-			}
-			if (output.getName().endsWith(".zip")) {
-				this.writeZipResult();
-			} else {
-				this.writeDirResult();
-			}
-
 			log.info("执行成功");
 		} catch (Exception e) {
 			log.error("编译失败", e);
@@ -86,7 +95,8 @@ public class LiteCompiler {
 	}
 
 	private void writeZipResult() throws IOException {
-		ZipOutputStream zipos = new ZipOutputStream(new FileOutputStream(output));
+		ZipOutputStream zipos = new ZipOutputStream(
+				new FileOutputStream(output));
 		for (String path : resultMap.keySet()) {
 			zipos.setMethod(ZipOutputStream.DEFLATED);
 			zipos.putNextEntry(new ZipEntry(path.substring(1)));
@@ -116,15 +126,17 @@ public class LiteCompiler {
 
 	protected void initialize() throws IOException {
 		if (root == null) {
-			root = new File(".");
+			root = new File("./");
 		}
 		if (config == null) {
 			config = new File(root, "/WEB-INF/lite.xml");
 		}
-		this.resourceManager = new ResourceManagerImpl(root.toURI(), config
-				.exists() ? config.toURI() : null);
-		engine = new HotTemplateEngine(resourceManager);
-
+		if(this.resourceManager == null){
+			this.resourceManager = new ResourceManagerImpl(root.toURI(), config.toURI());
+		}
+		if(engine == null){
+			engine = new HotTemplateEngine(resourceManager);
+		}
 		if (output != null) {
 			if (!output.exists()) {
 				log.info("mkdirs:" + output);
@@ -181,11 +193,11 @@ public class LiteCompiler {
 
 				String encoding = resourceManager.getFeatureMap(path).get(
 						ParseContext.FEATURE_ENCODING);
-				//中间代码永远是UTF-8；但是静态文本中大大字符还是要确保安全。
-				this.resultMap.put(path2, replaceBigChar(result,encoding).getBytes("utf-8"));
+				// 中间代码永远是UTF-8；但是静态文本中大大字符还是要确保安全。
+				this.resultMap.put(path2, result.getBytes("utf-8"));
 				if (this.translator != null) {
 					if ("php".equals(translator)) {
-						this.buildPHP(path, replaceBigChar(result,encoding), encoding);
+						this.buildPHP(path, result, encoding);
 					}
 				}
 
@@ -213,25 +225,6 @@ public class LiteCompiler {
 		return "/WEB-INF/litecode/" + path.replace('/', '^');
 	}
 
-	public static String replaceBigChar(String text, String encoding) {
-		if (encoding == null || encoding.length() == 0) {
-			encoding = "GBK";
-		}else if(encoding.equalsIgnoreCase("utf-8")){
-			return text;
-		}
-		Charset charset = Charset.forName(encoding);
-		CharsetEncoder encoder = charset.newEncoder();
-		StringBuilder buf = new StringBuilder();
-		for (char c : text.toCharArray()) {
-			if (encoder.canEncode(c)) {
-				buf.append(c);
-			} else {
-				buf.append("&#" + ((int) c) + ';');
-			}
-		}
-		text = buf.toString();
-		return text;
-	}
 
 	private void buildPHP(String path, String litecode, String encoding)
 			throws IOException {
@@ -266,6 +259,10 @@ public class LiteCompiler {
 
 	public void setExcludes(String[] excludes) {
 		this.excludes = excludes;
+	}
+
+	public void setLinked(boolean linked) {
+		this.linked = linked;
 	}
 
 	public void setTranslator(String translator) {

@@ -55,8 +55,8 @@ var INIT_SCRIPT = String(function(){
         }
 		g[2] = function(date,pattern){
 			//TODO:未考虑国际化偏移
-			date = new Date(date);
-	        return pattern.replace(/([YMDhsm])\1*|\.s|TZD/g,function(format){
+			date = date?new Date(date):new Date();
+	        return pattern.replace(/([YMDhms])\1*|\.s|TZD/g,function(format){
 	            switch(format.charAt()){
 	            case 'Y' :
 	                return dl(date.getFullYear(),format);
@@ -356,9 +356,9 @@ JSTranslateContext.prototype = new PT({
     	this.impl_counter.x++;
         this._appendOutput(this.liteImpl,'x(',this.stringifyEL(item[1]),',2)')
     },
-    appendDateFormatPlugin:function(item){//&#233;&#0xDDS;
+    appendDatePlugin:function(date,pattern){//&#233;&#0xDDS;
     	this.impl_counter.d++;
-        this._appendOutput(this.liteImpl,'d(',this.stringifyEL(item[1]),',2)')
+        this._appendOutput(this.liteImpl,'d(',this.stringifyEL(date[1]),',',this.stringifyEL(pattern[1]),')')
     },
     processIf:function(code,i){
         var item = code[i];
