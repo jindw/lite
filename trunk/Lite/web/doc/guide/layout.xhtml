@@ -289,7 +289,9 @@ function formatDate(value,format){
 									
 								}
 								xhr.onreadystatechange = messagePosted;
-								xhr.open("POST",window.location.href,true);
+								var href = window.location.href;
+								href=href.replace(/\/doc\/guide\/(?:index\.php\/)/,'/doc/guide/index.php/')
+								xhr.open("POST",href,true);
 								var data = 'username='+encodeURIComponent(username)+
 										'&email='+encodeURIComponent(email)+
 										'&content='+encodeURIComponent(content);
