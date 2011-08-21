@@ -104,14 +104,6 @@ function parseCode(node){
 		this.append("<div class='code'><script>renderSource("+text+','+(model||null)+",'"+path+"');<\/script></div>")
 	}
 };
-function seekFormat(value){
-	var begin = value.indexOf('|');
-	var end = value.indexOf('}');
-	var content = value.substring(begin+1,end);
-	value = content;
-	this.appendEL('formatDate('+value+')');
-	return end+1;
-}
 function parseNL2BR(node){
 	var text = String(node.textContent || node.text);
 	var varId = this.allocateId();
@@ -140,13 +132,6 @@ function parseNL2BR(node){
 			//<![CDATA[
 var xmlSourceMap = {};
 		
-function formatDate(value,format){
-	value = new Date(value);
-	return value.getFullYear()+'-'+
-			(value.getMonth()+1)+'-'+
-			value.getDate()+' '+
-			value.getHours()+':'+value.getMinutes();
-}
 		CodeMirror.defineMode("litexml", function(config, parserConfig) {
 		  var litexmlOverlay = {
 		    token: function(stream, state) {
@@ -244,10 +229,13 @@ function formatDate(value,format){
 						<legend>留言区</legend>
 						<a name="messages" />
 						<div id="messages" />
+						<c:def name="formatTime(date)">
+							<c:date-format pattern="YYYY-MM-DDThh:mm" value="${date}"/>
+						</c:def>
 						<c:client name="renderMessage(messages)">
 							<c:for var="message" list="${messages}">
 								<div class="message-${for.index%2}">
-									<div title="mail to:${message.email.replace('@','?')}">@${message.username} : $x:format{"YYYY-MM-DDThh:mm"|message.postTime}</div>
+									<div title="mail to:${message.email.replace('@','?')}">@${message.username} : ${formatTime(message.postTime)}</div>
 									<div>
 										<x:nl2br>${message.content}</x:nl2br>
 									</div>
