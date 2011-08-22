@@ -584,8 +584,8 @@ function dateFormat(node){
 		pattern2 = '"YYYY-MM-DD"';
 	}
 	this.appendPlugin("org.xidea.lite.DatePlugin","{}");
-	this.appendEL(value);
 	this.appendEL(pattern2);
+	this.appendEL(value);
 	this.appendEnd();
 }
 Core.parseDateFormat = dateFormat

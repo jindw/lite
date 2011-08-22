@@ -271,13 +271,14 @@ PHPTranslateContext.prototype = new TCP({
     appendEncodePlugin:function(item){
     	this._appendEL(item[1],-1,this.stringifyEL(item[1]));
     },
-    appendDatePlugin:function(date,pattern){//&#233;&#0xDDS;
+    appendDatePlugin:function(pattern,date){//&#233;&#0xDDS;
     	//this.impl_counter.d++;
     	var pattern = this.stringifyEL(pattern[1]);
+    	var date = this.stringifyEL(date[1]);
     	if(/^(?:'[^']+'|"[^"]+")$/.test(pattern)){
-    		pattern = pattern + ',false'
+    		date = date + ',true';
     	}
-        this.append('echo lite__2(',this.stringifyEL(date[1]),',',pattern,');')
+        this.append('echo lite__2(',pattern,',',date,');')
     },
     processIf:function(code,i){
         var item = code[i];

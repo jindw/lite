@@ -178,15 +178,18 @@ function lite_op__invoke($obj,$member,$args){
 	}
 }
 /* ================ 内部函数 ==================*/
-function lite__2($date,$pattern,$replaced){
-	$pattern = strtr(
-	
-		$pattern,
-		array('YYYY'=>'Y','YY'=>'y','MM'=>'m','M'=>'n','DD'=>'d','D'=>'j',
-			'hh'=>'H','h'=>'G','mm'=>'i','m'=>'i','ss'=>'s','s'=>'s','.s'=>'.0',
-			'TZD'=>'P','T'=>'\T'
-		)
-	);
+function lite__2($date,$pattern,$raw){
+	if($raw){
+		$pattern = preg_replace('/YYY+/','Y',$pattern);
+		$pattern = preg_replace('/\w/','\\\$0',$pattern);
+		$pattern = strtr(
+			$pattern,
+			array('\Y\Y'=>'y','\Y'=>'Y','\M\M'=>'m','\M'=>'n','\D\D'=>'d','\D'=>'j',
+				'\h\h'=>'H','\h'=>'G','\m\m'=>'i','\m'=>'i','\s\s'=>'s','\s'=>'s','.\s'=>'.0',
+				'\T\Z\D'=>'P'
+			)
+		);
+	}
 	
 	if($date == null){
 		$date = time(true) * 1000;
@@ -195,8 +198,6 @@ function lite__2($date,$pattern,$replaced){
 			//$date *= 1000;//还是不容错吧
 		}
 	}
-	
-	print_r(array($date,$pattern));
 	return date($pattern,$date/1000);
 }
 /* ================ 全局函数调用 =================*/

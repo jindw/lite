@@ -5,53 +5,66 @@
 	</head>
 	<body>
 		<h3>功能支持</h3>
+		<ul>
+			<li>表达式输出
+				<p>将模板变量或表达式运算值按照指定规则输出。</p>
+			</li>
+			<li>日期格式化输出
+				<p>一种跨平台统一的日期格式化模式。</p>
+			</li>
+		</ul>
+		<h3>表达式输出</h3>
 		<p>
-			输出动态数据是模板最基本的功能，Lite可以将表达式的值，通过如下三种方式输出：
-			<ul>
-				<li>
-					<strong>HTML/XML自动编码输出（\${...}）。</strong>
-					<p>
-						在HTML/XML文本中，为了确保代码安全性， XML保留字符
-						<strong>(&lt;&amp;)</strong>
-						和属性中的
-						<strong>(")</strong>
-						都将被自动转义；
+			输出动态数据是模板最基本的功能，Lite可以将表达式的值，通过如下三种方式输出：</p>
+		<ul>
+			<li>
+				<strong>HTML/XML自动编码输出（\${...}）。</strong>
+				<p>
+					在HTML/XML文本中，为了确保代码安全性， XML保留字符
+					<strong>(&lt;&amp;)</strong>
+					和属性中的
+					<strong>(")</strong>
+					都将被自动转义；
+				</p>
+				<p>
+					脚本/资源地址中的表达式，将自动加上JSON.stringify和encodeURIComponent。
 					</p>
-					<p>
-						脚本/资源地址中的表达式，将自动加上JSON.stringify和encodeURIComponent。
-					</p>
-					<p>
-						关于自动编码的详细介绍，请参考：
-						<a href="feature-autoencode.xhtml">自动编码特性介绍</a>
-					</p>
-					<p>
-						自动编码的表达式，如果是属性的单一值，他还具备一个隐含的特设功能：条件属性输出！
-						<i>
-							<p>
-								在XML 属性中，如果属性值为单一表达式且运行时表达式值为
-								<strong>null</strong>，则整个属性不输出，否则自动按xml属性的编码规则(&lt;&amp;和
-								<strong>"</strong>
-								)，编码XML属性内容并输出。
+				<p>
+					关于自动编码的详细介绍，请参考：
+					<a href="feature-autoencode.xhtml">自动编码特性介绍</a>
+				</p>
+				<p>
+					自动编码的表达式，如果是属性的单一值，他还具备一个隐含的特设功能：条件属性输出！
+					<i>
+						<p>
+							在XML 属性中，如果属性值为单一表达式且运行时表达式值为
+							<strong>null</strong>，则整个属性不输出，否则自动按xml属性的编码规则(&lt;&amp;和
+							<strong>"</strong>
+							)，编码XML属性内容并输出。
 
-								这点在html 定值属性（如：disabled/checked/selected/...）输出时非常有用。
-							</p>
-						</i>
-					</p>
+							这点在html 定值属性（如：disabled/checked/selected/...）输出时非常有用。
+						</p>
+					</i>
+				</p>
 
-				</li>
-				<li>
-					<strong>避免过度转义的安全输出（\$#{...}）。</strong>
-					<p>有的时候，特别是老的GBK中文环境下，我们数据库中存储有字符实体(如：&amp;#0x7C21;&amp;#0x7E41;);
-						默认的自动编码输出，在这些数据的输出展现的时候，不能直接用完全编码输出的方式。</p>
-				</li>
-				<li>
-					<strong>XSS风险自负的直接输出（\$!{...}）。</strong>
-					<p>慎用！！！</p>
-				</li>
-			</ul>
+			</li>
+			<li>
+				<strong>避免过度转义的安全输出（\$#{...}）。</strong>
+				<p>有的时候，特别是老的GBK中文环境下，我们数据库中存储有字符实体(如：&amp;#0x7C21;&amp;#0x7E41;);
+					默认的自动编码输出，在这些数据的输出展现的时候，不能直接用完全编码输出的方式。</p>
+			</li>
+			<li>
+				<strong>XSS风险自负的直接输出（\$!{...}）。</strong>
+				<p>慎用！！！</p>
+			</li>
+		</ul>
+		<h3>日期格式化输出语法</h3>
+		<p>
+			该详细功能请参考独立文档：<a href="syntax-date.xhtml" />
 		</p>
+				
 		<h3>示例</h3>
-		<p>
+		<ul>
 			<x:code var="blogModel">
 			<![CDATA[
 					{
@@ -96,13 +109,6 @@
 			<p title="$!{blog.title}">$!{blog.content}</p>
 			]]>
 			</x:code>
-		</p>
-		<h3>相关参考</h3>
-		<ul>
-			<li>
-				日期格式化输出语法
-				<a href="syntax-date.xhtml" />
-			</li>
 		</ul>
 	</body>
 </html>

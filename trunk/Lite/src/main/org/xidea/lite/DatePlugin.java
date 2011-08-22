@@ -2,13 +2,14 @@ package org.xidea.lite;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.WeakHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.xidea.el.Expression;
 import org.xidea.el.ValueStack;
 
@@ -18,7 +19,7 @@ import org.xidea.el.ValueStack;
  * @author jindw
  */
 public class DatePlugin implements RuntimePlugin {
-	// private static Log log = LogFactory.getLog(DatePlugin.class);
+	private static Log log = LogFactory.getLog(DatePlugin.class);
 	private static Pattern datePattern = Pattern
 			.compile("([YMDhms])\\1*|(\\.s|TZD)|[\\s\\S]+?");
 	private static java.util.WeakHashMap<String, String> CACHED_PATTERN = new WeakHashMap<String, String>();
@@ -26,8 +27,8 @@ public class DatePlugin implements RuntimePlugin {
 	private Expression date;
 
 	public void initialize(Template template, Object[] children) {
-		this.date = (Expression) ((Object[]) children[0])[1];
-		this.pattern = (Expression) ((Object[]) children[1])[1];
+		this.pattern = (Expression) ((Object[]) children[0])[1];
+		this.date = (Expression) ((Object[]) children[1])[1];
 	}
 
 	private static String replace(final String pattern) {
@@ -45,22 +46,34 @@ public class DatePlugin implements RuntimePlugin {
 				} else if ("TZD".equals(a)) {
 					a = "Z";
 				} else if (p != null) {
-					switch (p.charAt(0)) {
+					int len = a.length();
+					char first = p.charAt(0);
+					if(first == 'Y'){
+						if(len ==2){
+							a = "yy";
+						}else{
+							if(len != 4 && len != 1){
+								log.error("unknow pattern:"+a);
+							}
+							a = "yyyy";
+						}
+					}else{
+						if(len >2){
+							log.error("unknow pattern:"+a+";normalized to:"+p);
+							a = p;
+						}
+					}
+					switch (first) {
 					case 'Y':
-						a = a.toLowerCase();
-						break;
-					case 'M':
-						break;
 					case 'D':
 						a = a.toLowerCase();
 						break;
 					case 'h':
 						a = a.toUpperCase();
 						break;
-					case 'm':
-						a = a.toLowerCase();
-						break;
-					case 's':
+					//case 'M':
+					//case 'm':
+					//case 's':
 					}
 				} else {
 					int len = buf.length();
@@ -104,4 +117,7 @@ public class DatePlugin implements RuntimePlugin {
 		}
 		out.write(format((String)pattern, (Date)date));
 	}
+//	public static void main(String[] args){
+//		System.out.println(new DatePlugin().format("Y-M-D h:m:s", new Date(1000*9)));
+//	}
 }

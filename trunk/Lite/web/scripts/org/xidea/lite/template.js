@@ -43,7 +43,7 @@ function tz(offset){
 	offset = offset;
 	return offset?(offset>0?'-':offset*=-1||'+')+dl(offset/60,'00')+':'+dl(offset%60,'00'):'Z'
 }
-g[2] = function(date,pattern){
+g[2] = function(pattern,date){
 	//TODO:未考虑国际化偏移
 	date = date?new Date(date):new Date();
     return pattern.replace(/([YMDhms])\1*|\.s|TZD/g,function(format){

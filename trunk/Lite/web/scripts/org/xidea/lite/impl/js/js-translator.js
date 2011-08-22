@@ -53,7 +53,7 @@ var INIT_SCRIPT = String(function(){
         	offset = offset;
         	return offset?(offset>0?'-':offset*=-1||'+')+dl(offset/60,'00')+':'+dl(offset%60,'00'):'Z'
         }
-		g[2] = function(date,pattern){
+		g[2] = function(pattern,date){
 			//TODO:未考虑国际化偏移
 			date = date?new Date(date):new Date();
 	        return pattern.replace(/([YMDhms])\1*|\.s|TZD/g,function(format){
@@ -356,9 +356,9 @@ JSTranslateContext.prototype = new PT({
     	this.impl_counter.x++;
         this._appendOutput(this.liteImpl,'x(',this.stringifyEL(item[1]),',2)')
     },
-    appendDatePlugin:function(date,pattern){//&#233;&#0xDDS;
+    appendDatePlugin:function(pattern,date){//&#233;&#0xDDS;
     	this.impl_counter.d++;
-        this._appendOutput(this.liteImpl,'d(',this.stringifyEL(date[1]),',',this.stringifyEL(pattern[1]),')')
+        this._appendOutput(this.liteImpl,'d(',this.stringifyEL(pattern[1]),',',this.stringifyEL(date[1]),')')
     },
     processIf:function(code,i){
         var item = code[i];
