@@ -1,8 +1,8 @@
-<%@ page contentType="text/html; charset=utf-8" pageEncoding="utf-8"
+<%@ page contentType="text/html;charset=utf-8" pageEncoding="utf-8"
  isELIgnored="false"%><%
  
- 		String code = request.getParameter("code");
-		String model = request.getParameter("model");
+ 		String code = new String(request.getParameter("code").getBytes("ISO-8859-1"), "utf-8");
+		String model = new String(request.getParameter("model").getBytes("ISO-8859-1"), "utf-8");
 		String callback = request.getParameter("callback");
 		java.util.List<Object> litecode = org.xidea.el.json.JSONDecoder.decode(code);
 		java.util.Map<String,Object> litemodel = org.xidea.el.json.JSONDecoder.decode(model);
