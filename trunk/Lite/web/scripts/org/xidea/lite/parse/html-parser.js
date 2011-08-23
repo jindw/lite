@@ -237,7 +237,7 @@ function replaceJSON(v){
 	return "JSON.stringify("+v+")";
 }
 function replaceURI(v){
-	return "encodeURIComponent("+v+")";
+	return "encodeURI("+v+")";
 }
 function forceURIParse(attr){
 	attr.value = autoEncode(attr.value,/^\s*encodeURI*/,replaceURI);
