@@ -191,7 +191,7 @@ function lite__2($pattern,$date,$raw){
 		);
 	}
 	
-	if($date == null){
+	if($date === null){
 		$date = time(true) * 1000;
 	}else{
 		if($date < 0xFFFFFFFF){
