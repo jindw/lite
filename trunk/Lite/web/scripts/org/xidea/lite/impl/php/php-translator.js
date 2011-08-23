@@ -313,7 +313,6 @@ PHPTranslateContext.prototype = new TCP({
     },
     processFor:function(code,i){
         var item = code[i];
-        var itemsAutoId = this.allocateId();
         var indexAutoId = this.allocateId();
         var keyAutoId = this.allocateId();
         var isKeyAutoId = this.allocateId();
@@ -325,7 +324,12 @@ PHPTranslateContext.prototype = new TCP({
         if(forInfo.depth){
             var preForAutoId = this.allocateId();
         }
-        this.append(itemsAutoId,'=',this.elPrefix,itemsEL,';');
+        if(/^\$[\w_]+$/.test(itemsEL)){
+        	var itemsAutoId = itemsEL;
+        }else{
+        	var itemsAutoId = this.allocateId();
+        	this.append(itemsAutoId,'=',this.elPrefix,itemsEL,';');
+        }
         //初始化 items 开始
 	    this.append('if(',itemsAutoId,'<=PHP_INT_MAX){',itemsAutoId,'=',itemsAutoId,'>0?range(1,',itemsAutoId,'):array();}');
         //初始化 for状态
@@ -343,9 +347,10 @@ PHPTranslateContext.prototype = new TCP({
         this.depth++;
 	    this.append("if(++",indexAutoId," === 0){");
         this.depth++;
-	    this.append(isKeyAutoId,"=",indexAutoId," === 0;");
+	    this.append(isKeyAutoId,"=",keyAutoId," !== 0;");
         this.depth--;
-	    this.append("}else if(",isKeyAutoId,"){",varName,'=',keyAutoId,";}");
+	    this.append("}");
+	    this.append("if(",isKeyAutoId,"){",varName,'=',keyAutoId,";}");
         
         if(needForStatus){
             this.append(FOR_STATUS_KEY,"['index']=",indexAutoId,";");
