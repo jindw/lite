@@ -355,7 +355,6 @@ PHPTranslateContext.prototype = new TCP({
         if(needForStatus){
             this.append(FOR_STATUS_KEY,"['index']=",indexAutoId,";");
         }
-        this.append(varName,"=",itemsAutoId,"[",indexAutoId,"];");
         this.appendCode(childCode);
         this.depth--;
         this.append("}");//end for
