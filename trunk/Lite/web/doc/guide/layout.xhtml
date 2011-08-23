@@ -98,7 +98,7 @@ function parseCode(node){
 	if(varName){
 		this.append("<script>" + varName+'=' +text+";<\/script>")
 		if(model){
-			this.append("<span class='runner' onclick='runExample("+model+','+varName+")'>执行</span>");
+			this.append("<span class='runner' onclick='showExample("+model+','+varName+")'>执行</span>");
 		}
 	}else{
 		this.append("<div class='code'><script>renderSource("+text+','+(model||null)+",'"+path+"');<\/script></div>")
@@ -159,7 +159,7 @@ var xmlSourceMap = {};
 		}
 		function renderSource(text,json,path){
 			if(json){
-				document.write("<div class='runner' onclick='runExample(jsons["+jsons.length+"],mirrors["+mirrors.length+"].getValue())'>执行</div>");
+				document.write("<div class='runner' onclick='showExample(jsons["+jsons.length+"],mirrors["+mirrors.length+"].getValue())'>执行</div>");
 				jsons.push(json);
 			}
 			var mirror =  CodeMirror(placeMirror, {
@@ -330,6 +330,8 @@ var xmlSourceMap = {};
 				</div>
 				<div class="resultSource" id="exampleResult">
 					<h5>结果输出</h5>
+					<div id="resultLoader"/>
+					<div id="resultSource">
 					<script>//<![CDATA[
 		var resultEditor = CodeMirror(placeMirror, {
 			value: '',
@@ -344,7 +346,7 @@ var xmlSourceMap = {};
 		function closeExample(){
 			exampleRunner.parentNode.style.display = 'none';
 		}	
-		function runExample(json,template){
+		function showExample(json,template){
 			exampleRunner.parentNode.style.display = 'block';
 			exampleResult.style.display = 'none';
 			if(typeof json != 'string'){
@@ -352,44 +354,8 @@ var xmlSourceMap = {};
 			}
 			jsonEditor.setValue(json);
 			templateEditor.setValue(template);
-		}
-		function showResult(result){
-			exampleResult.style.display = 'block';
-			resultEditor.setValue(result);
-			var n = 0;
-			var i = setInterval(function a(){
-				exampleResult.style.opacity = n/10;
-				if(n++>10){
-					clearInterval(i);
-				}
-			},100)
-		}
-		function runTemplate(){
-			try{
-				var js = jsonEditor.getValue();
-				var data = window.eval('('+js+')');
-			}catch(e){
-				$log.error("测试失败：模拟数据异常："+e);
-				return;
-			}
-			try{
-				var context = buildContext();
-				var translator = new JSTranslator();//'.','/','-','!','%'
-				translator.liteImpl = "lite__impl_"
-				var code = translator.translate(context.toList(),true);
-				var tpl =  window.eval("(function(lite__impl_def,lite__impl_get){"+(code||null)+"})");
-				tpl = new Template(tpl);
-			}catch(e){
-				$log.error("测试失败：模板编译异常："+e);
-				return;
-			}
-			try{
-				var result = tpl.render(data);
-			}catch(e){
-				$log.error("测试失败：模板运行异常："+tpl.render+e);
-				return;
-			}
-			showResult(result);
+			var runButton = document.getElementById("runButton");
+			runButton.disabled=true;
 		}
 		function buildContext(){
 			var context = new ParseContext();
@@ -424,6 +390,7 @@ var xmlSourceMap = {};
 				return;
 			}
 			showResult(jscode);
+			updateResultRunner('js',litecode,jscode);
 		}
 		function compileToPHP(){
 			try{
@@ -436,6 +403,7 @@ var xmlSourceMap = {};
 				return;
 			}
 			showResult(phpcode);
+			updateResultRunner('php',litecode,phpcode);
 		}
 		function compileToLite(){
 			try{
@@ -447,16 +415,84 @@ var xmlSourceMap = {};
 				return;
 			}
 			showResult(litecode);
+			updateResultRunner('java',litecode,null);
 		}
-		
+		function updateResultRunner(type,litecode,runcode){
+			runStatus = {type:type,litecode:litecode,runcode:runcode}
+			var runButton = document.getElementById("runButton");
+			runButton.disabled=false
+			runButton.value="运行("+type+")"
+		}
+		var runStatus = {}
+		function runTemplate(){
+			try{
+				var js = jsonEditor.getValue();
+				var data = window.eval('('+js+')');
+			}catch(e){
+				$log.error("测试失败：模拟数据异常："+e);
+				return;
+			}
+
+			if(runStatus.type == 'js'){
+				try{
+					var code = runStatus.runcode;
+					code = code.replace(/^function\(\$\_context\)/m,"return $&");
+					//alert(code)
+					var tpl =  window.eval("(function(lite__impl_def,lite__impl_get){"+(code||null)+"})");
+					tpl = new Template(tpl);
+					var result = tpl.render(data);
+				}catch(e){
+					$log.error("测试失败：模板运行异常："+tpl.render+e);
+					return;
+				}
+				showResult(result);
+			}else {
+				var loader = document.getElementById('resultLoader');
+				loader.style.display = 'block';
+				try{
+					if(runStatus.type == 'php'){
+						var code = runStatus.runcode+'\nlite_template_test_xhtml(json_decode('+stringifyJSON(stringifyJSON(data))+',true));'
+						var url = 'http://litetest.sinaapp.com/?php='+encodeURIComponent(code)+'&t='+ +new Date();
+						loader.innerHTML = '<h2>load php result ....</h2><p>php 预览环境由新浪appengine提供。<a href="'+url+'">手动预览</a></p>';
+					
+					}else{
+						var code = runStatus.litecode;
+						var model = stringifyJSON(data);
+						var url = 'http://www.xidea.org:1981/lite/doc/runner.jsp?code='
+							+encodeURIComponent(code)+'&model='
+							+encodeURIComponent(model)+'&'+ +new Date();
+						loader.innerHTML = '<h2>load java result ....</h2><p>java 预览环境由满江红开源组织提供。<a href="'+url+'">手动预览</a></p>';
+					}
+				}catch(e){
+				}
+				var s = document.createElement('script');
+				s.src = url +'&callback=showResult'
+				loader.appendChild(s);
+			}
+		}
+		function showResult(result){
+			var resultSource = document.getElementById('resultSource');
+			exampleResult.style.display = 'block';
+			resultEditor.setValue(result);
+			var n = 0;
+			var i = setInterval(function a(){
+				resultSource.style.opacity = n/10;
+				if(n++>10){
+					document.getElementById('resultLoader').style.display = 'none'
+					resultSource.style.opacity = 1;
+					clearInterval(i);
+				}
+			},100)
+		}
 		//]]>
 					</script>
+					</div>
 				</div>
 				<div class="toolbar">
 					<input type="button" value="编译(JS)" onclick="compileToJS()" />
 					<input type="button" value="编译(PHP)" onclick="compileToPHP()" />
 					<input type="button" title="lite" value="编译(Java)" onclick="compileToLite()" />
-					<input type="button" value="运行" onclick="runTemplate()" />
+					<input type="button" id="runButton" disabled value="运行" onclick="runTemplate()" />
 				</div>
 			</div>
 		</div>

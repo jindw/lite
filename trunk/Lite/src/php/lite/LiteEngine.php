@@ -178,7 +178,7 @@ function lite_op__invoke($obj,$member,$args){
 	}
 }
 /* ================ 内部函数 ==================*/
-function lite__2($date,$pattern,$raw){
+function lite__2($pattern,$date,$raw){
 	if($raw){
 		$pattern = preg_replace('/YYY+/','Y',$pattern);
 		$pattern = preg_replace('/\w/','\\\$0',$pattern);

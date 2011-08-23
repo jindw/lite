@@ -310,6 +310,14 @@ a:hover{
 	border-radius: 3px 3px 3px 3px;
 	cursor:pointer;
 }
+#resultLoader{
+	border-radius: 8px;
+	background-color: #494;
+	padding:15px;
+	display:none;
+	color:#FFF;
+}
+
 .api .runner{
 	background-color: #330;
 	color:#FFF;
