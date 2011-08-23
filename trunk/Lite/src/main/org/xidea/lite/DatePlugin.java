@@ -113,7 +113,11 @@ public class DatePlugin implements RuntimePlugin {
 		if (date == null) {
 			date = new Date();
 		} else if (!(date instanceof Date)) {
-			date = new Date(((Number) date).longValue());
+			if(date instanceof Number){
+				date = new Date(((Number) date).longValue());
+			}else{
+				date = new Date();
+			}
 		}
 		out.write(format((String)pattern, (Date)date));
 	}

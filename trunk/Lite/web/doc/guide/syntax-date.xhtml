@@ -43,7 +43,7 @@
 		</ul>
 		<h3>示例：</h3>
 		<ul>
-			<x:code model="{date:new Date()}">
+			<x:code model="{date:+new Date()}">
 				<![CDATA[
 				<div> 
 				  今天是：<c:date-format pattern="YYYY-MM-DD" value="${date}"/>
@@ -57,7 +57,7 @@
 				<i>
 					小技巧1：我们可以通过自定义模板函数，实现日期格式化的函数支持：
 					<ul>
-					<x:code model="{date:new Date()}">
+					<x:code model="{date:+new Date()}">
 				<![CDATA[
 				<c:def name="dateFormat(date)"><c:date-format pattern="YYYY-MM-DD hh:mm:ss" value="${date}"/></c:def>
 				<div>
