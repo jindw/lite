@@ -32,7 +32,7 @@
 		$wait = 3000;
     	echo "<p>正在执行文档编译...</p>";
 		flush();
-		$log = lite_exec("java -Dfile.encoding=UTF-8 -jar ../../../workspace/Lite2/build/dest/Lite.jar -includes /doc/guide/*.xhtml -root ../ -output ../ -translators php");
+		$log = lite_exec("java -Dfile.encoding=UTF-8 -jar ../../../workspace/Lite2/build/dest/Lite.jar -includes /doc/guide/*.xhtml -root ../ -output ../ -translator php");
 		echo '<p>'.htmlspecialchars($log).'</p>';
 		flush();
 	}
