@@ -245,7 +245,7 @@ var xmlSourceMap = {};
 						<!-- 禁止IE用户 -->
 						<div>
 							<form method="POST"
-								onsubmit="return commitMessage(this.username.value,this.email.value,this.content.value) || this.reset() || false">
+								onsubmit="return commitMessage(this.username.value,this.email.value,this.content.value) || (this.content.value='') || false">
 								<label>大名:<input name="username" required="required" /></label>
 								<label>email:<input name="email" type="email" /></label>
 								<br/>
@@ -266,9 +266,19 @@ var xmlSourceMap = {};
 						}
 						var messageContainer = document.getElementById('messages');
 						var messageData = ${messages}||[];
+						var cookie = document.cookie;
+						var liteuser = cookie.replace(/^(?:[\s\S]*;\s*)?lite_user=([^;\s]+)[\s\S]*$/,'$1')
+						if(cookie != liteuser){
+							var f = document.forms;
+							f = f[f.length-1];
+							liteuser = decodeURIComponent(liteuser).split('\n')
+							f.username.value = liteuser[0];
+							f.email.value = liteuser[1];
+						}
 						messageContainer.innerHTML = renderMessage(messageData);
 						function commitMessage(username,email,content){
 							try{
+								document.cookie = "lite_user="+encodeURI(username+'\n'+email);
 								var item = {username:username,email:email,content:content,postTime:+new Date()};
 								messageData.push(item);
 								messageContainer.innerHTML = renderMessage(messageData);

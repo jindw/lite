@@ -25,7 +25,7 @@
 					<strong>&<"</strong>
 					三个XML特殊字符（所有XML属性将自动规范为" 做为属性引号！）
 				</li>
-				<li>src,href,form@action等，属性中出现的模板变量，将先做自动url编码（encodeURIComponent），再做html属性编码
+				<li>src,href,form@action等，属性中出现的模板变量，将先做自动url编码（encodeURI），再做html属性编码
 				</li>
 				<li>on* (事件脚本) 中出现的模板变量，将先做JSON.stringify 编码再做XML属性编码</li>
 				<li>script 中出现的模板变量，将做JSON.stringify
@@ -40,6 +40,7 @@
 					<![CDATA[
 					{
 						title:"特殊字符\"&&lt;",
+						url:"http://www.xidea.org/lite?test=测试#1234"
 						content:"危险代码&lt;script>alert(\"想做点坏事，能得逞吗？\") &lt;\/script>",
 						"disabled":null,
 						data:{p1:"属性1",p2:"属性2"}
@@ -50,7 +51,8 @@
 					<![CDATA[
 					<!-- javascript自动编码(JSON.stringify) -->
 					<div onclick="alert(${content})">...</div>
-					<!-- URL 自动编码(encodeURIComponent) -->
+					<!-- URL 自动编码(encodeURI) -->
+					<a href="${url}">encodeURI转义</a>
 					<a href="/test?p1=${data.p1}&p2=${data.p2}&p3=${'中文自动编码'}">...</a>
 					<!-- xml/html自动编码  -->
 					<p title="${title}">${content}</p>
