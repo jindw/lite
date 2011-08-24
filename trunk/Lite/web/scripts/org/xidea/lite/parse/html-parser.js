@@ -25,7 +25,7 @@ var HTML = {
 	 * <!--<![endif]-->
 	 */
 	parse8:function(comm){//comment
-		var text = comm.textContent;
+		var text = comm.textContent || comm.data;
 		var match = text.match(/^\[if\s[^\]]+\]>|<!\[endif\]$/ig);
 		if(match){
 			if(match.length == 1){

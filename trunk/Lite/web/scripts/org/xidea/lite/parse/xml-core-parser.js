@@ -137,6 +137,7 @@ var Core = {
 		var ns = findXMLAttribute(node,'*namespace','ns');
 		var file = findXMLAttribute(node,'file');
 		var pkg = findXMLAttribute(node,'package');
+		
 		if(pkg){
 			source = pkg;
 		}else if(file){

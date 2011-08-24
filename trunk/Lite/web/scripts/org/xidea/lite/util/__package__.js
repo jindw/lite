@@ -12,3 +12,8 @@ this.addScript('kv.js',["setByKey","getByKey","removeByKey"]);
 this.addScript('resource.js',["URI","encodeURIComponent","decodeURIComponent"]);
 
 this.addDependence("*",'org.xidea.jsi:$log',true);
+/*
+//nodejs
+this.addScript("_xmlparser.js","DOMParser");
+this.addDependence("xml.js",'DOMParser',true);
+// */
