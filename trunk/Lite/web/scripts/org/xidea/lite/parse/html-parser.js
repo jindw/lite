@@ -155,13 +155,16 @@ var HTML_EXT = {
 		}
 	}
 }
-var moveList = ['parseClient','parse2Client','seekClient'];
+var moveList = ['parseclient','parse2client','seekclient'];
 function buildMoved(tag){
-	var fn = Core[tag];
-	HTML_EXT[tag]= fn;
-	Core[tag] = function(){
-		$log.info("标签:"+tag+ " 已经从core到：html-ext上了！")
-		fn.apply(this,arguments);
+	if(tag){
+		var fn = Core[tag];
+		HTML_EXT[tag]= fn;
+		Core[tag] = function(){
+			$log.info("标签:"+tag+ " 已经从core到：html-ext上了！")
+			fn.apply(this,arguments);
+		}
+		return true;
 	}
 }
 while(buildMoved(moveList.pop()));

@@ -158,6 +158,9 @@ function normalizeLiteXML(text,uri){
     			}
     			return a;
     		}else if(scriptTag){
+    			if(tag == null){
+    				rootCount++;
+    			}
     			tag = {parentTag:tag};
     			var content = a.substring(scriptTag.length);
     			scriptTag = normalizeTag(scriptTag,tag,uri,getPositionAttr(offset));
