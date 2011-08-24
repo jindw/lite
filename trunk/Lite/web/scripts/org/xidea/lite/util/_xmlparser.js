@@ -21,7 +21,6 @@ DOMParser.prototype.parseFromString = function(text){
 	}
 	var t2 = +new Date();
 	var doc2 = new DOMImplementation().loadXML(text);
-	
 	var t3 = +new Date();
 	$log.info("时间差",t2-t1,t3-t2,doc2.documentElement.namespaceURI);
 	var isBrower = window.document && document.body
@@ -1690,7 +1689,9 @@ function DOMException(code) {
 
   this.code = code;
 };
-
+DOMException.prototype.toString = function(){
+	return this.code +":"+ DOMImplementation.prototype.translateErrCode(this.code);
+}
 // DOMException constants
 // Introduced in DOM Level 1:
 DOMException.INDEX_SIZE_ERR                 = 1;
@@ -1918,8 +1919,14 @@ DOMImplementation.prototype._parseLoop = function DOMImplementation__parseLoop(d
   // if namespaceAware, add default namespace
   if (this.namespaceAware) {
     var iNS = doc.createNamespace(""); // add the default-default namespace
-    iNS.setValue("http://www.w3.org/2000/xmlns/");
+    //iNS.setValue("http://www.w3.org/2000/xmlns/");
+    iNS.setValue("http://www.w3.org/1999/xhtml");
     doc._namespaces.setNamedItem(iNS);
+    
+    
+    //var iNS = doc.createNamespace("xml"); // add the default-default namespace
+    //iNS.setValue("http://www.w3.org/XML/1998/namespace");
+    //doc._namespaces.setNamedItem(iNS);
   }
 
   // loop until SAX parser stops emitting events
@@ -4509,7 +4516,7 @@ DOMDocument.prototype._genId = function DOMDocument__genId() {
  * @return : boolean
  */
 DOMDocument.prototype._isValidNamespace = function DOMDocument__isValidNamespace(namespaceURI, qualifiedName, isAttribute) {
-
+//alert([namespaceURI, qualifiedName, isAttribute])
   if (this._performingImportNodeOperation == true) {
     //we're doing an importNode operation (or a cloneNode) - in both cases, there
     //is no need to perform any namespace checking since the nodes have to have been valid
