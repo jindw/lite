@@ -1,3 +1,26 @@
+function XPathEvaluator(){
+	
+}
+XPathEvaluator.prototype.evaluate = function(xpath,currentNode){
+	var result = currentNode.selectNodeSet(xpath.replace(/\bxhtml\:(\w+)/g,'$1'));
+	var i = 0;
+	result.iterateNext = function(){
+		if(i<this.length){
+			return this.item(i++);
+		}
+	}
+}
+//        //var nsResolver = xpe.createNSResolver(doc.documentElement);
+//        var result = xpe.evaluate(xpath, currentNode, function(prefix){return nsMap[prefix]}, 5, null);
+//        var node;
+//        var nodes = [];
+//        while (node = result.iterateNext()){
+//            nodes.push(node);
+//        }
+//        nodes.item = nodeListItem;
+
+
+
 // =========================================================================
 //
 // xmlxpath.js - a partially W3C compliant XPath parser for XML for <SCRIPT>
@@ -206,7 +229,7 @@ DOMNode.prototype._findExpressionEnd = function(expression, startCharacter, endC
     var intCount = expression.length;
 
 
-    for (intLoop = 0; intLoop < intCount; intLoop++) {
+    for (var intLoop = 0; intLoop < intCount; intLoop++) {
         var character = expression.charAt(intLoop);
         switch(character) {
             case startCharacter:
@@ -304,7 +327,7 @@ DOMNode.prototype._filterByName = function(expr, containerNodeSet) {
 
     //our name will be the text after the quoteChar until the next quoteChar is found
     var name = "";
-    for (intLoop = equalLocation + 2; intLoop < expr.length; intLoop++) {
+    for (var intLoop = equalLocation + 2; intLoop < expr.length; intLoop++) {
         if (expr.charAt(intLoop) == quoteChar) {
             break;
         }
@@ -342,7 +365,7 @@ DOMNode.prototype._filterByPosition = function(expr, containerNodeSet) {
     //OK, it wasn't last so that means there's a numeric number here. Find it
     var intCount = tmpPos.length;
     var positionStr = "";
-    for (intLoop = 0; intLoop < intCount; intLoop++) {
+    for (var intLoop = 0; intLoop < intCount; intLoop++) {
         if (isNaN(positionStr + tmpPos.charAt(intLoop)) == false) {
             positionStr+=tmpPos.charAt(intLoop);
         }
@@ -379,7 +402,8 @@ DOMNode.prototype._filterByPosition = function(expr, containerNodeSet) {
 // =========================================================================
 DOMNode.prototype._filter = function(expr, containerNodeSet) {
 
-  expr = trim(expr, true, true);
+  //expr = trim(expr, true, true);
+  expr = expr.replace(/\s+|\s+/g,'');
 
   //handle not()
   if (expr.indexOf("not(") == 0) {
@@ -909,8 +933,8 @@ DOMNode.prototype.selectNodeSet_recursive = function (locationPath) {
     // parse Predicates
     var predicateList = this._parsePredicates(predicateListStr);
         
-    // apply each predicate in turn
-    for (predicate in predicateList) {
+    // apply each  in turn
+    for (var predicate in predicateList) {
       // filter NodeSet by applying Predicate
       candidateNodeSet = candidateNodeSet.filter(predicateList[predicate]);
     }
@@ -1142,7 +1166,7 @@ DOMNode.prototype._parsePredicates = function(predicateListStr) {
 // XPATHNodeSet - Container of Nodes selected by XPath (sub)expression
 //
 // @extends
-// DOMNodeList
+// 
 //
 // @author
 // Jon van Noort (jon@webarcana.com.au)
@@ -1151,7 +1175,7 @@ DOMNode.prototype._parsePredicates = function(predicateListStr) {
 // doc : string - the dom document that actually contains the Node data
 // arr : [int]  - initial set of DOMNode _id(s)
 // ========================================================================= 
-XPATHNodeSet = function(ownerDocument, parentNode, nodeList) {
+var XPATHNodeSet = function(ownerDocument, parentNode, nodeList) {
   this.DOMNodeList = DOMNodeList;
   this.DOMNodeList(ownerDocument, parentNode);
    if (nodeList) {
@@ -1695,7 +1719,7 @@ function __removeFirstArrayElement(oldArray) {
     var newArray = new Array();
 
     try {
-        for (intLoop = 1; intLoop < oldArray.length; intLoop++) {
+        for (var intLoop = 1; intLoop < oldArray.length; intLoop++) {
             newArray[newArray.length] = oldArray[intLoop];
         }
     }

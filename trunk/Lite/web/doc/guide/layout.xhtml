@@ -232,7 +232,7 @@ var xmlSourceMap = {};
 						<c:def name="formatTime(date)">
 							<c:date-format pattern="YYYY-MM-DDThh:mm" value="${date}"/>
 						</c:def>
-						<c:client name="renderMessage(messages)">
+						<h:client name="renderMessage(messages)">
 							<c:for var="message" list="${messages.concat().reverse()}">
 								<div class="message-${for.index%2}">
 									<div title="mail to:${message.email.replace('@','?')}">@${message.username} : ${formatTime(message.postTime)}</div>
@@ -241,7 +241,7 @@ var xmlSourceMap = {};
 									</div>
 								</div>
 							</c:for>
-						</c:client>
+						</h:client>
 						<!-- 禁止IE用户 -->
 						<div>
 							<form method="POST"
