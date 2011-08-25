@@ -56,7 +56,7 @@ public class LiteCompiler {
 				for (String path : this.resourceManager.getLinkedResources()) {
 					this.processFile(path);
 				}
-				if (linked) {
+				if (linked && !output.equals(root)) {
 					List<String> lrs = this.resourceManager
 							.getLinkedResources();
 					for (String rp : lrs) {
