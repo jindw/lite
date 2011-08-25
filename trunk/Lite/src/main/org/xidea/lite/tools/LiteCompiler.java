@@ -2,22 +2,16 @@ package org.xidea.lite.tools;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.el.impl.CommandParser;
 import org.xidea.el.json.JSONEncoder;
-import org.xidea.jsi.JSIRuntime;
 import org.xidea.lite.impl.HotTemplateEngine;
-import org.xidea.lite.impl.ParseUtil;
 import org.xidea.lite.parse.ParseContext;
 
 public class LiteCompiler {
@@ -46,19 +40,15 @@ public class LiteCompiler {
 					// "-root","D:\\workspace\\FileServer/src/main/org/jside/filemanager/","-litecode","D:\\workspace\\FileServer/build/dest/lite","-nodeParsers","org.xidea.lite.parser.impl.HTMLNodeParser"
 					"-root", "D:\\workspace\\Lite2/web/", "-output",
 					"D:\\workspace\\Lite2/build/dest/web",
-					//"-path","/doc/guide/index.xhtml",
-					"-includes","/doc/guide/*.xhtml",
-					"-excludes","/doc/guide/layout.xhtml", "-translators", "php" };
+					// "-path","/doc/guide/index.xhtml",
+					"-includes", "/doc/guide/*.xhtml", "-excludes",
+					"/doc/guide/layout.xhtml", "-translators", "php" };
 		}
 		new LiteCompiler(args).execute();
 	}
 
 	public void execute() {
 		try {
-			if(root == null || output == null){
-				log.error("必须指定 -root 和 -output 参数！！");
-				return;
-			}
 			initialize();
 			this.resultMap = new LinkedHashMap<String, byte[]>();
 			if (path == null) {
@@ -67,24 +57,13 @@ public class LiteCompiler {
 					this.processFile(path);
 				}
 				if (linked) {
-					List<String> lrs = this.resourceManager.getLinkedResources();
+					List<String> lrs = this.resourceManager
+							.getLinkedResources();
 					for (String rp : lrs) {
 						this.processFile(rp);
 					}
 				}
-				if (!output.exists()) {
-					if (output.getName().endsWith(".zip")) {
-						output.getParentFile().mkdir();
-						output.createNewFile();
-					} else {
-						output.mkdir();
-					}
-				}
-				if (output.getName().endsWith(".zip")) {
-					this.writeZipResult();
-				} else {
-					this.writeDirResult();
-				}
+				LiteCompilerHelper.writeOutput(this.resultMap, this.output);
 			} else {
 				this.processFile(path);
 			}
@@ -94,56 +73,33 @@ public class LiteCompiler {
 		}
 	}
 
-	private void writeZipResult() throws IOException {
-		ZipOutputStream zipos = new ZipOutputStream(
-				new FileOutputStream(output));
-		for (String path : resultMap.keySet()) {
-			zipos.setMethod(ZipOutputStream.DEFLATED);
-			zipos.putNextEntry(new ZipEntry(path.substring(1)));
-			zipos.write(resultMap.get(path));
-		}
-		zipos.flush();
-		zipos.finish();
-		zipos.close();
-	}
-
-	private void writeDirResult() throws IOException {
-		for (String path : resultMap.keySet()) {
-			byte[] data = resultMap.get(path);
-			File cachedFile = new File(output, path);
-			cachedFile.getParentFile().mkdirs();
-			OutputStream out = new FileOutputStream(cachedFile);
-			try {
-				out.write(data);
-				out.flush();
-				log.info("文件写入成功:" + cachedFile);
-			} finally {
-				out.close();
-			}
-		}
-
-	}
-
 	protected void initialize() throws IOException {
 		if (root == null) {
-			root = new File("./");
+			root = new File("./").getAbsoluteFile();
+		}
+
+		if (output == null) {
+			log.error("必须指定 -output 参数！！");
+			throw new IllegalArgumentException(" -output is required!!");
+		} else {
+			if (output.equals(root)) {
+				String[] includes = this.includes;
+				LiteCompilerHelper.checkOutput(includes);
+			}
 		}
 		if (config == null) {
 			config = new File(root, "/WEB-INF/lite.xml");
 		}
-		if(this.resourceManager == null){
-			this.resourceManager = new ResourceManagerImpl(root.toURI(), config.toURI());
+		if (this.resourceManager == null) {
+			this.resourceManager = new ResourceManagerImpl(root.toURI(), config
+					.toURI());
 		}
-		if(engine == null){
+		if (engine == null) {
 			engine = new HotTemplateEngine(resourceManager);
 		}
-		if (output != null) {
-			if (!output.exists()) {
-				log.info("mkdirs:" + output);
-				output.mkdirs();
-			}
-		}
 	}
+
+	
 
 	public void processDir(final File dir, final String path) {
 		log.info("处理目录：" + dir.getAbsolutePath());
@@ -188,7 +144,7 @@ public class LiteCompiler {
 				if (path.equals(layout)) {
 					return false;
 				}
-				String path2 = translatePath(path);
+				String path2 = LiteCompilerHelper.translatePath(path);
 				String result = engine.getLiteCode(path);
 
 				String encoding = resourceManager.getFeatureMap(path).get(
@@ -197,7 +153,8 @@ public class LiteCompiler {
 				this.resultMap.put(path2, result.getBytes("utf-8"));
 				if (this.translator != null) {
 					if ("php".equals(translator)) {
-						this.buildPHP(path, result, encoding);
+						LiteCompilerHelper.buildPHP(path, result, encoding,
+								this.resultMap);
 					}
 				}
 
@@ -219,22 +176,6 @@ public class LiteCompiler {
 			}
 			return true;
 		}
-	}
-
-	private String translatePath(final String path) {
-		return "/WEB-INF/litecode/" + path.replace('/', '^');
-	}
-
-
-	private void buildPHP(String path, String litecode, String encoding)
-			throws IOException {
-		JSIRuntime runtime = ParseUtil.getJSIRuntime();
-		Object translator = runtime
-				.eval("new ($import('org.xidea.lite.impl.php:PHPTranslator',{}))('"
-						+ path + "'," + litecode + ")");
-		String result = (String) runtime.invoke(translator, "translate");
-		this.resultMap.put(translatePath(path) + ".php", result
-				.getBytes(encoding));
 	}
 
 	public void setRoot(File webRoot) {
