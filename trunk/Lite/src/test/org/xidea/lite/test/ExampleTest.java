@@ -149,7 +149,7 @@ public class ExampleTest {
 		pc.parse(ParseUtil.loadXML(source));
 		StringWriter out = new StringWriter();
 		System.out.println(JSONEncoder.encode(pc.toList()));
-		new Template(pc.toList()).render(JSONDecoder.decode(contextJSON),
+		new Template(pc.toList(),null).render(JSONDecoder.decode(contextJSON),
 				out);
 		String java = out.toString();
 		Assert.assertEquals("JS结果与Java不一致:"+key, sumText((String) jsJSON),

@@ -145,7 +145,7 @@ public class WebServer {
 				long time = manager == null? -1:lastModified(manager.getScriptFileList());
 				if(time <0 || lastModified != time){
 					manager = new ResourceManagerImpl(base, base.resolve("WEB-INF/lite.xml"));
-					ht = new HotTemplateEngine((ParseConfig)manager);
+					ht = new HotTemplateEngine((ParseConfig)manager,null);
 					final List<File> scriptFileList = manager.getScriptFileList();
 					new File(new File(base),"WEB-INF").listFiles(new FileFilter() {
 						public boolean accept(File file) {

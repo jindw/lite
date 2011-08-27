@@ -15,9 +15,15 @@
  * 
  */
 class LiteService{
-	function LiteService($root,$litecode){
-		$this->root = $root;
-		$this->litecode = $litecode;
+	/**
+	 * Lite 模板编译服务
+	 * 编译服务的三个重要设置(debug/root/litecode)不可修改，只能俺TemplateEngine 默认设置
+	 */
+	function LiteService(){
+		require_once('LiteEngine.php');
+		$engine = new LiteEngine();
+		$this->root = $engine->root;
+		$this->litecode = $engine->litecode;
 	}
 	function resetService($file){
 		$root = @$_SERVER['DOCUMENT_ROOT'] ;
@@ -177,5 +183,23 @@ class LiteService{
 		
 	}
 }
+
+/**
+ * 设置模板目录和模板缓存目录
+ */
+$service = new LiteService(dirname(realpath(__FILE__)).'/WEB-INF/litecode');
+
+/**
+ * 重置URL 地址(有的网站可能配在子目录中,不推荐!!)
+ */
+$service->resetService(__FILE__);
+
+
+
+if(!array_key_exists('LITE_SERVICE_URL',$_REQUEST)){
+	$_REQUEST['LITE_SERVICE_URL'] = $_SERVER['SCRIPT_NAME'];
+}
+$service->execute();
+
 
 ?>

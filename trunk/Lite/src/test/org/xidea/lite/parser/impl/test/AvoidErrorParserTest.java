@@ -134,7 +134,7 @@ public class AvoidErrorParserTest {
 
 	private String toString(ParseContext context) throws IOException {
 		StringWriter out = new StringWriter();
-		new Template(context.toList()).render(this, out);
+		new Template(context.toList(),null).render(this, out);
 		String result = out.toString();
 		return result;
 	}

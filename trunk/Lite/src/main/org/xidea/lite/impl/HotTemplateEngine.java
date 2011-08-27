@@ -11,6 +11,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,23 +30,17 @@ public class HotTemplateEngine extends TemplateEngine {
 	private URI compiledBase;
 	private boolean checkFile;
 
-	public HotTemplateEngine(URI base) {
-		super(base);
+	public HotTemplateEngine(URI root, URI config,URI compiledBase) {
+		this(new ParseConfigImpl(root, config),compiledBase);
 	}
 
-	public HotTemplateEngine(URI root, URI config) {
-		this(new ParseConfigImpl(root, config));
-	}
-
-	public HotTemplateEngine(ParseConfig config) {
+	public HotTemplateEngine(ParseConfig config,URI compiledBase) {
 		super(config.getRoot());
 		this.checkFile = true;
 		this.config = config;
-	}
-
-	public void setCompiledBase(URI compiledBase) {
 		this.compiledBase = compiledBase;
 	}
+
 
 	protected ParseContext createParseContext(String path) {
 		return new ParseContextImpl(config, path);
@@ -116,15 +111,21 @@ public class HotTemplateEngine extends TemplateEngine {
 				files.add(new File(base, p));
 			}
 		}
-		Template template = new Template(items);
+		Template template = new Template(items,context.getFeatureMap());
 		
 		if(compiledBase!=null && ParseUtil.isFile(compiledBase)){
 			File file = new File(toCompiedURI(path));
-			file.getParentFile().mkdirs();
-			OutputStreamWriter out = new OutputStreamWriter(
+			try{
+				file.getParentFile().mkdirs();
+				OutputStreamWriter out = new OutputStreamWriter(
 					new FileOutputStream(file), "UTF-8");
-			out.write(buildLiteCode(context, items));
-			out.close();
+				out.write(buildLiteCode(context, items));
+				out.close();
+			}catch(Exception e){
+				if(log.isDebugEnabled()){
+					log.debug("complie result("+path+") save failed",e);
+				}
+			}
 		}
 		long end = System.currentTimeMillis();
 		log.info("lite compile success;\t time used: "+(end - begin)+"ms;\t resource dependence："+path+":\t"+files);
@@ -177,7 +178,7 @@ public class HotTemplateEngine extends TemplateEngine {
 				log.info("文件关联："+path+":\t"+files);
 				infoMap.put(path, entry);
 			}
-			return new Template((List<Object>) list.get(1));
+			return new Template((List<Object>) list.get(1),(Map<String,String>)list.get(2));
 		} catch (RuntimeException e) {
 			log.error("装载模板中间代码失败", e);
 			return null;

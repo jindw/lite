@@ -54,7 +54,7 @@ public class TextParserTest {
 		ParseContext context = LiteTestUtil.buildParseContext(new URI("http://localhost:8080/"));
 		p.parse(text, context, null);
 		List<Object> insts = context.toList();
-		Template t = new Template(insts);
+		Template t = new Template(insts,context.getFeatureMap());
 		Writer out = new StringWriter();
 		t.render(new HashMap<Object, Object>(), out);
 		Assert.assertEquals(result, out.toString());

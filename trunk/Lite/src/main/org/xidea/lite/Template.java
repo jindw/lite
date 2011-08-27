@@ -21,6 +21,10 @@ import org.xidea.el.impl.ReflectUtil;
 
 public class Template {
 	private static Log log = LogFactory.getLog(Template.class);
+	// 默认值为utf-8
+	public static final String FEATURE_ENCODING = "http://www.xidea.org/lite/features/output-encoding";
+	// 默认值为 text/html
+	public static final String FEATURE_MIME_TYPE = "http://www.xidea.org/lite/features/output-mime-type";
 	
 	public static final int EL_TYPE = 0; // [0,<el>]
 	public static final int IF_TYPE = 1; // [1,[...],<test el>]
@@ -47,13 +51,19 @@ public class Template {
 
 	protected Object[] items;// transient＄1�7
 
+	private Map<String, String> featureMap;
+
 	protected Template() {
 	}
 
-	public Template(List<Object> list) {
+	public Template(List<Object> list,Map<String, String> featureMap) {
 		this.items = this.compile(list);
+		this.featureMap = featureMap;
 	}
 
+	public String getFeature(String key){
+		return featureMap.get(key);
+	}
 	public void render(Object context, Writer out) throws IOException {
 		ValueStack contextMap;
 		if (context instanceof ValueStack) {

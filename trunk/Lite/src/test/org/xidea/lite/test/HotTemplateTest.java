@@ -21,7 +21,7 @@ public class HotTemplateTest {
 		File root = new File(new File(uri),"../../").getCanonicalFile();
 		File config = new File(root,"WEB-INF/lite.xml");
 		System.out.println(root);
-		HotTemplateEngine ht = new HotTemplateEngine(new ParseConfigImpl(root.toURI(), config.toURI()));
+		HotTemplateEngine ht = new HotTemplateEngine(new ParseConfigImpl(root.toURI(), config.toURI()),null);
 		StringWriter out = new StringWriter();
 		ht.getTemplate("/example/test.xhtml").render(new Object(),out);
 		System.out.println(out);
@@ -38,9 +38,9 @@ public class HotTemplateTest {
 		String path = "org/xidea/lite/test/input.xml";
 		URI root = this.getClass().getResource("/").toURI();
 		System.out.println(root);
-		HotTemplateEngine ht = new HotTemplateEngine(new ParseConfigImpl(root, null));
+		HotTemplateEngine ht = new HotTemplateEngine(new ParseConfigImpl(root, null),null);
 		cacheTest(path, ht);
-		ht = new HotTemplateEngine(new ParseConfigImpl(URI.create("classpath:///"),null));
+		ht = new HotTemplateEngine(new ParseConfigImpl(URI.create("classpath:///"),null),null);
 		cacheTest(path, ht);
 	}
 	
@@ -51,7 +51,7 @@ public class HotTemplateTest {
 		String path = "/example/test.xhtml";
 		URI root = this.getClass().getResource("/").toURI().resolve("../../");
 		System.out.println(root);
-		HotTemplateEngine ht = new HotTemplateEngine(new ParseConfigImpl(root, null));
+		HotTemplateEngine ht = new HotTemplateEngine(new ParseConfigImpl(root, null),null);
 		cacheTest(path, ht);
 		StringWriter out = new StringWriter();
 		ht.render(path, new Object(), out);

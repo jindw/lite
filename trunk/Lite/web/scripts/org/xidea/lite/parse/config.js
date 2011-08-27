@@ -27,7 +27,7 @@
  * ]
  */
 function ParseConfig(root,json){
-	this._root = new URI(root||(window.location?window.location.href.replace(/(.*?\w\/).*/,'$1'):'http://localhost/'));
+	this.root = new URI(root||(window.location?window.location.href.replace(/(.*?\w\/).*/,'$1'):'http://localhost/'));
 	if(json){
 		var result = [];
 		var i = json.length
@@ -38,9 +38,9 @@ function ParseConfig(root,json){
 			item.excludes = new RegExp(item.excludes||"^$");
 			result[i] = item;
 		}
-		this._config = result;
+		this._groups = result;
 	}else{
-		this._config = defaultConfig;
+		this._groups = defaultConfig;
 	}
 }
 function copy(source,dest){
@@ -66,14 +66,14 @@ ParseConfig.prototype = {
 //	},
 	getFeatureMap:function(path){
 		var result = {}
-		var g = findGroup(this._config,path,null);
+		var g = findGroup(this._groups,path,null);
 		if(g){
 			copy(g.featureMap,result);
 		}
 		return result;
 	},
 	getExtensionMap:function(path){
-		var g = findGroup(this._config,path,null);
+		var g = findGroup(this._groups,path,null);
 		if(g){
 			return g.extensionMap;
 		}

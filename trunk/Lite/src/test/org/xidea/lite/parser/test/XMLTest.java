@@ -110,7 +110,7 @@ public class XMLTest {
 		List<Object> insts = LiteTestUtil.parse(text);
 		checkElse(insts,info);
 //		System.out.println(JSONEncoder.encode(insts));
-		Template t = new Template(insts);
+		Template t = new Template(insts,null);
 		Writer out = new StringWriter();
 		t.render(new HashMap(context), out);
 		assertXMLEquals(info+text+":\n"+result,result, out.toString());

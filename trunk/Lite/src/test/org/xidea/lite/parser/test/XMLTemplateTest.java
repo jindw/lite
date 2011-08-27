@@ -25,7 +25,7 @@ public class XMLTemplateTest {
 	public Object getTemplate(URL resource) throws Exception {
 		ParseContext context = LiteTestUtil.buildParseContext(null);
 		context.parse(resource.toString());
-		return new Template(context.toList());
+		return new Template(context.toList(),context.getFeatureMap());
 	}
 
 	@Test

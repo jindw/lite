@@ -19,7 +19,7 @@ function liteFunction(source,config){
 		source = source.toXMLString();
 	case 'string':
     	if(/^\s*</.test(source)){
-    		data =  loadLiteXML(source,parseContext._config._root)
+    		data =  loadLiteXML(source,parseContext.config.root)
     		//parseContext.loadXML(source);
     	}else{
     		data = source;

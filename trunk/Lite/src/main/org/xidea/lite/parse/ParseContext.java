@@ -8,6 +8,7 @@ import java.util.Map;
 
 
 import org.w3c.dom.Document;
+import org.xidea.lite.Template;
 import org.xidea.lite.impl.ParseContextImpl;
 import org.xml.sax.SAXException;
 
@@ -23,9 +24,9 @@ public interface ParseContext extends ResultContext, ParserHolder {
 //	 默认值为空
 //	public String FEATURE_HTML_JAVASCRIPT_COMPRESSOR = "http://www.xidea.org/lite/features/html-javascript-compressor";
 	// 默认值为utf-8
-	public String FEATURE_ENCODING = "http://www.xidea.org/lite/features/output-encoding";
+	public String FEATURE_ENCODING = Template.FEATURE_ENCODING;
 	// 默认值为 text/html
-	public String FEATURE_MIME_TYPE = "http://www.xidea.org/lite/features/output-mime-type";
+	public String FEATURE_MIME_TYPE = Template.FEATURE_MIME_TYPE;
 	// 默认值为 null,可以采用相对路径模式：layout='./layout.xhtml'
 	public String FEATURE_LAYOUT = "http://www.xidea.org/lite/features/config-layout";
 

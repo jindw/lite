@@ -12,11 +12,11 @@ var defaultBase = new URI("lite:///");
  */
 function ParseContext(config,path){
 	config = config || new ParseConfig();
+    this.config = config;
 	this.currentURI = defaultBase;
 	this.featureMap = config.getFeatureMap(path);
     this.textType=0;
 	this._path = path;
-    this._config = config;
 	this._attributeMap = [[],[],{}]
     this._result = new ResultContext();
 	this._context = this;
@@ -111,8 +111,8 @@ ParseContext.prototype = {
 		
 	},
     createURI:function(path) {
-    	//$log.error(path,this.currentURI,this.config._root)
-    	var base = this._config._root.toString();
+    	//$log.error(path,this.currentURI,this.config.root)
+    	var base = this.config.root.toString();
     	if(path.indexOf(base) ==0){
     		path = path.substring(base.length-1);
     	}
@@ -136,7 +136,7 @@ ParseContext.prototype = {
     	if(uri.scheme == 'lite'){
     		var path = uri.path+(uri.query||'');
     		path = path.replace(/^\//,'./')
-    		uri = this.config._root.resolve(path);
+    		uri = this.config.root.resolve(path);
     	}
     	var xhr = new XMLHttpRequest();
 	    xhr.open("GET",uri,false)
@@ -149,13 +149,13 @@ ParseContext.prototype = {
     	if(path instanceof URI){
     	}else{
     		if(/^\s*</.test(path)){
-    			return loadLiteXML(path,this._config._root)
+    			return loadLiteXML(path,this.config.root)
     		}else{
     			path = new URI(path)
     		}
     	}
     	this.setCurrentURI(path);
-    	var doc = loadLiteXML(path,this._config._root);
+    	var doc = loadLiteXML(path,this.config.root);
     	this._context._loadTime+=(new Date()-t1);
     	return doc;
     },
@@ -164,14 +164,11 @@ ParseContext.prototype = {
 //    	if(uri.scheme == 'lite'){
 //    		var path = uri.path+(uri.query||'');
 //    		path = path.replace(/^\//,'./')
-//    		uri = this.config._root.resolve(path);
+//    		uri = this.config.root.resolve(path);
 //    	}
 //    	return Packages.org.xidea.lite.impl.ParseUtil.openStream(uri)
 		throw new Error("only for java");
     },
-//	getTextType:function(){
-//		return this._context.textType;
-//	},
 	setAttribute:function(key,value){
 		setByKey(this._context._attributeMap,key,value)
 	},
@@ -209,7 +206,7 @@ ParseContext.prototype = {
     	return this._resources;
     },
     createNew:function(){
-    	var nc = new ParseContext(this._config,this.currentURI);
+    	var nc = new ParseContext(this.config,this.currentURI);
     	nc.featureMap = this.featureMap;
     	nc._resources = this._resources;
     	return nc;

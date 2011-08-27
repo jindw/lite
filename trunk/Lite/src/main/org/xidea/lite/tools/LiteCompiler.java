@@ -95,7 +95,7 @@ public class LiteCompiler {
 					.toURI());
 		}
 		if (engine == null) {
-			engine = new HotTemplateEngine(resourceManager);
+			engine = new HotTemplateEngine(resourceManager,null);
 		}
 	}
 

@@ -15,7 +15,7 @@ public class TemplateEngineSerializeTest {
 	//@Test
 	public void test() throws IOException, ClassNotFoundException{
 		Object[] obj = new Object[]{new HotTemplateEngine(
-				new ParseConfigImpl(new File(".").toURI(),null))};
+				new ParseConfigImpl(new File(".").toURI(),null),null)};
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		ObjectOutputStream out2 = new ObjectOutputStream(out);
 		out2.writeObject(obj);

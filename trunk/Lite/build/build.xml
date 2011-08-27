@@ -92,6 +92,7 @@
 			</manifest>
 			<fileset dir="web/scripts">
 				<include name="org/xidea/**/*.js" />
+				<exclude name="**/nodejs/*.*" />
 			</fileset>
 			<fileset dir="src/php/">
 				<include name="lite/*.*" />

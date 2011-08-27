@@ -13,6 +13,15 @@
 
 class LiteEngine{
 	/**
+	 * 上线后建议关闭
+	 * 可以制定true,false,客户端 ip 匹配正则表达式.
+	 * 在调试模式下，用户可以自动编译并上传Lite模板编译结果和其他普通静态文件（js,css,png,gif,jpg,jpeg）
+	 * A：10.0.0.0-10.255.255.255
+	 * B：172.16.0.0-172.31.255.255
+	 * C：192.168.0.0-192.168.255.255 
+	 */
+	public $debug = '/^(?:127\.0\.0\.1|10\..+|172\.(?:1[6789]|2.|30|31)\..+|192\.168\..+|([0:]+1))$/';
+	/**
 	 * 模板根目录（建议为网站根目录）
 	 */
 	public $root;
@@ -20,14 +29,6 @@ class LiteEngine{
 	 * 中间代码根目录（默认为：/[网站根目录]/WEB-INF/litecode）
 	 */
 	public $litecode;	
-	/**
-	 * 上线后建议关闭
-	 * 可以制定true,false,客户端 ip 匹配正则表达式
-	 * A：10.0.0.0-10.255.255.255
-	 * B：172.16.0.0-172.31.255.255
-	 * C：192.168.0.0-192.168.255.255 
-	 */
-	public $debug = '/^(?:127\.0\.0\.1|10\..+|172\.(?:1[6789]|2.|30|31)\..+|192\.168\..+|([0:]+1))$/';
 	/**
 	 * 当前执行的模板示例
 	 */
@@ -37,20 +38,18 @@ class LiteEngine{
 	 * 上线后建议置空
 	 * 设置是编译器实现，有则自动编译，必须在$debug 为true时，才能生效
 	 */
-	public $compiler = "/lite-service.php";
+	public $compiler = "/WEB-INF/classes/lite/LiteService.php";
 	function LiteEngine($root=null,$litecode=null){
 		if(!$root){
 			$pos = strrpos(__FILE__,'WEB-INF');
 			$root = $pos ? substr(__FILE__,0,$pos) : $_SERVER['DOCUMENT_ROOT'];
 		}
-		
 		$this->root = strtr(realpath($root),'\\','/').'/';
 		if($litecode){
 			$this->litecode = $litecode.'/';
 		}else{
 			$this->litecode = $this->root.'WEB-INF/litecode/';
 		}
-		
 	}
 
 	function render($path,$context){

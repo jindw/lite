@@ -19,7 +19,7 @@ public class HTMLParserTest {
 
 	@Test
 	public void testSelect() throws Exception {
-		Template t = new Template(LiteTestUtil.parse("<select/>"));
+		Template t = new Template(LiteTestUtil.parse("<select/>"),null);
 		StringWriter out = new StringWriter();
 		t.render(new HashMap<Object, Object>(), out);
 		Assert.assertEquals("<select></select>", out.toString());
