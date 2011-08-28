@@ -13,8 +13,8 @@
  * 		"includes":["/example\\/*.xhtml"],
  * 		"excludes":[],
  * 		"featureMap":{
- *          "http://www.xidea.org/lite/features/output-encoding":"utf-8",
- * 			"http://www.xidea.org/lite/features/output-mime-type":"text/html",
+ *          "http://www.xidea.org/lite/features/encoding":"utf-8",
+ * 			"http://www.xidea.org/lite/features/content-type":"text/html;charset=UTF-8",
  * 			"http://www.xidea.org/lite/features/html-javascript-compressor":"org.jside.jsi.tools.JSACompressor"
  * 		},
  * 		"extensions":[
@@ -87,9 +87,9 @@ var defaultConfig = {
 		"excludes":/^$/,
 		"featureMap":{
 			//必要属性（控制xml编译）
-			"http://www.xidea.org/lite/features/output-encoding":"utf-8",
+			"http://www.xidea.org/lite/features/encoding":"utf-8",
 			//必要属性（控制xml编译）
-			"http://www.xidea.org/lite/features/output-mime-type":"text/html"
+			"http://www.xidea.org/lite/features/content-type":"text/html;charset=UTF-8"
 		},
 		"extensionMap":{
 			////xhtml 编译不是自带的，需要自己定义

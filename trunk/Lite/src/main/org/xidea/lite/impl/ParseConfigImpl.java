@@ -30,8 +30,8 @@ import org.xml.sax.SAXException;
  *   "includes":"^[\\\\/]example[\\\\/][^\\\\/]*\.xhtml$", 
  *   "excludes":"^$",//不匹配
  *   "featureMap":{ "http://www.xidea.org/lite/features/layout":"/layout.xhtml",
- *     "http://www.xidea.org/lite/features/output-encoding":"utf-8",
- *     "http://www.xidea.org/lite/features/output-mime-type":"text/html",
+ *     "http://www.xidea.org/lite/features/encoding":"utf-8",
+ *     "http://www.xidea.org/lite/features/content-type":"text/html",
  *     "http://www.xidea.org/feature/lite/html-javascript-compressor":"org.jside.jsi.tools.JSACompressor" 
  *   }, 
  *   "extensionMap":[]

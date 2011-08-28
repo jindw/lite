@@ -24,8 +24,8 @@
  * 		"excludes":"",
  * 		"featureMap":{
  * 			"http://www.xidea.org/lite/features/layout":"/layout.xhtml",
- * 			"http://www.xidea.org/lite/features/output-encoding":"utf-8",
- * 			"http://www.xidea.org/lite/features/output-mime-type":"text/html",
+ * 			"http://www.xidea.org/lite/features/encoding":"utf-8",
+ * 			"http://www.xidea.org/lite/features/content-type":"text/html;charset=UTF-8",
  * 			"http://www.xidea.org/lite/features/html-javascript-compressor":"org.jside.jsi.tools.JSACompressor"
  * 		},
  * 		"extensionMap":[
@@ -39,8 +39,8 @@
  * 		"includes":"^.*\.xhtml$",
  * 		"excludes":"",
  * 		"featureMap":{
- * 			"http://www.xidea.org/lite/features/output-encoding":"utf-8",
- * 			"http://www.xidea.org/lite/features/output-mime-type":"text/html"
+ * 			"http://www.xidea.org/lite/features/encoding":"utf-8",
+ * 			"http://www.xidea.org/lite/features/content-type":"text/html;charset=UTF-8"
  * 		},
  * 		"extensionMap":{
  * 			"http://www.w3.org/1999/xhtml":["org.xidea.lite.xhtml"]
@@ -74,9 +74,9 @@ function LiteGroup(node,parentConfig){
 	this.parentConfig = parentConfig || null
 	this.featureMap = {}
 	this.encoding= findXMLAttribute(node,'encoding','charset');
-	this.mimeType = findXMLAttribute(node,'mime-type','mimeType','mimiType','metaType');
-	this.layout = findXMLAttribute(node,'layout');
+	this.type = findXMLAttribute(node,'type');
 	this.contentType = findXMLAttribute(node,'contentType','contextType');
+	this.layout = findXMLAttribute(node,'layout');
 	this.extensionMap = {};
 	this.children = [];
 	this.includes = [];
@@ -141,43 +141,11 @@ LiteGroup.prototype.initialize = function(){
 		this.featureMap=featureMap;
 		this.extensionMap = margeExtensionMap(parentConfig.extensionMap,this.extensionMap);
 	}
-	if(this.encoding == null){
-		this.encoding = parentConfig && parentConfig.encoding;
-	}
-	if(this.mimeType == null){
-		this.mimeType = parentConfig && parentConfig.mimeType;
-	}
 	this.includes = compilePatterns(this.includes)
 	this.excludes = compilePatterns(this.excludes)
-	var contentType = this.contentType;
-	if(contentType!=null){
-		$log.warn("ContentType属性不被推荐，请采用mimeType和encoding代替")
-		var p = contentType.indexOf('charset=');
-		var encoding = this.encoding;
-		if(p>0){
-			var charset = contentType.substring(p+8);
-			if(encoding){
-				if(charset.toUpperCase() != encoding.toUpperCase()){
-					$log.error('encoding 与 contentType 不匹配'+encoding+','+contentType+'contentType 的设置将覆盖encoding 设置');
-					this.encoding=charset;
-				}
-			}else{
-				this.encoding = charset;
-			}
-			contentType =  contentType.substring(0,contentType.lastIndexOf(';'))
-		}
-		var mimeType = this.mimeType;
-		if(mimeType){
-			if(mimeType.toUpperCase() != contentType.toUpperCase()){
-				$log.error('mimeType 与 contentType 不匹配'+mimeType+','+contentType+'contentType 的设置将覆盖mimeType 设置');
-				this.mimeType=contentType;
-			}
-		}else{
-			this.mimeType=contentType;
-		}
-	}
-	this.featureMap["http://www.xidea.org/lite/features/output-encoding"] = this.encoding;
-	this.featureMap["http://www.xidea.org/lite/features/output-mime-type"] = this.mimeType;
+	mergeContentType(this,parentConfig);
+	this.featureMap["http://www.xidea.org/lite/features/encoding"] = this.encoding;
+	this.featureMap["http://www.xidea.org/lite/features/content-type"] = this.contentType;
 	if(this.layout != null){
 		if(!this.layout || this.layout.charAt() == '/'){
 			this.featureMap["http://www.xidea.org/lite/features/config-layout"] = this.layout;
@@ -186,6 +154,55 @@ LiteGroup.prototype.initialize = function(){
 		}
 		
 	}
+}
+function mergeContentType(thiz,parentConfig){
+	var type=thiz.type;
+	var encoding = thiz.encoding;
+	var contentType = thiz.contentType;//不从parent继承
+	/*========= init 3 vars==========*/
+	if(contentType!=null){
+		$log.info("contentType 用于同时指定 type 和charset 属性，如此需求更推荐您采用type和encoding代替")
+		var p = contentType.indexOf('charset=');
+		if(p>0){
+			var charset = contentType.substring(p+8);
+			if(encoding){
+				if(charset.toUpperCase() != encoding.toUpperCase()){
+					$log.info('encoding 与 contentType 不一致'+encoding+','+contentType
+						+"; ");
+				}
+			}else{
+				encoding = charset;
+			}
+		}
+		var contentType0 = contentType.replace(/\s*;.*$/,'');
+		if(type){
+			if(type.toUpperCase() != contentType0.toUpperCase()){
+				$log.error('type 与 contentType 不一致'+type+','+contentType0
+					+';type 设置将被忽略');
+			}
+		}
+		type = contentType0
+	}
+	/*========== init from parent ==============*/
+	if(encoding == null){
+		encoding = parentConfig && parentConfig.encoding || 'UTF-8';
+	}
+	if(type == null){
+		type = parentConfig && parentConfig.type;
+	}
+	if(contentType == null){//不继承
+		if(type){
+			contentType = type+";charset="+encoding;
+		}
+	}else{
+		var p = contentType.indexOf('charset=');
+		if(p<0){
+			contentType +=";charset="+encoding;
+		}
+	}
+	thiz.type = type;
+	thiz.encoding = encoding;
+	thiz.contentType = contentType;
 }
 function copy(source,dest){
 	for(var n in source){

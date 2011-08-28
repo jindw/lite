@@ -26,8 +26,8 @@
 
 var FOR_STATUS_KEY = '$__for';
 var VAR_LITE_TEMP="$__tmp";
-var ENCODING_KEY = 'http://www.xidea.org/lite/features/output-encoding';
-var MIME_TYPE_KEY = 'http://www.xidea.org/lite/features/output-mime-type';
+var ENCODING_KEY = 'http://www.xidea.org/lite/features/encoding';
+var CONTENT_TYPE_KEY = 'http://www.xidea.org/lite/features/content-type';
 
 //function checkEL(el){
 //    new Function("return "+el)
@@ -54,8 +54,8 @@ PHPTranslator.prototype = {
 		
 		context.encoding = this.featureMap && this.featureMap[ENCODING_KEY] ||"UTF-8";
 	    context.htmlspecialcharsEncoding = context.encoding ;
-	    var mimeType = this.featureMap && this.featureMap[MIME_TYPE_KEY];
-	    context.contentType = mimeType?mimeType+';charset='+context.encoding:null;
+	    var contentType = this.featureMap && this.featureMap[CONTENT_TYPE_KEY];
+	    context.contentType = contentType;
 	    
 		context.parse();
 		var code = context.toSource();

@@ -113,9 +113,8 @@ public class TemplateServlet extends GenericServlet {
 		}
 
 		Template template = templateEngine.getTemplate(path);
-		String mimeType = template.getFeature(Template.FEATURE_MIME_TYPE);
-		String encoding = template.getFeature(Template.FEATURE_ENCODING);
-		resp.setContentType(mimeType+";charset="+encoding);
+		String contentType = template.getFeature(Template.FEATURE_CONTENT_TYPE);
+		resp.setContentType(contentType);
 		template.render(createModel(request), resp.getWriter());
 	}
 

@@ -21,10 +21,8 @@ import org.xidea.el.impl.ReflectUtil;
 
 public class Template {
 	private static Log log = LogFactory.getLog(Template.class);
-	// 默认值为utf-8
-	public static final String FEATURE_ENCODING = "http://www.xidea.org/lite/features/output-encoding";
 	// 默认值为 text/html
-	public static final String FEATURE_MIME_TYPE = "http://www.xidea.org/lite/features/output-mime-type";
+	public static final String FEATURE_CONTENT_TYPE = "http://www.xidea.org/lite/features/content-type";
 	
 	public static final int EL_TYPE = 0; // [0,<el>]
 	public static final int IF_TYPE = 1; // [1,[...],<test el>]
