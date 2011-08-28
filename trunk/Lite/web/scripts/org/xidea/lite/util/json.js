@@ -41,7 +41,7 @@ function charReplacer(item) {
  * JSON 串行化实现
  * @internal
  */
-function stringifyJSON(value) {
+function stringifyJSON(value,ident,depth) {
     switch (typeof value) {
         case 'string':
             stringRegexp.lastIndex = 0;
@@ -55,25 +55,26 @@ function stringifyJSON(value) {
             if (!value) {
                 return 'null';
             }
+            depth  = (depth||0)+1;
             var buf = [];
             if (value instanceof Array) {
                 var i = value.length;
                 while (i--) {
-                    buf[i] = stringifyJSON(value[i]) || 'null';
+                    buf[i] = stringifyJSON(value[i],ident,depth) || 'null';
                 }
-                return '[' + buf.join(',') + ']';
+                return stringifyObject('[' , buf, ']',ident,depth);
             }else if(value instanceof RegExp){
             	//RegExp Source
             	//return value+'';
-            	return '{"class":"RegExp","source":'+stringifyJSON(value+'')+"}";
+            	return '{"class":"RegExp","source":'+stringifyJSON(value+'',ident,depth)+"}";
             }
             for (var k in value) {
-                var v = stringifyJSON(value[k]);
+                var v = stringifyJSON(value[k],ident,depth);
                 if (v) {
-                    buf.push(stringifyJSON(k) + ':' + v);
+                    buf.push(stringifyJSON(k,ident,depth) + ':' + v);
                 }
             }
-            return '{' + buf.join(',') + '}';
+            return stringifyObject('{',buf,'}',ident,depth);
         case 'undefined':
         	return 'null';
         case 'number':
@@ -84,5 +85,13 @@ function stringifyJSON(value) {
             }
         default:
             return String(value);
+    }
+}
+function stringifyObject(begin,buf,end,ident,depth){
+	if(ident){
+		var prefix = new Array(depth+1).join(ident);
+        return begin+ '\n'+prefix + buf.join(',\n'+prefix) + '\n'+ prefix.substr(ident.length)+end;
+    }else{
+        return begin + buf.join(',') + end;
     }
 }

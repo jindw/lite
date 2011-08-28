@@ -1,20 +1,23 @@
 package org.xidea.lite.servlet;
 
 import java.util.AbstractMap;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
-public class RequestMap extends AbstractMap<Object, Object> {
+public class RequestMap extends AbstractMap<String, Object> {
 	private static final long serialVersionUID = 1L;
 	protected final HttpServletRequest request;
+	private Set<java.util.Map.Entry<String, Object>> entries = null;
 
 	public RequestMap(final HttpServletRequest request) {
 		this.request = request;
 	}
 
 	@Override
-	public Object put(Object key, Object value) {
+	public Object put(String key, Object value) {
 		request.setAttribute((String) key, value);
 		return null;
 	}
@@ -30,8 +33,16 @@ public class RequestMap extends AbstractMap<Object, Object> {
 				&& request.getAttribute((String) key) != null;
 	}
 
+	@SuppressWarnings("unchecked")
+	public Set<String> keySet() {
+		return new HashSet<String>( Collections.list(request.getAttributeNames()));
+	}
+
 	@Override
-	public Set<java.util.Map.Entry<Object, Object>> entrySet() {
-		throw new UnsupportedOperationException();
+	public Set<java.util.Map.Entry<String, Object>> entrySet() {
+		if (entries == null) {
+			entries = new MapEntrySet(this);
+		}
+		return entries;
 	}
 }

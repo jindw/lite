@@ -1,13 +1,4 @@
-this.addScript('lite-demo-util.js',["TestCase"]
-               ,[
-                   "org.xidea.lite.impl.*",
-                   "org.xidea.lite.parse.*",
-                   "org.xidea.lite.util.*",
-                   "liteFormat",
-                   "org.xidea.jsi:$log"
-               ]
-               ,"org.xidea.jsidoc.util:XMLHttpRequest");
-this.addScript('lite-compiler.js',["liteFunction","liteTemplate"]
+this.addScript('js-compiler.js',["liteFunction","liteTemplate"]
                ,[
                    "org.xidea.lite.impl.js:JSTranslator",
                    "org.xidea.lite.impl.*",
@@ -18,7 +9,7 @@ this.addScript('lite-compiler.js',["liteFunction","liteTemplate"]
                ]
                ,"org.xidea.jsidoc.util:XMLHttpRequest");
 
-this.addScript('server-compiler.js',["WebCompiler"]
+this.addScript('server-compiler.js',["WebCompiler","base64Encode"]
                ,[
                    "org.xidea.lite.impl.php:PHPTranslator",
                    "org.xidea.lite.parse.*",
@@ -26,9 +17,10 @@ this.addScript('server-compiler.js',["WebCompiler"]
                    "org.xidea.jsi:$log"
                ]
                ,"org.xidea.jsidoc.util:XMLHttpRequest");
-this.addScript('lite-formatter.js',["liteFormat"]
-                ,[
-                    "org.xidea.lite.impl.*",
-                    "org.xidea.lite.util.*",
-                    "org.xidea.el.*"
-                ]);
+               
+this.addScript("data-view.js","DataView",
+				[
+					"org.xidea.lite.util.stringifyJSON"
+					,"org.xidea.jsidoc.util:XMLHttpRequest"
+					,"base64Encode"
+				])

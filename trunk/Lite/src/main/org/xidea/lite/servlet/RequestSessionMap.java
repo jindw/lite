@@ -1,6 +1,8 @@
 package org.xidea.lite.servlet;
 
 import java.util.AbstractMap;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -14,9 +16,14 @@ public class RequestSessionMap extends RequestMap {
 		public Object get(Object key) {
 			return request.getSession().getAttribute(String.valueOf(key));
 		}
+		@SuppressWarnings("unchecked")
+		public Set<String> keySet() {
+			return new HashSet<String>( Collections.list(request.getAttributeNames()));
+		}
+
 		@Override
 		public Set<java.util.Map.Entry<String, Object>> entrySet() {
-			return null;
+			return new MapEntrySet(this);
 		}
 
 	}

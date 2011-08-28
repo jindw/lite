@@ -11,7 +11,7 @@
  * 
  */
 
-class LiteEngine{
+class LiteEngine{ 
 	/**
 	 * 上线后建议关闭
 	 * 可以制定true,false,客户端 ip 匹配正则表达式.
@@ -22,6 +22,11 @@ class LiteEngine{
 	 */
 	public $debug = '/^(?:127\.0\.0\.1|10\..+|172\.(?:1[6789]|2.|30|31)\..+|192\.168\..+|([0:]+1))$/';
 	/**
+	 * 上线后建议置false
+	 * 设置是编译器实现，有则自动编译，必须在$debug 为true时，才能生效
+	 */
+	public $autocompile = true;
+	/**
 	 * 模板根目录（建议为网站根目录）
 	 */
 	public $root;
@@ -30,15 +35,10 @@ class LiteEngine{
 	 */
 	public $litecode;	
 	/**
-	 * 当前执行的模板示例
+	 * 模板版本号
 	 */
-	public static $instance;
+	public $version = '2.0.0.0 Beta';
 	
-	/**
-	 * 上线后建议置空
-	 * 设置是编译器实现，有则自动编译，必须在$debug 为true时，才能生效
-	 */
-	public $compiler = "/WEB-INF/classes/lite/LiteService.php";
 	function LiteEngine($root=null,$litecode=null){
 		if(!$root){
 			$pos = strrpos(__FILE__,'WEB-INF');
@@ -53,12 +53,17 @@ class LiteEngine{
 	}
 
 	function render($path,$context){
-		global $lite__instance;
-		$old = $lite__instance;
+		global $lite_engine;
+		$old = $lite_engine;
 		if($old == null){
 			if(is_string($this->debug)){
 				if(preg_match($this->debug,$_SERVER["REMOTE_ADDR"])){
 					$this->debug = true;
+					//localhost 或者 调试服务器下,compiler = true
+					//echo "<pre>";print_r($_SERVER);echo "</pre>";
+					if($_SERVER['HTTP_Host'] == 'localhost'){
+						$this->autocompile = true;
+					}
 				}else{
 					$this->debug = false;
 					//check_exist?
@@ -66,32 +71,34 @@ class LiteEngine{
 						trigger_error("template can not be compiled!");
 					}
 				}
+			}else{
+				if($_SERVER['HTTP_Host'] == 'localhost'){
+					$this->autocompile = true;
+				}
 			}
 		}
-	    $lite__instance = $this;
-		$fn = lite_load($path);
-	    $fn($context);
-	    $lite__instance = $old;
+	    $lite_engine = $this;
+		lite_render($path,$context);
+	    $lite_engine = $old;
 	}
 }
 /**
  * 装载模板函数
  * @return function name
  */
-function lite_load($path){
-	global $lite__instance;
+function lite_render($path,$context){
+	global $lite_engine;
+	$file = $lite_engine->litecode.strtr($path,'/','^').'.php';
 	$fn = 'lite_template'.str_replace(array('.','/','-','!','%'),'_',$path);
-    if($lite__instance->debug && $lite__instance->compiler ){
-    	$_REQUEST['LITE_ACTION'] = 'compile';
-    	$_REQUEST['LITE_PATH'] = $path;
-    	$compiler =  $lite__instance->compiler;
-    	$_REQUEST['LITE_SERVICE_URL'] =$compiler;
-    	require($lite__instance->root.$compiler);
+    if($lite_engine->debug ){
+	    require("LiteService.php");
+	    $engine = new LiteService();
+	    $engine->debug($path,$context);
+    }else{
+    	require_once($file);
+    	$fn($context);
     }
-    require_once($lite__instance->litecode.strtr($path,'/','^').'.php');
-    return $fn;
 }
-
 
 /**
  * javascript == 运算符模拟

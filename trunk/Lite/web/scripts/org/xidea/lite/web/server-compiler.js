@@ -38,8 +38,8 @@ WebCompiler.prototype.save = function(){
 		"compileTime="+this.compileTime+
 		"&translateTime="+this.translateTime+
 		'&LITE_PATH='+encodeURIComponent(this.path)+
-		'&LITE_ACTION=save&LITE_CODE='+encode(this.litecode)+
-		'&LITE_PHP='+encode(this.phpcode);
+		'&LITE_ACTION=save&LITE_CODE='+base64Encode(this.litecode)+
+		'&LITE_PHP='+base64Encode(this.phpcode);
 		
 	
 	var xhr = new XMLHttpRequest();
@@ -88,7 +88,7 @@ function utf8Replacer(c){
             (0x80 |  (n         & 0x3f)));
     }
 }
-function encode(data){
+function base64Encode(data){
 	data = data && data.replace(/[\u0080-\uFFFF]/g,utf8Replacer)||''
 	data = btoa(data) ;
 	return encodeURIComponent(data);

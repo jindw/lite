@@ -15,22 +15,37 @@
  * 
  */
 class LiteService{
+	private $url = "/WEB-INF/classes/lite/LiteService.php";
+	private $root;
+	private $litecode;
 	/**
 	 * Lite 模板编译服务
 	 * 编译服务的三个重要设置(debug/root/litecode)不可修改，只能俺TemplateEngine 默认设置
 	 */
 	function LiteService(){
-		require_once('LiteEngine.php');
-		$engine = new LiteEngine();
-		$this->root = $engine->root;
-		$this->litecode = $engine->litecode;
+		global $lite_engine;
+		if($lite_engine == null){
+			require_once('LiteEngine.php');
+			$engine = new LiteEngine();
+			$this->root = $engine->root;
+			$this->litecode = $engine->litecode;
+			$this->url = $_SERVER['SCRIPT_NAME'];
+		}else{
+			$this->root = $lite_engine->root;
+			$this->litecode = $lite_engine->litecode;
+			$this->reset(__FILE__);
+		}
 	}
-	function resetService($file){
+	/**
+	 * 重置URL 地址(有的网站可能配在子目录中[不推荐这种部署方式])
+	 */
+	private function reset($file){
 		$root = @$_SERVER['DOCUMENT_ROOT'] ;
-		$url = @$_REQUEST['LITE_SERVICE_URL'];
+		$url =$this->url;
 		if(!$root || 
-			 $url && file_exists($root.$url)
-			 && $this->root && realpath($this->root) == realpath($root)){
+			 $this->root && realpath($this->root) == realpath($root)
+			 && $url && file_exists($root.$url)
+			 ){
 			return;
 		}
 		//放在某个子目录下了.
@@ -38,41 +53,116 @@ class LiteService{
 		if(strncmp($file,$root,$begin) ===0){
 			$url =substr($file,$begin);
 			if(file_exists($root.$url)){
-				$_REQUEST['LITE_SERVICE_URL'] = $url;
+				$this->url = $url;
 			}
 		}
+	}
+	public function debug($path,$context){
+		global $lite_engine;
+		$lite = $lite_engine->litecode.strtr($path,'/','^');
+		$fn = 'lite_template'.str_replace(array('.','/','-','!','%'),'_',$path);
+		$compile = $lite_engine->autocompile;
+		$debug = @$_COOKIE["LITE_DEBUG"];
+		if($debug && preg_match('/(\w+)(?:[;,\s]+(.*))?/',$debug,$result)){
+			//print_r($result);
+			switch($result[1]){
+			case 'refresh':
+				if($compile){
+					unlink($lite.'.php');
+				}else{
+					trigger_error("compile is off !!can not recompile the template:$path");
+				}
+				break;
+			case 'model':
+				$lite_code = file_get_contents($lite);
+				$dataUrl = @$result[2];
+				if($dataUrl){
+					$p = strpos($dataUrl,$this->url);
+					if($p>0){
+						$fileUrl = substr($dataUrl,$p+strlen($this->url));
+						$fileUrl = $this->root.$fileUrl;
+						if(file_exists($fileUrl)){
+							$dataUrl = $fileUrl;
+						}
+					}
+					$json = file_get_contents($dataUrl);
+					$context = json_decode($json,true);
+					//TODO:编码转换
+				}else{
+					header("Content-Type:text/html;charset=UTF-8");
+					$featureMap = array();
+					$scriptPath = $this->url.'/scripts/data-view.js';
+					echo "<!DOCTYPE html><html><body>\n",
+						"<style>body,html{width:100%;height:100%}</style>\n",
+						"<script>var serviceBase='",$this->url,"'",
+						";\nvar templateModel = ",json_encode($context),
+						";\nvar templateFeatureMap = ",json_encode($featureMap),";</script>\n",
+						"<script src='$scriptPath'></script>\n",
+						"<script>if(!this.DataView && this.$import){$import('org.xidea.lite.web.DataView',true);}</script>\n",
+						"<script>DataView.render(serviceBase,templateModel,templateFeatureMap);</script>\n",
+						"<hr>\n<pre>";
+					var_dump($context);
+					echo "</pre></body></html>";
+					return true;
+				}
+			}
+			
+    	}
+    	if($compile){
+			$this->compile($path);
+		}else{
+			//TODO: file check and helper info
+		}
+    	require_once($lite.'.php');
+    	$fn($context);
 	}
 	public function execute(){
 		$lite_action = @$_REQUEST['LITE_ACTION'] ;
-		$lite_path = @$_REQUEST['LITE_PATH'] ;
-		if($lite_action == 'compile'){
-			$this->compile($lite_path);
-		}else if($lite_action == 'save'){
+		if($lite_action == 'save'){
+			$lite_path = @$_REQUEST['LITE_PATH'] ;
 			$this->save($lite_path);
-		}else{//prox
-			$pathinfo = @$_SERVER['PATH_INFO']?$_SERVER['PATH_INFO']:$_SERVER['ORIG_PATH_INFO'];
-			if(strncmp($pathinfo,'/scripts/',9) == 0){
-				header("Content-Type:text/javascript;charset=utf-8");
-				//echo '!!'.substr($pathinfo,10);
-				readfile(dirname(__FILE__).substr($pathinfo,8));
-			}else if($pathinfo){
-				if(substr($pathinfo,-6) == '.xhtml' || substr($pathinfo,-4) == '.xml'){
-					header("Content-Type:text/xml;charset=utf-8");
-					readfile($this->root.$pathinfo);
-				}else{
-					echo "not support";
-				}
-			}else if($lite_action){
-				echo "not support action [{$lite_action}]";
-				print_r($_REQUEST);
-			}else{
-				header("Location:./");
-			}
+		}else{//resource
+			$this->printResource();
 		}
 	}
+	private function printResource(){
+		$pathinfo = @$_SERVER['PATH_INFO']?$_SERVER['PATH_INFO']:$_SERVER['ORIG_PATH_INFO'];
+		if(strncmp($pathinfo,'/scripts/',9) == 0){
+			header("Content-Type:text/javascript;charset=utf-8");
+			//echo '!!'.substr($pathinfo,10);
+			readfile(dirname(__FILE__).substr($pathinfo,8));
+		}else if($pathinfo){
+			if(substr($pathinfo,-6) == '.xhtml' || substr($pathinfo,-4) == '.xml' ){
+				header("Content-Type:text/json;charset=utf-8");
+				$path = $this->root.$pathinfo;
+				//header("Content-Length:".filesize($path));
+				readfile($path);
+			}else if(substr($pathinfo,-5) == '.json'){
+				header("Content-Type:text/xml;charset=utf-8");
+				readfile($this->root.$pathinfo);
+			}else{
+				echo "not support";
+			}
+		}else if($lite_action){
+			echo "not support action [{$lite_action}]";
+			print_r($_REQUEST);
+		}else{
+			header("Location:./");
+		}
+	}
+	/**
+	 * 1. 存储模板编译结果
+	 * 2. 存储模拟数据
+	 */
 	private function save($lite_path){
-		$lite_code = base64_decode($_REQUEST['LITE_CODE']);
-		$lite_php = base64_decode($_REQUEST['LITE_PHP']) ;
+		if(preg_match('/\.json$/',$lite_path)){
+			if($this->saveJSON($lite_path,@base64_decode($_POST['data']))){
+				return;
+			}
+		}
+		$lite_code = @$_POST['LITE_CODE'];
+		$lite_code = base64_decode(code);
+		$lite_php = base64_decode($_POST['LITE_PHP']) ;
 		$litefile = $this->litecode.'/'.strtr($lite_path,'/','^');
 		$phpfile = $litefile.'.php';
 		if($lite_code){
@@ -80,17 +170,39 @@ class LiteService{
 		}
 		file_put_contents($phpfile,$lite_php);
 		if($lite_php){
-			require($phpfile);
-			echo '{"success":true,"phpPath":"'.$phpfile.'"}';
+			$error = $this->checkError($phpfile);
+			echo json_encode(array("success"=>!$error,
+					"error"=>$error,
+					"phpPath"=>$phpfile));
 		}else{
-			echo '{"success":false,"phpPath":"'.$phpfile.'"}';
+			echo '{"success":false,"error":"php file not found","phpPath":"',
+					json_encode($phpfile),'"}';
 		}
 		flush();
-		exit();
 		
 	}
+	private function saveJSON($path,$data){
+		if($path != '/WEB-INF/litecode/mock.json'){
+			if(!file_exists($this->root. preg_replace('/.json$/','.xhtml',$path))){
+				//trigger_error("$path is not a mock data,can not save as json mock data");
+				return false;
+			}
+		}
+		$path = $this->root.$path;
+		file_put_contents($path,$data);
+		echo '{"success":true,"phpPath":"',
+					json_encode($path),'"}';
+		return true;
+	}
+	private function checkError($phpfile){
+		ob_start();
+		require($phpfile);
+		$rtv = ob_get_contents();
+		ob_clean();
+		return $rtv;
+	}
 	private function loadJavaScriptClass(){
-		$scriptBase = $_REQUEST['LITE_SERVICE_URL'];
+		$serviceBase = $this->url;
 		$fns = func_get_args();
 		
 		$sns = array();
@@ -101,7 +213,7 @@ class LiteService{
 		$importScript = '$import("'.join($fns,	'",true);$import("').'",true);';
 		
 		
-		echo "<script>if(!($checkScript)){document.write(\"<script src='$scriptBase/scripts/boot.js'></\"+\"script>\");}</script>\n"
+		echo "<script>if(!($checkScript)){document.write(\"<script src='$serviceBase/scripts/boot.js'></\"+\"script>\");}</script>\n"
 			,"<script>if(!($checkScript)){$importScript}</script>";
 	}
 	private function compile($path){
@@ -121,7 +233,7 @@ class LiteService{
 			}
 		}
 		if( $this->getFileModified($path)){
-			$scriptBase = $_REQUEST['LITE_SERVICE_URL'];
+			$serviceBase = $this->url;
 			$this->loadJavaScriptClass('org.xidea.lite.web:WebCompiler');
 			$config = realpath($this->root.'/WEB-INF/lite.xml');
 			if($config){
@@ -129,7 +241,7 @@ class LiteService{
 			}
 			$config = json_encode($config);
 			echo "<script>"
-				,"var LITE_WC = window.LITE_WC || new WebCompiler('$scriptBase/',$config || null);\n"
+				,"var LITE_WC = window.LITE_WC || new WebCompiler('$serviceBase/',$config || null);\n"
 				,"try{\n"
 				,"	LITE_WC.compile('$path');\n"
 				,"}finally{\n"
@@ -183,23 +295,10 @@ class LiteService{
 		
 	}
 }
-
-/**
- * 设置模板目录和模板缓存目录
- */
-$service = new LiteService(dirname(realpath(__FILE__)).'/WEB-INF/litecode');
-
-/**
- * 重置URL 地址(有的网站可能配在子目录中,不推荐!!)
- */
-$service->resetService(__FILE__);
-
-
-
-if(!array_key_exists('LITE_SERVICE_URL',$_REQUEST)){
-	$_REQUEST['LITE_SERVICE_URL'] = $_SERVER['SCRIPT_NAME'];
+if(realpath( $_SERVER['DOCUMENT_ROOT'].'/'. $_SERVER['SCRIPT_NAME'] ) == realpath(__FILE__)){
+	//direct access from remote
+	$service = new LiteService();
+	$service->execute();
+}else{//included
 }
-$service->execute();
-
-
 ?>
