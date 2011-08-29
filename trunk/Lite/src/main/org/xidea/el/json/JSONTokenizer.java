@@ -378,6 +378,7 @@ public class JSONTokenizer {
 				if (c == quoteChar) {
 					return (buf.toString());
 				}
+				buf.append(c);
 				break;
 			case '\r':
 			case '\n':
