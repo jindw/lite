@@ -176,6 +176,20 @@
 			<arg value="-outputExported" />
 			<arg value="${basedir}/build/dest/boot.js" />
 		</java>
+
+		<echo>到处数据展示(DataView) JS程序</echo>
+		<java fork="true" failonerror="true" classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
+			<arg value="-scriptBase" />
+			<arg value="${basedir}/web/scripts" />
+			<arg value="-exports" />
+			<arg value="org.xidea.lite.web:DataView" />
+			<!--
+			<arg value="-bootCached"/>
+			<arg value="org.xidea.lite.util:*" />
+			-->
+			<arg value="-outputExported" />
+			<arg value="${basedir}/build/dest/data-view.js" />
+		</java>
 		<echo>压缩JSLite实现</echo>
 		<!-- export lite -->
 		<!-- empty -->
@@ -249,6 +263,7 @@
 			</zipfileset>
 			<zipfileset dir="build/dest/" prefix="WEB-INF/classes/lite/">
 				<include name="boot.js" />
+				<include name="data-view.js" />
 			</zipfileset>
 		</zip>
 	</target>

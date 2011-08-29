@@ -9,7 +9,7 @@ this.addScript('js-compiler.js',["liteFunction","liteTemplate"]
                ]
                ,"org.xidea.jsidoc.util:XMLHttpRequest");
 
-this.addScript('server-compiler.js',["WebCompiler","base64Encode"]
+this.addScript('server-compiler.js',["WebCompiler"]
                ,[
                    "org.xidea.lite.impl.php:PHPTranslator",
                    "org.xidea.lite.parse.*",
@@ -20,7 +20,7 @@ this.addScript('server-compiler.js',["WebCompiler","base64Encode"]
                
 this.addScript("data-view.js","DataView",
 				[
-					"org.xidea.lite.util.stringifyJSON"
+					"org.xidea.lite.util:stringifyJSON"
 					,"org.xidea.jsidoc.util:XMLHttpRequest"
-					,"base64Encode"
+					,"org.xidea.jsidoc.util:base64Encode"
 				])
