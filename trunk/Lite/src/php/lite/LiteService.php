@@ -63,16 +63,17 @@ class LiteService{
 		$fn = 'lite_template'.str_replace(array('.','/','-','!','%'),'_',$path);
 		$compile = $lite_engine->autocompile;
 		$debug = @$_COOKIE["LITE_DEBUG"];
-		if($debug && preg_match('/(\w+)(?:[;,\s]+(.*))?/',$debug,$result)){
-			//print_r($result);
+		if($debug && preg_match('/^(\w+)(?:[;,\s]+(.*))?/',$debug,$result)){
 			switch($result[1]){
-			case 'refresh':
-				if($compile){
-					unlink($lite.'.php');
+			case 'source':
+				$file = $lite_engine->root.$path;
+				if(file_exists($file)){
+					readfile($file);
 				}else{
-					trigger_error("compile is off !!can not recompile the template:$path");
+					header('HTTP/1.1 404 Not Found');
+					trigger_error("source code not found:$path");
 				}
-				break;
+				return;
 			case 'model':
 				$lite_code = file_get_contents($lite);
 				$dataUrl = @$result[2];
@@ -91,20 +92,31 @@ class LiteService{
 				}else{
 					header("Content-Type:text/html;charset=UTF-8");
 					$featureMap = array();
-					$scriptPath = $this->url.'/scripts/data-view.js';
+					$scriptPath = $this->url.'?LITE_ACTION=load&LITE_PATH=/scripts/data-view.js';
 					echo "<!DOCTYPE html><html><body>\n",
 						"<style>body,html{width:100%;height:100%}</style>\n",
-						"<script>var serviceBase='",$this->url,"'",
+						"<script>",
+						"var templatePath ='$path'",
 						";\nvar templateModel = ",json_encode($context),
-						";\nvar templateFeatureMap = ",json_encode($featureMap),";</script>\n",
+						";\nvar templateFeatureMap = ",json_encode($featureMap),
+						";\nvar serviceBase='",$this->url,"'",
+						";</script>\n",
 						"<script src='$scriptPath'></script>\n",
-						"<script>if(!this.DataView && this.$import){$import('org.xidea.lite.web.DataView',true);}</script>\n",
-						"<script>DataView.render(serviceBase,templateModel,templateFeatureMap);</script>\n",
+						"<script>if(!this.DataView && this.\$import){\$import('org.xidea.lite.web.DataView',true);}</script>\n",
+						"<script>DataView.render(templatePath,templateModel,templateFeatureMap,serviceBase);</script>\n",
 						"<hr>\n<pre>";
 					var_dump($context);
 					echo "</pre></body></html>";
 					return true;
 				}
+				break;
+			case 'refresh':
+				if($compile){
+					unlink($lite.'.php');
+				}else{
+					trigger_error("compile is off !!can not recompile the template:$path");
+				}
+				break;
 			}
 			
     	}
@@ -121,12 +133,20 @@ class LiteService{
 		if($lite_action == 'save'){
 			$lite_path = @$_REQUEST['LITE_PATH'] ;
 			$this->save($lite_path);
+		}else if($lite_action == 'load'){//resource
+			$lite_path = @$_REQUEST['LITE_PATH'] ;
+			$this->load($lite_path);
 		}else{//resource
 			$this->printResource();
 		}
 	}
-	private function printResource(){
-		$pathinfo = @$_SERVER['PATH_INFO']?$_SERVER['PATH_INFO']:$_SERVER['ORIG_PATH_INFO'];
+	private function load($path){
+		$this->printResource($path);
+	}
+	private function printResource($pathinfo=null){
+		if(!$pathinfo){
+			$pathinfo = @$_SERVER['PATH_INFO']?$_SERVER['PATH_INFO']:$_SERVER['ORIG_PATH_INFO'];
+		}
 		if(strncmp($pathinfo,'/scripts/',9) == 0){
 			header("Content-Type:text/javascript;charset=utf-8");
 			//echo '!!'.substr($pathinfo,10);
@@ -156,12 +176,12 @@ class LiteService{
 	 */
 	private function save($lite_path){
 		if(preg_match('/\.json$/',$lite_path)){
-			if($this->saveJSON($lite_path,@base64_decode($_POST['data']))){
+			if($this->saveJSON($lite_path,@base64_decode($_REQUEST['LITE_DATA']),$_REQUEST['LITE_CALLBACK'])){
 				return;
 			}
 		}
 		$lite_code = @$_POST['LITE_CODE'];
-		$lite_code = base64_decode(code);
+		$lite_code = base64_decode($lite_code);
 		$lite_php = base64_decode($_POST['LITE_PHP']) ;
 		$litefile = $this->litecode.'/'.strtr($lite_path,'/','^');
 		$phpfile = $litefile.'.php';
@@ -181,17 +201,22 @@ class LiteService{
 		flush();
 		
 	}
-	private function saveJSON($path,$data){
-		if($path != '/WEB-INF/litecode/mock.json'){
+	private function saveJSON($path,$data,$callback){
+		if(!preg_match('/^\/WEB\-INF\/litecode\/.*\.json/',$path)){
 			if(!file_exists($this->root. preg_replace('/.json$/','.xhtml',$path))){
 				//trigger_error("$path is not a mock data,can not save as json mock data");
 				return false;
 			}
 		}
-		$path = $this->root.$path;
-		file_put_contents($path,$data);
-		echo '{"success":true,"phpPath":"',
-					json_encode($path),'"}';
+		$absPath = $this->root.$path;
+		file_put_contents($absPath,$data);
+		if($callback){
+			echo $callback,'(';
+		}
+		echo json_encode(array('success'=>true,'absPath'=>$absPath,"path"=>$path));
+		if($callback){
+			echo ',true)';
+		}
 		return true;
 	}
 	private function checkError($phpfile){

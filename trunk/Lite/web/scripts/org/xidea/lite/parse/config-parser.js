@@ -74,7 +74,7 @@ function LiteGroup(node,parentConfig){
 	this.parentConfig = parentConfig || null
 	this.featureMap = {}
 	this.encoding= findXMLAttribute(node,'encoding','charset');
-	this.type = findXMLAttribute(node,'type');
+	this.type = findXMLAttribute(node,'type',"mime-type",'mimeType');
 	this.contentType = findXMLAttribute(node,'contentType','contextType');
 	this.layout = findXMLAttribute(node,'layout');
 	this.extensionMap = {};

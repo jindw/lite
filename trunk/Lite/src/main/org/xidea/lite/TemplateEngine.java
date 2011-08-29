@@ -50,13 +50,13 @@ public class TemplateEngine {
 	}
 	@SuppressWarnings("unchecked")
 	protected Template createTemplate(String path) throws IOException {
-		List<Object> data =  JSONDecoder.decode(getLiteCode(path));
+		List<Object> data =  JSONDecoder.decode(getLitecode(path));
 		List<Object> list = (List<Object>) data.get(1);
 		Map<String,String> featureMap = (Map<String,String>) data.get(2);
 		return new Template(list,featureMap);
 	}
 
-	protected String getLiteCode(String path) throws IOException {
+	protected String getLitecode(String path) throws IOException {
 		URI uri = root.resolve(path.substring(1));
 		InputStream in ;
 		if("classpath".equals(root.getScheme())){

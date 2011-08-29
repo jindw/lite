@@ -84,8 +84,8 @@ public class WebServer {
 			private long lastModified = 0;
 			ResourceManagerImpl manager;
 			HotTemplateEngine ht;
-			final org.jside.webserver.servlet.ServletContextImpl servletAdaptor = new ServletContextImpl(
-					this);
+			final ServletContextImpl servletAdaptor = new ServletContextImpl(
+					);
 
 			TemplateServlet servlet = null;
 

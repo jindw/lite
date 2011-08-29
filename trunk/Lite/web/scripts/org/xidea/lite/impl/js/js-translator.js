@@ -15,11 +15,11 @@
 var FOR_STATUS_KEY = '$__for';
 var INIT_SCRIPT = String(function(){
 	var lite__impl_get;
-	var lite__impl_def = function(g,map){
+	var lite__impl_def = function(g){
     	lite__impl_get = function(n,c){
 			return (c && n in c ? c:n in g?g:this)[n];
 		};
-		function replacer(c){return map[c]||c}
+		function replacer(c){return g[c]||c}
 		//xt:0,xa:1,xp:2
 		g[0] = function(txt,type){
 			return String(txt).replace(
@@ -84,8 +84,8 @@ var INIT_SCRIPT = String(function(){
 		return function(n,fn){
     		g[n]=fn;
     	};
-	}({});
-	with({},{'"':'&#34;','<':'&lt;','&':'&#38;'}){
+	}({'"':'&#34;','<':'&lt;','&':'&#38;'});
+	with({}){
 		alert(lite__impl_def,lite__impl_get);
 	}
 

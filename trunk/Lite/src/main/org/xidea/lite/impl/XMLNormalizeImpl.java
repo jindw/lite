@@ -136,8 +136,8 @@ public class XMLNormalizeImpl {
 					int p = key.indexOf(':');
 					if (p < 0
 							|| key.equals("xmlns:c")
-							|| text.matches("[<\\s]" + key.substring(p + 1)
-									+ ':')) {
+							|| Pattern.compile("[<\\s]" + key.substring(p + 1)
+									+ "\\:").matcher(text).find()) {
 						tag.nsMap.put(key, value);
 						result.append(" ");
 						result.append(key);

@@ -47,7 +47,7 @@ public class Template {
 
 	private int forCount = 0;
 
-	protected Object[] items;// transient＄1�7
+	protected Object[] items;// transient
 
 	private Map<String, String> featureMap;
 

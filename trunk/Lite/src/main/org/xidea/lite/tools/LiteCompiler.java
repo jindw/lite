@@ -145,7 +145,7 @@ public class LiteCompiler {
 					return false;
 				}
 				String path2 = LiteCompilerHelper.translatePath(path);
-				String result = engine.getLiteCode(path);
+				String result = engine.getLitecode(path);
 
 				String encoding = resourceManager.getFeatureMap(path).get(
 						ParseContext.FEATURE_ENCODING);

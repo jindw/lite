@@ -12,6 +12,6 @@
 	<classpathentry kind="lib" path="web/WEB-INF/lib/servlet-api.jar" sourcepath="E:/opensource/servlet/servlet-api-2.4-src.jar"/>
 	<classpathentry kind="lib" path="web/WEB-INF/lib/js.jar"/>
 	<classpathentry kind="lib" path="web/WEB-INF/lib/JSI.jar"/>
-	<classpathentry kind="lib" path="web/WEB-INF/lib/JSide.jar"/>
+	<classpathentry kind="lib" path="web/WEB-INF/lib/JSide.jar" sourcepath="/JSA/src"/>
 	<classpathentry kind="output" path="web/WEB-INF/classes"/>
 </classpath>

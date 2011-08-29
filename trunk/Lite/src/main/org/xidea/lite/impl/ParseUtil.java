@@ -230,12 +230,17 @@ public class ParseUtil {
 		InputSource in = new InputSource(new StringReader(text));
 		in.setSystemId(id);
 		in.setCharacterStream(new StringReader(text));
-		Document xml = documentBuilder.parse(in);
-		if (ins != null) {
-			xml.insertBefore(xml.createProcessingInstruction("xml", ins), xml
+		try{
+			Document xml = documentBuilder.parse(in);
+			if (ins != null) {
+				xml.insertBefore(xml.createProcessingInstruction("xml", ins), xml
 					.getFirstChild());
+			}
+			return xml;
+		}catch(SAXException e){
+			log.info("xml 解析失败,文件:"+id+"\n 内容:"+text);
+			throw e;
 		}
-		return xml;
 
 	}
 

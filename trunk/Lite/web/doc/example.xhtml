@@ -1,6 +1,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:c="http://www.xidea.org/lite/core">
 	<body>
+	<script>/['"&amp;]/.test('')+{a:''}</script>
 		<!--
 			如果您的编辑器没有语法提示，清看设置：
 			http://www.javaeye.com/topic/342483
@@ -68,11 +69,13 @@
 			<strong>很复杂很复杂.....</strong>
 		</form>
 
-		<!-- 模板內部变量申明 -->
+		<!-- 模板內部变量申明
 		<c:var name="中文名">${user.姓氏}${user.大名}</c:var>
+		<p>我的中文名字是：${中文名}</p>
+		 -->
 		<c:var name="englishName"
 			value="${user.firstName}.${user.lastName}" />
-		<p>我的中文名字是：${中文名}</p>
+		
 		<p>我的英文名字是：${englishName}</p>
 	</body>
 </html>

@@ -75,7 +75,7 @@ public class HotTemplateEngine extends TemplateEngine {
 		return templateEntry == null || templateEntry.isModified();
 	}
 
-	public String getLiteCode(String path) {
+	public String getLitecode(String path) {
 		try {
 			if(buildFromCode(path) != null){
 				URI uri = toCompiedURI(path);
@@ -99,7 +99,15 @@ public class HotTemplateEngine extends TemplateEngine {
 		}
 		return buildFromSource(path);
 	}
-
+	public void clear(String path) {
+		templateMap.remove(path);
+		if (compiledBase!= null && ParseUtil.isFile(compiledBase)){
+			File file = new File(toCompiedURI(path));
+			if(file.exists()){
+				file.delete();
+			}
+		}
+	}
 	private Template buildFromSource(final String path) throws IOException {
 		long begin = System.currentTimeMillis();
 		ArrayList<File> files = new ArrayList<File>();
@@ -133,9 +141,13 @@ public class HotTemplateEngine extends TemplateEngine {
 		infoMap.put(path, entry);
 		return template;
 	}
-	private URI toCompiedURI(String path) throws UnsupportedEncodingException{
+	private URI toCompiedURI(String path){
 		path =  path.replace('/', '^');
-		return this.compiledBase.resolve(URLEncoder.encode(path, "UTF-8"));
+		try {
+			return this.compiledBase.resolve(URLEncoder.encode(path, "UTF-8"));
+		} catch (UnsupportedEncodingException e) {//不可能
+			return null;
+		}
 		
 	}
 

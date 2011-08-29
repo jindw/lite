@@ -1,0 +1,117 @@
+<div id="main" xmlns:x="http://www.xidea.org/lite/example" >
+	<div id="header">
+		<div class="logo" onclick="location = 'index.xhtml'">
+			<c:for var="item"
+				list="${
+  [
+    [0,0,19,100],
+    [0,81,42,19],
+    [23,0,19,19],
+    [23,23,19,54],
+    [46,0,42,19],
+    [46,23,19,77],
+    [69,81,19,19]
+  ]
+  }">
+				<div
+					style='left:${item[0]}px;top:${item[1]}px;width:${item[2]}px;height:${item[3]}px;'>&#160;</div>
+			</c:for>
+		</div>
+		<h1>
+			<c:include path="$page" xpath="//xhtml:title/text()" />
+		</h1>
+		<div class="line" />
+	</div>
+	<div id="content">
+		<c:include path="$page" xpath="//xhtml:body/node()" />
+		<div id="post">
+			<fieldset>
+				<legend>用户反馈</legend>
+				<a name="messages" />
+				<div id="messages" />
+				<c:def name="formatTime(date)">
+					<c:date-format pattern="YYYY-MM-DDThh:mm" value="${date}" />
+				</c:def>
+				<h:client name="renderMessage(messages)">
+					<c:for var="message" list="${messages.concat().reverse()}">
+						<div class="message-${for.index%2}">
+							<div title="mail to:${message.email.replace('@','?')}">@${message.username} :
+								${formatTime(message.postTime)}</div>
+							<div>
+								<x:nl2br>${message.content}</x:nl2br>
+							</div>
+						</div>
+					</c:for>
+				</h:client>
+				<!-- 禁止IE用户 -->
+				<div>
+					<form method="POST"
+						onsubmit="return commitMessage(this.username.value,this.email.value,this.content.value) || (this.content.value='') || false">
+						<label>
+							大名:
+							<input name="username" required="required" />
+						</label>
+						<label>
+							email:
+							<input name="email" type="email" />
+						</label>
+						<br />
+						<div>
+							<textarea name="content" required="required" minlength="30"></textarea>
+						</div>
+						<div>
+							<input type="submit" value="发表留言">
+						</div>
+					</form>
+				</div>
+				<script>
+					//<![CDATA[
+						if(window.ActiveXObject){
+							alert("不建议使用IE浏览器查看文档");
+							document.body.style.filter="alpha(opacity=50)";
+						}
+						var messageContainer = document.getElementById('messages');
+						var messageData = ${messages}||[];
+						var cookie = document.cookie;
+						var liteuser = cookie.replace(/^(?:[\s\S]*;\s*)?lite_user=([^;\s]+)[\s\S]*$/,'$1')
+						if(cookie != liteuser){
+							var f = document.forms;
+							f = f[f.length-1];
+							liteuser = decodeURIComponent(liteuser).split('\n')
+							f.username.value = liteuser[0];
+							f.email.value = liteuser[1];
+						}
+						messageContainer.innerHTML = renderMessage(messageData);
+						function commitMessage(username,email,content){
+							try{
+								document.cookie = "lite_user="+encodeURI(username+'\n'+email);
+								var item = {username:username,email:email,content:content,postTime:+new Date()};
+								messageData.push(item);
+								messageContainer.innerHTML = renderMessage(messageData);
+								var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('MSXML2.XMLHTTP');
+								function messagePosted(){
+									
+								}
+								xhr.onreadystatechange = messagePosted;
+								var href = window.location.href;
+								href=href.replace(/\/doc\/guide\/(?:index\.php\/)/,'/doc/guide/index.php/')
+								xhr.open("POST",href,true);
+								var data = 'username='+encodeURIComponent(username)+
+										'&email='+encodeURIComponent(email)+
+										'&content='+encodeURIComponent(content);
+								//xhr.setRequestHeader('Connection','close');
+								xhr.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
+								xhr.setRequestHeader('Accept','text/javascript, */*');
+								xhr.send(data);
+							}catch(e){
+								alert(e)
+							}
+							return false;
+						}
+						//]]>
+				</script>
+			</fieldset>
+		</div>
+	</div>
+	<div id="footer"></div>
+</div>

@@ -200,8 +200,8 @@ public class DefaultXMLNodeParser implements NodeParser<Node> {
 				return;
 			}
 			// }
-		} 
-		context.append(" " + name + "=\"");
+		}
+		context.append((name.startsWith("on")?'\n':' ') + name + "=\"");
 		if (name.startsWith("xmlns")) {
 			if (buf.size() == 1
 					&& "http://www.xidea.org/lite/xhtml".equals(buf.get(0))) {
