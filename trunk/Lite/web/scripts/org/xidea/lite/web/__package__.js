@@ -22,5 +22,5 @@ this.addScript("data-view.js","DataView",
 				[
 					"org.xidea.lite.util:stringifyJSON"
 					,"org.xidea.jsidoc.util:XMLHttpRequest"
-					,"org.xidea.jsidoc.util:base64Encode"
+					,"org.xidea.lite.util:base64Encode"
 				])
