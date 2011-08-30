@@ -86,6 +86,7 @@ class LiteService{
 							$dataUrl = $fileUrl;
 						}
 					}
+					//$dataUrl = str_replace('//localhost/','//127.0.0.1/',$dataUrl);
 					$json = file_get_contents($dataUrl);
 					$context = json_decode($json,true);
 					//TODO:编码转换
@@ -105,6 +106,8 @@ class LiteService{
 						"<script>if(!this.DataView && this.\$import){\$import('org.xidea.lite.web.DataView',true);}</script>\n",
 						"<script>DataView.render(templatePath,templateModel,templateFeatureMap,serviceBase);</script>\n",
 						"<hr>\n<pre>";
+					echo json_encode($context);
+					echo '<hr/>';
 					var_dump($context);
 					echo "</pre></body></html>";
 					return true;
@@ -155,17 +158,18 @@ class LiteService{
 			if(substr($pathinfo,-6) == '.xhtml' || substr($pathinfo,-4) == '.xml' ){
 				header("Content-Type:text/json;charset=utf-8");
 				$path = $this->root.$pathinfo;
-				//header("Content-Length:".filesize($path));
 				readfile($path);
 			}else if(substr($pathinfo,-5) == '.json'){
-				header("Content-Type:text/xml;charset=utf-8");
-				readfile($this->root.$pathinfo);
+				$path = $this->root.$pathinfo;
+				header("Content-Type:text/javascript;charset=utf-8");
+				header("Content-Length:".filesize($path));
+				readfile($path);
 			}else{
 				echo "not support";
 			}
 		}else if($lite_action){
-			echo "not support action [{$lite_action}]";
-			print_r($_REQUEST);
+			trigger_error("not support action [{$lite_action}]");
+			//print_r($_REQUEST);
 		}else{
 			header("Location:./");
 		}
@@ -175,6 +179,9 @@ class LiteService{
 	 * 2. 存储模拟数据
 	 */
 	private function save($lite_path){
+		if(preg_match('/\.\./',$lite_path)){
+			trigger_error("saved path can not contains '..'(parent dir is not allowed)!");
+		}
 		if(preg_match('/\.json$/',$lite_path)){
 			if($this->saveJSON($lite_path,@base64_decode($_REQUEST['LITE_DATA']),$_REQUEST['LITE_CALLBACK'])){
 				return;
@@ -210,13 +217,11 @@ class LiteService{
 		}
 		$absPath = $this->root.$path;
 		file_put_contents($absPath,$data);
+		$rtv = json_encode(array('success'=>true,'absPath'=>$absPath,"path"=>$path));
 		if($callback){
-			echo $callback,'(';
+			$rtv = "$callback($rtv,true)";
 		}
-		echo json_encode(array('success'=>true,'absPath'=>$absPath,"path"=>$path));
-		if($callback){
-			echo ',true)';
-		}
+		echo $rtv;
 		return true;
 	}
 	private function checkError($phpfile){

@@ -26,6 +26,7 @@ public abstract interface ExpressionToken {
 	public static final int VALUE_VAR       = -0x02;//var
 	public static final int VALUE_LIST      = -0x03;//[]
 	public static final int VALUE_MAP       = -0x04;//{}
+	public static final int VALUE_LAMBDA    = -0x05;//{}
 	
 	
 	//九：（最高级别的运算符号） OP_GET,.[]
