@@ -39,6 +39,7 @@ function OptimizeScope(code,params){
 	 * 所有函数定义数组
 	 */
 	this.defs = [];
+	this.defMap = {};
 	this._forStack = [];
 	vistLite(this,this.code = code);
     delete this._forStack;
@@ -77,6 +78,9 @@ function vistDef(context,item){
 	def.defaults = config.defaults;
 	context.fors = context.fors.concat(def.fors)
 	context.defs.push(def);
+	context.defMap[def.name] = def;
+	def.defs = context.defs;
+	def.defMap = context.defMap;
 }
 function vistLite(context,code){
 	if(code == null){

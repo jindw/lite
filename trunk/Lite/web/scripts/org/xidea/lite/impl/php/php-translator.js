@@ -139,6 +139,7 @@ PHPTranslateContext.prototype = new TCP({
 		this.out = [];
 	    //add function
 	    var defs = this.scope.defs;
+	    
 	    for(var i=0;i<defs.length;i++){
 	        var def = defs[i];
 	        var n = def.name;

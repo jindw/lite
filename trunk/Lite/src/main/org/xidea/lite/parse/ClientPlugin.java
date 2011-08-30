@@ -136,5 +136,8 @@ public class ClientPlugin implements OptimizePlugin, OptimizeScope {
 	}
 	public void before() {
 	}
+	public List<String> getDefs() {
+		return new ArrayList<String>(context.getDefCallMap().keySet());
+	}
 
 }

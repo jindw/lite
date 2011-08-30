@@ -155,12 +155,19 @@ function stringifyINVOKE(el,context){
 		return "lite_op__invoke("+stringifyPHPEL(oel,context)+","+stringifyPHPEL(pel,context)+","+value2+")"
 		//value1 = value1.replace(/.*?,([\s\S]+)\)/,'array($1)');
 	}else if(type1 == VALUE_VAR){
-		var name = arg1[1];
-		var fn = "isset($"+name+")?$"+name+":'"+name+"'"
-		return 'lite_op__invoke('+fn+',null,'+value2+')';
-		//return value2.replace('array',"lite__"+name)
-	}else{
-		throw new Error("Invalid Invoke EL");
+		var varName = arg1[1];
+		if(varName in GLOBAL_DEF_MAP || varName in context.scope.defMap){
+			//静态编译方式
+			return value2.replace('array',"lite__"+varName)
+		}else{
+			//动态调用方式
+			var fn = "isset($"+varName+")?$"+varName+":'"+varName+"'"
+			return 'lite_op__invoke('+fn+',null,'+value2+')';
+		}
+	}else{	
+		var value1 = stringifyPHPEL(arg1,context);
+		return 'lite_op__invoke('+value1+',null,'+value2+')';
+		//throw new Error("Invalid Invoke EL");
 	}
 }
 /**

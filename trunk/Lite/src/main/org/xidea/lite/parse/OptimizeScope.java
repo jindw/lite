@@ -18,6 +18,10 @@ public interface OptimizeScope{
 	 */
 	public List<String> getVars();
 	/**
+	 * 本地申明的函数表[参看:def,语法,不包括变量,不包括参数]
+	 */
+	public List<String> getDefs();
+	/**
 	 * 参数列表
 	 */
 	public List<String> getParams();

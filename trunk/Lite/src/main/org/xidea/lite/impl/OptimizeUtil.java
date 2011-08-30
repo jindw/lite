@@ -202,16 +202,16 @@ class OptimizeUtil {
 					} catch (ClassNotFoundException e) {
 						throw new RuntimeException(e);
 					}
-						if (OptimizePlugin.class.isAssignableFrom(clazz)) {
-							String p = position == null ? null : position
-									.toString();
-							int j = revicer.visit(source, i, p);
-							if (j == -1) {
-								return true;
-							} else {
-								i = j;
-							}
+					if (OptimizePlugin.class.isAssignableFrom(clazz)) {
+						String p = position == null ? null : position
+								.toString();
+						int j = revicer.visit(source, i, p);
+						if (j == -1) {
+							return true;
+						} else {
+							i = j;
 						}
+					}
 				case CAPTURE_TYPE:
 				case IF_TYPE:
 				case ELSE_TYPE:
@@ -241,8 +241,8 @@ class OptimizeUtil {
 		return false;
 	}
 
-	static BlockInfoImpl parseList(List<Object> list, List<String> params) {
-		BlockInfoImpl bi = new BlockInfoImpl();
+	static BlockInfoImpl parseList(List<Object> list, List<String> params,Set<String> defs) {
+		BlockInfoImpl bi = new BlockInfoImpl(defs);
 		if(params!=null){
 			bi.paramList.addAll(params);
 		}
@@ -368,14 +368,19 @@ class OptimizeUtil {
 class BlockInfoImpl implements OptimizeScope {
 
 	ArrayList<String> paramList = new ArrayList<String>();
+	ArrayList<String> defList;
 	ArrayList<String> varList = new ArrayList<String>();
-	List<Set<String>> varStack = new ArrayList<Set<String>>();
+//	private List<Set<String>> varStack = new ArrayList<Set<String>>();
 	ArrayList<String> refList = new ArrayList<String>();
 	ArrayList<String> externalRefList = new ArrayList<String>();
 	/**
 	 * 所有函数调用记录:[true,直接调用, false 可能调用(表达式出口函数)]
 	 */
 	ArrayList<String> callList = new ArrayList<String>();
+
+	BlockInfoImpl(Set<String> defs) {
+		defList = new ArrayList<String>(defs);
+	}
 
 	public void addVar(String name) {
 		varList.add(name);
@@ -398,5 +403,9 @@ class BlockInfoImpl implements OptimizeScope {
 	}
 	public List<String> getParams() {
 		return paramList;
+	}
+
+	public List<String> getDefs() {
+		return defList;
 	}
 }

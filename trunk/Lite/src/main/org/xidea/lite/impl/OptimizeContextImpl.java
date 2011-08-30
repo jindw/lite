@@ -108,7 +108,7 @@ public class OptimizeContextImpl implements OptimizeContext {
 				List data = entry.getValue();
 				Map config = (Map) data.get(2);
 				List code = (List) data.get(1);
-				defCallMap.put(entry.getKey(), getCall(OptimizeUtil.parseList(code, (List)config.get("params"))));
+				defCallMap.put(entry.getKey(), getCall(OptimizeUtil.parseList(code, (List)config.get("params"),defMap.keySet())));
 			}
 		}
 		return defCallMap;
@@ -131,7 +131,7 @@ public class OptimizeContextImpl implements OptimizeContext {
 
 
 	public OptimizeScope parseScope(List<Object> children, List<String> params) {
-		return OptimizeUtil.parseList(children, params);
+		return OptimizeUtil.parseList(children, params,defMap.keySet());
 	}
 
 	public void optimizeCallClosure(Map<String, Set<String>> callMap,
