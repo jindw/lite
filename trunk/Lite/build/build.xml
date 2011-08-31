@@ -177,7 +177,7 @@
 			<arg value="${basedir}/build/dest/boot.js" />
 		</java>
 
-		<echo>到处数据展示(DataView) JS程序</echo>
+		<echo>导出数据展示(DataView) JS程序</echo>
 		<java fork="true" failonerror="true" classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
 			<arg value="-scriptBase" />
 			<arg value="${basedir}/web/scripts" />
@@ -189,6 +189,19 @@
 			-->
 			<arg value="-outputExported" />
 			<arg value="${basedir}/build/dest/data-view.js" />
+		</java>
+		<echo>导出NodeJS版本</echo>
+		<java fork="true" failonerror="true" classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
+			<arg value="-scriptBase" />
+			<arg value="${basedir}/web/scripts" />
+			<arg value="-exports" />
+			<arg value="org.xidea.lite.nodejs:TemplateEngine" />
+			<!--
+			<arg value="-bootCached"/>
+			<arg value="org.xidea.lite.util:*" />
+			-->
+			<arg value="-outputExported" />
+			<arg value="${basedir}/build/dest/nodejs.js" />
 		</java>
 		<echo>压缩JSLite实现</echo>
 		<!-- export lite -->

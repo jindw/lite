@@ -329,7 +329,11 @@ a:hover{
 	content:"示例...";
 }
 #post{
-	padding-top:18px;
+	margin-top:10px;
+	padding:8px 4px;
+	border:1px dotted #CCC;
+	border-radius: 3px 3px 3px 3px;
+	background:#DDD;
 }
 #post legend{
 	font-weight:bold;

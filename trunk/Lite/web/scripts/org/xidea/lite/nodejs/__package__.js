@@ -5,7 +5,10 @@ this.addScript("_xmlxpath.js","XPathEvaluator",
 	["DOMNode", "DOMNodeList"]
 )
 this.addScript("template-engine.js","TemplateEngine",
+	["DOMParser","XPathEvaluator"],
 	["org.xidea.lite:Template",
+	 "org.xidea.lite.parse:ParseConfig",
+	 "org.xidea.lite.parse:parseConfig",
 	 "org.xidea.lite.parse:ParseContext",
 	 "org.xidea.lite.impl.js:JSTranslator",
 	 "org.xidea.lite.util:normalizeLiteXML",

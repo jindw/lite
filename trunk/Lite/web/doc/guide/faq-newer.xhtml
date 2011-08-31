@@ -7,25 +7,8 @@
 	</head>
 	<body>
 		<h3>先悟透XML</h3>
-		<p>Lite XML 模板语法最大的特点是，她是基于XML的模板语法，不是文本类型的模板语法。</p>
-		<h3>不要打破XML语法结构</h3>
-		<p>
-			习惯了Smarty，Velocity等文本模板系统的同学，一定还记得那种直接从文本层面控制输出结构的痛快与刺激。
-			这些在LiteXML 中是很不推荐，也较难实现的。
-			<ul>
-			<strong>文本语法的自由</strong>
-			<x:code><![CDATA[
-				$for{item:list}
-				
-				$if{for.index == 0}<div>第一条数据： ${item},
-				$else{for.index == for.lastIndex}最后一条数据：${item}</div> 
-				$else$第${for.index}条数据：${item},$end$
-				
-				$end$
-			]]></x:code>
-			</ul>
-			<p>但是，这种语法是很难阅读和维护的，所以。LiteXML中，极不推荐这种做法。</p>
-		</p>
+		<p>Lite XML 模板语法最大的特点是，她是基于HTML/XML的语法结构的模板语法，不是文本类型的模板语法。</p>
+		
 		<h3>放下字符串拼接的思维</h3>
 		<p>
 			在Lite XML 模板语法中，每一段输出都是一个有意义的语法单元。
@@ -73,6 +56,42 @@
 			 	</div>
 			 ]]></x:code>
 			 </ul>
+		</p>
+		<h3>不要打破XML语法结构</h3>
+		<p>
+			习惯了Smarty，Velocity等文本模板系统的同学，一定还记得那种直接从文本层面控制输出结构的痛快与刺激。
+			这些在LiteXML 中是很不推荐，也较难实现的。
+			<ul>
+			<strong>文本语法的自由</strong>
+			<x:code model="{list:[1,2,3,4]} "><![CDATA[
+			<code>
+				$for{item:list}
+				
+				$if{for.index == 0}<div>第一条数据： ${item},
+				$else{for.index == for.lastIndex}最后一条数据：${item}</div> 
+				$else$第${for.index+1}条数据：${item},$end$
+				
+				$end$
+			</code>
+			]]></x:code>
+			</ul>
+			<p>但是，这种语法是很难阅读和维护的，所以。LiteXML中，极不推荐这种做法。</p>
+			<strong>无法通过的Lite XML 语法</strong>
+			<ul>
+			<x:code model="{list:[1,2,3,4]}"><![CDATA[
+				<c:for var="item" list="${list}">
+					<c:if test="${for.index == 0}">
+						<div>第一条数据： ${item},
+					</c:if>
+					<c:else test="${for.index == for.lastIndex}">
+						最后一条数据：${item}</div> 
+					</c:else>
+					<c:else>
+						第${for.index+1}条数据：${item},$end$
+					</c:else>
+				</c:for>
+			]]></x:code>
+			</ul>
 		</p>
 	</body>
 </html>

@@ -1,26 +1,60 @@
-function TemplateEngine(root){}
-TemplateEngine.prototype.render=function(path,data){
-	var context = buildContext();
+var fs = require('fs');
+var Path = require('path');
+function TemplateEngine(root){
+	var config = Path.resolve(root,'WEB-INF/lite.xml');
+	//console.log(Path.existsSync(config))
+	if(Path.existsSync(config)){
+		config = loadXMLFile(config,config+'');
+	}else{
+		config = null;
+	}
+	var root ='file:///'+ String(root).replace(/\\/g,'/');
+	//this.config.root.reserve(uri.path)
+	this.config = new ParseConfig(root,parseConfig(config));
+	//console.dir(this.config._groups);
+}
+TemplateEngine.prototype.render=function(path,data,response){
+	var context = buildContext(this.config,path);
+	//console.dir(context.featureMap)
 	var litecode = context.toList();
 	var translator = new JSTranslator();//'.','/','-','!','%'
 	translator.liteImpl = 'lite__impl_';//avoid inline jslib 
 	var jscode = translator.translate(litecode,true);
-	var fcode = "function(lite__impl_def,lite__impl_get,lite__impl_encode,lite__impl_list){"+code+"}"
+	var fcode = "function(lite__impl_def,lite__impl_get,lite__impl_encode,lite__impl_list){"+jscode+"}"
+	var i = fcode.indexOf('charAt')
+	
+	//console.log(fcode.substr(i-100,300));
 	data =  window.eval("["+(fcode||null)+"][0]");
-	var tpl = new Template(data);
-	return tpl.render(data);
+	var tpl = new (Template)(data);
+	var data = tpl.render(data);
+	response.write(data,'utf-8')
 }
-var fs = require('fs');
 
-function buildContext(){
-	var context = new ParseContext();
+function buildContext(config,path){
+	var context = new ParseContext(config,path);
 	context.loadXML = loadXML;
-	context.parse(context.createURI('/source.xhtml'));
+	context.loadText = loadText;
+	var uri = context.createURI(path);
+	context.parse(uri);
+	return context;
+}
+function loadText(uri){
+	var uri2 = this.config.root.resolve(uri.path.replace(/^\//,''));
+	var path = uri2.path.replace(/^[\/\\]([A-Z]\:[\/\\])/,'$1');
+	var text = fs.readFileSync(path,'utf-8');
+	//console.log(text);
+	return text;
 }
 function loadXML(uri){
-	var text = fs.readFileSync(this.config.root.reserve(uri.path),'utf-8');
+	this.setCurrentURI(uri);
+	var uri2 = this.config.root.resolve(uri.path.replace(/^\//,''));
+	var path = uri2.path.replace(/^[\/\\]([A-Z]\:[\/\\])/,'$1');
+	return loadXMLFile(path,uri)
+}
+function loadXMLFile(file,uri){
+	var text = fs.readFileSync(file,'utf-8');
 	var text = normalizeLiteXML(text,uri);
 	var xml = new DOMParser().parseFromString(text);
-	xml.documentURI = uri;
+	xml.documentURI = uri+'' || ''+file;
 	return xml;
 }

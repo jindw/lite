@@ -41,7 +41,7 @@
     			if((path+'').replace(/#.*|([\/])+/g,'$1') === (uri+'').replace(/#.*|([\/])+/g,'$1')){
     				styleClass += ' current'
     			}else{
-    				var file = root && !/^https?\:\/\//.test(root) && new java.io.File(new java.io.File(root),uri.path);
+    				var file = root && !/^https?\:\/\//.test(root) && window.java && new java.io.File(new java.io.File(root),uri.path);
     				//$log.error((path+'').replace(/#.*|([\/])+/g,'$1'),(uri+'').replace(/#.*|([\/])+/g,'$1'));
     				if(root && uri.scheme == 'lite' && file && !file.exists()){
     					styleClass += ' missed';

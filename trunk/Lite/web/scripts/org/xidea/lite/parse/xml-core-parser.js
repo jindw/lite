@@ -636,12 +636,14 @@ function setNodeURI(context,node){
 	}
 	var doc = node.nodeType == 9?node:node.ownerDocument;
 	if(doc){
+		
 		var uri = doc.documentURI
 		if(/^lite:\//.test(uri)){
 			context.setCurrentURI(context.createURI(uri));
-		}else{
-			var info = getLiteTagInfo(doc.documentElement)
-			var i = info.indexOf('|@');
+		}else if(uri){
+			var info = getLiteTagInfo(doc.documentElement);
+			//console.log(info)
+			var i = info && info.indexOf('|@');
 			if(i>0){
 				uri = info.substring(i+2);
 			}
@@ -656,7 +658,6 @@ function parseInclude(node){
     var selector = findXMLAttribute(node,'selector');
     var parentURI = this.currentURI;
 	try{
-		
 	    if(path!=null){
 	    	if(path.charAt() == '#'){
 	    		$log.error("装饰器命名节点改用${pageName}模式了:(");

@@ -121,11 +121,16 @@ ParseContext.prototype = {
     		//if(cu.scheme == 'data'){
     		//	return new URI(cu);
     		//}else{
+    		//console.log(path,cu)
+    		//console.log('???'+cu.resolve(path))
     		return cu.resolve(path);
     		//}
     	}else{
     		path= path.replace(/^[\\\/]/,'./');// /xxx=>./xxx
     		//$log.warn(defaultBase+'',path,defaultBase.resolve(path)+'',defaultBase.authority)
+    		
+    		//console.log(path,defaultBase)
+    		//console.log('###'+defaultBase.resolve(path))
     		return defaultBase.resolve(path);
     	}
     	

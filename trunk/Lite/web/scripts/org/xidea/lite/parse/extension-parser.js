@@ -36,18 +36,18 @@ function formatName(el){
 	return tagName.toLowerCase();
 }
 
-$log.filters.push(function(msg){
-	if(nodeLocal){
-		var currentNode = nodeLocal.get();
-		if(currentNode){
-			var p = getLiteTagPosition(currentNode);
-			if(p){
-				msg = p+'\n'+msg;
-			}
-		}
-	}
-	return msg;
-});
+//$log.filters.push(function(msg){
+//	if(nodeLocal){
+//		var currentNode = nodeLocal.get();
+//		if(currentNode){
+//			var p = getLiteTagPosition(currentNode);
+//			if(p){
+//				msg = p+'\n'+msg;
+//			}
+//		}
+//	}
+//	return msg;
+//});
 
 function getLiteTagPosition(el){
 	var pos = getLiteTagInfo(el);
@@ -245,7 +245,7 @@ ExtensionParser.prototype = {
 //			var es = 10;
 			chain.next(node)
 		}catch(e){
-			$log.error("扩展解析异常：",e)
+			$log.error("扩展解析异常：",e);
 		}
 	},
 	parseAttribute:function(node,context,chain){

@@ -2,11 +2,58 @@
 require("D:\\workspace\\Lite2\\web\\nodejs\\test.js")
 */
 
+var vm = require('vm');
 var fs = require('fs');
+var roots = ["D:\\workspace\\JSI2\\web\\scripts\\","D:\\workspace\\Lite2\\web\\scripts\\"];
 var Path = require('path');
+var $JSI = {
+	impl:{
+		loadText : loadSource,
+		eval : evalSource,
+		log:function(title,level,msg){console.info(msg)}
+	}
+}
+function loadSource(path){
+	path = path.replace(/^classpath\:\/+/,'')
+	for(var i=0;i<roots.length;i++){
+		var tp = roots[i]+path;
+		if(Path.existsSync(tp)){
+			//console.info('!!'+tp);
+			var s = fs.readFileSync(tp,'utf8');
+			//console.info('!#!'+s.substring(0,1000));
+			return s;
+		}
+	}
+}
+var g = {$JSI:$JSI,console:console,require:require};
+g.window = g;
+var context = vm.createContext(g);
+function evalSource(thiz,text,path){
+	 var fn = vm.runInContext('(function(){'+text+'\n})',context,path);
+	 return fn.call(thiz);
+}
+var boot = loadSource('boot.js');
+vm.runInContext(boot,context,"classpath:///boot.js");
+try{
+	evalSource(g,"$import('org.xidea.lite:*')",'classpath:///$import');
+	evalSource(g,"$import('org.xidea.lite.nodejs:DOMParser')",'classpath:///$import');
+	evalSource(g,"$import('org.xidea.lite.nodejs:XPathEvaluator')",'classpath:///$import');
+	evalSource(g,"$import('org.xidea.lite.impl.js:*')",'classpath:///$import');
+	evalSource(g,"$import('org.xidea.lite.impl:*')",'classpath:///$import');
+	evalSource(g,"$import('org.xidea.lite.nodejs:TemplateEngine')",'classpath:///$import');
+	var TemplateEngine = evalSource(g,"return TemplateEngine;",'classpath:///$import');
+	
+}catch(e){
+	console.log('error'+e);
+	throw e;
+}
+
+
+
+
+
 var http = require('http');
 var root = "D:\\workspace\\Lite2\\web\\";
-var TemplateEngine = require("D:\\workspace\\Lite2\\build\\dest\\nodejs.js").TemplateEngine;
 var templateEngine = new TemplateEngine(root);
 //** 测试 
 templateEngine.render('/doc/guide/index.xhtml',{}, {write:function(arg){console.log(arg.substring(0,0));}});

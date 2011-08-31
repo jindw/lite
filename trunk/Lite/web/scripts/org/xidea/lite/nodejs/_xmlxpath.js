@@ -9,7 +9,10 @@ XPathEvaluator.prototype.evaluate = function(xpath,currentNode){
 			return this.item(i++);
 		}
 	}
+	return result;
 }
+//for nodejs
+window.XPathEvaluator = XPathEvaluator;
 //        //var nsResolver = xpe.createNSResolver(doc.documentElement);
 //        var result = xpe.evaluate(xpath, currentNode, function(prefix){return nsMap[prefix]}, 5, null);
 //        var node;

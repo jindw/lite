@@ -4,8 +4,8 @@ function DOMParser(){
 DOMParser.prototype.parseFromString = function(text){
 	var t1 = +new Date();
 	if(OP){
-	var doc = new OP().parseFromString(text,"text/xml");
-	}else{
+		var doc = new OP().parseFromString(text,"text/xml");
+	}else if(this.ActiveXObject){
 		var errors = [];
 		var doc = new ActiveXObject("Msxml2.DOMDocument");
 	    //var doc = new ActiveXObject("Microsoft.XMLDOM");
@@ -23,9 +23,10 @@ DOMParser.prototype.parseFromString = function(text){
 	var t3 = +new Date();
 	$log.debug("时间差",t2-t1,t3-t2,doc2.documentElement.namespaceURI);
 	var isBrower = window.document && document.body
-	return isBrower ? doc2 : doc;
+	return isBrower ? doc : doc2;
 }
-
+//for nodejs
+window.DOMParser = DOMParser;
 // =========================================================================
 //
 // xmlw3cdom.js - a W3C compliant DOM parser for XML for <SCRIPT>
@@ -2818,7 +2819,7 @@ DOMDocument.prototype.createAttributeNS = function DOMDocument_createAttributeNS
   if (this.ownerDocument.implementation.errorChecking) {
     // throw Exception if the Namespace is invalid
     if (namespaceURI && !this.ownerDocument._isValidNamespace(namespaceURI, qualifiedName, true)) {
-      console.log(namespaceURI+qualifiedName+1)
+     // console.log(namespaceURI+qualifiedName+1)
       throw(new DOMException(DOMException.NAMESPACE_ERR));
     }
 
@@ -3213,7 +3214,7 @@ DOMElement.prototype.getAttributeNS = function DOMElement_getAttributeNS(namespa
  */
 DOMElement.prototype.setAttributeNS = function DOMElement_setAttributeNS(namespaceURI, qualifiedName, value) {
   // call DOMNamedNodeMap.getNamedItem
-  console.log(222)
+ // console.log(222)
   var attr = this.attributes.getNamedItem(namespaceURI, qualifiedName);
 
   if (!attr) {  // if Attribute exists, use it

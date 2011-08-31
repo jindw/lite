@@ -154,7 +154,7 @@ function getNamespaceMap(node){
 	var attributes = node.attributes;
 	var map = {};
 	for(var i = 0;i<attributes.length;i++){
-		var attribute = attributes[i];
+		var attribute = attributes[i] ||attributes.item(i);
 		var name = attribute.name;
 		if(/^xmlns(:.*)?$/.test(name)){
 			var value = attribute.value;
@@ -174,6 +174,7 @@ function selectByXPath(currentNode,xpath){
 	var doc = currentNode.ownerDocument || currentNode;
     //var docFragment = doc.createDocumentFragment();
     var nsMap = getNamespaceMap(doc.documentElement);
+    
     try{//ie
     	var buf = [];
     	for(var n in nsMap){
@@ -187,11 +188,13 @@ function selectByXPath(currentNode,xpath){
 //            buf.push(nodes.item(i))
 //        }
     }catch(e){
+    	
         var xpe = doc.evaluate? doc: new XPathEvaluator();
         //var nsResolver = xpe.createNSResolver(doc.documentElement);
         var result = xpe.evaluate(xpath, currentNode, function(prefix){return nsMap[prefix]}, 5, null);
         var node;
         var nodes = [];
+        
         while (node = result.iterateNext()){
             nodes.push(node);
         }
@@ -202,7 +205,7 @@ function selectByXPath(currentNode,xpath){
 //    }
     return nodes;
 }
-if(!(window.DOMParser && window.XMLHttpRequest || window.ActiveXObject)){
+if(!(window.DOMParser && window.XMLHttpRequest || window.ActiveXObject) && window.Packages){
     var pu = Packages.org.xidea.lite.impl.ParseUtil;
     parseXMLByURL = parseXMLByText = function(url){
     	//TODO:data for text
