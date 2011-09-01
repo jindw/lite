@@ -69,6 +69,7 @@ if(strpos($path,".xhtml")>0){
 	if(array_key_exists('@',$_GET)){
 	echo "/*1${boot}*/";
 		if($boot){
+		echo "/*2.1${boot}*/";
 			$old_etag = @$_SERVER('HTTP_IF_NONE_MATCH');
 			echo "/*2${boot}*/";
 			$etag = @(filemtime($boot).'-'.filesize($boot));
