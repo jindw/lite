@@ -83,6 +83,7 @@ if(strpos($path,".xhtml")>0){
 			header("Cache-Control: max-age=315360000");
 		}
 	}
+    echo "//$path\n";
 	if($boot){
 		readfile($boot);
 	}else if(realpath("..".$path)){
