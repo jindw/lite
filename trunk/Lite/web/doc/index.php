@@ -70,6 +70,7 @@ if(strpos($path,".xhtml")>0){
 		if($boot){
 			$old_etag = @$_SERVER('HTTP_IF_NONE_MATCH');
 			$etag = filemtime($boot).'-'.filesize($boot);
+			echo "/**/";
 			if($old_etag && $old_etag == $etag ){
 				//header('HTTP/1.1 304 Not Modfied');  
 				//header('X-INFO-OLD:'.$old_etag);
