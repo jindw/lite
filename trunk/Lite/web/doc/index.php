@@ -65,8 +65,11 @@ if(strpos($path,".xhtml")>0){
 	}
 	$engine->render($path2,$context);
 }else{
+    echo "//$path\n";
 
 	$boot = $path == '/doc/boot.js'?realpath('../WEB-INF/classes/lite/boot.js'):null;
+	    echo "/////$path\n";
+	
 	if(array_key_exists('@',$_GET)){
 		if($boot){
 			$old_etag = @$_SERVER('HTTP_IF_NONE_MATCH');
