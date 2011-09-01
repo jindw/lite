@@ -68,16 +68,13 @@ if(strpos($path,".xhtml")>0){
 	$boot = $path == '/doc/boot.js'?realpath('../WEB-INF/classes/lite/boot.js'):null;
 	if(array_key_exists('@',$_GET)){
 		if($boot){
-		echo "/*2.1${boot}*/";
 			$old_etag = array_key_exists('HTTP_IF_NONE_MATCH',$_SERVER)?@$_SERVER('HTTP_IF_NONE_MATCH'):0;
-			echo "/*2${boot}*/";
 			$etag = @(filemtime($boot).'-'.filesize($boot));
-			echo "/*3*/";
 			if($old_etag && $old_etag == $etag ){
-				//header('HTTP/1.1 304 Not Modfied');  
+				header('HTTP/1.1 304 Not Modfied');  
 				//header('X-INFO-OLD:'.$old_etag);
 				//header('X-INFO:'.$etag);
-				//exit();
+				exit();
 			}else{
 				header("ETag:".$etag);
 			}
