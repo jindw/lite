@@ -36,8 +36,8 @@
 		echo '<p>'.htmlspecialchars($log).'</p>';
 		flush();
 	}
-	echo "<p>文档$wait毫秒后跳转到文档首页!</p>";
+	//echo "<p>文档$wait毫秒后跳转到文档首页!</p>";
 	echo "<p><a href='index.php/guide/index.xhtml'>立即跳转</a>!</p>";
     echo "\n\n<script>setTimeout(function(){
-    	document.location = ('index.php/guide/index.xhtml')
+    	//document.location = ('index.php/guide/index.xhtml')
     },$wait);</script>";
