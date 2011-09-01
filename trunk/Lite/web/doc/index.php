@@ -67,10 +67,9 @@ if(strpos($path,".xhtml")>0){
 }else{
 	$boot = $path == '/doc/boot.js'?realpath('../WEB-INF/classes/lite/boot.js'):null;
 	if(array_key_exists('@',$_GET)){
-	echo "/*1${boot}*/";
 		if($boot){
 		echo "/*2.1${boot}*/";
-			$old_etag = @$_SERVER('HTTP_IF_NONE_MATCH');
+			$old_etag = array_key_exists('HTTP_IF_NONE_MATCH',$_SERVER)?@$_SERVER('HTTP_IF_NONE_MATCH'):0;
 			echo "/*2${boot}*/";
 			$etag = @(filemtime($boot).'-'.filesize($boot));
 			echo "/*3*/";
