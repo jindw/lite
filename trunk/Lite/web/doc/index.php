@@ -70,6 +70,7 @@ if(strpos($path,".xhtml")>0){
 		if($boot){
 			$old_etag = array_key_exists('HTTP_IF_NONE_MATCH',$_SERVER)?@$_SERVER('HTTP_IF_NONE_MATCH'):0;
 			$etag = @(filemtime($boot).'-'.filesize($boot));
+			header("Content-Type:text/javascript;charset=utf-8");
 			if($old_etag && $old_etag == $etag ){
 				header('HTTP/1.1 304 Not Modfied');  
 				//header('X-INFO-OLD:'.$old_etag);
@@ -84,6 +85,8 @@ if(strpos($path,".xhtml")>0){
 		}
 	}
 	if($boot){
+		
+		header("Content-Type:text/javascript;charset=utf-8");
 		readfile($boot);
 	}else if(realpath("..".$path)){
 		if(strpos($path,".css")>0){
