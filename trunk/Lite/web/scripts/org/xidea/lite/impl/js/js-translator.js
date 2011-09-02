@@ -12,7 +12,6 @@
 //lite__init(1,name,context);//get
 //lite__init(2,obj);//encode
 //lite__init(3,list);//tolist
-var FOR_STATUS_KEY = '$__for';
 var INIT_SCRIPT = String(function(){
 	var lite__impl_get;
 	var lite__impl_def = function(g){
@@ -137,10 +136,10 @@ if(!window.lite__def){
 	${INIT_SCRIPT}
 }
 lite__def('add',function add(a,b){retur a+b});
-function($_context){
-	var var1 = lite__init('var1',$_context);
-	var var2 = lite__init('var2',$_context);
-	var var3 = lite__init('var3',$_context);
+function($__context__){
+	var var1 = lite__init('var1',$__context__);
+	var var2 = lite__init('var2',$__context__);
+	var var3 = lite__init('var3',$__context__);
 	....
 }
  */
@@ -173,7 +172,7 @@ function copy(source,target){
 
 function optimizeFunction(context,functionName,params,defaults,result){
 	var text = context.reset();
-	var args = '$_context';
+	var args = '$__context__';
 	if(params){
 		args = params.join(',');
 	}
@@ -199,7 +198,7 @@ function optimizeFunction(context,functionName,params,defaults,result){
 		}
 		result.push('\t}\n');
 	}
-	var SP = /^\s*\$_out\.push\((?:(.*)\)\s*;?)\s*$/g;
+	var SP = /^\s*\$__out__\.push\((?:(.*)\)\s*;?)\s*$/g;
 	if(SP.test(text)){
 		var c  =text.replace(SP,'$1');
 		if(c.indexOf(',')>0){
@@ -209,7 +208,7 @@ function optimizeFunction(context,functionName,params,defaults,result){
 			text = "\treturn "+c+';';
 		}
 	}else{
-		text = "\tvar $_out=[]\n"+text+"\n\treturn $_out.join('');\n";
+		text = "\tvar $__out__=[]\n"+text+"\n\treturn $__out__.join('');\n";
 	}
 	if(functionName){
     	try{
@@ -223,14 +222,19 @@ function optimizeFunction(context,functionName,params,defaults,result){
     }
     return functionName+"("+args+'){\n'+result.join('')+text.replace(/^[\r\n]+/,'')+'\n}';
 }
-function buildVars(context,refMap,callMap,params){
+function buildVars(context,scope,params){
 	var result = [];
 	var map = {};
+	var refMap = scope.externalRefMap;
+	var callMap = scope.callMap;
+	var varMap = scope.varMap;
+	var paramMap = scope.paramMap;
+	
 	copy(refMap,map);
 	copy(callMap,map);
 	for(var n in map){
-		if(!((n in GLOBAL_VAR_MAP) ||( n in GLOBAL_DEF_MAP))){
-			result.push('\tvar ',n,'=',context.liteImpl,'get("',n,'"',(params?'':',$_context'),');\n');
+		if(n != '*' && !((n in GLOBAL_VAR_MAP) ||( n in GLOBAL_DEF_MAP) || (n in varMap) || (n in paramMap))){
+			result.push('\tvar ',n,'=',context.liteImpl,'get("',n,'"',(params?'':',$__context__'),');\n');
 		}
 	}
 	if(context.impl_counter.l){
@@ -262,7 +266,7 @@ JSTranslateContext.prototype = new PT({
     		data = lastOut.substring(0,lastOut.length-2)+","+data+");";
     		this.out[lastIndex] = data;
     	}else{
-    		data = "$_out.push("+data+");";
+    		data = "$__out__.push("+data+");";
     		this.append(data);
     	}
     	this._lastOut = data
@@ -271,7 +275,7 @@ JSTranslateContext.prototype = new PT({
 		return el?stringifyJSEL(el,this):null;
 	},
 	parse:function(){
-		var code = this.code;
+		var code = this.scope.code;
 		var params = this.params;
 		this.depth=0;
 		this.out = [];
@@ -279,13 +283,11 @@ JSTranslateContext.prototype = new PT({
 	    var fs = [];
 	    var defs = this.scope.defs;
 	    for(var i=0;i<defs.length;i++){
-	        var def = defs[i];
+	        var def = this.scope.defMap[defs[i]];
 	        var n = def.name;
-	        var refMap = def.externalRefMap;
-	        var callMap = def.callMap;
 	        this.depth++;
 	        this.appendCode(def.code);
-	        var vars = buildVars(this,refMap,callMap,def.params);
+	        var vars = buildVars(this,def,def.params);
 	        var content = optimizeFunction(this,'',def.params,def.defaults,vars);
 	        this.depth--;
 	        fs.push(this.liteImpl,"def('",n,"',",content,");\n");
@@ -301,12 +303,9 @@ JSTranslateContext.prototype = new PT({
 	        //alert(["编译失败：",buf.join(""),code])
 	        throw e;
 	    }
-	    var refMap = this.scope.externalRefMap;
-	    var callMap =this.scope.callMap;
-	    
-	    var vars = buildVars(this,refMap,callMap,this.params);
+	    var vars = buildVars(this,this.scope,this.params);
 	    this.body = optimizeFunction(this,this.name,this.params,this.defaults,vars);
-	    //this.append("return $_out.join('');");
+	    //this.append("return $__out__.join('');");
 	},
 	
     appendStatic:function(item){
@@ -347,9 +346,9 @@ JSTranslateContext.prototype = new PT({
         var childCode = item[1];
         var varName = item[2];
         var bufbak = this.allocateId();
-        this.append("var ",bufbak,"=$_out;$_out=[];");
+        this.append("var ",bufbak,"=$__out__;$__out__=[];");
         this.appendCode(childCode);
-        this.append("var ",varName,"=$_out.join('');$_out=",bufbak,";");
+        this.append("var ",varName,"=$__out__.join('');$__out__=",bufbak,";");
         this.freeId(bufbak);
     },
     appendEncodePlugin:function(item){//&#233;&#0xDDS;

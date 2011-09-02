@@ -9,7 +9,16 @@ import java.util.List;
  */
 public interface OptimizeScope{
 	/**
-	 * 明确的函数调用,不包括变量/参数(var ,params)做为函数的调用(标记为不确定,添加'*' 至列表),不包括表达式返回的函数调用
+	 * 明确的函数调用(非var,params调用,非表达式调用)
+	 * 
+	 * 不包括变量/参数(var ,params)做为函数的调用
+	 * 不包括表达式返回的函数调用
+	 * (变量,做为函数调用的时候,scope的calls 不确定, 需要添加'*' 至列表加以区别);
+	 * 仅仅是参数做为函数调用,这个调用不会被单独记录下来,而是由调用者记录该数据???
+	 * 这个不靠谱啊!!!
+	 * 
+	 * 当存在不确定的函数调用的时候,
+	 * 前端模板需要将有所出现的非var非params引用都标记为可能的函数调用.
 	 * @return
 	 */
 	public List<String> getCalls();
@@ -22,7 +31,7 @@ public interface OptimizeScope{
 	 */
 	public List<String> getDefs();
 	/**
-	 * 参数列表
+	 * 参数列表,不能为空.
 	 */
 	public List<String> getParams();
 	/**

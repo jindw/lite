@@ -25,7 +25,7 @@ class LiteEngine{
 	 * 上线后建议置false
 	 * 设置是编译器实现，有则自动编译，必须在$debug 为true时，才能生效
 	 */
-	public $autocompile = true;
+	public $autocompile = false;
 	/**
 	 * 模板根目录（建议为网站根目录）
 	 */

@@ -26,7 +26,6 @@ function TranslateContext(code,name,params){
      * 当前scope的信息(包括变量,引用,函数调用信息,for状态,函数集...) 
      */
     this.scope = new OptimizeScope(code,params)
-    this.code = code;
     this.idMap = {};
     this.depth = 0;
 

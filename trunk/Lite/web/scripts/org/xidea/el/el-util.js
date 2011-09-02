@@ -50,13 +50,15 @@ function findELEnd(text, elQuteBegin) {
 			}
 			break;
 		case '/':// 如果是正则，需要跳过正则
-			var regExp = isRegExp(text, elQuteBegin, next);
-			if (regExp) {
-				var end = findRegExpEnd(text, next);
-				if(end >0){
-					next = end;
-				}else{
-					$log.error("无效状态");
+			if (stringChar == 0) {
+				var regExp = isRegExp(text, elQuteBegin, next);
+				if (regExp) {
+					var end = findRegExpEnd(text, next);
+					if(end >0){
+						next = end;
+					}else{
+						$log.error("无效状态");
+					}
 				}
 			}
 		}

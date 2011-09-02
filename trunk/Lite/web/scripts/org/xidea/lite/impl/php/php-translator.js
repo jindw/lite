@@ -129,24 +129,31 @@ function _encodeEL(text,model,encoding){
 	}
 	return encode;
 }
+function _appendFunctionName(context,scope){
+	for(var n in scope.refMap){
+		if(!(n in scope.varMap || n in scope.paramMap)){
+			context.append("if(function_exists('lite__",n,"')){$",n,"='",n,"';}");
+		}
+	}
+}
 PHPTranslateContext.prototype = new TCP({
 	stringifyEL:function (el){
 		return el?stringifyPHPEL(el,this):null;
 	},
 	parse:function(){
-		var code = this.code;
 		this.depth = 0;
 		this.out = [];
 	    //add function
 	    var defs = this.scope.defs;
 	    
 	    for(var i=0;i<defs.length;i++){
-	        var def = defs[i];
+	        var def = this.scope.defMap[defs[i]];
 	        var n = def.name;
 	        this.append("if(!function_exists('lite__",n,"')){function lite__",
 	        		n,"(",toArgList(def.params),'){')
 	        this.depth++;
 	        this.append("ob_start();");
+	        _appendFunctionName(this,def);
 	        this.appendCode(def.code);
     		this.append("$rtv= ob_get_contents();ob_end_clean();return $rtv;");
 	        this.depth--;
@@ -155,11 +162,12 @@ PHPTranslateContext.prototype = new TCP({
 	    try{
 	        this.append("function lite_template",this.id,'($__context__){')
 	        this.depth++;
-			this.append("extract($__context__,EXTR_SKIP);");
 			if(this.contentType){
 				this.append("if(!headers_sent())header('ContentType:"+this.contentType+"');")
 			}
-	        this.appendCode(code);
+			_appendFunctionName(this,this.scope);
+			this.append("extract($__context__,EXTR_OVERWRITE);");
+	        this.appendCode(this.scope.code);
 	        this.depth--;
 	        this.append("}");
 	    }catch(e){

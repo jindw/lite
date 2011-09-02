@@ -148,14 +148,23 @@ function copy(source,target){
 		target[n] = source[n];
 	}
 }
+function remove(source,target){
+	for(var n in source){
+		delete target[n];
+	}
+}
 function getDefCall(data){
 	var scope = getDefScope(data);
 	var callMap = {}
 	copy(scope.callMap,callMap);
-	if(scope.callMap['*']){
-		copy(scope.externalRefMap,callMap);
-		delete callMap['*'];
-	}
+//	if(scope.callMap['*']){
+//		copy(scope.externalRefMap,callMap);
+//		delete callMap['*'];
+//	}
+	copy(scope.externalRefMap,callMap);
+	remove(scope.varMap,callMap);
+	remove(scope.paramMap,callMap);
+	delete callMap['*'];
 	return callMap
 	
 }

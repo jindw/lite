@@ -156,12 +156,17 @@ function stringifyINVOKE(el,context){
 		//value1 = value1.replace(/.*?,([\s\S]+)\)/,'array($1)');
 	}else if(type1 == VALUE_VAR){
 		var varName = arg1[1];
-		if(varName in GLOBAL_DEF_MAP || varName in context.scope.defMap){
+		if((varName in GLOBAL_DEF_MAP || varName in context.scope.defMap)
+			&& !(varName in context.scope.varMap || varName in context.scope.paramMap)){
 			//静态编译方式
 			return value2.replace('array',"lite__"+varName)
 		}else{
 			//动态调用方式
-			var fn = "isset($"+varName+")?$"+varName+":'"+varName+"'"
+			if(varName in context.scope.varMap || varName in context.scope.paramMap){
+				var fn = '$'+varName;
+			}else{
+				var fn = "isset($"+varName+")?$"+varName+":'"+varName+"'";
+			}
 			return 'lite_op__invoke('+fn+',null,'+value2+')';
 		}
 	}else{	

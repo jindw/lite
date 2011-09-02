@@ -13,12 +13,10 @@ function OptimizeScope(code,params){
 	 * @see org.xidea.lite.parse.OptimizeScope#getParams()
 	 */
 	this.params =  params?params.concat():[];
-	this.paramMap = listMap(this.params,{});
 	/**
 	 * @see org.xidea.lite.parse.OptimizeScope#getVars()
 	 */
 	this.vars = [];
-	this.varMap = {}
 	/**
 	 * @see org.xidea.lite.parse.OptimizeScope#getCalls()
 	 */
@@ -40,6 +38,8 @@ function OptimizeScope(code,params){
 	 */
 	this.defs = [];
 	this.defMap = {};
+	this.paramMap = listMap(this.params,{});
+	this.varMap = {}
 	this._forStack = [];
 	vistLite(this,this.code = code);
     delete this._forStack;
@@ -77,7 +77,7 @@ function vistDef(context,item){
 	def.params = config.params;
 	def.defaults = config.defaults;
 	context.fors = context.fors.concat(def.fors)
-	context.defs.push(def);
+	context.defs.push(def.name);
 	context.defMap[def.name] = def;
 	def.defs = context.defs;
 	def.defMap = context.defMap;

@@ -109,9 +109,11 @@ public class ClientPlugin implements OptimizePlugin, OptimizeScope {
 
 	private static Set<String> getCall(OptimizeScope si) {
 		HashSet<String> cs = new HashSet<String>(si.getCalls());
-		if (cs.contains("*")) {
-			cs.addAll(si.getExternalRefs());
-		}
+		//if (cs.contains("*")) {
+		cs.addAll(si.getExternalRefs());
+		//}
+		cs.removeAll(si.getParams());
+		cs.removeAll(si.getVars());
 		cs.remove("*");
 		return cs;
 	}

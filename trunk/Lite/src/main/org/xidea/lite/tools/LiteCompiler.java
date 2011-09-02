@@ -53,9 +53,6 @@ public class LiteCompiler {
 			this.resultMap = new LinkedHashMap<String, byte[]>();
 			if (path == null) {
 				this.processDir(root, "/");
-				for (String path : this.resourceManager.getLinkedResources()) {
-					this.processFile(path);
-				}
 				if (linked && !output.equals(root)) {
 					List<String> lrs = this.resourceManager
 							.getLinkedResources();

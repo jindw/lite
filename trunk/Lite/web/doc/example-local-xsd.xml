@@ -26,7 +26,7 @@
 				</c:for>
 			</div>
 		</c:for>
-		<c:for items="${item}" var="item">${for.index}</c:for>
+		<c:for list="${item}" var="item">${for.index}</c:for>
 
 
 
