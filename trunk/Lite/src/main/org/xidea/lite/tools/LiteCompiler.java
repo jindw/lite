@@ -52,7 +52,9 @@ public class LiteCompiler {
 			initialize();
 			this.resultMap = new LinkedHashMap<String, byte[]>();
 			if (path == null) {
-				this.processDir(root, "/");
+				final PathMatcher includes = PathMatcher.createMatcher(this.includes);
+				final PathMatcher excludes = PathMatcher.createMatcher(this.excludes);
+				this.processDir(root, "/",includes,excludes);
 				if (linked && !output.equals(root)) {
 					List<String> lrs = this.resourceManager
 							.getLinkedResources();
@@ -98,24 +100,24 @@ public class LiteCompiler {
 
 	
 
-	public void processDir(final File dir, final String path) {
+	public void processDir(final File dir, final String path,final PathMatcher includes,final PathMatcher excludes) {
 		log.info("处理目录：" + dir.getAbsolutePath());
-		final PathMatcher includes = PathMatcher.createMatcher(this.includes);
-		final PathMatcher excludes = PathMatcher.createMatcher(this.excludes);
-
 		dir.listFiles(new FileFilter() {
 			public boolean accept(File file) {
 				if (!file.equals(output)) {
 					String path2 = path + file.getName();
 					if (file.isDirectory()) {
+						path2 += '/';
 						if (file.getName().startsWith(".")) {
-							log.warn("跳过目录：" + file);
+							log.debug("跳过目录：" + file);
 						} else {
-							if (excludes == null || !excludes.must(path)) {
-								processDir(file, path2 + '/');
+							if ((includes == null || includes.maybe(path))
+								&&(excludes == null || !excludes.must(path2))) {
+								processDir(file, path2,includes,excludes);
 							}
 						}
-					} else if ((includes == null || includes.match(path2))
+					} else if ((includes == null && path2.endsWith(".xhtml")
+								|| includes.match(path2))
 							&& (excludes == null || !excludes.match(path2))) {
 						try {
 							processFile(path2);

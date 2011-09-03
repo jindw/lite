@@ -68,7 +68,7 @@ class LiteEngine{
 					$this->debug = false;
 					//check_exist?
 					if(!file_exists($this->litecode.strtr($path,'/','^').'.php')){
-						trigger_error("template can not be compiled!");
+						trigger_error("debug model is false; template can not be compiled!");
 					}
 				}
 			}else{
