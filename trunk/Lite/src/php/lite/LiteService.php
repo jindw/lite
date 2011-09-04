@@ -103,9 +103,18 @@ class LiteService{
 						";\nvar serviceBase='",$this->url,"'",
 						";</script>\n",
 						"<script src='$scriptPath'></script>\n",
-						"<script>if(!this.DataView && this.\$import){\$import('org.xidea.lite.web.DataView',true);}</script>\n",
-						"<script>DataView.render(templatePath,templateModel,templateFeatureMap,serviceBase);</script>\n",
-						"<hr>\n<pre>";
+						"<script>if(!this.DataView && this.\$import){\$import('org.xidea.lite.web.DataView',true);}</script>\n";
+						
+					
+					$model_view_impl = @$_COOKIE["LITE_MODEL_VIEW_IMPL"];
+					if($model_view_impl){
+						echo "<script src='$model_view_impl'></script>";
+					}
+					echo "<script>DataView.render(templatePath,templateModel,templateFeatureMap,serviceBase);</script>\n";
+					if($model_view_impl){
+						echo "<div><a href='#' onclick=\"document.cookie='LITE_MODEL_VIEW_IMPL=;expires='+new Date(0).toGMTString();alert('恢复成功')\">回复默认视图</a></div>";
+					}
+					echo "<hr>\n<pre>";
 					echo json_encode($context);
 					echo '<hr/>';
 					var_dump($context);

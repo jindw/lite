@@ -36,8 +36,8 @@ var DataView = {
 			}
 		}else{
 			var id = toname(this.modelPath);
-			document.write("<div class='toolbar'>"
-					+"<div class='data-view-skin'>当前数据视图实现 [系统默认]<a href='#' onclick='DataView.setViewImpl();return false'>自定制</a></div>"
+			document.write("<div id='toolbar' class='toolbar'>"
+					+"<div class='data-view-skin'>当前数据视图实现 ["+(getCookie(LITE_MODEL_VIEW_IMPL) || '系统默认')+"]<a href='#' onclick='DataView.setViewImpl();return false'>自定制</a></div>"
 					+"<input type='button' value='修改数据' onclick='DataView.mockModel([\""+this.modelPath+"\"])'/>"
 					+"<input type='button' value='刷新缓存' onclick='DataView.refresh()'/>"
 					+"<input type='button' value='查看源码' onclick='DataView.source()'/>"
@@ -46,23 +46,6 @@ var DataView = {
 					"' onchange='DataView.checkJSON(this.value,this)'>"+
 					encode(model)+"</textarea>");
 			
-		}
-	},
-	setViewImpl:function(){
-		var help = "(视图定制的详细参考见:http://www.xidea.org/lite/doc/index.php/guide/dev-data-view.xhtml)";
-		var impl = prompt("请输入视图实现JavaScript脚本(为空表示回复默认视图):\n\n"+help,'');
-		if(impl){
-			var date = new Date(+new Date()*2);
-		}else{
-			var date = new Date(0);
-		}
-		document.cookie = 
-			'LITE_MODEL_VIEW_IMPL='+encodeURIComponent(impl)+';expires='+date.toGMTString();
-		var msg = "刷新后将附加新的视图实现脚本!\n\n"+help;
-		if(impl){
-			prompt("视图Cookie设置成功!附加脚本("+impl+")将用来扩展视图功能.\n"+msg )
-		}else{
-			prompt("视图Cookie删除成功,将只采用默认视图脚本!\n"+msg )
 		}
 	},
 	refresh:function(){
@@ -109,6 +92,42 @@ var DataView = {
 			}
 		}
 		len && callback();
+	},
+	setViewImpl:function(){
+		var help = "(视图定制参考见:http://www.xidea.org/lite/doc/index.php/guide/dev-data-view.xhtml)";
+		var currentImpl = getCookie(LITE_MODEL_VIEW_IMPL)
+		var impl = prompt("请输入视图实现JavaScript脚本(为空表示回复默认视图):\n"+help,currentImpl||'');
+		if(impl == null){
+			confirm('修改取消');
+			return;
+		} else if ((currentImpl||'') == impl){
+			confirm('未作修改');
+			return;
+		}
+		if(impl){
+			var date = new Date(+new Date()*2);
+		}else{
+			var date = new Date(0);
+		}
+		document.cookie = 
+			LITE_MODEL_VIEW_IMPL+'='+encodeURIComponent(impl)+';expires='+date.toGMTString();
+		var msg = "刷新后将附加新的视图实现脚本!\n\n"+help;
+		if(impl){
+			var rtv = confirm("视图Cookie设置成功!附加脚本("+impl+")将用来扩展视图功能,点击确认刷新页面.\n"+msg )
+		}else{
+			var rtv = confirm("视图Cookie删除成功,将只采用默认视图脚本,点击确认刷新页面!\n"+msg )
+		}
+		if(rtv){
+			debugReload("model");
+		}
+	}
+}
+var LITE_MODEL_VIEW_IMPL = 'LITE_MODEL_VIEW_IMPL';
+function getCookie(key){
+	var c = document.cookie;
+	var r = c.replace(new RegExp('^(?:.*;)?'+key+'=([^;]+).*$'),'$1');
+	if(c != r){
+		return decodeURIComponent(r);
 	}
 }
 function toname(path){

@@ -101,8 +101,15 @@ public class DebugSupportImpl implements DebugSupport {
 					+ "'></script>\n");
 			out
 					.append("<script>if(!this.DataView && this.$import){$import('org.xidea.lite.web.DataView',true);}</script>\n");
-			out
-					.append("<script>DataView.render(templatePath,templateModel,templateFeatureMap,serviceBase);</script>\n");
+			
+			String model_view_impl = getCookie(request, "LITE_MODEL_VIEW_IMPL");
+			if(model_view_impl !=null){
+				out.append("<script src='"+model_view_impl+"'></script>");
+			}
+			out.append("<script>DataView.render(templatePath,templateModel,templateFeatureMap,serviceBase);</script>\n");
+			if(model_view_impl!=null){
+				out.append("<div><a href='#' onclick=\"document.cookie='LITE_MODEL_VIEW_IMPL=;expires='+new Date(0).toGMTString();alert('恢复成功')\">回复默认视图</a></div>");
+			}
 			out.append("\n<hr><pre>");
 			out.print(result.replace("&", "&amp;").replace("<", "&lt;"));
 			out.append("</pre>");
@@ -113,8 +120,6 @@ public class DebugSupportImpl implements DebugSupport {
 			String dataURL = value.substring(6);
 			InputStream in = new URL(dataURL).openStream();
 			String json = ParseUtil.loadTextAndClose(in, "UTF-8");
-			System.out.println(dataURL);
-			System.out.println(json);
 			Map<String, Object> context = templateServlet.createModel(request);
 			Map<String, Object> mock = JSONDecoder.decode(json);
 			for(String key : mock.keySet()){
