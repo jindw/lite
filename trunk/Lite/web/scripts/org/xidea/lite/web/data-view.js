@@ -6,37 +6,63 @@ var DataView = {
 		this.remoteModel = serviceBase == this.serviceBase;
 		//.replace('//localhost/','//127.0.0.1/'));
 		var model = stringifyJSON(templateModel,'\t');
+		document.write("<style>body{background:#ddd;}.data-view-skin{float:left;}"+
+			"textarea.model{background:#333;width:98%;height:80%;color:#eee;font-weight:bold;}"+
+			".toolbar{text-align:right;background:#EEE;width:98%;padding:2px;border:1px outset #333333}"+
+			"</style>");
 		if(model instanceof Array){
 			//文件集合
 			//[[file1,source1],["file2","source2"]
 			var len = model.length;
 			var models = [];
+			document.write("<div class='toolbar'>"
+					+"<div class='data-view-skin'>切换皮肤</div>"
+					+"<input type='button' value='刷新缓存' onclick='DataView.refresh()'/>"
+					+"<input type='button' value='测试模板' onclick='DataView.reload("+stringifyJSON(models)+")'/>"
+				+"</div>");
 			for(var i=0;i<len;i++){
 				var item = model[i];
 				var id = toname(item[0]);
 				models.push(item[0]);
-				document.write("<div>"
+				document.write("<div class='modelbar'>"
 					+"<label>"
 					+"<strong>"+item[0]+"</strong>"
 					+"<input type='button' value='修改数据' onclick='DataView.save("+stringifyJSON(item[0])+","+id+")'/>"
 				+"</label></div>");
-				document.write("<textarea autocomplete='off' id='"+
-					id+"' style='width:99%;height:"+parseInt(90 / len)+
+				document.write("<textarea class='model' autocomplete='off' id='"+
+					id+"' style='height:"+parseInt(90 / len)+
 					"%' onchange='DataView.checkJSON(this.value,this)'>"+
 					encode(item[1])+"</textarea>");
 			}
-			document.write("<div>"
-					+"<input type='button' value='刷新缓存' onclick='DataView.refresh()'/>"
-					+"<input type='button' value='测试模板' onclick='DataView.reload("+stringifyJSON(models)+")'/>"
-				+"</div>");
 		}else{
 			var id = toname(this.modelPath);
-			document.write("<textarea autocomplete='off' id='"+id+"' style='width:99%;height:80%' onchange='DataView.checkJSON(this.value,this)'>"+encode(model)+"</textarea>");
-			document.write("<div>"
+			document.write("<div class='toolbar'>"
+					+"<div class='data-view-skin'>当前数据视图实现 [系统默认]<a href='#' onclick='DataView.setViewImpl();return false'>自定制</a></div>"
 					+"<input type='button' value='修改数据' onclick='DataView.mockModel([\""+this.modelPath+"\"])'/>"
 					+"<input type='button' value='刷新缓存' onclick='DataView.refresh()'/>"
 					+"<input type='button' value='查看源码' onclick='DataView.source()'/>"
 				+"</div>");
+			document.write("<textarea class='model' autocomplete='off' id='"+id+
+					"' onchange='DataView.checkJSON(this.value,this)'>"+
+					encode(model)+"</textarea>");
+			
+		}
+	},
+	setViewImpl:function(){
+		var help = "(视图定制的详细参考见:http://www.xidea.org/lite/doc/index.php/guide/dev-data-view.xhtml)";
+		var impl = prompt("请输入视图实现JavaScript脚本(为空表示回复默认视图):\n\n"+help,'');
+		if(impl){
+			var date = new Date(+new Date()*2);
+		}else{
+			var date = new Date(0);
+		}
+		document.cookie = 
+			'LITE_MODEL_VIEW_IMPL='+encodeURIComponent(impl)+';expires='+date.toGMTString();
+		var msg = "刷新后将附加新的视图实现脚本!\n\n"+help;
+		if(impl){
+			prompt("视图Cookie设置成功!附加脚本("+impl+")将用来扩展视图功能.\n"+msg )
+		}else{
+			prompt("视图Cookie删除成功,将只采用默认视图脚本!\n"+msg )
 		}
 	},
 	refresh:function(){
