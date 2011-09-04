@@ -12,7 +12,9 @@ import org.apache.commons.logging.LogFactory;
 import org.xidea.el.impl.CommandParser;
 import org.xidea.el.impl.ReflectUtil;
 import org.xidea.el.json.JSONEncoder;
+import org.xidea.jsi.JSIRuntime;
 import org.xidea.lite.impl.HotTemplateEngine;
+import org.xidea.lite.impl.ParseUtil;
 import org.xidea.lite.parse.ParseContext;
 
 public class LiteCompiler {
@@ -141,7 +143,13 @@ public class LiteCompiler {
 			}
 		});
 	}
-
+	public static String buildPHP(String path, String litecode) {
+		JSIRuntime runtime = ParseUtil.getJSIRuntime();
+		Object translator = runtime
+				.eval("new ($import('org.xidea.lite.impl.php:PHPTranslator',{}))('"
+						+ path + "'," + litecode + ")");
+		return (String) runtime.invoke(translator, "translate");
+	}
 	public boolean processFile(final String path) throws IOException {
 		log.info("process file(处理文件)：" + path);
 		if (this.resultMap.containsKey(path)) {
@@ -154,17 +162,19 @@ public class LiteCompiler {
 				if (path.equals(layout)) {
 					return false;
 				}
-				String path2 = LiteCompilerHelper.translatePath(path);
+				String litecodepath = "/WEB-INF/litecode/" + path.replace('/', '^');
 				String result = engine.getLitecode(path);
 
 				String encoding = resourceManager.getFeatureMap(path).get(
 						ParseContext.FEATURE_ENCODING);
 				// 中间代码永远是UTF-8；但是静态文本中大大字符还是要确保安全。
-				this.resultMap.put(path2, result.getBytes("utf-8"));
+				this.resultMap.put(litecodepath, result.getBytes("utf-8"));
 				if (this.translator != null) {
 					if ("php".equals(translator)) {
-						LiteCompilerHelper.buildPHP(path, result, encoding,
-								this.resultMap);
+//						LiteCompilerHelper.buildPHP(path, result);
+						String code = buildPHP(path, result);
+						resultMap.put(litecodepath + ".php",
+								code.getBytes(encoding));
 					}
 				}
 

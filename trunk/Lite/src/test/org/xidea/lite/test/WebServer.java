@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
@@ -34,8 +36,10 @@ import org.xidea.jsi.web.JSIService;
 import org.xidea.lite.impl.HotTemplateEngine;
 import org.xidea.lite.impl.ParseUtil;
 import org.xidea.lite.parse.ParseConfig;
+import org.xidea.lite.parse.ParseContext;
 import org.xidea.lite.servlet.RequestMap;
 import org.xidea.lite.servlet.TemplateServlet;
+import org.xidea.lite.tools.LiteCompiler;
 import org.xidea.lite.tools.ResourceManagerImpl;
 
 public class WebServer {
@@ -88,16 +92,29 @@ public class WebServer {
 					);
 
 			TemplateServlet servlet = null;
+			
 
 			public void processRequest(RequestContext context) throws Exception {
 				init(base);
 				final String uri = context.getRequestURI();
+				final String lite_compile_service = "/WEB-INF/service/lite-compile";
 				String rp = CGIEnvironment.toRealPath(base, uri);
-				if (rp.endsWith(".php")) {
+				if(uri.equals(lite_compile_service)){
+					String path = context.getParam().get("path");
+					String litecode = ht.getLitecode(path);
+					String phpcode = LiteCompiler.buildPHP(path, litecode);
+					String litecodepath = "/WEB-INF/litecode/" + path.replace('/', '^');
+					writeFile(litecodepath, litecode.getBytes("UTF-8"));
+					writeFile(litecodepath+".php", phpcode.getBytes(manager.getFeatureMap(path).get(ParseContext.FEATURE_ENCODING)));
+					
+				}else if (rp.endsWith(".php")) {
 					Map<String, String> envp = new CGIEnvironment(context)
 							.toMap(System.getenv());
-					CGIRunner cr = new CGIRunner(context, "php-cgi.exe", envp,
+					String compile_service = "http://127.0.0.1:"+context.getServer().getPort()+lite_compile_service;
+					envp.put("LITE_COMPILE_SERVICE", compile_service);
+					CGIRunner cr = new CGIRunner(context, "", envp,
 							new File(new File(base), rp).getParentFile(), null);
+					cr.setCgiExecutable("php-cgi.exe -d extension=ext/php_mbstring.dll".split("[\\s]+"));
 					cr.run();
 				} else {
 					String prefix = "/scripts/";
@@ -151,6 +168,19 @@ public class WebServer {
 							}
 						}
 					}
+				}
+			}
+
+			private void writeFile(String path,byte[] litecode) throws FileNotFoundException,
+					IOException, UnsupportedEncodingException {
+				File file = new File(root,path);
+				file.getParentFile().mkdirs();
+				FileOutputStream out1 = new FileOutputStream(file);
+				try{
+					out1.write(litecode);
+					out1.flush();
+				}finally{
+					out1.close();
 				}
 			}
 

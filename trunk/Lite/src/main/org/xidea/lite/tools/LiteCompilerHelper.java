@@ -10,8 +10,6 @@ import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.xidea.jsi.JSIRuntime;
-import org.xidea.lite.impl.ParseUtil;
 
 class LiteCompilerHelper {
 	private static final Log log = LogFactory.getLog(LiteCompilerHelper.class);
@@ -55,16 +53,6 @@ class LiteCompilerHelper {
 			}
 		}
 	}
-	static void buildPHP(String path, String litecode, String encoding,Map<String, byte[]> resultMap)
-			throws IOException {
-		JSIRuntime runtime = ParseUtil.getJSIRuntime();
-		Object translator = runtime
-				.eval("new ($import('org.xidea.lite.impl.php:PHPTranslator',{}))('"
-						+ path + "'," + litecode + ")");
-		String result = (String) runtime.invoke(translator, "translate");
-		resultMap.put(LiteCompilerHelper.translatePath(path) + ".php",
-				result.getBytes(encoding));
-	}
 
 	private static void writeZipResult(Map<String, byte[]> resultMap,
 			File output) throws IOException {
@@ -98,7 +86,4 @@ class LiteCompilerHelper {
 
 	}
 
-	static String translatePath(final String path) {
-		return "/WEB-INF/litecode/" + path.replace('/', '^');
-	}
 }

@@ -264,6 +264,13 @@ class LiteService{
 		}
 		if( $this->getFileModified($path)){
 			$serviceBase = $this->url;
+			
+			$compile_service = @$_SERVER['LITE_COMPILE_SERVICE'];
+			if($compile_service){
+				file_get_contents($compile_service.'?path='.$path);
+				return ;
+			}
+			
 			$this->loadJavaScriptClass('org.xidea.lite.web:WebCompiler');
 			$config = realpath($this->root.'/WEB-INF/lite.xml');
 			if($config){

@@ -60,11 +60,6 @@ class LiteEngine{
 			if(is_string($this->debug)){
 				if(preg_match($this->debug,$_SERVER["REMOTE_ADDR"])){
 					$this->debug = true;
-					//localhost 或者 调试服务器下,compiler = true
-					//echo "<pre>";print_r($_SERVER);echo "</pre>";
-					if($_SERVER['HTTP_Host'] == 'localhost'){
-						$this->autocompile = true;
-					}
 				}else{
 					$this->debug = false;
 					//check_exist?
@@ -72,8 +67,11 @@ class LiteEngine{
 						trigger_error("debug model is false; template can not be compiled!");
 					}
 				}
-			}else{
-				if($_SERVER['HTTP_Host'] == 'localhost'){
+			}
+			if($this->debug){
+				//调试服务器下,compiler = true
+				//echo "<pre>";print_r($_SERVER);echo "</pre>";
+				if(array_key_exists('LITE_COMPILE_SERVICE',$_SERVER)){
 					$this->autocompile = true;
 				}
 			}
