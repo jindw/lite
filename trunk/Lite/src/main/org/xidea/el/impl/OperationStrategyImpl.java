@@ -113,11 +113,7 @@ public class OperationStrategyImpl implements OperationStrategy {
 		switch (type) {
 		case ExpressionToken.VALUE_VAR:
 			Object key = item.getParam();
-			Object v = vs.get(key);
-			if (v == null) {
-				return globalMap.get(key);
-			}
-			return v;
+			return getVar(vs,key);
 		case ExpressionToken.VALUE_CONSTANTS:
 			return item.getParam();
 		case ExpressionToken.VALUE_LIST:

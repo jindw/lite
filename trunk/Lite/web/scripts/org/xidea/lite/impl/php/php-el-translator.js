@@ -110,6 +110,7 @@ function stringifyGET(el,context){
 	var value2 = stringifyPHPEL(el[2],context);
 	if(arg2[0] == VALUE_CONSTANTS){
 		if( arg2[1] != 'length'){
+			//这里有可能要抛警告
 			return value1+'['+value2+']';
 		}
 	}

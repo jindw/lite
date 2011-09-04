@@ -23,7 +23,8 @@ class LiteEngine{
 	public $debug = '/^(?:127\.0\.0\.1|10\..+|172\.(?:1[6789]|2.|30|31)\..+|192\.168\..+|([0:]+1))$/';
 	/**
 	 * 上线后建议置false
-	 * 设置是编译器实现，有则自动编译，必须在$debug 为true时，才能生效
+	 * 设置是编译器实现，有则自动编译。
+	 * 必须在$debug 为true时，才能生效，当在调试服务器下运行时，只要debug打开， 该选项也会自动打开。
 	 */
 	public $autocompile = false;
 	/**
@@ -78,8 +79,13 @@ class LiteEngine{
 			}
 		}
 	    $lite_engine = $this;
+		$error_level =  error_reporting();
+		error_reporting($error_level & ~E_NOTICE);
+		$encoding = mb_internal_encoding();
 		lite_render($path,$context);
 	    $lite_engine = $old;
+	    error_reporting($error_level);
+	    mb_internal_encoding($encoding);
 	}
 }
 /**
@@ -160,7 +166,7 @@ function lite_op__get($obj, $key) {
 			return count($obj);
 		}
 	}
-	return @$obj[$key];
+	return array_key_exists($key,$obj)?$obj[$key]:null;
 }
 /* ===================== 成员函数调用 ======================*/
 /**

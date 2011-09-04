@@ -134,10 +134,12 @@
 			if(runStatus.type == 'js'){
 				try{
 					var code = runStatus.runcode;
-					code = code.replace(/^function\(\$\_context\)/m,"return $&");
+					code = code.replace(/^function\(\$\__context__\)/m,"return $&");
 					//alert(code)
 					var tpl =  window.eval("(function(lite__impl_def,lite__impl_get){"+(code||null)+"})");
+					//alert(code)
 					tpl = new Template(tpl);
+					
 					var result = tpl.render(data);
 				}catch(e){
 					$log.error("测试失败：模板运行异常："+tpl.render+e);

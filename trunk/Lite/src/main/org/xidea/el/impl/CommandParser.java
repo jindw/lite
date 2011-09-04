@@ -21,7 +21,6 @@ public class CommandParser {
 			.getInstance();
 	public Map<Class<?>, Convertor<? extends Object>> convertorMap = Convertor.DEFAULT_MAP;
 	private Map<String, String[]> params;
-
 	public CommandParser(String[] args) {
 		if (args != null) {
 			this.params = parseArgs(args);
@@ -67,18 +66,20 @@ public class CommandParser {
 							result.setValue(getValue(values, type, context,
 									name));
 						} else if (context != null) {
-							if (log.isInfoEnabled()) {
-								log.info("找不到相关属性：" + name);
-								Object properties = ReflectUtil.map(context)
-										.keySet();
-								log.info("当前对象可能属性有：" + properties);
-							}
+							onMissedProperty(context, name);
 						}
 					} catch (ExpressionSyntaxException e) {
 						log.debug("无效属性："+name,e);
 					}
 				}
 			}
+		}
+	}
+
+	protected void onMissedProperty(final Object context, String name) {
+		if (log.isInfoEnabled()) {
+			String msg = "找不到相关属性：" + name+"; 当前对象可能属性有：" + ReflectUtil.map(context).keySet();
+			log.info(msg);
 		}
 	}
 

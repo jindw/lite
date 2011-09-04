@@ -29,11 +29,23 @@ public abstract class PathMatcher {
 		return new MultiPathMatcher(rtv);
 	}
 
-	abstract boolean must(String path);
+	/**
+	 * @param path
+	 *            path必须以/ 开头，且以/结尾 测试某个目录是否所有子文件都能匹配该模式。
+	 */
+	public abstract boolean must(String path);
 
-	abstract boolean maybe(String path);
+	/**
+	 * @param path
+	 *            path必须以/ 开头，且以/结尾 测试某个目录是否可能包含能匹配该模式的子文件。
+	 */
+	public abstract boolean maybe(String path);
 
-	abstract boolean match(String path);
+	/**
+	 * @param path
+	 *            path必须以/ 开头 测试某个路径能否匹配该模式。
+	 */
+	public abstract boolean match(String path);
 }
 
 class SinglePathMatcher extends PathMatcher {
@@ -42,7 +54,9 @@ class SinglePathMatcher extends PathMatcher {
 			+ "[^\\*/]+?|" + "[/]");
 	private final Pattern pattern;
 	private final Pattern[] parties;
+	private final Pattern endParty;
 	private final Pattern must;
+
 	/**
 	 * /path/.* /*.jpg =>/path/(?: .* /(?:.*)? )?
 	 */
@@ -51,13 +65,17 @@ class SinglePathMatcher extends PathMatcher {
 		StringBuilder buf = new StringBuilder("^");
 		boolean fixPart = true;
 		ArrayList<Pattern> prefix = new ArrayList<Pattern>();
+		Pattern endParty = null;
 		while (matcher.find()) {
 			String item = matcher.group();
 			int length = item.length();
 			char firstChar = item.charAt(0);
 			if (firstChar == '*') {
 				if (length > 1) {
-					fixPart = false;
+					if (fixPart) {
+						fixPart = false;
+						endParty = Pattern.compile(buf.toString() + ".*$");
+					}
 					buf.append(".*");// * 允许 0至多个非分割字符（\/）
 				} else {
 					buf.append("[^/]*");// * 允许 0至多个任意字符
@@ -65,7 +83,7 @@ class SinglePathMatcher extends PathMatcher {
 			} else if (firstChar == '/') {
 				buf.append("[/]");
 				if (fixPart) {
-					prefix.add(Pattern.compile(buf.toString()));
+					prefix.add(Pattern.compile(buf.toString() + '$'));
 				}
 			} else {
 				buf.append(Pattern.quote(item));
@@ -76,6 +94,7 @@ class SinglePathMatcher extends PathMatcher {
 		this.pattern = Pattern.compile(ps);
 		this.must = ps.endsWith(".*$") ? this.pattern : null;
 		this.parties = prefix.toArray(new Pattern[prefix.size()]);
+		this.endParty = endParty;
 
 	}
 
@@ -83,14 +102,19 @@ class SinglePathMatcher extends PathMatcher {
 		return pattern.matcher(url).find();
 	}
 
-	boolean maybe(String path) {
+	public boolean maybe(String path) {
+		checkDir(path);
 		if (parties.length > 0) {
 			int p = path.lastIndexOf('/');
 			int c = 0;
 			while (p >= 0) {
 				c++;
 				if (c >= parties.length) {
-					break;
+					if (endParty != null) {
+						return endParty.matcher(path).find();
+					} else {
+						break;
+					}
 				}
 				p = path.lastIndexOf('/', p - 1);
 			}
@@ -102,8 +126,18 @@ class SinglePathMatcher extends PathMatcher {
 
 	}
 
-	boolean must(String path) {
+	public boolean must(String path) {
+		checkDir(path);
 		return must != null && must.matcher(path).find();
+
+	}
+
+	private void checkDir(String path) {
+		int len = path.length();
+		if (len == 0 || path.charAt(0) != '/' || path.charAt(len - 1) != '/') {
+			throw new IllegalArgumentException(
+					"path must begin with and end with '/'!");
+		}
 	}
 
 }
@@ -126,7 +160,7 @@ class MultiPathMatcher extends PathMatcher {
 		return false;
 	}
 
-	boolean maybe(String path) {
+	public boolean maybe(String path) {
 		for (PathMatcher pm : children) {
 			if (pm.maybe(path)) {
 				return true;
@@ -135,7 +169,7 @@ class MultiPathMatcher extends PathMatcher {
 		return false;
 	}
 
-	boolean must(String path) {
+	public boolean must(String path) {
 		for (PathMatcher pm : children) {
 			if (pm.must(path)) {
 				return true;

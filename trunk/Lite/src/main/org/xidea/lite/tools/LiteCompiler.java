@@ -10,6 +10,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.el.impl.CommandParser;
+import org.xidea.el.impl.ReflectUtil;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.impl.HotTemplateEngine;
 import org.xidea.lite.parse.ParseContext;
@@ -29,8 +30,15 @@ public class LiteCompiler {
 	private ResourceManagerImpl resourceManager;
 
 	public LiteCompiler(String[] args) {
-		log.info("Args:" + JSONEncoder.encode(args));
-		CommandParser cp = new CommandParser(args);
+		log.info("Lite Compiler Args:" + JSONEncoder.encode(args));
+		CommandParser cp = new CommandParser(args){
+			protected void onMissedProperty(final Object context, String name) {
+				if (log.isInfoEnabled()) {
+					String msg = "illegal param(无效参数)：-" + name+"; avaliable params may be():"+ ReflectUtil.map(context).keySet();
+					log.error(msg);
+				}
+			}
+		};
 		cp.setup(this);
 	}
 
@@ -66,9 +74,9 @@ public class LiteCompiler {
 			} else {
 				this.processFile(path);
 			}
-			log.info("执行成功");
+			log.info("Compile success(执行成功):");
 		} catch (Exception e) {
-			log.error("编译失败", e);
+			log.error("Compile failed(编译失败):", e);
 		}
 	}
 
@@ -78,7 +86,7 @@ public class LiteCompiler {
 		}
 
 		if (output == null) {
-			log.error("必须指定 -output 参数！！");
+			log.error("-output is required(必须指定 -output 参数)!!");
 			throw new IllegalArgumentException(" -output is required!!");
 		} else {
 			if (output.equals(root)) {
@@ -101,19 +109,22 @@ public class LiteCompiler {
 	
 
 	public void processDir(final File dir, final String path,final PathMatcher includes,final PathMatcher excludes) {
-		log.info("处理目录：" + dir.getAbsolutePath());
+		log.info("process dir(处理目录)：" + dir.getAbsolutePath());
 		dir.listFiles(new FileFilter() {
 			public boolean accept(File file) {
 				if (!file.equals(output)) {
-					String path2 = path + file.getName();
+					String name = file.getName();
+					String path2 = path + name;
 					if (file.isDirectory()) {
 						path2 += '/';
-						if (file.getName().startsWith(".")) {
-							log.debug("跳过目录：" + file);
+						if (name.startsWith(".")) {
+							log.debug("skip dir(跳过目录)：" + file);
 						} else {
-							if ((includes == null || includes.maybe(path))
+							if ((includes == null || includes.maybe(path2))
 								&&(excludes == null || !excludes.must(path2))) {
 								processDir(file, path2,includes,excludes);
+							}else{
+								log.debug("skip dir(跳过目录)：" + file);
 							}
 						}
 					} else if ((includes == null && path2.endsWith(".xhtml")
@@ -122,7 +133,7 @@ public class LiteCompiler {
 						try {
 							processFile(path2);
 						} catch (IOException e) {
-							log.error("文件处理异常:" + path2, e);
+							log.error("file process exception(文件处理异常):" + path2, e);
 						}
 					}
 				}
@@ -132,7 +143,7 @@ public class LiteCompiler {
 	}
 
 	public boolean processFile(final String path) throws IOException {
-		log.info("处理文件：" + path);
+		log.info("process file(处理文件)：" + path);
 		if (this.resultMap.containsKey(path)) {
 			return false;
 		}
@@ -160,7 +171,7 @@ public class LiteCompiler {
 				return true;
 			} catch (Exception e) {
 				// JOptionPane.showConfirmDialog(null, e);
-				log.error("处理模板异常：" + path, e);
+				log.error("process template exception(处理模板异常)：" + path, e);
 				return false;
 			}
 		} else {

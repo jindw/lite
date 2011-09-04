@@ -49,8 +49,8 @@ PHPTranslator.prototype = {
 	translate:function(list){
 	    //var result =  stringifyJSON(context.toList())
 		var context = new PHPTranslateContext(list||this.code,this.id);
-		context.elPrefix = //'';//:
-							'@';//*/
+		context.elPrefix = '';//:
+							//'@';//*/
 		
 		context.encoding = this.featureMap && this.featureMap[ENCODING_KEY] ||"UTF-8";
 	    context.htmlspecialcharsEncoding = context.encoding ;
@@ -189,7 +189,7 @@ PHPTranslateContext.prototype = new TCP({
 	},
     _appendEL:function(el,model,text,prefix){
     	var encoding = "'"+this.htmlspecialcharsEncoding+"'";
-    	prefix = prefix!=null? prefix : 'echo '+this.elPrefix
+    	prefix = prefix!=null? prefix : 'echo '
     	//@see http://notownme.javaeye.com/blog/335036
     	var text = text || this.stringifyEL(el);
     	var type = getELType(el);
@@ -255,7 +255,7 @@ PHPTranslateContext.prototype = new TCP({
             this.append(testAutoId,"=",value,';');
         }
         if(attributeName){
-            this.append("if(",this.elPrefix,testAutoId,"!=null){");
+            this.append("if(",testAutoId,"!=null){");
             this.depth++;
             this.append("echo ' "+attributeName+"=\"';");
             this._appendEL(el,XA_TYPE,testAutoId)
@@ -268,7 +268,7 @@ PHPTranslateContext.prototype = new TCP({
         this.freeId(testAutoId);
     },
     appendVar:function(item){
-        this.append("$",item[2],"=",this.elPrefix,this.stringifyEL(item[1]),";");
+        this.append("$",item[2],"=",this.stringifyEL(item[1]),";");
     },
     appendCapture:function(item){
         var childCode = item[1];
@@ -294,7 +294,7 @@ PHPTranslateContext.prototype = new TCP({
         var childCode = item[1];
         var testEL = item[2];
         var test = this.stringifyEL(testEL);
-        this.append("if(",this.elPrefix,php2jsBoolean(testEL,test),"){");
+        this.append("if(",php2jsBoolean(testEL,test),"){");
         this.depth++;
         this.appendCode(childCode)
         this.depth--;
@@ -307,7 +307,7 @@ PHPTranslateContext.prototype = new TCP({
             var testEL = nextElse[2];
             var test = this.stringifyEL(testEL);
             if(test){
-                this.append("else if(",this.elPrefix,php2jsBoolean(testEL,test),"){");
+                this.append("else if(",php2jsBoolean(testEL,test),"){");
             }else{
                 notEnd = false;
                 this.append("else{");
@@ -337,7 +337,7 @@ PHPTranslateContext.prototype = new TCP({
         	var itemsAutoId = itemsEL;
         }else{
         	var itemsAutoId = this.allocateId();
-        	this.append(itemsAutoId,'=',this.elPrefix,itemsEL,';');
+        	this.append(itemsAutoId,'=',itemsEL,';');
         }
         //初始化 items 开始
 	    this.append('if(',itemsAutoId,'<=PHP_INT_MAX){',itemsAutoId,'=',itemsAutoId,'>0?range(1,',itemsAutoId,'):array();}');
@@ -389,10 +389,10 @@ PHPTranslateContext.prototype = new TCP({
             var test = this.stringifyEL(testEL);
             var ifstart = elseIndex >1 ?'else if' :'if';
             if(test){
-                this.append(ifstart,"(",this.elPrefix,"!",indexAutoId,"&&",php2jsBoolean(testEL,test),"){");
+                this.append(ifstart,"(","!",indexAutoId,"&&",php2jsBoolean(testEL,test),"){");
             }else{
                 notEnd = false;
-                this.append(ifstart,"(",this.elPrefix,"!",indexAutoId,"){");
+                this.append(ifstart,"(","!",indexAutoId,"){");
             }
             this.depth++;
             this.appendCode(childCode)
