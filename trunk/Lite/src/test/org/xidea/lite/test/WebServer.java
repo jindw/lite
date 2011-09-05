@@ -16,6 +16,7 @@ import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.xml.transform.TransformerFactory;
@@ -97,8 +98,8 @@ public class WebServer {
 			public void processRequest(RequestContext context) throws Exception {
 				init(base);
 				final String uri = context.getRequestURI();
-				final String lite_compile_service = "/WEB-INF/service/lite-compile";
 				String rp = CGIEnvironment.toRealPath(base, uri);
+				final String lite_compile_service = "/WEB-INF/service/lite-compile";
 				if(uri.equals(lite_compile_service)){
 					String path = context.getParam().get("path");
 					String litecode = ht.getLitecode(path);
@@ -193,17 +194,13 @@ public class WebServer {
 					ht = new HotTemplateEngine((ParseConfig) manager, null);
 					servlet = new TemplateServlet(){
 						{
+							init(servletAdaptor);
+						}
+						public void init(final ServletConfig config){
 							this.templateEngine = ht;
+							this.initDebug(config);
 						}
 					};
-					{
-						try {
-							servlet.init(this.servletAdaptor);
-						} catch (ServletException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}
 					final List<File> scriptFileList = manager
 							.getScriptFileList();
 					new File(new File(base), "WEB-INF")

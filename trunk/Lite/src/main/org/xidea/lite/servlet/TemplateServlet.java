@@ -104,10 +104,15 @@ public class TemplateServlet extends GenericServlet {
 	public void service(ServletRequest req, ServletResponse resp)
 			throws ServletException, IOException {
 		HttpServletRequest request = (HttpServletRequest) req;
+		HttpServletResponse response = (HttpServletResponse) resp;
 		String path = request.getServletPath();
+		service(path, request, response);
+	}
+
+	protected void service(String path, HttpServletRequest request,
+			HttpServletResponse response) throws IOException {
+		// 这个是测试用的代码
 		if (debug != null && debug.matcher(request.getRemoteAddr()).find()) {
-			// 这个是测试用的代码
-			HttpServletResponse response = (HttpServletResponse) resp;
 			if (path.equals(this.serviceBase)) {
 				if (debugService.service(request, response)) {
 					return;
@@ -119,8 +124,8 @@ public class TemplateServlet extends GenericServlet {
 		// 这个才是线上代码
 		Template template = templateEngine.getTemplate(path);
 		String contentType = template.getFeature(Template.FEATURE_CONTENT_TYPE);
-		resp.setContentType(contentType);
-		PrintWriter out = resp.getWriter();
+		response.setContentType(contentType);
+		PrintWriter out = response.getWriter();
 		template.render(createModel(request), out);
 		out.flush();
 	}
