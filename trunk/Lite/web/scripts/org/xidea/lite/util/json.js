@@ -66,7 +66,14 @@ function stringifyJSON(value,ident,depth) {
             }else if(value instanceof RegExp){
             	//RegExp Source
             	//return value+'';
-            	return '{"class":"RegExp","source":'+stringifyJSON(value+'',ident,depth)+"}";
+            	return stringifyJSON({
+            		"class":"RegExp",
+            		'literal':value+''
+//    				'source':value.source,
+//    				'multiline':value.multiline,
+//    				'global':value.global,
+//    				'ignoreCase':value.ignoreCase
+    			},ident,depth);
             }
             for (var k in value) {
                 var v = stringifyJSON(value[k],ident,depth);

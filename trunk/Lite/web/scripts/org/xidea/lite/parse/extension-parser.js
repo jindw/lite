@@ -36,18 +36,18 @@ function formatName(el){
 	return tagName.toLowerCase();
 }
 
-//$log.filters.push(function(msg){
-//	if(nodeLocal){
-//		var currentNode = nodeLocal.get();
-//		if(currentNode){
-//			var p = getLiteTagPosition(currentNode);
-//			if(p){
-//				msg = p+'\n'+msg;
-//			}
-//		}
-//	}
-//	return msg;
-//});
+$log.filters.push(function(msg){
+	if(nodeLocal){
+		var currentNode = nodeLocal.get();
+		if(currentNode){
+			var p = getLiteTagPosition(currentNode);
+			if(p){
+				msg = p+'\n'+msg;
+			}
+		}
+	}
+	return msg;
+});
 
 function getLiteTagPosition(el){
 	var pos = getLiteTagInfo(el);

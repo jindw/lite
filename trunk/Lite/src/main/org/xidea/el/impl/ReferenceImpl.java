@@ -85,12 +85,13 @@ class ReferenceImpl implements Reference {
 		return invocable;
 	}
 
-	static Invocable createInvocable(
+	private static Invocable createInvocable(
 			Map<String, Map<String, Invocable>> methodMap,
 			final Object thisObject, final String name, Object[] args) {
 		Map<String, Invocable> invocableMap = methodMap.get(name);
 		Invocable invocable = null;
 		if (invocableMap != null) {
+			//TODO:这个可是没有缓存的方法阿! 注意后续优化阿!!
 			invocable = findInvocable(invocableMap, thisObject.getClass());
 		}
 		if (invocable == null) {
@@ -103,6 +104,31 @@ class ReferenceImpl implements Reference {
 			}
 		}
 		return invocable;
+	}
+	private static Invocable findInvocable(Map<String, Invocable> methodMap,
+			Class<?> clazz) {
+		Invocable invocation = methodMap.get(clazz.getName());
+		if (invocation != null) {
+			return invocation;
+		} else {
+			Class<?>[] interfaces = clazz.getInterfaces();
+			for (Class<?> clazz2 : interfaces) {
+				invocation = findInvocable(methodMap, clazz2);
+				if (invocation != null) {
+					return invocation;
+				}
+			}
+		}
+		Class<? extends Object> clazz2 = clazz.getSuperclass();
+		if (clazz2 != clazz) {
+			if(clazz2 == Object.class && clazz.isArray() && clazz != Object[].class){
+				clazz2 = Object[].class;
+			}else if(clazz2 == null){
+				return null;
+			}
+			return findInvocable(methodMap, clazz2);
+		}
+		return null;
 	}
 
 	static Invocable getInvocable(final Class<? extends Object> clazz, final String name,
@@ -125,26 +151,6 @@ class ReferenceImpl implements Reference {
 		return result;
 	}
 
-	static Invocable findInvocable(Map<String, Invocable> methodMap,
-			Class<?> clazz) {
-		Invocable invocation = methodMap.get(clazz.getName());
-		if (invocation != null) {
-			return invocation;
-		} else {
-			Class<?>[] interfaces = clazz.getInterfaces();
-			for (Class<?> clazz2 : interfaces) {
-				invocation = findInvocable(methodMap, clazz2);
-				if (invocation != null) {
-					return invocation;
-				}
-			}
-		}
-		Class<?> clazz2 = clazz.getSuperclass();
-		if (clazz2 != clazz && clazz2 != null) {
-			return findInvocable(methodMap, clazz2);
-		}
-		return null;
-	}
 
 	static Invocable createProxy(final Method... methods) {
 		for (Method method : methods) {

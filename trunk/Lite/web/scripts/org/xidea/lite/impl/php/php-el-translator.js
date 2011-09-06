@@ -116,63 +116,92 @@ function stringifyGET(el,context){
 	}
 	return "lite_op__get("+value1+','+value2+")"
 }
+/**
+ * return [owner,prop,args]
+ */
+function parseInvoke(el){
+	var method = el[1];
+	if(method[0] == OP_GET){//member_call
+		var ownerEL = method[1];
+		var propEL = method[2];
+		if(ownerEL[0] == VALUE_VAR){
+			var varName = ownerEL[1];
+		}
+		if(propEL[0] == VALUE_CONSTANTS){
+			var prop = propEL[1];
+		}
+		return [varName||ownerEL,prop||propEL,el[2]];
+	}else{//function_call
+		return [method,null,el[2]]
+	}
+}
+function stringifyPHPEL2ID(el,context,id){
+	if(typeof el != 'string'){
+		return stringifyPHPEL(el,context)
+	}else if(id){
+		return '$'+el;
+	}
+	return "'"+el+"'";
+}
 function stringifyINVOKE(el,context){
-	var arg1 = el[1];
-	var type1 = arg1[0];
-	//var value1 = stringifyPHPEL(arg1,context);
-	var value2 = stringifyPHPEL(el[2],context);//array(arg1,arg2...)
-	if(type1 == OP_GET){//member_call
-		var oel = arg1[1];
-		var pel = arg1[2];
-		if(oel[0] == VALUE_VAR){
-			var varName = oel[1];
-		}
-		if(pel[0] == VALUE_CONSTANTS){
-			var prop = pel[1];
-		}
-		if(varName && prop){
+	var info = parseInvoke(el);
+	var owner = info[0];
+	var prop = info[1];
+	var args = stringifyPHPEL(info[2],context);
+	if(prop){//member_call
+		if(typeof prop == 'string'){
 //			random=>rand(0, PHP_INT_MAX
 //			sin,sqrt,tan,cos,acos,asin,atan,atan2 
 //			max,min,,floor,round,abs,ceil,exp,log,pow,
-			if(varName == 'Math'){
+			if(owner === 'Math'){
 				var mp = /^(?:sin|sqrt|tan|cos|acos|asin|atan|atan2|max|min||floor|round|abs|ceil|exp|log|pow)$/;
 				if(prop == 'random'){
 					return 'rand(0, PHP_INT_MAX)';
 				}else if(mp.test(prop)){
-					return value2.replace('array',prop);
+					return args.replace('array',prop);
 				}else{
 					$log.warn("Math 不支持方法:"+prop+";Math 支持的方法有:random|"+mp.source.replace(/[^\w\|]/g,''))
 				}
-			}else if(varName == 'JSON'){
+			}else if(owner === 'JSON'){
 				if(prop == "parse"){
-					return value2.replace('array','json_parse').slice(0,-1)+',true)';
+					return args.replace('array','json_parse').slice(0,-1)+',true)';
 				}else if(prop =='stringify'){
-					return value2.replace('array','json_encode');
+					return args.replace('array','json_encode');
 				}else{
 					$log.warn("JSON 不支持方法:"+prop+";JSON 只支持:stringify和parse方法")
 				}
+			}else if(prop == 'reverse' && args == 'array()' && owner[0] == OP_INVOKE){
+				var info2 = parseInvoke(owner);
+				$log.error(info2);
+				if(info2[1] == 'concat'){
+					owner = info2[0];
+					owner = stringifyPHPEL2ID(owner,context,true)
+					args = stringifyPHPEL(info2[2],context);
+					return "lite_op__invoke("+owner+",'concat_reverse',"+args+")"
+				}
 			}
 		}
-		return "lite_op__invoke("+stringifyPHPEL(oel,context)+","+stringifyPHPEL(pel,context)+","+value2+")"
+		owner = stringifyPHPEL2ID(owner,context,true)
+		prop = stringifyPHPEL2ID(prop,context)
+		return "lite_op__invoke("+owner+","+prop+","+args+")"
 		//value1 = value1.replace(/.*?,([\s\S]+)\)/,'array($1)');
-	}else if(type1 == VALUE_VAR){
-		var varName = arg1[1];
-		if((varName in GLOBAL_DEF_MAP || varName in context.scope.defMap)
-			&& !(varName in context.scope.varMap || varName in context.scope.paramMap)){
+	}else if(typeof owner == 'string'){
+		if((owner in GLOBAL_DEF_MAP || owner in context.scope.defMap)
+			&& !(owner in context.scope.varMap || owner in context.scope.paramMap)){
 			//静态编译方式
-			return value2.replace('array',"lite__"+varName)
+			return args.replace('array',"lite__"+owner)
 		}else{
 			//动态调用方式
-			if(varName in context.scope.varMap || varName in context.scope.paramMap){
-				var fn = '$'+varName;
+			if(owner in context.scope.varMap || owner in context.scope.paramMap){
+				var fn = '$'+owner;
 			}else{
-				var fn = "isset($"+varName+")?$"+varName+":'"+varName+"'";
+				var fn = "isset($"+owner+")?$"+owner+":'"+owner+"'";
 			}
-			return 'lite_op__invoke('+fn+',null,'+value2+')';
+			return 'lite_op__invoke('+fn+',null,'+args+')';
 		}
-	}else{	
-		var value1 = stringifyPHPEL(arg1,context);
-		return 'lite_op__invoke('+value1+',null,'+value2+')';
+	}else{
+		owner = stringifyPHPEL2ID(owner,context,true)
+		return 'lite_op__invoke('+owner+',null,'+args+')';
 		//throw new Error("Invalid Invoke EL");
 	}
 }

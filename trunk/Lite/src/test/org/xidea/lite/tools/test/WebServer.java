@@ -1,4 +1,4 @@
-package org.xidea.lite.test.oldcases;
+package org.xidea.lite.tools.test;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -113,7 +113,7 @@ public class WebServer {
 					envp.put("LITE_COMPILE_SERVICE", compile_service);
 					CGIRunner cr = new CGIRunner(context, "", envp,
 							new File(new File(base), rp).getParentFile(), null);
-					cr.setCgiExecutable("php-cgi.exe -d extension=ext/php_mbstring.dll".split("[\\s]+"));
+					cr.setCgiExecutable("php-cgi.exe -d extension_dir=./ -d extension=ext/php_mbstring.dll".split("[\\s]+"));
 					cr.run();
 				} else {
 					String prefix = "/scripts/";

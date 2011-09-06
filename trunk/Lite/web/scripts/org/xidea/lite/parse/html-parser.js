@@ -77,9 +77,10 @@ var HTML = {
 		var autoform = this.getAttribute(AUTO_FORM_PREFIX);
 		if(autoform!=null){
 			var name_ = el.getAttribute('name');
+			//$log.warn(uneval(autoform),name_);
 			if(name_){
 				var type = el.getAttribute('type');
-				if(type && !/^(?:reset|button|submit)$/i.test(type)){
+				if(!/^(?:reset|button|submit)$/i.test(type)){
 					if(/^(?:checkbox|radio)$/i.test(type)){
 						if(!el.hasAttribute('checked')){
 							buildCheck2select(this,el,name_,'checked',/checkbox/i.test(type));
@@ -127,6 +128,7 @@ var HTML_EXT = {
 		var oldAutoform = this.getAttribute(AUTO_FORM_PREFIX);
 		try{
 			var prefix = findXMLAttribute(node,'*value');
+			//$log.info("#####",prefix);
 			if(prefix == 'true'){
 				prefix = '';
 			}

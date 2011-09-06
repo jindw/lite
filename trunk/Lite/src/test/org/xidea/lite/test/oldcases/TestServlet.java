@@ -9,7 +9,7 @@ import javax.servlet.ServletResponse;
 
 
 @SuppressWarnings("serial")
-public class TestServlet extends GenericServlet {
+class TestServlet extends GenericServlet {
 
 	/**
 	 * type=java&code=[...]&model={..}

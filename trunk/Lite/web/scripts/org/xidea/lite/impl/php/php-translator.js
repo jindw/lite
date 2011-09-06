@@ -165,6 +165,7 @@ PHPTranslateContext.prototype = new TCP({
 			if(this.contentType){
 				this.append("if(!headers_sent())header('ContentType:"+this.contentType+"');")
 			}
+			this.append("mb_internal_encoding('"+this.encoding+"');")
 			_appendFunctionName(this,this.scope);
 			this.append("extract($__context__,EXTR_OVERWRITE);");
 	        this.appendCode(this.scope.code);
@@ -172,6 +173,7 @@ PHPTranslateContext.prototype = new TCP({
 	        this.append("}");
 	    }catch(e){
 	        //alert(["编译失败：",buf.join(""),code])
+	        $log.error("PHP编译失败:"+this.id,e);
 	        throw e;
 	    }
 	    //this.append("return _$out.join('');");

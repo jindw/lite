@@ -15,7 +15,7 @@ import org.xidea.el.json.JSONEncoder;
 
 /**
  * @author jindawei
- * @see org.xidea.lite.parser.impl.xml.test.XMLNormalizeTest
+ * @see org.xidea.lite.tools.test.XMLNormalizeTest
  */
 public class XMLNormalizeImpl {
 	private static final Log log = LogFactory.getLog(XMLNormalizeImpl.class);

@@ -26,42 +26,39 @@ public class JSONEncoder {
 	public final static String W3C_DATE_TIME_MILLISECOND_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
 
 	private static Log log = LogFactory.getLog(JSONEncoder.class);
-	private static JSONEncoder encoder = new JSONEncoder(W3C_DATE_TIME_MILLISECOND_FORMAT, true, 64, true, true);
+
+	private static JSONEncoder encoder = new JSONEncoder(
+			W3C_DATE_TIME_MILLISECOND_FORMAT, true, 64);
+
 	private final boolean ignoreClassName;
-	private final boolean checkByAddress;
-	private final boolean throwError;
 	private final String dateFormat;
 	private final Object[] parent;
 	private int index = 0;
 
-	public JSONEncoder(String dateFormat, boolean ignoreClassName, int depth,
-			boolean checkByAddress, boolean throwError) {
+	public JSONEncoder(String dateFormat, boolean ignoreClassName, int depth) {
 		this.dateFormat = dateFormat;
 		this.ignoreClassName = ignoreClassName;
 		this.parent = depth > 0 ? new Object[depth] : null;
-		this.checkByAddress = checkByAddress;
-		this.throwError = throwError;
 	}
-
 
 	public static String encode(Object value) {
 		StringBuilder buf = new StringBuilder();
-		try {
-			encoder.encode(value, buf);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+		encoder.encode(value, buf);
 		return buf.toString();
 	}
 
-	public void encode(Object value, Appendable out) throws IOException {
-		if (this.parent == null) {
-			print(value, out);
-		} else {
-			synchronized (parent) {
-				index = 0;
+	public void encode(Object value, Appendable out){
+		try {
+			if (this.parent == null) {
 				print(value, out);
+			} else {
+				synchronized (parent) {
+					index = 0;
+					print(value, out);
+				}
 			}
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 
 	}
@@ -92,33 +89,16 @@ public class JSONEncoder {
 			printString(date, out);
 		} else {// PATTERN
 			if (parent != null) {
-				int i = index;
-				if (i < parent.length) {
-					if (checkByAddress) {
-						while (i-- > 0) {
-							if (parent[i] == object) {
-								break;
-							}
-						}
-					} else {
-						while (i-- > 0) {
-							if (object.equals(parent[i])) {
-								break;
-							}
-						}
-					}
-				}
-				if (i < 0) {
-					parent[index++] = object;
-				} else {
-					String error = i < parent.length ? "JSON 数据源中发现递归行为:" + out
-							+ "，递归数据将当null处理" : "深度超出许可范围：" + out;
-					log.error(error);
-					if (throwError) {
-						throw new IllegalStateException(error);
-					}
-					out.append("null");
+				if (index > parent.length) {
+					reportError("深度超出许可范围：" + out);
 					return;
+				}
+				if (checkNest(object)) {
+					out.append("null");
+					reportError("JSON 数据源中发现递归行为,递归数据将当null处理:" + out);
+					return;
+				} else {
+					parent[index++] = object;
 				}
 			}
 			try {
@@ -141,24 +121,49 @@ public class JSONEncoder {
 		}
 	}
 
+	protected void reportError(String error) {
+		log.error(error);
+		// throw new IllegalStateException(error);
+	}
+
+	protected boolean checkNest(Object object) {
+		int i = index;
+		if (object instanceof Collection<?> || object instanceof Map<?, ?>
+				|| object instanceof Object[]) {
+			while (i-- > 0) {
+				if (parent[i] == object) {
+					return true;
+				}
+			}
+		} else {
+			while (i-- > 0) {
+				if (object.equals(parent[i])) {
+					return true;
+				}
+			}
+		}
+		;
+
+		return false;
+	}
+
 	protected void printString(String text, Appendable out) throws IOException {
 		out.append('"');
 		final int len = text.length();
 		for (int i = 0; i < len; i++) {
 			char c = text.charAt(i);
 			switch (c) {
-			case '/'://escape HTML </script> </script >
-				if(i>0 && text.charAt(i-1) == '<'
-					&& text.regionMatches(true, i-1, "</script", 0, 8)
-				){
+			case '/':// escape HTML </script> </script >
+				if (i > 0 && text.charAt(i - 1) == '<'
+						&& text.regionMatches(true, i - 1, "</script", 0, 8)) {
 					out.append('\\');
 				}
 				out.append(c);
 				break;
 			case '\\':
 			case '"':
-			// case '\'':
-			// case '/':
+				// case '\'':
+				// case '/':
 				out.append('\\');
 				out.append(c);
 				break;
@@ -197,7 +202,7 @@ public class JSONEncoder {
 	protected void printMap(Object object, Appendable out) throws IOException {
 		out.append('{');
 		try {
-			Map<String, Method> props = ReflectUtil.getGetterMap(object.getClass());
+			Map<String, Method> props = getGetterMap(object.getClass());
 			boolean first = true;
 			for (String name : props.keySet()) {
 				try {
@@ -209,7 +214,7 @@ public class JSONEncoder {
 					Object value = accessor.invoke(object);
 					if (first) {
 						first = false;
-					}else{
+					} else {
 						out.append(',');
 					}
 					out.append('"');
@@ -225,6 +230,10 @@ public class JSONEncoder {
 			log.warn("JavaBean信息获取失败", e);
 		}
 		out.append('}');
+	}
+
+	protected Map<String, Method> getGetterMap(Class<? extends Object> clazz) {
+		return ReflectUtil.getGetterMap(clazz);
 	}
 
 	protected void printMap(Map<?, ?> map, Appendable out) throws IOException {
@@ -248,15 +257,14 @@ public class JSONEncoder {
 		}
 	}
 
-	protected void printList(Object array, Appendable out)
-			throws IOException {
+	protected void printList(Object array, Appendable out) throws IOException {
 		out.append('[');
 		int len = Array.getLength(array);
 		for (int i = 0; i < len; ++i) {
 			if (i > 0) {
 				out.append(',');
 			}
-			print( Array.get(array, i), out);
+			print(Array.get(array, i), out);
 		}
 		out.append(']');
 	}

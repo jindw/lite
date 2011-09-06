@@ -7,8 +7,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.lang.reflect.Method;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.ServletOutputStream;
@@ -16,6 +19,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.xidea.el.impl.ReflectUtil;
 import org.xidea.el.json.JSONDecoder;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.jsi.JSIExportor;
@@ -28,9 +32,24 @@ import org.xidea.lite.impl.ParseUtil;
 
 public class DebugSupportImpl implements DebugSupport {
 	private TemplateServlet templateServlet;
+	private JSONEncoder json;
 
 	public DebugSupportImpl(TemplateServlet templateServlet) {
 		this.templateServlet = templateServlet;
+		json = new JSONEncoder(JSONEncoder.W3C_DATE_TIME_FORMAT, true, 32){
+			Map<String, Method> fileGetterMap;
+			{
+				fileGetterMap = new HashMap<String, Method>( ReflectUtil.getGetterMap(File.class));
+				fileGetterMap.keySet().retainAll(Arrays.asList("name","path","canonicalPath","absolutePath","absolute","hidden","file","directory"));
+				
+			}
+			public Map<String, Method> getGetterMap(Class<?extends Object> clazz){
+				if(clazz == File.class){
+					return fileGetterMap;
+				}
+				return super.getGetterMap(clazz);
+			}
+		};
 	}
 
 	/**
@@ -73,7 +92,7 @@ public class DebugSupportImpl implements DebugSupport {
 			ServletOutputStream out = response.getOutputStream();
 			FileInputStream in = new FileInputStream(f);
 			byte[] buf = new byte[64];
-			for (int c = in.read(buf); c >= 0;) {
+			for (int c = in.read(buf); c >= 0;c=in.read(buf)) {
 				out.write(buf, 0, c);
 			}
 			in.close();
@@ -83,8 +102,8 @@ public class DebugSupportImpl implements DebugSupport {
 			// 只支持数据预览，不支持数据修改
 			// log.warn("该版本尚不支持数据模型展现");
 			// templateEngine.clear(path);
-			String result = JSONEncoder.encode(templateServlet
-					.createModel(request));
+			Map<String, Object> model = templateServlet.createModel(request);
+			String result = jsonStringify(model);
 			String features = "{}";
 			response.setContentType("text/html;charset=utf-8");
 			PrintWriter out = response.getWriter();
@@ -92,7 +111,7 @@ public class DebugSupportImpl implements DebugSupport {
 			out.append("<!DOCTYPE html><html><body>\n");
 			out.append("<style>body,html{width:98%;height:100%}</style>\n");
 			out.append("<script>");
-			out.append(";\nvar templatePath = " + JSONEncoder.encode(path));
+			out.append(";\nvar templatePath = " + jsonStringify(path));
 			out.append(";\nvar templateModel = " + result);
 			out.append(";\nvar templateFeatureMap = " + features);
 			out.append(";\nvar serviceBase='" + serviceBase + "';</script>\n");
@@ -134,6 +153,12 @@ public class DebugSupportImpl implements DebugSupport {
 			return true;
 		}
 		return false;
+	}
+
+	private String jsonStringify(Object model) throws IOException {
+		StringBuilder buf = new StringBuilder(); 
+		json.encode(model,buf);
+		return buf.toString();
 	}
 
 	private String getServiceBase(HttpServletRequest request) {
@@ -185,7 +210,7 @@ public class DebugSupportImpl implements DebugSupport {
 			}
 		}else if (PARAM_LITE_ACTION_SAVE.equals(liteAction)) {
 			if(litePath.endsWith(".json")){
-				String path = "/WEB-INF/litecode/"+litePath.replace('\\', '^').replace('/', '^');
+				String path = "/WEB-INF/litecode/"+litePath.replace(':', '^').replace('/', '^');
 				final File dest = new File(root, path);
 				String liteData = request.getParameter(PARAM_LITE_DATA);
 				FileOutputStream fout = new FileOutputStream(dest);
@@ -196,7 +221,7 @@ public class DebugSupportImpl implements DebugSupport {
 				response.setContentType("text/javascript;charset=utf-8");
 				PrintWriter out = response.getWriter();
 				//String serviceBase = getServiceBase(request);
-				String pathJSON = JSONEncoder.encode(path);
+				String pathJSON = jsonStringify(path);
 				String callback = request.getParameter(PARAM_LITE_CALLBACK);
 				String data = "{\"path\":"+pathJSON+"}";
 				if(callback!=null){

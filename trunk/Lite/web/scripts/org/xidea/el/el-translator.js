@@ -32,7 +32,7 @@ function stringifyValue(el,context){
 	var param = el[1];
 	switch(el[0]){
     case VALUE_CONSTANTS:
-        return (param && param['class']=='RegExp' && param.source) || stringifyJSON(param);
+        return (param && param['class']=='RegExp' && param.literal) || stringifyJSON(param);
     case VALUE_VAR:
     	if(param == 'for'){
     		var f = context && context.getForName();

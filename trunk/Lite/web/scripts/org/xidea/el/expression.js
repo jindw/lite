@@ -37,7 +37,8 @@ function _evaluate(item,context){
         arg1 = item[1]
         return (arg1 in context?context:this)[arg1];
     case VALUE_CONSTANTS:
-        return item[1];
+    	arg1 = item[1];
+        return arg1&&arg1['class'] == 'RegExp'?window.eval(arg1.literal):arg1;
     ///* and or */
     case OP_AND:
         return realValue(_evaluate(item[1],context)) && (_evaluate(item[2],context));

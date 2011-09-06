@@ -7,7 +7,7 @@
 	<body>
 		<h3>表达式括弧不可嵌套</h3>
 		<ul>
-			<x:code model="{data:{key:'value1'}}">
+			<x:code model="{data:{key:'value1'}}" error="true">
 			<![CDATA[
 			<code>
 				//功能: 将变量data json化输出,采用函数JSON.stringify
@@ -23,7 +23,7 @@
 		</ul>
 		<h3>表达式不能用来输出标签</h3>
 		<ul>
-			<x:code model="{user:{name:'张三',admin:true}}">
+			<x:code model="{user:{name:'张三',admin:true}}"  error="true">
 			<![CDATA[
 			<div>
 				//功能: 输出一个带 < strong> 标签的表达式
@@ -40,7 +40,7 @@
 		</ul>
 		<h3>标签必须严格匹配(包括html标签)</h3>
 		<ul>
-			<x:code>
+			<x:code  error="true">
 			<![CDATA[
 			<div>
 				//功能: 输出一个带< strong> 标签的表达式
@@ -59,7 +59,7 @@
 		</ul>
 		<h3>属性无需if</h3>
 		<ul>
-			<x:code model="{disabled:null}">
+			<x:code model="{disabled:null}"  error="true">
 			<![CDATA[
 			<form>//错误用法 :
 				<input type="submit" value="disabled?提交"

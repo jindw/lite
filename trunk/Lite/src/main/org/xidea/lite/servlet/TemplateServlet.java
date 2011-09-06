@@ -28,13 +28,19 @@ public class TemplateServlet extends GenericServlet {
 	private static final Log log = LogFactory.getLog(TemplateServlet.class);
 
 	protected TemplateEngine templateEngine;
-	protected String serviceBase = "/WEB-INF/classes/lite/LiteService.xhtml";
+	protected String serviceBase = "/WEB-INF/service/lite-service";
 	private Pattern debug = null;
 	private DebugSupport debugService = null;
 
 	@Override
-	public void init(final ServletConfig config) throws ServletException {
-		super.init(config);
+	public void init() {
+		final ServletConfig config = this.getServletConfig();
+		initEngine(config);
+		initDebug(config);
+
+	}
+
+	protected void initEngine(final ServletConfig config) {
 		ServletContext context = config.getServletContext();
 		String configPath = config.getInitParameter("config");
 		if (configPath == null) {
@@ -54,7 +60,7 @@ public class TemplateServlet extends GenericServlet {
 					Class.forName("org.xidea.lite.parse.ParseConfig"),
 					URI.class).newInstance(parseConfig, litecode.toURI());
 			log.info("Lite HotTemplateEngine(runtime and compiler) is used");
-			initDebug(config);
+			
 		} catch (ClassNotFoundException e) {
 			templateEngine = new TemplateEngine(litecode.toURI());
 			log.info("Lite TemplateEngine(runtime only) is used");
@@ -62,7 +68,6 @@ public class TemplateServlet extends GenericServlet {
 			log.error("Lite HotTemplateEngine init faild!", e);
 			templateEngine = new TemplateEngine(litecode.toURI());
 		}
-
 	}
 
 	protected void initDebug(final ServletConfig config) {

@@ -1,4 +1,4 @@
-package org.xidea.lite.test.oldcases;
+package org.xidea.lite.tools.test;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

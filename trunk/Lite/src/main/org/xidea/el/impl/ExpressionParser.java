@@ -89,7 +89,8 @@ public class ExpressionParser extends JSONTokenizer {
 		try {
 			toTree(right(this.tokens), stack);
 		} catch (Exception e) {
-			throw new ExpressionSyntaxException("逆波兰式树型化异常",e);
+			this.fail("逆波兰式树型化异常");
+			//throw new ExpressionSyntaxException("逆波兰式树型化异常",e);
 		}
 		if (stack.size() != 1) {
 			this.fail("表达式语法错误");
@@ -481,9 +482,15 @@ public class ExpressionParser extends JSONTokenizer {
 					if (end > 0) {
 						String regexp = this.value.substring(this.start - 1,
 								end);
-						Map<String, String> value = new HashMap<String, String>();
+						Map<String, Object> value = new HashMap<String, Object>();
+//						int p = regexp.lastIndexOf('/');
+//						String source = regexp.substring(1,p);
 						value.put("class", "RegExp");
-						value.put("source", regexp);
+						value.put("literal", regexp);
+//						value.put("source", source);
+//						value.put("multiline", regexp.indexOf('m',p));
+//						value.put("global", regexp.indexOf('g',p));
+//						value.put("ignoreCase", regexp.indexOf('i',p));
 						this.addToken(new TokenImpl(VALUE_CONSTANTS, value));
 						this.start = end;
 						break;

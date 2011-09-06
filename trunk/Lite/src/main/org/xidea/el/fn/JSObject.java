@@ -44,13 +44,16 @@ abstract class JSObject implements Invocable {
 
 	static Number getNumberArg(Object[] args, int index, Number defaultValue) {
 		Object value = getArg(args, index, defaultValue);
+		if(value == null){
+			return defaultValue;
+		}
 		return ECMA262Impl.ToNumber(value);
 	}
 
 	static String getStringArg(Object[] args, int index, String defaultValue) {
 		Object value = getArg(args, index, null);
 		if (value == null) {
-			return null;
+			return defaultValue;
 		}
 		return ECMA262Impl.ToString(value);
 	}

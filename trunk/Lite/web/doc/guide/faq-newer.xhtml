@@ -78,7 +78,7 @@
 			<p>但是，这种语法是很难阅读和维护的，所以。LiteXML中，极不推荐这种做法。</p>
 			<strong>无法通过的Lite XML 语法</strong>
 			<ul>
-			<x:code model="{list:[1,2,3,4]}"><![CDATA[
+			<x:code model="{list:[1,2,3,4]}" error="true"><![CDATA[
 				<c:for var="item" list="${list}">
 					<c:if test="${for.index == 0}">
 						<div>第一条数据： ${item},

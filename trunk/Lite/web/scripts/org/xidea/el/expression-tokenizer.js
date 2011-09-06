@@ -313,8 +313,15 @@ var pt = new JSONTokenizer('');
 for(var n in fns){
     pt[n] = fns[n]
 }
-function toValue(v){
-    return this.eval(v);
+function toValue(s){
+    var v= this.eval(s);
+    if(v instanceof RegExp){
+    	v = {
+            "class":"RegExp",
+    		'literal':s+''
+    	}
+    }
+    return v;
 }
 function findRegExp(text,start){
 	var depth=0,c;

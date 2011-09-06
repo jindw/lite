@@ -349,7 +349,16 @@ function lite_member_split($obj, $separator=null, $limit=-1){
 	if(is_string($separator)){
 		$rtv = explode($separator, $obj);
 	}else{
-		$rtv = preg_split('/'.$separator['source']+'/',$obj);
+		$literal = $separator['literal'];//img
+		
+		$p = strrpos($literal,'/');
+		if($p){
+			$p = strpos($literal,'g',$p);
+			if($p){
+				$literal = substr_replace($literal,'',$p,1);
+			}
+		}
+		$rtv = preg_split($literal,$obj);
 	}
 	if($limit<0){
 		return $rtv;
@@ -424,9 +433,18 @@ function lite_member_lastIndexOf($obj, $needle, $from_index=null) {
  * @return array
  */
 function lite_member_match($obj, $regexp) {
-	//TODO:flag没有加上
-	preg_match_all('/'.$regexp['source'].'/', $obj, $matches);
-	return $matches;
+	$literal = $regexp['literal'];
+	$p = strrpos($literal,'/');
+	if($p){
+		$p = strpos($literal,'g',$p);
+	}
+	if($p){
+		preg_match_all(substr_replace($literal,'',$p,1), $obj, $matches);
+		$matches = $matches[0];
+	}else{
+		preg_match($literal, $obj, $matches);
+	}
+	return $matches?$matches:null;
 }
 
 /**
@@ -438,8 +456,17 @@ function lite_member_match($obj, $regexp) {
  */
 function lite_member_replace($obj, $regexp, $replacement) {
     if(is_array($regexp)){
-    	//TODO:flags
-        return preg_replace('/'.$regexp['source'].'/', $replacement, $obj);
+		$literal = $separator['literal'];
+		$p = strrpos($literal,'/');
+		if($p){
+			$p = strpos($literal,'g',$p);
+		}
+		if($p){
+			return preg_replace(substr_replace($literal,'',$p,1), $replacement, $obj,-1);
+		}else{
+			return preg_replace($literal, $replacement, $obj,1);
+		}
+       
     }else{
     	//if(is_string($regexp)){
     	$pos = strpos($obj, $regexp);
@@ -568,7 +595,7 @@ function lite_member_join($obj, $separator=","){
 		}else{
 			$result.=$separator;
 		}
-		$result.=lite_member_toString($e);;
+		$result.=$e == null?'':lite_member_toString($e);;
 	}
 	return $result == null?'':$result;
 }

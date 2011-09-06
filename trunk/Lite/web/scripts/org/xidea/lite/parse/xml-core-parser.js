@@ -660,7 +660,7 @@ function parseInclude(node){
 	try{
 	    if(path!=null){
 	    	if(path.charAt() == '#'){
-	    		$log.error("装饰器命名节点改用${pageName}模式了:(");
+	    		$log.warn("装饰器命名节点改用${pageName}模式了:(,您实用的模式还是:"+path);
 	    		path = '$'+path.substring(1);
 	    	}
 	    	if(path.charAt() == '$'){

@@ -86,6 +86,7 @@ function parseCode(node){
 	text = text.replace(/[\\"'\r\n<]/g,encodeString)
 	text = '"'+text+'"';
 	var varName = node.getAttribute("var");
+	var alias = node.getAttribute("alias");
 	var path = node.getAttribute("path");
 	var model = node.getAttribute("model");
 	if(model){
@@ -101,6 +102,9 @@ function parseCode(node){
 			this.append("<span class='runner' onclick='showExample("+model+','+varName+")'>执行</span>");
 		}
 	}else{
+		if(alias){
+			this.append("<script>" + alias+'=' +text+";<\/script>")
+		}
 		this.append("<div class='code'><script>renderSource("+text+','+(model||null)+",'"+path+"');<\/script></div>")
 	}
 };

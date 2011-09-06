@@ -57,14 +57,21 @@ class JSArray extends JSObject implements Invocable {
 	public Object join(List<Object> thiz, Object... args) {
 		StringBuilder buf = new StringBuilder();
 		String joiner = null;
+		boolean isFirst = true;
 		for (Object o : thiz) {
-			if (joiner == null) {
-				joiner = JSObject.getStringArg(args, 0, ",");
-			} else {
+			if(isFirst){
+				isFirst = false;
+				if(args.length>0){
+					joiner = JSObject.getStringArg(args, 0, ",");
+				}else{
+					joiner = ",";
+				}
+			}else{
 				buf.append(joiner);
 			}
-			o = ECMA262Impl.ToString(o);
-			buf.append(o);
+			if(o !=null){
+				buf.append(ECMA262Impl.ToString(o));
+			}
 
 		}
 		return buf.toString();

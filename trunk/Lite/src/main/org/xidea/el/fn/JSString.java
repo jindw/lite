@@ -1,6 +1,8 @@
 package org.xidea.el.fn;
 
+import java.util.ArrayList;
 import java.util.Locale;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.xidea.el.Invocable;
@@ -47,8 +49,8 @@ class JSString extends JSObject implements Invocable {
 	// 15.5.4.6 String.prototype.concat([ string1[, string2 [,...]]])
 	public String concat(String thiz, Object[] args) {
 		StringBuilder buf = new StringBuilder(thiz);
-		for (int i = args.length - 1; i >= 0;) {
-			buf.append(ECMA262Impl.ToString(args[i]));
+		for (Object arg:args) {
+			buf.append(ECMA262Impl.ToString(arg));
 		}
 		return buf.toString();
 	}
@@ -72,13 +74,47 @@ class JSString extends JSObject implements Invocable {
 		if(args.length>0){
 			Object regexp = args[0];
 			String replaceValue = JSObject.getStringArg(args, 1, "undefined");
-			return JSRegExp.replace(thiz, regexp, replaceValue);
+			JSRegExp exp = JSRegExp.getRegExp(regexp);
+			if (exp == null) {
+				String s = String.valueOf(regexp);
+				int p = thiz.indexOf(s);
+				if (p >= 0) {
+					return thiz.substring(0, p) + replaceValue
+							+ thiz.substring(p + s.length());
+				}
+				return thiz;
+			}
+			Matcher match = exp.pattern.matcher(thiz);
+			if (exp.globals) {
+				return match.replaceAll(replaceValue);
+			} else {
+				return match.replaceFirst(replaceValue);
+			}
 			
 		}
 		return thiz;
 	}
-	public boolean match(String thiz, Object[] args) {
-		return args.length>0 && JSRegExp.match(thiz,args[0]);
+	public Object match(String thiz, Object[] args) {
+		JSRegExp exp = JSRegExp.getRegExp(getArg(args, 0, null));
+		if (exp == null) {
+			return null;
+		}
+		Matcher match = exp.pattern.matcher(thiz);
+		if (match.find()) {
+			ArrayList<String> result = new ArrayList<String>();
+			if (exp.globals) {
+				do{
+					result.add(match.group());
+				}while(match.find());
+			} else {
+				int c = match.groupCount();
+				for(int i=0;i<=c;i++){
+					result.add(match.group(i));
+				}
+			}
+			return result;
+		}
+		return null;
 	}
 	// 15.5.4.13 String.prototype.slice(start, end)
 	public String slice(String thiz, Object[] args) {
@@ -95,13 +131,44 @@ class JSString extends JSObject implements Invocable {
 	}
 
 	// 15.5.4.14 String.prototype.split(separator, limit)
-	public String[] split(String thiz, Object[] args) {
-		String separator = JSObject.getStringArg(args, 0, null);
+	public Object[] split(String thiz, Object[] args) {
+		Object separator = JSObject.getArg(args, 0, null);
 		if (separator == null) {
 			return new String[] { thiz };
 		}
-		int limit = JSObject.getIntArg(args, 0, -1);
-		return thiz.split(Pattern.quote(separator), limit);
+		final int limit = JSObject.getIntArg(args, 1, -1);
+		JSRegExp exp = JSRegExp.getRegExp(separator);
+		Pattern pattern;
+		if(exp!=null){
+			pattern = exp.pattern;
+			///System.out.println(exp.pattern);
+			//System.out.println(Arrays.asList(exp.pattern.split(thiz, limit)));
+			return exp.pattern.split(thiz, limit);
+		}else{
+			pattern = Pattern.compile(Pattern.quote(String.valueOf(separator)));
+		}
+		ArrayList<String> rtv = new ArrayList<String>();
+	    Matcher m = pattern.matcher(thiz);
+		int index = 0;
+	    int ms = 0;
+	    int me = 0;
+	    while(m.find()) {
+	    	ms = m.start();
+	    	me = m.end();
+			if (limit <0 || rtv.size() < limit) {
+				if(!(ms == me && index == ms)){
+					String match = thiz.substring(index,ms);
+					rtv.add(match);
+					index = me;
+				}
+			}
+		}
+	    if (limit <0 || rtv.size() < limit ) {
+			if(!(ms == me && thiz.length() == ms)){
+	    		rtv.add(thiz.substring(index));
+	    	}
+	    }
+		return rtv.toArray();
 	}
 
 	static int toSubstringRange(int pos, int size) {
