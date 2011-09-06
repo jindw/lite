@@ -1,0 +1,13 @@
+<lite>
+    <exclude>/test1/xxx.action</exclude>
+    <group layout="/test1/template.xhtml">
+        <include>/test1/**</include>
+    	<exclude>/test1/login.action</exclude>
+    </group>
+    <group layout="/test2/template.xhtml">
+        <include>/test2/*.action</include>
+    </group>
+    <group layout="/test3/template.xhtml">
+        <include>/test3/*.action</include>
+    </group>
+</lite>

@@ -8,10 +8,6 @@ import org.xidea.lite.tools.PathMatcher;
 
 public class PathMatcherTest {
 
-	@Test
-	public void testCreateMatcher() {
-		fail("Not yet implemented");
-	}
 
 	@Test
 	public void testMatch() {
@@ -30,10 +26,10 @@ public class PathMatcherTest {
 		must("/doc/guide/",true,"/doc/guide/**");
 		must("/doc/guide/a/",true,"/doc/guide/**");
 		must("/doc/guide/aa/bb/",true,"/doc/guide/**");
-		must("/doc/guide/1.txt",true,"/doc/guide/**");
+		must("/doc/guide/",true,"/doc/guide/**");
 		must("/doc/",false,"/doc/guide/**");
 		must("/",false,"/doc/guide/**");
-		must("/doc/guide",false,"/doc/guide/**");
+		must("/doc/book/",false,"/doc/guide/**");
 		
 	}
 
@@ -43,7 +39,7 @@ public class PathMatcherTest {
 		maybe("/doc/guide/a/b/",true,"/doc/guide/**.xhtml");
 		maybe("/doc/book/a/b/",false,"/doc/guide/**.xhtml","/doc/book/*.xhtml");
 		maybe("/doc/aa/",false,"/doc/guide/**.xhtml");
-		maybe("/doc/guide/a/1.txt",false,"/doc/guide/*.xhtml","/doc/book/*.xhtml");
+		maybe("/doc/guide/a/",false,"/doc/guide/*.xhtml","/doc/book/*.xhtml");
 	}
 
 	void match(String path,boolean result,String... pattern){

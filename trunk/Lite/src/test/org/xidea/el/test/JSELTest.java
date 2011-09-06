@@ -7,6 +7,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.xidea.el.Expression;
 import org.xidea.el.ExpressionFactory;
+import org.xidea.el.impl.ExpressionFactoryImpl;
 
 public class JSELTest {
     private ExpressionFactory factory = ExpressionFactory.getInstance();
@@ -61,6 +62,29 @@ public class JSELTest {
         System.out.println("result3");
         System.out.println(result3);
     }
+	@Test
+	public void testNumber(){
+		System.out.println(Double.NaN);
+		System.out.println(Double.NEGATIVE_INFINITY);
+		ELTest.testEL(null,"'abc'*123");
+	}
+
+	@Test
+	public void testIn(){
+		String expression = "srcPort in [1,2,30]";  
+		Expression expressionInstance = factory.create(expression); 
+		HashMap variables = new HashMap();  
+		variables.put("srcPort", 2);  
+		System.out.println(expressionInstance.evaluate(variables));  
+	}
+	@Test
+	public void testArray(){
+		HashMap<String, Object> context = new HashMap<String, Object>();
+		//context.put("array", "1,2,3,4".split(","));
+		context.put("array", new String[]{"1","2","3","4"});
+		ELTest.testEL(context,"array.slice(1,2)");
+	}
+	
     public static void main(String[] args){
         JSELTest test = new JSELTest();
         test.testExpression();

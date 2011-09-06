@@ -1,0 +1,64 @@
+<test>
+
+
+	<unit>
+		<model>{"str":"abc中国defg八荣八耻瘪三个代表/万税/万税/万万税"}</model>
+		<case>str.length*2</case>
+		<case>"abcd战三efg".length	</case>
+		
+		<case>"2八荣八耻abcdefg".charAt(1)</case>	
+		<case>"和谐社会abcdefg".charCodeAt(1)</case>	
+		
+		<case>"abc普天大厦gdefg".indexOf('g')</case>	
+		<case>"abc普天大厦gdefg".lastIndexOf('g')</case>	
+		
+		<case>"aDxi汉字".toLowerCase()</case>	
+		<case>"aDxi汉字".toUpperCase()</case>	
+		
+		<case>str.substr(3)</case>
+		<case>str.substr(2, 7)</case>
+		<case>str.substring(3)</case>	
+		<case>str.substring(2, 7)</case>
+		<case>str.substring(3, str.length*2)</case>
+		
+		<case>"abcdefg".split("c")[0]</case>	
+		<case>"abcdefg".split("")</case>	
+		
+		
+		<case>'1/2/3/4'.split('')</case>
+		<case>'1/2/3/4'.split('/')</case>
+		<case>'1/2/3/4'.split('1/2/3/4')</case>
+		<case>'1/2/3/4'.split('1/2/3/')</case>
+		
+		<case>"abcdefg".slice(2, 7)</case>	
+		
+		<case>"中文abcdefg".concat("zzz我")</case>
+		
+		<case>"aDxi汉字".replace("a","$1...")</case>		
+		<case>"理想国际abcdefg".replace("a", "1")</case>	
+	</unit>
+		
+	<!-- 正则表达式  -->
+	<unit>
+		<case>'1/2/3/4'.replace(/\//,'')</case>
+		<case>'1/2/3/4'.replace(/\//g,'')</case>
+		<case>'1/2/3/4'.replace(/\//img,'')</case>
+		<case>'1/2/3/4'.replace(/\//im,'')</case>
+		<case>"a汉字aDxi".replace(/([\w\W]{2})[\s\S]+/,"$1...")</case>	
+		
+		<case>'1/2/3/4'.match(/\/(\d)\/(\d)/im)</case>
+		<case>'1/2/3/4'.match(/\/(\d)\/(\d)/gim)</case>
+		
+		<case>'1/2/3/4'.split(/\/\d\/\d/gim)</case>
+		<case>'1/2/3/4'.split(/\/\d/im)</case>
+		<case>'1/2/3/4'.split(/\//img)</case>
+		<case>'1/2/3/4'.split(/[\/\d]+/img)</case>
+		<!-- TODO: 不支持 分组split 
+		<case>'1/2/3/4'.split(/([\/\d])/img)</case>
+		-->
+		
+		<!-- TODO: 不支持 search 
+		<case>'1/2/3/4'.search(/([\/\d])/img)</case>
+		-->
+	</unit>
+</test>
