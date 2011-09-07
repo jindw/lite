@@ -120,31 +120,28 @@ function lite_op__eq($lop, $rop) {
 }
 
 /**
+ * php 实现只考虑 string,number,null,true,false
  * javascript + 运算符模拟
  * @return string|number
  */
 function lite_op__add($lop, $rop) {
-	if($lop === null || $lop === false || $lop === true || is_numeric($lop)){
-		if($rop === null || $rop === false){
-			return $lop;
-		}else if($rop === true || is_numeric($rop)){
-			return $lop + $rop;
+	//if($lop === null || $lop === false || $lop === true || is_int($lop)|| is_float($lop)){
+	if($lop === null || $lop === false || $lop === true){
+		if(is_string($rop)){
+			return json_encode($lop).$rop;
 		}
-	}
-	return $lop . $rop;
-}
-/**
- *
- * 左操作数为确定数值类型(number/boolean/null)的 javascript + 运算符模拟
- * @return string|number
- */
-function lite_op__add_nx($lop, $rop) {
-	if($rop === null || $rop === false){
-		return $lop;
-	}else if($rop === true || is_numeric($rop)){
-		return $lop + $rop;
-	}else{
-		return $lop . $rop;
+		return $lop+$rop;
+	}else if(is_string($lop)){
+		if($rop === null || $rop === false || $rop === true){
+			return $lop.json_encode($rop);
+		}else{
+			return $lop.$rop;
+		}
+	}else{//number only, 
+		if(is_string($rop)){
+			return $lop.$rop;
+		}
+		return $lop+$rop;
 	}
 }
 
@@ -200,7 +197,7 @@ function lite__2($pattern,$date,$raw){
 			)
 		);
 	}
-	
+	//echo $pattern;
 	if($date === null){
 		$date = time(true) * 1000;
 	}else{

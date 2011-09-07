@@ -315,6 +315,38 @@ function getELType(el){
 			}
 			return TYPE_ANY;
 		case OP_INVOKE:
+			if(arg1[0] == VALUE_VAR){
+				switch(arg1[1]){
+					case "encodeURI":
+					case "encodeURIComponent":
+					case "decodeURI":
+					case "decodeURIComponent":
+						return TYPE_STRING;
+					case "parseInt":
+					case "parseInt":
+						return TYPE_NUMBER;
+					case "isFinite":
+					case "isNaN":
+						return TYPE_BOOLEAN;
+				}
+			}else if(arg1[0] == OP_GET){
+				//$log.warn(uneval(arg1));
+				arg2 = arg1[2];
+				arg1 = arg1[1];
+				if(arg2[0] == VALUE_CONSTANTS){
+					var method = arg2[1];
+					if(arg1[0] == VALUE_VAR){
+						var owner = arg1[1];
+						if(owner == 'JSON'){
+							if(method == 'stringify'){
+								return TYPE_STRING;
+							}
+						}else if(owner == 'Math'){
+							return TYPE_NUMBER;
+						}
+					}
+				}
+			}
 			return TYPE_ANY;
 		default:
 			return TYPE_ANY;

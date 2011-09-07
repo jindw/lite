@@ -39,22 +39,16 @@ abstract class JSObject implements Invocable {
 
 	static int getIntArg(Object[] args, int index, Integer defaultValue) {
 		Number value = getNumberArg(args, index, defaultValue);
-		return value.intValue();
+		return value == null?null:value.intValue();
 	}
 
 	static Number getNumberArg(Object[] args, int index, Number defaultValue) {
 		Object value = getArg(args, index, defaultValue);
-		if(value == null){
-			return defaultValue;
-		}
-		return ECMA262Impl.ToNumber(value);
+		return value == null?null:ECMA262Impl.ToNumber(value);
 	}
 
 	static String getStringArg(Object[] args, int index, String defaultValue) {
-		Object value = getArg(args, index, null);
-		if (value == null) {
-			return defaultValue;
-		}
-		return ECMA262Impl.ToString(value);
+		Object value = getArg(args, index, defaultValue);
+		return value == null?null:ECMA262Impl.ToString(value);
 	}
 }

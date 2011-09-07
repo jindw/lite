@@ -110,6 +110,8 @@ public class DatePlugin implements RuntimePlugin {
 	public void execute(ValueStack context, Writer out) throws IOException {
 		Object pattern = this.pattern.evaluate(context);
 		Object date = this.date.evaluate(context);
+//		System.out.println(pattern);
+//		System.out.println(date);
 		if (date == null) {
 			date = new Date();
 		} else if (!(date instanceof Date)) {

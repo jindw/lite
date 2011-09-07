@@ -13,7 +13,7 @@ this.addScript('expression-token.js',
 					//,"OP_*"
 					//,"TYPE_*"
 					]
-				,0
+				,"org.xidea.jsi:$log"
 				,["evaluate",'getPriority']);
 				
 				

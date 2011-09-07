@@ -43,7 +43,8 @@ function typesOnly(t1,t2){
 	while(--i>1){
 		a |= arguments[i];
 	}
-	return (t1 & a) == a && (t2 & a) == a;
+	var t = t1 | t2;
+	return (t & a) == t;
 }
 function stringifyADD(el,context){
 	var t = getELType(el);
@@ -58,17 +59,22 @@ function stringifyADD(el,context){
 		if(/^[\d\.]+$/.test(value2)){
 			value2=' '+value2;
 		}
-		return value1+'.'+value2;
+		//还需要处理 null,true,false 字面量的问题
+		
+		var t1 = getELType(el[1]);
+		var t2 = getELType(el[2]);
+		//$log.error(t1,t2)
+		if(typesOnly(t1,t2,TYPE_STRING,TYPE_NUMBER)){
+			return value1+'.'+value2;
+		}
 	}
-	
-	var t1 = getELType(el[1]);
-	var t2 = getELType(el[2]);
-	if(typesOnly(t1,t1,TYPE_NULL,TYPE_NUMBER,TYPE_BOOLEAN)){
-		return "lite_op__add_nx("+value1+','+value2+")"
-	}
-	if(typesOnly(t2,t2,TYPE_NULL,TYPE_NUMBER,TYPE_BOOLEAN)){
-		return "lite_op__add_nx("+value2+','+value1+")"
-	}
+	//字符串加法不复合交换律
+//	if(typesOnly(t1,t1,TYPE_NULL,TYPE_NUMBER,TYPE_BOOLEAN)){
+//		return "lite_op__add_nx("+value1+','+value2+")"
+//	}
+//	if(typesOnly(t2,t2,TYPE_NULL,TYPE_NUMBER,TYPE_BOOLEAN)){
+//		return "lite_op__add_nx("+value2+','+value1+")"
+//	}
 	return "lite_op__add("+value1+','+value2+")"
 }
 
@@ -132,7 +138,10 @@ function parseInvoke(el){
 		}
 		return [varName||ownerEL,prop||propEL,el[2]];
 	}else{//function_call
-		return [method,null,el[2]]
+		if(method[0] == VALUE_VAR){
+			var varName = method[1];
+		}
+		return [varName||method,null,el[2]]
 	}
 }
 function stringifyPHPEL2ID(el,context,id){
@@ -192,6 +201,7 @@ function stringifyINVOKE(el,context){
 			return args.replace('array',"lite__"+owner)
 		}else{
 			//动态调用方式
+			$log.error("!!!!!!!!!!!!",context.scope.varMap);
 			if(owner in context.scope.varMap || owner in context.scope.paramMap){
 				var fn = '$'+owner;
 			}else{
@@ -200,7 +210,9 @@ function stringifyINVOKE(el,context){
 			return 'lite_op__invoke('+fn+',null,'+args+')';
 		}
 	}else{
+		//$log.error("??????????",typeof owner,owner,context.scope.varMap);
 		owner = stringifyPHPEL2ID(owner,context,true)
+		//$log.error(owner);
 		return 'lite_op__invoke('+owner+',null,'+args+')';
 		//throw new Error("Invalid Invoke EL");
 	}

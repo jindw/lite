@@ -111,11 +111,16 @@ public class JSONDecoder {
 
 	@SuppressWarnings("unchecked")
 	public <T> T decode(String value, Class<T> type) {
-		Object result = new JSONTokenizer(value, strict).parse();
-		if (type != null && type != Object.class) {
-			result = toValue(result, type);
+		try{
+			Object result = new JSONTokenizer(value, strict).parse();
+			if (type != null && type != Object.class) {
+				result = toValue(result, type);
+			}
+			return (T) result;
+		}catch (RuntimeException e) {
+			log.warn("json error:"+value,e);
+			throw e;
 		}
-		return (T) result;
 	}
 
 	

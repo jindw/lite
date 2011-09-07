@@ -66,7 +66,7 @@ public class JSELTest {
 	public void testNumber(){
 		System.out.println(Double.NaN);
 		System.out.println(Double.NEGATIVE_INFINITY);
-		ELTest.testEL(null,"'abc'*123");
+		ELTest.testEL("{\"abc\":null}","'abc'*123");
 	}
 
 	@Test

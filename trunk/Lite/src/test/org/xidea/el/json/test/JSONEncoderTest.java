@@ -19,7 +19,7 @@ public class JSONEncoderTest {
 	@Test
 	public void testEncodeObject() throws IOException {
 		assertEquals("{}", JSONEncoder.encode(new Object()));
-		StringWriter out = new StringWriter();
+		StringBuilder out = new StringBuilder();
 		new JSONEncoder(null,false,10).encode(new Object(),out);
 		assertEquals("{\"class\":\"java.lang.Object\"}", out.toString());
 	}

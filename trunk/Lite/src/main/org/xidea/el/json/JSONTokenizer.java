@@ -14,7 +14,7 @@ public class JSONTokenizer {
 	protected final int end;
 	protected boolean strict = false;
 
-	public JSONTokenizer(String source,boolean strict) {
+	public JSONTokenizer(String source, boolean strict) {
 		this.value = source.trim();
 		if (value.startsWith("\uFEFF")) {
 			value = value.substring(1);
@@ -26,8 +26,8 @@ public class JSONTokenizer {
 	protected Object parse() {
 		skipComment();
 		char c = toLower(value.charAt(start));
-		switch(c){
-		case '"' :
+		switch (c) {
+		case '"':
 		case '\'':
 			return findString();
 		case '[':
@@ -35,8 +35,27 @@ public class JSONTokenizer {
 		case '{':
 			return findMap();
 		default:
-			if (c == '-' || c >= '0' && c <= '9') {
+			if (c >= '0' && c <= '9') {
 				return findNumber();
+			} else if (c == '-') {
+				if (strict) {
+					return findNumber();
+				} else {
+					int start = this.start;
+					skipComment();
+					c = value.charAt(this.start);
+					if (c >= 0 || c <= 9) {
+						this.start = start;
+						return findNumber();
+					} else {
+						String key = findId();
+						if ("Infinity".equals(key)) {
+							return Double.NEGATIVE_INFINITY;
+						} else {
+							throw buildError(key + " is  not a valid number!!");
+						}
+					}
+				}
 			}
 			String key = findId();
 			if ("true".equals(key)) {
@@ -45,27 +64,32 @@ public class JSONTokenizer {
 				return Boolean.FALSE;
 			} else if ("null".equals(key)) {
 				return null;
+			} else if (!strict) {
+				if ("NaN".equals(key)) {
+					return Double.NaN;
+				} else if ("Infinit".equals(key)) {
+					return Double.POSITIVE_INFINITY;
+				}
+
 			}
 			throw buildError("");
 		}
 	}
 
-	protected ExpressionSyntaxException buildError(String msg)  {
-		return new ExpressionSyntaxException("语法错误:"+msg +"\n"+ value + "@" + start);
+	protected ExpressionSyntaxException buildError(String msg) {
+		return new ExpressionSyntaxException("语法错误:" + msg + "\n" + value + "@"
+				+ start);
 	}
+
 	/*
-	 * 0xfee0+0x21-0xfee0+0x7e
-	 * \uff01-\uff5e
-	 * ！ - ～
-	 * ! - ~
+	 * 0xfee0+0x21-0xfee0+0x7e \uff01-\uff5e ！ - ～ ! - ~
 	 */
 	protected char toLower(char c) {
-		if(c >=0xff01 && c<=0xff5e){
-			c-=0xfee0;
+		if (c >= 0xff01 && c <= 0xff5e) {
+			c -= 0xfee0;
 		}
 		return c;
 	}
-
 
 	protected Map<String, Object> findMap() {
 		start++;
@@ -79,13 +103,13 @@ public class JSONTokenizer {
 			// result.add(parse());
 			char c = value.charAt(start);
 			final String key;
-			if(c == '"'){
+			if (c == '"') {
 				key = findString();
-			}else{
-				if(c == '\''){
+			} else {
+				if (c == '\'') {
 					key = findString();
-				}else{
-					if(strict){
+				} else {
+					if (strict) {
 						throw buildError("JSON 标准Object Key 必须为标准JSON 字符串,如:{\"key\":\"value\"}");
 					}
 					key = findId();
@@ -152,6 +176,7 @@ public class JSONTokenizer {
 		}
 		return lvalue;
 	}
+
 	private int parseOctal() {
 		int lvalue = 0;//
 		while (start < end) {
@@ -165,6 +190,7 @@ public class JSONTokenizer {
 		}
 		return lvalue;
 	}
+
 	private void seekDecimal() {
 		while (start < end) {
 			char c = value.charAt(start++);
@@ -175,40 +201,42 @@ public class JSONTokenizer {
 			}
 		}
 	}
-	private void seekNegative(){
+
+	private void seekNegative() {
 		char c = value.charAt(start++);
-		if(c  == '-' || c == '+'){
-		}else{
+		if (c == '-' || c == '+') {
+		} else {
 			start--;
 		}
-		
+
 	}
-	private Number parseZero(boolean neg){
+
+	private Number parseZero(boolean neg) {
 		if (start < end) {
 			char c = value.charAt(start++);
 			if (c == 'x' || c == 'X') {
-				if(strict){
+				if (strict) {
 					throw buildError("JSON未定义16进制数字");
 				}
 				long value = parseHex();
-				if(neg){
+				if (neg) {
 					value = -value;
 				}
 				return value;
-			} else if(c > '0' && c<='7'){
-				if(strict){
+			} else if (c > '0' && c <= '7') {
+				if (strict) {
 					throw buildError("JSON未定义8进制数字");
 				}
 				start--;
 				int value = parseOctal();
-				if(neg){
+				if (neg) {
 					value = -value;
 				}
 				return value;
-			} else if(c == '.') {
+			} else if (c == '.') {
 				start--;
-				return parseFloat(start-1);
-			}else{
+				return parseFloat(start - 1);
+			} else {
 				start--;
 				return 0;
 			}
@@ -219,6 +247,7 @@ public class JSONTokenizer {
 
 	/**
 	 * 当前值为 . 或者 E，e
+	 * 
 	 * @param begin
 	 * @return
 	 */
@@ -229,49 +258,50 @@ public class JSONTokenizer {
 			start++;
 			int p = start;
 			seekDecimal();
-			if(start == p){//复位
+			if (start == p) {// 复位
 				start--;
 				String ns = value.substring(begin, start);
 				return Long.parseLong(ns);
-			}else{
-				isFloatingPoint=true;
-				if(start<end){
+			} else {
+				isFloatingPoint = true;
+				if (start < end) {
 					next = value.charAt(start);
-				}else{
+				} else {
 					next = 0;
 				}
 			}
 		}
 		if (next == 'E' || next == 'e') {
 			start++;
-			isFloatingPoint=true;
+			isFloatingPoint = true;
 			seekNegative();
 			seekDecimal();
 		}
 		String ns = value.substring(begin, start);
-//		System.out.println(ns);
+		// System.out.println(ns);
 		if (isFloatingPoint) {
 			return Double.parseDouble(ns);
 		} else {
 			return Long.parseLong(ns);
 		}
 	}
-	//还是改成JDK自己的parser？
+
+	// 还是改成JDK自己的parser？
 	protected Number findNumber() {
-		//10进制优化
+		// 10进制优化
 		final int begin = start;
 		boolean nag = false;
 		char c = value.charAt(start++);
-		if(c == '+'){
+		if (c == '+') {
 			c = value.charAt(start++);
-		}else if( c == '-'){
+		} else if (c == '-') {
 			nag = true;
 			c = value.charAt(start++);
 		}
-		
-		if(c == '0'){
+
+		if (c == '0') {
 			return parseZero(nag);
-		}else{
+		} else {
 			long ivalue = c - '0';
 			while (start < end) {
 				c = value.charAt(start++);
@@ -291,7 +321,6 @@ public class JSONTokenizer {
 		}
 	}
 
-
 	protected String findId() {
 		int p = start;
 		if (Character.isJavaIdentifierPart(value.charAt(p++))) {
@@ -308,11 +337,11 @@ public class JSONTokenizer {
 	}
 
 	/**
-	 * {@link Decompiler#printSourceString
+	 * {@link Decompiler#printSourceString
 	 */
 	protected String findString() {
 		char quoteChar = value.charAt(start++);
-		if(strict && quoteChar=='\''){
+		if (strict && quoteChar == '\'') {
 			throw buildError("JSON标准 字符串应该是双引号\"...\")");
 		}
 		StringBuilder buf = new StringBuilder();
@@ -356,17 +385,17 @@ public class JSONTokenizer {
 					buf.append('"');
 					break;
 				case 'u':
-					buf.append((char) Integer.parseInt(value.substring(
-							start, start + 4), 16));
+					buf.append((char) Integer.parseInt(value.substring(start,
+							start + 4), 16));
 					start += 4;
 					break;
 				case 'x':
-					buf.append((char) Integer.parseInt(value.substring(
-							start, start + 2), 16));
+					buf.append((char) Integer.parseInt(value.substring(start,
+							start + 2), 16));
 					start += 2;
 					break;
 				default:
-					if(strict){
+					if (strict) {
 						throw buildError("发现JSON 标准未定义转义字符");
 					}
 					buf.append(c);
@@ -382,9 +411,9 @@ public class JSONTokenizer {
 				break;
 			case '\r':
 			case '\n':
-				//if(strict){
+				// if(strict){
 				throw buildError("JSON 标准字符串不能换行");
-				//}
+				// }
 			default:
 				buf.append(c);
 
@@ -402,7 +431,7 @@ public class JSONTokenizer {
 				start++;
 			}
 			if (start < end && value.charAt(start) == '/') {
-				if(strict){
+				if (strict) {
 					throw buildError("JSON 标准未定义注释");
 				}
 				start++;
@@ -427,7 +456,7 @@ public class JSONTokenizer {
 							if (this.value.charAt(cend - 1) == '*') {
 								start = cend + 1;
 								break;
-							}else{
+							} else {
 								cend++;
 							}
 						} else {

@@ -132,7 +132,7 @@ function _encodeEL(text,model,encoding){
 function _appendFunctionName(context,scope){
 	for(var n in scope.refMap){
 		if(!(n in scope.varMap || n in scope.paramMap)){
-			context.append("if(function_exists('lite__",n,"')){$",n,"='",n,"';}");
+			context.append('$',n,"=function_exists('lite__",n,"')?'",n,"':null;");
 		}
 	}
 }
@@ -150,7 +150,7 @@ PHPTranslateContext.prototype = new TCP({
 	        var def = this.scope.defMap[defs[i]];
 	        var n = def.name;
 	        this.append("if(!function_exists('lite__",n,"')){function lite__",
-	        		n,"(",toArgList(def.params),'){')
+	        		n,"(",toArgList(def.params,def.defaults),'){')
 	        this.depth++;
 	        this.append("ob_start();");
 	        _appendFunctionName(this,def);

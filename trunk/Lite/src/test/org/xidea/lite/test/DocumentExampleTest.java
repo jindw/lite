@@ -6,10 +6,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.junit.Test;
@@ -29,22 +31,25 @@ public class DocumentExampleTest {
 		ArrayList<String> errors = new ArrayList<String>();
 		for(File file : dir.listFiles()){
 			String name = file.getName();
+			String status = "失败:";
 			try{
 				testFile(file, name);
+				 status = "成功:";
 			}catch (Exception e) {
-				System.out.println(file);
 				e.printStackTrace();
-				errors.add(file.toString());
+				errors.add(file.toString()+'\n');
 				//throw e;
+			}finally{
+				System.out.println("文件测试"+status+file);
 			}
 		}
 		if(errors.size()>0){
-			System.out.println(errors);
-			throw new RuntimeException("失败文件:"+errors);
+			System.out.println("错误文件有:"+errors);
+			//throw new RuntimeException("失败文件:"+errors);
 		}
 	}
 	private void testFile(File file, String name) throws SAXException,
-			IOException, FileNotFoundException, XPathExpressionException {
+			IOException, FileNotFoundException, XPathExpressionException, TransformerConfigurationException, TransformerException, TransformerFactoryConfigurationError {
 		if(name.endsWith(".xhtml") && !name.startsWith("layout")){
 			String xhtml = ParseUtil.loadXMLTextAndClose(new FileInputStream(file));
 			xhtml = ParseUtil.normalize(xhtml, file.getAbsolutePath());
@@ -86,8 +91,7 @@ public class DocumentExampleTest {
 				}
 				fileMap.put(path, s);
 				m = m.replaceAll("\\+\\s*new\\s+Date\\(\\)", ""+System.currentTimeMillis());
-				String html = LiteTest.testTemplate(fileMap, m, path);
-				//System.out.println(html);
+				LiteTest.testTemplate(fileMap, m, path,null);
 			}
 			if(evalMap.size()>0){
 				System.out.println(file+"测试成功:"+evalMap.size());

@@ -90,7 +90,7 @@ public class XMLNormalizeImpl {
 		ArrayList<String> attrs = new ArrayList<String>();
 	}
 
-	private void addAttr(String space, String name, String value, char qute) {
+	protected void addAttr(String space, String name, String value, char qute) {
 		if (tag.name == null) {
 			error("tagName is required");
 		}
@@ -272,14 +272,7 @@ public class XMLNormalizeImpl {
 						if (end > start) {
 							int end2 = text.lastIndexOf('<',end-9);
 							String content = text.substring(this.start, end2);
-							if (XML_TEXT_RESERED.matcher(content).find()
-									&& content.indexOf("<![CDATA[") < 0) {
-								result.append("/*<![CDATA[*/");
-								result.append(content);
-								result.append("/*]]>*/");
-							} else {
-								result.append(content);
-							}
+							appendScript(content);
 							this.start = end2;
 						}
 					}
@@ -326,6 +319,18 @@ public class XMLNormalizeImpl {
 		this.start = start;
 		result.setLength(len);
 		return false;
+	}
+
+	protected void appendScript(String content) {
+		
+		if (XML_TEXT_RESERED.matcher(content).find()
+				&& content.indexOf("<![CDATA[") < 0) {
+			result.append("/*<![CDATA[*/");
+			result.append(content);
+			result.append("/*]]>*/");
+		} else {
+			result.append(content);
+		}
 	}
 
 	private int findScriptEnd() {

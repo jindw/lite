@@ -50,8 +50,10 @@
 		<case>1?0?5:0?11:13:3</case>
 		<case>1?1?0?5:0?11:13:3?1?0?5:0?11:13:3:0?11:13:3</case>
 		<!-- 字符串操作 -->
-		<case>['abc'+123,'abc'*123,'12'*123,'012'*123,'012'+123].join(',')
-		</case>
+		<case>['abc'+123,'abc'*123,'12'*123,'012'*123,'012'+123].join(',')</case>
+		<case>true+123</case>
+		<case>true+123+''</case>
+		<case>true+''+null+123+''</case>
 		<case>['abc'.indexOf('b'),'abc'.lastIndexOf('2')].join(',')</case>
 		<case>['123'.substr(1),'123'.substring(2),'123'.substring(-3)].join(',')
 		</case>

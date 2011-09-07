@@ -21,20 +21,17 @@ import org.xidea.lite.test.oldcases.XMLParser;
 
 public class AutoTest {
 	ExpressionFactory expressionFactory = ExpressionFactoryImpl.getInstance();
-
-
-
 	@Before
 	public void setup(){
-		
 	}
 	@Test
 	public void test(){
-		ELTest.testEL(null,"JSON.stringify([1,2])");
-		ELTest.testEL(null, "\"\\u91D1\\u5927\\u4E3A\"+'aa'");
+		ELTest.testEL("{}","JSON.stringify([1,2])");
+		ELTest.testEL("{}", "\"\\u91D1\\u5927\\u4E3A\"+'aa'");
 	}
 	@Test
 	public void testAll() throws Exception {
+		test("global-case.xml");
 		test("array-case.xml");
 		test("string-case.xml");
 		test("op-case.xml");
@@ -62,6 +59,9 @@ public class AutoTest {
 				if(me!=null){
 					model = me.getTextContent();
 				}
+			}
+			if(model == null || model.length() == 0){
+				model = "{}";
 			}
 			ELTest.testEL(model,source);
 		}

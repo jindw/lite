@@ -41,8 +41,8 @@ public class DefinePlugin implements RuntimePlugin,Invocable {
 	public void setParams(List<String> params) {
 		this.params = params.toArray(new String[params.size()]);
 	}
-	public void setDefaults(List<String> defaults) {
-		this.defaults = defaults.toArray(new String[defaults.size()]);
+	public void setDefaults(List<Object> defaults) {
+		this.defaults = defaults.toArray(new Object[defaults.size()]);
 	}
 	public void setType(String type) {
 		this.type = type;
@@ -70,7 +70,7 @@ public class DefinePlugin implements RuntimePlugin,Invocable {
 				context.put(params[i], args[i]);
 			}else{
 				int begin = i - (params.length -defaults.length);
-				if(i>=0 && i<defaults.length){
+				if(begin>=0 && begin<defaults.length){
 					context.put(params[i], defaults[begin]);
 				//}else{
 				//	//context.put(params[i], null);

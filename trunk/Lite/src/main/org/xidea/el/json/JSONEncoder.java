@@ -1,6 +1,5 @@
 package org.xidea.el.json;
 
-import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
@@ -42,28 +41,22 @@ public class JSONEncoder {
 	}
 
 	public static String encode(Object value) {
-		StringBuilder buf = new StringBuilder();
-		encoder.encode(value, buf);
-		return buf.toString();
+		return encoder.encode(value, new StringBuilder()).toString();
 	}
 
-	public void encode(Object value, Appendable out){
-		try {
-			if (this.parent == null) {
+	public StringBuilder encode(Object value, StringBuilder out) {
+		if (this.parent == null) {
+			print(value, out);
+		} else {
+			synchronized (parent) {
+				index = 0;
 				print(value, out);
-			} else {
-				synchronized (parent) {
-					index = 0;
-					print(value, out);
-				}
 			}
-		} catch (IOException e) {
-			throw new RuntimeException(e);
 		}
-
+		return out;
 	}
 
-	protected void print(Object object, Appendable out) throws IOException {
+	protected void print(Object object, StringBuilder out){
 		if (object == null) {
 			out.append("null");
 			return;
@@ -147,7 +140,7 @@ public class JSONEncoder {
 		return false;
 	}
 
-	protected void printString(String text, Appendable out) throws IOException {
+	protected void printString(String text, StringBuilder out) {
 		out.append('"');
 		final int len = text.length();
 		for (int i = 0; i < len; i++) {
@@ -199,7 +192,7 @@ public class JSONEncoder {
 		out.append('"');
 	}
 
-	protected void printMap(Object object, Appendable out) throws IOException {
+	protected void printMap(Object object, StringBuilder out) {
 		out.append('{');
 		try {
 			Map<String, Method> props = getGetterMap(object.getClass());
@@ -236,7 +229,7 @@ public class JSONEncoder {
 		return ReflectUtil.getGetterMap(clazz);
 	}
 
-	protected void printMap(Map<?, ?> map, Appendable out) throws IOException {
+	protected void printMap(Map<?, ?> map,StringBuilder out) {
 		Iterator<?> it = map.entrySet().iterator();
 		if (it.hasNext()) {
 			out.append('{');
@@ -257,7 +250,7 @@ public class JSONEncoder {
 		}
 	}
 
-	protected void printList(Object array, Appendable out) throws IOException {
+	protected void printList(Object array,StringBuilder out) {
 		out.append('[');
 		int len = Array.getLength(array);
 		for (int i = 0; i < len; ++i) {
@@ -269,7 +262,7 @@ public class JSONEncoder {
 		out.append(']');
 	}
 
-	protected void printList(Iterator<?> it, Appendable out) throws IOException {
+	protected void printList(Iterator<?> it, StringBuilder out) {
 		if (it.hasNext()) {
 			out.append('[');
 			while (true) {

@@ -230,7 +230,7 @@ public abstract class ECMA262Impl {
             // ALERT: should it distinguish -0.0 from +0.0 ?
             return "0";
         }
-        if (base != 10) {
+        if (base == 10) {
             String result = Double.toString(d);
             if(result.endsWith(".0")){
             	result = result.substring(0,result.length()-2);

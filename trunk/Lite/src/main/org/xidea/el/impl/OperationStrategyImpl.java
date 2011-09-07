@@ -202,9 +202,10 @@ public class OperationStrategyImpl implements OperationStrategy {
 		case ExpressionToken.OP_ADD:
 			Object p1 = ECMA262Impl.ToPrimitive(arg1, String.class);
 			Object p2 = ECMA262Impl.ToPrimitive(arg2, String.class);
-			if (p1 instanceof String || p1 instanceof Character
-					 || p2 instanceof String|| p2 instanceof Character) {
-				return String.valueOf(p1) + p2;
+			if (p1 instanceof String || p1 instanceof Character){
+				return p1 + ECMA262Impl.ToString(p2);
+			}else if(p2 instanceof String|| p2 instanceof Character) {
+				return ECMA262Impl.ToString(p1) + p2;
 			} else {
 				return na.add(ECMA262Impl.ToNumber(p1), ECMA262Impl
 						.ToNumber(p2));

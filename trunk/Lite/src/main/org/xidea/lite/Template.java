@@ -5,7 +5,9 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -78,6 +80,8 @@ public class Template {
 			if (((ExpressionInfo) e).getVars().contains("for")) {
 				forCount++;
 			}
+		}else{
+			forCount++;
 		}
 		return e;
 	}
@@ -92,7 +96,7 @@ public class Template {
 		// Object[] result = datas.toArray();// ;
 		// reverse(result);
 		ArrayList<Object> result = new ArrayList<Object>();
-		for (int i = datas.size() - 1; i >= 0; i--) {
+		for (int i = datas.size() - 1; i >= 0; i--) {//逆序很危险.顺序也一样
 			final Object item = datas.get(i);
 			if (item instanceof List) {
 				final List data = (List) item;
@@ -109,14 +113,16 @@ public class Template {
 					int forCount0 = forCount;
 					cmd[1] = compile((List) cmd[1]);
 
+					//System.out.println(forCount+"/"+forCount0);
 					//log.info("\n" + forCount0 + "/" + forCount + cmd[3]);
 					if (forCount == forCount0) {
 						//log.info("no_status");
 						cmd[0] = FOR_TYPE_NO_STATUS;
-					} else if (forCount0 == 0) {
+					} else if (forCount0 == 0) {//for count0 不等价于 父循环的for 命中次数
 						//log.info("first_status");
-						cmd[0] = FOR_TYPE_FIRST_STATUS;// may not first(no for
+						cmd[0] = FOR_TYPE;//_FIRST_STATUS;// may not first(no for
 														// status after)
+						//不能草率决定first_status,first_status 必须完整解析之后才能确定下来
 					} else {
 						//log.info("full_status");
 					}
@@ -164,7 +170,9 @@ public class Template {
 			if (addonType == DefinePlugin.class) {// definePlugin no status care
 				forCount = forCount0;
 			}
-			addon.initialize(this, children);
+			List<Object> list = Arrays.asList(children);
+			Collections.reverse(list);
+			addon.initialize(this, list.toArray());
 			cmd[PLUGIN_POS] = addon;
 		} catch (Exception e) {
 			log.error("装载扩展失败", e);
@@ -290,8 +298,10 @@ public class Template {
 		final String varName = (String) data[3];
 		ForStatus preiousStatus;
 		if (type == FOR_TYPE) {
+			//System.out.println("FOR_TYPE");
 			preiousStatus = (ForStatus) context.get(FOR_KEY);
-		} else {
+		} else {//normal
+			//System.out.println(type == FOR_TYPE_FIRST_STATUS?"FIRST_STATUS":"NO_STATUS");
 			preiousStatus = null;
 		}
 		boolean hasElement = false;
@@ -308,7 +318,7 @@ public class Template {
 						context.put(varName, item);
 						renderList(context, children, out);
 					}
-				} else {
+				} else {//first status and other_status
 					ForStatus forStatus = new ForStatus(items.size());
 					context.put(FOR_KEY, forStatus);
 					for (Object item : items) {
@@ -344,7 +354,6 @@ public class Template {
 				}
 			}
 		} finally {
-			// context.put("for", preiousStatus);
 			if (type == FOR_TYPE) {
 				context.put(FOR_KEY, preiousStatus);// for key
 			}
