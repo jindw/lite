@@ -101,16 +101,28 @@ class JSGlobal implements Invocable {
 		case 101:
 			return stringify(JSObject.getArg(args, 0, null));
 		}
-		// math,isFinite,isNaN
-		Number n1 = JSObject.getNumberArg(args, 0, Double.NaN);
+		//isFinite,isNaN,math
 		switch (type) {
 		// isFinite
 		case 200:
+			Number n1 = JSObject.getNumberArg(args, 0, null);
+			if(n1 == null){
+				return true;
+			}
 			return !Double.isNaN(n1.doubleValue())
 					&& !Double.isInfinite(n1.doubleValue());
 			// isNaN
 		case 201:
+			n1 = JSObject.getNumberArg(args, 0, null);
+			if(n1 == null){
+				return false;
+			}
 			return Double.isNaN(n1.doubleValue());
+		}
+		Number n1 = JSObject.getNumberArg(args, 0, Double.NaN);
+		switch (type) {
+		// math,
+		
 		case 14:
 			// 15.8.2.14 random()
 			return Math.random();
@@ -291,8 +303,8 @@ class JSGlobal implements Invocable {
 	// }
 	/** ===================number parse ======================= */
 	private static final Pattern INT_PARTTERN = Pattern
-			.compile("^[\\+\\-]?(0x[0-9a-fA-F]+" + "|0+[0-7]*"
-					+ "|[1-9][0-9]*)");
+			.compile("^[\\+\\-]?(0x[0-9a-f]+" + "|0+[0-7]*"
+					+ "|[1-9][0-9]*)",Pattern.CASE_INSENSITIVE);
 	private static final Pattern FLOAT_PARTTERN = Pattern
 			.compile("^[\\+\\-]?[0-9]*(?:\\.[0-9]+)?");
 
@@ -330,8 +342,13 @@ class JSGlobal implements Invocable {
 			}
 			String n = matcher.group(1);
 			if (n.charAt(0) == '0') {
-				if (n.startsWith("0x") || n.startsWith("0X")) {
-					return Long.parseLong(text.substring(2), 16);
+				if(n.length() ==1){
+					return 0;
+				}else{
+					int c = n.charAt(1);
+					if (c == 'x' || c == 'X') {
+						return Long.parseLong(text.charAt(0)+n.substring(2), 16);
+					}
 				}
 				return Long.parseLong(text, 8);
 			} else {

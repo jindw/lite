@@ -109,14 +109,33 @@ function stringifyEQ(el,context,opc){
     }
     return (opc=='!='?'!':'')+"lite_op__eq("+value1+','+value2+")"
 }
+var math = {
+	"E":2.718281828459045,
+	"PI":3.141592653589793,
+	"LN2":0.6931471805599453,
+	"LN10":2.302585092994046,
+	"LOG2E":1.4426950408889634,
+	"LOG10E":0.4342944819032518,
+	"SQRT1_2":0.7071067811865476,
+	"SQRT2":1.4142135623730951
+}
 function stringifyGET(el,context){
 	var arg1 = el[1];
 	var arg2 = el[2];
 	var value1 = stringifyPHPEL(el[1],context);
 	var value2 = stringifyPHPEL(el[2],context);
 	if(arg2[0] == VALUE_CONSTANTS){
-		if( arg2[1] != 'length'){
+		var prop = arg2[1];
+		if( prop != 'length'){
 			//这里有可能要抛警告
+			if(arg1[0] == VALUE_VAR){
+				var owner = arg1[1];
+				if(owner == 'Math' && !(owner in context.scope.defMap && owner in context.scope.varMap && owner in context.scope.paramMap)){
+					if(typeof math[prop] == 'number'){
+						return '('+math[prop]+')';
+					}
+				}
+			}
 			return value1+'['+value2+']';
 		}
 	}
@@ -165,7 +184,7 @@ function stringifyINVOKE(el,context){
 			if(owner === 'Math'){
 				var mp = /^(?:sin|sqrt|tan|cos|acos|asin|atan|atan2|max|min||floor|round|abs|ceil|exp|log|pow)$/;
 				if(prop == 'random'){
-					return 'rand(0, PHP_INT_MAX)';
+					return 'rand(0, 0.99999)';
 				}else if(mp.test(prop)){
 					return args.replace('array',prop);
 				}else{
@@ -201,7 +220,7 @@ function stringifyINVOKE(el,context){
 			return args.replace('array',"lite__"+owner)
 		}else{
 			//动态调用方式
-			$log.error("!!!!!!!!!!!!",context.scope.varMap);
+			//$log.error("!!!!!!!!!!!!",context.scope.varMap);
 			if(owner in context.scope.varMap || owner in context.scope.paramMap){
 				var fn = '$'+owner;
 			}else{

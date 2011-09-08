@@ -1,0 +1,33 @@
+<test>
+	<unit title="Math 方法测试">
+		<case>Math.E.toFixed(5)</case>
+		<case>Math.LN2.toFixed(5)</case>
+		<case>Math.LN10.toFixed(5)</case>
+		<case>Math.LOG2E.toFixed(5)</case>
+		<case>Math.LOG10E.toFixed(5)</case>
+		<case>Math.PI.toFixed(5)</case>	
+		<case>Math.SQRT1_2.toFixed(5)</case>
+		<case>Math.SQRT2.toFixed(5)</case>
+		
+		<case>Math.acos(-0.5).toFixed(5)</case>
+		<case>Math.asin(-0.5).toFixed(5)</case>
+		<case>Math.atan(1).toFixed(5)</case>
+		<case>Math.atan2(1,2).toFixed(5)</case>
+		<case>Math.ceil(1.2).toFixed(5)</case>
+		<case>Math.cos(-0.5).toFixed(5)</case>	
+		<case>Math.sin(-0.5).toFixed(5)</case>	
+		<case>Math.sqrt(4).toFixed(5)</case>	
+		<case>Math.tan(10).toFixed(5)</case>	
+		<case>Math.exp(2).toFixed(5)</case>
+		<case>Math.log(2).toFixed(5)</case>
+		<case>Math.pow(-2,2).toFixed(5)</case>		
+		<case>Math.abs(-121.11)</case>
+		<case>Math.floor(4.5).toFixed(2)</case>	
+		<case>Math.max(1,2,3,4,5,6)</case>	
+		<case>Math.min(1,2,3,4,5,6)</case>
+		<case>Math.round(-4.40)</case>
+		<case>Math.random() != Math.random()</case>
+		<case>Math.random() >=0</case>
+		<case>Math.random() &lt; 1</case>
+	</unit>
+</test>

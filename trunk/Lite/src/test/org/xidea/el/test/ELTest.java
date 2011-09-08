@@ -43,6 +43,8 @@ public class ELTest {
 				}else if(Float.isNaN(n.floatValue())){
 					out.append("null");
 					//this.print("NaN", out);
+				}else if(n.doubleValue() == 0){
+					out.append("0");
 				}else{
 					super.print(object, out);
 				}

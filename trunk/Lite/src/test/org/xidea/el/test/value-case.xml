@@ -1,0 +1,7 @@
+<test>
+	<unit title="URL编码测试">
+		<!-- 包括超出long 类型的数值 0xF16... -->
+		<case>0xFFFFFFFFFFFFFFFFE</case>
+		<case>-0xFFFFFFFFFFFFFFFF</case>
+	</unit>
+</test>

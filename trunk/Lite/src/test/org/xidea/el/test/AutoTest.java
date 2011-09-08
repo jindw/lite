@@ -26,15 +26,17 @@ public class AutoTest {
 	}
 	@Test
 	public void test(){
-		ELTest.testEL("{}","JSON.stringify([1,2])");
-		ELTest.testEL("{}", "\"\\u91D1\\u5927\\u4E3A\"+'aa'");
+		ELTest.testEL("{}","Math.E.toFixed(5)");
+//		ELTest.testEL("{}","JSON.stringify([1,2])");
+//		ELTest.testEL("{}", "\"\\u91D1\\u5927\\u4E3A\"+'aa'");
 	}
 	@Test
 	public void testAll() throws Exception {
+		test("op-case.xml");
 		test("global-case.xml");
 		test("array-case.xml");
 		test("string-case.xml");
-		test("op-case.xml");
+		test("math-case.xml");
 	}
 	private void test(String path) throws Exception {
 		Document doc = ParseUtil.loadXML(this.getClass().getResource(path).toURI().toString());

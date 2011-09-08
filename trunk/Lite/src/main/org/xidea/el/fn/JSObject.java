@@ -42,6 +42,13 @@ abstract class JSObject implements Invocable {
 		return value == null?null:value.intValue();
 	}
 
+	/**
+	 * 有指定参数则返回指定参数(包括null),无则返回defaultValue
+	 * @param args
+	 * @param index
+	 * @param defaultValue
+	 * @return
+	 */
 	static Number getNumberArg(Object[] args, int index, Number defaultValue) {
 		Object value = getArg(args, index, defaultValue);
 		return value == null?null:ECMA262Impl.ToNumber(value);

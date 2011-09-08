@@ -129,10 +129,16 @@ function _encodeEL(text,model,encoding){
 	}
 	return encode;
 }
+
 function _appendFunctionName(context,scope){
 	for(var n in scope.refMap){
 		if(!(n in scope.varMap || n in scope.paramMap)){
-			context.append('$',n,"=function_exists('lite__",n,"')?'",n,"':null;");
+			if(n in GLOBAL_DEF_MAP){
+				context.append('$',n,"='",n,"';");
+			}else if(n in GLOBAL_VAR_MAP){
+			}else{
+				context.append('$',n,"=function_exists('lite__",n,"')?'",n,"':null;");
+			}
 		}
 	}
 }

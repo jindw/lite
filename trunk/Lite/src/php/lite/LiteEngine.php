@@ -213,7 +213,7 @@ function lite__2($pattern,$date,$raw){
  * isFinite Evaluates an argument to determine whether it is a finite number
  */
 function lite__isFinite($op) {
-	if (!is_numeric($op)) {
+	if ($op !== null && !is_numeric($op)) {
 		//in EcmasScript unnumeric string is infinite
 		return false;
 	}

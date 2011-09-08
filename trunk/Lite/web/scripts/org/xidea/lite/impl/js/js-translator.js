@@ -149,10 +149,7 @@ function JSTranslateContext(code,name,params,defaults){
     this.defaults = defaults;
     this.impl_counter = {d:0,l:0,x:0};
 }
-var GLOBAL_VAR_MAP ={
-	"JSON":1,
-	"Math":1
-}
+
 var GLOBAL_DEF_MAP ={
 	"parseInt":1, 	
 	"parseFloat":1, 	
@@ -163,6 +160,11 @@ var GLOBAL_DEF_MAP ={
 	"isFinite":1, 	
 	"isNaN":1
 };
+var GLOBAL_VAR_MAP ={
+	"JSON":1,
+	"Math":1
+}
+copy(GLOBAL_DEF_MAP,GLOBAL_VAR_MAP);
 
 function copy(source,target){
 	for(var n in source){
@@ -233,7 +235,7 @@ function buildVars(context,scope,params){
 	copy(refMap,map);
 	copy(callMap,map);
 	for(var n in map){
-		if(n != '*' && !((n in GLOBAL_VAR_MAP) ||( n in GLOBAL_DEF_MAP) || (n in varMap) || (n in paramMap))){
+		if(n != '*' && !((n in GLOBAL_VAR_MAP)|| (n in varMap) || (n in paramMap))){
 			result.push('\tvar ',n,'=',context.liteImpl,'get("',n,'"',(params?'':',$__context__'),');\n');
 		}
 	}

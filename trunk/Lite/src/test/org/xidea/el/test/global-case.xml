@@ -1,22 +1,59 @@
 <test>
-	<unit>
-		<model>{"var1":1,"array":[true,1,2,3,4,null]}
-		</model>
-		<case>array['0']+''</case>
+	<unit title="URL编码测试">
 		<case>encodeURIComponent("和谐万税")</case>
 		<case>encodeURI("和谐万税")</case>
-		<case>encodeURIComponent("http://www.中国点康/和谐万税?独裁晚睡")</case>
-		<case>encodeURI("http://www.中国点康/和谐万税?独裁晚睡")</case>
+		<case>encodeURIComponent("http://www.中国点康/和谐万税?独裁&amp;&amp;晚=睡")</case>
+		<case>encodeURI("http://www.中国点康/和谐万税?独裁&amp;&amp;晚=睡")</case>
+		<case>encodeURI('http://www.baike.com/中文/汉/字.html').toUpperCase()</case>
+		<case>encodeURIComponent('http://www.baike.com/中文.html?方式=水电费').toUpperCase()</case>
 	</unit>
-	<unit>
-		<model>{"var1":1,"array":[1,2,3,4,null]}
-		</model>
+	<unit title="URL解码测试">
+		<case>decodeURIComponent(encodeURIComponent("和谐万税"))</case>
+		<case>decodeURIComponent(encodeURI("和谐万税"))</case>
+		<case>decodeURIComponent(encodeURIComponent("http://www.中国点康/和谐万税?独裁&amp;&amp;晚=睡"))</case>
+		<case>decodeURIComponent(encodeURI("http://www.中国点康/和谐万税?独裁&amp;&amp;晚=睡"))</case>
+		<case>decodeURI(encodeURIComponent("和谐万税"))</case>
+		<case>decodeURI(encodeURI("和谐万税"))</case>
+		<case>decodeURI(encodeURIComponent("http://www.中国点康/和谐万税?独裁&amp;&amp;晚=睡"))</case>
+		<case>decodeURI(encodeURI("http://www.中国点康/和谐万税?独裁&amp;&amp;晚=睡"))</case>
+		<case>decodeURIComponent(encodeURIComponent('http://www.baike.com/中文.html?方式=水电费'))</case>
+		<case>decodeURI(encodeURI('http://www.baike.com/中文/汉/字.html'))</case>
+	</unit>
+	<unit title="数值解析测试">
 		<case>parseInt("123").toString(2)</case>
+		<case>parseInt("-123")</case>
 		<case>parseInt("0123")</case>
 		<case>parseInt("0123.阿")</case>
 		<!-- 浮点数展现问题, 是应为默认json格式化工具导致 -->
 		<case>parseFloat("123").toString(2)</case>
 		<case>parseFloat("0123")+'1'</case>
 		<case>parseFloat("0123.阿")+'1'</case>
+		
+		<case>parseInt("100.11")</case>
+		<case>parseInt("-100.11")</case>
+		<case>parseInt("-0100.11")</case>
+		<case>parseInt("-0x100.11")</case>
+		<case>parseInt("-0x1a0.11")</case>
+		
+		<case>parseFloat("a1")||0</case>
+		<case>parseFloat("-100").toFixed(1)</case>
+		<case>parseFloat("100.11")</case>
+		<case>parseFloat("-100.11")</case>
+		<!-- parseFloat()字符串必须以十进制形式表示浮点数，而不是用八进制或十六进制。
+		该方法会忽略前导 0，所以八进制数 0102 将被解析为 102。对于十六进制数 0xA，该方法将返回 NaN，因为在浮点数中，x 不是有效字符。
+		但PHP中，php下给定参数为NaN，执行parseInt,parseFloat，返回值为0-->
+		<case>parseFloat("-0100.11")</case>
+		<case>parseFloat("0x10a.11")</case>
+		<case>parseFloat("0x10.11").toFixed(1)</case>
+		<case>parseFloat("-0x1a0.11").toFixed(1)</case>
+	</unit>
+	<unit title="特殊浮点数函数测试" level="2">
+		<case>[isFinite(Math.log(0)),isFinite(-Math.log(0))]</case>
+		<case>[isNaN(Math.log(0)),isNaN(-Math.log(0))]</case>
+		<case>[isFinite(Math.acos(8)),isFinite(-Math.acos(8))]</case>
+		<case>[isNaN(Math.acos(8)),isNaN(-Math.acos(8))]</case>
+		
+		<case>[isFinite(0),isFinite(null),isFinite(8),isFinite(-2)]</case>
+		<case>[isNaN(0),isNaN(null),isNaN(8),isNaN(-2)]</case>
 	</unit>
 </test>
