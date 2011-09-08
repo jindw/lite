@@ -184,7 +184,7 @@ function stringifyINVOKE(el,context){
 			if(owner === 'Math'){
 				var mp = /^(?:sin|sqrt|tan|cos|acos|asin|atan|atan2|max|min||floor|round|abs|ceil|exp|log|pow)$/;
 				if(prop == 'random'){
-					return 'rand(0, 0.99999)';
+					return '(rand(0, 0xFFFF)/0xFFFF)';
 				}else if(mp.test(prop)){
 					return args.replace('array',prop);
 				}else{
@@ -192,7 +192,7 @@ function stringifyINVOKE(el,context){
 				}
 			}else if(owner === 'JSON'){
 				if(prop == "parse"){
-					return args.replace('array','json_parse').slice(0,-1)+',true)';
+					return args.replace('array','json_decode').slice(0,-1)+',true)';
 				}else if(prop =='stringify'){
 					return args.replace('array','json_encode');
 				}else{

@@ -54,13 +54,14 @@ public class ELTest {
 		}
 	};
 
-	public static void testEL(Object context, String source) {
+	public static void testEL(Object context, String source,boolean jsonStringResult) {
 		String contextJSON;
 		System.out.println("测试表达式：" + source + ",context:" + context);
 		Object contextObject;
 		if (context instanceof String) {
 			contextJSON = (String) context;
 			contextObject = JSONDecoder.decode(contextJSON);
+			contextJSON = encoder.encode(contextObject,new StringBuilder()).toString();
 		} else {
 			contextJSON = encoder.encode(context,new StringBuilder()).toString();
 			contextObject = context;
@@ -78,11 +79,12 @@ public class ELTest {
 		String jsStepResult = runStepJS(contextJSON, litecode);
 		Assert.assertEquals("JS 运行结果有误(单步)：#" + source, expect, jsStepResult);
 		
-		String jsresult = normalizeJSON(LiteTest.runNativeJS(parsedContext, contextJSON));
+		String jsresult = normalizeJSON(LiteTest.runNativeJS(parsedContext, contextJSON),false);
 		Assert.assertEquals("JS 运行结果有误(编译)：#" + source, expect,jsresult);
 		
-		
-		String phpresult= normalizeJSON(LiteTest.runNativePHP(parsedContext, contextJSON));
+		//LiteTest.replaceUnicode(content)
+		String phpresult = LiteTest.runNativePHP(parsedContext, contextJSON);
+		phpresult= normalizeJSON(phpresult,jsonStringResult);
 		try{
 			Assert.assertEquals("PHP 运行结果有误(编译)：#" + source, expect,phpresult);
 		}catch(Error e){
@@ -106,13 +108,18 @@ public class ELTest {
 		String expect = (String) js.eval(evaljs);
 		System.out.println(evaljs);
 		System.out.println(expect);
-		return normalizeJSON(expect);
+		return normalizeJSON(expect,false);
 	}
 
 
-	private static String normalizeJSON(String result) {
+	private static String normalizeJSON(String result,boolean jsonStringResult) {
 		try {
-			System.out.println(result);
+//			System.out.println(result);
+			if(jsonStringResult){
+				String raw = JSONDecoder.decode((String)JSONDecoder.decode(result));
+				raw = encoder.encode(raw,new StringBuilder()).toString();
+				return encoder.encode(raw,new StringBuilder()).toString();
+			}
 			result = encoder.encode(JSONDecoder.decode(result),new StringBuilder()).toString();
 		} catch (Exception e) {
 		}
@@ -130,7 +137,9 @@ public class ELTest {
 		jsc = jsc.optimize(ExpressionFactoryImpl.getInstance()
 				.getStrategy(), new HashMap<String, Object>());
 		Assert.assertEquals("Java 和 JS EL编译中间结果不一致：", encoder
-				.encode(javacode,new StringBuilder()).toString(), encoder.encode(jsc,new StringBuilder()).toString().toString());
+				.encode(javacode,new StringBuilder()).toString(), 
+				
+				encoder.encode(jsc,new StringBuilder()).toString().toString());
 		return litecode;
 	}
 

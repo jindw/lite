@@ -24,7 +24,7 @@ public class ExpressionParseTimelTest {
 	}
 
 	private void test(String el) throws IOException {
-		ELTest.testEL(null, el);
+		ELTest.testEL(null, el,false);
 		Object els = factory.parse(el);
 		final String jsonel = JSONEncoder.encode(els);
 		int count = 1000,count2;

@@ -104,13 +104,7 @@ JSONTokenizer.prototype = {
 		}
 		if (c == '0') {
 			if (i < this.end) {
-				c = this.value.charAt(i++);
-				if (c == 'x' || c == 'X') {
-					return this.parseHex(i);
-				} else {
-					c = '0';
-					i--;
-				}
+				return this.parseZero();
 			} else {
 				this.start = i;
 				return 0;
@@ -169,26 +163,15 @@ JSONTokenizer.prototype = {
 			return ivalue;
 		}
 	},
-	parseHex: function(i){
-		var lvalue = 0;//
-		while (i < this.end) {
-			var c = this.value.charAt(i++);
-			if (c >= '0' && c <= '9') {
-				lvalue = (lvalue << 4) + (c - '0');
-			} else if (c >= 'A' && c <= 'F') {
-				lvalue = (lvalue << 4) + (c - 'A' + 10);
-			} else if (c >= 'a' && c <= 'f') {
-				lvalue = (lvalue << 4) + (c - 'a' + 10);
-			} else {
-				i--;
-				break;
-			}
+	parseZero: function(){
+		var value = this.value.substr(this.start);
+		value = value.replace(/([+-]?0(?:x[0-9a-f]+|\.?[0-9]*))[\s\S]*/i,'$1');
+		this.start += value.length;
+		print(value+'/'+parseInt(value))
+		if(value.indexOf('.')<0){
+			return parseInt(value);
 		}
-		if (this.value.charAt(this.start) == '-') {
-			lvalue = -lvalue;
-		}
-		this.start = i;
-		return lvalue;
+		return parseFloat(value);
 	},
 	findId:function() {
 		var p = this.start;
@@ -337,6 +320,6 @@ JSONTokenizer.prototype = {
 	}
 }
 
-function parseNumber(text, radix) {
-	return parseInt(text, radix);
-}
+//function parseNumber(text, radix) {
+//	return parseInt(text, radix);
+//}

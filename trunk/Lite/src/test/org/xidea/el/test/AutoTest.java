@@ -15,6 +15,7 @@ import org.w3c.dom.NodeList;
 import org.xidea.el.ExpressionFactory;
 import org.xidea.el.impl.ExpressionFactoryImpl;
 import org.xidea.el.json.JSONEncoder;
+import org.xidea.jsi.impl.RuntimeSupport;
 import org.xidea.lite.impl.ParseUtil;
 import org.xidea.lite.test.oldcases.XMLParser;
 
@@ -26,12 +27,14 @@ public class AutoTest {
 	}
 	@Test
 	public void test(){
-		ELTest.testEL("{}","Math.E.toFixed(5)");
+		ELTest.testEL("{}","0xFFFFFFFF",false);
 //		ELTest.testEL("{}","JSON.stringify([1,2])");
 //		ELTest.testEL("{}", "\"\\u91D1\\u5927\\u4E3A\"+'aa'");
 	}
 	@Test
 	public void testAll() throws Exception {
+		test("value-case.xml");
+		test("json-case.xml");
 		test("op-case.xml");
 		test("global-case.xml");
 		test("array-case.xml");
@@ -45,6 +48,7 @@ public class AutoTest {
 		for(int i=0;i<ns.getLength();i++){
 			Element e = (Element) ns.item(i);
 			String source = e.getAttribute("source");
+			String isJSONResult = e.getAttribute("json");
 			if(source.length() == 0){
 				Element se = getFirstChild(e,"source");
 				source = (se == null?e:se).getTextContent();
@@ -65,7 +69,7 @@ public class AutoTest {
 			if(model == null || model.length() == 0){
 				model = "{}";
 			}
-			ELTest.testEL(model,source);
+			ELTest.testEL(model,source,"true".equals(isJSONResult));
 		}
 	}
 	private Element getFirstChild(Node e, String tagName) {

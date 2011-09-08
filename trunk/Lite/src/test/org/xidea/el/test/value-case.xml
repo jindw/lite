@@ -1,7 +1,25 @@
 <test>
-	<unit title="URL编码测试">
-		<!-- 包括超出long 类型的数值 0xF16... -->
-		<case>0xFFFFFFFFFFFFFFFFE</case>
-		<case>-0xFFFFFFFFFFFFFFFF</case>
+	<unit title="字面量测试">
+		<!-- 最大unsign int32整数 -->
+		<case>0xFFFFFFFF</case>
+		<case>-0xFFFFFFFF</case>
+		<case>-0100</case>
+		<case>0100</case>
+		
+		<case>0x80000000000</case>
+		<case>-0x80000000000</case>
+		<case>0x7FFFFFFFFFF</case>
+		<case>-0x7FFFFFFFFFF</case>
+		
+		<!--  int 64 以内也会有精度问题 
+		<case>0x8000000000000000</case>
+		<case>-0x8000000000000000</case>
+		<case>0x7FFFFFFFFFFFFFFF</case>
+		<case>-0x7FFFFFFFFFFFFFFF</case>
+		-->
+		<!-- 包括超出long 类型的数值 0xF16... 
+		<case>0xFFFFFFFFFFFFFFFE</case>
+		<case>0xFFFFFFFFFFFFFFFF</case>
+		<case>-0xFFFFFFFFFFFFFFFF</case>-->
 	</unit>
 </test>

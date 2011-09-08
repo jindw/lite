@@ -66,7 +66,7 @@ public class JSELTest {
 	public void testNumber(){
 		System.out.println(Double.NaN);
 		System.out.println(Double.NEGATIVE_INFINITY);
-		ELTest.testEL("{\"abc\":null}","'abc'*123");
+		ELTest.testEL("{\"abc\":null}","'abc'*123",false);
 	}
 
 	@Test
@@ -82,7 +82,7 @@ public class JSELTest {
 		HashMap<String, Object> context = new HashMap<String, Object>();
 		//context.put("array", "1,2,3,4".split(","));
 		context.put("array", new String[]{"1","2","3","4"});
-		ELTest.testEL(context,"array.slice(1,2)");
+		ELTest.testEL(context,"array.slice(1,2)",false);
 	}
 	
     public static void main(String[] args){

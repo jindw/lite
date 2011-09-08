@@ -147,33 +147,7 @@ public class LiteTest {
 					this.defaultNSMap = Collections.emptyMap();
 				}
 
-				public String replaceUnicode(String content) {
-					Pattern p = Pattern.compile("\\\\u([0-9a-f]{4})|\\\\+/");
-					Matcher m = p.matcher(content);
-					boolean result = m.find();
-					if (result) {
-						StringBuffer sb = new StringBuffer();
-						do {
-							String c = m.group(1);
-							if (c != null && c.length() > 0) {
-								m.appendReplacement(sb, ""
-										+ (char) Integer.parseInt(c, 16));
-							}else{
-								c = m.group();
-								if(c.length()%2 == 0){
-									c = c.substring(0,c.length()-2)+'/';
-								}
-								m.appendReplacement(sb, c);
-							}
-							result = m.find();
-						} while (result);
-						m.appendTail(sb);
-						// System.out.println(m);
-						return sb.toString();
-					}
-					return content;
-				}
-
+				
 				public void appendScript(String content) {
 					super.appendScript(replaceUnicode(content));
 				}
@@ -207,6 +181,32 @@ public class LiteTest {
 		}
 		return result;
 
+	}
+	public static String replaceUnicode(String content) {
+		Pattern p = Pattern.compile("\\\\u([0-9a-f]{4})|\\\\+/");
+		Matcher m = p.matcher(content);
+		boolean result = m.find();
+		if (result) {
+			StringBuffer sb = new StringBuffer();
+			do {
+				String c = m.group(1);
+				if (c != null && c.length() > 0) {
+					m.appendReplacement(sb, ""
+							+ (char) Integer.parseInt(c, 16));
+				}else{
+					c = m.group();
+					if(c.length()%2 == 0){
+						c = c.substring(0,c.length()-2)+'/';
+					}
+					m.appendReplacement(sb, c);
+				}
+				result = m.find();
+			} while (result);
+			m.appendTail(sb);
+			// System.out.println(m);
+			return sb.toString();
+		}
+		return content;
 	}
 
 	private static ParseContext buildContext(

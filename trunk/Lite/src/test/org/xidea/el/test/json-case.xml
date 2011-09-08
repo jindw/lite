@@ -1,0 +1,23 @@
+<test>
+	<unit title="JSON 功能测试">
+		<model>
+		{
+		array:[1,2,3,'4',5.5,'',true,null,false,[1,2],{a:1,b:2},[]],
+		string:"JSON 功能测试'\"",
+		object:{aa:1,bB:2,CC:[1]}
+		}
+		</model>
+		<case json="true">JSON.stringify(array)</case>
+		<case json="true">JSON.stringify(true)</case>
+		<case json="true">JSON.stringify(null)</case>
+		<case json="true">JSON.stringify(string)</case>
+		<case json="true">JSON.stringify(object)</case>
+		
+		
+		<case>JSON.parse(JSON.stringify(array))</case>
+		<case>JSON.parse(JSON.stringify(true))</case>
+		<case>JSON.parse(JSON.stringify(null))</case>
+		<case>JSON.parse(JSON.stringify(string))</case>
+		<case>JSON.parse(JSON.stringify(object))</case>
+	</unit>
+</test>
