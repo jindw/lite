@@ -1,0 +1,33 @@
+<html>
+<head>	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<script>
+function addCase(title,results){
+	document.write(showCase(title,results));
+}
+function showText(e){
+	e.removeChild(e.firstChild);
+	e.appendChild(document.createTextNode(e.getAttribute('title')))
+}
+
+</script>
+<h:client name="showCase(title,result)">
+	<h3>${title}</h3>
+	<div>
+		<table border="1" width="98%">
+			<tr><th width="30%">源码</th><th>模型</th><th>Java</th><th>JS</th><th>PHP</th></tr>
+			<tr c:for="${item:result}">
+				<td>${item.source}</td>
+				<td title="${item.model}" onclick="showText(this)">${item.model.replace(/^\s*([\s\S]{10})[\s\S]+/,"$1...")}</td>
+				<td title="${item.java}" onclick="$!{item.java && 'showText(this)' ||''}">${item.java?'显示错误':'测试通过'}</td>
+				<td title="${item.js}" onclick="$!{item.js && 'showText(this)' ||''}">${item.js?'显示错误':'测试通过'}</td>
+				<td title="${item.php}" onclick="$!{item.php && 'showText(this)' ||''}">${item.php?'显示错误':'测试通过'}</td>
+			</tr>
+		</table>
+	</div>
+</h:client>
+</head>
+<body>
+
+<script src="data/test-el.js" charset="UTF-8"></script>
+</body>
+</html>

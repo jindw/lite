@@ -1,23 +1,52 @@
 <test>
 	<unit title="URL编码测试">
-		<case>encodeURIComponent("和谐万税")</case>
-		<case>encodeURI("和谐万税")</case>
-		<case>encodeURIComponent("http://www.中国点康/和谐万税?独裁&amp;&amp;晚=睡")</case>
-		<case>encodeURI("http://www.中国点康/和谐万税?独裁&amp;&amp;晚=睡")</case>
-		<case>encodeURI('http://www.baike.com/中文/汉/字.html').toUpperCase()</case>
-		<case>encodeURIComponent('http://www.baike.com/中文.html?方式=水电费').toUpperCase()</case>
+		<model>{
+		url1:"http://www.中国点康/和谐万税?独裁&amp;&amp;晚=睡",
+		url2:"/www.中国点康/和谐万税?独裁&amp;&amp;晚=睡",
+		url3:'http://www.baike.com/中文/汉/字.html',
+		url4:"中文.html?方式=水电费",
+		part1:"和谐万税",
+		part2:"和谐=脱轨&amp;??"
+		}</model>
+		<case>encodeURIComponent(part1)</case>
+		<case>encodeURIComponent(part2)</case>
+		<case>encodeURI(url1)</case>
+		<case>encodeURI(url2)</case>
+		<case>encodeURI(url3)</case>
+		<case>encodeURI(url4)</case>
+		
+		
+		<case>encodeURI(part1)</case>
+		<case>encodeURI(part2)</case>
+		<case>encodeURIComponent(url1)</case>
+		<case>encodeURIComponent(url2)</case>
+		<case>encodeURIComponent(url3)</case>
+		<case>encodeURIComponent(url4)</case>
 	</unit>
 	<unit title="URL解码测试">
-		<case>decodeURIComponent(encodeURIComponent("和谐万税"))</case>
-		<case>decodeURIComponent(encodeURI("和谐万税"))</case>
-		<case>decodeURIComponent(encodeURIComponent("http://www.中国点康/和谐万税?独裁&amp;&amp;晚=睡"))</case>
-		<case>decodeURIComponent(encodeURI("http://www.中国点康/和谐万税?独裁&amp;&amp;晚=睡"))</case>
-		<case>decodeURI(encodeURIComponent("和谐万税"))</case>
-		<case>decodeURI(encodeURI("和谐万税"))</case>
-		<case>decodeURI(encodeURIComponent("http://www.中国点康/和谐万税?独裁&amp;&amp;晚=睡"))</case>
-		<case>decodeURI(encodeURI("http://www.中国点康/和谐万税?独裁&amp;&amp;晚=睡"))</case>
-		<case>decodeURIComponent(encodeURIComponent('http://www.baike.com/中文.html?方式=水电费'))</case>
-		<case>decodeURI(encodeURI('http://www.baike.com/中文/汉/字.html'))</case>
+		<model>{
+		url1:"http://www.中国点康/和谐万税?独裁&amp;&amp;晚=睡",
+		url2:"/www.中国点康/和谐万税?独裁&amp;&amp;晚=睡",
+		url3:'http://www.baike.com/中文/汉/字.html',
+		url4:"中文.html?方式=水电费",
+		part1:"和谐万税",
+		part2:"和谐=脱轨&amp;??"
+		}</model>
+		<case>decodeURIComponent(encodeURIComponent(url1))</case>
+		<case>decodeURIComponent(encodeURI(url1))</case>
+		<case>decodeURIComponent(encodeURIComponent(url2))</case>
+		<case>decodeURIComponent(encodeURI(url2))</case>
+		<case>decodeURIComponent(encodeURIComponent(url4))</case>
+		<case>decodeURIComponent(encodeURI(url3))</case>
+		<case>decodeURIComponent(encodeURIComponent(url4))</case>
+		<case>decodeURIComponent(encodeURI(url4))</case>
+		
+		<case>decodeURI(encodeURIComponent(part1))</case>
+		<case>decodeURI(encodeURI(part2))</case>
+		<case>decodeURI(encodeURIComponent(url1))</case>
+		<case>decodeURI(encodeURI(url1))</case>
+		<case>decodeURIComponent(encodeURIComponent(url2))</case>
+		<case>decodeURI(encodeURI(url2))</case>
 	</unit>
 	<unit title="数值解析测试">
 		<case>parseInt("123").toString(2)</case>

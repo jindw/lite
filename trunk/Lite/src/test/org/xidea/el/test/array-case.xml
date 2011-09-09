@@ -1,5 +1,5 @@
 <test>
-	<unit>
+	<unit title="数组函数测试">
 		<model>{"var1":1,"array":[1,2,3,4,null]}
 		</model>
 		<case>[1,2,3,4].concat().reverse()</case>

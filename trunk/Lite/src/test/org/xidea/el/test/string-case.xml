@@ -1,7 +1,7 @@
 <test>
 
 
-	<unit>
+	<unit title="普通字符串操作函数">
 		<model>{"str":"abc中国defg八荣八耻瘪三个代表/万税/万税/万万税"}</model>
 		<case>str.length*2</case>
 		<case>"abcd战三efg".length	</case>
@@ -12,8 +12,8 @@
 		<case>"abc普天大厦gdefg".indexOf('g')</case>	
 		<case>"abc普天大厦gdefg".lastIndexOf('g')</case>	
 		
-		<case>"aDxi汉字".toLowerCase()</case>	
-		<case>"aDxi汉字".toUpperCase()</case>	
+		<case>"aDxiAA汉字".toLowerCase()</case>	
+		<case>"aDxi_DD汉字".toUpperCase()</case>	
 		
 		<case>str.substr(3)</case>
 		<case>str.substr(2, 7)</case>
@@ -35,13 +35,15 @@
 		<case>"中文abcdefg".concat("zzz我")</case>
 		
 		<case>"aDxi汉字".replace("a","$1...")</case>		
+		<case>"aDxi////".replace("////","////")</case>	
+		<case>"aDxi\\\\.\\\\".replace("\\\\.\\\\","\\\\%\\\\")</case>		
 		<case>"理想国际abcdefg".replace("a", "1")</case>	
 	</unit>
 		
-	<!-- 正则表达式  -->
-	<unit>
+	<unit title="正则表达式">
 		<case>'1/2/3/4'.replace(/\//,'')</case>
 		<case>'1/2/3/4'.replace(/\//g,'')</case>
+		<case>"aDxi\\\\.\\\\".replace(/\\\\.\\\\/,"\\\\%\\\\")</case>	
 		<case>'1/2/3/4'.replace(/\//img,'')</case>
 		<case>'1/2/3/4'.replace(/\//im,'')</case>
 		<case>"a汉字aDxi".replace(/([\w\W]{2})[\s\S]+/,"$1...")</case>	

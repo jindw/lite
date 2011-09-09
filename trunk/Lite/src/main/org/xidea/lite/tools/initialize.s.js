@@ -36,19 +36,24 @@ function textFilterCSS(path,text){
 
 function processJS(text){
 	//replace js:	encodeURI("/module/static/img/a/_/8.png")
-	text = text.replace(/\bencodeURI\s*\(\s*(['"])(.*?)\1\s*\)/g,function(a,qute,content){
-		content = window.eval(qute+content+qute);
-		content = replacePath(content);
-		return JSON.stringify(content);
+	text = text.replace(/\bencodeURI\s*\(\s*(['"])([^'"]+)\1\s*\)/g,function(a,qute,content){
+		try{
+			//野蛮替换,字符串中呢?当能,线上很少见.
+			content = window.eval(qute+content+qute);
+			content = replacePath(content);
+			return JSON.stringify(content);
+		}catch(e){
+			return a;
+		}
 	})
 	//TODO:autoEncodeScript
 	//${..} == > ${JSON.stringify(..)} ==> /$(tghjk)/
 	//compress
 	//manager.compressJS(value);
-	
 	text = text.replace(/(\\(?:\r\n?|\n).)|^\s+/gm,'$1');
 	text = text.replace(/^(?:\/(?:\*[\s\S]*?\*\/|\/.*)|\s+)+/g,'');//trim left
-	text = text.replace( /(?:\/(?:\*[\s\S]*?\*\/|\/.*)|\s+)+$/g,'');//trim right
+	//切尾巴很耗时阿
+	text = text.replace( /(?:\/(?:\*[\s\S]*?\*\/\s*|\/.*)|\s+)$/g,'');//trim right
 	return text;
 }
 function processCSS(text){

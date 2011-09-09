@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Assert;
 import org.xidea.el.Expression;
@@ -55,8 +57,17 @@ public class ELTest {
 	};
 
 	public static void testEL(Object context, String source,boolean jsonStringResult) {
-		String contextJSON;
 		System.out.println("测试表达式：" + source + ",context:" + context);
+		Map<String, String> resultMap = resultMap(context, source, jsonStringResult);
+		String expect = resultMap.get("#expect");
+		for (Map.Entry<String, String> entry : resultMap.entrySet()) {
+			if(!entry.getKey().startsWith("#")){
+				Assert.assertEquals(entry.getKey()+"运行结果有误：#" + source, expect,entry.getValue());
+			}
+		}
+	}
+	public static Map<String, String> resultMap(Object context, String source,boolean jsonStringResult) {
+				String contextJSON;
 		Object contextObject;
 		if (context instanceof String) {
 			contextJSON = (String) context;
@@ -70,31 +81,25 @@ public class ELTest {
 		final String expect = runAsJS(source, contextJSON);
 		Expression el = expressionFactory.create(JSONDecoder.decode(litecode));
 		ParseContext parsedContext = createParserContext("${JSON.stringify(" + source + ")}");
-		
-		
 		String javaresult = encoder.encode(el.evaluate(contextObject),new StringBuilder()).toString();
-		Assert.assertEquals("Java 运行结果有误：#" + source, expect, javaresult);
-		
-		
 		String jsStepResult = runStepJS(contextJSON, litecode);
-		Assert.assertEquals("JS 运行结果有误(单步)：#" + source, expect, jsStepResult);
-		
+		//Assert.assertEquals("JS 运行结果有误(单步)：#" + source, expect, jsStepResult);
 		String jsresult = normalizeJSON(LiteTest.runNativeJS(parsedContext, contextJSON),false);
-		Assert.assertEquals("JS 运行结果有误(编译)：#" + source, expect,jsresult);
-		
+		//Assert.assertEquals("JS 运行结果有误(编译)：#" + source, expect,jsresult);
 		//LiteTest.replaceUnicode(content)
 		String phpresult = LiteTest.runNativePHP(parsedContext, contextJSON);
 		phpresult= normalizeJSON(phpresult,jsonStringResult);
-		try{
-			Assert.assertEquals("PHP 运行结果有误(编译)：#" + source, expect,phpresult);
-		}catch(Error e){
+		HashMap<String, String> result = new LinkedHashMap<String, String>();
+		result.put("#model" , contextJSON);
+		result.put("#expect", expect);
+		result.put("Java" , javaresult);
+		result.put("JSStep" , jsStepResult);
+		result.put("JS" , jsresult);
+		result.put("PHP" , phpresult);
+		if(!expect.equals(phpresult)){
 			LiteTest.printLatestPHP();
-			throw e;
 		}
-		
-		System.out.println("表达式测试成功：" + source + "\t\t#" + contextJSON + '\n'
-				+ javaresult);
-
+		return result;
 	}
 
 	private static String runStepJS(String contextJSON, final String litecode) {
