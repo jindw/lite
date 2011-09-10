@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -40,6 +41,8 @@ import org.xidea.lite.impl.XMLNormalizeImpl;
 import org.xidea.lite.parse.ParseContext;
 import org.xml.sax.SAXException;
 
+import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
+
 public class LiteTest {
 	private static JSIRuntime js = org.xidea.jsi.impl.RuntimeSupport.create();
 	private static String phpcmd = "php";
@@ -63,36 +66,56 @@ public class LiteTest {
 	}
 
 	@Test
-	public void testFor() throws TransformerConfigurationException, IOException, SAXException, TransformerException, TransformerFactoryConfigurationError{
+	public void testFor() throws TransformerConfigurationException,
+			IOException, SAXException, TransformerException,
+			TransformerFactoryConfigurationError {
 		HashMap<String, String> sm = new HashMap<String, String>();
-		sm.put("/s.xhtml", "<p><c:for var='a' list='${[1,2,3]}'>" +
-				"${for.index}" +
-				"<c:for var='a' list='${[1,2,3]}'>${for.index}</c:for></c:for></p>");
+		sm
+				.put(
+						"/s.xhtml",
+						"<p><c:for var='a' list='${[1,2,3]}'>"
+								+ "${for.index}"
+								+ "<c:for var='a' list='${[1,2,3]}'>${for.index}</c:for></c:for></p>");
 		String expected = testTemplate(sm, this, "/s.xhtml", null);
 		System.out.println(expected);
 	}
 
 	@Test
-	public void testDate() throws TransformerConfigurationException, IOException, SAXException, TransformerException, TransformerFactoryConfigurationError{
+	public void testDate() throws TransformerConfigurationException,
+			IOException, SAXException, TransformerException,
+			TransformerFactoryConfigurationError {
 		HashMap<String, String> sm = new HashMap<String, String>();
-		sm.put("/s.xhtml", "<c:def name='dateFormat(date)'><c:date-format pattern='YYYY-MM-DD hh:mm:ss' value='${date}'/></c:def>"+
-				"<div>今天是：${dateFormat(date)}	</div>");
+		sm
+				.put(
+						"/s.xhtml",
+						"<c:def name='dateFormat(date)'><c:date-format pattern='YYYY-MM-DD hh:mm:ss' value='${date}'/></c:def>"
+								+ "<div>今天是：${dateFormat(date)}	</div>");
 		String expected = testTemplate(sm, this, "/s.xhtml", null);
 		System.out.println(expected);
 	}
+
 	@Test
-	public void testDef() throws TransformerConfigurationException, IOException, SAXException, TransformerException, TransformerFactoryConfigurationError{
+	public void testDef() throws TransformerConfigurationException,
+			IOException, SAXException, TransformerException,
+			TransformerFactoryConfigurationError {
 		HashMap<String, String> sm = new HashMap<String, String>();
-		sm.put("/s.xhtml", "<c:def name='dateFormat(date,arg2=1)'>${arg2}</c:def>"+
-				"<div>今天是：${dateFormat(date)}	</div>");
+		sm.put("/s.xhtml",
+				"<c:def name='dateFormat(date,arg2=1)'>${arg2}</c:def>"
+						+ "<div>今天是：${dateFormat(date)}	</div>");
 		String expected = testTemplate(sm, this, "/s.xhtml", null);
 		System.out.println(expected);
 	}
-	
-	
-	
-	public static String testTemplate(Map<String, String> relativeSourceMap,
-			Object context, String path, String expected) throws IOException, SAXException{
+
+	static String testTemplate(Map<String, String> relativeSourceMap,
+			Object context, String path, String expected) throws IOException,
+			SAXException {
+		return runTemplate(relativeSourceMap, context, path, expected).get(
+				"#expect");
+	}
+
+	public static HashMap<String, String> runTemplate(
+			Map<String, String> relativeSourceMap, Object context, String path,
+			String expected) throws IOException, SAXException {
 		ParseContext pc = buildContext(relativeSourceMap, path);
 		Template tpl = new Template(pc.toList(), pc.getFeatureMap());
 		String contextJSON;
@@ -108,37 +131,46 @@ public class LiteTest {
 		StringWriter out = new StringWriter();
 		tpl.render(contextObject, out);
 		String javaresult = out.toString();
-		try{
-		expected = checkResultEqual("js", runNativeJS(pc, contextJSON), expected);
-		checkResultEqual("java", javaresult, expected);
-		try {
-			checkResultEqual("php", runNativePHP(pc, contextJSON), expected);
-		} catch (Error e) {
-			System.out.println(currentPHP);
-			throw e;
+		String jsresult = runNativeJS(pc, contextJSON);
+		String phpresult = runNativePHP(pc, contextJSON);
+		expected = expected != null ? expected : jsresult;
+		HashMap<String, String> result = new LinkedHashMap<String, String>();
+		result.put("#model", contextJSON);
+		result.put("#expect", expected);
+		result.put("java", javaresult);
+		result.put("js", jsresult);
+		result.put("php", phpresult);
+		if (!expected.equals(phpresult)) {
+			LiteTest.printLatestPHP();
 		}
-		}catch (SAXException e) {
-			System.out.println("出错文件:"+path);
-			throw e;
-		}
-		return expected;
+		return result;
 	}
 
-	private static String checkResultEqual(String typemsg, String result,
-			String expected) throws
-			IOException, SAXException{
-		result = normalizeXML(result);
-		if (expected == null) {
-			return result;
+	static void checkResultEqual(String source, String expected,
+			Map<String, String> resultMap,Map<String, String> outputMap) throws IOException, SAXException {
+		//Map<String, String> outputMap = new HashMap<String, String>();
+		for (Map.Entry<String, String> entry : resultMap.entrySet()) {
+			if (!entry.getKey().startsWith("#")) {
+				try {
+					if (expected == null) {
+						Assert.assertEquals(entry.getKey() + "运行结果有误：#"
+								+ source, expected, entry.getValue());
+					}
+				} catch (Error e) {
+					if (outputMap == null) {
+						throw e;
+					} else {
+						outputMap.put(entry.getKey(), entry.getValue());
+					}
+				}
+
+			}
 		}
-		if (expected.startsWith("<")) {
-			Assert.assertEquals(typemsg, expected, result);
-		}
-		return expected;
 	}
 
-	public static String normalizeXML(String result) throws IOException, SAXException {
-		if(!result.trim().startsWith("<")){
+	public static String normalizeXML(String result) throws IOException,
+			SAXException {
+		if (!result.trim().startsWith("<")) {
 			return result;
 		}
 		try {
@@ -147,7 +179,6 @@ public class LiteTest {
 					this.defaultNSMap = Collections.emptyMap();
 				}
 
-				
 				public void appendScript(String content) {
 					super.appendScript(replaceUnicode(content));
 				}
@@ -182,6 +213,7 @@ public class LiteTest {
 		return result;
 
 	}
+
 	public static String replaceUnicode(String content) {
 		Pattern p = Pattern.compile("\\\\u([0-9a-f]{4})|\\\\+/");
 		Matcher m = p.matcher(content);
@@ -191,12 +223,13 @@ public class LiteTest {
 			do {
 				String c = m.group(1);
 				if (c != null && c.length() > 0) {
-					m.appendReplacement(sb, ""
-							+ (char) Integer.parseInt(c, 16));
-				}else{
+					m
+							.appendReplacement(sb, ""
+									+ (char) Integer.parseInt(c, 16));
+				} else {
 					c = m.group();
-					if(c.length()%2 == 0){
-						c = c.substring(0,c.length()-2)+'/';
+					if (c.length() % 2 == 0) {
+						c = c.substring(0, c.length() - 2) + '/';
 					}
 					m.appendReplacement(sb, c);
 				}
@@ -283,9 +316,8 @@ public class LiteTest {
 	public static String runNativeJS(ParseContext parsedContext,
 			String contextJSON) {
 		Object ts = js.eval("new JSTranslator('')");
-		String code = (String) js.invoke(ts, "translate", js.eval("("+
-				JSONEncoder.encode(parsedContext
-				.toList())+")"), true);
+		String code = (String) js.invoke(ts, "translate", js.eval("("
+				+ JSONEncoder.encode(parsedContext.toList()) + ")"), true);
 		// System.out.println(code);
 		String jsResult = (String) js.eval("(function(){" + code + "})()("
 				+ contextJSON + ")");

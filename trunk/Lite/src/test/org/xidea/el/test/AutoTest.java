@@ -101,7 +101,6 @@ public class AutoTest {
 				info.put("expect", expect);
 				for (Map.Entry<String, String> entry : resultMap.entrySet()) {
 					if (!entry.getKey().startsWith("#")) {
-
 						try {
 							Assert.assertEquals(entry.getKey() + "运行结果有误：#"
 									+ source, expect, entry.getValue());

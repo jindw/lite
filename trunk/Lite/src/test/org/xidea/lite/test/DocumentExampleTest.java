@@ -3,10 +3,14 @@ package org.xidea.lite.test;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.transform.TransformerConfigurationException;
@@ -18,6 +22,8 @@ import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+import org.xidea.el.json.JSONEncoder;
+import org.xidea.el.test.AutoTest;
 import org.xidea.lite.impl.ParseUtil;
 import org.xidea.lite.test.oldcases.ExampleTest;
 import org.xml.sax.SAXException;
@@ -27,7 +33,7 @@ public class DocumentExampleTest {
 				.getFile()), "../../");
 	@Test
 	public void testAll() throws Exception{
-		File dir = new File(webRoot,"doc/guide");
+		File dir = new File(webRoot.getCanonicalFile(),"doc/guide");
 		ArrayList<String> errors = new ArrayList<String>();
 		for(File file : dir.listFiles()){
 			String name = file.getName();
@@ -48,7 +54,40 @@ public class DocumentExampleTest {
 			//throw new RuntimeException("失败文件:"+errors);
 		}
 	}
-	private void testFile(File file, String name) throws SAXException,
+
+	public static void main(String[] args) throws Exception {
+		File root = new File(new File(AutoTest.class.getResource("/").toURI()),
+				"../../");
+		Writer out = new OutputStreamWriter(new FileOutputStream(new File(root,
+				"test/data/test-guide-example.json")));
+		try {
+			ArrayList<Object> result = new ArrayList<Object>();
+			File dir = new File(webRoot.getCanonicalFile(),"doc/guide");
+			ArrayList<String> errors = new ArrayList<String>();
+			for(File file : dir.listFiles()){
+				String name = file.getName();
+				String status = "失败:";
+				try{
+					List<Object> item = testFile(file, name);
+					if(item != null){
+						result.add(item);
+					}
+					 status = "成功:";
+				}catch (Exception e) {
+					e.printStackTrace();
+					errors.add(file.toString()+'\n');
+					//throw e;
+				}finally{
+					System.out.println("文件测试"+status+file);
+				}
+			}
+			out.write(JSONEncoder.encode(result));
+			out.flush();
+		} finally {
+			out.close();
+		}
+	}
+	private static List<Object> testFile(File file, String name) throws SAXException,
 			IOException, FileNotFoundException, XPathExpressionException, TransformerConfigurationException, TransformerException, TransformerFactoryConfigurationError {
 		if(name.endsWith(".xhtml") && !name.startsWith("layout")){
 			String xhtml = ParseUtil.loadXMLTextAndClose(new FileInputStream(file));
@@ -58,6 +97,9 @@ public class DocumentExampleTest {
 			HashMap<String, String> fileMap = new HashMap<String, String>();
 			HashMap<String, String> varMap = new HashMap<String, String>();
 			HashMap<String, String> evalMap = new LinkedHashMap<String, String>();
+
+			ArrayList<Object> result = new ArrayList<Object>();
+			result.add(file.getName());
 			for(int i=0;i<ns.getLength();i++){
 				Element el = (Element) ns.item(i);
 				String varName = el.getAttribute("var");
@@ -83,20 +125,30 @@ public class DocumentExampleTest {
 			}
 			int index = 0;
 			for(Map.Entry<String, String> entry : evalMap.entrySet()){
-				String m = entry.getValue();
-				String s = entry.getKey();
+				String model = entry.getValue();
+				String source = entry.getKey();
 				String path = '/'+name+"@"+index++ ;
-				if(varMap.containsKey(m)){
-					m = varMap.get(m);
+				if(varMap.containsKey(model)){
+					model = varMap.get(model);
 				}
-				fileMap.put(path, s);
-				m = m.replaceAll("\\+\\s*new\\s+Date\\(\\)", ""+System.currentTimeMillis());
-				LiteTest.testTemplate(fileMap, m, path,null);
+				fileMap.put(path, source);
+				model = model.replaceAll("\\+\\s*new\\s+Date\\(\\)", ""+System.currentTimeMillis());
+				
+				Map<String, String> map = LiteTest.runTemplate(fileMap, model, path,null);
+				Map<String, String> outputMap = new HashMap<String, String>();
+				String expect = map.get("#expect");
+				outputMap.put("source", source);
+				outputMap.put("model", model);
+				outputMap.put("expect", expect);
+				LiteTest.checkResultEqual(source, expect, map, outputMap);
+				result.add(outputMap);
 			}
 			if(evalMap.size()>0){
 				System.out.println(file+"测试成功:"+evalMap.size());
 			}
+			return result;
 		}
+		return null;
 	}
 
 }

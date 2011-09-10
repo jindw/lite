@@ -114,7 +114,7 @@ function addCase(title,result){
 	for(var i=0;i< result.length;i++){
 		var item = result[i];
 		for(var n in errorMap){
-			if(Math.random()< 0.3){item[n] = "test Error";}
+			//if(Math.random()< 0.3){item[n] = "test Error";}
 			errorMap.all++;
 			if(item[n]){
 				errorMap[n]++;
@@ -139,6 +139,8 @@ function showText(e){
 		展现测试结果:<select id="resultSelect" onchange="loadTestResult(this.options[this.selectedIndex].value)">
 			<option value="data/test-el.json">EL表达式</option>
 			<option value="data/test-tpl.json">模板语法</option>
+			<option value="data/test-guide-example.json">文档实例</option>
+			
 		</select>
 		<div id="topInfo" />
 		<div id="content"><h1>数据装载中....</h1></div>
@@ -169,7 +171,9 @@ function showText(e){
 				var buf = [];
 				for(var i=0;i<data.length;i++){
 					var result = data[i];
-					buf.push(addCase(result[0],result.slice(1)))
+					if(result.length>1){
+						buf.push(addCase(result[0],result.slice(1)))
+					}
 				}
 				content.innerHTML += buf.join('\n')
 				var info = showInfo(allErrorMap);
