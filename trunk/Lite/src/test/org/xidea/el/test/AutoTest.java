@@ -55,7 +55,7 @@ public class AutoTest {
 		test(filename, null);
 	}
 
-	private static void test(String path, Writer out) throws IOException {
+	private static void test(String path, List<Object> out) throws IOException {
 		Document doc;
 		try {
 			doc = ParseUtil.loadXML(AutoTest.class.getResource(path).toURI()
@@ -69,6 +69,7 @@ public class AutoTest {
 			String title = unit.getAttribute("title");
 			NodeList ns = unit.getElementsByTagName("case");
 			ArrayList<Object> result = new ArrayList<Object>();
+			result.add(title);
 			for (int j = 0; j < ns.getLength(); j++) {
 				Element case0 = (Element) ns.item(j);
 				String isJSONResult = case0.getAttribute("json");
@@ -121,10 +122,12 @@ public class AutoTest {
 				// + "," + model + "," + resultMap + ")");
 			}
 			if (out != null) {
-				String js = JSONEncoder.encode(result);
-				js = js.replaceAll("\\bencodeURI\\(", "encod\\\\u0065URI(");
-				out.append("addCase(" + JSONEncoder.encode(title) + ","
-						+ js + ");\n");
+				
+				out.add(result);
+				//String js = JSONEncoder.encode(result);
+				//js = js.replaceAll("\\bencodeURI\\(", "encod\\\\u0065URI(");
+//				out.append("addCase(" + JSONEncoder.encode(title) + ","
+//						+ js + ");\n");
 			}
 		}
 	}
@@ -147,11 +150,13 @@ public class AutoTest {
 		File root = new File(new File(AutoTest.class.getResource("/").toURI()),
 				"../../");
 		Writer out = new OutputStreamWriter(new FileOutputStream(new File(root,
-				"test/data/test-el.js")));
+				"test/data/test-el.json")));
 		try {
+			ArrayList<Object> result = new ArrayList<Object>();
 			for (String file : casefiles) {
-				test(file, out);
+				test(file, result);
 			}
+			out.write(JSONEncoder.encode(result));
 			out.flush();
 		} finally {
 			out.close();
