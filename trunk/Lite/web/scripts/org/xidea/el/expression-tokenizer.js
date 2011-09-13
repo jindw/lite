@@ -256,7 +256,11 @@ var fns = {
 								this.value.substring(this.start-1,end))]);
 						this.start = end;
 						break;
+					}else{
+						throw new Error("异常正则:"+this.value+'@'+this.start)
 					}
+				//}else{
+				//	this.addToken([findTokenType(op)]);// /
 				}
 			default:
 				this.addToken([findTokenType(op)]);

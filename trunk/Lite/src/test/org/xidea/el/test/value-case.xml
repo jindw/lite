@@ -1,6 +1,8 @@
 <test>
 	<unit title="字面量测试">
 		<!-- 字符转义 -->
+		<case>"\\\\"</case>
+		<case>"\/\/"</case>
 		<case>"\u91D1\u5927\u4E3A"</case>
 		<case>"\x21\x32\x42"</case>
 		<!-- 最大unsign int32整数 -->

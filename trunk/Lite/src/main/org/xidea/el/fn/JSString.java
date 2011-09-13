@@ -85,6 +85,8 @@ class JSString extends JSObject implements Invocable {
 				return thiz;
 			}
 			Matcher match = exp.pattern.matcher(thiz);
+			replaceValue = replaceValue.replaceAll("[\\\\]", "\\\\\\\\").replace("[\\$]{2}","\\\\$");
+//			System.out.println(replaceValue);
 			if (exp.globals) {
 				return match.replaceAll(replaceValue);
 			} else {

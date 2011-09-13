@@ -3,6 +3,7 @@ package org.xidea.el.test;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -11,21 +12,33 @@ import java.util.Map;
 import org.junit.Assert;
 import org.xidea.el.Expression;
 import org.xidea.el.ExpressionFactory;
+import org.xidea.el.ExpressionToken;
 import org.xidea.el.impl.ExpressionFactoryImpl;
+import org.xidea.el.impl.ExpressionParser;
 import org.xidea.el.impl.TokenImpl;
 import org.xidea.el.json.JSONDecoder;
 import org.xidea.jsi.JSIRuntime;
 import org.xidea.lite.Template;
+import org.xidea.lite.impl.ParseContextImpl;
 import org.xidea.lite.parse.ParseContext;
 import org.xidea.lite.test.LiteTest;
 import org.xidea.lite.test.oldcases.LiteTestUtil;
 
 public class ELTest {
 	private static JSIRuntime js = org.xidea.jsi.impl.RuntimeSupport.create();
-	private static ExpressionFactory expressionFactory = ExpressionFactoryImpl
-			.getInstance();
-	static {
+	private static ExpressionFactory optimizedFactory = new ExpressionFactoryImpl();
+	private static ExpressionFactory noneOptimizedFactory = new ExpressionFactoryImpl(){
 
+		@SuppressWarnings("unchecked")
+		public Object parse(String el) {
+			ExpressionParser ep = new ExpressionParser(el);
+			ep.setAliasMap(aliseMap);
+			ExpressionToken tokens = ep.parseEL();
+			//tokens = ((TokenImpl) tokens).optimize(strategy, Collections.EMPTY_MAP);
+			return tokens;
+		}
+	};
+	static {
 		try {
 			js.eval("$import('org.xidea.el:*');//parseEL,Expression");
 			js.eval("$import('org.xidea.jsidoc.util:*');");
@@ -77,9 +90,9 @@ public class ELTest {
 			contextJSON = encoder.encode(context,new StringBuilder()).toString();
 			contextObject = context;
 		}
-		final String litecode = checkLiteParse(source);
+		final String litecode = checkOptimizedLiteParse(source);
 		final String expect = runAsJS(source, contextJSON);
-		Expression el = expressionFactory.create(JSONDecoder.decode(litecode));
+		Expression el = optimizedFactory.create(JSONDecoder.decode(litecode));
 		ParseContext parsedContext = createParserContext("${JSON.stringify(" + source + ")}");
 		String javaresult = encoder.encode(el.evaluate(contextObject),new StringBuilder()).toString();
 		String jsStepResult = runStepJS(contextJSON, litecode);
@@ -92,10 +105,10 @@ public class ELTest {
 		HashMap<String, String> result = new LinkedHashMap<String, String>();
 		result.put("#model" , contextJSON);
 		result.put("#expect", expect);
-		result.put("Java" , javaresult);
-		result.put("JSStep" , jsStepResult);
-		result.put("JS" , jsresult);
-		result.put("PHP" , phpresult);
+		result.put("java" , javaresult);
+		result.put("jsStep" , jsStepResult);
+		result.put("js" , jsresult);
+		result.put("php" , phpresult);
 		if(!expect.equals(phpresult)){
 			LiteTest.printLatestPHP();
 		}
@@ -132,10 +145,10 @@ public class ELTest {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static String checkLiteParse(String source) {
+	private static String checkOptimizedLiteParse(String source) {
 		final String litecode = (String) js.eval("JSON.stringify(parseEL("
 				+ encoder.encode(source,new StringBuilder()).toString() + "))");
-		final Object javacode = expressionFactory.parse(source);
+		final Object javacode = optimizedFactory.parse(source);
 
 		TokenImpl jsc = TokenImpl.toToken((List<Object>) JSONDecoder
 				.decode(litecode));
@@ -151,7 +164,8 @@ public class ELTest {
 
 	private static ParseContext createParserContext(String el) {
 		URI uri = new File(".", "unknow").toURI();
-		ParseContext pc = LiteTestUtil.buildParseContext(uri);
+		ParseContext pc = (ParseContextImpl) LiteTestUtil.buildParseContext(uri);
+		pc.setExpressionFactory(noneOptimizedFactory);
 		// System.out.println(pc.getFeatureMap());
 		List<Object> tps = pc.parseText( el,
 				Template.EL_TYPE);

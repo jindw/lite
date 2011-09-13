@@ -16,8 +16,8 @@ import org.xidea.el.fn.ECMA262Impl;
 
 public class ExpressionFactoryImpl extends ExpressionFactory {
 	private static ExpressionFactoryImpl expressionFactory;
-	private final OperationStrategy strategy;
-	private Map<String, Integer> aliseMap = new HashMap<String, Integer>();
+	protected final OperationStrategy strategy;
+	protected Map<String, Integer> aliseMap = new HashMap<String, Integer>();
 	private int inc = 1;
 
 	public static ExpressionFactoryImpl getInstance() {
@@ -102,7 +102,7 @@ public class ExpressionFactoryImpl extends ExpressionFactory {
 		}
 	}
 
-	private Expression getOptimizedExpression(ExpressionToken el) {
+	protected Expression getOptimizedExpression(ExpressionToken el) {
 		Expression ressult = OptimizeExpressionImpl.create(el, strategy);
 		return ressult != null ? ressult : new ExpressionImpl(el, strategy);
 	}

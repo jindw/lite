@@ -222,7 +222,8 @@ JSONTokenizer.prototype = {
 					buf.push(' ');
 					break;
 				case '\\':
-					buf.push('\\');
+				case '\/':
+					buf.push(c2);
 					break;
 				case '\'':
 					buf.push('\'');
@@ -244,6 +245,9 @@ JSONTokenizer.prototype = {
 					buf.push(String.fromCharCode(c));
 					this.start += 2;
 					break;
+				default:
+					buf.push(c);
+					buf.push(c2);
 				}
 				break;
 			case '"':

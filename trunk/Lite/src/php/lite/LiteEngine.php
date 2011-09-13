@@ -316,10 +316,11 @@ function lite_member_toString($obj, $radix=10){
         if ($radix<2 || $radix>36) {
             throw new Error("Error: illegal radix {$radix}");
     	}
-    	$float = floatval($obj);
     	if ($radix === 10) {
-        	return strval($float);
+        	return strval($obj);
     	}
+    	$float = floatval($obj);
+    	
     	$int = intval($obj);
     	if($int == $float){
     		return base_convert($float, 10, $radix);//小数没有考虑
@@ -453,21 +454,25 @@ function lite_member_match($obj, $regexp) {
  */
 function lite_member_replace($obj, $regexp, $replacement) {
     if(is_array($regexp)){
-		$literal = $separator['literal'];
+		$literal = $regexp['literal'];
 		$p = strrpos($literal,'/');
 		if($p){
 			$p = strpos($literal,'g',$p);
 		}
+		$replacement = strtr($replacement,array('\\$'=>'\\$','\\'=>'\\\\','$$'=>'\\$','$&'=>'$0'));
 		if($p){
 			return preg_replace(substr_replace($literal,'',$p,1), $replacement, $obj,-1);
 		}else{
 			return preg_replace($literal, $replacement, $obj,1);
 		}
-       
     }else{
     	//if(is_string($regexp)){
     	$pos = strpos($obj, $regexp);
-    	return $pos?substr_replace($obj, $replacement, strlen($regexp)) :$obj;
+    	if($pos === false){
+    		return $obj;
+    	}else{ 
+    		return substr_replace($obj, $replacement, $pos, strlen($regexp));
+    	}
     }
 }
 
@@ -592,7 +597,7 @@ function lite_member_join($obj, $separator=","){
 		}else{
 			$result.=$separator;
 		}
-		$result.=$e == null?'':lite_member_toString($e);;
+		$result.=$e === null?'':lite_member_toString($e);;
 	}
 	return $result == null?'':$result;
 }

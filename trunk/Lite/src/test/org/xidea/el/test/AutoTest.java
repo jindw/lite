@@ -9,6 +9,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,42 +35,73 @@ public class AutoTest {
 	static String[] casefiles = { "value-case.xml", "json-case.xml",
 			"op-case.xml", "global-case.xml", "array-case.xml",
 			"string-case.xml", "math-case.xml" };
-	String filename;
+	static Collection<Object[]> params = null;
+
+	private String source;
+
+	private String model;
+
+	private boolean isJSONResult;
+
+	private Map<String, String> resultMap;
 
 	@Parameters
 	public static Collection<Object[]> getParams() {
-		ArrayList<Object[]> rtv = new ArrayList<Object[]>();
-		for (String file : casefiles) {
-			rtv.add(new Object[] { file });
+		if (params == null) {
+			ArrayList<Object[]> rtv = new ArrayList<Object[]>();
+			for (String file : casefiles) {
+				for (List<Object[]> args : loadCases(file).values()) {
+					rtv.addAll(args);
+				}
+			}
+			params = rtv;
 		}
-		return rtv;
+		return params;
 	}
 
 	// public AutoTest(){}
-	public AutoTest(String filename) {
-		this.filename = filename;
+	public AutoTest(String source,String model,boolean isJSONResult) {
+		this.source = source;
+		this.model = model;
+		this.isJSONResult = isJSONResult;
+		this.resultMap = ELTest.resultMap(model, source,
+				isJSONResult);
 	}
 
 	@Test
-	public void test() throws IOException {
-		test(filename, null);
+	public void testJava() throws IOException {
+		test("java");
+	}
+	@Test
+	public void testPhp() throws IOException {
+		test("php");
+	}
+	@Test
+	public void testJS() throws IOException {
+		test("js");
+	}
+	public void test(String type) throws IOException {
+		String expect = resultMap.get("#expect");
+		String value = resultMap.get(type);
+				Assert.assertEquals(type + "运行结果有误：#"
+						+ source, expect, value);
 	}
 
-	private static void test(String path, List<Object> out) throws IOException {
+	private static Map<String, List<Object[]>> loadCases(String path) {
+		LinkedHashMap<String, List<Object[]>> caseMap = new LinkedHashMap<String, List<Object[]>>();
 		Document doc;
 		try {
 			doc = ParseUtil.loadXML(AutoTest.class.getResource(path).toURI()
 					.toString());
 		} catch (Exception e1) {
-			throw new RuntimeException("load test cases failure:" + path);
+			throw new RuntimeException("load test cases xml failure:" + path);
 		}
 		NodeList units = doc.getElementsByTagName("unit");
 		for (int i = 0; i < units.getLength(); i++) {
 			Element unit = (Element) units.item(i);
 			String title = unit.getAttribute("title");
 			NodeList ns = unit.getElementsByTagName("case");
-			ArrayList<Object> result = new ArrayList<Object>();
-			result.add(title);
+			ArrayList<Object[]> result = new ArrayList<Object[]>();
 			for (int j = 0; j < ns.getLength(); j++) {
 				Element case0 = (Element) ns.item(j);
 				String isJSONResult = case0.getAttribute("json");
@@ -86,50 +118,14 @@ public class AutoTest {
 				if (model == null || model.length() == 0) {
 					model = "{}";
 				}
-				// ELTest.testEL(model, source,
-				// "true".equals(isJSONResult));
-				// System.out.println(model);
-				// System.out.println(source);
-				// System.out.println(filename);
-				// System.exit(0);
-				Map<String, String> resultMap = ELTest.resultMap(model, source,
-						"true".equals(isJSONResult));
-				String expect = resultMap.get("#expect");
-				HashMap<String, String> info = new HashMap<String, String>();
-				info.put("source", source);
-				info.put("model", model);
-				info.put("expect", expect);
-				for (Map.Entry<String, String> entry : resultMap.entrySet()) {
-					if (!entry.getKey().startsWith("#")) {
-						try {
-							Assert.assertEquals(entry.getKey() + "运行结果有误：#"
-									+ source, expect, entry.getValue());
-						} catch (Error e) {
-							if (out == null) {
-								throw e;
-							} else {
-								info.put(entry.getKey(), entry.getValue());
-							}
-						}
-
-					}
-				}
-				if (out != null) {
-					result.add(info);
-				}
-				// System.out.println("addCase(" + JSONEncoder.encode(source)
-				// + "," + model + "," + resultMap + ")");
+				result.add(new Object[] { source, model,
+						isJSONResult.equals("true") });
 			}
-			if (out != null) {
-				
-				out.add(result);
-				//String js = JSONEncoder.encode(result);
-				//js = js.replaceAll("\\bencodeURI\\(", "encod\\\\u0065URI(");
-//				out.append("addCase(" + JSONEncoder.encode(title) + ","
-//						+ js + ");\n");
-			}
+			caseMap.put(title, result);
 		}
+		return caseMap;
 	}
+
 
 	private static Element getFirstChild(Node e, String tagName) {
 		Node c = e.getFirstChild();
@@ -145,17 +141,47 @@ public class AutoTest {
 
 	}
 
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] arg) throws Exception {
 		File root = new File(new File(AutoTest.class.getResource("/").toURI()),
 				"../../");
 		Writer out = new OutputStreamWriter(new FileOutputStream(new File(root,
 				"test/data/test-el.json")));
 		try {
-			ArrayList<Object> result = new ArrayList<Object>();
+
+			ArrayList<Object> allResult = new ArrayList<Object>();
 			for (String file : casefiles) {
-				test(file, result);
+				Map<String, List<Object[]>> cases = loadCases(file);
+				for (Map.Entry<String, List<Object[]>> unitEntry : cases
+						.entrySet()) {
+					String title = unitEntry.getKey();
+					ArrayList<Object> unitResult = new ArrayList<Object>();
+					unitResult.add(title);
+					for (Object[] args : unitEntry.getValue()) {
+						String source = (String) args[0];
+						String model = (String) args[1];
+						boolean isJSONResult = (Boolean) args[2];
+						Map<String, String> resultMap = ELTest.resultMap(model,
+								source, isJSONResult);
+						String expect = resultMap.get("#expect");
+						HashMap<String, String> info = new HashMap<String, String>();
+						info.put("source", source);
+						info.put("model", model);
+						info.put("expect", expect);
+						for (Map.Entry<String, String> entry : resultMap
+								.entrySet()) {
+							if (!entry.getKey().startsWith("#")) {
+								if (expect.equals(entry.getValue())) {
+								} else {
+									info.put(entry.getKey(), entry.getValue());
+								}
+							}
+						}
+						unitResult.add(info);
+					}
+					allResult.add(unitResult);
+				}
 			}
-			out.write(JSONEncoder.encode(result));
+			out.write(JSONEncoder.encode(allResult));
 			out.flush();
 		} finally {
 			out.close();

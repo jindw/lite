@@ -34,19 +34,23 @@
 		
 		<case>"中文abcdefg".concat("zzz我")</case>
 		
-		<case>"aDxi汉字".replace("a","$1...")</case>		
+		<case>"aDaaxi汉字".replace("a","$1...")</case>		
 		<case>"aDxi////".replace("////","////")</case>	
 		<case>"aDxi\\\\.\\\\".replace("\\\\.\\\\","\\\\%\\\\")</case>		
-		<case>"理想国际abcdefg".replace("a", "1")</case>	
+		<case>"理想国际abcdefaaagaa".replace("a", "1")</case>	
 	</unit>
 		
 	<unit title="正则表达式">
 		<case>'1/2/3/4'.replace(/\//,'')</case>
+		<case>'1/2/3/4'.replace(/\/d/,'$&amp;-')</case>
+		<case>'1/2/3/4'.replace(/\/d/,'\\$&amp;-')</case>
+		<case>'1/2/3/4'.replace(/\/d/,'$0-')</case>
+		<case>'1/2/3/4'.replace(/(\/d)/,'($1-)')</case>
 		<case>'1/2/3/4'.replace(/\//g,'')</case>
 		<case>"aDxi\\\\.\\\\".replace(/\\\\.\\\\/,"\\\\%\\\\")</case>	
 		<case>'1/2/3/4'.replace(/\//img,'')</case>
 		<case>'1/2/3/4'.replace(/\//im,'')</case>
-		<case>"a汉字aDxi".replace(/([\w\W]{2})[\s\S]+/,"$1...")</case>	
+		<case>"ab汉字aDxi".replace(/([\w\W]{2})[\s\S]+/,"$1...")</case>	
 		
 		<case>'1/2/3/4'.match(/\/(\d)\/(\d)/im)</case>
 		<case>'1/2/3/4'.match(/\/(\d)\/(\d)/gim)</case>

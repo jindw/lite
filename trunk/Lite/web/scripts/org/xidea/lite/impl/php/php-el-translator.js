@@ -53,10 +53,10 @@ function stringifyADD(el,context){
 	if(t == TYPE_NUMBER){
 		return value1+'+'+value2;//动态部分要考虑 array的问题,这里不需要考虑
 	}else if(t == TYPE_STRING){
-		if(/^[\d\.]+$/.test(value1)){
+		if(/[\d]$/.test(value1)){
 			value1+=' ';
 		}
-		if(/^[\d\.]+$/.test(value2)){
+		if(/^[\d]/.test(value2)){
 			value2=' '+value2;
 		}
 		//还需要处理 null,true,false 字面量的问题
@@ -136,7 +136,10 @@ function stringifyGET(el,context){
 					}
 				}
 			}
-			return value1+'['+value2+']';
+			if(!/^[^(][\s\S]*\)$/.test(value1) && !/^(true|false|null|[\d\.]+)$/.test(value1)){//php bug method(args)[index]非法
+				return value1+'['+value2+']';
+			}
+			
 		}
 	}
 	return "lite_op__get("+value1+','+value2+")"

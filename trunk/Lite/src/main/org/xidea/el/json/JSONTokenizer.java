@@ -373,10 +373,8 @@ public class JSONTokenizer {
 					buf.append(' ');
 					break;
 				case '\\':
-					buf.append('\\');
-					break;
 				case '/':
-					buf.append('/');
+					buf.append(c2);
 					break;
 				case '\'':
 					buf.append('\'');

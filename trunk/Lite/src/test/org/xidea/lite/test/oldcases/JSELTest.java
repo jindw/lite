@@ -1,4 +1,4 @@
-package org.xidea.el.test;
+package org.xidea.lite.test.oldcases;
 
 import java.util.HashMap;
 import java.util.logging.Logger;
@@ -8,6 +8,7 @@ import org.junit.Test;
 import org.xidea.el.Expression;
 import org.xidea.el.ExpressionFactory;
 import org.xidea.el.impl.ExpressionFactoryImpl;
+import org.xidea.el.test.ELTest;
 
 public class JSELTest {
     private ExpressionFactory factory = ExpressionFactory.getInstance();
