@@ -23,7 +23,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xidea.el.json.JSONEncoder;
-import org.xidea.el.test.AutoTest;
+import org.xidea.el.test.AutoELTest;
 import org.xidea.lite.impl.ParseUtil;
 import org.xidea.lite.test.oldcases.ExampleTest;
 import org.xml.sax.SAXException;
@@ -56,7 +56,7 @@ public class DocumentExampleTest {
 	}
 
 	public static void main(String[] args) throws Exception {
-		File root = new File(new File(AutoTest.class.getResource("/").toURI()),
+		File root = new File(new File(AutoELTest.class.getResource("/").toURI()),
 				"../../");
 		Writer out = new OutputStreamWriter(new FileOutputStream(new File(root,
 				"test/data/test-guide-example.json")));

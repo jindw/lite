@@ -99,11 +99,11 @@ public class ResultContextImpl implements ResultContext {
 		}
 	}
 
-	protected void clearPreviousText() {
+	protected void clearPreviousSpaceText() {
 		int i = result.size();
 		while (i-- > 0) {
 			Object item = result.get(i);
-			if (item instanceof String) {
+			if (item instanceof String && ((String)item).trim().length()==0) {
 				result.remove(i);
 			} else {
 				break;
@@ -135,7 +135,7 @@ public class ResultContextImpl implements ResultContext {
 	}
 
 	public final void appendElse(Object testEL) {
-		this.clearPreviousText();
+		this.clearPreviousSpaceText();
 		testEL = requrieEL(testEL);
 		if (this.getType(this.result.size() - 1) != -1) {
 			this.appendEnd();

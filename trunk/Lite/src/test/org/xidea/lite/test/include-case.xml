@@ -1,0 +1,22 @@
+<test>
+	<unit title="文件包含语法">
+		<model>
+		{
+		array:[1,2,3,'4',5.5,'',true,null,false,[1,2],{a:1,b:2},[]],
+		string:"JSON 功能测试'\"",
+		object:{aa:1,bB:2,CC:[1]}
+		}
+		</model>
+		<source path="/test/include1.xhtml"><![CDATA[<html><body><div class="content"></div><div class="include">[<c:include path="sub/include2.xhtml"/>]</div></body></html>]]></source>
+		<source path="/test/include2.xhtml"><![CDATA[<span>include2</span>]]></source>
+		<source path="/test/sub/include2.xhtml"><![CDATA[<c:include path="../include2.xhtml"/>]]></source>
+		<case>
+			<source><![CDATA[<c:include path="/test/include1.xhtml"/>]]></source>
+			<expect><![CDATA[<html><body><div class="content"></div><div class="include">[<span>include2</span>]</div></body></html>]]></expect>
+		</case>
+		<case>
+			<source><![CDATA[<c:include path="/test/include1.xhtml" xpath="//xhtml:div[@class='include']"/>]]></source>
+			<expect><![CDATA[<div class="include">[<span>include2</span>]</div>]]></expect>
+		</case>
+	</unit>
+</test>

@@ -267,6 +267,7 @@ public class LiteTest {
 			if (source == null) {
 				System.out.println(id);
 				System.out.println(uri.getPath());
+				System.out.println(this.sourceMap.get(uri.getPath()));
 				System.out.println(this.sourceMap.keySet());
 			}
 			source = ParseUtil.normalize(source, id);

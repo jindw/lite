@@ -167,7 +167,7 @@ JSONTokenizer.prototype = {
 		var value = this.value.substr(this.start);
 		value = value.replace(/([+-]?0(?:x[0-9a-f]+|\.?[0-9]*))[\s\S]*/i,'$1');
 		this.start += value.length;
-		print(value+'/'+parseInt(value))
+		//print(value+'/'+parseInt(value))
 		if(value.indexOf('.')<0){
 			return parseInt(value);
 		}

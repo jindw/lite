@@ -269,7 +269,7 @@ function processChoose(node){
 	var value = findXMLAttributeAsEL(node,"value","test");
 	var oldStatus = this.getAttribute(CHOOSE_KEY);
 	this.setAttribute(CHOOSE_KEY,{value:value,first:true});
-	parseChildRemoveAttr(this,node);
+	parseChildRemoveAttr(this,node,true);
 	this.setAttribute(CHOOSE_KEY,oldStatus);
 }
 //function seekChoose(text){
@@ -294,7 +294,7 @@ function processWhen(node){
 	var stat = this.getAttribute(CHOOSE_KEY);
 	var value = findXMLAttributeAsEL(node,"*test","if","value");
 	if(stat.value){
-		value = stat.value + '==('+value+')';
+		value = '('+stat.value + ')==('+value+')';
 	}
 	if(stat.first){
 		stat.first = false;
@@ -772,9 +772,19 @@ function processBlock(node){
 
 
 
-function parseChildRemoveAttr(context,node){
+function parseChildRemoveAttr(context,node,ignoreSpace){
 	if(node.nodeType == 1){//child
-		context.parse(node.childNodes)
+		if(ignoreSpace){
+			var child = node.firstChild;
+			while(child){
+				if(child.nodeType != 3 || String(child.data).replace(/\s+/g,'')){
+					context.parse(child)
+				}
+				child = child.nextSibling;
+			}
+		}else{
+			context.parse(node.childNodes)
+		}
 	}else if(node.nodeType == 2){//attr
 		var el = node.ownerElement||node.selectSingleNode('..');
 		el.removeAttributeNode(node);
