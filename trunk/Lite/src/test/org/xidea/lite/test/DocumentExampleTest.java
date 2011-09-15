@@ -56,10 +56,15 @@ public class DocumentExampleTest {
 	}
 
 	public static void main(String[] args) throws Exception {
-		File root = new File(new File(AutoELTest.class.getResource("/").toURI()),
-				"../../");
-		Writer out = new OutputStreamWriter(new FileOutputStream(new File(root,
-				"test/data/test-guide-example.json")));
+		File root;
+		if(args.length>0){
+			root = new File(args[0]);
+		}else{
+			root = new File(new File(AutoELTest.class.getResource("/").toURI()),"../../");
+		}
+		File dest = new File(root,
+				"test/data/test-guide-example.json");
+		Writer out = new OutputStreamWriter(new FileOutputStream(dest));
 		try {
 			ArrayList<Object> result = new ArrayList<Object>();
 			File dir = new File(webRoot.getCanonicalFile(),"doc/guide");
@@ -84,6 +89,7 @@ public class DocumentExampleTest {
 			out.write(JSONEncoder.encode(result));
 			out.flush();
 		} finally {
+			System.out.println("文档示例测试结果写入:"+dest);
 			out.close();
 		}
 	}

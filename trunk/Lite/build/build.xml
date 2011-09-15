@@ -58,6 +58,10 @@
 			<fileset dir="web/scripts">
 				<include name="**/*.*" />
 			</fileset>
+			<fileset dir="src/test">
+				<include name="org/xidea/el/test/*.*" />
+				<include name="org/xidea/lite/test/*.*" />
+			</fileset>
 		</copy>
 		<javac srcdir="src/main" fork="true" target="1.5" debug="true" destdir="web/WEB-INF/classes" encoding="UTF-8">
 			<classpath>
@@ -244,18 +248,25 @@
 	<target name="build" depends="compress,package,php-example">
 		<copy tofile="../TT/web/WEB-INF/lib/Lite-${version}.jar" file="build/dest/Lite.jar" />
 	</target>
-	<target name="publish">
+	<target name="publish" depends="build">
+		<available file="${basedir}/build/dest/" property="webdest" value="${basedir}/build/dest/web" />
+		<available file="../../xidea/lite" property="webdest" value="../../xidea/lite/" />
 		<java jar="build/dest/Lite.jar" fork="true">
 			<arg value="-root"/>
 			<arg value="web"/>
-			<arg value="-translators"/>
+			<arg value="-translator"/>
 			<arg value="php"/>
 			<arg value="-output"/>
-			<arg value="${basedir}/build/dest/web"/>
+			<arg value="${webdest}"/>
 			<arg value="-includes"/>
 			<arg value="/doc/guide/**"/>
-			<arg value="-excludes"/>
-			<arg value="/doc/guide/layout.xhtml"/>
+		</java>
+		<mkdir dir="${webdest}/test/data"/>
+		<java classname="org.xidea.el.test.AutoELTest" classpath="web/WEB-INF/classes;web/WEB-INF/lib/junit.jar;build/dest/Lite.jar" fork="true">
+			<arg value="${webdest}"/>
+		</java>
+		<java classname="org.xidea.lite.test.AutoSyntaxTest" classpath="web/WEB-INF/classes;web/WEB-INF/lib/junit.jar;build/dest/Lite.jar" fork="true">
+			<arg value="${webdest}"/>
 		</java>
 	</target>
 

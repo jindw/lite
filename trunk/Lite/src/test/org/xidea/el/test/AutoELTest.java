@@ -123,10 +123,15 @@ public class AutoELTest {
 	}
 
 	public static void main(String[] arg) throws Exception {
-		File root = new File(new File(AutoELTest.class.getResource("/").toURI()),
-				"../../");
-		Writer out = new OutputStreamWriter(new FileOutputStream(new File(root,
-				"test/data/test-el.json")));
+		File root;
+		if(arg.length>0){
+			root = new File(arg[0]);
+		}else{
+			root = new File(new File(AutoELTest.class.getResource("/").toURI()),"../../");
+		}
+		File dest = new File(root,
+				"test/data/test-el.json");
+		Writer out = new OutputStreamWriter(new FileOutputStream(dest));
 		try {
 
 			ArrayList<Object> allResult = new ArrayList<Object>();
@@ -165,6 +170,7 @@ public class AutoELTest {
 			out.write(JSONEncoder.encode(allResult));
 			out.flush();
 		} finally {
+			System.out.println("表达式测试结果写入:"+dest);
 			out.close();
 		}
 	}

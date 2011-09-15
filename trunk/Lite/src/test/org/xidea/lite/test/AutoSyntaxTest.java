@@ -24,6 +24,7 @@ import org.w3c.dom.NodeList;
 import org.xidea.el.ExpressionFactory;
 import org.xidea.el.impl.ExpressionFactoryImpl;
 import org.xidea.el.json.JSONEncoder;
+import org.xidea.el.test.AutoELTest;
 import org.xidea.lite.impl.ParseUtil;
 import org.xml.sax.SAXException;
 
@@ -154,10 +155,15 @@ public class AutoSyntaxTest {
 	}
 
 	public static void main(String[] arg) throws Exception {
-		File root = new File(new File(AutoSyntaxTest.class.getResource("/").toURI()),
-				"../../");
-		Writer out = new OutputStreamWriter(new FileOutputStream(new File(root,
-				"test/data/test-syntax.json")));
+		File root;
+		if(arg.length>0){
+			root = new File(arg[0]);
+		}else{
+			root = new File(new File(AutoELTest.class.getResource("/").toURI()),"../../");
+		}
+		File dest = new File(root,
+				"test/data/test-syntax.json");
+		Writer out = new OutputStreamWriter(new FileOutputStream(dest));
 		try {
 
 			ArrayList<Object> allResult = new ArrayList<Object>();
@@ -195,6 +201,7 @@ public class AutoSyntaxTest {
 			out.write(JSONEncoder.encode(allResult));
 			out.flush();
 		} finally {
+			System.out.println("语法测试结果写入:"+dest);
 			out.close();
 		}
 	}

@@ -1,5 +1,5 @@
 <?php
-$path = @$_GET['path'] || '/test/index.xhtml';
+$path = array_key_exists('path',$_GET)?$_GET['path'] : '/test/index.xhtml';
 if($path){
 	require_once("../WEB-INF/classes/lite/LiteEngine.php");
 	// 通过上下文数据方式传递模板参数：

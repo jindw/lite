@@ -20,7 +20,8 @@
 				<![CDATA[
 				<span>
 				您好：
-					<c:if test="${username}">${username}</c:if>
+					<c:if test="${displayName}">${displayName}</c:if>
+					<c:if test="${loginName}">${loginName}</c:if>
 					<c:else>匆匆过客</c:else>；
 				今天是：
 					<c:if test="${day>5}">休息</c:if>
@@ -33,7 +34,7 @@
 							小技巧1： JavaScript 与或运算（JavaScript与或技巧）和三目运算符号，也可以解决上述问题。语法如下：
 							<x:code model="{day:2}">
 				<![CDATA[
-				<span>您好：${username||'匆匆过客'}；今天是：${day>5?'休息':'工作'}日</span>
+				<span>您好：${displayName||loginName||'匆匆过客'}；今天是：${day>5?'休息':'工作'}日</span>
 				]]>
 							</x:code>
 						</i>
