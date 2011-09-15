@@ -77,11 +77,11 @@ if(strpos($path,".xhtml")>0){
 				header('HTTP/1.1 304 Not Modfied');  
 				//header('X-INFO-OLD:'.$old_etag);
 				//header('X-INFO:'.$etag);
-				header("ETag:".$etag);
+				//header("ETag:".$etag);
 				header("Content-Type:text/javascript;charset=utf-8");
 				//exit();
 			}else{
-				header("ETag:".$etag);
+				//header("ETag:".$etag);
 				header("Content-Type:text/javascript;charset=utf-8");
 			}
 		}else{
