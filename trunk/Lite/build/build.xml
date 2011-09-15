@@ -62,6 +62,9 @@
 				<include name="org/xidea/el/test/*.*" />
 				<include name="org/xidea/lite/test/*.*" />
 			</fileset>
+			<fileset dir="src/php">
+				<include name="lite/**/*.*" />
+			</fileset>
 		</copy>
 		<javac srcdir="web/WEB-INF/classes" fork="true" target="1.5" debug="true" destdir="web/WEB-INF/classes" encoding="UTF-8">
 			<classpath>
