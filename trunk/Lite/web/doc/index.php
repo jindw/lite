@@ -79,7 +79,7 @@ if(strpos($path,".xhtml")>0){
 				//header('X-INFO:'.$etag);
 				header("ETag:".$etag);
 				header("Content-Type:text/javascript;charset=utf-8");
-				exit();
+				//exit();
 			}else{
 				header("ETag:".$etag);
 				header("Content-Type:text/javascript;charset=utf-8");
