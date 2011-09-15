@@ -162,7 +162,7 @@ public class AutoSyntaxTest {
 			root = new File(new File(AutoELTest.class.getResource("/").toURI()),"../../");
 		}
 		File dest = new File(root,
-				"test/data/test-syntax.json");
+				"doc/test-data/test-syntax.json");
 		Writer out = new OutputStreamWriter(new FileOutputStream(dest));
 		try {
 

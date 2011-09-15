@@ -62,7 +62,7 @@ public class DocumentExampleTest {
 			root = new File(new File(AutoELTest.class.getResource("/").toURI()),"../../");
 		}
 		File dest = new File(root,
-				"test/data/test-guide-example.json");
+				"doc/test-data/test-guide-example.json");
 		Writer out = new OutputStreamWriter(new FileOutputStream(dest));
 		try {
 			ArrayList<Object> result = new ArrayList<Object>();

@@ -129,7 +129,7 @@ public class AutoELTest {
 			root = new File(new File(AutoELTest.class.getResource("/").toURI()),"../../");
 		}
 		File dest = new File(root,
-				"test/data/test-el.json");
+				"doc/test-data/test-el.json");
 		Writer out = new OutputStreamWriter(new FileOutputStream(dest));
 		try {
 

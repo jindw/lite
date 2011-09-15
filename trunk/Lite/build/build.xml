@@ -273,6 +273,9 @@
 		<java classname="org.xidea.lite.test.AutoSyntaxTest" classpath="web/WEB-INF/classes;web/WEB-INF/lib/junit.jar;build/dest/Lite.jar" fork="true">
 			<arg value="${webdest}"/>
 		</java>
+		<java classname="org.xidea.lite.test.DocumentExampleTest" classpath="web/WEB-INF/classes;web/WEB-INF/lib/junit.jar;build/dest/Lite.jar" fork="true">
+			<arg value="${webdest}"/>
+		</java>
 	</target>
 
 	<target name="php-example" depends="compress">

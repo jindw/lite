@@ -1,0 +1,191 @@
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<style><![CDATA[
+body {
+	font: 11px "Lucida Grande", "Trebuchet MS", Verdana, sans-serif;
+	color: #41464D;
+	margin: 0;
+	padding: 0;
+	background: #F3F1F1;
+}
+.pass {
+	color: #657528;
+	background: #CFE773;
+}
+.error {
+	color: #B33F3F;
+	background: #EE9A9A;
+	font-weight: bold;
+	cursor:pointer;
+}
+.result th{
+	color: #657528;
+	background: #CFE773;
+}
+
+table {
+	border-collapse: collapse;
+	width: 98%;
+	margin: 0;
+	padding: 0;
+}
+
+td, th {
+	background: #C8CBD0;
+	padding: 5px 8px;
+	margin: 0;
+	font-size: 11px;
+	width: 150px;
+	border: 3px solid #fff;
+}
+
+th {
+	font-weight: bold;
+	background: #D0C8C8;
+	color: #8A7575;
+}
+]]>
+		</style>
+		<c:def name="showError(count)">
+			<c:if test="${count}">
+				<span>失败:${count}次</span>
+			</c:if>
+			<c:else>
+				<span>全部通过</span>
+			</c:else>
+		</c:def>
+		<h:client name="showCase(title,result,errorMap)">
+			<div class="unit">
+				<h3>${title}
+					$!{showError(errorMap.any)}
+				</h3>
+				<div class="result">
+					<table border="1" width="98%">
+						<tr>
+							<th width="30%">源码</th>
+							<th>模型</th>
+							<th>Java$!{showError(errorMap.java)}</th>
+							<th>JS$!{showError(errorMap.js)}</th>
+							<th>PHP$!{showError(errorMap.js)}</th>
+						</tr>
+						<tr c:for="${item:result}">
+							<td title="${item.expect}">${item.source}</td>
+							<td title="${item.model}" onclick="showText(this)">${item.model.replace(/^\s*([\s\S]{10})[\s\S]+/,"$1...")}
+							</td>
+							<c:for var="type" list="${['java','js','php']}">
+								<c:var name="error" value="${item[type]}" />
+								<td title="${error}" class="${error?'error':'pass'}"
+									onclick="$!{error && 'showText(this)' ||''}">
+									${error?'显示错误':'测试通过'}</td>
+							</c:for>
+						</tr>
+					</table>
+				</div>
+			</div>
+		</h:client>
+		<h:client name="showInfo(errorMap)">
+			<table>
+				<th>图例</th>
+				<td class="pass">
+					测试通过:
+					<span id="pass">
+						${errorMap.all-errorMap.any}
+					</span>
+				</td>
+				<td class="error">
+					测试失败:
+					<span id="error">
+						${errorMap.any}(
+						java:${errorMap.java};
+						js:${errorMap.js};
+						php:${errorMap.php};
+						)
+					</span>
+				</td>
+			</table>
+		</h:clent>
+		<script>
+<![CDATA[
+var allErrorMap = {all:0,any:0,java:0,php:0,js:0};
+function addCase(title,result){
+	var errorMap = {all:0,java:0,php:0,js:0};
+	var any = 0;
+	for(var i=0;i< result.length;i++){
+		var item = result[i];
+		for(var n in errorMap){
+			//if(Math.random()< 0.3){item[n] = "test Error";}
+			errorMap.all++;
+			if(item[n]){
+				errorMap[n]++;
+				any++;
+			}
+		}
+	}
+	errorMap.any = any;
+	for(var n in errorMap){
+		allErrorMap[n] += errorMap[n];
+	}
+	return showCase(title,result,errorMap);
+}
+function showText(e){
+	e.removeChild(e.firstChild);
+	e.appendChild(document.createTextNode(e.getAttribute('title')))
+}
+]]>
+		</script>
+	</head>
+	<body>
+		展现测试结果:<select id="resultSelect" onchange="loadTestResult(this.options[this.selectedIndex].value)">
+			<option value="test-data/test-el.json">EL表达式</option>
+			<option value="test-data/test-syntax.json">模板语法</option>
+			<option value="test-data/test-guide-example.json">文档实例</option>
+		</select>
+		<div id="topInfo" />
+		<div id="content"><h1>数据装载中....</h1></div>
+		<div id="buttonInfo" />
+		<script><![CDATA[
+			function loadTestResult(url){
+				if(url){
+					var xhr = new XMLHttpRequest();
+					xhr.open("GET",url,true);
+					
+					
+					var content = document.getElementById('content');
+					content.innerHTML = "<h1>数据装载中....</h1>";
+					xhr.onreadystatechange = function(){
+					//console.log(xhr.reayState);
+						if(xhr.readyState == 4){
+							var text = xhr.responseText;
+							xhr = null;
+							showTestResult(window.eval('('+text+')'));
+						}
+					}
+					xhr.send('')
+				}
+			}
+			function showTestResult(data){
+				allErrorMap = {all:0,any:0,java:0,php:0,js:0};
+				var content = document.getElementById('content');
+				var buf = [];
+				for(var i=0;i<data.length;i++){
+					var result = data[i];
+					if(result.length>1){
+						buf.push(addCase(result[0],result.slice(1)))
+					}
+				}
+				content.innerHTML += buf.join('\n')
+				var info = showInfo(allErrorMap);
+				document.getElementById('topInfo').innerHTML = info;
+				document.getElementById('buttonInfo').innerHTML = info;
+			}
+			var resultSelect = document.getElementById('resultSelect');
+			var index = resultSelect.selectedIndex;
+			if(!index){
+				resultSelect.selectedIndex = index = 0;
+			}
+			loadTestResult(resultSelect.options[index].value)
+			]]>
+		</script>
+	</body>
+</html>
