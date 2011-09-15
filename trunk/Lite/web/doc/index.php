@@ -72,15 +72,17 @@ if(strpos($path,".xhtml")>0){
 		if($boot){
 			$old_etag = array_key_exists('HTTP_IF_NONE_MATCH',$_SERVER)?@$_SERVER('HTTP_IF_NONE_MATCH'):0;
 			$etag = @(filemtime($boot).'-'.filesize($boot));
-			header("Content-Type:text/javascript;charset=utf-8");
+			
 			if($old_etag && $old_etag == $etag ){
 				header('HTTP/1.1 304 Not Modfied');  
 				//header('X-INFO-OLD:'.$old_etag);
 				//header('X-INFO:'.$etag);
 				header("ETag:".$etag);
+				header("Content-Type:text/javascript;charset=utf-8");
 				exit();
 			}else{
 				header("ETag:".$etag);
+				header("Content-Type:text/javascript;charset=utf-8");
 			}
 		}else{
 			header("Expires: ".gmdate("D, d M Y H:i:s", time()+315360000)." GMT");
