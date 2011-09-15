@@ -78,11 +78,11 @@ if(strpos($path,".xhtml")>0){
 				//header('X-INFO-OLD:'.$old_etag);
 				//header('X-INFO:'.$etag);
 				//header("ETag:".$etag);
-				header("Content-Type:text/javascript;charset=utf-8");
+				//header("Content-Type:text/javascript;charset=utf-8");
 				//exit();
 			}else{
 				//header("ETag:".$etag);
-				header("Content-Type:text/javascript;charset=utf-8");
+				//header("Content-Type:text/javascript;charset=utf-8");
 			}
 		}else{
 			header("Expires: ".gmdate("D, d M Y H:i:s", time()+315360000)." GMT");
@@ -96,6 +96,8 @@ if(strpos($path,".xhtml")>0){
 	}else if(realpath("..".$path)){
 		if(strpos($path,".css")>0){
 			header("Content-type: text/css;charset=UTF-8");
+		}else if(strpos($path,".js")>0){
+			header("Content-type: text/javascript;charset=UTF-8");
 		}
 		readfile("..".$path);
 	}else{
