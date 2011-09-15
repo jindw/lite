@@ -25,11 +25,10 @@ import org.w3c.dom.NodeList;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.el.test.AutoELTest;
 import org.xidea.lite.impl.ParseUtil;
-import org.xidea.lite.test.oldcases.ExampleTest;
 import org.xml.sax.SAXException;
 
 public class DocumentExampleTest {
-	static File webRoot = new File(new File(ExampleTest.class.getResource("/")
+	static File webRoot = new File(new File(DocumentExampleTest.class.getResource("/")
 				.getFile()), "../../");
 	@Test
 	public void testAll() throws Exception{

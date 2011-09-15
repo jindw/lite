@@ -41,7 +41,6 @@ import org.xidea.lite.impl.XMLNormalizeImpl;
 import org.xidea.lite.parse.ParseContext;
 import org.xml.sax.SAXException;
 
-import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
 
 public class LiteTest {
 	private static JSIRuntime js = org.xidea.jsi.impl.RuntimeSupport.create();
