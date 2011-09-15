@@ -90,14 +90,14 @@ if(strpos($path,".xhtml")>0){
 		}
 	}
 	if($boot){
-		header("Content-Type:text/javascript;charset=utf-8");
-		readfile($boot);
+		header("Content-Type:text/javascript;charset=utf-8",true);
 		header("X-TYPE: bootfile");
+		readfile($boot);
 	}else if(realpath("..".$path)){
 		if(strpos($path,".css")>0){
-			header("Content-type: text/css;charset=UTF-8");
+			header("Content-type: text/css;charset=UTF-8",true);
 		}else if(strpos($path,".js")>0){
-			header("Content-type: text/javascript;charset=UTF-8");
+			header("Content-type: text/javascript;charset=UTF-8",true);
 		}
 		readfile("..".$path);
 	}else{
