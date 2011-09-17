@@ -35,7 +35,7 @@ public class TemplateEngine {
 	}
 
 	public Template getTemplate(String path) throws IOException {
-		Template template = (Template) templateMap.get(path);
+		Template template = templateMap.get(path);
 		if (template == null) {
 			template = createTemplate(path);
 			templateMap.put(path, template);
@@ -53,7 +53,7 @@ public class TemplateEngine {
 		List<Object> data =  JSONDecoder.decode(getLitecode(path));
 		List<Object> list = (List<Object>) data.get(1);
 		Map<String,String> featureMap = (Map<String,String>) data.get(2);
-		return new Template(list,featureMap);
+		return new LiteTemplate(list,featureMap);
 	}
 
 	protected String getLitecode(String path) throws IOException {

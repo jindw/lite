@@ -1,5 +1,7 @@
 package org.xidea.el;
 
+import java.util.Map;
+
 
 
 
@@ -19,6 +21,6 @@ public interface OperationStrategy {
 	 * @return 运算结果
 	 * @see org.xidea.el.impl.OperationStrategyImpl#evaluate
 	 */
-	public Object evaluate(ExpressionToken token,ValueStack vs) ;
-	public Object getVar(ValueStack vs,Object key);
+	public Object evaluate(ExpressionToken token,Map<String,Object> vs) ;
+	public Object getVar(Map<String, Object> vs,Object key);
 }

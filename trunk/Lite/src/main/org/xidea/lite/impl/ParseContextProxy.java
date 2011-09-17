@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
 import org.xidea.el.ExpressionFactory;
+import org.xidea.lite.LiteTemplate;
 import org.xidea.lite.parse.ParseConfig;
 import org.xidea.lite.parse.ParseContext;
 import org.xidea.lite.parse.ResultContext;
@@ -36,7 +37,7 @@ abstract public class ParseContextProxy implements ParseContext {
 		this.featureMap = featureMap;
 		this.attributeMap = new HashMap<Object, Object>();
 		this.resources = new ArrayList<URI>();
-		String encoding = featureMap.get(ParseContext.FEATURE_ENCODING);
+		String encoding = featureMap.get(LiteTemplate.FEATURE_ENCODING);
 		this.resultContext = new ResultContextImpl(encoding);
 	}
 

@@ -23,17 +23,17 @@
 		<p>
 			比如，有如下两个相似的网页结构：
 			<ul>
-				<x:code>
+				<x:code id="result1">
 			<![CDATA[
 			<html>
 			<head>
 			    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-				<title>... 不同标题2...</title>
+				<title>标题1</title>
 				.... 完全相同的meta，link，scripts....
 			</head>
 			<body>
 				<div id="head">...完全相同的head....</div>
-				<div id="content">... 不同内容1</div>
+				<div id="content">内容1...</div>
 				<div id="foot">... 完全相同的foot...</div>
 			</body>
 			</html>
@@ -79,11 +79,11 @@
 				</x:code>
 				<p>然后，每个具体模板可以如此：</p>
 
-				<x:code model="{}">
+				<x:code model="{}" expect="result1">
 			<![CDATA[
 			<c:extends path="parent.xhtml">
 			    <c:block name="title">标题1</c:block>
-			    <c:block name="content">内容1</c:block>
+			    <c:block name="content">内容1...</c:block>
 			</c:extends>
 			]]>
 				</x:code>

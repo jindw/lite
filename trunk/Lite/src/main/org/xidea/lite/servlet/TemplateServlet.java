@@ -18,15 +18,15 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.xidea.lite.Template;
 import org.xidea.lite.TemplateEngine;
+import org.xidea.lite.Template;
 
 public class TemplateServlet extends GenericServlet {
-	private static final String LOCAL_IP = "^(?:127\\.0\\.0\\.1|10\\..+|172\\.(?:1[6789]|2.|30|31)\\..+|192\\.168\\..+|([0:]+1))$";
-
 	private static final long serialVersionUID = 1L;
 	private static final Log log = LogFactory.getLog(TemplateServlet.class);
+	private static final String LOCAL_IP = "^(?:127\\.0\\.0\\.1|10\\..+|172\\.(?:1[6789]|2.|30|31)\\..+|192\\.168\\..+|([0:]+1))$";
 
+	
 	protected TemplateEngine templateEngine;
 	protected String serviceBase = "/WEB-INF/service/lite-service";
 	private Pattern debug = null;
@@ -128,7 +128,7 @@ public class TemplateServlet extends GenericServlet {
 		}
 		// 这个才是线上代码
 		Template template = templateEngine.getTemplate(path);
-		String contentType = template.getFeature(Template.FEATURE_CONTENT_TYPE);
+		String contentType = template.getContentType();
 		response.setContentType(contentType);
 		PrintWriter out = response.getWriter();
 		template.render(createModel(request), out);

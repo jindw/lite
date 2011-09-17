@@ -14,33 +14,28 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.TransformerFactoryConfigurationError;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
 import junit.framework.Assert;
 
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xidea.el.ExpressionFactory;
+import org.xidea.el.impl.ExpressionFactoryImpl;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.el.test.ELTest;
 import org.xidea.jsi.JSIRuntime;
+import org.xidea.lite.LiteTemplate;
 import org.xidea.lite.Template;
 import org.xidea.lite.impl.ParseConfigImpl;
 import org.xidea.lite.impl.ParseContextImpl;
 import org.xidea.lite.impl.ParseUtil;
+import org.xidea.lite.impl.TextPosition;
 import org.xidea.lite.impl.XMLNormalizeImpl;
 import org.xidea.lite.parse.ParseContext;
 import org.xml.sax.SAXException;
-
 
 public class LiteTest {
 	private static JSIRuntime js = org.xidea.jsi.impl.RuntimeSupport.create();
@@ -65,9 +60,7 @@ public class LiteTest {
 	}
 
 	@Test
-	public void testFor() throws TransformerConfigurationException,
-			IOException, SAXException, TransformerException,
-			TransformerFactoryConfigurationError {
+	public void testFor() throws IOException, SAXException {
 		HashMap<String, String> sm = new HashMap<String, String>();
 		sm
 				.put(
@@ -80,9 +73,7 @@ public class LiteTest {
 	}
 
 	@Test
-	public void testDate() throws TransformerConfigurationException,
-			IOException, SAXException, TransformerException,
-			TransformerFactoryConfigurationError {
+	public void testDate() throws IOException, SAXException {
 		HashMap<String, String> sm = new HashMap<String, String>();
 		sm
 				.put(
@@ -94,9 +85,7 @@ public class LiteTest {
 	}
 
 	@Test
-	public void testDef() throws TransformerConfigurationException,
-			IOException, SAXException, TransformerException,
-			TransformerFactoryConfigurationError {
+	public void testDef() throws IOException, SAXException {
 		HashMap<String, String> sm = new HashMap<String, String>();
 		sm.put("/s.xhtml",
 				"<c:def name='dateFormat(date,arg2=1)'>${arg2}</c:def>"
@@ -114,13 +103,13 @@ public class LiteTest {
 
 	public static HashMap<String, String> runTemplate(
 			Map<String, String> relativeSourceMap, Object context, String path,
-			String expected) throws IOException, SAXException {
+			String expect) throws IOException, SAXException {
 		ParseContext pc = buildContext(relativeSourceMap, path);
-		Template tpl = new Template(pc.toList(), pc.getFeatureMap());
+		Template tpl = new LiteTemplate(pc.toList(), pc.getFeatureMap());
 		String contextJSON;
 		Object contextObject;
 		if (context instanceof String) {
-			contextObject = ExpressionFactory.getInstance().create(
+			contextObject = ExpressionFactoryImpl.getInstance().create(
 					(String) context).evaluate(relativeSourceMap);
 			contextJSON = JSONEncoder.encode(contextObject);
 		} else {
@@ -132,39 +121,23 @@ public class LiteTest {
 		String javaresult = out.toString();
 		String jsresult = runNativeJS(pc, contextJSON);
 		String phpresult = runNativePHP(pc, contextJSON);
-		expected = expected != null ? expected : jsresult;
+		expect = expect != null ? expect : jsresult;
+		expect = normalizeXML(expect);
 		HashMap<String, String> result = new LinkedHashMap<String, String>();
 		result.put("#model", contextJSON);
-		result.put("#expect", expected);
+		result.put("#expect", expect);
 		result.put("java", javaresult);
 		result.put("js", jsresult);
 		result.put("php", phpresult);
-		if (!expected.equals(phpresult)) {
-			LiteTest.printLatestPHP();
-		}
-		return result;
-	}
-
-	static void checkResultEqual(String source, String expected,
-			Map<String, String> resultMap,Map<String, String> outputMap) throws IOException, SAXException {
-		//Map<String, String> outputMap = new HashMap<String, String>();
-		for (Map.Entry<String, String> entry : resultMap.entrySet()) {
-			if (!entry.getKey().startsWith("#")) {
-				try {
-					if (expected == null) {
-						Assert.assertEquals(entry.getKey() + "运行结果有误：#"
-								+ source, expected, entry.getValue());
-					}
-				} catch (Error e) {
-					if (outputMap == null) {
-						throw e;
-					} else {
-						outputMap.put(entry.getKey(), entry.getValue());
-					}
-				}
-
+		if (!expect.equals(phpresult)) {
+			phpresult = normalizeXML(phpresult);
+			if (!expect.equals(phpresult)) {
+				System.out.println("expect:" + expect);
+				System.out.println("php:" + phpresult);
+				LiteTest.printLatestPHP();
 			}
 		}
+		return result;
 	}
 
 	public static String normalizeXML(String result) throws IOException,
@@ -172,73 +145,9 @@ public class LiteTest {
 		if (!result.trim().startsWith("<")) {
 			return result;
 		}
-		try {
-			result = new XMLNormalizeImpl() {
-				{
-					this.defaultNSMap = Collections.emptyMap();
-				}
-
-				public void appendScript(String content) {
-					super.appendScript(replaceUnicode(content));
-				}
-
-				public void addAttr(String space, String name, String value,
-						char qute) {
-					if (name.startsWith("on")) {
-						value = replaceUnicode(value);
-					}
-					super.addAttr(space, name, value, qute);
-				}
-			}.normalize(result, LiteTest.class.getName());
-			Document doc = ParseUtil
-					.loadXMLBySource(result, "normalize source");
-			StringWriter out = new StringWriter();
-			Transformer newTransformer = TransformerFactory.newInstance()
-					.newTransformer();
-			newTransformer.setOutputProperty(
-					javax.xml.transform.OutputKeys.INDENT, "yes");
-			newTransformer.transform(new DOMSource(doc), new StreamResult(out));
-			result = out.toString();
-		} catch (TransformerConfigurationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (TransformerFactoryConfigurationError e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (TransformerException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		result = new XMLFormat().normalize(result, LiteTest.class.getName());
 		return result;
 
-	}
-
-	public static String replaceUnicode(String content) {
-		Pattern p = Pattern.compile("\\\\u([0-9a-f]{4})|\\\\+/");
-		Matcher m = p.matcher(content);
-		boolean result = m.find();
-		if (result) {
-			StringBuffer sb = new StringBuffer();
-			do {
-				String c = m.group(1);
-				if (c != null && c.length() > 0) {
-					m
-							.appendReplacement(sb, ""
-									+ (char) Integer.parseInt(c, 16));
-				} else {
-					c = m.group();
-					if (c.length() % 2 == 0) {
-						c = c.substring(0, c.length() - 2) + '/';
-					}
-					m.appendReplacement(sb, c);
-				}
-				result = m.find();
-			} while (result);
-			m.appendTail(sb);
-			// System.out.println(m);
-			return sb.toString();
-		}
-		return content;
 	}
 
 	private static ParseContext buildContext(
@@ -364,4 +273,141 @@ public class LiteTest {
 		System.out.println(currentPHP);
 	}
 
+}
+
+class XMLFormat extends XMLNormalizeImpl {
+	{
+		defaultNSMap = Collections.emptyMap();
+		defaultEntryMap = new HashMap<String, String>(defaultEntryMap);
+
+		defaultEntryMap.put("&lt;", "&#60;");
+		defaultEntryMap.put("&gt;", "&#62;");
+		defaultEntryMap.put("&amp;", "&#38;");
+		defaultEntryMap.put("&quot;", "&#34;");
+	}
+
+	public static String replaceUnicode(String content) {
+		Pattern p = Pattern.compile("\\\\u([0-9a-f]{4})|\\\\+/");
+		Matcher m = p.matcher(content);
+		boolean result = m.find();
+		if (result) {
+			StringBuffer sb = new StringBuffer();
+			do {
+				String c = m.group(1);
+				if (c != null && c.length() > 0) {
+					m
+							.appendReplacement(sb, ""
+									+ (char) Integer.parseInt(c, 16));
+				} else {
+					c = m.group();
+					if (c.length() % 2 == 0) {
+						c = c.substring(0, c.length() - 2) + '/';
+					}
+					m.appendReplacement(sb, c);
+				}
+				result = m.find();
+			} while (result);
+			m.appendTail(sb);
+			// System.out.println(m);
+			return sb.toString();
+		}
+		return content;
+	}
+
+	public void appendScript(String content) {
+		super.appendScript(replaceUnicode(content));
+	}
+
+	private java.util.SortedMap<String, StringBuilder> attrValues = new TreeMap<String, StringBuilder>();
+
+	protected void addAttr(String space, String name, String value, char qute) {
+		if (name.startsWith("on")) {
+			value = replaceUnicode(value);
+		}
+		StringBuilder result = this.result;
+		this.result = new StringBuilder();
+		super.addAttr(space, name, value, qute);
+		attrValues.put(name, this.result);
+		this.result = result;
+	}
+
+	protected void compliteAttr() {
+		for (StringBuilder value : attrValues.values()) {
+			this.result.append(value);
+		}
+		attrValues = new TreeMap<String, StringBuilder>();
+	}
+
+	protected void appendTextTo(int p) {
+		if (p > start) {
+			String text = this.text.substring(start, p);
+
+			text = safeTrim(text);
+			String text2 = formatXMLValue(text, null, (char) 0);
+
+			if(tag == null || ignoreSpaceTagSet.contains(tag.name)){
+				text2 = text2.trim();
+			}
+			result.append(text2);
+			start = p;
+		}
+	}
+
+	private String safeTrim(String text) {
+		return ParseUtil.safeTrim(text);
+	}
+
+	/**
+	 * "["'&<]"
+	 * 
+	 * @param value
+	 * @return
+	 */
+	protected String formatXMLValue(String value, String attrName, char qute) {
+		Matcher m = XML_TEXT.matcher(value);
+		int hit = -1;
+		if (m.find()) {
+			StringBuffer sb = new StringBuffer();
+			do {
+				String entity = m.group();
+				if (entity.length() == 1) {
+					int c = entity.charAt(0);
+					switch (c) {
+					case '&':
+					case '<':
+						if (hit < 0) {
+							hit = m.start();
+						}
+					case '\'':
+					case '\"':
+						if (hit < 0 && c == qute) {
+							hit = m.start();
+						}
+						entity = "&#" + c + ";";
+						break;
+					default:
+
+					}
+				} else {
+					String entity2 = defaultEntryMap.get(entity);
+					if (entity2 != null) {
+						entity = entity2;
+					}
+				}
+				m.appendReplacement(sb, entity);
+			} while (m.find());
+			m.appendTail(sb);
+			if (hit >= 0) {
+				if (attrName == null) {
+					String line = new TextPosition(value).getLineText(hit);
+					info("XML未转义(已修复):" + line.trim());
+				} else {
+					String line = new TextPosition(value).getLineText(hit);
+					info("属性:" + attrName + " 值未转义(已修复):" + line.trim());
+				}
+			}
+			return sb.toString();
+		}
+		return value;
+	}
 }

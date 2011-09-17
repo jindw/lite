@@ -18,7 +18,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xidea.el.impl.ReflectUtil;
-import org.xidea.lite.Template;
+import org.xidea.lite.LiteTemplate;
 import org.xidea.lite.TemplateEngine;
 import org.xidea.lite.impl.ParseContextImpl;
 import org.xidea.lite.impl.ParseUtil;
@@ -133,7 +133,7 @@ public class AvoidErrorParserTest {
 
 	private String toString(ParseContext context) throws IOException {
 		StringWriter out = new StringWriter();
-		new Template(context.toList(),null).render(this, out);
+		new LiteTemplate(context.toList(),LiteTestUtil.defaultFeatureMap).render(this, out);
 		String result = out.toString();
 		return result;
 	}

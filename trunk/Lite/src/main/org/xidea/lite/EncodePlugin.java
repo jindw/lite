@@ -1,10 +1,9 @@
 package org.xidea.lite;
 
 import java.io.IOException;
-import java.io.Writer;
+import java.util.Map;
 
 import org.xidea.el.Expression;
-import org.xidea.el.ValueStack;
 
 /**
  * 自定义函数和扩展函数（Invocable接口类）
@@ -19,7 +18,7 @@ public class EncodePlugin implements RuntimePlugin {
 		this.el = (Expression) ((Object[]) children[0])[1];
 	}
 
-	public void execute(ValueStack context, Writer out) throws IOException {
+	public void execute(Map<String, Object> context, Appendable out) throws IOException {
 		Object value = el.evaluate(context);
 		if (value instanceof Number) {
 			if (((Number) value).floatValue() == 0) {
@@ -33,21 +32,21 @@ public class EncodePlugin implements RuntimePlugin {
 			int c = text.charAt(i);
 			switch (c) {
 			case '<':
-				out.write("&lt;");// 60
+				out.append("&lt;");// 60
 				break;
 			case '"':// 34
-				out.write("&#34;");
+				out.append("&#34;");
 				break;
 			case '\'':// 39
-				out.write("&#39;");
+				out.append("&#39;");
 				break;
 			case '&':// 38
 				if (notEntity(text, i, len)) {
-					out.write("&amp;");
+					out.append("&amp;");
 					break;
 				}
 			default:
-				out.write(c);
+				out.append((char)c);
 			}
 		}
 	}

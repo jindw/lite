@@ -7,6 +7,8 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
+import org.xidea.lite.Template;
+
 
 @SuppressWarnings("serial")
 class TestServlet extends GenericServlet {
@@ -26,7 +28,7 @@ class TestServlet extends GenericServlet {
 		String callback = request.getParameter("callback");
 		java.util.List<Object> litecode = org.xidea.el.json.JSONDecoder.decode(code);
 		java.util.Map<String,Object> litemodel = org.xidea.el.json.JSONDecoder.decode(model);
-		org.xidea.lite.Template tpl = new org.xidea.lite.Template(litecode,null);
+		Template tpl = new org.xidea.lite.LiteTemplate(litecode,LiteTestUtil.defaultFeatureMap);
 		java.io.StringWriter out2 = new java.io.StringWriter();
 		tpl.render(litemodel, out2);
 		if(callback == null){

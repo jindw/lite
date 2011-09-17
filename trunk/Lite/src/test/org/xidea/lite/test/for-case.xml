@@ -27,5 +27,20 @@
 			 var="f2" list='${1}'>${f1}${for.index}</c:for>${for.lastIndex}</c:for>]]></source>
 			<expect>a01b01</expect>
 		</case>
+		<case title="for else">
+			<source><![CDATA[<c:for
+			 var="f1" list="${[0]}">for</c:for><c:else>else</c:else>]]></source>
+			<expect>for</expect>
+		</case>
+		<case title="for else">
+			<source><![CDATA[<c:for
+			 var="f1" list="${0}">for</c:for><c:else>else</c:else>]]></source>
+			<expect>else</expect>
+		</case>
+		<case title="for else">
+			<source><![CDATA[<c:for
+			 var="f1" list="${[]}">for</c:for><c:else>else</c:else>]]></source>
+			<expect>else</expect>
+		</case>
 	</unit>
 </test>

@@ -4,9 +4,10 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 import org.xidea.el.ExpressionFactory;
+import org.xidea.el.impl.ExpressionFactoryImpl;
 
 public class CompareTest {
-	ExpressionFactory ef = ExpressionFactory.getInstance();
+	ExpressionFactory ef = ExpressionFactoryImpl.getInstance();
 	@Test
 	public void test(){
 		String el = "NaN==NaN";

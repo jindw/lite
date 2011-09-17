@@ -2,6 +2,7 @@ package org.xidea.el.impl;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -14,11 +15,14 @@ import org.xidea.el.ExpressionFactory;
 import org.xidea.el.ExpressionToken;
 import org.xidea.el.fn.ECMA262Impl;
 
-public class ExpressionFactoryImpl extends ExpressionFactory {
+public class ExpressionFactoryImpl implements ExpressionFactory {
 	private static ExpressionFactoryImpl expressionFactory;
+	private static ValueStackImpl EMPTY_VS = new ValueStackImpl(Collections
+			.emptyMap());
 	protected final OperationStrategy strategy;
 	protected Map<String, Integer> aliseMap = new HashMap<String, Integer>();
 	private int inc = 1;
+	private static Map<String, Invocable> cachedInvocableMap = new HashMap<String, Invocable>();
 
 	public static ExpressionFactoryImpl getInstance() {
 		if (expressionFactory == null) {
@@ -56,24 +60,25 @@ public class ExpressionFactoryImpl extends ExpressionFactory {
 			Invocable invocable) {
 		getImpl().addMethod(clazz, name,invocable);
 	}
-
+	private Invocable toInvocable(Object impl){
+		if(impl instanceof Method){
+			Method method = (Method)impl;
+			if(Modifier.isPublic(method.getModifiers()) && Modifier.isStatic(method.getModifiers())){
+				impl = createProxy(method);
+			}
+		}
+		if(impl instanceof Invocable){
+			return (Invocable) impl;
+		}
+		throw new IllegalArgumentException("支持public static 格式的函数或者org.xidea.el.Invocable 对象");
+	}
 	public void addOperator(int sampleToken, String name, Object impl) {
 		if(impl == null){
 			this.aliseMap.put(name, sampleToken);
 		}else{
-			if(impl instanceof Method){
-				Method method = (Method)impl;
-				if(Modifier.isPublic(method.getModifiers()) && Modifier.isStatic(method.getModifiers())){
-					impl = ReferenceImpl.createProxy(method);
-				}
-			}
-			if(impl instanceof Invocable){
-				sampleToken += (inc++ << ExpressionToken.POS_INC);
-				this.aliseMap.put(name, sampleToken);
-				getImpl().addVar(sampleToken, impl);
-			}else{
-				throw new IllegalArgumentException("操作符实现只支持public static 模式函数或者org.xidea.el.Invocable 对象");
-			}
+			sampleToken += (inc++ << ExpressionToken.POS_INC);
+			this.aliseMap.put(name, sampleToken);
+			getImpl().addVar(sampleToken, toInvocable(impl));
 		}
 	}
 
@@ -103,7 +108,77 @@ public class ExpressionFactoryImpl extends ExpressionFactory {
 	}
 
 	protected Expression getOptimizedExpression(ExpressionToken el) {
-		Expression ressult = OptimizeExpressionImpl.create(el, strategy);
-		return ressult != null ? ressult : new ExpressionImpl(el, strategy);
+		Expression ressult = OptimizeExpressionImpl.create(el, this,strategy);
+		return ressult != null ? ressult : new ExpressionImpl(el, this,strategy);
+	}
+
+	public static Invocable createProxy(final Method... methods) {
+		for (Method method : methods) {
+			try{
+				method.setAccessible(true);
+			}catch (Exception e) {
+			}
+		}
+		MethodInvocable inv = new MethodInvocable();
+		inv.methods = methods;
+		return inv;
+	}
+
+	static Invocable getInvocable(final Class<? extends Object> clazz, final String name,
+			int length) {
+		String key = clazz.getName() + '.' + length + name;
+		Invocable result = cachedInvocableMap.get(key);
+		if (result == null && !cachedInvocableMap.containsKey(key)) {
+			ArrayList<Method> methods = new ArrayList<Method>();
+			for (Method method : clazz.getMethods()) {
+				if (method.getName().equals(name)
+						&& (length <0 || method.getParameterTypes().length == length)) {
+					methods.add(method);
+				}
+			}
+			if(methods.size()>0){
+				result = createProxy(methods.toArray(new Method[methods.size()]));
+				cachedInvocableMap.put(key, result);
+			}
+		}
+		return result;
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T>T wrapAsContext(Object context) {
+		Map<String, Object> valueStack;
+		if (context instanceof Map) {
+			valueStack = (Map<String, Object>) context;
+		} else if (context == null) {
+			valueStack = EMPTY_VS;
+		} else {
+			valueStack = new ValueStackImpl(context);
+		}
+		return (T)valueStack;
+	}
+}
+
+class MethodInvocable implements Invocable {
+	Method[] methods;
+	public Object invoke(Object thiz, Object... args) throws Exception {
+		nextMethod: for (Method method : methods) {
+			Class<? extends Object> clazzs[] = method
+					.getParameterTypes();
+			if (clazzs.length == args.length) {
+				for (int i = 0; i < clazzs.length; i++) {
+					Class<? extends Object> type = ReflectUtil.toWrapper(clazzs[i]);
+					Object value = args[i];
+					value = ECMA262Impl.ToValue(value, type);
+					args[i] = value;
+					if (value != null) {
+						if (!type.isInstance(value)) {
+							continue nextMethod;
+						}
+					}
+				}
+			}
+			return method.invoke(thiz, args);
+		}
+		return null;
 	}
 }

@@ -1,10 +1,10 @@
 package org.xidea.el.impl;
 
+import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
-import org.xidea.el.ValueStack;
-
-public class ValueStackImpl implements ValueStack {
+public class ValueStackImpl implements Map<String, Object> {
 	protected Object[] stack;
 
 	public ValueStackImpl(Object... stack) {
@@ -29,7 +29,7 @@ public class ValueStackImpl implements ValueStack {
 					return result;
 				}
 				if (key instanceof String) {
-					return ReferenceImpl.getInvocable(clazz,
+					return ExpressionFactoryImpl.getInvocable(clazz,
 							(String) key, -1);
 				}
 			}
@@ -41,8 +41,9 @@ public class ValueStackImpl implements ValueStack {
 		return null;
 	}
 
-	public void put(Object key, Object value) {
+	public Object put(String key, Object value) {
 		put(key, value, -1);
+		return null;
 	}
 
 	public void put(Object key, Object value, int level) {
@@ -52,15 +53,45 @@ public class ValueStackImpl implements ValueStack {
 		ReflectUtil.setValue(stack[level], key, value);
 	}
 
+	public void clear() {
+	}
+
+	public boolean containsKey(Object key) {
+		return false;
+	}
+
+	public boolean containsValue(Object value) {
+		return false;
+	}
+
+	public Set<java.util.Map.Entry<String, Object>> entrySet() {
+		return null;
+	}
+
+	public boolean isEmpty() {
+		return false;
+	}
+
+	public Set<String> keySet() {
+		return null;
+	}
+
+	public void putAll(Map<? extends String, ? extends Object> m) {
+	}
+
+	public Object remove(Object key) {
+		return null;
+	}
+
+	public int size() {
+		return 0;
+	}
+
+	public Collection<Object> values() {
+		return null;
+	}
+
 }
-//class ThisWrapper implements Invocable {
-//	Invocable base;
-//	Object thiz;
-//	public Object invoke(Object thiz2, Object... args)
-//			throws Exception {
-//		return base.invoke(thiz, args);
-//	}
-//};
 class RefrenceStackImpl extends ValueStackImpl {
 	public RefrenceStackImpl(Object... context) {
 		super(context);

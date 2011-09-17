@@ -3,12 +3,14 @@ package org.xidea.lite.test.oldcases;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.util.HashMap;
 import java.util.List;
 
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xidea.jsi.JSIRuntime;
 import org.xidea.jsi.impl.RuntimeSupport;
+import org.xidea.lite.LiteTemplate;
 import org.xidea.lite.impl.ParseConfigImpl;
 import org.xidea.lite.impl.ParseContextImpl;
 import org.xidea.lite.impl.ParseUtil;
@@ -18,7 +20,9 @@ import org.xml.sax.SAXException;
 public class LiteTestUtil {
 	private static boolean useJS = false;
 	private static JSIRuntime rt = RuntimeSupport.create();
+	static HashMap defaultFeatureMap = new HashMap();
 	static{
+		defaultFeatureMap.put(LiteTemplate.FEATURE_ENCODING, "UTF-8");
 		try{
 		rt.eval("$import('org.xidea.lite.impl.*')");
 		rt.eval("$import('org.xidea.lite.parse.*')");

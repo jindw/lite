@@ -103,7 +103,7 @@ public class ParseUtil {
 	 * @param text
 	 * @return
 	 */
-	static String safeTrim(String text) {
+	public static String safeTrim(String text) {
 		StringBuffer buf = new StringBuffer(text);
 		final int len = buf.length();
 		if (len == 0) {
@@ -247,7 +247,8 @@ public class ParseUtil {
 
 	public static String normalize(String text, String id) throws IOException,
 			SAXException {
-		if (!text.startsWith("<")) {
+		int start  = text.indexOf('<');
+		if(start<0 || start>0 && text.substring(0,start).trim().length() > 0){
 			return "<out xmlns='http://www.xidea.org/lite/core'><![CDATA["
 					+ TXT_CDATA_END.matcher(
 							TXT_HEADER.matcher(text).replaceAll(""))

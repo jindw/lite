@@ -2,9 +2,8 @@ package org.xidea.lite;
 
 
 import java.io.IOException;
-import java.io.Writer;
+import java.util.Map;
 
-import org.xidea.el.ValueStack;
 
 
 /**
@@ -14,5 +13,5 @@ import org.xidea.el.ValueStack;
  */
 public interface RuntimePlugin {
 	public void initialize(Template template,Object[] children);
-	public void execute(ValueStack context,Writer out) throws IOException;
+	public void execute(Map<String, Object> context,Appendable out) throws IOException;
 }

@@ -3,18 +3,19 @@ package org.xidea.el.impl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
+import org.xidea.el.ExpressionFactory;
 import org.xidea.el.OperationStrategy;
 import org.xidea.el.Expression;
 import org.xidea.el.ExpressionToken;
-import org.xidea.el.ValueStack;
 
 public class OptimizeExpressionImpl extends ExpressionImpl {
 	protected String name;
 
-	public OptimizeExpressionImpl(ExpressionToken expression,
+	public OptimizeExpressionImpl(ExpressionToken expression,ExpressionFactory factory,
 			OperationStrategy calculater, String name) {
-		super(expression, calculater);
+		super(expression, factory,calculater);
 		this.name = name;
 	}
 
@@ -25,18 +26,11 @@ public class OptimizeExpressionImpl extends ExpressionImpl {
 
 	@Override
 	public Object evaluate(Object context) {
-		ValueStack valueStack;
-		if (context == null) {
-			valueStack = new ValueStackImpl();
-		} else if (context instanceof ValueStack) {
-			valueStack = (ValueStack) context;
-		} else {
-			valueStack = new ValueStackImpl(context);
-		}
-		return compute(valueStack);
+		Map<String, Object> contextMap = factory.wrapAsContext(context);
+		return compute(contextMap);
 	}
 
-	protected Object compute(ValueStack valueStack) {
+	protected Object compute(Map<String, Object> valueStack) {
 		return strategy.getVar(valueStack,name);
 	}
 	/**
@@ -45,10 +39,10 @@ public class OptimizeExpressionImpl extends ExpressionImpl {
 	 * @param calculater
 	 * @return
 	 */
-	public static Expression create(final ExpressionToken el,
+	public static Expression create(final ExpressionToken el,ExpressionFactory factory,
 			OperationStrategy calculater) {
 		if (el.getType() == ExpressionToken.VALUE_VAR) {
-			return new OptimizeExpressionImpl(el, calculater, 
+			return new OptimizeExpressionImpl(el,factory, calculater, 
 					(String)el.getParam());
 		}else if (el.getType() == TokenImpl.OP_GET_STATIC) {
 					ArrayList<Object> props = new ArrayList<Object>();
@@ -70,10 +64,10 @@ public class OptimizeExpressionImpl extends ExpressionImpl {
 			final Object[] properties = props.toArray();
 			switch (properties.length) {
 			case 1:
-				return new PropertyImpl(el, calculater, 
+				return new PropertyImpl(el,factory, calculater, 
 						baseName,properties[0]);
 			default:
-				return new PropertiesImpl(el, calculater, 
+				return new PropertiesImpl(el, factory,calculater, 
 						baseName,properties);
 			}
 
@@ -87,13 +81,13 @@ public class OptimizeExpressionImpl extends ExpressionImpl {
 class PropertyImpl extends OptimizeExpressionImpl {
 	private Object key;
 
-	public PropertyImpl(ExpressionToken expression,
+	public PropertyImpl(ExpressionToken expression,ExpressionFactory factory,
 			OperationStrategy calculater, String name, Object key) {
-		super(expression, calculater, name);
+		super(expression,factory, calculater, name);
 		this.key = key;
 	}
 
-	protected Object compute(ValueStack valueStack) {
+	protected Object compute(Map<String, Object> valueStack) {
 		Object base = strategy.getVar(valueStack, name);
 		return ReflectUtil.getValue(base, key);
 	}
@@ -102,13 +96,13 @@ class PropertyImpl extends OptimizeExpressionImpl {
 class PropertiesImpl extends PropertyImpl {
 	private Object[] keys;
 
-	public PropertiesImpl(ExpressionToken expression,
+	public PropertiesImpl(ExpressionToken expression,ExpressionFactory factory,
 			OperationStrategy calculater, String name, Object[] keys) {
-		super(expression, calculater, name, null);
+		super(expression,factory, calculater, name, null);
 		this.keys = keys;
 	}
 
-	protected Object compute(ValueStack valueStack) {
+	protected Object compute(Map<String, Object> valueStack) {
 		Object base = strategy.getVar(valueStack, name);
 		int i = keys.length;
 		while (i-- > 0) {

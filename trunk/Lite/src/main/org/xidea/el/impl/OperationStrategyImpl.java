@@ -14,14 +14,13 @@ import org.xidea.el.OperationStrategy;
 import org.xidea.el.ExpressionToken;
 import org.xidea.el.Invocable;
 import org.xidea.el.Reference;
-import org.xidea.el.ValueStack;
 import org.xidea.el.fn.ECMA262Impl;
 
 public class OperationStrategyImpl implements OperationStrategy {
 	private static final NumberArithmetic na = new NumberArithmetic();
 	private static final Log log = LogFactory
 			.getLog(OperationStrategyImpl.class);
-	private final Map<String, Map<String, Invocable>> methodMap = new HashMap<String, Map<String, Invocable>>();
+	private final Map<Class<? extends Object>, Map<String, Invocable>> classMethodMap = new HashMap<Class<? extends Object>, Map<String, Invocable>>();
 	private final Map<Object, Object> globalMap = new HashMap<Object, Object>();
 	boolean customizable;
 
@@ -38,15 +37,17 @@ public class OperationStrategyImpl implements OperationStrategy {
 	}
 
 	protected void addMethod(Class<? extends Object> clazz, String name,
-			Invocable invocable) {
-
-		Map<String, Invocable> invocableMap = this.methodMap.get(name);
+				Invocable invocable) {
+		Map<String, Invocable> invocableMap = this.classMethodMap.get(clazz);
 		if (invocableMap == null) {
 			invocableMap = new HashMap<String, Invocable>();
-			this.methodMap.put(name, invocableMap);
+			this.classMethodMap.put(clazz, invocableMap);
 		}
-		invocableMap.put(clazz.getName(), invocable);
-
+		for(Map.Entry<Class<?extends Object>,Map<String,Invocable>> entry: this.classMethodMap.entrySet()){
+			if(entry.getKey().isAssignableFrom(clazz)){
+				entry.getValue().put(name, invocable);
+			}
+		}
 	}
 
 	/**
@@ -108,12 +109,12 @@ public class OperationStrategyImpl implements OperationStrategy {
 	}
 
 	@SuppressWarnings( { "unchecked" })
-	public Object evaluate(ExpressionToken item, ValueStack vs) {
+	public Object evaluate(ExpressionToken item, Map<String, Object> vs) {
 		final int type = item.getType();
 		switch (type) {
 		case ExpressionToken.VALUE_VAR:
 			Object key = item.getParam();
-			return getVar(vs,key);
+			return getVar(vs, key);
 		case ExpressionToken.VALUE_CONSTANTS:
 			return item.getParam();
 		case ExpressionToken.VALUE_LIST:
@@ -202,9 +203,9 @@ public class OperationStrategyImpl implements OperationStrategy {
 		case ExpressionToken.OP_ADD:
 			Object p1 = ECMA262Impl.ToPrimitive(arg1, String.class);
 			Object p2 = ECMA262Impl.ToPrimitive(arg2, String.class);
-			if (p1 instanceof String || p1 instanceof Character){
+			if (p1 instanceof String || p1 instanceof Character) {
 				return p1 + ECMA262Impl.ToString(p2);
-			}else if(p2 instanceof String|| p2 instanceof Character) {
+			} else if (p2 instanceof String || p2 instanceof Character) {
 				return ECMA262Impl.ToString(p1) + p2;
 			} else {
 				return na.add(ECMA262Impl.ToNumber(p1), ECMA262Impl
@@ -252,7 +253,7 @@ public class OperationStrategyImpl implements OperationStrategy {
 		default:
 			int a1 = ECMA262Impl.ToNumber(arg1).intValue();
 			int a2 = ECMA262Impl.ToNumber(arg1).intValue();
-			switch(type){
+			switch (type) {
 			case ExpressionToken.OP_BIT_AND:
 				return a1 & a2;
 			case ExpressionToken.OP_BIT_XOR:
@@ -260,12 +261,12 @@ public class OperationStrategyImpl implements OperationStrategy {
 			case ExpressionToken.OP_BIT_OR:
 				return a1 | a2;
 			case ExpressionToken.OP_LSH:
-				return a1<<a2;
+				return a1 << a2;
 			case ExpressionToken.OP_RSH:
-				return a1>>a2;
+				return a1 >> a2;
 			case ExpressionToken.OP_URSH:
-				return a1>>>a2;
-			
+				return a1 >>> a2;
+
 			}
 
 			Object impl = this.globalMap.get(type);
@@ -280,20 +281,24 @@ public class OperationStrategyImpl implements OperationStrategy {
 				}
 			}
 			throw new RuntimeException("不支持的操作符" + item.getType());
-			
-			
-//			case ExpressionToken.VALUE_CONSTANTS:// = -0x01;//value
-//			case ExpressionToken.VALUE_VAR://       = -0x02;//var
-//			case ExpressionToken.VALUE_LIST://      = -0x03;//[]
-//			case ExpressionToken.VALUE_MAP://       = -0x04;//{}
-			
-			
-//			case ExpressionToken.OP_GET://      = 0<<12 | 0<<8 | 1<<6 | 8<<2 | 0;//.[]
-//			case ExpressionToken.OP_INVOKE://   = 0<<12 | 0<<8 | 1<<6 | 8<<2 | 1;//()
-//			case ExpressionToken.OP_AND:// = 0<<12 | 1<<8 | 1<<6 | 2<<2 | 0;//&&
-//			case ExpressionToken.OP_OR://  = 0<<12 | 0<<8 | 1<<6 | 2<<2 | 0;//||
-//			case ExpressionToken.OP_QUESTION://        = 0<<12 | 0<<8 | 1<<6 | 1<<2 | 0;//?
-//			case ExpressionToken.OP_QUESTION_SELECT:// = 0<<12 | 0<<8 | 1<<6 | 1<<2 | 1;//:
+
+			// case ExpressionToken.VALUE_CONSTANTS:// = -0x01;//value
+			// case ExpressionToken.VALUE_VAR:// = -0x02;//var
+			// case ExpressionToken.VALUE_LIST:// = -0x03;//[]
+			// case ExpressionToken.VALUE_MAP:// = -0x04;//{}
+
+			// case ExpressionToken.OP_GET:// = 0<<12 | 0<<8 | 1<<6 | 8<<2 |
+			// 0;//.[]
+			// case ExpressionToken.OP_INVOKE:// = 0<<12 | 0<<8 | 1<<6 | 8<<2 |
+			// 1;//()
+			// case ExpressionToken.OP_AND:// = 0<<12 | 1<<8 | 1<<6 | 2<<2 |
+			// 0;//&&
+			// case ExpressionToken.OP_OR:// = 0<<12 | 0<<8 | 1<<6 | 2<<2 |
+			// 0;//||
+			// case ExpressionToken.OP_QUESTION:// = 0<<12 | 0<<8 | 1<<6 | 1<<2
+			// | 0;//?
+			// case ExpressionToken.OP_QUESTION_SELECT:// = 0<<12 | 0<<8 | 1<<6
+			// | 1<<2 | 1;//:
 		}
 
 	}
@@ -318,41 +323,92 @@ public class OperationStrategyImpl implements OperationStrategy {
 			return false;
 		}
 		String skey = ECMA262Impl.ToString(key);
-		if (object instanceof Map<?,?>) {
-			return ((Map<?,?>)object).containsKey(skey);
+		if (object instanceof Map<?, ?>) {
+			return ((Map<?, ?>) object).containsKey(skey);
 		}
-		
+
 		return ReflectUtil.getPropertyType(clazz, skey) != null;
 	}
 
-	private Object invoke(ValueStack vs, Object arg1, Object[] arguments) {
+	private Map<String, Invocable> requireMethodMap(
+			Class<? extends Object> clazz) {
+		Map<String, Invocable> methodMap = this.classMethodMap.get(clazz);
+		if (methodMap == null) {
+			methodMap = new HashMap<String, Invocable>();
+			{
+				Class<?>[] interfaces = clazz.getInterfaces();
+				for (Class<?> clazz2 : interfaces) {
+					Map<String, Invocable> m2 = requireMethodMap(clazz2);
+					methodMap.putAll(m2);
+				}
+			}
+			Class<? extends Object> clazz2 = clazz.getSuperclass();
+			if (clazz2 != clazz) {
+				if (clazz2 == Object.class && clazz.isArray()
+						&& clazz != Object[].class) {
+					clazz2 = Object[].class;
+				}
+				if (clazz2 != null) {
+					Map<String, Invocable> m2 = requireMethodMap(clazz2);
+					methodMap.putAll(m2);
+				}
+			}
+		}
+		return methodMap;
+	}
+	protected Invocable getInvocable(Object base ,String name,Object[] args){
+		Map<String, Invocable> mm = requireMethodMap(base.getClass());
+		Invocable invocable = mm.get(name);
+		if (invocable == null && name instanceof String) {
+			invocable = ExpressionFactoryImpl.getInvocable(base.getClass(), name,
+					args.length);
+			if (invocable == null && base instanceof Class<?>) {
+				invocable = ExpressionFactoryImpl.getInvocable((Class<?>) base, name,
+						args.length);
+			}
+		}
+		return invocable;
+	}
+
+	private Object invoke(Map<String, Object> vs, Object arg1, Object[] arguments) {
 		try {
 			Object thiz;
 			Invocable invocable = null;
 			if (arg1 instanceof Reference) {
 				Reference pv = (Reference) arg1;
-				invocable = ReferenceImpl.createInvocable(pv, methodMap,
-						arguments);
 				thiz = pv.getBase();
-			} else {
+				Object name = pv.getName();
+				invocable = getInvocable(thiz,String.valueOf(name), arguments);
+				if(invocable == null){
+					arg1 = pv.getValue();
+				}else{
+					return invocable.invoke(thiz, arguments);
+				}
+			}else{
 				thiz = vs;
+			}
+			if(invocable == null){
 				if (arg1 instanceof Invocable) {
 					invocable = (Invocable) arg1;
 				} else if ((arg1 instanceof java.lang.reflect.Method)) {
-					invocable = ReferenceImpl
+					invocable = ExpressionFactoryImpl
 							.createProxy((java.lang.reflect.Method) arg1);
+				}else{
+					if (log.isInfoEnabled()) {
+						log.info("对象不是有效函数:" + arg1);
+					}
 				}
 			}
 			return invocable.invoke(thiz, arguments);
 		} catch (Exception e) {
-			if (log.isDebugEnabled()) {
-				log.debug("方法调用失败:" + arg1, e);
+			if (log.isInfoEnabled()) {
+				log.info("方法调用失败:" + arg1, e);
 			}
 			return null;
 		}
 	}
 
-	public Object getVar(ValueStack vs, Object key) {
+	public Object getVar(Map<String, Object> vs, Object key) {
 		Object o = vs.get(key);
 		if (o == null) {
 			return globalMap.get(key);
@@ -360,4 +416,5 @@ public class OperationStrategyImpl implements OperationStrategy {
 		return o;
 	}
 
-}
+
+};

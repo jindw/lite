@@ -2,16 +2,17 @@ package org.xidea.lite.test.oldcases;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.HashMap;
 import java.util.regex.Pattern;
 
 import junit.framework.Assert;
 
 import org.junit.Test;
 import org.xidea.el.ExpressionFactory;
-import org.xidea.el.ValueStack;
+import org.xidea.el.impl.ExpressionFactoryImpl;
 import org.xidea.lite.EncodePlugin;
 
-public class EncodePluginTest implements ValueStack {
+public class EncodePluginTest extends HashMap<String, Object> {
 	static Pattern P = Pattern.compile("[&<'\"]");
 	static String data;
 	EncodePlugin plugin = new EncodePlugin();
@@ -19,7 +20,7 @@ public class EncodePluginTest implements ValueStack {
 
 	{
 		plugin.initialize(null, new Object[] { new Object[] { null,
-				ExpressionFactory.getInstance().create("value") } });
+				ExpressionFactoryImpl.getInstance().create("value") } });
 	}
 
 	@Test

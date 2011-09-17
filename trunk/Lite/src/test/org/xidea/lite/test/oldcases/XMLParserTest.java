@@ -22,7 +22,7 @@ import org.w3c.dom.CDATASection;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xidea.el.json.JSONEncoder;
-import org.xidea.lite.Template;
+import org.xidea.lite.LiteTemplate;
 import org.xidea.lite.impl.ParseContextImpl;
 import org.xidea.lite.impl.ParseUtil;
 import org.xidea.lite.impl.dtd.DefaultEntityResolver;

@@ -17,8 +17,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.el.json.JSONDecoder;
 import org.xidea.el.json.JSONEncoder;
-import org.xidea.lite.Template;
+import org.xidea.lite.LiteTemplate;
 import org.xidea.lite.TemplateEngine;
+import org.xidea.lite.Template;
 import org.xidea.lite.parse.ParseConfig;
 import org.xidea.lite.parse.ParseContext;
 
@@ -119,7 +120,7 @@ public class HotTemplateEngine extends TemplateEngine {
 				files.add(new File(base, p));
 			}
 		}
-		Template template = new Template(items,context.getFeatureMap());
+		Template template = new LiteTemplate(items,context.getFeatureMap());
 		
 		if(compiledBase!=null && ParseUtil.isFile(compiledBase)){
 			File file = new File(toCompiedURI(path));
@@ -190,7 +191,7 @@ public class HotTemplateEngine extends TemplateEngine {
 				log.info("文件关联："+path+":\t"+files);
 				infoMap.put(path, entry);
 			}
-			return new Template((List<Object>) list.get(1),(Map<String,String>)list.get(2));
+			return new LiteTemplate((List<Object>) list.get(1),(Map<String,String>)list.get(2));
 		} catch (RuntimeException e) {
 			log.error("装载模板中间代码失败", e);
 			return null;

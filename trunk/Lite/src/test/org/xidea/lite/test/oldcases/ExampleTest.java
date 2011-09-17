@@ -22,7 +22,7 @@ import org.xidea.el.json.JSONEncoder;
 import org.xidea.jsi.JSIRuntime;
 import org.xidea.jsi.impl.JSIText;
 import org.xidea.jsi.impl.RuntimeSupport;
-import org.xidea.lite.Template;
+import org.xidea.lite.LiteTemplate;
 import org.xidea.lite.impl.ParseUtil;
 import org.xidea.lite.parse.ParseContext;
 import org.xml.sax.SAXException;
@@ -148,7 +148,7 @@ public class ExampleTest {
 		pc.parse(ParseUtil.loadXML(source));
 		StringWriter out = new StringWriter();
 		System.out.println(JSONEncoder.encode(pc.toList()));
-		new Template(pc.toList(),null).render(JSONDecoder.decode(contextJSON),
+		new LiteTemplate(pc.toList(),LiteTestUtil.defaultFeatureMap).render(JSONDecoder.decode(contextJSON),
 				out);
 		String java = out.toString();
 		Assert.assertEquals("JS结果与Java不一致:"+key, sumText((String) jsJSON),

@@ -9,7 +9,7 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.xidea.lite.Template;
+import org.xidea.lite.LiteTemplate;
 import org.xidea.lite.parse.ParseContext;
 
 public class XMLTemplateTest {
@@ -24,7 +24,7 @@ public class XMLTemplateTest {
 	public Object getTemplate(URL resource) throws Exception {
 		ParseContext context = LiteTestUtil.buildParseContext(null);
 		context.parse(resource.toString());
-		return new Template(context.toList(),context.getFeatureMap());
+		return new LiteTemplate(context.toList(),context.getFeatureMap());
 	}
 
 	@Test

@@ -8,6 +8,7 @@ import java.util.HashMap;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.xidea.lite.LiteTemplate;
 import org.xidea.lite.Template;
 
 public class HTMLParserTest {
@@ -19,7 +20,7 @@ public class HTMLParserTest {
 
 	@Test
 	public void testSelect() throws Exception {
-		Template t = new Template(LiteTestUtil.parse("<select/>"),null);
+		Template t = new LiteTemplate(LiteTestUtil.parse("<select/>"),LiteTestUtil.defaultFeatureMap);
 		StringWriter out = new StringWriter();
 		t.render(new HashMap<Object, Object>(), out);
 		Assert.assertEquals("<select></select>", out.toString());

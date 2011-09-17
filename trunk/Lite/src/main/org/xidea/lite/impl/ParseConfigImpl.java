@@ -19,8 +19,8 @@ import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
 import org.xidea.el.json.JSONDecoder;
 import org.xidea.jsi.JSIRuntime;
+import org.xidea.lite.LiteTemplate;
 import org.xidea.lite.parse.ParseConfig;
-import org.xidea.lite.parse.ParseContext;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -166,7 +166,7 @@ public class ParseConfigImpl implements ParseConfig {
 			this.includes = Pattern.compile("\\.xhtml$");
 			this.excludes = Pattern.compile("^[\\.^]");
 			this.featureMap = new HashMap<String, String>();
-			this.featureMap.put(ParseContext.FEATURE_ENCODING, "UTF-8");
+			this.featureMap.put(LiteTemplate.FEATURE_ENCODING, "UTF-8");
 			this.featureMap = Collections.unmodifiableMap(this.featureMap);
 		}
 

@@ -1,13 +1,12 @@
 package org.xidea.lite;
 
-import java.io.StringWriter;
-import java.io.Writer;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.el.Invocable;
-import org.xidea.el.ValueStack;
 /**
  * 自定义函数和扩展函数（Invocable接口类）
  * @author jindw
@@ -48,23 +47,23 @@ public class DefinePlugin implements RuntimePlugin,Invocable {
 		this.type = type;
 	}
 
-	public void execute(ValueStack context,Writer out) {
+	public void execute(Map<String, Object> context,Appendable out) {
 		if (type==null) {
-			context.put(this.name, this);
+			template.addVar(name, this);
 		} else {
-			context.put(name, instance);
+			template.addVar(name, instance);
 		}
 	}
 
 	public Object invoke(Object thiz, Object... args) throws Exception {
-		StringWriter out = new StringWriter();
+		StringBuilder out = new StringBuilder();
 		apply(thiz, out, args);
 		return out.toString();
 
 	}
 
-	public void apply(Object thiz, Writer out, Object... args) {
-		Context context = new Context(null);
+	public void apply(Object thiz, Appendable out, Object... args) {
+		HashMap<String, Object> context = new HashMap<String, Object>();
 		for (int i = 0; i < params.length; i++) {
 			if(i<args.length){
 				context.put(params[i], args[i]);
@@ -72,13 +71,11 @@ public class DefinePlugin implements RuntimePlugin,Invocable {
 				int begin = i - (params.length -defaults.length);
 				if(begin>=0 && begin<defaults.length){
 					context.put(params[i], defaults[begin]);
-				//}else{
-				//	//context.put(params[i], null);
 				}
 				
 			}
 		}
-		template.renderList(context,children, out);
+		template.render(context,children, out);
 	}
 
 }

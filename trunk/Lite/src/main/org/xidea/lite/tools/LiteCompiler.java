@@ -13,6 +13,7 @@ import org.xidea.el.impl.CommandParser;
 import org.xidea.el.impl.ReflectUtil;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.jsi.JSIRuntime;
+import org.xidea.lite.LiteTemplate;
 import org.xidea.lite.impl.HotTemplateEngine;
 import org.xidea.lite.impl.ParseUtil;
 import org.xidea.lite.parse.ParseContext;
@@ -166,7 +167,7 @@ public class LiteCompiler {
 				String result = engine.getLitecode(path);
 
 				String encoding = resourceManager.getFeatureMap(path).get(
-						ParseContext.FEATURE_ENCODING);
+						LiteTemplate.FEATURE_ENCODING);
 				// 中间代码永远是UTF-8；但是静态文本中大大字符还是要确保安全。
 				this.resultMap.put(litecodepath, result.getBytes("utf-8"));
 				if (this.translator != null) {
@@ -191,7 +192,7 @@ public class LiteCompiler {
 			} else {
 				String text = resourceManager.getFilteredText(path);
 				String encoding = resourceManager.getFeatureMap(path).get(
-						ParseContext.FEATURE_ENCODING);
+						LiteTemplate.FEATURE_ENCODING);
 				this.resultMap.put(path, text.getBytes(encoding));
 			}
 			return true;

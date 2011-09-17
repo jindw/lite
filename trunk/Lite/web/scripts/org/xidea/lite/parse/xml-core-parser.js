@@ -703,7 +703,7 @@ function processExtends(node){
 		if(oldConfig.parse){//解析进行时
 			if(root){//模板继承
 				if(extendsConfig.root){
-					this.reset(0);
+					//this.reset(0);
 				}
 				extendsConfig = oldConfig;
 				extendsConfig.parse = false;

@@ -22,9 +22,9 @@ import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
 import org.xidea.jsi.JSIRuntime;
 import org.xidea.jsi.impl.RuntimeSupport;
+import org.xidea.lite.LiteTemplate;
 import org.xidea.lite.impl.ParseConfigImpl;
 import org.xidea.lite.impl.ParseUtil;
-import org.xidea.lite.parse.ParseContext;
 import org.xml.sax.SAXException;
 
 public class ResourceManagerImpl extends ParseConfigImpl implements
@@ -133,7 +133,7 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 			Group group = this.find(path, false);
 			if (group != null) {
 				encoding = this.getFeatureMap(path).get(
-						ParseContext.FEATURE_ENCODING);
+						LiteTemplate.FEATURE_ENCODING);
 				return encoding;
 			}
 		}

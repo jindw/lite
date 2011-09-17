@@ -1,9 +1,9 @@
 package org.xidea.lite;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -11,7 +11,6 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.el.Expression;
-import org.xidea.el.ValueStack;
 
 /**
  * 自定义函数和扩展函数（Invocable接口类）
@@ -107,7 +106,7 @@ public class DatePlugin implements RuntimePlugin {
 		return value;
 	}
 
-	public void execute(ValueStack context, Writer out) throws IOException {
+	public void execute(Map<String, Object> context, Appendable out) throws IOException {
 		Object pattern = this.pattern.evaluate(context);
 		Object date = this.date.evaluate(context);
 //		System.out.println(pattern);
@@ -121,7 +120,7 @@ public class DatePlugin implements RuntimePlugin {
 				date = new Date();
 			}
 		}
-		out.write(format((String)pattern, (Date)date));
+		out.append(format((String)pattern, (Date)date));
 	}
 //	public static void main(String[] args){
 //		System.out.println(new DatePlugin().format("Y-M-D h:m:s", new Date(1000*9)));

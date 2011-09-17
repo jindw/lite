@@ -1,46 +1,40 @@
 package org.xidea.el.impl;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.xidea.el.ExpressionFactory;
 import org.xidea.el.ExpressionInfo;
 import org.xidea.el.OperationStrategy;
 import org.xidea.el.Expression;
 import org.xidea.el.ExpressionToken;
 import org.xidea.el.Reference;
 import org.xidea.el.ReferenceExpression;
-import org.xidea.el.ValueStack;
 
 public class ExpressionImpl implements Expression, ReferenceExpression,
 		ExpressionInfo {
 	protected final OperationStrategy strategy;
 	protected final ExpressionToken expression;
-	private static ValueStack EMPTY_VS = new ValueStackImpl(Collections
-			.emptyMap());
+	protected ExpressionFactory factory;
 
 	public ExpressionImpl(String el) {
 		ExpressionFactoryImpl efi = ExpressionFactoryImpl.getInstance();
+		this.factory = efi;
 		this.expression = (ExpressionToken) efi.parse(el);
 		this.strategy = efi.getStrategy();
 	}
 
-	public ExpressionImpl(ExpressionToken expression, OperationStrategy strategy) {
+	public ExpressionImpl(ExpressionToken expression, ExpressionFactory factory, OperationStrategy strategy) {
+		this.factory = factory;
 		this.strategy = strategy;
 		this.expression = expression;
 	}
 
 	public Object evaluate(Object context) {
-		ValueStack valueStack;
-		if (context instanceof ValueStack) {
-			valueStack = (ValueStack) context;
-		} else if (context == null) {
-			valueStack = EMPTY_VS;
-		} else {
-			valueStack = new ValueStackImpl(context);
-		}
-		Object result = strategy.evaluate(expression, valueStack);
+		Map<String, Object> contextMap = factory.wrapAsContext(context);
+		Object result = strategy.evaluate(expression,contextMap);
 		return result;
 	}
 
@@ -61,14 +55,7 @@ public class ExpressionImpl implements Expression, ReferenceExpression,
 	}
 
 	public Reference prepare(Object context) {
-		ValueStack valueStack;
-		if (context == null) {
-			valueStack = EMPTY_VS;
-		} else if (context instanceof ValueStack) {
-			valueStack = (ValueStack) context;
-		} else {
-			valueStack = new RefrenceStackImpl(context);
-		}
+		Map<String, Object> valueStack = new RefrenceStackImpl(context);
 		Object result = this.prepare(expression, valueStack);
 		if (result instanceof Reference) {
 			return (Reference) result;
@@ -77,7 +64,7 @@ public class ExpressionImpl implements Expression, ReferenceExpression,
 		}
 	}
 
-	protected Object prepare(ExpressionToken item, ValueStack vs) {
+	protected Object prepare(ExpressionToken item, Map<String, Object> vs) {
 		int type = item.getType();
 		Object arg2;
 		if (type == TokenImpl.OP_GET_STATIC) {

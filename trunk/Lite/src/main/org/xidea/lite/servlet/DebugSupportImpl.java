@@ -145,7 +145,7 @@ public class DebugSupportImpl implements DebugSupport {
 				context.put(key, mock.get(key));
 			}
 			Template template = templateServlet.templateEngine.getTemplate(path);
-			String contentType = template.getFeature(Template.FEATURE_CONTENT_TYPE);
+			String contentType = template.getContentType();
 			response.setContentType(contentType);
 			PrintWriter out = response.getWriter();
 			template.render(context, out);

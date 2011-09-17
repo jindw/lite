@@ -203,7 +203,7 @@ function stringifyINVOKE(el,context){
 				}
 			}else if(prop == 'reverse' && args == 'array()' && owner[0] == OP_INVOKE){
 				var info2 = parseInvoke(owner);
-				$log.error(info2);
+				//$log.error(info2);
 				if(info2[1] == 'concat'){
 					owner = info2[0];
 					owner = stringifyPHPEL2ID(owner,context,true)

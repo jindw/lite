@@ -11,7 +11,7 @@ import org.xidea.el.impl.ExpressionFactoryImpl;
 import org.xidea.el.test.ELTest;
 
 public class JSELTest {
-    private ExpressionFactory factory = ExpressionFactory.getInstance();
+    private ExpressionFactory factory = ExpressionFactoryImpl.getInstance();
 
     
     private final double EPS6 = 0.000001;

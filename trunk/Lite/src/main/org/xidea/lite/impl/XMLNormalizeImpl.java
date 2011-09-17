@@ -37,6 +37,7 @@ public class XMLNormalizeImpl {
 
 	public final static Map<String, String> DEFAULT_ENTRY_MAP;
 	public final static Map<String, String> DEFAULT_NS_MAP;
+	public final static Set<String> DEFAULT_IGNORE_SPACE_TAG_SET;
 	static {
 		Map<String, String> map = new HashMap<String, String>();
 		map.put("&copy;", "&#169;");
@@ -55,11 +56,17 @@ public class XMLNormalizeImpl {
 		set.add("hr");
 		set.add("input");
 		DEFAULT_LEAF_SET = Collections.unmodifiableSet(set);
+		set = new HashSet<String>(set);
+		set.add("html");
+		set.add("body");
+		set.add("head");
+		set.add("title");
+		DEFAULT_IGNORE_SPACE_TAG_SET = Collections.unmodifiableSet(set);
 	}
 
 	protected Map<String, String> defaultNSMap = DEFAULT_NS_MAP;
 	protected Map<String, String> defaultEntryMap = DEFAULT_ENTRY_MAP;
-	protected Set<String> defaultLeafSet;
+	protected Set<String> leafSet = DEFAULT_LEAF_SET;
 	protected String documentStart = "<c:group xmlns:c='"+NS_CORE+"' xmlns:h='"+NS_HTML_EXT+"'>";
 	protected String documentEnd = "</c:group>";
 
@@ -70,21 +77,22 @@ public class XMLNormalizeImpl {
 	protected TagAttr tag;
 	protected StringBuilder result;
 	protected String uri;
+	protected Set<String> ignoreSpaceTagSet;
 
 	public XMLNormalizeImpl(Map<String, String> defaultNSMap,
 			Map<String, String> defaultEntryMap) {
+		this();
 		this.defaultNSMap = defaultNSMap;
 		this.defaultEntryMap = defaultEntryMap;
-		defaultLeafSet = new HashSet<String>(DEFAULT_LEAF_SET);
 	}
 
 	public XMLNormalizeImpl() {
-		defaultLeafSet = new HashSet<String>(DEFAULT_LEAF_SET);
+		this.ignoreSpaceTagSet= DEFAULT_IGNORE_SPACE_TAG_SET;
 	}
 
 	protected class TagAttr {
 		int start = XMLNormalizeImpl.this.start;
-		String name;
+		public String name;
 		Map<String, String> nsMap;
 		TagAttr parentTag = tag;
 		ArrayList<String> attrs = new ArrayList<String>();
@@ -124,7 +132,7 @@ public class XMLNormalizeImpl {
 		result.append(qute);
 	}
 
-	private void compliteAttr() {
+	protected void compliteAttr() {
 		if (tag.parentTag == null) {// first Node
 			if (tag.nsMap == null) {
 				tag.nsMap = new HashMap<String, String>();
@@ -382,9 +390,9 @@ public class XMLNormalizeImpl {
 
 	protected boolean isLeaf(String name) {
 		name = name.toLowerCase();
-		if (defaultLeafSet.contains(name)) {
+		if (leafSet.contains(name)) {
 			if (this.text.indexOf("</" + name + '>', this.start) > 0) {
-				defaultLeafSet.remove(name);
+				leafSet.remove(name);
 				return false;
 			}
 			return true;
@@ -410,11 +418,11 @@ public class XMLNormalizeImpl {
 		} else if (isElementStart(type)) {
 			if (!appendElementStart()) {
 				start++;
-				result.append("&lt;");
+				result.append("&#60;");//&lt;
 			}
 		} else {
 			start++;
-			result.append("&lt;");
+			result.append("&#60;");
 		}
 	}
 
@@ -470,6 +478,10 @@ public class XMLNormalizeImpl {
 
 	protected void appendInstruction() {
 		String content = sourceTo("?>");
+		if(content == null){
+			error("xml instruction must end with ?>");
+			content = sourceTo(">").replaceFirst(">$", "?>");
+		}
 		result.append(content);
 	}
 
@@ -478,6 +490,9 @@ public class XMLNormalizeImpl {
 			String text = this.text.substring(start, p);
 			String text2 = formatXMLValue(text, null, (char) 0);
 
+			if(tag == null || ignoreSpaceTagSet.contains(tag.name)){
+				text2 = text2.trim();
+			}
 			result.append(text2);
 			start = p;
 		}
@@ -531,29 +546,19 @@ public class XMLNormalizeImpl {
 				if (entity.length() == 1) {
 					int c = entity.charAt(0);
 					switch (c) {
-					case '&':
-						if (hit < 0) {
-							hit = m.start();
-						}
-						entity = "&amp;";
-						break;
-					case '<':
-						if (hit < 0) {
-							hit = m.start();
-						}
-						entity = "&lt;";
-						break;
 					case '\'':
 					case '\"':
-						if (qute == c) {
-							if (hit < 0) {
-								hit = m.start();
-							}
-							entity = "&#" + c + ";";
+						if (qute != c) {
+							break;
 						}
-						break;
+//					case '&':
+//					case '<':
 					default:
-
+						if (hit < 0) {
+							hit = m.start();
+						}
+						entity = "&#" + c + ";";
+						break;
 					}
 				} else {
 					String entity2 = defaultEntryMap.get(entity);

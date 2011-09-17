@@ -9,7 +9,6 @@ import java.util.Map;
 import org.xidea.el.ExpressionSyntaxException;
 import org.xidea.el.ExpressionToken;
 import org.xidea.el.OperationStrategy;
-import org.xidea.el.ValueStack;
 import org.xidea.el.json.JSONEncoder;
 
 public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
@@ -50,7 +49,7 @@ public class TokenImpl extends AbstractList<Object> implements ExpressionToken {
 	}
 
 	private TokenImpl optimize(OperationStrategy os,
-			Map<String, Object> context, ValueStack vs) {
+			Map<String, Object> context, OptimizeStack vs) {
 		if (type > 0) {
 			boolean childOptimized = false;
 			if (type == OP_INVOKE

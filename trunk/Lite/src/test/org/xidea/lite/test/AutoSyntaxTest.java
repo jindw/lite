@@ -35,7 +35,10 @@ public class AutoSyntaxTest {
 	static ExpressionFactory expressionFactory = ExpressionFactoryImpl
 			.getInstance();
 
-	static String[] casefiles = { "if-case.xml","choose-case.xml","for-case.xml", "include-case.xml" };
+	static String[] casefiles = {  "if-case.xml",
+			"choose-case.xml", "for-case.xml", "def-case.xml",
+	"extends-case.xml",		
+	"include-case.xml" };
 	static Collection<Object[]> params = null;
 
 	private Map<String, String> sourceMap;
@@ -47,7 +50,7 @@ public class AutoSyntaxTest {
 			ArrayList<Object[]> rtv = new ArrayList<Object[]>();
 			for (String file : casefiles) {
 				Map<String, List<Object[]>> cases = loadCases(file);
-				
+
 				for (List<Object[]> args : cases.values()) {
 					rtv.addAll(args);
 				}
@@ -60,16 +63,16 @@ public class AutoSyntaxTest {
 	}
 
 	// public AutoTest(){}
-	public AutoSyntaxTest(Map<String, String> sourceMap, String model, String expected)
-			throws IOException, SAXException {
+	public AutoSyntaxTest(Map<String, String> sourceMap, String model,
+			String expected) throws IOException, SAXException {
 		this.sourceMap = sourceMap;
-		try{
-		resultMap = LiteTest
-				.runTemplate(sourceMap, model, TEST_XHTML, expected);
-		}catch(Error e){
+		try {
+			resultMap = LiteTest.runTemplate(sourceMap, model, TEST_XHTML,
+					expected);
+		} catch (Error e) {
 			e.printStackTrace();
 			throw e;
-		}catch(RuntimeException e){
+		} catch (RuntimeException e) {
 			e.printStackTrace();
 			throw e;
 		}
@@ -93,15 +96,16 @@ public class AutoSyntaxTest {
 	public void test(String type) throws IOException {
 		String expect = resultMap.get("#expect");
 		String value = resultMap.get(type);
-		Assert.assertEquals(type + "运行结果有误：#" + sourceMap.get(TEST_XHTML), expect, value);
+		Assert.assertEquals(type + "运行结果有误：#" + sourceMap.get(TEST_XHTML),
+				expect, value);
 	}
 
 	private static Map<String, List<Object[]>> loadCases(String path) {
 		LinkedHashMap<String, List<Object[]>> caseMap = new LinkedHashMap<String, List<Object[]>>();
 		Document doc;
 		try {
-			doc = ParseUtil.loadXML(AutoSyntaxTest.class.getResource(path).toURI()
-					.toString());
+			doc = ParseUtil.loadXML(AutoSyntaxTest.class.getResource(path)
+					.toURI().toString());
 		} catch (Exception e1) {
 			e1.printStackTrace();
 			throw new RuntimeException("load test cases xml failure:" + path);
@@ -128,7 +132,8 @@ public class AutoSyntaxTest {
 					} else if ("case".equals(tagName)) {
 						String source = getChildContent(case0, "source", null);
 						String expect = getChildContent(case0, "expect", null);
-						String model = getChildContent(case0, "model", defaultModel);
+						String model = getChildContent(case0, "model",
+								defaultModel);
 						sourceMap = new HashMap<String, String>(sourceMap);
 						sourceMap.put(TEST_XHTML, source);
 						result.add(new Object[] { sourceMap, model, expect });
@@ -156,13 +161,14 @@ public class AutoSyntaxTest {
 
 	public static void main(String[] arg) throws Exception {
 		File root;
-		if(arg.length>0){
+		if (arg.length > 0) {
 			root = new File(arg[0]);
-		}else{
-			root = new File(new File(AutoELTest.class.getResource("/").toURI()),"../../");
+		} else {
+			root = new File(
+					new File(AutoELTest.class.getResource("/").toURI()),
+					"../../");
 		}
-		File dest = new File(root,
-				"doc/test-data/test-syntax.json");
+		File dest = new File(root, "doc/test-data/test-syntax.json");
 		Writer out = new OutputStreamWriter(new FileOutputStream(dest));
 		try {
 
@@ -178,8 +184,8 @@ public class AutoSyntaxTest {
 						Map<String, String> sourceMap = (Map<String, String>) args[0];
 						String model = (String) args[1];
 						String expect = (String) args[2];
-						Map<String, String> resultMap = LiteTest.runTemplate(sourceMap, model, TEST_XHTML,
-								expect);
+						Map<String, String> resultMap = LiteTest.runTemplate(
+								sourceMap, model, TEST_XHTML, expect);
 						HashMap<String, String> info = new HashMap<String, String>();
 						info.put("source", sourceMap.get(TEST_XHTML));
 						info.put("model", model);
@@ -201,7 +207,7 @@ public class AutoSyntaxTest {
 			out.write(JSONEncoder.encode(allResult));
 			out.flush();
 		} finally {
-			System.out.println("语法测试结果写入:"+dest);
+			System.out.println("语法测试结果写入:" + dest);
 			out.close();
 		}
 	}

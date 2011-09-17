@@ -4,11 +4,12 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 import org.xidea.el.ExpressionFactory;
+import org.xidea.el.impl.ExpressionFactoryImpl;
 import org.xidea.jsi.JSIRuntime;
 import org.xidea.jsi.impl.RuntimeSupport;
 
 public class QuestionTest {
-	ExpressionFactory ef = ExpressionFactory.getInstance();
+	ExpressionFactory ef = ExpressionFactoryImpl.getInstance();
 	JSIRuntime rt = RuntimeSupport.create();
 
 	@Test

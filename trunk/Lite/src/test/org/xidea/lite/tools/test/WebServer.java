@@ -31,8 +31,10 @@ import org.jside.webserver.RequestUtil;
 import org.jside.webserver.servlet.ServletContextImpl;
 import org.w3c.dom.Document;
 import org.xidea.el.ExpressionFactory;
+import org.xidea.el.impl.ExpressionFactoryImpl;
 import org.xidea.jsi.impl.RuntimeSupport;
 import org.xidea.jsi.web.JSIService;
+import org.xidea.lite.LiteTemplate;
 import org.xidea.lite.impl.HotTemplateEngine;
 import org.xidea.lite.impl.ParseUtil;
 import org.xidea.lite.parse.ParseConfig;
@@ -104,7 +106,7 @@ public class WebServer {
 					String phpcode = LiteCompiler.buildPHP(path, litecode);
 					String litecodepath = "/WEB-INF/litecode/" + path.replace('/', '^');
 					writeFile(litecodepath, litecode.getBytes("UTF-8"));
-					writeFile(litecodepath+".php", phpcode.getBytes(manager.getFeatureMap(path).get(ParseContext.FEATURE_ENCODING)));
+					writeFile(litecodepath+".php", phpcode.getBytes(manager.getFeatureMap(path).get(LiteTemplate.FEATURE_ENCODING)));
 					
 				}else if (rp.endsWith(".php")) {
 					Map<String, String> envp = new CGIEnvironment(context)
@@ -256,7 +258,7 @@ public class WebServer {
 			if (df.exists()) {
 				String source = ParseUtil.loadTextAndClose(new FileInputStream(
 						df), null);
-				data = (HashMap<String,Object>)ExpressionFactory.getInstance().create(source).evaluate(
+				data = (HashMap<String,Object>)ExpressionFactoryImpl.getInstance().create(source).evaluate(
 						data);
 			}
 		}

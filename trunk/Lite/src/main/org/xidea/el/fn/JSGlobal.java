@@ -16,17 +16,17 @@ import org.xidea.el.json.JSONEncoder;
 
 class JSGlobal implements Invocable {
 
+	static String[] mathArgs = {
+	// 0,6
+			"abs", "acos", "asin", "atan", "ceil", "asin", "cos",
+			// 6,10
+			"exp", "floor", "log", "round",
+			// 11,13
+			"sin", "sqrt", "tan"
+			// 14,15,16,17+18
+			, "random", "min", "max", "pow", "atan2" };
 	static void setupVar(ExpressionFactoryImpl calculater) {
 		/*==== Math 0+ ====*/
-		String[] mathArgs = {
-		// 0,6
-				"abs", "acos", "asin", "atan", "ceil", "asin", "cos",
-				// 6,10
-				"exp", "floor", "log", "round",
-				// 11,13
-				"sin", "sqrt", "tan"
-				// 14,15,16,17+18
-				, "random", "min", "max", "pow", "atan2" };
 		Map<String, Object> map = new HashMap<String, Object>();
 		double LN10 = Math.log(10);
 		double LN2 = Math.log(2);
@@ -73,6 +73,27 @@ class JSGlobal implements Invocable {
 		this.type = type;
 	}
 
+	public String toString(){
+		switch (type) {
+		//encodeURI,decodeURI,encodeURIConponent,decodeURIComponent
+		case 400:return "encodeURI";
+		case 401:return "decodeURI";
+		case 402:return "encodeURIConponent";
+		case 403:return "decodeURIComponent";
+		//parseInt,parseFloat
+		case 300:return "parseInt";
+		case 301:return "parseFloat";
+		case 200:return "isFinite";
+		case 201:return "isNaN";
+		case 100:return "JSON.parse";
+		case 101:return "JSON.stringify";
+		default:
+			if(type>0 && type<mathArgs.length){
+				return "Math."+mathArgs[type];
+			}
+			return "unknow method:"+type;
+		}
+	}
 	public Object invoke(Object thiz, Object... args) throws Exception {
 
 		switch (type) {

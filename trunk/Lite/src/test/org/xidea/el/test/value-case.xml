@@ -15,6 +15,10 @@
 		<case>-0x80000000000</case>
 		<case>0x7FFFFFFFFFF</case>
 		<case>-0x7FFFFFFFFFF</case>
+		<case>[]</case>
+		<case>{}</case>
+		<case>{a:1,"bb":2,c:[123,[],[123]],d:{a:1}}</case>
+		<case>[1,234,{"a":1}]</case>
 		
 		<!--  int 64 以内也会有精度问题 
 		<case>0x8000000000000000</case>

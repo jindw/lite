@@ -20,6 +20,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.xidea.el.json.JSONEncoder;
+import org.xidea.lite.LiteTemplate;
 import org.xidea.lite.Template;
 import org.xidea.lite.impl.ParseUtil;
 
@@ -109,7 +110,7 @@ public class XMLTest {
 		List<Object> insts = LiteTestUtil.parse(text);
 		checkElse(insts,info);
 //		System.out.println(JSONEncoder.encode(insts));
-		Template t = new Template(insts,null);
+		Template t = new LiteTemplate(insts,LiteTestUtil.defaultFeatureMap);
 		Writer out = new StringWriter();
 		t.render(new HashMap(context), out);
 		assertXMLEquals(info+text+":\n"+result,result, out.toString());

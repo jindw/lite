@@ -397,10 +397,10 @@ PHPTranslateContext.prototype = new TCP({
             var test = this.stringifyEL(testEL);
             var ifstart = elseIndex >1 ?'else if' :'if';
             if(test){
-                this.append(ifstart,"(","!",indexAutoId,"&&",php2jsBoolean(testEL,test),"){");
+                this.append(ifstart,"(",indexAutoId,"<0&&",php2jsBoolean(testEL,test),"){");
             }else{
                 notEnd = false;
-                this.append(ifstart,"(","!",indexAutoId,"){");
+                this.append(ifstart,"(",indexAutoId,"<0){");
             }
             this.depth++;
             this.appendCode(childCode)

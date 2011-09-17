@@ -11,6 +11,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.xidea.lite.LiteTemplate;
 import org.xidea.lite.Template;
 import org.xidea.lite.impl.ParseContextImpl;
 import org.xidea.lite.impl.TextNodeParser;
@@ -53,7 +54,7 @@ public class TextParserTest {
 		ParseContext context = LiteTestUtil.buildParseContext(new URI("http://localhost:8080/"));
 		p.parse(text, context, null);
 		List<Object> insts = context.toList();
-		Template t = new Template(insts,context.getFeatureMap());
+		Template t = new LiteTemplate(insts,context.getFeatureMap());
 		Writer out = new StringWriter();
 		t.render(new HashMap<Object, Object>(), out);
 		Assert.assertEquals(result, out.toString());
