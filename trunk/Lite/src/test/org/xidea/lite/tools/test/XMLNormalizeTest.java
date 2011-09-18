@@ -19,7 +19,7 @@ import org.w3c.dom.Element;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.jsi.JSIRuntime;
 import org.xidea.jsi.impl.RuntimeSupport;
-import org.xidea.lite.impl.HotTemplateEngine;
+import org.xidea.lite.impl.HotLiteEngine;
 import org.xidea.lite.impl.ParseConfigImpl;
 import org.xidea.lite.impl.ParseContextImpl;
 import org.xidea.lite.impl.ParseUtil;
@@ -75,9 +75,9 @@ public class XMLNormalizeTest {
 		assertNorm("<hr><a></a>","<c:group xmlns:c='http://www.xidea.org/lite/core' xmlns:h='http://www.xidea.org/lite/html-ext'><hr/><a></a></c:group>");
 		assertNorm("<hr>","<hr/>");
 		assertNorm("<hr><hr title=jindw selected>","<c:group xmlns:c='http://www.xidea.org/lite/core' xmlns:h='http://www.xidea.org/lite/html-ext'><hr/><hr title=\"jindw\" selected=\"selected\"/></c:group>");
-		assertNorm("<img src=\"'<hr>\">","<img src=\"'&lt;hr>\"/>");
-		assertNorm("<img src=\"'<hr>\" title=${1 <e}>","<img src=\"'&lt;hr>\" title=\"${1 &lt;e}\"/>");
-		assertNorm("<hr c:if=${1<a}></hr>","<hr c:if=\"${1&lt;a}\"></hr>");
+		assertNorm("<img src=\"'<hr>\">","<img src=\"'&#60;hr>\"/>");
+		assertNorm("<img src=\"'<hr>\" title=${1 <e}>","<img src=\"'&#60;hr>\" title=\"${1 &#60;e}\"/>");
+		assertNorm("<hr c:if=${1<a}></hr>","<hr c:if=\"${1&#60;a}\"></hr>");
 		//System.out.println(impl.normalize("<hr>"));
 	}
 	@Test
@@ -93,8 +93,8 @@ public class XMLNormalizeTest {
 	public void testSpec() throws SAXException, IOException{
 		assertNorm("<a href=\"&copy;\"></a>","<a href=\"&#169;\"></a>");
 		assertNorm("<a href='&nbsp;nbsp;'></a>","<a href='&#160;nbsp;'></a>");
-		assertNorm("<a href='a&b'></a>","<a href='a&amp;b'></a>");
-		assertNorm("<a href='a&amp,;'></a>","<a href='a&amp;amp,;'></a>");
+		assertNorm("<a href='a&b'></a>","<a href='a&#38;b'></a>");
+		assertNorm("<a href='a&amp,;'></a>","<a href='a&#38;amp,;'></a>");
 	}
 	private void assertNorm(String source, String expect) throws SAXException, IOException {
 		String result = norm(source);

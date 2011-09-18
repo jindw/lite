@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.lite.TemplateEngine;
+import org.xidea.lite.LiteEngine;
 import org.xidea.lite.Template;
 
 public class TemplateServlet extends GenericServlet {
@@ -53,7 +54,7 @@ public class TemplateServlet extends GenericServlet {
 			Class<?> configClass = Class
 					.forName("org.xidea.lite.impl.ParseConfigImpl");
 			Class<? extends Object> engineClass = Class
-					.forName("org.xidea.lite.impl.HotTemplateEngine");
+					.forName("org.xidea.lite.impl.HotLiteEngine");
 			Object parseConfig = configClass.getConstructor(URI.class,
 					URI.class).newInstance(root.toURI(), configFile.toURI());
 			templateEngine = (TemplateEngine) engineClass.getConstructor(
@@ -62,11 +63,11 @@ public class TemplateServlet extends GenericServlet {
 			log.info("Lite HotTemplateEngine(runtime and compiler) is used");
 			
 		} catch (ClassNotFoundException e) {
-			templateEngine = new TemplateEngine(litecode.toURI());
-			log.info("Lite TemplateEngine(runtime only) is used");
+			templateEngine = new LiteEngine(litecode.toURI());
+			log.info("Lite LiteEngine(runtime only) is used");
 		} catch (Exception e) {
-			log.error("Lite HotTemplateEngine init faild!", e);
-			templateEngine = new TemplateEngine(litecode.toURI());
+			log.error("Lite HotLiteEngine init faild!", e);
+			templateEngine = new LiteEngine(litecode.toURI());
 		}
 	}
 

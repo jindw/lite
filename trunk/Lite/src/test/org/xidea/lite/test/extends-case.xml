@@ -1,5 +1,5 @@
-<test>
-	<unit title="文件包含语法">
+<test format="true">
+	<unit title="继承语法(页面继承和元素继承)">
 		<model>
 		{
 		array:[1,2,3,'4',5.5,'',true,null,false,[1,2],{a:1,b:2},[]],

@@ -19,7 +19,7 @@ import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xidea.el.impl.ReflectUtil;
 import org.xidea.lite.LiteTemplate;
-import org.xidea.lite.TemplateEngine;
+import org.xidea.lite.LiteEngine;
 import org.xidea.lite.impl.ParseContextImpl;
 import org.xidea.lite.impl.ParseUtil;
 import org.xidea.lite.parse.ParseContext;

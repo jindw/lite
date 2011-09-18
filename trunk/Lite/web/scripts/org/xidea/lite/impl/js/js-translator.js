@@ -16,7 +16,7 @@ var INIT_SCRIPT = String(function(){
 	var lite__impl_get;
 	var lite__impl_def = function(g){
     	lite__impl_get = function(n,c){
-			return (c && n in c ? c:n in g?g:this)[n];
+			return (c && n in c? c:n in g?g:this)[n];
 		};
 		function replacer(c){return g[c]||c}
 		//xt:0,xa:1,xp:2

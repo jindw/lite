@@ -11,7 +11,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.Template;
-import org.xidea.lite.impl.HotTemplateEngine;
+import org.xidea.lite.impl.HotLiteEngine;
 import org.xidea.lite.impl.ParseConfigImpl;
 
 public class HotTemplateTest {
@@ -21,7 +21,7 @@ public class HotTemplateTest {
 		File root = new File(new File(uri),"../../").getCanonicalFile();
 		File config = new File(root,"WEB-INF/lite.xml");
 		System.out.println(root);
-		HotTemplateEngine ht = new HotTemplateEngine(new ParseConfigImpl(root.toURI(), config.toURI()),null);
+		HotLiteEngine ht = new HotLiteEngine(new ParseConfigImpl(root.toURI(), config.toURI()),null);
 		StringWriter out = new StringWriter();
 		ht.getTemplate("/example/test.xhtml").render(new Object(),out);
 		System.out.println(out);
@@ -38,9 +38,9 @@ public class HotTemplateTest {
 		String path = this.getClass().getPackage().getName().replace('.', '/')+"/input.xml";
 		URI root = this.getClass().getResource("/").toURI();
 		System.out.println(root);
-		HotTemplateEngine ht = new HotTemplateEngine(new ParseConfigImpl(root, null),null);
+		HotLiteEngine ht = new HotLiteEngine(new ParseConfigImpl(root, null),null);
 		cacheTest(path, ht);
-		ht = new HotTemplateEngine(new ParseConfigImpl(URI.create("classpath:///"),null),null);
+		ht = new HotLiteEngine(new ParseConfigImpl(URI.create("classpath:///"),null),null);
 		cacheTest(path, ht);
 	}
 	
@@ -51,14 +51,14 @@ public class HotTemplateTest {
 		String path = "/example/test.xhtml";
 		URI root = this.getClass().getResource("/").toURI().resolve("../../");
 		System.out.println(root);
-		HotTemplateEngine ht = new HotTemplateEngine(new ParseConfigImpl(root, null),null);
+		HotLiteEngine ht = new HotLiteEngine(new ParseConfigImpl(root, null),null);
 		cacheTest(path, ht);
 		StringWriter out = new StringWriter();
 		ht.render(path, new Object(), out);
 		System.out.println(out);
 	}
 
-	private void cacheTest(String path, HotTemplateEngine ht) throws IOException {
+	private void cacheTest(String path, HotLiteEngine ht) throws IOException {
 		Template t1 = ht.getTemplate(path);
 		Template t2 = ht.getTemplate(path);
 		t2 = ht.getTemplate(path);

@@ -24,6 +24,7 @@ import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xidea.el.ExpressionFactory;
 import org.xidea.el.impl.ExpressionFactoryImpl;
+import org.xidea.el.json.JSONDecoder;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.el.test.ELTest;
 import org.xidea.jsi.JSIRuntime;
@@ -101,6 +102,16 @@ public class LiteTest {
 				"#expect");
 	}
 
+	/**
+	 * 
+	 * @param relativeSourceMap
+	 * @param context
+	 * @param path
+	 * @param expect
+	 * @return value is unformat 
+	 * @throws IOException
+	 * @throws SAXException
+	 */
 	public static HashMap<String, String> runTemplate(
 			Map<String, String> relativeSourceMap, Object context, String path,
 			String expect) throws IOException, SAXException {
@@ -109,9 +120,15 @@ public class LiteTest {
 		String contextJSON;
 		Object contextObject;
 		if (context instanceof String) {
-			contextObject = ExpressionFactoryImpl.getInstance().create(
+			try{
+				contextObject = ExpressionFactoryImpl.getInstance().create(
 					(String) context).evaluate(relativeSourceMap);
-			contextJSON = JSONEncoder.encode(contextObject);
+				contextJSON = JSONEncoder.encode(contextObject);
+			}catch(Exception e){
+				contextJSON= (String)js.eval("JSON.stringify("+context+")");
+				contextObject = JSONDecoder.decode(contextJSON);
+			}
+			
 		} else {
 			contextObject = context;
 			contextJSON = JSONEncoder.encode(context);
@@ -122,7 +139,6 @@ public class LiteTest {
 		String jsresult = runNativeJS(pc, contextJSON);
 		String phpresult = runNativePHP(pc, contextJSON);
 		expect = expect != null ? expect : jsresult;
-		expect = normalizeXML(expect);
 		HashMap<String, String> result = new LinkedHashMap<String, String>();
 		result.put("#model", contextJSON);
 		result.put("#expect", expect);
@@ -130,6 +146,7 @@ public class LiteTest {
 		result.put("js", jsresult);
 		result.put("php", phpresult);
 		if (!expect.equals(phpresult)) {
+			expect = normalizeXML(expect);
 			phpresult = normalizeXML(phpresult);
 			if (!expect.equals(phpresult)) {
 				System.out.println("expect:" + expect);
@@ -140,8 +157,7 @@ public class LiteTest {
 		return result;
 	}
 
-	public static String normalizeXML(String result) throws IOException,
-			SAXException {
+	public static String normalizeXML(String result) throws IOException {
 		if (!result.trim().startsWith("<")) {
 			return result;
 		}
@@ -228,9 +244,15 @@ public class LiteTest {
 		String code = (String) js.invoke(ts, "translate", js.eval("("
 				+ JSONEncoder.encode(parsedContext.toList()) + ")"), true);
 		// System.out.println(code);
-		String jsResult = (String) js.eval("(function(){" + code + "})()("
-				+ contextJSON + ")");
-		return (jsResult);
+		String source = "(function(){" + code + "})()("
+				+ contextJSON + ")";
+		try{
+			String jsResult = (String) js.eval(source);
+			return (jsResult);
+		}catch (RuntimeException e) {
+			System.out.println(source);
+			throw e;
+		}
 	}
 
 	public static String runNativePHP(ParseContext parsedContext,
@@ -333,7 +355,8 @@ class XMLFormat extends XMLNormalizeImpl {
 
 	protected void compliteAttr() {
 		for (StringBuilder value : attrValues.values()) {
-			this.result.append(value);
+			this.result.append(" ");
+			this.result.append(value.toString().trim());
 		}
 		attrValues = new TreeMap<String, StringBuilder>();
 	}
@@ -356,7 +379,8 @@ class XMLFormat extends XMLNormalizeImpl {
 	private String safeTrim(String text) {
 		return ParseUtil.safeTrim(text);
 	}
-
+	protected static final Pattern XML_TEXT = Pattern
+	.compile("&\\w+;|&#\\d+;|&#x[\\da-fA-F]+;|([&\"\'<>])");
 	/**
 	 * "["'&<]"
 	 * 
@@ -375,6 +399,7 @@ class XMLFormat extends XMLNormalizeImpl {
 					switch (c) {
 					case '&':
 					case '<':
+					case '>':
 						if (hit < 0) {
 							hit = m.start();
 						}

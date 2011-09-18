@@ -203,7 +203,7 @@ public class DocumentExampleTest {
 		return null;
 	}
 
-	static void checkResultEqual(String source, String expect,
+	private static void checkResultEqual(String source, String expect,
 			Map<String, String> resultMap, Map<String, String> outputMap)
 			throws IOException, SAXException {
 		// Map<String, String> outputMap = new HashMap<String, String>();

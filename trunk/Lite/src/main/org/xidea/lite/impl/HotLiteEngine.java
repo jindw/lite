@@ -18,28 +18,26 @@ import org.apache.commons.logging.LogFactory;
 import org.xidea.el.json.JSONDecoder;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.LiteTemplate;
-import org.xidea.lite.TemplateEngine;
+import org.xidea.lite.LiteEngine;
 import org.xidea.lite.Template;
 import org.xidea.lite.parse.ParseConfig;
 import org.xidea.lite.parse.ParseContext;
 
-public class HotTemplateEngine extends TemplateEngine {
-	private static final Log log = LogFactory.getLog(HotTemplateEngine.class);
+public class HotLiteEngine extends LiteEngine {
+	private static final Log log = LogFactory.getLog(HotLiteEngine.class);
 	private HashMap<String, Object> lock = new HashMap<String, Object>();
 	private HashMap<String, Info> infoMap = new HashMap<String, Info>();
 	protected ParseConfig config;
-	private URI compiledBase;
 	private boolean checkFile;
 
-	public HotTemplateEngine(URI root, URI config,URI compiledBase) {
+	public HotLiteEngine(URI root, URI config,URI compiledBase) {
 		this(new ParseConfigImpl(root, config),compiledBase);
 	}
 
-	public HotTemplateEngine(ParseConfig config,URI compiledBase) {
-		super(config.getRoot());
+	public HotLiteEngine(ParseConfig config,URI compiledBase) {
+		super(compiledBase);
 		this.checkFile = true;
 		this.config = config;
-		this.compiledBase = compiledBase;
 	}
 
 
@@ -109,6 +107,16 @@ public class HotTemplateEngine extends TemplateEngine {
 			}
 		}
 	}
+	private URI toCompiedURI(String path){
+		path =  path.replace('/', '^');
+		try {
+			return this.compiledBase.resolve(URLEncoder.encode(path, "UTF-8"));
+		} catch (UnsupportedEncodingException e) {//不可能
+			return null;
+		}
+		
+	}
+
 	private Template buildFromSource(final String path) throws IOException {
 		long begin = System.currentTimeMillis();
 		ArrayList<File> files = new ArrayList<File>();
@@ -142,16 +150,6 @@ public class HotTemplateEngine extends TemplateEngine {
 		infoMap.put(path, entry);
 		return template;
 	}
-	private URI toCompiedURI(String path){
-		path =  path.replace('/', '^');
-		try {
-			return this.compiledBase.resolve(URLEncoder.encode(path, "UTF-8"));
-		} catch (UnsupportedEncodingException e) {//不可能
-			return null;
-		}
-		
-	}
-
 	@SuppressWarnings("unchecked")
 	private Template buildFromCode(String path) throws IOException {
 		if(this.compiledBase == null){
@@ -172,7 +170,7 @@ public class HotTemplateEngine extends TemplateEngine {
 				if(checkFile){
 					List<String> resource = (List<String>) list.get(0);
 					long lm = 0;
-					File root = new File(this.root);
+					File root = new File(this.config.getRoot());
 					for(String res:resource){
 						File f = new File(root,res);
 						long l = f.lastModified();

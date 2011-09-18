@@ -35,7 +35,7 @@ import org.xidea.el.impl.ExpressionFactoryImpl;
 import org.xidea.jsi.impl.RuntimeSupport;
 import org.xidea.jsi.web.JSIService;
 import org.xidea.lite.LiteTemplate;
-import org.xidea.lite.impl.HotTemplateEngine;
+import org.xidea.lite.impl.HotLiteEngine;
 import org.xidea.lite.impl.ParseUtil;
 import org.xidea.lite.parse.ParseConfig;
 import org.xidea.lite.parse.ParseContext;
@@ -88,7 +88,7 @@ public class WebServer {
 		MutiThreadWebServer mtws = new MutiThreadWebServer(base) {
 			private long lastModified = 0;
 			ResourceManagerImpl manager;
-			HotTemplateEngine ht;
+			HotLiteEngine ht;
 			final ServletContextImpl servletAdaptor = new ServletContextImpl(
 					);
 
@@ -191,7 +191,7 @@ public class WebServer {
 				if (time < 0 || lastModified != time) {
 					manager = new ResourceManagerImpl(base, base
 							.resolve("WEB-INF/lite.xml"));
-					ht = new HotTemplateEngine((ParseConfig) manager, null);
+					ht = new HotLiteEngine((ParseConfig) manager, null);
 					servlet = new TemplateServlet(){
 						{
 							init(servletAdaptor);

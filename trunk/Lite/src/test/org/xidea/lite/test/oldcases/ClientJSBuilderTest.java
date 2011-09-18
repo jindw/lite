@@ -24,7 +24,7 @@ import org.xidea.el.Expression;
 import org.xidea.el.ExpressionFactory;
 import org.xidea.jsi.JSIRuntime;
 import org.xidea.jsi.impl.RuntimeSupport;
-import org.xidea.lite.TemplateEngine;
+import org.xidea.lite.LiteEngine;
 import org.xidea.lite.impl.ParseContextImpl;
 import org.xidea.lite.parse.ParseContext;
 import org.xidea.lite.parse.TextParser;

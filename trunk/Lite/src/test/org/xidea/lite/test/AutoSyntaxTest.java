@@ -38,11 +38,17 @@ public class AutoSyntaxTest {
 	static String[] casefiles = {  "if-case.xml",
 			"choose-case.xml", "for-case.xml", "def-case.xml",
 	"extends-case.xml",		
-	"include-case.xml" };
+	"include-case.xml" ,
+	"extension-case.xml",
+	"out-case.xml"};
 	static Collection<Object[]> params = null;
 
 	private Map<String, String> sourceMap;
 	private Map<String, String> resultMap;
+
+	private boolean format;
+
+	private String expect;
 
 	@Parameters
 	public static Collection<Object[]> getParams() {
@@ -57,18 +63,28 @@ public class AutoSyntaxTest {
 			}
 			params = rtv;
 
-			System.out.println(JSONEncoder.encode(rtv));
+//			System.out.println(JSONEncoder.encode(rtv));
 		}
 		return params;
 	}
 
 	// public AutoTest(){}
 	public AutoSyntaxTest(Map<String, String> sourceMap, String model,
-			String expected) throws IOException, SAXException {
+			String expect,boolean format) throws IOException, SAXException {
 		this.sourceMap = sourceMap;
 		try {
+			this.format = format;
 			resultMap = LiteTest.runTemplate(sourceMap, model, TEST_XHTML,
-					expected);
+					expect);
+
+			if(expect == null){
+				expect = resultMap.get("#expect");
+				//System.out.println(sourceMap);
+			}
+			if(this.format){
+				expect = LiteTest.normalizeXML(expect);
+			}
+			this.expect = expect;
 		} catch (Error e) {
 			e.printStackTrace();
 			throw e;
@@ -94,8 +110,14 @@ public class AutoSyntaxTest {
 	}
 
 	public void test(String type) throws IOException {
-		String expect = resultMap.get("#expect");
 		String value = resultMap.get(type);
+		if(!expect.equals(value)){
+		if(this.format){
+			value = LiteTest.normalizeXML(value);
+		}else{
+			value=value.replace("&quot;", "&#34;").replace("&lt;", "&#60;");
+		}
+		}
 		Assert.assertEquals(type + "运行结果有误：#" + sourceMap.get(TEST_XHTML),
 				expect, value);
 	}
@@ -110,10 +132,13 @@ public class AutoSyntaxTest {
 			e1.printStackTrace();
 			throw new RuntimeException("load test cases xml failure:" + path);
 		}
+		String format0 = doc.getDocumentElement().getAttribute("format");
 		NodeList units = doc.getElementsByTagName("unit");
 		for (int i = 0; i < units.getLength(); i++) {
 			Element unit = (Element) units.item(i);
 			String title = unit.getAttribute("title");
+
+			String format1 = initFormat(unit, format0);
 			NodeList ns = unit.getChildNodes();
 			ArrayList<Object[]> result = new ArrayList<Object[]>();
 			HashMap<String, String> sourceMap = new HashMap<String, String>();
@@ -136,13 +161,19 @@ public class AutoSyntaxTest {
 								defaultModel);
 						sourceMap = new HashMap<String, String>(sourceMap);
 						sourceMap.put(TEST_XHTML, source);
-						result.add(new Object[] { sourceMap, model, expect });
+						String format = initFormat(case0, format1);
+						result.add(new Object[] { sourceMap, model, expect,"true".equals(format) });
 					}
 				}
 			}
 			caseMap.put(title, result);
 		}
 		return caseMap;
+	}
+
+	private static String initFormat(Element unit, String format) {
+		format =unit.hasAttribute("format")? unit.getAttribute("format"):format;
+		return format;
 	}
 
 	private static String getChildContent(Node e, String tagName,

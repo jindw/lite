@@ -14,7 +14,7 @@ import org.xidea.el.impl.ReflectUtil;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.jsi.JSIRuntime;
 import org.xidea.lite.LiteTemplate;
-import org.xidea.lite.impl.HotTemplateEngine;
+import org.xidea.lite.impl.HotLiteEngine;
 import org.xidea.lite.impl.ParseUtil;
 import org.xidea.lite.parse.ParseContext;
 
@@ -28,7 +28,7 @@ public class LiteCompiler {
 	private String[] includes;
 	private String[] excludes;
 	private boolean linked;
-	private HotTemplateEngine engine;
+	private HotLiteEngine engine;
 	private String translator;
 	private ResourceManagerImpl resourceManager;
 
@@ -105,7 +105,7 @@ public class LiteCompiler {
 					.toURI());
 		}
 		if (engine == null) {
-			engine = new HotTemplateEngine(resourceManager,null);
+			engine = new HotLiteEngine(resourceManager,null);
 		}
 	}
 

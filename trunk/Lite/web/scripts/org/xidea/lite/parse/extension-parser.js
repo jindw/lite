@@ -281,21 +281,22 @@ ExtensionParser.prototype = {
 		try{
 			var es = 0;
 			if(/^xmlns(?:\:\w+)?/.test(attr.name)){
+			
 				var v = attr.value;
 				var fp = this.packageMap[v||''];
-				if(fp && fp.namespaceParser){
-					fp.namespaceParser.call(chain,attr);
-					return true;
-				}
-				var es = 1;
-				var el = attr.ownerElement ||  attr.selectSingleNode("..");//ie bug
-				var es = 2;
-				var info = getLiteTagInfo(el);
-				var es  = 3;
-				if(info.length ==0 || info.indexOf("|"+attr.name+"|")>0){
-					return false;
-				}else{
-					return true;//自动补全的xmlns 不处理!
+				if(fp){
+					if(fp.namespaceParser){
+						fp.namespaceParser.call(chain,attr);
+						return true;
+					}
+					
+					var el = attr.ownerElement ||  attr.selectSingleNode("..");//ie bug
+					var info = getLiteTagInfo(el);
+					if(info && info.length ==0 || info.indexOf("|"+attr.name+"|")>0){
+						return fp!=null;
+					}else{
+						return true;//自动补全的xmlns 不处理!
+					}
 				}
 				//$log.error(v,fp.namespaceParser);
 			}

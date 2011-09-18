@@ -20,21 +20,12 @@ public class TokenGen {
 		ExpressionFactoryImpl exp = new ExpressionFactoryImpl();
 		OperationStrategyImpl osi = (OperationStrategyImpl) exp.getStrategy();
 		System.out.println(new TreeSet<Object>(osi.getGlobalMap().keySet()));
-		Field field = OperationStrategyImpl.class.getDeclaredField("methodMap");
+		Field field = OperationStrategyImpl.class.getDeclaredField("classMethodMap");
 		field.setAccessible(true);
-		Map<String, Map<String, Invocable>> methodMap = (Map<String, Map<String, Invocable>>) field.get(osi);
-		for(String key : new TreeSet<String>(methodMap.keySet())){
-			Map<String, Invocable> map = methodMap.get(key);
-			System.out.println(key);
-			System.out.print("类型：");
-			for (String c : new TreeSet<String>(map.keySet())) {
-				if(!c.startsWith("[")){
-					System.out.print(c.substring(c.lastIndexOf('.')+1)+",");
-				}
-			}
-			System.out.println();
+		Map<Class<? extends Object>, Map<String, Invocable>>  classMethodMap = (Map<Class<? extends Object>, Map<String, Invocable>> ) field.get(osi);
+		for(Map<String,Invocable> methodMap:classMethodMap.values()){
+				System.out.print(methodMap);
 		}
-		
 	}
 	@Test
 	public void genExpressionTokens()throws Exception {

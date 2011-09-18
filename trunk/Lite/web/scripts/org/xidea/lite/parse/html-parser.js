@@ -58,7 +58,7 @@ var HTML = {
 			if(!el.hasAttribute('src')){
 				var child = el.firstChild;
 				while(child){
-					if(child.nodeType==3 || child.nodeType == 4){
+					if(child.nodeType==3 || child.nodeType == 4){//text/cdata
 						child.data = processJS(child.data);
 					}
 					child = child.nextSibling;
@@ -236,6 +236,15 @@ function preservedParse(node){
 	}
 }
 function processJS(value){
+	var value2 = value.replace(/^\s*\$\{([\s\S]+)\}\s*$/,'return $1');
+	if(value2 != value){
+		try{
+			new Function(value2);
+			//$log.error(value2)
+			return value;
+		}catch(e){
+		}
+	}
 	return autoEncode(value,/^\s*JSON\s*\.*/,replaceJSON);
 }
 function replaceJSON(v){
@@ -245,7 +254,8 @@ function replaceURI(v){
 	return "encodeURI("+v+")";
 }
 function forceURIParse(attr){
-	attr.value = autoEncode(attr.value,/^\s*encodeURI*/,replaceURI);
+	var value = attr.value;
+	attr.value = autoEncode(value,/^\s*encodeURI*/,replaceURI);
 	this.next(attr);
 }
 HTML.parsePre = preservedParse;

@@ -58,7 +58,6 @@ public class XMLNormalizeImpl {
 		DEFAULT_LEAF_SET = Collections.unmodifiableSet(set);
 		set = new HashSet<String>(set);
 		set.add("html");
-		set.add("body");
 		set.add("head");
 		set.add("title");
 		DEFAULT_IGNORE_SPACE_TAG_SET = Collections.unmodifiableSet(set);
@@ -66,7 +65,8 @@ public class XMLNormalizeImpl {
 
 	protected Map<String, String> defaultNSMap = DEFAULT_NS_MAP;
 	protected Map<String, String> defaultEntryMap = DEFAULT_ENTRY_MAP;
-	protected Set<String> leafSet = DEFAULT_LEAF_SET;
+	private Set<String> leafSet = DEFAULT_LEAF_SET;
+	protected Set<String> ignoreSpaceTagSet= DEFAULT_IGNORE_SPACE_TAG_SET;
 	protected String documentStart = "<c:group xmlns:c='"+NS_CORE+"' xmlns:h='"+NS_HTML_EXT+"'>";
 	protected String documentEnd = "</c:group>";
 
@@ -77,7 +77,6 @@ public class XMLNormalizeImpl {
 	protected TagAttr tag;
 	protected StringBuilder result;
 	protected String uri;
-	protected Set<String> ignoreSpaceTagSet;
 
 	public XMLNormalizeImpl(Map<String, String> defaultNSMap,
 			Map<String, String> defaultEntryMap) {
@@ -87,7 +86,6 @@ public class XMLNormalizeImpl {
 	}
 
 	public XMLNormalizeImpl() {
-		this.ignoreSpaceTagSet= DEFAULT_IGNORE_SPACE_TAG_SET;
 	}
 
 	protected class TagAttr {
@@ -392,12 +390,21 @@ public class XMLNormalizeImpl {
 		name = name.toLowerCase();
 		if (leafSet.contains(name)) {
 			if (this.text.indexOf("</" + name + '>', this.start) > 0) {
-				leafSet.remove(name);
+				removeLeaf(name);
 				return false;
 			}
 			return true;
 		}
 		return false;
+	}
+
+	private void removeLeaf(String name) {
+		try{
+			leafSet.remove(name);
+		}catch (Exception e) {
+			leafSet = new HashSet<String>(leafSet);
+			leafSet.remove(name);
+		}
 	}
 
 	private void appendElement() {
