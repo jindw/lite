@@ -328,30 +328,3 @@ a:hover{
 .api .runner:after {
 	content:"示例...";
 }
-#post{
-	margin-top:10px;
-	padding:8px 4px;
-	border:1px dotted #CCC;
-	border-radius: 3px 3px 3px 3px;
-	background:#DDD;
-}
-#post legend{
-	font-weight:bold;
-}
-#post input{
-	width:200px;
-}
-#post textarea{
-	margin-top:12px;
-	width:600px;
-	height:80px;
-}
-#messages .message-0,#messages .message-1{
-	border-radius: 3px 3px 3px 3px;
-	background-color:#eec;
-	margin:12px;
-	padding:8px;
-}
-#messages .message-0{
-	background-color:#eee;
-}
