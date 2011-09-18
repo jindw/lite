@@ -53,6 +53,7 @@
 		<copy todir="web/WEB-INF/classes">
 			<fileset dir="src/main">
 				<include name="**/*.*" />
+				<exclude name="**/script/**"/>
 				<exclude name="**/*.java" />
 			</fileset>
 			<fileset dir="web/scripts">
