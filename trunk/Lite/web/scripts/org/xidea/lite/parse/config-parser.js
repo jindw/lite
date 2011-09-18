@@ -257,7 +257,7 @@ function buildURIMatcher(pattern){
 			if (len > 1) {
 				buf.push(".*");
 			} else {
-				buf.push("[^\\\\/]+");
+				buf.push("[^\\\\/]*");
 			}
 		} else if(len == 1 && c == '/' || c == '\\') {
 			buf.push("[\\\\/]");

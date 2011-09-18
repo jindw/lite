@@ -35,9 +35,10 @@
 	<servlet>
 		<servlet-name>LiteXML</servlet-name>
 		<servlet-class>org.xidea.lite.servlet.TemplateServlet</servlet-class>
+		<!-- debug support config -->
 		<init-param>
-			<param-name>contentType</param-name>
-			<param-value>text/html;charset=UTF-8</param-value>
+			<param-name>debugService</param-name>
+			<param-value>/.debug.xhtml</param-value>
 		</init-param>
 	</servlet>
 	<!-- servlet mapping info -->
@@ -58,7 +59,32 @@
 					<p>下载<a href="http://code.google.com/p/lite/downloads/list"> php-example-YYYYMMDD.zip</a>。
 					直接解压到能运行PHP的网站目录中即可运行(浏览example目录下的test.php文件，如果服务器超时时间太短，第一次可能无法正确输出，刷新就好了)</p>
 				</li>
+				<li>
+					<strong>开发期间强烈建议实用调试服务器开发测试.</strong>
+				</li>
 			</ul>
+			<h3>如何配置</h3>
+			<p>
+				如果你采用的是UTF-8编码,那么你一般可以忽略掉火麒麟的配置(系统默认值).
+				如果您希望自定义一些信息(最常见的是 ContentType输出), 那么您需要手写lite.xml文件.
+				<x:code><![CDATA[
+				<lite encoding="utf-8">
+					<group contentType="application/wml;charset=utf-8">
+						<include>/*.wml</include>
+					</group>
+					<!-- contentType 默认值: contentType="text/html;charset=utf-8" -->
+					<group layout="/doc/guide/layout.xhtml">
+						<include>/doc/guide/*.xhtml</include>
+						<include>/doc/guide/*test*</include>
+					</group>
+					<group>
+						<include>/*.xhtml</include>
+					</group>
+				</lite>]]>
+				</x:code>
+				<p>匹配规则为: 分组匹配, 匹配即退出, 后续分组再配置也无效, 属性可从上级节点继承.</p>
+				<p>遍历文件时, 先 include 决定是否可能匹配, 再用exclude排除, 得出该文件最终是否匹配改组.</p>
+			</p>
 			<h3>调试环境如何使用</h3>
 			<p>
 				启动测试服务器后，有一个Lite Logo 半透明最前端显示在桌面右下角（允许拖拽），您可以选择需要测试的网站目录。选中目录后直接拖放至Logo窗口上。测试服务器自动切换网站目录，一个新的测试网站就搭建起来了。

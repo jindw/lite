@@ -7,8 +7,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -74,7 +76,10 @@ public class DebugSupportImpl implements DebugSupport {
 	private String getCookie(HttpServletRequest request, String key) {
 		for (Cookie cookie : request.getCookies()) {
 			if (key.equals(cookie.getName())) {
-				return cookie.getValue();
+				try {
+					return URLDecoder.decode(cookie.getValue(),"UTF-8");
+				} catch (UnsupportedEncodingException e) {
+				}
 			}
 		}
 		return null;

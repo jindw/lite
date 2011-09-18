@@ -60,7 +60,7 @@ public class TemplateServlet extends GenericServlet {
 			templateEngine = (TemplateEngine) engineClass.getConstructor(
 					Class.forName("org.xidea.lite.parse.ParseConfig"),
 					URI.class).newInstance(parseConfig, litecode.toURI());
-			log.info("Lite HotTemplateEngine(runtime and compiler) is used");
+			log.info("Lite HotLiteEngine(runtime and compiler) is used");
 			
 		} catch (ClassNotFoundException e) {
 			templateEngine = new LiteEngine(litecode.toURI());

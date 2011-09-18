@@ -6,8 +6,8 @@
 	<display-name>Lite</display-name>
 	<description>Lite Example</description>
 	<filter>
-		<filter-class>org.xidea.jsi.web.JSIFilter</filter-class>
 		<filter-name>JSIFilter</filter-name>
+		<filter-class>org.xidea.jsi.web.JSIFilter</filter-class>
 	</filter>
 	<filter-mapping>
 		<filter-name>JSIFilter</filter-name>
@@ -21,8 +21,8 @@
 			org.xidea.lite.servlet.TemplateServlet
 		</servlet-class>
 		<init-param>
-			<param-name>contentType</param-name>
-			<param-value>text/html;charset=UTF-8</param-value>
+			<param-name>debugService</param-name>
+			<param-value>/.debug.xhtml</param-value>
 		</init-param>
 	</servlet>
 	<servlet-mapping>
