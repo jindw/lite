@@ -327,3 +327,4 @@ JSONTokenizer.prototype = {
 //function parseNumber(text, radix) {
 //	return parseInt(text, radix);
 //}
+

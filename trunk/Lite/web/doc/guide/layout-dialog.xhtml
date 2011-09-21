@@ -151,7 +151,7 @@
 				loader.style.display = 'block';
 				try{
 					if(runStatus.type == 'php'){
-						var code = runStatus.runcode+'\nlite_template_test_xhtml(json_decode('+stringifyJSON(stringifyJSON(data))+',true));'
+						var code = runStatus.runcode+'\nlite_template_test_xhtml(json_decode('+stringifyJSON(stringifyJSON(data))+',true));';
 						var url = 'http://litetest.sinaapp.com/?php='+encodeURIComponent(code)+'&t='+ +new Date();
 						loader.innerHTML = '<h2>load php result ....</h2><p>php 预览环境由新浪appengine提供。<a href="'+url+'">手动预览</a></p>';
 					

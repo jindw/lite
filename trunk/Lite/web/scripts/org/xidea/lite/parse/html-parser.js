@@ -56,12 +56,23 @@ var HTML = {
 		this.setAttribute(XML_SPACE_TRIM,false);
 		try{
 			if(!el.hasAttribute('src')){
-				var child = el.firstChild;
-				while(child){
+				var child;
+				var buf = [];
+				while(child = el.firstChild){
 					if(child.nodeType==3 || child.nodeType == 4){//text/cdata
-						child.data = processJS(child.data);
+						buf.push(child.data);
+					}else{
+						$log.warn('script 中不能用嵌入html标签，建议将脚本放在 <![CDATA[...]]>中。');
 					}
-					child = child.nextSibling;
+					el.removeChild(child);
+				}
+				buf = processJS(buf.join(''));
+				var doc = el.ownerDocument;
+				if(buf.search(/[<&]/)>=0){
+					el.appendChild(doc.createTextNode('/*'));
+					el.appendChild(doc.createCDATASection('*/'+buf+'//'));
+				}else{
+					el.appendChild(doc.createTextNode(buf));
 				}
 			}
 			this.next(el);

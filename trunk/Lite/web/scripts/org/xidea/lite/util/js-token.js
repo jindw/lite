@@ -1,5 +1,5 @@
 function compressJS(source){
-	if(!source.search(/^\s{2}/m)){
+	if(source.search(/^(?:\s|\/[*\/])/m)<0){
 		return source;
 	}
 	var ps = partitionJavaScript(source);
@@ -13,13 +13,14 @@ function compressJS(source){
 			break;
 		case '/':
 			//skip comment && reserve condition comment and regexp
-			var stat = /^\/(?:(\*\s*@)|\/|\*)/.match(item);
+			var stat = item.match(/^\/(?:(\*\s*@)|\/|\*)/);
 			if(!stat || stat[1]){
 				result.push(item);//regexp or condition comment
 			}
 			break;
 		default:
-			result.push(item.replace(/^\s+/gm,''));
+			//result.push(item.replace(/^[ \t]+/gm,''));//被切开的语法块，前置换行，可能上上一个语法的结束语法，不能删除
+			result.push(item.replace(/^[\t ]+|([\r\n])\s+/g,'$1'));
 		}
 	}
 	return result.join('');
@@ -42,6 +43,7 @@ function partitionJavaScript(source){
 					}else{
 						result.push(source.substring(0,index+1))
 					}
+					m = '/'
 					concatable = true;
 				}
 			}else{
@@ -85,6 +87,9 @@ function findExp(result,source){
 function findExpSource(text){
 	var depth=0,c,start = 0;
 	while(c = text.charAt(start++)){
+		if(c =='\n' || c == '\r'){
+			return;
+		}
 	    if(c=='['){
 	    	depth = 1;
 	    }else if(c==']'){

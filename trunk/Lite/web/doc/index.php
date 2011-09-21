@@ -2,7 +2,7 @@
 require_once("../WEB-INF/classes/lite/LiteEngine.php");
 $engine = new LiteEngine();
 $engine->debug = true;
-$engine->autocompile=false;
+$engine->autocompile=false ;
 //初始化Lite Logo 的点阵数据 
 $path = @$_SERVER['PATH_INFO'] ;
 

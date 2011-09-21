@@ -61,7 +61,7 @@ class LiteService{
 		global $lite_engine;
 		$lite = $lite_engine->litecode.strtr($path,'/','^');
 		$fn = 'lite_template'.str_replace(array('.','/','-','!','%'),'_',$path);
-		$compile = $lite_engine->autocompile;
+		$compile = $lite_engine->autocompile || @$_SERVER['LITE_COMPILE_SERVICE'];
 		$debug = @$_COOKIE["LITE_DEBUG"];
 		if($debug && preg_match('/^(\w+)(?:[;,\s]+(.*))?/',$debug,$result)){
 			switch($result[1]){
