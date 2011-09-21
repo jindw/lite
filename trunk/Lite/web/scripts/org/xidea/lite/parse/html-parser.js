@@ -239,12 +239,13 @@ function processJS(value){
 	var value2 = value.replace(/^\s*\$\{([\s\S]+)\}\s*$/,'return $1');
 	if(value2 != value){
 		try{
-			new Function(value2);
+			new Function(value2);//属性中直接插入的脚本（没有语句，不可能是json变量）
 			//$log.error(value2)
 			return value;
 		}catch(e){
 		}
 	}
+	value = compressJS(value);
 	return autoEncode(value,/^\s*JSON\s*\.*/,replaceJSON);
 }
 function replaceJSON(v){
@@ -255,7 +256,7 @@ function replaceURI(v){
 }
 function forceURIParse(attr){
 	var value = attr.value;
-	attr.value = autoEncode(value,/^\s*encodeURI*/,replaceURI);
+	attr.value = autoEncode(value,/^\s*encodeURI*/,replaceURI,encodeURI);
 	this.next(attr);
 }
 HTML.parsePre = preservedParse;
@@ -268,7 +269,7 @@ HTML.parse2action=forceURIParse;
 //if(/^(?:script|img|button)$/i.test(tagName)){
 //}else if(/^(?:a|frame|iframe)$/i.test(tagName)){
 HTML.parse2src=forceURIParse;
-function autoEncode(value,pattern,replacer){
+function autoEncode(value,pattern,replacer,replacer2){
 	var p = -1;
 	var result = [];
 	while(true){
@@ -281,7 +282,11 @@ function autoEncode(value,pattern,replacer){
 					if(!pattern.test(el)){
 						el = replacer(el);
 					}
-					result.push(value.substring(0,p+2),el,'}');
+					var prefix = value.substring(0,p);
+					if(replacer2){
+						prefix = replacer2(prefix);
+					}
+					result.push(prefix,'${',el,'}');
 					value = value.substring(p2+1)
 					p=-1;
 				}else{
@@ -291,6 +296,9 @@ function autoEncode(value,pattern,replacer){
 		}else{
 			break;
 		}
+	}
+	if(replacer2){
+		value = replacer2(value);
 	}
 	if(result.length){
 		result.push(value);

@@ -21,6 +21,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.xidea.el.impl.ExpressionFactoryImpl;
 import org.xidea.el.impl.ReflectUtil;
 import org.xidea.el.json.JSONDecoder;
 import org.xidea.el.json.JSONEncoder;
@@ -35,18 +36,26 @@ import org.xidea.lite.impl.ParseUtil;
 public class DebugSupportImpl implements DebugSupport {
 	private TemplateServlet templateServlet;
 	private JSONEncoder json;
+	private String contextPath;
 
 	public DebugSupportImpl(TemplateServlet templateServlet) {
 		this.templateServlet = templateServlet;
-		json = new JSONEncoder(JSONEncoder.W3C_DATE_TIME_FORMAT, true, 32){
+		this.contextPath = templateServlet.getServletContext().getContextPath();
+		json = new JSONEncoder(JSONEncoder.W3C_DATE_TIME_FORMAT, true, 32) {
 			Map<String, Method> fileGetterMap;
 			{
-				fileGetterMap = new HashMap<String, Method>( ReflectUtil.getGetterMap(File.class));
-				fileGetterMap.keySet().retainAll(Arrays.asList("name","path","canonicalPath","absolutePath","absolute","hidden","file","directory"));
-				
+				fileGetterMap = new HashMap<String, Method>(ReflectUtil
+						.getGetterMap(File.class));
+				fileGetterMap.keySet().retainAll(
+						Arrays.asList("name", "path", "canonicalPath",
+								"absolutePath", "absolute", "hidden", "file",
+								"directory"));
+
 			}
-			public Map<String, Method> getGetterMap(Class<?extends Object> clazz){
-				if(clazz == File.class){
+
+			public Map<String, Method> getGetterMap(
+					Class<? extends Object> clazz) {
+				if (clazz == File.class) {
 					return fileGetterMap;
 				}
 				return super.getGetterMap(clazz);
@@ -66,6 +75,21 @@ public class DebugSupportImpl implements DebugSupport {
 	public boolean debug(String path, HttpServletRequest request,
 			HttpServletResponse resp) throws IOException {
 		String debug = getCookie(request, LITE_DEBUG);
+
+		String rawPath = (String) request
+				.getAttribute("javax.servlet.forward.servlet_path");
+		if (rawPath == null) {
+			rawPath = (String) request
+					.getAttribute("javax.servlet.include.servlet_path");
+			String uri = request.getRequestURI();
+			if (rawPath == null && uri.startsWith(contextPath)
+					&& uri.substring(contextPath.length()).equals(path)) {
+				Map<String, Object> data = loadData(templateServlet.getServletContext().getRealPath("/"), path);
+				for (String key : data.keySet()) {
+					request.setAttribute(key, data.get(key));
+				}
+			}
+		}
 		if (debug != null) {
 			return debugCookie(path, request, resp, debug);
 		} else {
@@ -77,7 +101,7 @@ public class DebugSupportImpl implements DebugSupport {
 		for (Cookie cookie : request.getCookies()) {
 			if (key.equals(cookie.getName())) {
 				try {
-					return URLDecoder.decode(cookie.getValue(),"UTF-8");
+					return URLDecoder.decode(cookie.getValue(), "UTF-8");
 				} catch (UnsupportedEncodingException e) {
 				}
 			}
@@ -97,13 +121,13 @@ public class DebugSupportImpl implements DebugSupport {
 			ServletOutputStream out = response.getOutputStream();
 			FileInputStream in = new FileInputStream(f);
 			byte[] buf = new byte[64];
-			for (int c = in.read(buf); c >= 0;c=in.read(buf)) {
+			for (int c = in.read(buf); c >= 0; c = in.read(buf)) {
 				out.write(buf, 0, c);
 			}
 			in.close();
 			out.flush();
 			return true;
-		}else if("model".equals(value)) {
+		} else if ("model".equals(value)) {
 			// 只支持数据预览，不支持数据修改
 			// log.warn("该版本尚不支持数据模型展现");
 			// templateEngine.clear(path);
@@ -125,14 +149,16 @@ public class DebugSupportImpl implements DebugSupport {
 					+ "'></script>\n");
 			out
 					.append("<script>if(!this.DataView && this.$import){$import('org.xidea.lite.web.DataView',true);}</script>\n");
-			
+
 			String model_view_impl = getCookie(request, "LITE_MODEL_VIEW_IMPL");
-			if(model_view_impl !=null){
-				out.append("<script src='"+model_view_impl+"'></script>");
+			if (model_view_impl != null) {
+				out.append("<script src='" + model_view_impl + "'></script>");
 			}
-			out.append("<script>DataView.render(templatePath,templateModel,templateFeatureMap,serviceBase);</script>\n");
-			if(model_view_impl!=null){
-				out.append("<div><a href='#' onclick=\"document.cookie='LITE_MODEL_VIEW_IMPL=;expires='+new Date(0).toGMTString();alert('恢复成功')\">回复默认视图</a></div>");
+			out
+					.append("<script>DataView.render(templatePath,templateModel,templateFeatureMap,serviceBase);</script>\n");
+			if (model_view_impl != null) {
+				out
+						.append("<div><a href='#' onclick=\"document.cookie='LITE_MODEL_VIEW_IMPL=;expires='+new Date(0).toGMTString();alert('恢复成功')\">回复默认视图</a></div>");
 			}
 			out.append("\n<hr><pre>");
 			out.print(result.replace("&", "&amp;").replace("<", "&lt;"));
@@ -146,10 +172,11 @@ public class DebugSupportImpl implements DebugSupport {
 			String json = ParseUtil.loadTextAndClose(in, "UTF-8");
 			Map<String, Object> context = templateServlet.createModel(request);
 			Map<String, Object> mock = JSONDecoder.decode(json);
-			for(String key : mock.keySet()){
+			for (String key : mock.keySet()) {
 				context.put(key, mock.get(key));
 			}
-			Template template = templateServlet.templateEngine.getTemplate(path);
+			Template template = templateServlet.templateEngine
+					.getTemplate(path);
 			String contentType = template.getContentType();
 			response.setContentType(contentType);
 			PrintWriter out = response.getWriter();
@@ -160,17 +187,33 @@ public class DebugSupportImpl implements DebugSupport {
 		return false;
 	}
 
+	@SuppressWarnings("unchecked")
+	static Map<String, Object> loadData(String root, String uri)
+			throws IOException {
+		String jsonpath = uri.replaceFirst(".\\w+$", ".json");
+		Map<String, Object> data = new HashMap<String, Object>();
+		if (jsonpath.endsWith(".json")) {
+			File df = new File(root, jsonpath);
+			if (df.exists()) {
+				String source = ParseUtil.loadTextAndClose(new FileInputStream(
+						df), null);
+				data = (Map<String, Object>) ExpressionFactoryImpl
+						.getInstance().create(source).evaluate(data);
+			}
+		}
+		return data;
+	}
+
 	private String jsonStringify(Object model) throws IOException {
-		StringBuilder buf = new StringBuilder(); 
-		json.encode(model,buf);
+		StringBuilder buf = new StringBuilder();
+		json.encode(model, buf);
 		return buf.toString();
 	}
 
 	private String getServiceBase(HttpServletRequest request) {
 		String serviceBase = getCookie(request, LITE_SERVICE);
 		if (serviceBase == null) {
-			serviceBase = templateServlet.getServletContext()
-					.getContextPath()
+			serviceBase = templateServlet.getServletContext().getContextPath()
 					+ templateServlet.serviceBase;
 		}
 		return serviceBase;
@@ -180,7 +223,8 @@ public class DebugSupportImpl implements DebugSupport {
 			HttpServletResponse response) throws IOException {
 		final String liteAction = request.getParameter(PARAM_LITE_ACTION);
 		final String litePath = request.getParameter(PARAM_LITE_PATH);
-		final File root = new File(templateServlet.getServletContext().getRealPath("/"));
+		final File root = new File(templateServlet.getServletContext()
+				.getRealPath("/"));
 		if (PARAM_LITE_ACTION_LOAD.equals(liteAction)) {
 			if (DATA_VIEW_JS_PATH.equals(litePath)) {
 				response.setContentType("text/javascript;charset=utf-8");
@@ -197,8 +241,9 @@ public class DebugSupportImpl implements DebugSupport {
 							.createExplorter(
 									DefaultExportorFactory.TYPE_SIMPLE,
 									Collections.EMPTY_MAP);
-					
-					//FileRoot jsiRoot = new FileRoot(new File(root,"WEB-INF/classes").getAbsolutePath(),"UTF-8");
+
+					// FileRoot jsiRoot = new FileRoot(new
+					// File(root,"WEB-INF/classes").getAbsolutePath(),"UTF-8");
 					ClasspathRoot jsiRoot = new ClasspathRoot();
 					JSILoadContext context = jsiRoot
 							.$import("org.xidea.lite.web:DataView");
@@ -206,16 +251,18 @@ public class DebugSupportImpl implements DebugSupport {
 					out.write(result);
 				}
 				out.flush();
-			} else if(litePath.startsWith("/WEB-INF/litecode/") && litePath.endsWith(".json") && litePath.indexOf("..")<0){
+			} else if (litePath.startsWith("/WEB-INF/litecode/")
+					&& litePath.endsWith(".json") && litePath.indexOf("..") < 0) {
 				response.setContentType("text/javascript;charset=utf-8");
 				PrintWriter out = response.getWriter();
 				out.write(ParseUtil.loadTextAndClose(new FileInputStream(
-						new File(root,litePath)), "utf-8"));
+						new File(root, litePath)), "utf-8"));
 				out.flush();
 			}
-		}else if (PARAM_LITE_ACTION_SAVE.equals(liteAction)) {
-			if(litePath.endsWith(".json")){
-				String path = "/WEB-INF/litecode/"+litePath.replace(':', '^').replace('/', '^');
+		} else if (PARAM_LITE_ACTION_SAVE.equals(liteAction)) {
+			if (litePath.endsWith(".json")) {
+				String path = "/WEB-INF/litecode/"
+						+ litePath.replace(':', '^').replace('/', '^');
 				final File dest = new File(root, path);
 				String liteData = request.getParameter(PARAM_LITE_DATA);
 				FileOutputStream fout = new FileOutputStream(dest);
@@ -225,18 +272,18 @@ public class DebugSupportImpl implements DebugSupport {
 
 				response.setContentType("text/javascript;charset=utf-8");
 				PrintWriter out = response.getWriter();
-				//String serviceBase = getServiceBase(request);
+				// String serviceBase = getServiceBase(request);
 				String pathJSON = jsonStringify(path);
 				String callback = request.getParameter(PARAM_LITE_CALLBACK);
-				String data = "{\"path\":"+pathJSON+"}";
-				if(callback!=null){
-					out.print(callback+'('+ data+",true)");
-				}else{
-					out.print( data);
+				String data = "{\"path\":" + pathJSON + "}";
+				if (callback != null) {
+					out.print(callback + '(' + data + ",true)");
+				} else {
+					out.print(data);
 				}
 				out.flush();
-			}else{
-				
+			} else {
+
 			}
 		}
 		return true;

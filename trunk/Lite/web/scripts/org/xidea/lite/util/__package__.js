@@ -9,7 +9,9 @@ this.addScript('json.js',["stringifyJSON","parseJSON"]);
 
 this.addScript('kv.js',["setByKey","getByKey","removeByKey"]);
 
-this.addScript('resource.js',["URI","encodeURIComponent","decodeURIComponent",'base64Encode']);
+this.addScript('resource.js',["URI",'base64Encode']);
+
+this.addScript('js-token.js',['partitionJavaScript','compressJS']);
 
 this.addDependence("*",'org.xidea.jsi:$log',true);
 

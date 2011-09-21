@@ -13,14 +13,7 @@ var uriChars = /\\|[\x22\x3c\x3e\x5c\x5e\x60\u1680\u180e\u202f\u205f\u3000]|[\x0
 var allEncodes = /[\x2f\x60]|[\x00-\x29]|[\x2b-\x2c]|[\x3a-\x40]|[\x5b-\x5e]|[\x7b-\uffff]/g;
 ///[\x22\x25\x3c\x3e\x5c\x5e\x60\u1680\u180e\u202f\u205f\u3000]|[\x00-\x20]|[\x7b-\x7d]|[\x7f-\xa0]|[\u2000-\u200b]|[\u2028-\u2029]/g;
 
-var encodeURIComponent = window.encodeURIComponent;
-var decodeURIComponent = window.decodeURIComponent;
-encodeURIComponent = encodeURIComponent || function(url){
-	String(url).replace(/(?:%[\da-fA-F]{2})+/g,decodeChar);
-}
-decodeURIComponent = decodeURIComponent || function(url){
-	String(url).replace(allEncodes,uriDecode);
-}
+
 function encodeChar(i){
 	return "%"+(0x100+i).toString(16).substring(1)
 }
