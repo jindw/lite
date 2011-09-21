@@ -22,6 +22,7 @@ public class ExpressionFactoryImpl implements ExpressionFactory {
 	protected final OperationStrategy strategy;
 	protected Map<String, Integer> aliseMap = new HashMap<String, Integer>();
 	private int inc = 1;
+	private boolean optimize = true;
 	private static Map<String, Invocable> cachedInvocableMap = new HashMap<String, Invocable>();
 
 	public static ExpressionFactoryImpl getInstance() {
@@ -46,36 +47,42 @@ public class ExpressionFactoryImpl implements ExpressionFactory {
 		this.strategy = strategy;
 		ECMA262Impl.setup(this);
 	}
-	private OperationStrategyImpl getImpl(){
+
+	private OperationStrategyImpl getImpl() {
 		if (strategy instanceof OperationStrategyImpl) {
-			return (OperationStrategyImpl)strategy;
+			return (OperationStrategyImpl) strategy;
 		}
 		throw new UnsupportedOperationException();
 	}
+
 	public void addVar(String var, Object value) {
 		getImpl().addVar(var, value);
 	}
 
 	public void addMethod(Class<? extends Object> clazz, String name,
 			Invocable invocable) {
-		getImpl().addMethod(clazz, name,invocable);
+		getImpl().addMethod(clazz, name, invocable);
 	}
-	private Invocable toInvocable(Object impl){
-		if(impl instanceof Method){
-			Method method = (Method)impl;
-			if(Modifier.isPublic(method.getModifiers()) && Modifier.isStatic(method.getModifiers())){
+
+	private Invocable toInvocable(Object impl) {
+		if (impl instanceof Method) {
+			Method method = (Method) impl;
+			if (Modifier.isPublic(method.getModifiers())
+					&& Modifier.isStatic(method.getModifiers())) {
 				impl = createProxy(method);
 			}
 		}
-		if(impl instanceof Invocable){
+		if (impl instanceof Invocable) {
 			return (Invocable) impl;
 		}
-		throw new IllegalArgumentException("支持public static 格式的函数或者org.xidea.el.Invocable 对象");
+		throw new IllegalArgumentException(
+				"支持public static 格式的函数或者org.xidea.el.Invocable 对象");
 	}
+
 	public void addOperator(int sampleToken, String name, Object impl) {
-		if(impl == null){
+		if (impl == null) {
 			this.aliseMap.put(name, sampleToken);
-		}else{
+		} else {
 			sampleToken += (inc++ << ExpressionToken.POS_INC);
 			this.aliseMap.put(name, sampleToken);
 			getImpl().addVar(sampleToken, toInvocable(impl));
@@ -87,7 +94,9 @@ public class ExpressionFactoryImpl implements ExpressionFactory {
 		ExpressionParser ep = new ExpressionParser(el);
 		ep.setAliasMap(aliseMap);
 		ExpressionToken tokens = ep.parseEL();
-		tokens = ((TokenImpl) tokens).optimize(strategy, Collections.EMPTY_MAP);
+		if (optimize) {
+			tokens = ((TokenImpl) tokens).optimize(strategy, Collections.EMPTY_MAP);
+		}
 		return tokens;
 	}
 
@@ -102,21 +111,27 @@ public class ExpressionFactoryImpl implements ExpressionFactory {
 			} else {
 				el = TokenImpl.toToken((List<Object>) elo);
 			}
-			return getOptimizedExpression(el);
+			return createExpression(el);
 
 		}
 	}
 
-	protected Expression getOptimizedExpression(ExpressionToken el) {
-		Expression ressult = OptimizeExpressionImpl.create(el, this,strategy);
-		return ressult != null ? ressult : new ExpressionImpl(el, this,strategy);
+	protected Expression createExpression(ExpressionToken el) {
+		if (optimize) {
+			Expression ressult = OptimizeExpressionImpl.create(el, this,
+					strategy);
+			if (ressult != null) {
+				return ressult;
+			}
+		}
+		return new ExpressionImpl(el, this, strategy);
 	}
 
 	public static Invocable createProxy(final Method... methods) {
 		for (Method method : methods) {
-			try{
+			try {
 				method.setAccessible(true);
-			}catch (Exception e) {
+			} catch (Exception e) {
 			}
 		}
 		MethodInvocable inv = new MethodInvocable();
@@ -124,20 +139,21 @@ public class ExpressionFactoryImpl implements ExpressionFactory {
 		return inv;
 	}
 
-	static Invocable getInvocable(final Class<? extends Object> clazz, final String name,
-			int length) {
+	static Invocable getInvocable(final Class<? extends Object> clazz,
+			final String name, int length) {
 		String key = clazz.getName() + '.' + length + name;
 		Invocable result = cachedInvocableMap.get(key);
 		if (result == null && !cachedInvocableMap.containsKey(key)) {
 			ArrayList<Method> methods = new ArrayList<Method>();
 			for (Method method : clazz.getMethods()) {
 				if (method.getName().equals(name)
-						&& (length <0 || method.getParameterTypes().length == length)) {
+						&& (length < 0 || method.getParameterTypes().length == length)) {
 					methods.add(method);
 				}
 			}
-			if(methods.size()>0){
-				result = createProxy(methods.toArray(new Method[methods.size()]));
+			if (methods.size() > 0) {
+				result = createProxy(methods
+						.toArray(new Method[methods.size()]));
 				cachedInvocableMap.put(key, result);
 			}
 		}
@@ -145,7 +161,7 @@ public class ExpressionFactoryImpl implements ExpressionFactory {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T>T wrapAsContext(Object context) {
+	public <T> T wrapAsContext(Object context) {
 		Map<String, Object> valueStack;
 		if (context instanceof Map) {
 			valueStack = (Map<String, Object>) context;
@@ -154,19 +170,20 @@ public class ExpressionFactoryImpl implements ExpressionFactory {
 		} else {
 			valueStack = new ValueStackImpl(context);
 		}
-		return (T)valueStack;
+		return (T) valueStack;
 	}
 }
 
 class MethodInvocable implements Invocable {
 	Method[] methods;
+
 	public Object invoke(Object thiz, Object... args) throws Exception {
 		nextMethod: for (Method method : methods) {
-			Class<? extends Object> clazzs[] = method
-					.getParameterTypes();
+			Class<? extends Object> clazzs[] = method.getParameterTypes();
 			if (clazzs.length == args.length) {
 				for (int i = 0; i < clazzs.length; i++) {
-					Class<? extends Object> type = ReflectUtil.toWrapper(clazzs[i]);
+					Class<? extends Object> type = ReflectUtil
+							.toWrapper(clazzs[i]);
 					Object value = args[i];
 					value = ECMA262Impl.ToValue(value, type);
 					args[i] = value;

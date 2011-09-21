@@ -10,7 +10,6 @@ var FOR_STATUS_KEY = '$__for';
 var ID_PATTERN = /^[a-zA-Z_\$][_\$\w]*$/;
 var NUMBER_CALL = /^(\d+)(\.\w+)$/;
 
-
 /**
  * 将某一个token转化为表达式
  */

@@ -18,6 +18,7 @@ function compressJS(source){
 				result.push(item);//regexp or condition comment
 			}
 			break;
+			
 		default:
 			//result.push(item.replace(/^[ \t]+/gm,''));//被切开的语法块，前置换行，可能上上一个语法的结束语法，不能删除
 			result.push(item.replace(/^[\t ]+|([\r\n])\s+/g,'$1'));
@@ -26,14 +27,14 @@ function compressJS(source){
 	return result.join('');
 }
 function partitionJavaScript(source){
-	var regexp = /'(?:\\.|[^'])*'|"(?:\\.|[^"])*"|\/\/.*|\/\*([^*]+|\*[^\/])*\*\/|\//;
+	var regexp = /'(?:\\.|[^'])*'|"(?:\\.|[^"])*"|\/\/.*|\/\*([^*]+|\*[^\/])*\*\/|\/|</;
 	var m,result = [],concatable=false;//not comment string regexp
 	while(m = regexp.exec(source)){
 		if(m){
 			var index = m.index;
 			var m = m[0];
 			if(m == '/'){
-				m = findExp(result,source.substring(index));
+				m = findExpXML(result,source.substring(index));
 				if(m){
 					concatable = false;
 					result.push(source.substring(0,index),m);
@@ -64,10 +65,33 @@ function partitionJavaScript(source){
 var i=0;		
 if(i)alert(1)//...
 /alert(2)/i
-
 => var i=0;if(i){alert(1)/alert(2)/i}
+
  */
-function findExp(result,source){
+function findExpXML(result,source){
+	if(source.charAt() == '<'){
+		var tag = source.match(/<([a-zA-Z_][\w_\-\.]*(?:\:[\w_\-\.]+)?)(?:\s*[\/>]|\s+[\w_])/);
+		if(tag){
+			tag = tag[1];
+			tag = tag.replace(/\.\-/g,'\\$&');
+			var reg = new RegExp('<(/)?'+tag,'g');
+			var depth = 0;
+			reg.lastIndex = 0;
+			while(tag = reg.exec(source)){
+				if(reg[1]){
+					if(--depth == 0){
+						return source.substring(0,tag.index+tag[0].length)
+					}else if(depth<0){
+						return null;
+					}
+				}else{
+					depth++;
+				}
+			}
+		}else{
+			return null;
+		}
+	}
 	var i = result.length;
 	while(i--){
 		var line = result[i];
