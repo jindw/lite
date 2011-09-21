@@ -71,7 +71,7 @@ function findExp(result,source){
 		var line = result[i];
 		if(!/^\/[\/*]|^\s+$/.test(line)){//ignore common or space
 			line = line.replace(/\s+$/,'');
-			if(!/^(?:\b(?:new|instanceof|typeof)|[^\w_$\]})]$/.test(line)){
+			if(!/^(?:\b(?:new|instanceof|typeof)|[^\w_$\]})])$/.test(line)){
 				// if(this.status != STATUS_EXPRESSION)
 				// is op / start
 				return findExpSource(source);
