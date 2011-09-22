@@ -1,12 +1,8 @@
 /**
- * var tf = liteFunction("<c:if test='${test}'></c:if>",{type:'xml',extension:'/scripts/lite-extends.js'})
- * var tf = liteTemplate("<c:if test='${test}'></c:if>",{type:'xml',extension:'/scripts/lite-extends.js'})
  */
-function liteTemplate(source,config){
-	var jsTemplate = new TemplateImpl(source);
-	return jsTemplate;
-}
-function liteFunction(source,config){
+
+
+function liteImpl(source){
 	if(config instanceof Array){
 		config = {params:config}
 	}else if(typeof config == 'string'){

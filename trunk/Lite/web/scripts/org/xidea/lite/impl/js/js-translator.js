@@ -12,22 +12,30 @@
 //lite__init(1,name,context);//get
 //lite__init(2,obj);//encode
 //lite__init(3,list);//tolist
-var INIT_SCRIPT = String(function(){
-	var lite__impl_get;
-	var lite__impl_def = function(g){
-    	lite__impl_get = function(n,c){
-			return (c && n in c? c:n in g?g:this)[n];
-		};
-		function replacer(c){return g[c]||c}
+var INIT_SCRIPT = String(function(g){
+	function copy(source,dest){
+		for(var n in source){
+			dest[n] = source[n];
+		}
+		return dest;
+	}
+	function replacer(c){return g[c]||c}
+	function dl(date,format){//3
+        format = format.length;
+        return format == 1?date : ("000"+date).slice(-format);
+    }
+    function tz(offset){
+    	return offset?(offset>0?'-':offset*=-1||'+')+dl(offset/60,'00')+':'+dl(offset%60,'00'):'Z'
+    }
+	return {
 		//xt:0,xa:1,xp:2
-		g[0] = function(txt,type){
+		0:function(txt,type){
 			return String(txt).replace(
 				type==1?/[<&"]/g:
 					type?/&(?:\w+|#\d+|#x[\da-f]+);|[<&"]/ig:/[<&]/g
 				,replacer);
-		};
-		
-		g[1] = function(source,result,type) {
+		},
+		1:function(source,result,type) {
 			if(source instanceof Array){
 				return source;
 			}
@@ -43,16 +51,8 @@ var INIT_SCRIPT = String(function(){
  				}
 			}
 			return result;
-    	};
-		function dl(date,format){//3
-            format = format.length;
-            return format == 1?date : ("000"+date).slice(-format);
-        }
-        function tz(offset){
-        	offset = offset;
-        	return offset?(offset>0?'-':offset*=-1||'+')+dl(offset/60,'00')+':'+dl(offset%60,'00'):'Z'
-        }
-		g[2] = function(pattern,date){
+    	},
+		2: function(pattern,date){
 			//TODO:未考虑国际化偏移
 			date = date?new Date(date):new Date();
 	        return pattern.replace(/([YMDhms])\1*|\.s|TZD/g,function(format){
@@ -78,17 +78,12 @@ var INIT_SCRIPT = String(function(){
 	            	return tz(date.getTimezoneOffset());
 	            }
 	        });
+		},
+		create:function(context){
+			return copy(context,copy(this,{}))
 		}
-  
-		return function(n,fn){
-    		g[n]=fn;
-    	};
-	}({'"':'&#34;','<':'&lt;','&':'&#38;'});
-	with({}){
-		alert(lite__impl_def,lite__impl_get);
 	}
-
-}).replace(/^[^{]+\{\s*|\bwith\b[\s\S]*$/g,'');//.replace(/\s*([^\w_$\s]+)\s*/g,'$1')
+}({'"':'&#34;','<':'&lt;','&':'&#38;'}))
 /**
  * JS原生代码翻译器实现
  */
@@ -124,7 +119,7 @@ JSTranslator.prototype = {
 	    }
 		var result = [];
     	if(!this.liteImpl){
-    		result.push("if(!window.",context.liteImpl,"def){",INIT_SCRIPT,"}");
+    		result.push("if('undefined' !=typeof ",context.liteImpl,"){",context.liteImpl,'=',INIT_SCRIPT,"}");
     	}
 	    result.push('\n',code.replace(/<\/script>/g,'<\\/script>'));
 	    return result.join("");
@@ -236,17 +231,22 @@ function buildVars(context,scope,params){
 	copy(callMap,map);
 	for(var n in map){
 		if(n != '*' && !((n in GLOBAL_VAR_MAP)|| (n in varMap) || (n in paramMap))){
-			result.push('\tvar ',n,'=',context.liteImpl,'get("',n,'"',(params?'':',$__context__'),');\n');
+			if(params){//no $__context__
+				result.push('\tvar ',n,'=("',n,'" in $__context__? $__context__:',context.liteImpl,')["',n,'"];\n');
+			}else{
+				result.push('\tvar ',n,'=',context.liteImpl,'["',n,'"];\n');
+			}
+			
 		}
 	}
-	if(context.impl_counter.l){
-		result.push('\tvar ',context.liteImpl,'l=',context.liteImpl,'get(1);\n');
-	}
 	if(context.impl_counter.x){
-		result.push('\tvar ',context.liteImpl,'x=',context.liteImpl,'get(0);\n');
+		result.push('\tvar ',context.liteImpl,'x=',context.liteImpl,'[0];\n');
+	}
+	if(context.impl_counter.l){
+		result.push('\tvar ',context.liteImpl,'l=',context.liteImpl,'[1];\n');
 	}
 	if(context.impl_counter.d){
-		result.push('\tvar ',context.liteImpl,'d=',context.liteImpl,'get(2);\n');
+		result.push('\tvar ',context.liteImpl,'d=',context.liteImpl,'[2];\n');
 	}
 	return result;
 }
@@ -292,7 +292,7 @@ JSTranslateContext.prototype = new PT({
 	        var vars = buildVars(this,def,def.params);
 	        var content = optimizeFunction(this,'',def.params,def.defaults,vars);
 	        this.depth--;
-	        fs.push(this.liteImpl,"def('",n,"',",content,");\n");
+	        fs.push(this.liteImpl,"['",n,"]=",content,",\n");
 	        this.impl_counter = {d:0,l:0,x:0};
 	    }
 	    this.header = fs.join('');
