@@ -37,7 +37,8 @@ function Template(fn){
  * ==>
  * function(impl){return function(a,b){return ['<xml>tpl:',a+b+c+d,'</xml>'].join('')}}(impl);
  */
-var liteWrap = function(){
+var liteImpl;
+var liteWrap = function(replaceMap){
 	function replacer(c){return replaceMap[c]||c}
 	function dl(date,format){//3
 	    format = format.length;
@@ -46,7 +47,7 @@ var liteWrap = function(){
 	function tz(offset){
 		return offset?(offset>0?'-':offset*=-1||'+')+dl(offset/60,'00')+':'+dl(offset%60,'00'):'Z'
 	}
-	var liteImpl = {
+	liteImpl = {
 		//xt:0,xa:1,xp:2
 		0:function(txt,type){
 			return String(txt).replace(
@@ -99,7 +100,6 @@ var liteWrap = function(){
 	        });
 		}
 	}
-	var replaceMap = {'"':'&#34;','<':'&lt;','&':'&#38;'};
 	function loadImpl(){
 		loadImpl = null;
     	var impl = String(this.document && document && document.cookie).match(/LITE_COMPILE=([^;]+)/);
@@ -107,7 +107,7 @@ var liteWrap = function(){
     	impl = impl && impl[1];
     	if(!impl){
     		if(typeof $import == 'function'){
-    			$import('org.xidea.lite.impl.js:liteImpl');
+    			$import('org.xidea.lite.impl.js:liteCompile');
     			return;
     		}
     	}
@@ -138,4 +138,4 @@ var liteWrap = function(){
 	    	return liteImpl;
 	    }
 	}
-}();
+}( {'"':'&#34;','<':'&lt;','&':'&#38;'});
