@@ -31,7 +31,7 @@ function liteImpl(source){
 	translator.liteImpl = "lite__impl_"
 	var code = translator.translate(parseContext.toList(),true);
 	
-	data =  window.eval("(function(lite__impl_def,lite__impl_get){"+(code||null)+"})");
-	data = data(lite__impl_def,lite__impl_get);
+	data =  window.eval("(function(lite__impl_){"+(code||null)+"})");
+	data = data(lite__impl_);
     return data;
 }

@@ -62,7 +62,7 @@ function TemplateImpl(data,parseContext,runAsLiteCode){
 		    	var translator = new JSTranslator("");
 		    	translator.liteImpl = "lite__impl_"
 		    	var code = translator.translate(parseContext.toList(),true);
-		    	var fcode = "function(lite__impl_def,lite__impl_get,lite__impl_encode,lite__impl_list){"+code+"}"
+		    	var fcode = "function(lite__impl_){"+code+"}"
 	            data =  window.eval("["+(fcode||null)+"][0]");
 	            data.toString=function(){//_$1 encodeXML
 	                return fcode;

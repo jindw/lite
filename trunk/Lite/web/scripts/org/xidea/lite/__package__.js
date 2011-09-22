@@ -1,1 +1,1 @@
-this.addScript('template.js',["Template","lite__impl_def","lite__impl_get"]);
+this.addScript('template.js',["Template","liteWrap"]);

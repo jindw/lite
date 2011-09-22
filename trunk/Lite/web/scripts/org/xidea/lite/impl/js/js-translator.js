@@ -83,7 +83,7 @@ var INIT_SCRIPT = String(function(g){
 			return copy(context,copy(this,{}))
 		}
 	}
-}({'"':'&#34;','<':'&lt;','&':'&#38;'}))
+}).replace(/^\s+|\s+$/g,'')+"({'\"':'&#34;','<':'&lt;','&':'&#38;'})";
 /**
  * JS原生代码翻译器实现
  */
@@ -119,7 +119,7 @@ JSTranslator.prototype = {
 	    }
 		var result = [];
     	if(!this.liteImpl){
-    		result.push("if('undefined' !=typeof ",context.liteImpl,"){",context.liteImpl,'=',INIT_SCRIPT,"}");
+    		result.push("if('undefined' ==typeof ",context.liteImpl,"){",context.liteImpl,'=',INIT_SCRIPT,"}");
     	}
 	    result.push('\n',code.replace(/<\/script>/g,'<\\/script>'));
 	    return result.join("");
@@ -232,9 +232,9 @@ function buildVars(context,scope,params){
 	for(var n in map){
 		if(n != '*' && !((n in GLOBAL_VAR_MAP)|| (n in varMap) || (n in paramMap))){
 			if(params){//no $__context__
-				result.push('\tvar ',n,'=("',n,'" in $__context__? $__context__:',context.liteImpl,')["',n,'"];\n');
-			}else{
 				result.push('\tvar ',n,'=',context.liteImpl,'["',n,'"];\n');
+			}else{
+				result.push('\tvar ',n,'=("',n,'" in $__context__? $__context__:',context.liteImpl,')["',n,'"];\n');
 			}
 			
 		}
@@ -292,7 +292,7 @@ JSTranslateContext.prototype = new PT({
 	        var vars = buildVars(this,def,def.params);
 	        var content = optimizeFunction(this,'',def.params,def.defaults,vars);
 	        this.depth--;
-	        fs.push(this.liteImpl,"['",n,"]=",content,",\n");
+	        fs.push(this.liteImpl,".",n,"=",content,";\n");
 	        this.impl_counter = {d:0,l:0,x:0};
 	    }
 	    this.header = fs.join('');

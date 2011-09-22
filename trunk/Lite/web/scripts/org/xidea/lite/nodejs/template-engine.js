@@ -20,7 +20,7 @@ TemplateEngine.prototype.render=function(path,data,response){
 	var translator = new JSTranslator();//'.','/','-','!','%'
 	translator.liteImpl = 'lite__impl_';//avoid inline jslib 
 	var jscode = translator.translate(litecode,true);
-	var fcode = "function(lite__impl_def,lite__impl_get,lite__impl_encode,lite__impl_list){"+jscode+"}"
+	var fcode = "function(lite__impl_){"+jscode+"}"
 	var i = fcode.indexOf('charAt')
 	
 	//console.log(fcode.substr(i-100,300));
