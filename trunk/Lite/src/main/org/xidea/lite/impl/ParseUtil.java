@@ -80,10 +80,10 @@ public class ParseUtil {
 		cs.add("UTF-8");
 		cs.add(Charset.defaultCharset().name());
 		cs.add("GBK");
-		for(Charset c : Charset.availableCharsets().values()){
+		for (Charset c : Charset.availableCharsets().values()) {
 			cs.add(c.name());
 		}
-		CHARSETS =cs.toArray(new String[cs.size()]);
+		CHARSETS = cs.toArray(new String[cs.size()]);
 
 	}
 
@@ -92,7 +92,7 @@ public class ParseUtil {
 		if (rt == null) {
 			jsi.set(rt = RuntimeSupport.create());
 			rt.eval("$import('org.xidea.jsidoc.util:JSON')");
-			//((RuntimeSupport)rt).setOptimizationLevel(-1);
+			// ((RuntimeSupport)rt).setOptimizationLevel(-1);
 		}
 		return rt;
 	}
@@ -141,10 +141,14 @@ public class ParseUtil {
 		}
 		return String.valueOf(s1);
 	}
-	private static Pattern forcePattern = Pattern.compile("^\\s+|\\s+$|(\\s)\\s+");
+
+	private static Pattern forcePattern = Pattern
+			.compile("^\\s+|\\s+$|(\\s)\\s+");
+
 	static String forceTrim(String text) {
 		return forcePattern.matcher(text).replaceAll("$1");
 	}
+
 	public static InputStream openStream(URI uri) throws IOException {
 		try {
 			if ("data".equalsIgnoreCase(uri.getScheme())) {
@@ -231,15 +235,15 @@ public class ParseUtil {
 		InputSource in = new InputSource(new StringReader(text));
 		in.setSystemId(id);
 		in.setCharacterStream(new StringReader(text));
-		try{
+		try {
 			Document xml = documentBuilder.parse(in);
 			if (ins != null) {
-				xml.insertBefore(xml.createProcessingInstruction("xml", ins), xml
-					.getFirstChild());
+				xml.insertBefore(xml.createProcessingInstruction("xml", ins),
+						xml.getFirstChild());
 			}
 			return xml;
-		}catch(SAXException e){
-			log.info("xml 解析失败,文件:"+id+"\n 内容:"+text);
+		} catch (SAXException e) {
+			log.info("xml 解析失败,文件:" + id + "\n 内容:" + text);
 			throw e;
 		}
 
@@ -247,8 +251,9 @@ public class ParseUtil {
 
 	public static String normalize(String text, String id) throws IOException,
 			SAXException {
-		int start  = text.indexOf('<');
-		if(start<0 || start>0 && text.substring(0,start).trim().length() > 0){
+		int start = text.indexOf('<');
+		if (start < 0 || start > 0
+				&& text.substring(0, start).trim().length() > 0) {
 			return "<out xmlns='http://www.xidea.org/lite/core'><![CDATA["
 					+ TXT_CDATA_END.matcher(
 							TXT_HEADER.matcher(text).replaceAll(""))
@@ -282,8 +287,8 @@ public class ParseUtil {
 				String ln = getLocalName(attr);
 				String ns = attr.getNamespaceURI();
 				if (ns != null && !(ParseUtil.CORE_INFO.equals(ln))
-						//&& ParseUtil.CORE_URI.equals(ns)
-						) {
+				// && ParseUtil.CORE_URI.equals(ns)
+				) {
 					list.add(attr);
 				}
 			}
@@ -409,67 +414,33 @@ public class ParseUtil {
 		return xpathFactory.newXPath();
 	}
 
-	public static String loadXMLTextAndClose(InputStream in) throws IOException {
-		if(!in.markSupported()){
-			in = new BufferedInputStream(in);
-		}
-		String charset = getXMLCharset(in);
-		return loadTextAndClose(in,charset);
-	}
-
-	private static String getXMLCharset(InputStream bin)
-			throws IOException {
-		InputStreamReader cin = getBOMReader(bin);
-		bin.mark(128);
-		String charset = "utf-8";
-		if(cin == null){
-			cin = new InputStreamReader(bin);
-			if(cin.read() == '<' && cin.read() == '?'){
-				StringBuilder buf = new StringBuilder();
-				int len = 32-2;
-				while(len-->0){
-					int c = cin.read();
-					if(c == '>' || c<0){
-						String line = buf.toString().replace('\'', '"');
-						if(line.startsWith("xml")){
-							int p0 = line.indexOf("charset");
-							if(p0>0){
-								int p1 = line.indexOf('"',p0);
-								int p2 = line.indexOf('"',p1);
-								if(p1>0 && p2>0){
-									charset = line.substring(p1+1,p2);
-								}
-							}
-						}
-						break;
-					}
-				}
-			}
-		}
-		bin.reset();
-		return charset;
-	}
-
 	public static String loadTextAndClose(InputStream in, String defaultCharset)
 			throws IOException {
-		return loadTextAndClose(in,null,defaultCharset);
+		return loadTextAndClose(in, null,false, defaultCharset);
 	}
+
+	public static String loadXMLSourceAndClose(InputStream in,
+			String[] rtCharset) throws IOException {
+		return loadTextAndClose(in, rtCharset, true,"UTF-8");
+	}
+
 	/**
 	 * FE FF UTF-16, big-endian FF FE UTF-16, little-endian EF BB BF UTF-8
+	 * 如果有BOM，取BOM的编码设置。 如果有<?xml 取XML 编码设置。 如果defaultCharset 有值，
+	 * 优先采用defaultCharset
 	 * 
 	 * @param in
 	 * @return
 	 * @throws IOException
 	 */
-	public static String loadTextAndClose(InputStream in, String[] rtCharset,String defaultCharset)
-			throws IOException {
-		if(!in.markSupported()){
+	public static String loadTextAndClose(InputStream in, String[] rtCharset,
+			boolean isXML,String defaultCharset) throws IOException {
+		if (!in.markSupported()) {
 			in = new BufferedInputStream(in);
 		}
-		in.mark(3);
-		InputStreamReader cin = getBOMReader(in);
+		InputStreamReader cin = getSourceReader(in,isXML);
 		if (cin != null) {
-			if(rtCharset!=null){
+			if (rtCharset != null) {
 				rtCharset[0] = cin.getEncoding();
 			}
 			return loadTextAndClose(cin);
@@ -482,28 +453,74 @@ public class ParseUtil {
 			in.close();
 		}
 		byte[] data = out.toByteArray();
-		if (defaultCharset != null ) {
-			String t = getText(data,rtCharset, defaultCharset);
+		if (defaultCharset != null) {
+			String t = getText(data, rtCharset, defaultCharset);
 			if (t != null) {
 				return t;
 			}
 		}
-		return getText(data, rtCharset,CHARSETS);
-
+		return getText(data, rtCharset, CHARSETS);
 	}
 
-	private static String getText(byte[] data,String[] rtCharset, String... charsets)
-			throws UnsupportedEncodingException {
+	private static String getText(byte[] data, String[] rtCharset,
+			String... charsets) throws UnsupportedEncodingException {
 		for (String c : charsets) {
 			String t = new String(data, c);
 			byte[] data2 = t.getBytes(c);
 			if (Arrays.equals(data, data2)) {
-				if(rtCharset!=null){
+				if (rtCharset != null) {
 					rtCharset[0] = c;
 				}
 				return t;
 			}
 		}
+		return null;
+	}
+
+	private static InputStreamReader getSourceReader(InputStream bin,boolean isXML)
+			throws IOException {
+		InputStreamReader cin = getBOMReader(bin);
+		if (cin != null) {
+			return cin;
+		} else if(isXML){
+			bin.mark(256);
+			cin = new InputStreamReader(bin, "UTF-8");
+			int c = 0;
+			for (int i = 0; i < 128; i++) {
+				c = cin.read();
+				if (Character.isWhitespace(c)) {
+				} else {
+					break;
+				}
+			}
+			if (c == '<') {
+				String charset = "UTF-8";
+				if (cin.read() == '?') {
+					StringBuilder buf = new StringBuilder();
+					int len = 32 - 2;
+					while (len-- > 0) {
+						c = cin.read();
+						if (c == '>' || c < 0) {
+							String line = buf.toString().replace('\'', '"');
+							if (line.startsWith("xml")) {
+								int p0 = line.indexOf("charset");
+								if (p0 > 0) {
+									int p1 = line.indexOf('"', p0);
+									int p2 = line.indexOf('"', p1);
+									if (p1 > 0 && p2 > 0) {
+										charset = line.substring(p1 + 1, p2);
+									}
+								}
+							}
+							break;
+						}
+					}
+				}
+				bin.reset();
+				return new InputStreamReader(bin, charset);
+			}
+		}
+		bin.reset();
 		return null;
 	}
 
@@ -578,7 +595,6 @@ public class ParseUtil {
 		return text;
 	}
 
-	
 }
 
 class NamespaceContextImpl implements NamespaceContext {

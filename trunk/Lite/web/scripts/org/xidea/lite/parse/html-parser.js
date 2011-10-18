@@ -51,39 +51,6 @@ var HTML = {
 		}
 		
 	},
-	parseScript:function(el){
-		var oldSpace = this.getAttribute(XML_SPACE_TRIM);
-		this.setAttribute(XML_SPACE_TRIM,false);
-		try{
-			if(!el.hasAttribute('src')){
-				var child;
-				var buf = [];
-				while(child = el.firstChild){
-					if(child.nodeType==3 || child.nodeType == 4){//text/cdata
-						buf.push(child.data);
-					}else{
-						$log.warn('script 中不能用嵌入html标签，建议将脚本放在 <![CDATA[...]]>中。');
-					}
-					el.removeChild(child);
-				}
-				buf = processJS(buf.join(''));
-				var doc = el.ownerDocument;
-				if(buf.search(/[<&]/)>=0){
-					el.appendChild(doc.createTextNode('/*'));
-					el.appendChild(doc.createCDATASection('*/'+buf+'//'));
-				}else{
-					el.appendChild(doc.createTextNode(buf));
-				}
-			}
-			this.next(el);
-		}finally{
-			this.setAttribute(XML_SPACE_TRIM,oldSpace);
-		}
-	},
-	"parse2on*":function(attr){
-		attr.value = processJS(attr.value);
-		this.next(attr);
-	},
 	parseInput:function(el){
 		var autoform = this.getAttribute(AUTO_FORM_PREFIX);
 		if(autoform!=null){
@@ -180,6 +147,7 @@ function buildMoved(tag){
 		return true;
 	}
 }
+
 while(buildMoved(moveList.pop()));
 HTML_EXT.parseAutoform = HTML_EXT.beforeAutoform;
 HTML_EXT.parseTrim = HTML_EXT.beforeTrim;
@@ -237,6 +205,8 @@ function buildCheck2select(context,el,name_,checkName,multiple){
 	}
 	
 }
+
+/* html parse */
 function preservedParse(node){
 	var oldSpace = this.getAttribute(XML_SPACE_TRIM);
 	this.setAttribute(XML_SPACE_TRIM,false);
@@ -270,8 +240,50 @@ function forceURIParse(attr){
 	attr.value = autoEncode(value,/^\s*encodeURI*/,replaceURI,encodeURI);
 	this.next(attr);
 }
-HTML.parsePre = preservedParse;
-HTML.parseTextArea = preservedParse;
+
+function parseHtmlScript(el){
+	var oldSpace = this.getAttribute(XML_SPACE_TRIM);
+	this.setAttribute(XML_SPACE_TRIM,false);
+	try{
+		if(!el.hasAttribute('src')){
+			var child;
+			var buf = [];
+			while(child = el.firstChild){
+				if(child.nodeType==3 || child.nodeType == 4){//text/cdata
+					buf.push(child.data);
+				}else{
+					$log.warn('script 中不能用嵌入html标签，建议将脚本放在 <![CDATA[...]]>中。');
+				}
+				el.removeChild(child);
+			}
+			buf = processJS(buf.join(''));
+			var doc = el.ownerDocument;
+			if(buf.search(/[<&]/)>=0){
+				el.appendChild(doc.createTextNode('/*'));
+				el.appendChild(doc.createCDATASection('*/'+buf+'//'));
+			}else{
+				el.appendChild(doc.createTextNode(buf));
+			}
+		}
+		this.next(el);
+	}finally{
+		this.setAttribute(XML_SPACE_TRIM,oldSpace);
+	}
+}
+
+
+function parseHtmlEventAttr(attr){
+	attr.value = processJS(attr.value);
+	this.next(attr);
+}
+
+/* 处理 script中的模板变量(JSON.stringify)*/
+HTML.parseScript = parseHtmlScript;
+
+/* 处理 html 事件中的模板变量(JSON.stringify) (ELEMENT_NODE == 2)*/
+HTML["parse2on*"] = parseHtmlEventAttr;
+
+/* 处理html 资源地址属性中的模板变量（encodeURI） */
 //if(tagName=='link'){
 //}else if(/^a/i.test(tagName)){
 HTML.parse2href=forceURIParse;
@@ -280,6 +292,12 @@ HTML.parse2action=forceURIParse;
 //if(/^(?:script|img|button)$/i.test(tagName)){
 //}else if(/^(?:a|frame|iframe)$/i.test(tagName)){
 HTML.parse2src=forceURIParse;
+
+/* 处理保留空白的html节点 */
+
+HTML.parsePre = preservedParse;
+HTML.parseTextArea = preservedParse;
+
 function autoEncode(value,pattern,replacer,replacer2){
 	var p = -1;
 	var result = [];

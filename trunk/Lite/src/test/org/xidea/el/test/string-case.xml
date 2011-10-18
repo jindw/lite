@@ -47,9 +47,18 @@
 		<case>'1/2/3/4'.replace(/\/d/,'$0-')</case>
 		<case>'1/2/3/4'.replace(/(\/d)/,'($1-)')</case>
 		<case>'1/2/3/4'.replace(/\//g,'')</case>
+		<case>'1/2/3/4'.replace(/\//,'')</case>
 		<case>"aDxi\\\\.\\\\".replace(/\\\\.\\\\/,"\\\\%\\\\")</case>	
+		<case>"abcABCAbc".replace(/Ab/im,"")</case>	
+		<case>"abcABCAbc".replace(/Ab/ig,"")</case>		
+		<case>"abcABCAbc".replace(/Ab/m,"")</case>	
+		<case>"abcABCAbc".replace(/Ab/g,"")</case>	
 		<case>'1/2/3/4'.replace(/\//img,'')</case>
 		<case>'1/2/3/4'.replace(/\//im,'')</case>
+		<case>'/1/2\n/3/4\n/5'.replace(/^\//img,'')</case>
+		<case>'/1/2\n/3/4\n/5'.replace(/^\//g,'')</case>
+		<case>'/1/2\n/3/4\n/5'.replace(/^\//gm,'')</case>
+		<case>'/1/2\n/3/4\n/5'.replace(/^\//m,'')</case>
 		<case>"ab汉字aDxi".replace(/([\w\W]{2})[\s\S]+/,"$1...")</case>	
 		
 		<case>'1/2/3/4'.match(/\/(\d)\/(\d)/im)</case>

@@ -39,58 +39,54 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 	private final Map<String, ResourceItem> cached = new HashMap<String, ResourceItem>();
 	private ThreadLocal<ResourceItem> currentItem = new ThreadLocal<ResourceItem>();
 	private JSIRuntime jsr = RuntimeSupport.create();
-	private URI currentScript;
+	// private URI currentScript;
 	private List<File> scripts = new ArrayList<File>();
 
 	public ResourceManagerImpl(URI root, URI config) throws IOException {
 		super(root, config);
 		this.root = new File(root);
-		this.currentScript = root;
+		// this.currentScript = root;
+		this.jsr
+				.eval("$import('org.xidea.jsidoc.util:JSON');console=$import('org.xidea.jsi:$log');");
 		this.jsr.eval("var resourceManager=1;");
-		this.jsr.eval("$import('org.xidea.jsidoc.util:JSON');");
 		Object initfn = this.jsr.eval("(function(rm){resourceManager = rm;})");
 		this.jsr.invoke(this, initfn, this);
-		this.jsr.eval(ResourceManagerImpl.class.getResource("env.s.js"));
+		this.jsr.eval(ResourceManagerImpl.class
+				.getResource("internal/module.js"));
 		this.initialize();
 	}
 
 	protected void initialize() throws IOException {
-		String defaultInit = "/WEB-INF/initialize.s.js";
+		String defaultInit = "/WEB-INF/setup";
 		File initFile = new File(this.root, defaultInit);
-		if (initFile.exists()) {
-			include(defaultInit);
-		} else {
-			defaultInit = "/initialize.s.js";
+		if (!initFile.exists()) {
+			defaultInit = "/setup";
 			initFile = new File(this.root, defaultInit);
-			if (initFile.exists()) {
-				include(defaultInit);
-			} else {
-				include("classpath:///org/xidea/lite/tools/initialize.s.js");
+			if (!initFile.exists()) {
+				defaultInit = ("org/xidea/lite/tools/internal/setup");
 			}
 		}
+
+		this.jsr.eval("require('" + defaultInit + "')");
 	}
 
-	public void include(String path) throws IOException {
-		URI u;
-		if (path.startsWith("classpath:")) {
-			u = URI.create(path);
+	public Object eval(String code, String path) {
+		return this.jsr.eval(code, path);
+	}
+
+	public String loadScript(String absPath) throws IOException {
+		InputStream in;
+		File file = new File(this.root, absPath);
+		if (file.exists()) {
+			in = new FileInputStream(file);
+			this.scripts.add(file);
 		} else {
-			if (path.charAt(0) == '/') {
-				path = path.substring(1);
-			}
-			u = this.currentScript.resolve(path);
-			if ("file".equals(u.getScheme())) {
-				this.scripts.add(new File(u));
+			in = this.getClass().getClassLoader().getResourceAsStream(absPath);
+			if (in == null) {
+				return null;
 			}
 		}
-		URI oldScript = this.currentScript;
-		try {
-			this.currentScript = u;
-			jsr.eval(ParseUtil.loadTextAndClose(ParseUtil.openStream(u),
-					"utf-8"), u.toString());
-		} finally {
-			currentScript = oldScript;
-		}
+		return ParseUtil.loadTextAndClose(in, "utf-8");
 	}
 
 	public List<File> getScriptFileList() {
@@ -119,23 +115,12 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 		}
 	}
 
-	public String getSourceEncoding(String path) {
+	public String getSourceEncoding(String path) throws IOException {
 		File file = getFile(path);
 		String encoding = null;
 		if (file.exists()) {
-			try {
-				getFilteredContent(path);
-			} catch (IOException e) {
-			}
+			this.getFilteredText(path);
 			encoding = resource(path).encoding;
-		}
-		if (encoding != null) {
-			Group group = this.find(path, false);
-			if (group != null) {
-				encoding = this.getFeatureMap(path).get(
-						LiteTemplate.FEATURE_ENCODING);
-				return encoding;
-			}
 		}
 		return encoding;
 	}
@@ -184,10 +169,25 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 
 	private String loadText(ResourceItem item, byte[] data) throws IOException {
 		String[] rtCharset = new String[1];
-		String text = ParseUtil.loadTextAndClose(
-				new ByteArrayInputStream(data), rtCharset, item.encoding);
+		String path = item.path;
+		boolean isXML = containsFilter(path, documentFilters);
+		InputStream in = new ByteArrayInputStream(data);
+		final String text = ParseUtil.loadTextAndClose(in, rtCharset, isXML,
+				item.encoding);
 		item.encoding = rtCharset[0];
 		return text;
+	}
+
+	private <T> boolean containsFilter(String path,
+			List<MatcherFilter<T>> documentFilters) {
+		boolean isXML = false;
+		for (MatcherFilter<T> filter : documentFilters) {
+			if (filter.match(path)) {
+				isXML = true;
+				break;
+			}
+		}
+		return isXML;
 	}
 
 	public Document getFilteredDocument(String path) throws IOException,
@@ -235,96 +235,84 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 			} catch (SAXException e) {
 				throw new RuntimeException(e);
 			}
+		} else {
+			log.error("loadChainText must called in filter plugin context!!");
 		}
 		return null;
 	}
 
 	/**
-	 * 注意: getFilteredContent(path,String.class):
+	 * 注意: getFilteredContent(path,String.class,breakFilter):
 	 * 如果text没有被getFilterdDocument初始化，也没有相关的文本filter,返回null
 	 * 但是：getFilterdText，能有效返回数据
 	 * 
 	 * @param <T>
 	 * @param path
 	 * @param type
+	 * @param lastFilter
+	 *            not include
 	 * @return
 	 * @throws IOException
 	 * @throws SAXException
 	 */
 	private <T> ResourceItem getFilteredContent(String path, Class<T> type,
-			Object endFilter
+			Object lastFilter
 	// ,List<FilterPlugin<byte[]>> streamFilters,
 	// List<FilterPlugin<String>> stringFilters,
 	// List<FilterPlugin<Document>> documentFilters
 	) throws IOException, SAXException {
 		ResourceItem res = resource(path);
 		ResourceItem old = currentItem.get();
+		if (old == res) {// 不能两次进入同一个资源，否则会死锁
+			// TODO: 逻辑还有问题
+			return res;
+		}
 		synchronized (res) {
-			res.currentData = null;
+			File file = getFile(path);
 			try {
 				currentItem.set(res);
-				byte[] data = null;
-				if (res.data == null || endFilter != null) {// byte[]
-					data = getRawBytes(path);
-					for (MatcherFilter<byte[]> filter : streamFilters) {
-						if (endFilter == filter) {
-							res.currentData = data;
-							return res;
-						}
-						if (filter.match(path)) {
-							data = filter.doFilter(path, data);
-						}
+				{
+					byte[] data = null;
+					if (file.exists()) {
+						data = getRawBytes(path);
 					}
-					if (endFilter == null) {
-						res.data = data;
+					res.currentData = data;
+					byte[] oldData = res.data;
+					data = doFilter(res, lastFilter, streamFilters, data,
+							oldData);
+					if (data == null) {
+						return res;// filter result
+					}
+					res.data = data;
+					if (type == byte[].class) {
+						return res;
 					}
 				}
-				if (type == byte[].class && endFilter == null) {
-					return res;
-				} else if (data == null) {
-					data = res.data;
-				}
-
-				if (type == String.class) {
-					if (res.text == null || endFilter != null) {// string
-						String text = null;
-						for (MatcherFilter<String> filter : stringFilters) {
-							if (endFilter == filter) {
-								break;
-							}
-							if (filter.match(path)) {
-								if (text == null) {
-									text = loadText(res, res.data);
-								}
-								text = filter.doFilter(path, text);
-							}
-						}
-						if (endFilter == null) {
-							res.text = text;
-						} else {
-							if (text == null) {
-								text = loadText(res, data);
-							}
-							res.currentData = text;
-						}
+				String text = loadText(res, res.data);
+				{
+					String oldText = res.text;
+					text = doFilter(res, lastFilter, stringFilters, text,
+							oldText);
+					if (text == null) {
+						return res;// filter result
 					}
-					return res;
-				} else {
-					if (res.dom == null) {
-						String text = ParseUtil
-								.loadXMLTextAndClose(new ByteArrayInputStream(
-										res.data));
-						// check xml instruction utf-8
-						for (MatcherFilter<String> filter : stringFilters) {
-							if (filter.match(path)) {
-								text = filter.doFilter(path, text);
-							}
-						}
+					res.text = text;
+					if (type == String.class) {
+						return res;
+					}
+				}
+				{
+					if (res.dom == null) {// no lastFilter
 						// 没有默认的xml正规化
 						Document doc = ParseUtil.loadXMLBySource(text, "lite:"
 								+ path);
-						for (ResourceFilter<Document> filter : documentFilters) {
-							doc = filter.doFilter(path, doc);
+						for (MatcherFilter<Document> filter : documentFilters) {
+							try {
+								doc = filter.doFilter(path, doc);
+							} catch (RuntimeException e) {
+								log.error("filter error:" + filter);
+								throw e;
+							}
 						}
 						res.dom = doc;
 					}
@@ -335,6 +323,51 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 				res.lastModified = System.currentTimeMillis();
 			}
 		}
+	}
+
+	private <T> T doFilter(ResourceItem res, Object lastFilter,
+			List<MatcherFilter<T>> streamFilters, T data, T oldData)
+			throws FileNotFoundException {
+		lastFilter = getFilter(lastFilter, streamFilters);
+		String path = res.path;
+		if (oldData == null || lastFilter != null) {
+			for (MatcherFilter<T> filter : streamFilters) {
+				if (filter == lastFilter) {
+					break;
+				}
+				if (filter.match(path)) {
+					try {
+						data = filter.doFilter(path, data);
+					} catch (RuntimeException e) {
+						log.error("filter error:" + filter);
+						throw e;
+					}
+				}
+			}
+			if (lastFilter != null) {
+				// throw new
+				return null;
+			}
+			if (data == null) {
+				throw new FileNotFoundException("File not exists:" + path);
+			}
+			// data not null
+			return data;
+		} else {
+			return oldData;
+		}
+	}
+
+	private <T> MatcherFilter<T> getFilter(Object lastFilter,
+			List<MatcherFilter<T>> filters) {
+		if (lastFilter != null) {
+			for (MatcherFilter<T> filter : filters) {
+				if (lastFilter == filter) {
+					return filter;
+				}
+			}
+		}
+		return null;
 	}
 
 	private ResourceItem resource(String path) {
@@ -350,6 +383,12 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 		if (item == null) {
 			item = new ResourceItem();
 			item.path = path;
+			Group group = this.find(path, false);
+			if (group != null) {
+				String encoding = this.getFeatureMap(path).get(
+						LiteTemplate.FEATURE_ENCODING);
+				item.encoding = encoding;
+			}
 			cached.put(path, item);
 		}
 		return item;
@@ -398,15 +437,21 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 		public boolean match(String url) {
 			return matcher.match(url);
 		}
-
-		public T doFilter(String path, T in) {
-			currentItem.get().currentFilter = this;
-			return base.doFilter(path, in);
+		public String toString(){
+			return base.toString();
 		}
 
-		// public ResourceManager getFactory() {
-		// return base.getFactory();
-		// }
+		public T doFilter(String path, T in) {
+			ResourceItem item = currentItem.get();
+			item.currentFilter = this;// must before doFilter
+			T result = base.doFilter(path, in);
+			if (result == null) {
+				result = in;
+			}
+			item.currentData = result;
+			return result;
+
+		}
 
 	}
 
@@ -419,12 +464,12 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 		// ArrayList<FilterPlugin<String>>();
 		// List<FilterPlugin<Document>> documentFilters = new
 		// ArrayList<FilterPlugin<Document>>();
-		@SuppressWarnings("unused")
 		String path;
 		byte[] data;
-		/* 人工确保！ 当text 有值时，encoding一定有值 */
+		/**
+		 * 初始化为配置编码， 读取内容后，编码可能根据具体内容更正。
+		 */
 		String encoding;
-		/* 人工确保！document 装载时不能设置该值 */
 		String text;
 		Document dom;
 		long lastModified = -1;

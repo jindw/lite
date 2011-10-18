@@ -21,7 +21,7 @@
 				<span>
 				您好：
 					<c:if test="${displayName}">${displayName}</c:if>
-					<c:if test="${loginName}">${loginName}</c:if>
+					<c:else test="${loginName}">${loginName}</c:else>
 					<c:else>匆匆过客</c:else>；
 				今天是：
 					<c:if test="${day>5}">休息</c:if>

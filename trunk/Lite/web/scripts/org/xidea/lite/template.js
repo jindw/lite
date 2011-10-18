@@ -24,20 +24,24 @@ function Template(fn){
      * @private
      * @tyoeof string
      */
-	this.render = liteWrap(fn,this);
+    if(typeof fn == 'function'){
+    	this.render = fn(this);
+    }else{
+    	return new ($import('org.xidea.lite.impl:TemplateImpl'))(fn);
+    }
 }
 /**
  * micro:(a:a+1)
  * 		(a,b:a+1)
+ * 
  * liteWrap(function(a,b){
- * 	<xml>tpl:${a+b+c+d}</xml>
+ * 	<xml>tpl:${a+b+c}</xml>
  * })
  * ==>
- * liteWrap(function(a,b){return '<xml>tpl${a+b+c}<xml>'},function(){return [c,d]},impl?);
+ * liteWrap(function(a,b){return '<xml>tpl${a+b+c}<xml>'},impl?);
  * ==>
- * function(impl){return function(a,b){return ['<xml>tpl:',a+b+c+d,'</xml>'].join('')}}(impl);
+ * function(impl){return function(a,b){return ['<xml>tpl:',a+b+c,'</xml>'].join('')}}(impl);
  */
-var liteImpl;
 var liteWrap = function(replaceMap){
 	function replacer(c){return replaceMap[c]||c}
 	function dl(date,format){//3
@@ -47,7 +51,7 @@ var liteWrap = function(replaceMap){
 	function tz(offset){
 		return offset?(offset>0?'-':offset*=-1||'+')+dl(offset/60,'00')+':'+dl(offset%60,'00'):'Z'
 	}
-	liteImpl = {
+	var liteGlobal = {
 		//xt:0,xa:1,xp:2
 		0:function(txt,type){
 			return String(txt).replace(
@@ -102,40 +106,40 @@ var liteWrap = function(replaceMap){
 	}
 	function loadImpl(){
 		loadImpl = null;
-    	var impl = String(this.document && document && document.cookie).match(/LITE_COMPILE=([^;]+)/);
-    	var el = document.createElement("script");
+    	impl = String(this.document && document.cookie || '').match(/LITE_COMPILE=([^;]+)/);
     	impl = impl && impl[1];
     	if(!impl){
     		if(typeof $import == 'function'){
-    			$import('org.xidea.lite.impl.js:liteCompile');
+    			$import('org.xidea.lite.impl.js:liteWrapImpl');
     			return;
     		}
     	}
-    	el.setAttribute('src',impl && impl[1] || 'http://www.xidea.org/lite/release/lite-web-impl.js');
-    	el.onerror = loadError;
-    	impl = document.getElementsByTagName('script');
-    	impl = impl[impl.length-1];
-    	impl.parentNode.appendChild(el);
+    	//
+    	var impl = impl || 'http://www.xidea.org/lite/release/lite-web-impl.js'
+    	document.write('<script src="'+impl+'"></script>')
+//    	var el = document.createElement("script");
+//    	var impl = document.getElementsByTagName('script');
+//    	el.setAttribute('src',impl || 'http://www.xidea.org/lite/release/lite-web-impl.js');
+//    	el.onerror = loadError;
+//    	impl = impl[impl.length-1];
+//    	impl.parentNode.appendChild(el);
 	}
-	function wrap(data,externalCallback,impl){
+	function wrap(data,global){
 		var impl = null;
-		return function(){
-			if(!impl){
-				if(typeof liteFunction == 'undefined'){
-					!alert('liteWrapImpl not load');
+		return typeof liteWrapImpl == 'undefined' ? 
+			function(){//lazy impl
+				if(!impl){
+					if(typeof liteWrapImpl == 'undefined'){
+						!alert('liteWrapImpl not load');
+					}
+					impl = liteWrapImpl(data,global);
 				}
-				impl = liteFunction(data,externalCallback,impl);
-			}
-			return impl(context);
-		}
+				return impl.apply(this,arguments);
+			}:liteWrapImpl(data,global)
 	}
-	Template.prototype = liteImpl;
-	return function(fn,externalCallback,impl){
-	    if(fn){
-	    	loadImpl && loadImpl();
-	    	return wrap(fn,externalCallback,impl || liteImpl);
-	    }else{
-	    	return liteImpl;
-	    }
+	Template.prototype = liteGlobal;
+	return function(fn,global){
+	    loadImpl && loadImpl();
+	    return wrap(fn,global || liteGlobal);
 	}
 }( {'"':'&#34;','<':'&lt;','&':'&#38;'});

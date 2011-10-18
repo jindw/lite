@@ -1,0 +1,17 @@
+<div>
+	<span>排序:</span>
+	<!-- content 需要更新的目标节点， getList 后端开放 API方法名  -->
+	<a x:click-update="content=getList(${id},${index},'time')"
+		 class="time">时间</a>
+	<a x:click-update="content=getList(${id},${index},'post')"
+		 class="post">回复数</a>
+	...
+</div>
+<!-- 需要更新的区域，
+	这段区域首次渲染在后端实现 ，并生成前端JS模板。
+	后来用户操作刷新时，调用的是生成的前端模板函数。-->
+<div id="content">
+	<c:for var="item" list="${model.list}">
+		....
+	</c:for>
+</div>

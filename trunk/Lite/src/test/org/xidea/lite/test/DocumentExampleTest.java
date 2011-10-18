@@ -120,8 +120,8 @@ public class DocumentExampleTest {
 			XPathExpressionException, TransformerConfigurationException,
 			TransformerException, TransformerFactoryConfigurationError {
 		if (name.endsWith(".xhtml") && !name.startsWith("layout")) {
-			String xhtml = ParseUtil.loadXMLTextAndClose(new FileInputStream(
-					file));
+			String xhtml = ParseUtil.loadXMLSourceAndClose(new FileInputStream(
+					file),null);
 			xhtml = ParseUtil.normalize(xhtml, file.getAbsolutePath());
 			Document doc = ParseUtil.loadXMLBySource(xhtml, file
 					.getAbsolutePath());

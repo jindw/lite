@@ -265,7 +265,7 @@ public class XMLNormalizeImpl {
 				boolean closeTag = v.indexOf('/') >= 0;
 				if (closeTag || isLeaf(tag.name)) {
 					if (!closeTag) {
-						info("标签:" + tag.name + " 未关闭(已修复)");
+						debug("标签:" + tag.name + " 未关闭(已修复)");
 					}
 					result.append("/>");
 					tag = tag.parentTag;
@@ -301,7 +301,7 @@ public class XMLNormalizeImpl {
 
 					char qute = '"';
 					if (value == null) {
-						info("属性:" + name + " 未赋值(已修复)");
+						debug("属性:" + name + " 未赋值(已修复)");
 						value = name;
 					} else {
 						char f = value.charAt(0);
@@ -310,7 +310,7 @@ public class XMLNormalizeImpl {
 							String v1 = value.substring(1, value.length() - 1);
 							value = formatXMLValue(v1, name, qute);
 						} else {
-							info("属性:" + name + " 未使用\"'(已修复)");
+							debug("属性:" + name + " 未使用\"'(已修复)");
 							value = formatXMLValue(value, name, qute);
 						}
 					}
@@ -536,6 +536,9 @@ public class XMLNormalizeImpl {
 	protected void info(String msg) {
 		log.info(position(msg));
 	}
+	protected void debug(String msg) {
+		log.info(position(msg));
+	}
 
 	/**
 	 * "["'&<]"
@@ -579,10 +582,10 @@ public class XMLNormalizeImpl {
 			if (hit >= 0) {
 				if (attrName == null) {
 					String line = new TextPosition(value).getLineText(hit);
-					info("XML未转义(已修复):" + line.trim());
+					debug("XML未转义(已修复):" + line.trim());
 				} else {
 					String line = new TextPosition(value).getLineText(hit);
-					info("属性:" + attrName + " 值未转义(已修复):" + line.trim());
+					debug("属性:" + attrName + " 值未转义(已修复):" + line.trim());
 				}
 			}
 			return sb.toString();

@@ -26,25 +26,34 @@ function compressJS(source){
 	}
 	return result.join('');
 }
+/**
+ * 如何token
+ * 如何补全; 能不补全就不补全
+ */
 function partitionJavaScript(source){
-	var regexp = /'(?:\\.|[^'])*'|"(?:\\.|[^"])*"|\/\/.*|\/\*([^*]+|\*[^\/])*\*\/|\/|</;
+	var regexp = /'(?:\\.|[^'])*'|"(?:\\.|[^"])*"|\/\/.*|\/\*([^*]+|\*[^\/])*\*\/|[\/<]/;
 	var m,result = [],concatable=false;//not comment string regexp
+	regexp.lastIndex = 0;
 	while(m = regexp.exec(source)){
 		if(m){
 			var index = m.index;
 			var m = m[0];
-			if(m == '/'){
-				m = findExpXML(result,source.substring(index));
-				if(m){
+			var xml = m == '<'
+			if(m == '/' || xml){
+				var ex = (xml ?findXML:findExp)(result,source.substring(index));
+				if(ex){
+					m = ex;
+					if(xml){
+						ex = 'new XML("'+ex.replace(/["\r\n]/g,jsReplace)+'")'
+					}
 					concatable = false;
-					result.push(source.substring(0,index),m);
+					result.push(source.substring(0,index),ex);
 				}else{
 					if(concatable){
 						result[result.length-1]+=source.substring(0,index+1)
 					}else{
 						result.push(source.substring(0,index+1))
 					}
-					m = '/'
 					concatable = true;
 				}
 			}else{
@@ -66,32 +75,44 @@ var i=0;
 if(i)alert(1)//...
 /alert(2)/i
 => var i=0;if(i){alert(1)/alert(2)/i}
+忽略 CDATA/textarea
 
  */
-function findExpXML(result,source){
-	if(source.charAt() == '<'){
-		var tag = source.match(/<([a-zA-Z_][\w_\-\.]*(?:\:[\w_\-\.]+)?)(?:\s*[\/>]|\s+[\w_])/);
-		if(tag){
-			tag = tag[1];
-			tag = tag.replace(/\.\-/g,'\\$&');
-			var reg = new RegExp('<(/)?'+tag,'g');
-			var depth = 0;
-			reg.lastIndex = 0;
-			while(tag = reg.exec(source)){
-				if(reg[1]){
-					if(--depth == 0){
-						return source.substring(0,tag.index+tag[0].length)
-					}else if(depth<0){
-						return null;
-					}
-				}else{
-					depth++;
+function findXML(result,source){
+	var tag = source.match(/<([a-zA-Z_][\w_\-\.]*(?:\:[\w_\-\.]+)?)(?:\s*[\/>]|\s+[\w_])/);
+	if(tag){
+		tag = tag[1];
+		tag = tag.replace(/\.\-/g,'\\$&');
+		var reg = new RegExp('<(/)?'+tag,'g');
+		var depth = 0;
+		reg.lastIndex = 0;
+		while(tag = reg.exec(source)){
+			if(tag[1]){
+				if(--depth == 0){
+					return source.substring(0,tag.index+tag[0].length+1)
+				}else if(depth<0){
+					return null;
 				}
+			}else{
+				depth++;
 			}
-		}else{
-			return null;
 		}
+	}else{
+		return null;
 	}
+}
+function jsReplace(c){
+	switch(c){
+		case '\r':
+			return '\\r';
+		case '\n':
+			return '\\n';
+		case '"':
+			return '\\"';
+		
+	}
+}
+function findExp(result,source){
 	var i = result.length;
 	while(i--){
 		var line = result[i];

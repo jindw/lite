@@ -216,7 +216,7 @@ public class ParseConfigImpl implements ParseConfig {
 	public Document loadXML(URI uri) throws SAXException, IOException {
 		try{
 
-			String text = ParseUtil.loadXMLTextAndClose(this.openStream(uri));
+			String text = ParseUtil.loadXMLSourceAndClose(this.openStream(uri),null);
 			String id = uri.toString();
 			text = ParseUtil.normalize(text, id);
 			return ParseUtil.loadXMLBySource(text, id);

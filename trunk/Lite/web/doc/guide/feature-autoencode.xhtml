@@ -53,7 +53,8 @@
 					<div onclick="alert(${content})">...</div>
 					<!-- URL 自动编码(encodeURI) -->
 					<a href="${url}">encodeURI转义</a>
-					<a href="/test?p1=${data.p1}&p2=${data.p2}&p3=${'中文自动编码'}">...</a>
+					<!--IE amp 问题 -->
+					<a href="?amp_1=${data.p1}&amp_2=${data.p2}&amp_p3=${'中文自动编码'}">...</a>
 					<!-- xml/html自动编码  -->
 					<p title="${title}">${content}</p>
 					<script>
