@@ -79,7 +79,7 @@ if(i)alert(1)//...
 
  */
 function findXML(result,source){
-	var tag = source.match(/<([a-zA-Z_][\w_\-\.]*(?:\:[\w_\-\.]+)?)(?:\s*[\/>]|\s+[\w_])/);
+	var tag = source.match(/^<([a-zA-Z_][\w_\-\.]*(?:\:[\w_\-\.]+)?)(?:\s*[\/>]|\s+[\w_])/);
 	if(tag){
 		tag = tag[1];
 		tag = tag.replace(/\.\-/g,'\\$&');
@@ -112,12 +112,21 @@ function jsReplace(c){
 		
 	}
 }
+/**
+ * 
+ * ''/b/ // a
+ * /xxx\///2; /**\/ //b=2; 
+ *
+ */
 function findExp(result,source){
 	var i = result.length;
 	while(i--){
 		var line = result[i];
 		if(!/^\/[\/*]|^\s+$/.test(line)){//ignore common or space
 			line = line.replace(/\s+$/,'');
+			if(/^['"]|^\/.+\/$/.test(line)){
+				break;
+			}
 			if(!/^(?:\b(?:new|instanceof|typeof)|[^\w_$\]})])$/.test(line)){
 				// if(this.status != STATUS_EXPRESSION)
 				// is op / start
@@ -130,7 +139,7 @@ function findExp(result,source){
 }
 
 function findExpSource(text){
-	var depth=0,c,start = 0;
+	var depth=0,c,start = 1;
 	while(c = text.charAt(start++)){
 		if(c =='\n' || c == '\r'){
 			return;
@@ -149,7 +158,8 @@ function findExpSource(text){
 	    			case 'm':
 	    			break;
 	    			default:
-	    			return text.substring(0,start);
+	    			//$log.error(text.substring(0,start-1)+'@',text)
+	    			return text.substring(0,start-1);
 	    		}
 	    	}
 	    	

@@ -57,6 +57,9 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
       stream.match(/^\d*(?:\.\d*)?(?:e[+\-]?\d+)?/);
       return ret("number", "atom");
     }
+    //else if(ch == '<' && state.reAllowed){//reAllowed is xml allowed
+    //  return chain(stream,state,jsTokenXML) 
+    //}
     else if (ch == "/") {
       if (stream.eat("*")) {
         return chain(stream, state, jsTokenComment);
@@ -105,6 +108,9 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
       maybeEnd = (ch == "*");
     }
     return ret("comment", "comment");
+  }
+  function jsTokenXML(stream,state){
+  	
   }
 
   // Parser

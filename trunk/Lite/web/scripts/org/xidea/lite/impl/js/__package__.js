@@ -1,4 +1,4 @@
-this.addScript('browser-compiler.js',["liteWrapImpl"]
+this.addScript('browser-compiler.js',['liteWrapCompile',"liteWrapImpl"]
                ,[
                    "org.xidea.lite.impl.js:JSTranslator",
                    "org.xidea.lite.parse.*",

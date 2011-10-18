@@ -2,17 +2,123 @@
 	<head>
 		<meta content="text/html; charset=utf-8"
 			http-equiv="Content-Type" />
-		<title>Lite 模板系统</title>
+		<title>Lite模板系统</title>
 		<style>
-			/*<![CDATA*/
-
-			/*]]>*/
+html{
+	text-align:center;
+	font-size:12px;
+	background:#666;
+	padding:20px;
+	margin:0px;
+}
+body{
+    width:650px;
+    min-height:400px;
+    text-align:left;
+    margin:auto;
+    padding:8px;
+    background:#fefefe;
+    border:3px double #DDD;
+}
+.code {
+    background-color: #EEEEEE;
+    border-radius: 6px 6px 6px 6px;
+}
 		</style>
+		<link href="doc/codemirror/codemirror.css" rel="stylesheet" type="text/css" />
+		<link href="doc/codemirror/default.css" rel="stylesheet" type="text/css" />
+		<script src="doc/codemirror/codemirror.js" ></script>
+		<script src="doc/codemirror/overlay.js" ></script>
+		<script src="doc/codemirror/javascript.js" ></script>
+		<script src="doc/codemirror/xml.js" ></script>
+		<script src="doc/codemirror/jsx.js" ></script>
 	</head>
 	<body>
 		<div id="main">
-			<div><a href="demo.html">模板系统在线测试</a></div>
-			<div><a href="logo.xhtml">Lite Logo模板</a></div>
+			<div><h2>Lite 模板系统资源列表 </h2></div>
+			<ul>
+				<li><a href="doc/index.php/guide/index.xhtml">Lite2 使用文档</a>
+					<p>语法参考 / 在线测试 / 安装测试部署...</p>
+				</li>
+				<li><a href="doc/index.php/test.xhtml">Lite2 测试报表</a>
+					<p>Lite2 在 PHP / JavaScript / Java 三种运行环境下的对比测试报表。</p>
+				</li>
+				<li><a href="../jside/">JSide调试服务器参考</a>
+					<p>JSide 调试服务器是一个Java 编写的测试用服务器。<p>
+					<p>可运行 PHP / <a href="#0" title="只Lite2/Velocity等Java模板的运行">Java视图</a> / 服务端JavaScript, 可用Java或者JavaScript 做功能扩展。</p>
+					<p>
+					可用于<a href="#0" title="目前支持Lite和Velocity,可扩展">模板</a>测试和静态资源的实时编译。</p>
+				</li>
+				<li>
+					<a href="doc/index.php/guide/wrap.xhtml">liteWrap 参考</a>
+					<p>liteWrap 是一个基于E4X 设计的 JavaScript 模板风格， 可以将一个简单的html标签嵌入到JavaScript中，并像使用普通JavaScript函数一样使用这组标签描述的模板功能。</p>
+				
+<div class="code">
+<textarea>
+var modelA ={
+  id  : 'a',
+  tpl : liteWrap(function(title,list){
+    //E4X 语法
+    <div class="modelA">
+      <!-- 插入标题 -->
+        <h2 class="model-title">${title}</h2>
+        <ul>
+          <!-- 循环输出内容 -->
+          <li c:for="${item:list}">
+            <strong>${item.title}</string>
+            <c:if test="${item.content}">
+              <p>${item.content}</p>
+            </c:if>
+          </li>
+        </ul>
+    </div>
+  }),
+  render:function(title,list){
+    $(this.id).innerHTML = this.tpl(title,list)
+  }
+}
+</textarea></div>
+<h4>翻译后代码：</h4>
+<div class='code'>
+<textarea>var modelA ={
+id  : 'a',
+tpl : (function(lite__impl_){
+return function(title,list){
+var lite__impl_x=lite__impl_[0];
+var lite__impl_l=lite__impl_[1];
+var $__out__=[]
+$__out__.push("<div class=\"modelA\">\n\n<h2 class=\"model-title\">",lite__impl_x(title),"</h2>\n<ul>\n\n");
+var $_2=lite__impl_l(list)
+var $_0=0;
+var $_1 = $_2.length-1;
+for(;$_0<=$_1;$_0++){
+var item=$_2[$_0];
+$__out__.push("<li>\n<strong>",lite__impl_x(item.title),"</strong>\n");
+if(item.content){
+$__out__.push("\n<p>",lite__impl_x(item.content),"</p>\n");
+}
+$__out__.push("\n</li>");
+}
+$__out__.push("\n</ul>\n</div>");
+return $__out__.join('');
+}})(Template.prototype),
+render:function(title,list){
+$(this.id).innerHTML = this.tpl(title,list)
+}
+}
+</textarea></div>
+      			</tr>
+					</table>
+				</li>
+				
+				
+				<script>
+				var ts = document.getElementsByTagName('textarea');
+				for(var i=ts.length;i;){
+					CodeMirror.fromTextArea(ts[--i], {mode: "text/e4x",lineNumbers :1, tabMode: "indent"});
+				}
+                </script>
+			</ul>
 		</div>
 	</body>
 </html>

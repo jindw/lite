@@ -1,8 +1,9 @@
 var Env = require("org/xidea/lite/tools/internal/env");
 var Merge = require("./merge");
 var XHtml = require("./xhtml");
+var JSTransform = require('./jstransform').JSTransform;
+var liteWrapCompile =  $import('org.xidea.lite.impl.js.liteWrapCompile');
 //通过jsi2 的语法，链接到老的类库
-var compressJS = $import('org.xidea.lite.util.compressJS');
 
 function textFilterJS(path,text){
 	var fileList = [];
@@ -18,7 +19,7 @@ function textFilterJS(path,text){
 }
 function textFilterCSS(path,text){
 	var fileList = [];
-	var map = Merge.mergeCSS(path,fileList,getSourceLoader(path,text));
+	var map = Merge.mergeCSS(path,fileList);
 	var buf = [];
 	for(var i = 0;i<fileList.length;i++){
 		var n  = fileList[i];
@@ -34,25 +35,20 @@ function textFilterXHTML(path,text){
 
 function processJS(text){
 	//replace js:	encodeURI("/module/static/img/a/_/8.png")
-	text = text.replace(/\bencodeURI\s*\(\s*(['"])([^'"]+)\1\s*\)/g,function(a,qute,content){
+	//JSQurey(text).replace('^encodeURI(:S)$',function(s,value){..})
+	text = JSTransform(text).replace("^encodeURI(:S)",function(a,value){
 		try{
 			//野蛮替换,字符串中呢?当能,线上很少见.
-			content = window.eval(qute+content+qute);
-			content = replacePath(content);
-			return JSON.stringify(content);
+			value = window.eval(value);
+			value = replacePath(value);
+			return JSON.stringify(value);
 		}catch(e){
 			return a;
 		}
-	})
-	//TODO:autoEncodeScript
-	//${..} == > ${JSON.stringify(..)} ==> /$(tghjk)/
-	//compress
-	//manager.compressJS(value);
-//	text = text.replace(/(\\(?:\r\n?|\n).)|^\s+/gm,'$1');
-//	text = text.replace(/^(?:\/(?:\*[\s\S]*?\*\/|\/.*)|\s+)+/g,'');//trim left
-//	//切尾巴很耗时阿
-//	text = text.replace( /(?:\/(?:\*[\s\S]*?\*\/\s*|\/.*)|\s+)$/g,'');//trim right
-	return compressJS(text);
+	}).replace("^liteWrap(:S)",function(a,tpl){
+		return liteWrapCompile(tpl)+'(Template.prototype)'
+	}).compress();
+	return text ;
 }
 function processCSS(text){
 	//replace css:	url("/module/static/img/a/_/8.png")
