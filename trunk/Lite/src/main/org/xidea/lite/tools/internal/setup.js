@@ -103,19 +103,29 @@ function htmlScriptCSSFilter(path,text){
 	return cssFilter(jsFilter(text));
 }
 function cssFilter(text){
-	return text.replace(/(<style\b[^>]*>)([\s\S]*)<\/style>/g,
+	return text.replace(/(<style\b[^>]*>)([\s\S]*?)<\/style>|<!\[CDATA\[([\s\S]*?)\]\]>/g,
 		function(a,prefix,css){
-			return prefix+processCSS(css)+'</script>'
+			if(css){
+				return prefix+processCSS(css)+'</script>'
+			}else{
+				return a;
+			}
 		}
 	);
 }
 function jsFilter(text){
-	return text.replace(/(<script\b[^>]*>)([\s\S]*)<\/script>/g,
+	return text.replace(/<script\b[^>]*\/>|(<script\b[^>]*>)([\s\S]*?)<\/script>|<!\[CDATA\[([\s\S]*?)\]\]>/g,
 		function(a,prefix,js){
-			if(/\/>/.test(prefix)){
-				return prefix+jsFilter(js+'</script>')
+			if(js){
+				//$log.error(js)
+				if(/\/>/.test(prefix)){
+					return prefix+jsFilter(js+'</script>')
+				}
+				return prefix+processJS(js)+'</script>'
+			}else{
+				//$log.error(a)
+				return a;
 			}
-			return prefix+processJS(js)+'</script>'
 		}
 	);
 }
