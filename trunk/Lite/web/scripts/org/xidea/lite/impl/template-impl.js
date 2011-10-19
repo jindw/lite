@@ -60,9 +60,9 @@ function TemplateImpl(data,parseContext,runAsLiteCode){
         }else{
 	        try{
 		    	var translator = new JSTranslator("");
-		    	translator.liteImpl = "lite__impl_"
+		    	translator.liteImpl = "liteImpl"
 		    	var code = translator.translate(parseContext.toList(),true);
-		    	var fcode = "function(lite__impl_){"+code+"}"
+		    	var fcode = "function(liteImpl){"+code+"}"
 	            data =  window.eval("["+(fcode||null)+"][0]");
 	            data.toString=function(){//_$1 encodeXML
 	                return fcode;

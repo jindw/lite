@@ -18,9 +18,9 @@ TemplateEngine.prototype.render=function(path,data,response){
 	//console.dir(context.featureMap)
 	var litecode = context.toList();
 	var translator = new JSTranslator();//'.','/','-','!','%'
-	translator.liteImpl = 'lite__impl_';//avoid inline jslib 
+	translator.liteImpl = 'liteImpl';//avoid inline jslib 
 	var jscode = translator.translate(litecode,true);
-	var fcode = "function(lite__impl_){"+jscode+"}"
+	var fcode = jscode
 	var i = fcode.indexOf('charAt')
 	
 	//console.log(fcode.substr(i-100,300));

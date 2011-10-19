@@ -101,7 +101,7 @@ JSTranslator.prototype = {
 	    	//var result =  stringifyJSON(context.toList())
 	        //var list = context.toList();
 		    var context = new JSTranslateContext(list,this.name,this.params,this.defaults);
-		    context.liteImpl = this.liteImpl || "lite__impl_";
+		    context.liteImpl = this.liteImpl || "liteImpl";
 		    context.parse();
 		    if(rtf){
 		    	var code = context.header + "\nreturn "+ context.body;
