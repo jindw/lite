@@ -106,7 +106,7 @@ function cssFilter(text){
 	return text.replace(/(<style\b[^>]*>)([\s\S]*?)<\/style>|<!\[CDATA\[([\s\S]*?)\]\]>/g,
 		function(a,prefix,css){
 			if(css){
-				return prefix+processCSS(css)+'</script>'
+				return prefix+processCSS(css)+'</style>'
 			}else{
 				return a;
 			}

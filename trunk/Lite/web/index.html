@@ -57,7 +57,30 @@ body{
 					<a href="doc/index.php/guide/wrap.xhtml">liteWrap 参考</a>
 					<a name="liteWrap"></a>
 					<p>liteWrap 是一个基于E4X 设计的 JavaScript 模板风格， 可以将一个简单的html标签嵌入到JavaScript中，并像使用普通JavaScript函数一样使用这组标签描述的模板功能。</p>
-				
+				<script>
+				var modelA ={
+  id  : 'a',
+  tpl : liteWrap(function(title,list){
+    //E4X 语法
+    <div class="modelA">
+      <!-- 插入标题 -->
+        <h2 class="model-title">${title}</h2>
+        <ul>
+          <!-- 循环输出内容 -->
+          <li c:for="${item:list}">
+            <strong>${item.title}</string>
+            <c:if test="${item.content}">
+              <p>${item.content}</p>
+            </c:if>
+          </li>
+        </ul>
+    </div>
+  }),
+  render:function(title,list){
+    $(this.id).innerHTML = this.tpl(title,list)
+  }
+}
+				</script>
 <div class="code">
 <textarea autocomplete='off'>
 var modelA ={
