@@ -271,7 +271,7 @@
 		<available file="../../xidea/lite" property="webdest" value="../../xidea/lite/" />
 		<echo>liteWrap发布到 ${webdest}</echo>
 		<copy todir="${webdest}">
-			<fileset dir="/build/dest/">
+			<fileset dir="build/dest/">
 				<include name="release/*.js"/>
 			</fileset>
 		</copy>
