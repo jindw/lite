@@ -99,9 +99,38 @@ function addContextPath(path,contextPath){
 	return path;
 }
 
+function htmlScriptCSSFilter(path,text){
+	return cssFilter(jsFilter(text));
+}
+function cssFilter(text){
+	return text.replace(/(<style\b[^>]*>)([\s\S]*)<\/style>/g,
+		function(a,prefix,css){
+			return prefix+processCSS(css)+'</script>'
+		}
+	);
+}
+function jsFilter(text){
+	return text.replace(/(<script\b[^>]*>)([\s\S]*)<\/script>/g,
+		function(a,prefix,js){
+			if(/\/>/.test(prefix)){
+				return prefix+jsFilter(path,js+'</script>')
+			}
+			return prefix+processJS(js)+'</script>'
+		}
+	);
+}
 Env.addTextFilter("/**.css",textFilterCSS);
 Env.addTextFilter("/**.js",textFilterJS);
+
+Env.addTextFilter("/**.html",htmlScriptCSSFilter);
+Env.addTextFilter("/**.ftl",htmlScriptCSSFilter);
+Env.addTextFilter("/**.vm",htmlScriptCSSFilter);
+
+Env.addTextFilter("/**.xhtml",htmlScriptCSSFilter);
+
 Env.addTextFilter("/**.xhtml",textFilterXHTML);
+
+
 /* 添加文档验证器 */
 Env.addDocumentFilter("/**.xhtml",XHtml.checkXHTML);
 Env.addDocumentFilter("/**.xhtml",XHtml.filterXHTMLDom);

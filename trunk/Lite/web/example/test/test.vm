@@ -7,6 +7,9 @@
 				<span>${friend}</span>,
 			#end
 			都是我的朋友
+			<script language="javascript">
+			var x = liteWrap(function(a){<xml>${a}</xml>})
+			</script>
 		</p>
 	</body>
 </html>
