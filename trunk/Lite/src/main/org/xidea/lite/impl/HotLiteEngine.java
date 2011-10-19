@@ -28,18 +28,22 @@ public class HotLiteEngine extends LiteEngine {
 	private HashMap<String, Object> lock = new HashMap<String, Object>();
 	private HashMap<String, Info> infoMap = new HashMap<String, Info>();
 	protected ParseConfig config;
-	private boolean checkFile;
+	protected final boolean checkFile;
 
-	public HotLiteEngine(URI root, URI config,URI compiledBase) {
-		this(new ParseConfigImpl(root, config),compiledBase);
+	public HotLiteEngine(URI root, URI config, URI compiledBase) {
+		this(new ParseConfigImpl(root, config), compiledBase);
 	}
 
-	public HotLiteEngine(ParseConfig config,URI compiledBase) {
+	public HotLiteEngine(ParseConfig config, URI compiledBase) {
 		super(compiledBase);
-		this.checkFile = true;
+		URI root = config.getRoot();
+		this.checkFile = isFile(root);
 		this.config = config;
 	}
 
+	private boolean isFile(URI root) {
+		return "file".equals(root.getScheme());
+	}
 
 	protected ParseContext createParseContext(String path) {
 		return new ParseContextImpl(config, path);
@@ -76,9 +80,10 @@ public class HotLiteEngine extends LiteEngine {
 
 	public String getLitecode(String path) {
 		try {
-			if(buildFromCode(path) != null){
+			if (buildFromCode(path) != null) {
 				URI uri = toCompiedURI(path);
-				return ParseUtil.loadTextAndClose(ParseUtil.openStream(uri),"utf-8");
+				return ParseUtil.loadTextAndClose(ParseUtil.openStream(uri),
+						"utf-8");
 			}
 			ParseContext context = createParseContext(path);
 			List<Object> items = parse(path, context);
@@ -91,105 +96,104 @@ public class HotLiteEngine extends LiteEngine {
 	@Override
 	protected Template createTemplate(String path) throws IOException {
 		if (compiledBase != null) {
-			Template t =  buildFromCode(path);
-			if(t!=null){
+			Template t = buildFromCode(path);
+			if (t != null) {
 				return t;
 			}
 		}
 		return buildFromSource(path);
 	}
+
 	public void clear(String path) {
 		templateMap.remove(path);
-		if (compiledBase!= null && ParseUtil.isFile(compiledBase)){
+		if (compiledBase != null && ParseUtil.isFile(compiledBase)) {
 			File file = new File(toCompiedURI(path));
-			if(file.exists()){
+			if (file.exists()) {
 				file.delete();
 			}
 		}
 	}
-	private URI toCompiedURI(String path){
-		path =  path.replace('/', '^');
+
+	private URI toCompiedURI(String path) {
+		path = path.replace('/', '^');
 		try {
 			return this.compiledBase.resolve(URLEncoder.encode(path, "UTF-8"));
-		} catch (UnsupportedEncodingException e) {//不可能
+		} catch (UnsupportedEncodingException e) {// 不可能
 			return null;
 		}
-		
+
 	}
 
 	private Template buildFromSource(final String path) throws IOException {
 		long begin = System.currentTimeMillis();
-		ArrayList<File> files = new ArrayList<File>();
 		ParseContext context = createParseContext(path);
 		List<Object> items = parse(path, context);
-		if ("file".equals(config.getRoot().getScheme())) {
-			File base = new File(config.getRoot());
-			for (String p : getAssociatedPaths(context)) {
-				files.add(new File(base, p));
-			}
-		}
-		Template template = new LiteTemplate(items,context.getFeatureMap());
-		
-		if(compiledBase!=null && ParseUtil.isFile(compiledBase)){
+		List<File> files = getAssociatedFiles(context);
+		Template template = new LiteTemplate(items, context.getFeatureMap());
+
+		if (compiledBase != null && ParseUtil.isFile(compiledBase)) {
 			File file = new File(toCompiedURI(path));
-			try{
+			try {
 				file.getParentFile().mkdirs();
 				OutputStreamWriter out = new OutputStreamWriter(
-					new FileOutputStream(file), "UTF-8");
+						new FileOutputStream(file), "UTF-8");
 				out.write(buildLiteCode(context, items));
 				out.close();
-			}catch(Exception e){
-				if(log.isDebugEnabled()){
-					log.debug("complie result("+path+") save failed",e);
+			} catch (Exception e) {
+				if (log.isDebugEnabled()) {
+					log.debug("complie result(" + path + ") save failed", e);
 				}
 			}
 		}
 		long end = System.currentTimeMillis();
-		log.info("lite compile success;\t time used: "+(end - begin)+"ms;\t resource dependence："+path+":\t"+files);
+		log.info("lite compile success;\t time used: " + (end - begin)
+				+ "ms;\t resource dependence：" + path + ":\t" + files);
 		Info entry = new Info(files);
 		infoMap.put(path, entry);
 		return template;
 	}
+
 	@SuppressWarnings("unchecked")
 	private Template buildFromCode(String path) throws IOException {
-		if(this.compiledBase == null){
+		if (this.compiledBase == null) {
 			return null;
 		}
 		URI uri = toCompiedURI(path);
 		InputStream in = ParseUtil.openStream(uri);
-		if(in == null){
+		if (in == null) {
 			return null;
 		}
-		String litecode = ParseUtil.loadTextAndClose(in,"utf-8");
+		String litecode = ParseUtil.loadTextAndClose(in, "utf-8");
 		try {
 			ArrayList<File> files = new ArrayList<File>();
 			List<Object> list = JSONDecoder.decode(litecode);
 			if (ParseUtil.isFile(uri)) {
 				File lc = new File(uri);
 				files.add(lc);
-				if(checkFile){
+				if (checkFile) {
 					List<String> resource = (List<String>) list.get(0);
 					long lm = 0;
 					File root = new File(this.config.getRoot());
-					for(String res:resource){
-						File f = new File(root,res);
+					for (String res : resource) {
+						File f = new File(root, res);
 						long l = f.lastModified();
 						files.add(f);
-						if(l > lm){
+						if (l > lm) {
 							lm = l;
-						}else if(l == 0){
+						} else if (l == 0) {
 							return null;
 						}
 					}
-					if(lm>lc.lastModified()){
+					if (lm > lc.lastModified()) {
 						return null;
 					}
 				}
 				Info entry = new Info(files);
-				log.info("文件关联："+path+":\t"+files);
+				log.info("文件关联：" + path + ":\t" + files);
 				infoMap.put(path, entry);
 			}
-			return new LiteTemplate((List<Object>) list.get(1),(Map<String,String>)list.get(2));
+			return new LiteTemplate((List<Object>) list.get(1),
+					(Map<String, String>) list.get(2));
 		} catch (RuntimeException e) {
 			log.error("装载模板中间代码失败", e);
 			return null;
@@ -198,32 +202,51 @@ public class HotLiteEngine extends LiteEngine {
 
 	private String buildLiteCode(ParseContext context, List<Object> items) {
 		ArrayList<Object> result = new ArrayList<Object>();
-		List<String> resource = getAssociatedPaths(context);
+		List<String> resource = toAssociatedPaths(getAssociatedFiles(context));
 		result.add(resource);
 		result.add(items);
 		result.add(context.getFeatureMap());
 		return JSONEncoder.encode(result);
 
 	}
-	private List<String> getAssociatedPaths(ParseContext context) {
-		ArrayList<String> resource = new ArrayList<String>();
-		String root = config.getRoot().toString();
+
+	protected List<File> getAssociatedFiles(ParseContext context) {
+		ArrayList<File> files = new ArrayList<File>();
+		URI base = config.getRoot();
 		for (URI uri : context.getResources()) {
 			if ("lite".equals(uri.getScheme())) {
-				resource.add(uri.getPath());
-			} else {
-				String config = uri.toString();
-				if (config.startsWith(root)) {
-					config = config.substring(root.length());
-					if (config.length() > 0) {
-						if (config.charAt(0) != '/') {
-							config = '/' + config;
-						}
-						resource.add(config);
-					}
-				}else{// if("file".equals(uri.getScheme())){
-					log.warn("忽略关联文件:" + uri);
+				uri = base.resolve(uri.getPath());
+			}
+			if ("classpath".equals(uri.getScheme())) {
+				try {
+					String path = uri.getPath().replaceFirst("^[/]*", "/");
+					uri = HotLiteEngine.class.getResource(path).toURI();
+				} catch (Exception e) {
+					continue;
 				}
+			}
+			if (isFile(uri)) {
+				files.add(new File(uri));
+			}
+		}
+		return files;
+	}
+
+	private List<String> toAssociatedPaths(List<File> files) {
+		ArrayList<String> resource = new ArrayList<String>();
+		String root = config.getRoot().toString();
+		for (File file : files) {
+			String uri = file.toURI().toString();
+			if (uri.startsWith(root)) {
+				uri = uri.substring(root.length());
+				if (uri.length() > 0) {
+					if (uri.charAt(0) != '/') {
+						uri = '/' + uri;
+					}
+					resource.add(uri);
+				}
+			} else {// if("file".equals(uri.getScheme())){
+				log.warn("忽略关联文件:" + uri);
 			}
 		}
 		return resource;

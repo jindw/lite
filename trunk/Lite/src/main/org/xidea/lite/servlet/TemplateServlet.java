@@ -3,6 +3,7 @@ package org.xidea.lite.servlet;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.Constructor;
 import java.net.URI;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -27,21 +28,21 @@ public class TemplateServlet extends GenericServlet {
 	private static final Log log = LogFactory.getLog(TemplateServlet.class);
 	private static final String LOCAL_IP = "^(?:127\\.0\\.0\\.1|10\\..+|172\\.(?:1[6789]|2.|30|31)\\..+|192\\.168\\..+|([0:]+1))$";
 
-	
 	protected TemplateEngine templateEngine;
 	protected String serviceBase = "/WEB-INF/service/lite-service";
 	private Pattern debug = null;
 	private DebugSupport debugService = null;
 
 	@Override
-	public void init() {
+	public void init() throws ServletException {
 		final ServletConfig config = this.getServletConfig();
 		initEngine(config);
 		initDebug(config);
 
 	}
 
-	protected void initEngine(final ServletConfig config) {
+	protected void initEngine(final ServletConfig config)
+			throws ServletException {
 		ServletContext context = config.getServletContext();
 		String configPath = config.getInitParameter("config");
 		if (configPath == null) {
@@ -49,26 +50,47 @@ public class TemplateServlet extends GenericServlet {
 		}
 		final File root = new File(context.getRealPath("/"));
 		final File litecode = new File(root, "WEB-INF/litecode/");
+		
 		try {
-			final File configFile = new File(context.getRealPath(configPath));
-			Class<?> configClass = Class
-					.forName("org.xidea.lite.impl.ParseConfigImpl");
-			Class<? extends Object> engineClass = Class
-					.forName("org.xidea.lite.impl.HotLiteEngine");
-			Object parseConfig = configClass.getConstructor(URI.class,
-					URI.class).newInstance(root.toURI(), configFile.toURI());
-			templateEngine = (TemplateEngine) engineClass.getConstructor(
-					Class.forName("org.xidea.lite.parse.ParseConfig"),
-					URI.class).newInstance(parseConfig, litecode.toURI());
-			log.info("Lite HotLiteEngine(runtime and compiler) is used");
-			
-		} catch (ClassNotFoundException e) {
-			templateEngine = new LiteEngine(litecode.toURI());
-			log.info("Lite LiteEngine(runtime only) is used");
+			Class<TemplateEngine> engineClass;
+			try {
+				engineClass = loadImplClass(config);
+			} catch (ClassNotFoundException e) {
+				templateEngine = new LiteEngine(litecode.toURI());
+				log.info("Lite LiteEngine(runtime only) is used");
+				return;
+			}
+			Constructor<TemplateEngine> constructor;
+			try {
+				constructor = (Constructor<TemplateEngine>) engineClass
+						.getConstructor(URI.class, URI.class, URI.class);
+				final File configFile = new File(context
+						.getRealPath(configPath));
+				templateEngine = constructor.newInstance(root.toURI(),
+						configFile.toURI(), litecode.toURI());
+				log.info("Lite HotLiteEngine(runtime and compiler) is used");
+			} catch (NoSuchMethodException e) {
+				log
+						.error("TemplateEngine must has a constructor(URI webbase,URI config,URI compilecache)");
+				throw e;
+			}
 		} catch (Exception e) {
 			log.error("Lite HotLiteEngine init faild!", e);
-			templateEngine = new LiteEngine(litecode.toURI());
+			throw new ServletException(e);
 		}
+	}
+
+	protected Class<TemplateEngine> loadImplClass(final ServletConfig config)
+			throws ClassNotFoundException {
+		String templateImpl = config.getInitParameter(TemplateEngine.class
+				.getName());
+		if (templateImpl == null) {
+			templateImpl = "org.xidea.lite.impl.HotLiteEngine";
+		}
+		@SuppressWarnings("unchecked")
+		Class<TemplateEngine> engineClass = (Class<TemplateEngine>) Class
+				.forName(templateImpl);
+		return engineClass;
 	}
 
 	protected void initDebug(final ServletConfig config) {
@@ -92,13 +114,14 @@ public class TemplateServlet extends GenericServlet {
 			}
 			if (this.debug == null) {
 				log.info("debug support was disabled!!");
-			}else{
+			} else {
 				Class<?> debugClass = Class
 						.forName("org.xidea.lite.servlet.DebugSupportImpl");
 				debugService = (DebugSupport) debugClass.getConstructor(
 						TemplateServlet.class).newInstance(this);
 
-				log.info("debug on client ip:"+debug.pattern()+"; service base="+this.serviceBase);
+				log.info("debug on client ip:" + debug.pattern()
+						+ "; service base=" + this.serviceBase);
 			}
 		} catch (Exception e) {
 			log.error("DebugSupportImpl init faild!", e);

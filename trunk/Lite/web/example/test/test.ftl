@@ -3,9 +3,9 @@
 	<body>
 		<p>我是：${name},来自：${city}</p>
 		<p>
-			<c:for var="friend" list="${friends}">
+			<#list friends as friend>
 				<span>${friend}</span>,
-			</c:for>
+			</#list>
 			都是我的朋友
 		</p>
 	</body>

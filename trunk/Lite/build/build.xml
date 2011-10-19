@@ -112,7 +112,7 @@
 				<exclude name="**/test/**/*.*" />
 			</fileset>
 			<fileset dir="src/main/">
-				<include name="org/xidea/lite/tools/*.s.js" />
+				<include name="org/xidea/lite/tools/internal/*.js" />
 				<include name="org/xidea/**/*.java" />
 				<exclude name="org/xidea/**/test/**.java" />
 				<exclude name="org/xidea/**/*Test*.java" />

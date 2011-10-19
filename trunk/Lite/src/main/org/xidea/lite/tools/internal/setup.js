@@ -34,8 +34,6 @@ function textFilterXHTML(path,text){
 }
 
 function processJS(text){
-	//replace js:	encodeURI("/module/static/img/a/_/8.png")
-	//JSQurey(text).replace('^encodeURI(:S)$',function(s,value){..})
 	text = JSTransform(text).replace("^encodeURI(:S)",function(a,value){
 		try{
 			//野蛮替换,字符串中呢?当能,线上很少见.

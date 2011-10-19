@@ -3,9 +3,9 @@
 	<body>
 		<p>我是：${name},来自：${city}</p>
 		<p>
-			<c:for var="friend" list="${friends}">
+			#foreach($friend in $friends)
 				<span>${friend}</span>,
-			</c:for>
+			#end
 			都是我的朋友
 		</p>
 	</body>

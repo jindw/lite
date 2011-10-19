@@ -130,7 +130,7 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 			return new File(root, path.substring(1));
 		} else {
 			throw new IllegalArgumentException(
-					"resource path must be start with '/'");
+					"resource path must be start with '/' you gave:"+path);
 		}
 	}
 

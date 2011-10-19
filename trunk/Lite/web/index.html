@@ -24,6 +24,10 @@ body{
     background-color: #EEEEEE;
     border-radius: 6px 6px 6px 6px;
 }
+.code .cm-tag{
+	background:#ddd;
+	font-style:italic;
+}
 		</style>
 		<link href="doc/codemirror/codemirror.css" rel="stylesheet" type="text/css" />
 		<link href="doc/codemirror/default.css" rel="stylesheet" type="text/css" />
@@ -51,10 +55,11 @@ body{
 				</li>
 				<li>
 					<a href="doc/index.php/guide/wrap.xhtml">liteWrap 参考</a>
+					<a name="liteWrap"></a>
 					<p>liteWrap 是一个基于E4X 设计的 JavaScript 模板风格， 可以将一个简单的html标签嵌入到JavaScript中，并像使用普通JavaScript函数一样使用这组标签描述的模板功能。</p>
 				
 <div class="code">
-<textarea>
+<textarea autocomplete='off'>
 var modelA ={
   id  : 'a',
   tpl : liteWrap(function(title,list){

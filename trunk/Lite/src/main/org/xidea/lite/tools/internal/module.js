@@ -12,8 +12,9 @@ function require(absPath){
 		loader(function(path){
 			if(/^\./.test(path)){
 				path =absPath.replace(/[^\/]+$/,'')+path
-				while(path != (path = path.replace(/(?:[^\/]+(\/)\.)\.[\/]/,'$1')));
+				while(path != (path = path.replace(/[^\/]+\/\.\.\/|(\/)\.\//,'$1')));
 			}
+			//$log.info(path)
 			return require(path);
 		},exports);
 	}
