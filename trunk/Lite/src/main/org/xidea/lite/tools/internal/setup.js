@@ -113,7 +113,7 @@ function jsFilter(text){
 	return text.replace(/(<script\b[^>]*>)([\s\S]*)<\/script>/g,
 		function(a,prefix,js){
 			if(/\/>/.test(prefix)){
-				return prefix+jsFilter(path,js+'</script>')
+				return prefix+jsFilter(js+'</script>')
 			}
 			return prefix+processJS(js)+'</script>'
 		}
