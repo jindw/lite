@@ -171,6 +171,8 @@
 		<java fork="true" classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
 			<arg value="-scriptBase" />
 			<arg value="${basedir}/web/scripts" />
+			<arg value="-internalPrefix"/>
+			<arg value="lite$"/>
 			<arg value="-config.features" />
 			<arg value=":Debug" />
 			<arg value="-exports" />
@@ -190,6 +192,8 @@
 		<java fork="true" failonerror="true" classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
 			<arg value="-scriptBase" />
 			<arg value="${basedir}/web/scripts" />
+			<arg value="-internalPrefix"/>
+			<arg value="dataView$"/>
 			<arg value="-exports" />
 			<arg value="org.xidea.lite.web:DataView" />
 			<arg value="-outputExported" />
@@ -215,6 +219,8 @@
 		<java fork="true" failonerror="true" classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
 			<arg value="-scriptBase" />
 			<arg value="${basedir}/web/scripts" />
+			<arg value="-internalPrefix"/>
+			<arg value="liteImpl$"/>
 			<arg value="-exports" />
 			<arg value="org.xidea.el:*" />
 			<arg value="org.xidea.lite.impl:*" />
@@ -253,6 +259,9 @@
 			<arg value="${basedir}/web/scripts" />
 			<arg value="-exports" />
 			<arg value="org.xidea.lite.*" />
+			<arg value="-internalPrefix"/>
+			<arg value="lite$"/>
+			<arg value="-outputExported" />
 			<arg value="${basedir}/build/dest/release/template.js" />
 		</java>
 		<java fork="true" failonerror="true" classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
@@ -260,6 +269,9 @@
 			<arg value="${basedir}/web/scripts" />
 			<arg value="-exports" />
 			<arg value="org.xidea.lite.impl.js.liteWrapImpl" />
+			<arg value="-internalPrefix"/>
+			<arg value="liteWrapImpl$"/>
+			<arg value="-outputExported" />
 			<arg value="${basedir}/build/dest/release/lite-wrap-impl.js" />
 		</java>
 	</target>

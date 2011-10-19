@@ -162,7 +162,11 @@ public class AutoSyntaxTest {
 						sourceMap = new HashMap<String, String>(sourceMap);
 						sourceMap.put(TEST_XHTML, source);
 						String format = initFormat(case0, format1);
-						result.add(new Object[] { sourceMap, model, expect,"true".equals(format) });
+						//if(expect == null){
+							//System.out.println(path+source);
+						//}else{
+							result.add(new Object[] { sourceMap, model, expect,"true".equals(format) });
+						//}
 					}
 				}
 			}
@@ -221,9 +225,13 @@ public class AutoSyntaxTest {
 						info.put("source", sourceMap.get(TEST_XHTML));
 						info.put("model", model);
 						info.put("expect", expect);
+						
 						for (Map.Entry<String, String> entry : resultMap
 								.entrySet()) {
 							if (!entry.getKey().startsWith("#")) {
+								if(expect == null){
+									expect = entry.getValue();
+								}
 								if (expect.equals(entry.getValue())) {
 								} else {
 									info.put(entry.getKey(), entry.getValue());

@@ -142,8 +142,8 @@ public class LiteTest {
 		HashMap<String, String> result = new LinkedHashMap<String, String>();
 		result.put("#model", contextJSON);
 		result.put("#expect", expect);
-		result.put("java", javaresult);
 		result.put("js", jsresult);
+		result.put("java", javaresult);
 		result.put("php", phpresult);
 		if (!expect.equals(phpresult)) {
 			expect = normalizeXML(expect);

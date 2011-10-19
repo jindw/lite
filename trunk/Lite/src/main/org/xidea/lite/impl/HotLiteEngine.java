@@ -215,7 +215,7 @@ public class HotLiteEngine extends LiteEngine {
 		URI base = config.getRoot();
 		for (URI uri : context.getResources()) {
 			if ("lite".equals(uri.getScheme())) {
-				uri = base.resolve(uri.getPath());
+				uri = base.resolve(uri.getPath().replaceFirst("^[/]", ""));
 			}
 			if ("classpath".equals(uri.getScheme())) {
 				try {
