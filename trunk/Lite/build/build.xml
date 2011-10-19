@@ -7,7 +7,9 @@
 
 	<target name="init">
 		<delete dir="build/dest/jslite"/>
+		<delete dir="build/dest/release"/>
 		<mkdir dir="build/dest/jslite" />
+		<mkdir dir="build/dest/release" />
 		<mkdir dir="build/dest/jslite/el" />
 		<mkdir dir="build/dest/jslite/lite" />
 		<mkdir dir="build/dest/jslite/lite/impl" />
@@ -190,26 +192,22 @@
 			<arg value="${basedir}/web/scripts" />
 			<arg value="-exports" />
 			<arg value="org.xidea.lite.web:DataView" />
-			<!--
-			<arg value="-bootCached"/>
-			<arg value="org.xidea.lite.util:*" />
-			-->
 			<arg value="-outputExported" />
 			<arg value="${basedir}/build/dest/data-view.js" />
 		</java>
+		<!--
 		<echo>导出NodeJS版本</echo>
 		<java fork="true" failonerror="true" classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
 			<arg value="-scriptBase" />
 			<arg value="${basedir}/web/scripts" />
 			<arg value="-exports" />
 			<arg value="org.xidea.lite.nodejs:TemplateEngine" />
-			<!--
-			<arg value="-bootCached"/>
-			<arg value="org.xidea.lite.util:*" />
-			-->
 			<arg value="-outputExported" />
 			<arg value="${basedir}/build/dest/nodejs.js" />
 		</java>
+		-->
+	</target>
+	<target name="compressImpl">
 		<echo>压缩JSLite实现</echo>
 		<!-- export lite -->
 		<!-- empty -->
@@ -248,12 +246,34 @@
 			<arg value="${basedir}/build/dest/jslite/lite/util/impl.js" />
 		</java>
 	</target>
+	<target name="compressWrap" depends="init">
+		<echo>导出 浏览器JS 库</echo>
+		<java fork="true" failonerror="true" classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
+			<arg value="-scriptBase" />
+			<arg value="${basedir}/web/scripts" />
+			<arg value="-exports" />
+			<arg value="org.xidea.lite.*" />
+			<arg value="${basedir}/build/dest/release/template.js" />
+		</java>
+		<java fork="true" failonerror="true" classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
+			<arg value="-scriptBase" />
+			<arg value="${basedir}/web/scripts" />
+			<arg value="-exports" />
+			<arg value="org.xidea.lite.impl.js.liteWrapImpl" />
+			<arg value="${basedir}/build/dest/release/lite-wrap-impl.js" />
+		</java>
+	</target>
 	<target name="build" depends="compress,package,php-example">
 		<copy tofile="../TT/web/WEB-INF/lib/Lite-${version}.jar" file="build/dest/Lite.jar" />
 	</target>
 	<target name="publish" depends="build">
 		<available file="${basedir}/build/dest/" property="webdest" value="${basedir}/build/dest/web" />
 		<available file="../../xidea/lite" property="webdest" value="../../xidea/lite/" />
+		<copy todir="${webdest}">
+			<fileset dir="/build/dest/">
+				<include name="release/*.js"/>
+			</fileset>
+		</copy>
 		<java jar="build/dest/Lite.jar" fork="true">
 			<arg value="-root"/>
 			<arg value="web"/>

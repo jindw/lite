@@ -44,7 +44,7 @@ function processJS(text){
 			return a;
 		}
 	}).replace("^liteWrap(:S)",function(a,tpl){
-		return liteWrapCompile(tpl)+'(Template.prototype)'
+		return liteWrapCompile(tpl)+'(liteImpl)'
 	}).compress();
 	return text ;
 }

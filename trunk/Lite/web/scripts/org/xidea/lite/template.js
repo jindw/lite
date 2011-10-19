@@ -30,6 +30,7 @@ function Template(fn){
     	return new ($import('org.xidea.lite.impl:TemplateImpl'))(fn);
     }
 }
+var liteImpl;
 /**
  * micro:(a:a+1)
  * 		(a,b:a+1)
@@ -51,7 +52,7 @@ var liteWrap = function(replaceMap){
 	function tz(offset){
 		return offset?(offset>0?'-':offset*=-1||'+')+dl(offset/60,'00')+':'+dl(offset%60,'00'):'Z'
 	}
-	var liteGlobal = {
+	var liteImpl = {
 		//xt:0,xa:1,xp:2
 		0:function(txt,type){
 			return String(txt).replace(
@@ -110,36 +111,31 @@ var liteWrap = function(replaceMap){
     	impl = impl && impl[1];
     	if(!impl){
     		if(typeof $import == 'function'){
-    			$import('org.xidea.lite.impl.js:liteWrapImpl');
-    			return;
+    			return $import('org.xidea.lite.impl.js:liteWrapImpl');
     		}
     	}
     	//
-    	var impl = impl || 'http://www.xidea.org/lite/release/lite-web-impl.js'
+    	var impl = impl || 'http://www.xidea.org/lite/release/lite-wrap-impl.js'
     	document.write('<script src="'+impl+'"></script>')
-//    	var el = document.createElement("script");
-//    	var impl = document.getElementsByTagName('script');
-//    	el.setAttribute('src',impl || 'http://www.xidea.org/lite/release/lite-web-impl.js');
-//    	el.onerror = loadError;
-//    	impl = impl[impl.length-1];
-//    	impl.parentNode.appendChild(el);
 	}
 	function wrap(data,global){
 		var impl = null;
-		return typeof liteWrapImpl == 'undefined' ? 
+		return typeof liteWrapImpl == 'function' ? liteWrapImpl(data,global):
 			function(){//lazy impl
 				if(!impl){
-					if(typeof liteWrapImpl == 'undefined'){
-						!alert('liteWrapImpl not load');
+					if(typeof liteWrapImpl == 'function'){
+						impl = liteWrapImpl(data,global);
+					}else{
+						alert('liteWrapImpl not load');
 					}
-					impl = liteWrapImpl(data,global);
+					
 				}
 				return impl.apply(this,arguments);
-			}:liteWrapImpl(data,global)
+			};
 	}
-	Template.prototype = liteGlobal;
+	Template.prototype = liteImpl;
 	return function(fn,global){
 	    loadImpl && loadImpl();
-	    return wrap(fn,global || liteGlobal);
+	    return wrap(fn,global || liteImpl);
 	}
 }( {'"':'&#34;','<':'&lt;','&':'&#38;'});
