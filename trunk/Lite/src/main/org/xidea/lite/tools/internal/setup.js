@@ -34,17 +34,18 @@ function textFilterXHTML(path,text){
 }
 
 function processJS(text){
-	text = JSTransform(text).replace("^encodeURI(:S)",function(a,value){
-		try{
-			//野蛮替换,字符串中呢?当能,线上很少见.
-			value = window.eval(value);
-			value = replacePath(value);
-			return JSON.stringify(value);
-		}catch(e){
-			return a;
-		}
-	}).replace("^liteWrap(:S)",function(a,tpl){
+	// ^ 表达式开始
+	// $ 表达式结束
+	// :S 匹配表达式代码
+	// :ID 匹配JavaScript ID
+	// :/exp/i 匹配自定义正则表达式
+	// :[] 可选代码
+	text = JSTransform(text).replace("^liteWrap(:S)",function(a,tpl){
+		//编译LiteWrap模板
 		return liteWrapCompile(tpl)
+	}).replace("^encodeURI(:S)",function(a,value){
+		//处理js中的url资源
+		return JSON.stringify(replacePath(window.eval(value)));
 	}).compress();
 	return text ;
 }

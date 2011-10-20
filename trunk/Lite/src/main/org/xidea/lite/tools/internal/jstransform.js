@@ -1,3 +1,6 @@
+/**
+ * 现在还只是一个憧憬，别当真
+ */
 var compressJS = $import('org.xidea.lite.util.compressJS');
 function JSTransform(code){
 	if(this instanceof JSTransform){
@@ -35,7 +38,11 @@ JSTransform.prototype.replace = function(pattern,callback){
 				var end2 = end+right.length;
 				var statment = code.substring(start,end)
 				var all = code.substring(begin,end2);
-				buf.push(callback(all,statment));
+				try{
+					buf.push(callback(all,statment));
+				}catch(e){
+					buf.push(all);
+				}
 				code = code.substring(end2);
 				begin = -1;
 				break;

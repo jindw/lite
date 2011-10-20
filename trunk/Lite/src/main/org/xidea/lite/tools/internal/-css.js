@@ -1,5 +1,13 @@
 //导入调试服务器编译上下文
 var Env = require("./env");
+//申明预处理函数
+function compressJS(path,text){
+	//Rhino-LiveConnect->Java
+	return Packages.org.xidea.lite.util.YUIAdaptor.compressJS(text,path);
+}
+//注册预处理函数
+Env.addTextFilter("/**.js",compressJS);
+
 
 /**
  * @param path
@@ -49,9 +57,6 @@ function mergeCSS(path){
 	return result.join('\n');
 }
 
-function compressCSS(path,text){
-	return text.replace(/^\s+/g,'');
-}
 
 function onSpriteBackground(path){
 	//调用后端Java实现，生成Sprite图片
