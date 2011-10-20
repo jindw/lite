@@ -7,8 +7,9 @@
 				<span>${friend}</span>,
 			#end
 			都是我的朋友
+			<script href="http://www.xidea.org/lite/release/template.js"></script>
 			<script language="javascript">
-			var x = liteWrap(function(a){<xml>${a}</xml>})
+				var x = liteWrap(function(a){<p>${a}</p>})
 			</script>
 		</p>
 	</body>
