@@ -31,16 +31,15 @@ body{
 		</style>
 		<link href="doc/codemirror/codemirror.css" rel="stylesheet" type="text/css" />
 		<link href="doc/codemirror/default.css" rel="stylesheet" type="text/css" />
-		<script src="doc/codemirror/codemirror.js" ></script>
-		<script src="doc/codemirror/overlay.js" ></script>
-		<script src="doc/codemirror/javascript.js" ></script>
-		<script src="doc/codemirror/xml.js" ></script>
-		<script src="doc/codemirror/jsx.js" ></script>
 	</head>
 	<body>
 		<div id="main">
 			<div><h2>Lite 模板系统资源列表 </h2></div>
 			<ul>
+				<li><a href="#">讨论群/邮件组</a>
+					<p>QQ群：169075269</p>
+					<p>Google Group：169075269</p>
+				</li>
 				<li><a href="doc/index.php/guide/index.xhtml">Lite2 使用文档</a>
 					<p>语法参考 / 在线测试 / 安装测试部署...</p>
 				</li>
@@ -49,15 +48,16 @@ body{
 				</li>
 				<li><a href="../jside/">JSide调试服务器参考</a>
 					<p>JSide 调试服务器是一个Java 编写的测试用服务器。<p>
-					<p>可运行 PHP / <a href="#0" title="只Lite2/Velocity等Java模板的运行">Java视图</a> / 服务端JavaScript, 可用Java或者JavaScript 做功能扩展。</p>
+					<p>可运行 PHP / Java视图<a href="#0" title="只支持Lite2/Velocity/FreeMarker 等Java模板的运行">?</a> / 服务端JavaScript, 可用Java或者JavaScript 做功能扩展。</p>
 					<p>
-					可用于<a href="#0" title="目前支持Lite和Velocity,可扩展">模板</a>测试和静态资源的实时编译。</p>
+					可用于 模板<a href="#0" title="目前支持Lite和Velocity/FreeMarker,可扩展">?</a>测试和静态资源的实时编译。</p>
 				</li>
 				<li>
 					<a href="doc/index.php/guide/wrap.xhtml">liteWrap 参考</a>
 					<a name="liteWrap"></a>
 					<p>liteWrap 是一个基于E4X 设计的 JavaScript 模板风格， 可以将一个简单的html标签嵌入到JavaScript中，并像使用普通JavaScript函数一样使用这组标签描述的模板功能。</p>
-				</script>
+
+
 <div class="code">
 <textarea autocomplete='off'>
 var modelA ={
@@ -115,7 +115,11 @@ $(this.id).innerHTML = this.tpl(title,list)
 					</table>
 				</li>
 				
-				
+				<script src="doc/codemirror/codemirror.js" ></script>
+				<script src="doc/codemirror/overlay.js" ></script>
+				<script src="doc/codemirror/javascript.js" ></script>
+				<script src="doc/codemirror/xml.js" ></script>
+				<script src="doc/codemirror/jsx.js" ></script>
 				<script>
 				var ts = document.getElementsByTagName('textarea');
 				for(var i=ts.length;i;){
