@@ -6,7 +6,13 @@ $engine->autocompile=false ;
 //初始化Lite Logo 的点阵数据 
 $path = @$_SERVER['PATH_INFO'] ;
 
-
+if($path == '/guide/index.xhtml'){
+        $ref = @$_SERVER['HTTP_REFERER'];
+        if($ref && strlen($ref)>=40 && !substr_compare($ref,'http://www.qconhangzhou.com/Speaker.aspx',0,40,true)){
+                header('Location:http://www.xidea.org/lite/');
+                exit();
+        }
+}
 
 if($path){
 	$path = '/doc'.$path;

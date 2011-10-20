@@ -81,7 +81,7 @@
 				var context = buildContext();
 				var litecode = context.toList();
 				var translator = new JSTranslator();//'.','/','-','!','%'
-				translator.liteImpl = 'lite__impl_';//avoid inline jslib 
+				translator.liteImpl = 'liteImpl';//avoid inline jslib 
 				var jscode = translator.translate(litecode);
 			}catch(e){
 				$log.error("测试失败：模板编译异常：",e);
@@ -134,15 +134,12 @@
 			if(runStatus.type == 'js'){
 				try{
 					var code = runStatus.runcode;
-					code = code.replace(/^function\(\$\__context__\)/m,"return $&");
+					var tpl =  window.eval("("+(code||null)+")");
 					//alert(code)
-					var tpl =  window.eval("(function(lite__impl_def,lite__impl_get){"+(code||null)+"})");
-					//alert(code)
-					tpl = new Template(tpl);
 					
-					var result = tpl.render(data);
+					var result = tpl(data);
 				}catch(e){
-					$log.error("测试失败：模板运行异常："+tpl.render+e);
+					$log.error("测试失败：模板运行异常："+tpl+e);
 					return;
 				}
 				showResult(result);

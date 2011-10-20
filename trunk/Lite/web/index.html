@@ -57,29 +57,6 @@ body{
 					<a href="doc/index.php/guide/wrap.xhtml">liteWrap 参考</a>
 					<a name="liteWrap"></a>
 					<p>liteWrap 是一个基于E4X 设计的 JavaScript 模板风格， 可以将一个简单的html标签嵌入到JavaScript中，并像使用普通JavaScript函数一样使用这组标签描述的模板功能。</p>
-				<script>
-				var modelA ={
-  id  : 'a',
-  tpl : liteWrap(function(title,list){
-    //E4X 语法
-    <div class="modelA">
-      <!-- 插入标题 -->
-        <h2 class="model-title">${title}</h2>
-        <ul>
-          <!-- 循环输出内容 -->
-          <li c:for="${item:list}">
-            <strong>${item.title}</string>
-            <c:if test="${item.content}">
-              <p>${item.content}</p>
-            </c:if>
-          </li>
-        </ul>
-    </div>
-  }),
-  render:function(title,list){
-    $(this.id).innerHTML = this.tpl(title,list)
-  }
-}
 				</script>
 <div class="code">
 <textarea autocomplete='off'>
@@ -110,26 +87,25 @@ var modelA ={
 <div class='code'>
 <textarea>var modelA ={
 id  : 'a',
-tpl : (function(lite__impl_){
-return function(title,list){
-var lite__impl_x=lite__impl_[0];
-var lite__impl_l=lite__impl_[1];
+tpl : function(title,list){
+var liteImplx=liteImpl[0];
+var liteImpll=liteImpl[1];
 var $__out__=[]
-$__out__.push("<div class=\"modelA\">\n\n<h2 class=\"model-title\">",lite__impl_x(title),"</h2>\n<ul>\n\n");
-var $_2=lite__impl_l(list)
+$__out__.push("<div class=\"modelA\">\n\n<h2 class=\"model-title\">",liteImplx(title),"</h2>\n<ul>\n\n");
+var $_2=liteImpll(list)
 var $_0=0;
 var $_1 = $_2.length-1;
 for(;$_0<=$_1;$_0++){
 var item=$_2[$_0];
-$__out__.push("<li>\n<strong>",lite__impl_x(item.title),"</strong>\n");
+$__out__.push("<li>\n<strong>",liteImplx(item.title),"</strong>\n");
 if(item.content){
-$__out__.push("\n<p>",lite__impl_x(item.content),"</p>\n");
+$__out__.push("\n<p>",liteImplx(item.content),"</p>\n");
 }
 $__out__.push("\n</li>");
 }
 $__out__.push("\n</ul>\n</div>");
 return $__out__.join('');
-}})(Template.prototype),
+},
 render:function(title,list){
 $(this.id).innerHTML = this.tpl(title,list)
 }

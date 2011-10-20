@@ -103,11 +103,7 @@ JSTranslator.prototype = {
 		    var context = new JSTranslateContext(list,this.name,this.params,this.defaults);
 		    context.liteImpl = this.liteImpl || "liteImpl";
 		    context.parse();
-		    if(rtf){
-		    	var code = context.header + "\nreturn "+ context.body;
-		    }else{
-		    	var code = context.toSource();//context.header +  context.body;
-		    }
+		    var code = context.toSource(rtf);//context.header +  context.body;
 		    if(!this.name && !rtf){
 		    	new Function('return '+code);
 		    }else{
@@ -292,7 +288,7 @@ JSTranslateContext.prototype = new PT({
 	        var vars = buildVars(this,def,def.params);
 	        var content = optimizeFunction(this,'',def.params,def.defaults,vars);
 	        this.depth--;
-	        fs.push(this.liteImpl,".",n,"=",content,";\n");
+	        fs.push(this.liteImpl,".",n,"=",content,",\n");
 	        this.impl_counter = {d:0,l:0,x:0};
 	    }
 	    this.header = fs.join('');
@@ -476,7 +472,27 @@ JSTranslateContext.prototype = new PT({
         this.freeId(indexId);
         return i;
     },
-    toSource:function(){
-    	return this.header+this.body
+    toSource:function(rtf){
+    	var h = this.header;
+    	var b = this.body;
+    	if(h){
+    		if(rtf){
+    			return 'return ('+h+b+')'
+    		}else{
+    			var m = b.match(/^\s*function(\s+[^\s\(]+)([\s\S]+)$/)
+    			if(m && m[1]){
+    				return 'var '+m[1]+'= ('+h+'function '+m[2]+')'
+    			}else{
+    				return h + b;
+    			}
+    			
+    		}
+    	}else{
+    		if(rtf){
+    			return 'return '+b;
+    		}else{
+    			return b;
+    		}
+    	}
     }
 });

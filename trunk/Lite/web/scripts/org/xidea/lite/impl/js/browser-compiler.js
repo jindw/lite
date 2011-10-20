@@ -19,6 +19,6 @@ function liteWrapCompile(code,liteImplId){
 	parseContext.parse(xml);
 	var translator = new JSTranslator('',args && args.split(/\s*,\s*/));
 	translator.liteImpl = liteImplId || "liteImpl"
-	var code = translator.translate(parseContext.toList(),true);
+	var code = translator.translate(parseContext.toList());
 	return code;
 }
