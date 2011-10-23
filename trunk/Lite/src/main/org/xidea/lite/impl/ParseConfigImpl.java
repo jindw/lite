@@ -149,6 +149,7 @@ public class ParseConfigImpl implements ParseConfig {
 			groups2.add(DEFAULT_GROUP);
 		}
 		this.groups = groups2;
+		this.cached.clear();
 	}
 
 	protected static class Group {
@@ -167,6 +168,7 @@ public class ParseConfigImpl implements ParseConfig {
 			this.excludes = Pattern.compile("^[\\.^]");
 			this.featureMap = new HashMap<String, String>();
 			this.featureMap.put(LiteTemplate.FEATURE_ENCODING, "UTF-8");
+			this.featureMap.put(LiteTemplate.FEATURE_CONTENT_TYPE, "text/html;charset=UTF-8");
 			this.featureMap = Collections.unmodifiableMap(this.featureMap);
 		}
 

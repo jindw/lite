@@ -69,6 +69,7 @@ function getNodePosition(el){
 	return el.ownerDocument.documentURI + '@'+(info && info.replace(/\|[\s\S]*$/,''));
 }
 // for commonjs exports
+exports.root = resourceManager.root;
 exports.loadRawText = loadRawText;
 exports.saveText = saveText;
 exports.addRelation = addRelation;

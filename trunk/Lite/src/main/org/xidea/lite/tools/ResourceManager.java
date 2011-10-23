@@ -29,8 +29,12 @@ public interface ResourceManager {
 	public byte[] getFilteredBytes(String path) throws IOException;
 	public String getFilteredText(String path) throws IOException;
 	public Object getFilteredContent(String path) throws IOException;
-	public String loadChainText(String path) throws IOException;
+	public String[] dir(String path) throws IOException;
+
 	public long getLastModified(String path);
+	
+	
+	public String loadChainText(String path) throws IOException;
 	/**
 	 * 
 	 * 将指定绝对路径的资源经过过滤处理后，做xml容错，并加上lite 附加资源信息，做为org.w3c.Document 对象返回。
@@ -55,7 +59,7 @@ public interface ResourceManager {
 //	public String getEncoding(String path);
 	public URI getRoot();
 
-	public void saveText(String path,Object content) throws IOException ;
+//	public void saveText(String path,Object content) throws IOException ;
 	/**
 	 * 
 	 */

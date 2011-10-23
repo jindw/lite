@@ -547,4 +547,9 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 	public List<String> getLinkedResources() {
 		return Collections.unmodifiableList(linkedResources);
 	}
+
+	public String[] dir(String path) throws IOException {
+		File dir = new File(root,path);
+		return dir.list();
+	}
 }

@@ -3,6 +3,7 @@ var Merge = require("./merge");
 var XHtml = require("./xhtml");
 var JSTransform = require('./jstransform').JSTransform;
 var liteWrapCompile =  $import('org.xidea.lite.impl.js.liteWrapCompile');
+var Sprite = require('./sprite');
 //通过jsi2 的语法，链接到老的类库
 
 function textFilterJS(path,text){
@@ -14,7 +15,7 @@ function textFilterJS(path,text){
 		Env.addRelation(n);
 		buf.push(map[n])
 	}
-	text = processJS(buf.join('\n'));
+	text = processJS(buf.join('\n'),path);
 	return text;
 }
 function textFilterCSS(path,text){
@@ -26,14 +27,14 @@ function textFilterCSS(path,text){
 		Env.addRelation(n);
 		buf.push(map[n])
 	}
-	text = processCSS(buf.join('\n'));
+	text = processCSS(buf.join('\n'),path);
 	return text;
 }
 function textFilterXHTML(path,text){
 	return XHtml.normalizeXML(text,path);
 }
 
-function processJS(text){
+function processJS(text,path){
 	// ^ 表达式开始
 	// $ 表达式结束
 	// :S 匹配表达式代码
@@ -49,8 +50,9 @@ function processJS(text){
 	}).compress();
 	return text ;
 }
-function processCSS(text){
+function processCSS(text,path){
 	//replace css:	url("/module/static/img/a/_/8.png")
+	Sprite.spriteCSS(text,path);
 	text = text.replace(/\:\s*url\s*\(\s*(['"]|)(.*?)\1\s*\)/g,function(a,qute,content){
 		if(qute){
 			content = window.eval(qute+content+qute);
@@ -101,28 +103,28 @@ function addContextPath(path,contextPath){
 }
 
 function htmlScriptCSSFilter(path,text){
-	return cssFilter(jsFilter(text));
+	return cssFilter(jsFilter(text,path));
 }
-function cssFilter(text){
+function cssFilter(text,path){
 	return text.replace(/(<style\b[^>]*>)([\s\S]*?)<\/style>|<!\[CDATA\[([\s\S]*?)\]\]>/g,
 		function(a,prefix,css){
 			if(css){
-				return prefix+processCSS(css)+'</style>'
+				return prefix+processCSS(css,path)+'</style>'
 			}else{
 				return a;
 			}
 		}
 	);
 }
-function jsFilter(text){
+function jsFilter(text,path){
 	return text.replace(/<script\b[^>]*\/>|(<script\b[^>]*>)([\s\S]*?)<\/script>|<!\[CDATA\[([\s\S]*?)\]\]>/g,
 		function(a,prefix,js){
 			if(js){
 				//$log.error(js)
 				if(/\/>/.test(prefix)){
-					return prefix+jsFilter(js+'</script>')
+					return prefix+jsFilter(js+'</script>',path)
 				}
-				return prefix+processJS(js)+'</script>'
+				return prefix+processJS(js,path)+'</script>'
 			}else{
 				//$log.error(a)
 				return a;
