@@ -22,6 +22,44 @@ public class ImageUtil {
 		canvas.setRGB(x, y, image.getWidth(), image.getHeight(), imgRGB, 0,
 				image.getWidth());
 	}
+	static String getRepeat(BufferedImage image) {
+		int width = image.getWidth();
+		int height = image.getHeight();
+		int xc = width/2;
+		int yc = height/2;
+		int cc = image.getRGB(xc, yc);
+		int c0 = image.getRGB(xc, 0);
+		int zc = image.getRGB(0, yc);
+		boolean repeatX = zc == cc;
+		boolean repeatY = c0 == cc;
+		if(repeatX || repeatY){
+			final int[] imgRGB = image.getRGB(0, 0, width, height, null, 0, width);
+			if(repeatX){
+				int p = 0;
+				outer:for(int i=0;i<height;i++){
+					int p0 =imgRGB[p++];
+					for(int j =1;j<width;j++){
+						if(p0 !=imgRGB[p++]){
+							repeatX = false;
+							break outer;
+						}
+					}
+				}
+			}
+			if(repeatY){
+				int p = width;
+				outer:for(int i=width;i<height;i++){
+					for(int j =0;j<width;j++){
+						if(imgRGB[j] !=imgRGB[p++]){
+							repeatY = false;
+							break outer;
+						}
+					}
+				}
+			}
+		}
+		return repeatX?(repeatY?"xy":"x"):(repeatY?"y":"");
+	}
 
 	/**
 	 * Performs matting of the <code>source</code> image using

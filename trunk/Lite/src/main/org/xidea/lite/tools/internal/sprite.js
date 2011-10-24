@@ -149,7 +149,7 @@ function spriteCSS(path,base,dest,source){
 					var filename = url.replace(/.*\/([^\/]+)$/,'$1');
 					var fi = spriteInfo.imageMap[filename];
 					var pos = -fi.x + 'px '+ -fi.y+'px';
-					var repeat = '';
+					var repeat = 'no-repeat ';
 					var ext = repeat + pos + '';
 					var css = 'url('+destFile+') '+ext;
 					if(spriteInfo.alpha){
