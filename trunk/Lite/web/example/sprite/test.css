@@ -1,0 +1,18 @@
+#baidu{
+	background:url('/example/sprite/baidu.gif');
+}
+#sina{
+	background:url('/example/sprite/sina.gif');
+	width:250px;height:50px;
+}
+#google{
+	background:url('/example/sprite/google.png');
+	width:380;height:200px;
+}
+body{
+	background:red;
+}
+div{
+	width:250px;height:250px;
+	border:1px solid red;
+}

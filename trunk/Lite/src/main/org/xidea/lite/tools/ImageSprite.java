@@ -24,7 +24,6 @@ public class ImageSprite {
 		if(f.exists()){
 			CachedImageResource c = IMAGE_CACHE_MAP.get(f);
 			if(c == null || c.lastModified <= f.lastModified()){
-				System.out.println(f);
 				c = new CachedImageResource(f);
 			}
 			IMAGE_CACHE_MAP.put(f, c);

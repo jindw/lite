@@ -49,8 +49,8 @@ function addFilter(pattern,impl,type){
 	var proxy = resourceManager.createFilterProxy({doFilter:fn,toString:function(){return impl+''}});
 	return resourceManager['add'+type+'Filter'](pattern,proxy);
 }
-function addByteFilter(pattern,impl){
-	addFilter(pattern,impl,'Byte');
+function addBytesFilter(pattern,impl){
+	addFilter(pattern,impl,'Bytes');
 }
 function addTextFilter(pattern,impl){
 	addFilter(pattern,impl,'Text');
@@ -74,10 +74,23 @@ exports.loadRawText = loadRawText;
 exports.saveText = saveText;
 exports.addRelation = addRelation;
 exports.loadChainText = loadChainText;
+exports.addBytesFilter = addBytesFilter;
 exports.addTextFilter = addTextFilter;
 exports.addDocumentFilter = addDocumentFilter;
 exports.getContentHash = function(path){
 	return resourceManager.getContentHash(path);
 }
+exports.dir = function(path){
+	return resourceManager.dir(path);
+}
+
+exports.get = function(path,key){
+	return resourceManager.get(path,key);
+}
+
+exports.set = function(path,key,value){
+	return resourceManager.set(path,key,value);
+}
+
 exports.selectByXPath = selectByXPath;
 exports.getNodePosition = getNodePosition;

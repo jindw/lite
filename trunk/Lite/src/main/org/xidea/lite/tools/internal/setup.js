@@ -52,7 +52,7 @@ function processJS(text,path){
 }
 function processCSS(text,path){
 	//replace css:	url("/module/static/img/a/_/8.png")
-	Sprite.spriteCSS(text,path);
+	text = Sprite.spriteCSS(path,'/example/sprite/','/static/_/',text)
 	text = text.replace(/\:\s*url\s*\(\s*(['"]|)(.*?)\1\s*\)/g,function(a,qute,content){
 		if(qute){
 			content = window.eval(qute+content+qute);
@@ -132,6 +132,13 @@ function jsFilter(text,path){
 		}
 	);
 }
+//css sprite
+Env.addBytesFilter('/static/_/*.png',function(path){
+	return Sprite.spriteImage(path,'/example/sprite/');
+});
+
+
+
 Env.addTextFilter("/**.css",textFilterCSS);
 Env.addTextFilter("/**.js",textFilterJS);
 

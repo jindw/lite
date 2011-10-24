@@ -52,6 +52,9 @@ public interface ResourceManager {
 	public String getContentHash(String path);
 	public List<String> getLinkedResources();
 	public void addLinkedResource(String path);
+	public void set(String path,String key,Object value);
+	public Object get(String path,String key);
+	
 	/**
 	 * 获取文件编码信息
 	 * @return

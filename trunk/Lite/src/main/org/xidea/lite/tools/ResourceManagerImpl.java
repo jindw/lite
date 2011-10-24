@@ -288,8 +288,10 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 						return res;
 					}
 				}
-				String text = loadText(res, res.data);
+				String text = null;
+				if(containsFilter(path, stringFilters))
 				{
+					text = loadText(res, res.data);
 					String oldText = res.text;
 					text = doFilter(res, lastFilter, stringFilters, text,
 							oldText);
@@ -304,11 +306,19 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 				{
 					if (res.dom == null) {// no lastFilter
 						// 没有默认的xml正规化
-						Document doc = ParseUtil.loadXMLBySource(text, "lite:"
-								+ path);
+						Document doc = null;
 						for (MatcherFilter<Document> filter : documentFilters) {
 							try {
+								if(filter.match(path)){
+								if(doc == null){
+									if(text == null){
+										text = loadText(res, res.data);
+									}
+									doc = ParseUtil.loadXMLBySource(text, "lite:"
+												+ path);
+								}
 								doc = filter.doFilter(path, doc);
+								}
 							} catch (RuntimeException e) {
 								log.error("filter error:" + filter);
 								throw e;
@@ -401,6 +411,7 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 		}
 		File f = new File(root, path);
 		if (!f.exists()) {
+			if(!f.getParentFile().getName().equals("_"))
 			return -1;
 		}
 		long lastModified = f.lastModified();
@@ -474,6 +485,7 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 		Document dom;
 		long lastModified = -1;
 		String hash;
+		Map<Object,Object> map= new HashMap<Object, Object>();
 		transient Object currentData;
 	}
 
@@ -493,7 +505,7 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 			addLinkedResource(path);
 			return item.hash;
 		} catch (Exception e) {
-			log.warn("计算hash值失败：" + path);
+			log.warn("计算hash值失败：" + path,e);
 		}
 
 		return null;
@@ -551,5 +563,14 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 	public String[] dir(String path) throws IOException {
 		File dir = new File(root,path);
 		return dir.list();
+	}
+
+	public Object get(String path, String key) {
+		ResourceItem ri = resource(path);
+		return ri.map.get(key);
+	}
+
+	public void set(String path, String key, Object value) {
+		resource(path).map.put(key, value);
 	}
 }
