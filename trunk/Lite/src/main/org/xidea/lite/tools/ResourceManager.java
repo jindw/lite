@@ -29,6 +29,7 @@ public interface ResourceManager {
 	public byte[] getFilteredBytes(String path) throws IOException;
 	public String getFilteredText(String path) throws IOException;
 	public Object getFilteredContent(String path) throws IOException;
+	public Object doFilter(String path,Object source) throws IOException;
 	public String[] dir(String path) throws IOException;
 
 	public long getLastModified(String path);

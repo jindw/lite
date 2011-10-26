@@ -130,7 +130,7 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 			return new File(root, path.substring(1));
 		} else {
 			throw new IllegalArgumentException(
-					"resource path must be start with '/' you gave:"+path);
+					"resource path must be start with '/' you gave:" + path);
 		}
 	}
 
@@ -241,6 +241,26 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 		return null;
 	}
 
+	public Object doFilter(String path, Object source) throws IOException {
+//		int p = path.indexOf('#');
+//		if(p>0){
+//			String path0 = path.substring(0,p);
+//		}
+		ResourceItem item = resource(path);
+		try {
+			doFilter(item,source, null, null);
+		} catch (SAXException e) {
+			throw new IOException(e);
+		}
+		String text = item.text;// ,streamFilters,stringFilters,documentFilters);
+		if (text == null) {
+			return item.data;
+		} else {
+			return text;
+		}
+
+	}
+
 	/**
 	 * 注意: getFilteredContent(path,String.class,breakFilter):
 	 * 如果text没有被getFilterdDocument初始化，也没有相关的文本filter,返回null
@@ -262,6 +282,14 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 	// List<FilterPlugin<Document>> documentFilters
 	) throws IOException, SAXException {
 		ResourceItem res = resource(path);
+		return doFilter(res, null,type, lastFilter);
+
+	}
+
+	private <T> ResourceItem doFilter(ResourceItem res,Object source,Class<T> type,
+			Object lastFilter) throws IOException,
+			FileNotFoundException, SAXException {
+		String path = res.path;
 		ResourceItem old = currentItem.get();
 		if (old == res) {// 不能两次进入同一个资源，否则会死锁
 			// TODO: 逻辑还有问题
@@ -271,9 +299,11 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 			File file = getFile(path);
 			try {
 				currentItem.set(res);
-				{
+				if(source == null || !(source instanceof byte[])){
 					byte[] data = null;
-					if (file.exists()) {
+					if(source instanceof byte[]){
+						data = (byte[])source;
+					}else if (file.exists()) {
 						data = getRawBytes(path);
 					}
 					res.currentData = data;
@@ -289,9 +319,12 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 					}
 				}
 				String text = null;
-				if(containsFilter(path, stringFilters))
-				{
-					text = loadText(res, res.data);
+				if (containsFilter(path, stringFilters)) {
+					if(source instanceof String){
+						text = (String)source;
+					}else{
+						text = loadText(res, res.data);
+					}
 					String oldText = res.text;
 					text = doFilter(res, lastFilter, stringFilters, text,
 							oldText);
@@ -309,15 +342,15 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 						Document doc = null;
 						for (MatcherFilter<Document> filter : documentFilters) {
 							try {
-								if(filter.match(path)){
-								if(doc == null){
-									if(text == null){
-										text = loadText(res, res.data);
+								if (filter.match(path)) {
+									if (doc == null) {
+										if (text == null) {
+											text = loadText(res, res.data);
+										}
+										doc = ParseUtil.loadXMLBySource(text,
+												"lite:" + path);
 									}
-									doc = ParseUtil.loadXMLBySource(text, "lite:"
-												+ path);
-								}
-								doc = filter.doFilter(path, doc);
+									doc = filter.doFilter(path, doc);
 								}
 							} catch (RuntimeException e) {
 								log.error("filter error:" + filter);
@@ -329,8 +362,8 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 					return res;
 				}
 			} finally {
-				currentItem.set(old);
 				res.lastModified = System.currentTimeMillis();
+				currentItem.set(old);
 			}
 		}
 	}
@@ -411,8 +444,8 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 		}
 		File f = new File(root, path);
 		if (!f.exists()) {
-			if(!f.getParentFile().getName().equals("_"))
-			return -1;
+			if (!f.getParentFile().getName().equals("_"))
+				return -1;
 		}
 		long lastModified = f.lastModified();
 		for (String path2 : item.relations) {
@@ -448,7 +481,8 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 		public boolean match(String url) {
 			return matcher.match(url);
 		}
-		public String toString(){
+
+		public String toString() {
 			return base.toString();
 		}
 
@@ -485,7 +519,7 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 		Document dom;
 		long lastModified = -1;
 		String hash;
-		Map<Object,Object> map= new HashMap<Object, Object>();
+		Map<Object, Object> map = new HashMap<Object, Object>();
 		transient Object currentData;
 	}
 
@@ -505,7 +539,7 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 			addLinkedResource(path);
 			return item.hash;
 		} catch (Exception e) {
-			log.warn("计算hash值失败：" + path,e);
+			log.warn("计算hash值失败：" + path, e);
 		}
 
 		return null;
@@ -561,7 +595,7 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 	}
 
 	public String[] dir(String path) throws IOException {
-		File dir = new File(root,path);
+		File dir = new File(root, path);
 		return dir.list();
 	}
 

@@ -68,6 +68,7 @@ class CachedImageResource implements ImageResource{
 	int width;
 	boolean alpha;
 	BufferedImage image;
+	String repeat;
 	ArrayList<ChildImageResource> children = new ArrayList<ChildImageResource>();
 
 	public CachedImageResource(int width,int height){
@@ -97,6 +98,14 @@ class CachedImageResource implements ImageResource{
 
 	public void drawImage(ImageResource res, int x, int y) {
 		this.children.add(new ChildImageResource(res,x, y));
+	}
+	public String getRepeat() {
+		if(repeat == null){
+			if(image != null){
+				repeat = ImageUtil.getRepeat(image);
+			}
+		}
+		return repeat;
 	}
 	
 }

@@ -7,27 +7,13 @@ var Sprite = require('./sprite');
 //通过jsi2 的语法，链接到老的类库
 
 function textFilterJS(path,text){
-	var fileList = [];
-	var map = Merge.mergeJS(path,fileList);
-	var buf = [];
-	for(var i = 0;i<fileList.length;i++){
-		var n  = fileList[i];
-		Env.addRelation(n);
-		buf.push(map[n])
-	}
-	text = processJS(buf.join('\n'),path);
+	text = Merge.mergeJS(path);
+	text = processJS(text,path);
 	return text;
 }
 function textFilterCSS(path,text){
-	var fileList = [];
-	var map = Merge.mergeCSS(path,fileList);
-	var buf = [];
-	for(var i = 0;i<fileList.length;i++){
-		var n  = fileList[i];
-		Env.addRelation(n);
-		buf.push(map[n])
-	}
-	text = processCSS(buf.join('\n'),path);
+	text = Merge.mergeCSS(path);
+	text = processCSS(text,path);
 	return text;
 }
 function textFilterXHTML(path,text){
@@ -95,43 +81,7 @@ function addHashData(path,realpath){
  * 这个工作比较难啊，模板要定位所有资源路径。
  * js/css中通过规范解决（css 资源都用url(...),js 资源地址都用encodeURI(...)），
  */
-function addContextPath(path,contextPath){
-	if(path.charAt() == '/'){
-		return contextPath + path;
-	}
-	return path;
-}
 
-function htmlScriptCSSFilter(path,text){
-	return cssFilter(jsFilter(text,path));
-}
-function cssFilter(text,path){
-	return text.replace(/(<style\b[^>]*>)([\s\S]*?)<\/style>|<!\[CDATA\[([\s\S]*?)\]\]>/g,
-		function(a,prefix,css){
-			if(css){
-				return prefix+processCSS(css,path)+'</style>'
-			}else{
-				return a;
-			}
-		}
-	);
-}
-function jsFilter(text,path){
-	return text.replace(/<script\b[^>]*\/>|(<script\b[^>]*>)([\s\S]*?)<\/script>|<!\[CDATA\[([\s\S]*?)\]\]>/g,
-		function(a,prefix,js){
-			if(js){
-				//$log.error(js)
-				if(/\/>/.test(prefix)){
-					return prefix+jsFilter(js+'</script>',path)
-				}
-				return prefix+processJS(js,path)+'</script>'
-			}else{
-				//$log.error(a)
-				return a;
-			}
-		}
-	);
-}
 //css sprite
 Env.addBytesFilter('/static/_/*.png',function(path){
 	return Sprite.spriteImage(path,'/example/sprite/');
@@ -145,7 +95,6 @@ Env.addTextFilter("/**.js",textFilterJS);
 Env.addTextFilter("/**.html",htmlScriptCSSFilter);
 Env.addTextFilter("/**.ftl",htmlScriptCSSFilter);
 Env.addTextFilter("/**.vm",htmlScriptCSSFilter);
-
 Env.addTextFilter("/**.xhtml",htmlScriptCSSFilter);
 
 Env.addTextFilter("/**.xhtml",textFilterXHTML);

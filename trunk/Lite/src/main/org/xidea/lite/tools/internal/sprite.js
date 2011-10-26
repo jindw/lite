@@ -25,8 +25,6 @@ function spriteImage(path,base){
 	var files = Env.dir(dir);
 	var images = [];
 	var imageMap = {};
-	var maxWidth = 0;
-	var maxHeight = 0;
 	var spriteImpl = new ImageSprite(Env.root);
 	var alpha = false;
 	for(var i=0;i<files.length;i++){
@@ -36,8 +34,6 @@ function spriteImage(path,base){
 			if(resource.alpha){
 				alpha = true;
 			}
-			maxWidth = Math.max(resource.width,maxWidth)
-			maxHeight = Math.max(resource.height,maxHeight);
 			images.push(imageMap[file] = {
 				name : file,
 				info : file.replace(/^.*(\[.*\])?\.\w+$/,''),
@@ -50,11 +46,10 @@ function spriteImage(path,base){
 			});
 		}
 	}
-	var repeat = initRepeat(images);
-	if(repeat == 'xy'){
-		//error
-		throw new Error('repeat-x and repeat-y can not exits in same dir')
-	}
+	var ras = initRepeatAndSize(images);
+	var repeat = ras[0];
+	var maxWidth = ras[1];
+	var maxHeight = ras[2];
 	var size = initOffset(images,repeat,maxWidth,maxHeight);
 	var width = size[0];
 	var height = size[1];
@@ -99,7 +94,7 @@ function initOffset(images,repeat,maxWidth,maxHeight){
 			//todo
 			image.x = offsetX;
 			image.y = bottom ? maxHeight - image.height : 0;
-			offsetX+=image.width;
+			offsetX += image.width;
 			if(i<images.length-1){
 				offsetX += Math.max(48,image.width)
 			}
@@ -123,23 +118,77 @@ function initOffset(images,repeat,maxWidth,maxHeight){
 		return [maxWidth,offsetY]
 	}
 }
-function initRepeat(images){
-	var rtv = ['','']
+function initRepeatAndSize(images){
+	var repeatX = [];
+	var repeatY = [];
+	var repeat = []
+	var maxWidth = 0;
+	var maxHeight = 0;
 	for(var i=0;i<images.length;i++){
-		var info = images[i].info;
+		var image = images[i];
+		var resource=image.resource;
+		var info = image.info;
 		if(info.indexOf('x')>0){
-			rtv[0] = 'x'
+			repeatX.push(image)
+			if(!/x/.test(resource.repeat)){
+				repeat.push(image.width)
+			}
 			info.repeatX = true;
-		}else if(info.indexOf('y')>0){
-			rtv[1] = 'y'
+		}
+		if(info.indexOf('y')>0){
+			repeatY.push(image)
+			if(!/y/.test(resource.repeat)){
+				repeat.push(image.height)
+			}
 			info.repeatY = true;
 		}
+		maxWidth = Math.max(resource.width,maxWidth);
+		maxHeight = Math.max(resource.height,maxHeight);
 	}
-	return rtv.join('')
+	if(repeatX.length && repeatY.length){
+		//error
+		throw new Error('repeat-x and repeat-y can not exits in same dir')
+	}
+	if(repeatX.length){
+		maxWidth = repeatSize(maxWidth,repeat);
+		repeat = 'x';
+	}else if(repeatY.length){
+		maxHeight = repeatSize(maxHeight,repeat);
+		repeat = 'x';
+	}else{
+		repeat = '';
+	}
+	return [repeat,maxWidth,maxHeight]
+}
+//求可安全平铺的最小公倍数。
+function repeatSize(size,list){
+	if(list.length){
+		list.sort();
+		max = list.pop();
+		var base = parseInt(size/max)*max;
+		if(base < size){
+			base+=max;
+		}
+		if(list.length){
+			var last = list.length-1;
+			out:while(true){
+				var i = last;
+				while(i--){
+					if(base % list[i]){
+						base += max;
+						continue out;
+					}
+				}
+				break;
+			}
+		}
+		return base;
+	}
+	return size;
 }
 function spriteCSS(path,base,dest,source){
-	return source.replace(/\bbackground\s*\:\s*url\(([^)]+)\)\s*(?=[;\}]|\/\*})/ig,
-		function(a,url){
+	return source.replace(/\bbackground\s*\:\s*url\(([^)]+)\)(.*?)(?=[;\}]|\/\*})/ig,
+		function(a,url,postfix){
 			url = url.replace(/['"]/g,'');
 			var destFile = dest + spritePath(url,base);
 			if(destFile){
@@ -159,7 +208,6 @@ function spriteCSS(path,base,dest,source){
 							+ destFile
 							+ ')")';
 					}
-					$log.error(css)
 					return 'background:'+css;
 				}
 			}
