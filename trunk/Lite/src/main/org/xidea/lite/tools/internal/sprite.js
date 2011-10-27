@@ -234,12 +234,27 @@ function spriteCSS(path,base,dest,source){
 function getCSSPosition(fi,postfix){
 	var x = fi.x?-fi.x+'px':0;
 	var y = fi.y?-fi.y+'px':0;
-	
-	if(/[r]/.test(fi.info)){
+	var info = fi.info;
+	var info2 = info;
+	if(/[r]/.test(info)){
 		x = 'right';//'100%'
-	}
-	if(/[b]/.test(fi.info)){
+		if(info2 == info2.replace(/(?:\bright\b)|100%/,'')){
+			console.error('css code error, right align images must declared as right position');
+		}
+		if(/[b]/.test(info)){
+		   y = 'bottom';//'100%'
+		   if(info2 == info2.replace(/(?:\bbottom\b)|100%/,'')){
+		   		console.error('css code error, bottom align images must declared as bottom position');
+		   }
+		}
+	}else if(/[b]/.test(info)){
 		y = 'bottom';//'100%'
+		if(info2 == info2.replace(/(?:\bbottom\b)|100%/,'')){
+		   	console.error('css code error, bottom align images must declared as bottom position');
+		}
+	}
+	if(info2 != info2.replace(/\d+%?|\b(?:left|right|center|top|bottom)\b/,'')){
+			console.error('css code error, position must same as filename flag[xyrb]');
 	}
 	return x + ' '+ y;
 }
