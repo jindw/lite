@@ -1,18 +1,30 @@
 #baidu{
-	background:url('/example/sprite/baidu.gif');
+	background:url('/images/sprite/baidu.gif');
 }
 #sina{
-	background:url('/example/sprite/sina.gif');
-	/*width:250px;height:50px;*/
+	background:url('/images/sprite/sina.gif');
+	height:50px;
+}
+#sina-x{
+	background:url('/images/sprite/sina[x].gif');
+	height:50px;
+}
+#sina-y{
+	background:url('/images/sprite-y/sina[y].gif');
+	height:350px;
+}
+#sina-r{
+	background:url('/images/sprite/sina[r].gif') right;
+	height:50px;
 }
 #google{
-	background:url('/example/sprite/google.png');
+	background:url('/images/sprite/google.png');
 	/*width:380;height:200px;*/
 }
 body{
 	background:#444;
 }
 div{
-	width:250px;height:250px;
+	width:450px;height:200px;
 	border:1px solid red;
 }

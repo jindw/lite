@@ -1,11 +1,13 @@
 var Env = require('./env');
 
-function mergeJS(path,sourceLoader){
-	return merge(path,true,sourceLoader);
+
+function jsMergeFilter(path,text){
+	return merge(path,true);
 }
-function mergeCSS(path,sourceLoader){
-	return merge(path,false,sourceLoader);
+function cssMergeFilter(path,text){
+	return merge(path,false);
 }
+
 
 function merge(path,isJS,sourceLoader){
 	sourceLoader = sourceLoader || Env.loadChainText;
@@ -107,5 +109,5 @@ function findEnd(source,fi,end){
 	return null;
 }
 
-exports.mergeJS = mergeJS;
-exports.mergeCSS = mergeCSS;
+exports.jsMergeFilter = jsMergeFilter;
+exports.cssMergeFilter = cssMergeFilter;

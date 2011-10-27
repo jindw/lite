@@ -1,14 +1,16 @@
 //导入调试服务器编译上下文
 var Env = require("./env");
 
-function scriptCssFilter(path,text){
+var inc = 0;
+function scFilter(path,text){
 	return cssFilter(jsFilter(text,path));
 }
 function cssFilter(text,path){
 	return text.replace(/(<style\b[^>]*>)([\s\S]*?)<\/style>|<!\[CDATA\[([\s\S]*?)\]\]>/g,
 		function(a,prefix,css){
 			if(css){
-				return prefix+processCSS(css,path)+'</style>'
+				var css = Env.doFilter(path+'#'+ inc++ +'.js',css);
+				return prefix+css+'</style>'
 			}else{
 				return a;
 			}
@@ -23,7 +25,8 @@ function jsFilter(text,path){
 				if(/\/>/.test(prefix)){
 					return prefix+jsFilter(js+'</script>',path)
 				}
-				return prefix+processJS(js,path)+'</script>'
+				var js = Env.doFilter(path+'#'+ inc++ +'.js',js);
+				return prefix+js+'</script>'
 			}else{
 				//$log.error(a)
 				return a;
@@ -31,4 +34,4 @@ function jsFilter(text,path){
 		}
 	);
 }
-exports.scriptCssFilter = scriptCssFilter;
+exports.scFilter = scFilter;

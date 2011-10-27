@@ -1,106 +1,32 @@
 var Env = require("org/xidea/lite/tools/internal/env");
 var Merge = require("./merge");
 var XHtml = require("./xhtml");
-var JSTransform = require('./jstransform').JSTransform;
-var liteWrapCompile =  $import('org.xidea.lite.impl.js.liteWrapCompile');
+var Html = require("./html");
 var Sprite = require('./sprite');
-//通过jsi2 的语法，链接到老的类库
+var Code = require('./code')
 
-function textFilterJS(path,text){
-	text = Merge.mergeJS(path);
-	text = processJS(text,path);
-	return text;
-}
-function textFilterCSS(path,text){
-	text = Merge.mergeCSS(path);
-	text = processCSS(text,path);
-	return text;
-}
-function textFilterXHTML(path,text){
-	return XHtml.normalizeXML(text,path);
-}
-
-function processJS(text,path){
-	// ^ 表达式开始
-	// $ 表达式结束
-	// :S 匹配表达式代码
-	// :ID 匹配JavaScript ID
-	// :/exp/i 匹配自定义正则表达式
-	// :[] 可选代码
-	text = JSTransform(text).replace("^liteWrap(:S)",function(a,tpl){
-		//编译LiteWrap模板
-		return liteWrapCompile(tpl)
-	}).replace("^encodeURI(:S)",function(a,value){
-		//处理js中的url资源
-		return JSON.stringify(replacePath(window.eval(value)));
-	}).compress();
-	return text ;
-}
-function processCSS(text,path){
-	//replace css:	url("/module/static/img/a/_/8.png")
-	text = Sprite.spriteCSS(path,'/example/sprite/','/static/_/',text)
-	text = text.replace(/\:\s*url\s*\(\s*(['"]|)(.*?)\1\s*\)/g,function(a,qute,content){
-		if(qute){
-			content = window.eval(qute+content+qute);
-		}
-		content = replacePath(content);
-		return ":url("+JSON.stringify(content)+')';
-	})
-	//compress 
-	//manager.compressCSS(value);
-	return text.replace(/(\\(?:\r\n?|\n).)|^\s+/gm,'$1')
-}
-function processURI(path){
-	//replace exact
-	path = replacePath(path);
-	//TODO:autoEncode
-	//${..} == > ${encodeURIComponent(..)} 
-	return path;
-}
-function replacePath(path){
-	//exact: /module/static/img/a/_/8.png
-	//resourceManager.replacePath(path);
-	return path;
-}
-function addHashData(path,realpath){
-	if(path.indexOf('?')>=0){
-		return path;//not add hash on dynamic
-	}
-	if(path.indexOf('#')>=0){
-		return path;//not add hash on hash url
-	}
-	//TODO:use result md5 is better?
-	var hash = Env.getContentHash(realpath||path)
-	if(hash){
-		return path+'?@='+hash
-	}else{
-		return path;
-	}
-}
-/**
- * 这个工作比较难啊，模板要定位所有资源路径。
- * js/css中通过规范解决（css 资源都用url(...),js 资源地址都用encodeURI(...)），
+/*
+ * png 过滤 + css自动转换
  */
+Sprite.setupSprite('/images/','/images/_/');
 
-//css sprite
-Env.addBytesFilter('/static/_/*.png',function(path){
-	return Sprite.spriteImage(path,'/example/sprite/');
-});
+//js / html 过滤处理
+Env.addTextFilter('**.js',Merge.jsMergeFilter);
+Env.addTextFilter('**.js',Code.jsCodeFilter);
 
+Env.addTextFilter('**.css', Merge.cssMergeFilter);
+Env.addTextFilter('**.css', Code.cssCodeFilter);
 
-
-Env.addTextFilter("/**.css",textFilterCSS);
-Env.addTextFilter("/**.js",textFilterJS);
-
-Env.addTextFilter("/**.html",htmlScriptCSSFilter);
-Env.addTextFilter("/**.ftl",htmlScriptCSSFilter);
-Env.addTextFilter("/**.vm",htmlScriptCSSFilter);
-Env.addTextFilter("/**.xhtml",htmlScriptCSSFilter);
-
-Env.addTextFilter("/**.xhtml",textFilterXHTML);
+//预处理HTML中的js/css标签内容（xhtml是Lite模板，相关处理可以直接在DOM中处理）
+Env.addTextFilter("/**.html",Html.scFilter);
+Env.addTextFilter("/**.ftl",Html.scFilter);
+Env.addTextFilter("/**.vm",Html.scFilter);
 
 
+
+/* XML正规化，用于兼容html常用不严谨的书写习惯 */
+Env.addTextFilter("/**.xhtml",XHtml.xhtmlNormalizeFilter);
 /* 添加文档验证器 */
-Env.addDocumentFilter("/**.xhtml",XHtml.checkXHTML);
-Env.addDocumentFilter("/**.xhtml",XHtml.filterXHTMLDom);
+Env.addDocumentFilter("/**.xhtml",XHtml.xhtmlValidateFilter);
+Env.addDocumentFilter("/**.xhtml",XHtml.xhtmlDOMFilter);
 

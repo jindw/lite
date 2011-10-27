@@ -3,6 +3,7 @@ var ImageSprite = function(){
 	return new org.xidea.lite.tools.ImageSprite(Env.root);
 }
 var SPRITE_KEY = "org.xidea.lite.tools.ImageSprite"
+var spriteConfig = null;
 /**
  * sprite base /module/static/_/
  * sprite file /module/static/css/a.css
@@ -21,24 +22,29 @@ function spritePath(path,base){
  */
 function spriteImage(path,base){
 	var file = path.replace(/.*\//,'');
-	var dir = base+file.replace(/\.png$/,'').replace(/\./g,'/');
+	var dir = base+file.replace(/\.png$/,'.').replace(/\./g,'/');
 	var files = Env.dir(dir);
 	var images = [];
 	var imageMap = {};
 	var spriteImpl = new ImageSprite(Env.root);
 	var alpha = false;
+	Env.addRelation(dir);
 	for(var i=0;i<files.length;i++){
 		var file = files[i];
 		if(/\.(gif|png|jpe?g)$/.test(file)){
-			var resource = spriteImpl.getImage(dir+file);
+			//$log.info(path,base,dir,file)
+			var filePath = dir+file;
+			var resource = spriteImpl.getImage(filePath);
+			Env.addRelation(filePath);
 			if(resource.alpha){
 				alpha = true;
 			}
 			images.push(imageMap[file] = {
 				name : file,
-				info : file.replace(/^.*(\[.*\])?\.\w+$/,''),
+				info : file.replace(/^.*?(\[.*\])?\.\w+$/,'$1'),
 				width:resource.width,
 				height:resource.height,
+				alpha:resource.alpha,
 				//repeatX : false,
 				//repeatY : false,
 				//x:0,y:0,
@@ -54,11 +60,12 @@ function spriteImage(path,base){
 	var width = size[0];
 	var height = size[1];
 	var imgbuf = spriteImpl.createImage(width,height);
+	
 	for(var i=0;i<images.length;i++){
 		var image = images[i];
 		var resource = image.resource;
-		if(repeat){
-			if(repeat == 'x'){
+		if(image.repeat){
+			if(image.repeat == 'x'){
 				var x = 0;
 				do{
 					imgbuf.drawImage(resource,Math.min(x,maxWidth-image.width),image.y);
@@ -90,7 +97,7 @@ function initOffset(images,repeat,maxWidth,maxHeight){
 		var offsetX = 0;
 		for(var i=0;i<images.length;i++){
 			var image = images[i];
-			var bottom = image.info.indexOf('b')
+			var bottom = image.info.indexOf('b')>=0
 			//todo
 			image.x = offsetX;
 			image.y = bottom ? maxHeight - image.height : 0;
@@ -106,7 +113,7 @@ function initOffset(images,repeat,maxWidth,maxHeight){
 		var offsetY = 0;
 		for(var i=0;i<images.length;i++){
 			var image = images[i];
-			var right = image.info.indexOf('r')>0
+			var right = image.info.indexOf('r')>=0
 			//todo
 			image.y = offsetY;
 			image.x = right ? maxWidth - image.width : 0;
@@ -128,19 +135,22 @@ function initRepeatAndSize(images){
 		var image = images[i];
 		var resource=image.resource;
 		var info = image.info;
-		if(info.indexOf('x')>0){
+		console.error(image.name,info)
+		if(info.indexOf('x')>=0){
 			repeatX.push(image)
 			if(!/x/.test(resource.repeat)){
 				repeat.push(image.width)
 			}
-			info.repeatX = true;
+			image.repeat = 'x'
+			image.repeatX = true;
 		}
-		if(info.indexOf('y')>0){
+		if(info.indexOf('y')>=0){
 			repeatY.push(image)
 			if(!/y/.test(resource.repeat)){
 				repeat.push(image.height)
 			}
-			info.repeatY = true;
+			image.repeat = 'y'
+			image.repeatY = true;
 		}
 		maxWidth = Math.max(resource.width,maxWidth);
 		maxHeight = Math.max(resource.height,maxHeight);
@@ -154,7 +164,7 @@ function initRepeatAndSize(images){
 		repeat = 'x';
 	}else if(repeatY.length){
 		maxHeight = repeatSize(maxHeight,repeat);
-		repeat = 'x';
+		repeat = 'y';
 	}else{
 		repeat = '';
 	}
@@ -190,6 +200,9 @@ function spriteCSS(path,base,dest,source){
 	return source.replace(/\bbackground\s*\:\s*url\(([^)]+)\)(.*?)(?=[;\}]|\/\*})/ig,
 		function(a,url,postfix){
 			url = url.replace(/['"]/g,'');
+			if(path.indexOf(dest) == ''){//不能sprite 目标地址下的文件
+				return a;
+			}
 			var destFile = dest + spritePath(url,base);
 			if(destFile){
 				Env.getContentHash(destFile);
@@ -197,33 +210,64 @@ function spriteCSS(path,base,dest,source){
 				if(spriteInfo!=null){
 					var filename = url.replace(/.*\/([^\/]+)$/,'$1');
 					var fi = spriteInfo.imageMap[filename];
-					var pos = -fi.x + 'px '+ -fi.y+'px';
-					var repeat = 'no-repeat ';
-					var ext = repeat + pos + '';
-					var css = 'url('+destFile+') '+ext;
-					if(spriteInfo.alpha){
-						//如果有Alpha 透明
-						css += ';_background: none '+ext
-							+'_filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src="url(' 
-							+ destFile
-							+ ')")';
+					if(fi){
+						var pos = getCSSPosition(fi,postfix);
+						var repeat = getCSSRepeat(fi,postfix);
+						var ext = repeat+ ' '+ pos ;
+						var css = 'url('+destFile+') '+ext;
+						if(fi.alpha){
+							//如果有Alpha 透明
+							css += ';_background: none '+ext
+								+'_filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src="url(' 
+								+ destFile
+								+ ')")';
+						}
+						return 'background:'+css;
+					}else{
+						console.info(url,filename);
 					}
-					return 'background:'+css;
 				}
 			}
 			return a;
 		});
 }
+function getCSSPosition(fi,postfix){
+	var x = fi.x?-fi.x+'px':0;
+	var y = fi.y?-fi.y+'px':0;
+	
+	if(/[r]/.test(fi.info)){
+		x = 'right';//'100%'
+	}
+	if(/[b]/.test(fi.info)){
+		y = 'bottom';//'100%'
+	}
+	return x + ' '+ y;
+}
+function getCSSRepeat(fi,postfix){
+	if(fi.repeat){
+		return repeat = fi.repeatX? 'repeat-x':'repeat-y';
+	}else{
+		return 'no-repeat';
+	}
+}
+function setupSprite(base,dest){
+	if(!spriteConfig){
+		Env.addBytesFilter('**.png',function(path,data){
+			if(path.indexOf(dest) == 0 && path.indexOf('/',dest.length+1)<0){
+				return spriteImage(path,spriteConfig[0]);
+			}else{
+				return data;
+			}
+		});
+		Env.addTextFilter('**.css',function(path,text){
+			return spriteCSS(path,spriteConfig[0],spriteConfig[1],text)
+		})
+	}
+	spriteConfig = [base,dest];
+}
 exports.spriteCSS = spriteCSS;
 exports.spriteImage = spriteImage;
 exports.spritePath = spritePath;
-exports.setup = function(base,dest){
-	Env.addBytesFilter(dest+'_/*.png',function(path){
-		return spriteImage(path,base);
-	});
-	Env.addTextFilter('**.css',function(path,text){
-		return spriteCSS(path,base,dest,text)
-	})
-}
+exports.setupSprite = setupSprite;
 //Env.addTextFilter('/static/_/*.png',imgageSprite);
 //Env.addTextFilter('**.css',cssSprite);

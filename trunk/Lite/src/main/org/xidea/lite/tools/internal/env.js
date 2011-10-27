@@ -42,6 +42,10 @@ function addRelation(path){
 	resourceManager.addRelation(path)
 }
 function addFilter(pattern,impl,type){
+	if(!impl){
+		console.error('filter can not be null',pattern,type);
+		throw new Error('filter can not be null:'+pattern);
+	}
 	function fn(v){
 		var rtv = impl.apply(this,arguments)
 		return rtv || v;
@@ -83,7 +87,9 @@ exports.getContentHash = function(path){
 exports.dir = function(path){
 	return resourceManager.dir(path);
 }
-
+exports.doFilter = function(path,source){
+	return resourceManager.doFilter(path,source);
+}
 exports.get = function(path,key){
 	return resourceManager.get(path,key);
 }

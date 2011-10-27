@@ -29,21 +29,20 @@ function checkUnknowAttr(dom){
 	assertEmpty("网页中使用了未知或不推荐的 属性:\n",deprecatedAttributes)
 
 }
-function checkXHTML(path,dom){
+function xhtmlValidateFilter(path,dom){
 	checkEmptyImg(dom);
 	checkUnknowAttr(dom);
 	checkUnknowTag(dom);
 	return dom;
 }
-function normalizeXML(text,path){
+function xhtmlNormalizeFilter(path,text){
 	return Packages.org.xidea.lite.impl.ParseUtil.normalize(text,path);
 }
-
-function filterXHTMLDom(path,dom){
+function xhtmlDOMFilter(path,dom){
 	return dom;
 }
-exports.normalizeXML = normalizeXML;
-exports.checkXHTML = checkXHTML;
-exports.filterXHTMLDom = filterXHTMLDom;
+exports.xhtmlNormalizeFilter = xhtmlNormalizeFilter;
+exports.xhtmlValidateFilter = xhtmlValidateFilter;
+exports.xhtmlDOMFilter = xhtmlDOMFilter;
 
 

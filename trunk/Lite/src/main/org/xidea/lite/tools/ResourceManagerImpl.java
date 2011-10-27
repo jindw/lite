@@ -47,7 +47,7 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 		this.root = new File(root);
 		// this.currentScript = root;
 		this.jsr
-				.eval("$import('org.xidea.jsidoc.util:JSON');console=$import('org.xidea.jsi:$log');");
+				.eval("$import('org.xidea.jsidoc.util:JSON');var console=$import('org.xidea.jsi:$log');");
 		this.jsr.eval("var resourceManager=1;");
 		Object initfn = this.jsr.eval("(function(rm){resourceManager = rm;})");
 		this.jsr.invoke(this, initfn, this);
@@ -299,7 +299,7 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 			File file = getFile(path);
 			try {
 				currentItem.set(res);
-				if(source == null || !(source instanceof byte[])){
+				if(source == null || (source instanceof byte[])){
 					byte[] data = null;
 					if(source instanceof byte[]){
 						data = (byte[])source;
@@ -319,12 +319,13 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 					}
 				}
 				String text = null;
-				if (containsFilter(path, stringFilters)) {
+				if ((source == null || source instanceof String) && containsFilter(path, stringFilters)) {
 					if(source instanceof String){
 						text = (String)source;
 					}else{
 						text = loadText(res, res.data);
 					}
+					res.currentData = text;
 					String oldText = res.text;
 					text = doFilter(res, lastFilter, stringFilters, text,
 							oldText);
@@ -433,6 +434,11 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 				item.encoding = encoding;
 			}
 			cached.put(path, item);
+		}
+		int p = path.indexOf('#');
+		if(p>0){
+			String path0 = path.substring(0,p);
+			item.relations.add(path0);
 		}
 		return item;
 	}

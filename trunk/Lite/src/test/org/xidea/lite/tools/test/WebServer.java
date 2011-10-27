@@ -161,7 +161,11 @@ public class WebServer {
 						} else {
 							try {
 								Object result = manager.getFilteredContent(uri);
-								RequestUtil.printResource(result, null);
+								String contentType = null;
+								if(uri.matches("\\.(?:vm|ftl)$")){
+									contentType = "text/html";
+								}
+								RequestUtil.printResource(result, contentType);
 							} catch (FileNotFoundException e) {
 								context.setStatus(404, e.toString());
 								RequestUtil.printResource(e.toString(),
