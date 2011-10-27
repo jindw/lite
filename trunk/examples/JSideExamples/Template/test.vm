@@ -1,0 +1,16 @@
+<html>
+	<title>模板测试</title>
+	<body>
+		<p>我是：${name},来自：${city}</p>
+		<p>
+			#foreach($friend in $friends)
+				<span>${friend}</span>,
+			#end
+			都是我的朋友
+			<script href="http://www.xidea.org/lite/release/template.js"></script>
+			<script language="javascript">
+				var x = liteWrap(function(a){<p>${a}</p>})
+			</script>
+		</p>
+	</body>
+</html>
