@@ -101,7 +101,7 @@ public class ImageUtil {
 	 * Returns a two dimensional array of the <code>image</code>'s RGB values,
 	 * including transparency.
 	 */
-	public static int[][] getRgb(BufferedImage image) {
+	static int[][] getRgb(BufferedImage image) {
 		final int width = image.getWidth();
 		final int height = image.getHeight();
 
