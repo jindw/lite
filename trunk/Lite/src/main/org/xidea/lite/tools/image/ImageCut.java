@@ -1,14 +1,13 @@
 package org.xidea.lite.tools.image;
 
-import java.util.Arrays;
 
 public class ImageCut {
-	public int[] seachBorder(int[] data,int width,int height){
+	public int[] searchInnerBorder(int[] data,final int width,final int height){
+		return null;
+	}
+	public int[] seachOuterBorder(int[] data,final int width,final int height){
 		boolean repeatX = isRepeat(data,0,1,width);
 		boolean repeatY = isRepeat(data,0,width,height);
-//		System.out.println(repeatX+"/"+width);
-//		System.out.println(repeatY+"/"+height);
-		
 		int x0=0,y0=0,x1=0,y1=0;
 		//x0,x1
 //		if(repeatX){//=
@@ -32,6 +31,8 @@ public class ImageCut {
 			y1 = searchMargin(line0, data, data.length-1, -1, -width);
 //			System.out.println("y1:"+y1);
 		}
+//		System.out.println(x1);
+//		System.out.println(y1);
 		return new int[]{x0,y0,width-x1,height-y1};
 //		searchMargin(line0,data, width);
 	}
