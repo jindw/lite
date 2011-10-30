@@ -1,30 +1,93 @@
-#baidu{
-	background:url('/images/sprite-x/baidu.gif');
+.button{
+	float:left;
+	clear:both;
+	background:url('../images/sprite-x/left.png') no-repeat;
 }
-#sina{
-	background:url('/images/sprite-x/sina.gif');
-	height:50px;
+.button div{
+	background:url('../images/sprite-x/right.png') no-repeat top right;
 }
-#sina-x{
-	background:url('/images/sprite-x/sina[x].gif');
-	height:50px;
+.button div div{
+	background:url('../images/sprite-x/center[x].png');
+	margin:0 2px;
+	padding:5px 10px;
+	height:20px;
+	
 }
-#sina-y{
-	background:url('/images/sprite-y/sina[y].gif');
-	height:350px;
+
+
+.box{
+	clear:both;
+	float:left;
 }
-#sina-r{
-	background:url('/images/sprite-y/sina[r].gif') right;
-	height:50px;
+.box-head{
+	background:url('../images/sprite-x/widget-head[x].png');
+	height:27px;
+	padding-left:20px;
 }
-#google{
-	background:url('/images/sprite-y/google.png');
-	/*width:380;height:200px;*/
+.box-body{
+	border:1px solid rgb(168,191,96);
+	background:#FFF;
+	border-top:0px;
+	padding:12px;
 }
+
+
+.message-box{
+	float:left;
+	clear:both;
+}
+.message-body{
+	border:0 solid rgb(239,228,176);
+	border-width:0px 2px 0 2px;
+	background:rgb(255,255,185) ;
+	margin:0px;
+	padding:8px;
+}
+
+.message-head{
+	background:url('../images/box/boxlt.png') no-repeat;
+}
+
+.message-head div{
+	background:url('../images/box/boxrt.png') no-repeat top right;
+}
+.message-head div div{
+	height:15px;margin:0 14px;
+	background:rgb(255,255,185) ;
+	border-top:1px solid rgb(239,228,176);
+}
+.message-foot{
+	background:url('../images/box/boxlb.png') no-repeat;
+}
+.message-foot div{
+	background:url('../images/box/boxrb.png') no-repeat top right;
+}
+
+.message-foot div div{
+	height:16px;margin:0 14px;
+	color:red;
+	background:rgb(255,255,185) ;
+	border-bottom:1px solid rgb(239,228,176);
+	position:relative;
+}
+
+.message-foot div div div{
+	border:0;
+	background:url('../images/box/boxa.png');
+	position:absolute;
+	top:16px;left:0;
+	height:16px;width:22px;
+}
+
+
+
+
+
+
+
+
+
+h3{clear:both;padding:20}
 body{
 	background:#444;
-}
-div{
-	width:450px;height:200px;
-	border:1px solid red;
 }
