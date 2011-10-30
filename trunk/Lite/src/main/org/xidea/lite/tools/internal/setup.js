@@ -1,9 +1,9 @@
 var Env = require("org/xidea/lite/tools/internal/env");
-var Merge = require("./merge");
-var XHtml = require("./xhtml");
-var Html = require("./html");
-var Sprite = require('./sprite');
-var Code = require('./code')
+var Merge = require("org/xidea/lite/tools/internal/merge");
+var XHtml = require("org/xidea/lite/tools/internal/xhtml");
+var Html = require("org/xidea/lite/tools/internal/html");
+var Sprite = require('org/xidea/lite/tools/internal/sprite');
+var Code = require('org/xidea/lite/tools/internal/code')
 
 /*
  * png 过滤 + css自动转换

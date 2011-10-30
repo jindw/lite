@@ -91,6 +91,9 @@ function spriteImage(path,base){
 	})
 	return spriteImpl.compress(imgbuf);
 }
+function getOffset(image){
+	return image.info.replace(/[^\d]/g,'') || 1;
+}
 function initOffset(images,repeat,maxWidth,maxHeight){
 	//repeatY  ->x
 	if(repeat == 'y'){
@@ -103,7 +106,7 @@ function initOffset(images,repeat,maxWidth,maxHeight){
 			image.y = bottom ? maxHeight - image.height : 0;
 			offsetX += image.width;
 			if(i<images.length-1){
-				offsetX += Math.max(48,image.width)
+				offsetX += getOffset(image);
 			}
 		}
 		return [offsetX,maxHeight]
@@ -119,7 +122,7 @@ function initOffset(images,repeat,maxWidth,maxHeight){
 			image.x = right ? maxWidth - image.width : 0;
 			offsetY+=image.height;
 			if(i<images.length-1){
-				offsetY += Math.max(48,image.height)
+				offsetY += getOffset(image);
 			}
 		}
 		return [maxWidth,offsetY]
