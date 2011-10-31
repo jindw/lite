@@ -1,7 +1,6 @@
-//var LiteCompiler = require('./lite-compiler').LiteCompiler;
-var LiteCompiler = require('../../../../../../build/dest/nodejs').LiteCompiler;
-var root = process.argv[2].replace(/\/?$/,'/');
-var templateCompiler= new LiteCompiler(root);
+var LiteCompiler = require('./lite-compiler').LiteCompiler;
+//var LiteCompiler = require('../../../../../../build/dest/nodejs').LiteCompiler;
+var templateCompiler= new LiteCompiler(process.argv[2].replace(/\/?$/,'/'));
 
 process.on('message', function(config) {
 	var path = config.path;
