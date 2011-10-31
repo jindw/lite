@@ -4,7 +4,7 @@ this.addScript("_xmldom.js",["DOMParser","DOMNode","DOMNodeList"]
 this.addScript("_xmlxpath.js","XPathEvaluator",
 	["DOMNode", "DOMNodeList"]
 )
-this.addScript("template-loader.js","TemplateLoader",
+this.addScript("template-compiler.js","TemplateCompiler",
 	["DOMParser","XPathEvaluator"],
 	["org.xidea.lite:Template",
 	 "org.xidea.lite.parse:ParseConfig",
@@ -13,7 +13,4 @@ this.addScript("template-loader.js","TemplateLoader",
 	 "org.xidea.lite.impl.js:JSTranslator",
 	 "org.xidea.lite.util:normalizeLiteXML",
 	 "DOMParser"]);
-this.addScript("template-engine.js","TemplateEngine",
-	'TemplateLoader',
-	'org.xidea.lite:Template');
 this.addDependence("*",'org.xidea.jsi:console',true);

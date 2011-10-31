@@ -54,6 +54,7 @@ function loadXML(uri){
 	return loadXMLFile(path,uri)
 }
 function loadXMLFile(file,uri){
+//	console.info(file);
 	var text = fs.readFileSync(file,'utf-8');
 	var text = normalizeLiteXML(text,uri);
 	var xml = new DOMParser().parseFromString(text);

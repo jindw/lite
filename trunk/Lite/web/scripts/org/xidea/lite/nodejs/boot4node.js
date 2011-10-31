@@ -1,4 +1,7 @@
 /*
+ * Compressed by JSA(www.xidea.org)
+ */
+/*
  * JavaScript Integration Framework
  * License LGPL(您可以在任何地方免费使用,但请不要吝啬您对框架本身的改进)
  * http://www.xidea.org/project/jsi/
@@ -204,7 +207,7 @@ function $import(loaderEval,cachedScripts){
     var scriptBase = $JSI.scriptBase;
     var packageMap = {};
     if("org.xidea.jsi:COL"){
-        var lazyScript ="<script src='data:text/javascript,$import()'></script>";
+        var lazyScript ="<script src='data:text/javascript,$import()'><\/script>";
         var lazyTaskList = [];
         //
         /*
@@ -1147,11 +1150,11 @@ function $import(loaderEval,cachedScripts){
 	                if(":Debug"){
 	                     document.write(list.join("\n").
 	                                replace(/.js$/gm,"__preload__.js").
-	                                replace(/.+/g,"<script src='"+scriptBase+"$&' onerror='return false'></script>"));
+	                                replace(/.+/g,"<script src='"+scriptBase+"$&' onerror='return false'><\/script>"));
 	                }else{
 	                    document.write(list.join("\n").
 	                                replace(/.js$/gm,"__preload__.js").
-	                                replace(/.+/g,"<script src='"+scriptBase+"$&'></script>"))
+	                                replace(/.+/g,"<script src='"+scriptBase+"$&'><\/script>"))
 	                }
 	                lazyTaskList.push(function(){
 	                        while(filePath = list.pop()){
@@ -1245,4 +1248,815 @@ function $import(loaderEval,cachedScripts){
         return target;
     }
 }
-$import(function(){return eval(arguments[0]);},{});
+$import(function(){return eval(arguments[0]);},{'org.xidea.jsidoc.util':{'':function(){this.addScript("request.js",["Request"]
+                ,["org.xidea.jsi:$log","XMLHttpRequest"]);
+this.addScript("xhr.js","XMLHttpRequest");
+this.addScript("json.js",['JSON']);
+
+this.addScript("fn.js",['xmlReplacer','loadText']
+                ,["org.xidea.jsi:$log",'XMLHttpRequest']);
+
+//findGlobalsAsList 是为java提供的接口的。
+this.addScript("find-globals.js",['findGlobals','findGlobalsAsList']
+				,"org.xidea.jsi:$log");
+//无压缩功能的Zip文件生成（UTF8编码）
+this.addScript("zip.js","Zip")},'xhr.js':function(){eval(this.varText);/*
+ * Compressed by JSA(www.xidea.org)
+ */
+XMLHttpRequest = window.XMLHttpRequest;
+if(":Debug"){
+    if(window.ActiveXObject && location.protocol == "file:" ){
+        XMLHttpRequest = null;
+    }
+}
+if(!XMLHttpRequest && window.ActiveXObject){
+    var xmlHttpRequstActiveIds = [
+        //"Msxml2.XMLHTTP.6.0,"  //都IE7了，罢了罢了
+        //"Msxml2.XMLHTTP.5.0,"  //office 的
+        //"Msxml2.XMLHTTP.4.0,"
+        //"MSXML2.XMLHTTP.3.0,"  //应该等价于MSXML2.XMLHTTP
+        "MSXML2.XMLHTTP",
+        "Microsoft.XMLHTTP"//IE5的，最早的XHR实现
+        ];
+    /**
+     * 统一的 XMLHttpRequest 构造器（对于ie，做一个有返回值的构造器（这时new操作返回该返回值），返回他支持的AxtiveX控件）
+     * 关于 XMLHttpRequest对象的详细信息请参考
+     * <ul>
+     *   <li><a href="http://www.w3.org/TR/XMLHttpRequest/">W3C XMLHttpRequest</a></li>
+     *   <li><a href="http://www.ikown.com/manual/xmlhttp/index.htm">中文参考</a></li>
+     *   <li><a href="http://msdn2.microsoft.com/en-us/library/ms762757(VS.85).aspx">MSXML</a></li>
+     * </ul>
+     * @id XMLHttpRequest 
+     * @constructor
+     */
+    var XMLHttpRequest = function(){
+        while(true){
+            try{
+                 return new ActiveXObject(xmlHttpRequstActiveIds[0]);
+            }catch (e){
+                if(!xmlHttpRequstActiveIds.shift()){
+                    throw e;//not suport
+                }
+            }
+        }
+    };
+}
+},'json.js':function(){eval(this.varText);/*
+ * Compressed by JSA(www.xidea.org)
+ */
+/*
+ * @author 金大为
+ * @from JSON.org(http://www.json.org/)
+ * @version $Id: event-util.js,v 1.5 2008/02/25 01:55:59 jindw Exp $
+ */
+
+function parse(data){
+    return window.eval("("+data+")")
+};
+
+/**
+ * 转义替换函数
+ * @internal
+ */
+function charReplacer(item) {
+    var c = charMap[item];
+    if (c) {
+        return c;
+    }
+    c = item.charCodeAt().toString(16);
+    return '\\u00' + (c.length>1?c:'0'+c);
+}
+/**
+ * JSON 串行化实现
+ * @internal
+ */
+function serialize(value,prefix,indent,maxLength) {
+    switch (typeof value) {
+        case 'string':
+            stringRegexp.lastIndex = 0;
+            return '"' + (stringRegexp.test(value) ?
+                            value.replace(stringRegexp,charReplacer) :
+                            value)
+                       + '"';
+        case 'function':
+            return value.toString();
+        case 'object':
+            if (!value) {
+                return 'null';
+            }
+            if(indent){
+            	prefix+=indent;
+            }
+            var buf = [];
+            if (value instanceof Array) {
+                var i = value.length;
+                while (i--) {
+                	var v = serialize(value[i],prefix,indent,maxLength) || 'null';
+                    buf[i] = v;
+                }
+                v = buf.join(',');
+                if(indent && v.length>maxLength){
+                	var k = prefix+indent
+                	v = '\n'+ k+ buf.join(",\n"+k)+"\n"+prefix;
+                }
+                return '[' + v + ']';
+            }
+            for (var k in value) {
+                var v = serialize(value[k],prefix,indent,maxLength);
+                if (v) {
+                    buf.push(serialize(k) + ':' + v);
+                }
+            }
+            v = buf.join(',');
+            if(indent && v.length>maxLength){
+            	var k = prefix+indent
+            	v = '\n'+ k+ buf.join(",\n"+k)+"\n"+prefix;
+            }
+            return '{' + v + '}';
+        case 'number':
+            if(!isFinite(value)){
+                value = 'null';
+            }
+        default:
+            return String(value);
+    }
+}
+
+/**
+ * IE 好像容易出问题，可能是线程不安全导致。
+ * @internal
+ */
+var stringRegexp = /["\\\x00-\x1f\x7f-\x9f]/g;
+/**
+ * 转义替换字符
+ * @internal
+ */
+var charMap = {
+    '\b': '\\b',
+    '\t': '\\t',
+    '\n': '\\n',
+    '\f': '\\f',
+    '\r': '\\r',
+    '"' : '\\"',
+    '\\': '\\\\'
+};
+/**
+ * @public
+ * @param data
+ * @return JSON
+ */
+var JSON = {
+    /**
+     * 解析JSON文本
+     * @public 解析
+     * @owner JSON
+     */
+    parse :parse, 
+    /**
+     * 以JSON格式，系列化javascript对象
+     * @public
+     * @owner JSON
+     * @param <Object> value
+     * @return <String> json 表达式
+     */
+    stringify : serialize,
+    format : function(obj){
+    	return serialize(parse(obj),'','  ',32)
+    }
+}}},'org.xidea.jsi':{'':function(){//不能有依赖，否则boot文件太大
+this.addScript("optimize.js",["optimizePackage","trimPath"]
+			,'isBrowser');
+this.addScript("parse.js",["parse"]
+				,"trimPath");
+this.addScript("require.js",["buildRequire"]);
+this.addScript('browser-info.js',"isBrowser")
+this.addScript('log.js',['$log',"console"])
+},'parse.js':function(){eval(this.varText);/*
+ * Compressed by JSA(www.xidea.org)
+ */
+/**
+ * @jsiparser org.xidea.jsi.parse
+ * @export 
+ * @return [[objectNames, beforeLoadDependences, afterLoadDependences]]
+ */
+function parse(pkgName,scriptPath,resourceLoader){
+	if(scriptPath.indexOf('*') >=0 ){
+		var result = [];
+		var temp = resourceLoader($JSI.scriptBase + "?service=list&path="+pkgName.replace(/\.|$/g,'/'));
+		var list = parseJSON(temp);
+		var i = list.length;
+		while(i--){
+			var temp = list[i];
+			if(temp instanceof Array){
+				result.push(temp);
+			}else if('__package__.js'!=temp){
+				result.push([temp]);
+			}
+		}
+		return result;
+	}else{
+		var source = resourceLoader($JSI.scriptBase+pkgName.replace(/\.|$/g,'/')+scriptPath);
+		var exp = /^\s*\/\*[\s\S]+?\*\//gm;
+		exp.lastIndex=0;
+		var match;
+		var result = [];
+		while(match = exp.exec(source)){
+			var result1 = parseEntry(source,match.index ,exp.lastIndex);
+			var i = result1.length;
+			while(i-->1){
+				result1[i] = trimPathArray(pkgName,result1[i])
+			}
+			if(result1){
+				result.push([scriptPath].concat(result1));
+			}
+		}
+		return result;
+	}
+}
+
+function trimPathArray(pkgName,paths){
+	if(paths){
+		var i = paths.length;
+		while(i--){
+			paths[i] = trimPath(pkgName,paths[i]);
+		}
+	}
+}
+function parseJSON(){
+	return window.eval('('+arguments[0]+')');
+}
+function parseEntry(source,start,end){
+	var doc = source.substring(start,end);
+	var exp = /\s*\*\s*@([\w\:]+)[ \t]*(.*)/g
+	var match;
+	var doclets = {}
+	while(match = exp.exec(doc)){
+		var key = match[1];
+		var value = match[2].replace(/^\s+|\s+$/g,'');
+		var list = doclets[key] || (doclets[key] = []);
+		list.push(value);
+	}
+	
+	var jsiparser = doclets.jsiparser && doclets.jsiparser[0];
+	if(jsiparser === '' || jsiparser  == 'org.xidea.jsi.parse' || jsiparser == 'org.xidea.jsi:parse'){
+		var exports = doclets['export'];
+		var dependenceBefore = [].concat(
+			doclets['import']||[],doclets['require']||[]);
+		var dependenceAfter = [].concat(
+			doclets['import:after']||[],doclets['require:after']||[]);
+		if(exports){
+			var i = exports.length;
+			while(i--){
+				var item = exports[i];
+				if(!item ){
+					var id = source.substring(end);
+					id = id.match(/^\s*(?:var\s|function\s)?([\w\.\$\s]+)/)[1];
+					exports[i] = id.replace(/^\s+|\s+$/g,'');
+				}
+			}
+		}else{
+			exports = [];
+		}
+		return [exports,dependenceBefore,dependenceAfter]
+	}else if(jsiparser){
+		return $import(jsiparser).apply(this,arguments);
+	}
+}
+
+
+
+},'log.js':function(){eval(this.varText);/*
+ * Compressed by JSA(www.xidea.org)
+ */
+/*
+ * JavaScript Integration Framework
+ * License LGPL(您可以在任何地方免费使用,但请不要吝啬您对框架本身的改进)
+ * http://www.xidea.org/project/jsi/
+ * @author jindw
+ * @version $Id: fn.js,v 1.5 2008/02/24 08:58:15 jindw Exp $
+ */
+if(typeof window.confirm !='function'){
+	function output(title,bindLevel,msg){
+		return $JSI.impl.log(title,bindLevel,msg);
+	}
+}else{
+	output = function (title,bindLevel,msg){
+    	var outputLevelName = logLevelNameMap[bindLevel];
+		return confirm(outputLevelName+':' + msg+"\n\n继续弹出 ["+title+"]"+outputLevelName+" 日志?\r\n");
+	}
+}
+/*
+ * @param bindLevel 绑定函数的输出级别，只有该级别大于等于输出级别时，才可输出日志
+ */
+function buildLevelLog(bindLevel){
+    return function(){
+	    if(bindLevel>this.level){
+            var msg = this.format.apply(this,arguments);
+            if(bindLevel>this.userLevel){
+		        if(output(this.title,bindLevel,msg)===false){
+		        	this.userLevel = bindLevel;
+		        }
+		    }
+		    if(":debug"){
+				if(typeof (window.console && window.console.log) == 'function'){
+		    		window.console.log(msg)
+				}
+			}
+        }
+        return msg;
+    }
+}
+function JSILog(title,level){
+	/**
+	 * 基本级别(不输出，只有大于才输出)
+	 */
+	this.title = title;
+	this.level = level;
+}
+JSILog.prototype = {
+	/**
+	 * 用户许可级别（最终用户使用过程中禁止某些级别输出）
+	 */
+	userLevel : 1,
+	filters:[],
+	clone:function(title){
+		var c = new JSILog(title,this.level);
+		return c;
+	},
+	addFilter:function(f){
+		this.filters.push(f);
+	},
+	dir:function(o){
+		var buf = [];
+		for(o in o){
+			buf.push(o);
+		}
+		this.info(buf.join('\n'))
+	},
+	format: function(msg){
+	    for(var buf = [],i = 0;i<arguments.length;i++){
+	    	msg = arguments[i];
+	        if(msg instanceof Array){
+	        	buf.push('[',msg,']\n');
+	        }else if(msg instanceof Object){
+	            buf.push(msg,"{");
+	            for(var n in msg){
+	                buf.push(n,":",msg[n],",");
+	            }
+	            buf.push("}\n");
+	        }else{
+	            buf.push(msg,"\n");
+	        }
+	    }
+	    buf =  buf.join('');
+	    for(var i=0;i<this.filters.length;i++){
+	    	buf = this.filters[i].call(this,buf)
+	    }
+	    return buf;
+	}
+}
+//var confirm = window.confirm || function(arg){
+//	(this.print||java.lang.System.out.print)(String(arg))
+//	return true;
+//}
+		
+var $log = new JSILog('',1);
+var logLevelNameMap = "trace,debug,info,warn,error,fatal".split(',');
+/* 
+ * 允许输出的级别最小 
+ * @hack 先当作一个零时变量用了
+ */
+var logLevelIndex = logLevelNameMap.length;
+
+while(logLevelIndex--){
+    var logName = logLevelNameMap[logLevelIndex];
+    JSILog.prototype[logName] = buildLevelLog(logLevelIndex);
+};
+var console= $log;
+},'optimize.js':function(){eval(this.varText);/*
+ * Compressed by JSA(www.xidea.org)
+ */
+/**
+ * @jsiparser org.xidea.jsi.parse
+ * #@import org.xidea.jsidoc.util.findGlobals
+ * #@import org.xidea.jsi.parse
+ * @export optmizePackage
+ */
+var findGlobals,parse,loadText;
+function optimizePackage(PackageClass,loadTextArg){
+	loadText = loadTextArg;
+	var pp = PackageClass.prototype;
+	function OptmizePackage(){
+		PackageClass.apply(this,arguments);
+		for(var temp in this.scriptObjectMap){
+			return;
+		}
+		if(!this.implementation){
+			this.addScript("*");
+		}
+	}
+	OptmizePackage.prototype = pp;
+	pp.isBrowser = isBrowser;
+	addCallFilter(pp,'addScript',addScriptFilter);
+	addCallFilter(pp,'addDependence',addDependenceFilter);
+	return OptmizePackage;
+}
+function addCallFilter(pp,key,filter){
+	var chain = pp[key];
+	pp[key] = function(){
+		return filter.apply([this,chain],arguments) 
+	}
+}
+            	
+function addScriptFilter(scriptPath, objectNames, beforeLoadDependences, afterLoadDependences){
+	var thiz = this[0];
+	var chain = this[1]
+	if(/\*/.test(objectNames)){
+		if(objectNames instanceof Array){
+			var i = objectNames.length;
+            while(i--){
+            	thiz.addScript.call(thiz,scriptPath, objectNames[i], beforeLoadDependences, afterLoadDependences)
+            }
+		}else{
+    		var pattern = objectNames.replace(/\*/,'.*');
+    		var cache = thiz.nsCache || (thiz.nsCache = {});
+    		findGlobals = findGlobals || $import("org.xidea.jsidoc.util.findGlobals");
+    		if(!cache[scriptPath]){
+				cache[scriptPath] = loadText($JSI.scriptBase+thiz.name.replace(/\.|$/g,'/')+scriptPath);
+    		}
+    		objectNames = findGlobals(cache[scriptPath]);
+            pattern = new RegExp('^'+pattern+'$');
+            var i = objectNames.length;
+            while(i--){
+            	if(!pattern.test(objectNames[i])){
+            		objectNames.splice(i,1);
+            	}
+            }
+            thiz.addScript.call(thiz,scriptPath, objectNames, beforeLoadDependences, afterLoadDependences)
+        }
+	}else if(arguments.length == 1){
+    	//TODO:从源码分析依赖关系
+    	parse = parse || $import("org.xidea.jsi.parse");
+    	var result = parse(thiz.name,scriptPath,loadText);
+    	var i = result.length;
+    	while(i--){
+    		var item = result[i];// scriptPath,objectNames, beforeLoadDependences, afterLoadDependences
+    		thiz.addScript.apply(thiz,item)
+    	}
+    }else{
+    	chain.apply(thiz,arguments)
+    }
+}
+function addDependenceFilter(thisPath,targetPath,afterLoad){
+	var thiz = this[0];
+	var chain = this[1]
+	if(typeof targetPath == 'string'){
+		if(!afterLoad ){
+	    	//TODO:我未必想吧全部的依赖文件的全部对象名暴露出来
+	        thisPath = thiz.objectScriptMap[thisPath] || thisPath;
+	    }
+	    targetPath = trimPath(thiz.name,targetPath);
+	    thiz.dependenceMap.push([thisPath,targetPath,afterLoad]);
+	}else{
+		chain.apply(thiz,arguments)
+	}
+}
+/*
+ * 绝对路径:
+ *   example:sayHello
+ *   example/hello.js
+ * 上级路径:
+ *   ..util:JSON,....:Test
+ *   ../util/json.js,../../test.js
+ * 下级相对路径
+ *   .util:JSON
+ *   ./util/json.js
+ * 
+ */
+function trimPath(packageName,targetPath){
+	if(targetPath.charAt(0) == '.'){
+	    var splitPos2Exp = targetPath.indexOf('/');
+	    if(splitPos2Exp>0){
+	        packageName = packageName.replace(/[\.$]/g,'/') ;
+	        // a/b/c/../util/json.js   => a/b/util/json.js
+	        // a/b/c/../../test.js     => a/util/json.js
+	        // a/b/c/./util/json.js    => a/b/c/util/json.js
+	        splitPos2Exp = /\w+\/\.\.\/|\.\//
+	    }else{
+	        // a.b.c..util:JSON  => a.b.util:JSON
+	        // a.b.c.:Test       => a.b:Test
+	        // a.b.c.:.:Test     => a.b.:Test => a:Test
+	        // a.b.c.util:JSON
+	        splitPos2Exp = /\w+\.[\.\:]\.|\.\w+\.(?=[\.:])/;
+	        ///\w+\.[\:\.]\.|\.\w+\.(?=[\.\:])|\w+\.\.\:\./;
+	        ///\w+\.\:\.|\.\w+\.(:![\.\:])/
+	    }
+	    targetPath = packageName+targetPath;
+	    while(targetPath!=(targetPath = targetPath.replace(splitPos2Exp,'')));
+	}
+    return targetPath;
+}},'browser-info.js':function(){eval(this.varText);/*
+ * Compressed by JSA(www.xidea.org)
+ */
+/*
+ * JavaScript Integration Framework
+ * License LGPL(您可以在任何地方免费使用,但请不要吝啬您对框架本身的改进)
+ * http://www.xidea.org/project/jsi/
+ * @author jindw
+ * @version $Id: browser-info.js,v 1.3 2008/02/19 14:43:47 jindw Exp $
+ */
+
+function isBrowser(bn,n){
+	switch(bn.toUpperCase()){
+	case 'IE':
+	case 'MSIE':
+		return isIE(n);
+	case 'OPERA':
+		return isOpera(n);
+	case 'GECKO':
+		return isGecko(n);
+	case 'NETSCAPE':
+		return isNetscape(n);
+	case 'MOZILLA':
+		return isMozilla(n);
+	case 'FIREFOX':
+		return isFirefox(n);
+	case 'KHTML':
+		return isKhtml(n);
+	case 'SAFARI':
+		return isSafari(n);
+	case 'KONQUEROR':
+		return isKonqueror(n);
+	}
+	return true;
+}
+
+/** 
+ * 检测是否是指定版本范围内的<b>[$1]</b>浏览器
+ * @public 
+ * @param <string|double> minVersion 最小版本
+ * @param <string|double> maxVersion 最大版本
+ * @id BrowserInfo.is*
+ */
+var falseChecker = function(minVersion,maxVersion){return false};
+/**
+ * BrowserInfo 对象，用于判断浏览器的相关信息，如浏览器类型、客户端语言（简体中文？英语..未实现）、操作系统（未实现）等等。
+ * @public
+ */
+var isIE = falseChecker;
+var isOpera = falseChecker;
+var isGecko = falseChecker;
+var isNetscape = falseChecker;
+var isMozilla = falseChecker;
+var isFirefox = falseChecker;
+var isKhtml = falseChecker;
+var isSafari = falseChecker;
+var isKonqueror = falseChecker//;
+
+function buildBrowserChecker(version){
+    return function(min){
+        if(min == null){
+            return version;
+        }else{
+            return version<=min;
+        }
+    }
+}
+var ua = window && window.navigator && window.navigator.userAgent || '';
+if(ua.indexOf("Opera") > 0){//Opera
+    var version = ua.replace(/.*Opera\s+([^; ]+).*/,'$1');
+    isOpera = buildBrowserChecker(version);
+}else if(ua.indexOf(" MSIE ") > 0){//MSIE
+    var version = ua.replace(/.*MSIE\s+([^; ]+).*/,'$1');
+    isIE = buildBrowserChecker(version);
+    if(isIE(null,5.9)){
+        var isQuirks = function(){return true;};
+    }
+}else if(ua.indexOf("Gecko/") > 0){//mozilla netscape firefox ...
+    var version = ua.replace(/.*Gecko[\s\/]*([^;\/\) ]+).*/,'$1');
+    isGecko = buildBrowserChecker(version);
+    if(ua.indexOf("Firefox") > 0){
+        var version = ua.replace(/.*Firefox[\s\/]*([^;\/\) ]+).*/,'$1');
+        isFirefox = buildBrowserChecker(version);
+    }else if(ua.indexOf("Netscape") > 0){
+        var version = ua.replace(/.*Netscape[\s\/]*([^;\/\) ]+).*/,'$1');
+        isNetscape = buildBrowserChecker(version);
+    }else if(ua.indexOf("Mozilla") > 0){
+        var version = ua.replace(/.*rv:([^;\/\) ]+).*/,'$1');
+        isMozilla = buildBrowserChecker(version);
+    }
+}else if(ua.indexOf("KHTML") > 0){//khtml 
+    if(ua.indexOf("Konqueror") > 0){//Konqueror 糟糕的浏览器
+        //var version = ua.replace(/.*AppleWebKit\/([^;\/ ]+).*/,'$1');
+        //isKhtml = buildBrowserChecker(version);
+        isKhtml = function(){return true;};
+        version = ua.replace(/.*Konqueror\/([^;\/ ]+).*/,'$1');
+        isKonqueror = buildBrowserChecker(version);
+    }
+}else if(ua.indexOf("Safari") > 0){//Safari khtml 
+    //var version = ua.replace(/.*AppleWebKit\/([^;\/ ]+).*/,'$1');
+    //isKhtml = buildBrowserChecker(version);
+    isKhtml = function(){return true;};
+    version = ua.replace(/.*Safari\/([^;\/ ]+).*/,'$1');
+    isSafari = buildBrowserChecker(version);
+}else{
+    //UNKNOW 
+}
+},'require.js':function(){eval(this.varText);/*
+ * Compressed by JSA(www.xidea.org)
+ */
+var findPackageByPath;
+var realPackage;
+function buildRequire(scriptWriter,findPackageByPath0,realPackage0){
+	var requireList = [];
+	var loaderMap = {}
+	if(!findPackageByPath){
+		if(findPackageByPath0){
+			findPackageByPath = findPackageByPath0;
+			realPackage = realPackage0;
+		}else{
+			$require();
+		}
+	}else{
+	}
+	function writeRequire(packageObject,fileName,object){
+		var result = require(packageObject,fileName,object);
+		for(var i = 0,l = result.length;i<l;i++){
+			(scriptWriter || defaultWriter)(result[i]);
+		}
+	}
+	function defaultWriter(file){
+		document.write("<script src='"+file+"'><\/script>");
+	}
+	function require(packageObject,fileName,object){
+		var i = requireList.length;
+		requireScript(packageObject,fileName,object);
+		return requireList.slice(i);
+	}
+	function getLoader(packageObject,fileName){
+		return loaderMap[packageObject.name+'/'+fileName]
+	}
+	function setLoader(packageObject,fileName,loader){
+		loaderMap[packageObject.name+'/'+fileName] = loader;
+	}
+	/*
+	 * @see boot.js
+	 */
+	function requireScript(packageObject,fileName,object){
+	    var loader = getLoader(packageObject,fileName);
+	    if(!loader){
+	        //trace("load script path:",packageObject.scriptBase ,fileName);
+	        if(packageObject.scriptObjectMap[fileName]){
+	            //不敢确认是否需要延迟到这里再行初始化操作
+	            if(packageObject.initialize){
+	                packageObject.initialize();
+	            }
+	            loader = new ScriptLoader(packageObject,fileName);
+	        }else{
+	            //TODO: try parent
+	            if(":Debug"){
+	                throw new Error('Script:['+packageObject.name+':'+fileName+'] Not Found')
+	            }
+	        }
+	    }
+	    if(loader.initialize){
+	        //trace("object loader initialize:",packageObject.scriptBase ,fileName);
+	        loader.initialize(object);
+	    }
+	}
+	/*
+	 * @see boot.js
+	 */
+	function requireDependence(data){
+	    requireScript(data[0],data[1],data[2]);
+	}
+	/**
+	 * @see boot.js
+	 */
+	function ScriptLoader(packageObject,fileName){
+	    this.name = fileName;
+	    this.scriptBase = packageObject.scriptBase;
+	    var loader = prepareScriptLoad(packageObject,this)
+	    if(loader){
+	        return loader;
+	    }
+	    doScriptLoad(packageObject,this);
+	};
+	/*
+	 * 前期准备，初始化装载单元的依赖表，包括依赖变量申明，装载前依赖的装载注入
+	 * Dependence = [0            , 1             , 2               , 3            ,4         ,5    ]
+	 * Dependence = [targetPackage, targetFileName, targetObjectName,thisObjectName, afterLoad,names]
+	 * @see boot.js
+	 */
+	function prepareScriptLoad(packageObject,loader){
+	    var name = loader.name;
+	    var deps = packageObject.dependenceMap[name];
+	    var i = deps && deps.length;
+	    while(i--){
+	        var dep = deps[i];
+	        var key =  dep[3] || 0;
+	        if(dep[4]){//装在后依赖，记录依赖，以待装载
+	            if(map){
+	                if(map[key]){
+	                    map[key].push(dep);
+	                }else{
+	                    map[key] = [dep]
+	                }
+	            }else{
+	                //函数内只有一次赋值（申明后置，也就你JavaScript够狠！！ ）
+	                var map = loader.dependenceMap = {};
+	                loader.initialize = ScriptLoader_initialize;
+	                map[key] = [dep]
+	            }
+	        }else{//直接装载（只是装载到缓存对象，没有进入装载单元），无需记录
+	            //这里貌似有死循环的危险
+	            requireDependence(dep);
+	            if(dep = getLoader(packageObject,name)){
+	                return dep;
+	            }
+	        }
+	    }
+	}
+	
+	
+	/*
+	 * 装载脚本
+	 * 这里没有依赖装载，装载前依赖装载在prepareScriptLoad中完成，装载后依赖在ScriptLoader.initialize中完成。
+	 * @private 
+	 */
+	function doScriptLoad(packageObject,loader){
+	    var loaderName = loader.name;
+	    var packageName = packageObject.name;
+	    setLoader(packageObject,loaderName,loader);
+	    requireList.push(packageObject.scriptBase+loaderName);
+	    return;
+	}
+	/*
+	 * 初始化制定对象，未指定代表全部对象，即当前转载单元的全部对象
+	 * @private
+	 */
+	function ScriptLoader_initialize(object){
+	    //也一定不存在。D存I存，D亡I亡
+	    var dependenceMap = this.dependenceMap;
+	    var loaderName = this.name;
+	    var dependenceList = dependenceMap[0];
+	    if(dependenceList){
+	        //一定要用delete，彻底清除
+	        delete dependenceMap[0];
+	        var i = dependenceList.length;
+	        while(i--){
+	            //alert("ScriptLoader#initialize:"+loaderName+"/"+dep.getNames())
+	            requireDependence(dependenceList[i]);
+	        }
+	    }
+	    //这里进行了展开优化，有点冗余
+	    if(object){//装载对象
+	        if(dependenceList = dependenceMap[object]){
+	            //一定要用delete，彻底清除
+	            delete dependenceMap[object];
+	            var i = dependenceList.length;
+	            while(i--){
+	                requireDependence(dependenceList[i]);
+	            }
+	        }
+	        //谨慎，这里的i上面已经声明，不过，他们只有两种可能，undefined和0 
+	        for(var i in dependenceMap){
+	              break;
+	        }
+	        if(!i){
+	            //initialize 不能delete
+	            this.dependenceMap = this.initialize = 0;
+	        }
+	    }else{//装载脚本
+	        for(var object in dependenceMap){
+	            var dependenceList = dependenceMap[object];
+	            delete dependenceMap[object];
+	            var i = dependenceList.length;
+	            while(i--){
+	                requireDependence(dependenceList[i]);
+	            }
+	        }
+	        //initialize 不能delete
+	        this.dependenceMap = this.initialize = 0;
+	    }
+	}
+	
+	return function(path){
+		if(path){
+	        var packageObject = findPackageByPath(path);
+	        var objectName = path.substr(packageObject.name.length+1);
+	        packageObject = realPackage(packageObject);
+	        if(path.indexOf('/')+1){//path.indexOf('/') == -1
+	            writeRequire(packageObject,objectName,null);
+	        }else{
+	            if(objectName == '*'){
+	                for(var fileName in packageObject.scriptObjectMap){
+	                    writeRequire(packageObject,fileName,null);
+	                }
+	            }else{
+	                writeRequire(packageObject,packageObject.objectScriptMap[objectName],objectName);
+	            }
+	        }
+		}
+	}
+}}}})

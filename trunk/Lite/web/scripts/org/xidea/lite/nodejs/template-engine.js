@@ -1,30 +1,31 @@
 function TemplateEngine(root){
 	this.root = root;
 	this.compiler = require('child_process').fork(__dirname + '/template-setup.js',[root]);
-	this.templateMap = {};
-	this.renderTask = {};
+	var templateMap = this.templateMap = {};
+	var renderTask = this.renderTask = {};
 	this.compiler.on('message', function(result) {
-		var res = result[0];
-		var fn = result[1];
-		//var featureMap = result[2];
-		var tpl = new (Template)(new Function(fn));
-		this.templateMap[res[0]] = tpl; 
-		for(var i=0;i<res.length;i++){
-//			fs.watchFile(filename, function(pre,next){
-//				
-//			})
-		}
-		var task = this.renderTask[path];
-		if(task){
-			delete this.renderTask[path];
-			for(var i=0;i<task.length;i++){
-				render.apply(null,task[i])
+		var path = result.path;
+		var code = result.code;
+		if(code){
+			//var featureMap = result[2];
+			var tpl = new (Template)(eval('('+code+')'));
+			templateMap[path] = tpl; 
+			var task = renderTask[path];
+			if(task){
+				delete renderTask[path];
+				for(var i=0;i<task.length;i++){
+					var args = task[i];
+					args[0] = tpl;
+					render.apply(null,args)
+				}
 			}
+		}else{//clear cache
+			delete this.templateMap[path];
 		}
 	}); 
 }
 TemplateEngine.prototype.render=function(path,data,response){
-	var tpl = this.getTemplate(path);
+	var tpl = this.templateMap[path];
 	if(tpl){
 		render(tpl,data,response);
 	}else{
@@ -33,16 +34,74 @@ TemplateEngine.prototype.render=function(path,data,response){
 	}
 }
 
-TemplateEngine.prototype.getTemplate=function(path){
-	var cache = this.templateMap[path];
-	var res = cache[0];
-	var tpl = cache[1];
-	if(res){
-		return tpl;
-	}
-}
 function render(tpl,data,response){
 	var rtv = tpl.render(data);
-	response.write(rtv,'utf-8')
-	return ;
+	response.write(rtv,'utf-8');
+	response.end();
 }
+function Template(fn){
+    this.render = fn(this);
+}
+var replaceMap = {'"':'&#34;','<':'&lt;','&':'&#38;'};
+function replacer(c){return replaceMap[c]||c}
+function dl(date,format){//3
+    format = format.length;
+    return format == 1?date : ("000"+date).slice(-format);
+}
+function tz(offset){
+	return offset?(offset>0?'-':offset*=-1||'+')+dl(offset/60,'00')+':'+dl(offset%60,'00'):'Z'
+}
+Template.prototype = {
+	//xt:0,xa:1,xp:2
+	0:function(txt,type){
+		return String(txt).replace(
+			type==1?/[<&"]/g:
+				type?/&(?:\w+|#\d+|#x[\da-f]+);|[<&"]/ig:/[<&]/g
+			,replacer);
+	},
+	1:function(source,result,type) {
+		if(source instanceof Array){
+			return source;
+		}
+		var result = [];
+		if(typeof source == 'number'){
+			source = parseInt(source);
+			while(source >0){
+				result[--source] = source+1;
+			}
+		}else{
+			for(source in source){
+				result.push(source);
+			}
+		}
+		return result;
+	},
+	2: function(pattern,date){
+		//TODO:未考虑国际化偏移
+		date = date?new Date(date):new Date();
+        return pattern.replace(/([YMDhms])\1*|\.s|TZD/g,function(format){
+            switch(format.charAt()){
+            case 'Y' :
+                return dl(date.getFullYear(),format);
+            case 'M' :
+                return dl(date.getMonth()+1,format);
+            case 'D' :
+                return dl(date.getDate(),format);
+//	            case 'w' :
+//	                return date.getDay()+1;
+            case 'h' :
+                return dl(date.getHours(),format);
+            case 'm' :
+                return dl(date.getMinutes(),format);
+            case 's' :
+                return dl(date.getSeconds(),format);
+            case '.':
+            	return '.'+dl(date.getMilliseconds(),'000');
+            case 'T'://tzd
+            	//国际化另当别论
+            	return tz(date.getTimezoneOffset());
+            }
+        });
+	}
+}
+exports.TemplateEngine = TemplateEngine;

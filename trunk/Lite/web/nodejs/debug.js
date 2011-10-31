@@ -4,58 +4,15 @@ require("D:\\workspace\\Lite2\\web\\nodejs\\test.js")
 
 var vm = require('vm');
 var fs = require('fs');
-var roots = ["D:\\workspace\\JSI2\\web\\scripts\\","D:\\workspace\\Lite2\\web\\scripts\\"];
 var Path = require('path');
-var $JSI = {
-	impl:{
-		loadText : loadSource,
-		eval : evalSource,
-		log:function(title,level,msg){console.info(msg)}
-	}
-}
-function loadSource(path){
-	path = path.replace(/^classpath\:\/+/,'')
-	for(var i=0;i<roots.length;i++){
-		var tp = roots[i]+path;
-		if(Path.existsSync(tp)){
-			///console.info('!!'+tp);
-			var s = fs.readFileSync(tp,'utf8');
-			//console.info('!#!'+s.substring(0,1000));
-			return s;
-		}
-	}
-}
-var g = {$JSI:$JSI,console:console,require:require};
-g.window = g;//{$JSI:$JSI,console:console,require:require};
-var context = vm.createContext(g);
-function evalSource(thiz,text,path){
-	 var fn = vm.runInContext('(function(){'+text+'\n})',context,path);
-	 return fn.call(thiz);
-}
-var boot = loadSource('boot.js');
-vm.runInContext(boot,context,"classpath:///boot.js");
-try{
-	evalSource(g,"$import('org.xidea.lite:*')",'classpath:///$import');
-	evalSource(g,"$import('org.xidea.lite.nodejs:DOMParser')",'classpath:///$import');
-	evalSource(g,"$import('org.xidea.lite.nodejs:XPathEvaluator')",'classpath:///$import');
-	evalSource(g,"$import('org.xidea.lite.impl.js:*')",'classpath:///$import');
-	evalSource(g,"$import('org.xidea.lite.impl:*')",'classpath:///$import');
-	evalSource(g,"$import('org.xidea.lite.nodejs:TemplateEngine')",'classpath:///$import');
-	var TemplateEngine = evalSource(g,"return TemplateEngine;",'classpath:///$import');
-}catch(e){
-	console.log('error'+e);
-	throw e;
-}
 
-
-
-
+var root =Path.join(__dirname,'..');
+var TemplateEngine = require('../scripts/org/xidea/lite/nodejs/template-engine.js').TemplateEngine
 var templateEngine = new TemplateEngine(root);
 
 var http = require('http');
-var root = "D:\\workspace\\Lite2\\web\\";
 //** 测试 
-templateEngine.render('/doc/guide/index.xhtml',{}, {write:function(arg){console.log(arg.substring(0,0));}});
+//templateEngine.render('/doc/guide/index.xhtml',{}, {write:function(arg){console.log(arg.substring(0,0));}});
 
 //**/
 http.createServer(function (req, response) {
@@ -63,7 +20,6 @@ http.createServer(function (req, response) {
 	response.writeHead(200, {'Content-Type': 'text/html;charset=utf-8'});
 	if(/\.xhtml$/.test(url)){
 		templateEngine.render(url,{},response);
-		response.end();
 	}else{
 		url = url.substring(1);
 		var filepath = Path.resolve(root,url);
