@@ -4,7 +4,7 @@
 	background:url('../images/sprite-x/left.png') no-repeat;
 }
 .button div{
-	background:url('../images/sprite-x/right.png') no-repeat top right;
+	background:url('../images/sprite-x/right[r].png') no-repeat top right;
 }
 .button div div{
 	background:url('../images/sprite-x/center[x].png');
@@ -45,11 +45,11 @@
 }
 
 .message-head{
-	background:url('../images/box/boxlt.png') no-repeat;
+	background:url('../images/box/boxt.png') no-repeat;
 }
 
 .message-head div{
-	background:url('../images/box/boxrt.png') no-repeat top right;
+	background:url('../images/box/boxt[r].png') no-repeat top right;
 }
 .message-head div div{
 	height:15px;margin:0 14px;
@@ -57,10 +57,10 @@
 	border-top:1px solid rgb(239,228,176);
 }
 .message-foot{
-	background:url('../images/box/boxlb.png') no-repeat;
+	background:url('../images/box/boxb.png') no-repeat left;
 }
 .message-foot div{
-	background:url('../images/box/boxrb.png') no-repeat top right;
+	background:url('../images/box/boxb[r].png') no-repeat right;
 }
 
 .message-foot div div{
