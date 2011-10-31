@@ -121,7 +121,7 @@ TranslateContext.prototype = {
     		break;
     	case 'ClientPlugin':
     	default:
-			$log.error("程序bug(插件需要预处理):"+pn,item[2]);
+			console.error("程序bug(插件需要预处理):"+pn,item[2]);
     	}
     },
     processElse:function(code,i){

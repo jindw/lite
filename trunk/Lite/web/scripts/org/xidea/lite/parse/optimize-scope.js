@@ -120,7 +120,7 @@ function vistLite(context,code){
 					||className =='org.xidea.lite.DatePlugin'){
 					vistLite(context,item[1]);
 				}else{
-					$log.info(item[2])
+					console.info(item[2])
 				}
 				break;
 			case CAPTURE_TYPE:
@@ -210,7 +210,7 @@ function walkEL(thiz,el){
 						&& (typeof arg1Right[1] == 'string')) {
 					// member call
 				} else {
-					$log.info("表达式函数调用:"+stringifyJSEL(arg1));
+					console.info("表达式函数调用:"+stringifyJSEL(arg1));
 					thiz.calls.push("*");
 				}
 				walkEL(thiz, arg1);

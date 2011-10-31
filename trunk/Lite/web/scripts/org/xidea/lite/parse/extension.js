@@ -33,7 +33,7 @@ function appendParser(ext,key,patternKey,fn,o){
 			ext[patternKey] = pm = {};
 		}
 		add(pm,fn,o);//添加 patternParser
-		//$log.info(patternKey,fn,pm)
+		//console.info(patternKey,fn,pm)
 		if(m){//扫描已有 parser 添加 patternParser
 			var p = new RegExp('^'+fn.replace(/\*/g,'.*')+'$');
 			for(var n in m){
@@ -62,7 +62,7 @@ Extension.prototype={
 	initialize:function(objectMap){
 		for(var key in objectMap){
 			var o = objectMap[key];
-//			$log.error("["+key+"]:"+o+"\n\n")
+//			console.error("["+key+"]:"+o+"\n\n")
 			if(o instanceof Function){
 				var dest = null;
 				var match = key.match(/^(parse|seek|before|xmlns)(.*)/);

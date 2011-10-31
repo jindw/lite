@@ -18,7 +18,7 @@ function loadSource(path){
 	for(var i=0;i<roots.length;i++){
 		var tp = roots[i]+path;
 		if(Path.existsSync(tp)){
-			//console.info('!!'+tp);
+			///console.info('!!'+tp);
 			var s = fs.readFileSync(tp,'utf8');
 			//console.info('!#!'+s.substring(0,1000));
 			return s;
@@ -26,7 +26,7 @@ function loadSource(path){
 	}
 }
 var g = {$JSI:$JSI,console:console,require:require};
-g.window = g;
+g.window = g;//{$JSI:$JSI,console:console,require:require};
 var context = vm.createContext(g);
 function evalSource(thiz,text,path){
 	 var fn = vm.runInContext('(function(){'+text+'\n})',context,path);
@@ -42,7 +42,6 @@ try{
 	evalSource(g,"$import('org.xidea.lite.impl:*')",'classpath:///$import');
 	evalSource(g,"$import('org.xidea.lite.nodejs:TemplateEngine')",'classpath:///$import');
 	var TemplateEngine = evalSource(g,"return TemplateEngine;",'classpath:///$import');
-	
 }catch(e){
 	console.log('error'+e);
 	throw e;
@@ -51,10 +50,10 @@ try{
 
 
 
+var templateEngine = new TemplateEngine(root);
 
 var http = require('http');
 var root = "D:\\workspace\\Lite2\\web\\";
-var templateEngine = new TemplateEngine(root);
 //** 测试 
 templateEngine.render('/doc/guide/index.xhtml',{}, {write:function(arg){console.log(arg.substring(0,0));}});
 
@@ -73,7 +72,7 @@ http.createServer(function (req, response) {
 	            response.writeHead(404, {"Content-Type": "text/plain"});    
 	            response.write("404 Not Found\n");    
 	            response.end();    
-	            return;    
+	            return;
 	        }    
 	   		if(fs.statSync(filepath).isFile()){
 		        fs.readFile(filepath, "binary", function(err, file) {    
@@ -95,19 +94,20 @@ http.createServer(function (req, response) {
 		            response.end();    
 		        });
 	   		}else{
-	   			var childs = fs.readdir(filepath, function(err, files) {  
-	   				for(var i=0;i<files.length;i++){
-						response.write("<a href='"+files[i]+"'>"+files[i]+'</a><hr/>','utf8');
-					}
-					response.end();
-	   			});
-		
+	   			if(!url || /\/$/.test(url)){
+		   			fs.readdir(filepath, function(err, files) {  
+		   				for(var i=0;i<files.length;i++){
+							response.write("<a href='"+files[i]+"'>"+files[i]+'</a><hr/>','utf8');
+						}
+						response.end();
+		   			});
+	   			}else{
+	   				console.log("/"+url+'/')
+	   				response.writeHead(301, {"Location" : "/"+url+'/'});    
+	            	response.end();    
+	   			}
 	   		}    
 	    });   
-		
-		
-		
-		
 	}
 	
 }).listen(1337, "127.0.0.1");

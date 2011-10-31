@@ -27,11 +27,11 @@ var Core = {
 	            }
 	            return end;
 			}catch(e){
-				$log.error("表达式解析异常，请检查是否手误：[fileName:"+this.currentURI+",el:"+els+"]",e)
+				console.error("表达式解析异常，请检查是否手误：[fileName:"+this.currentURI+",el:"+els+"]",e)
 				return -1;
 			}
 		}else{
-			$log.warn("表达式解析异常，请检查是否手误：[fileName:"+this.currentURI+",text:"+text+"]")
+			console.warn("表达式解析异常，请检查是否手误：[fileName:"+this.currentURI+",text:"+text+"]")
 			return -1;
 		}
 	},
@@ -43,11 +43,11 @@ var Core = {
 	            this.appendEL(el);
 	            return end;
 			}catch(e){
-				$log.error("表达式解析异常，请检查是否手误：[fileName:"+this.currentURI+",el:"+el+"]",e)
+				console.error("表达式解析异常，请检查是否手误：[fileName:"+this.currentURI+",el:"+el+"]",e)
 				return -1;
 			}
 		}else{
-			$log.warn("表达式解析异常，请检查是否手误：[fileName:"+this.currentURI+",el:"+el+"]")
+			console.warn("表达式解析异常，请检查是否手误：[fileName:"+this.currentURI+",el:"+el+"]")
 			return -1;
 		}
 	},
@@ -67,7 +67,7 @@ var Core = {
 	        this.appendEL(el);
 	        return end;
 		}else{
-			$log.warn("Lambda 表达式解析异常，请检查是否手误：[fileName:"+this.currentURI+",el:"+el+"]")
+			console.warn("Lambda 表达式解析异常，请检查是否手误：[fileName:"+this.currentURI+",el:"+el+"]")
 			return -1;
 		}
 	},*/
@@ -81,11 +81,11 @@ var Core = {
 	            this.appendEnd()
 	            return end;
 			}catch(e){
-				$log.error("表达式解析异常，请检查是否手误：[fileName:"+this.currentURI+",el:"+el+"]",e)
+				console.error("表达式解析异常，请检查是否手误：[fileName:"+this.currentURI+",el:"+el+"]",e)
 				return -1;
 			}
 		}else{
-			$log.warn("表达式解析异常，请检查是否手误：[fileName:"+this.currentURI+",el:"+el+"]")
+			console.warn("表达式解析异常，请检查是否手误：[fileName:"+this.currentURI+",el:"+el+"]")
 			return -1;
 		}
 		
@@ -105,11 +105,11 @@ var Core = {
 				}
 		    	return end;
 			}catch(e){
-				$log.error("XML属性表达式解析异常，请检查是否手误：[fileName:"+this.currentURI+",el:"+el+"]",e)
+				console.error("XML属性表达式解析异常，请检查是否手误：[fileName:"+this.currentURI+",el:"+el+"]",e)
 				return -1;
 			}
 		}else{
-			$log.warn("XML属性表达式解析异常，请检查是否手误：[fileName:"+this.currentURI+",el:"+el+"]")
+			console.warn("XML属性表达式解析异常，请检查是否手误：[fileName:"+this.currentURI+",el:"+el+"]")
 			return -1;
 		}
 	},
@@ -121,11 +121,11 @@ var Core = {
 				this.appendXT(el)
 	            return end;
 			}catch(e){
-				$log.error("XML文本表达式解析异常，请检查是否手误：[fileName:"+this.currentURI+",el:"+el+"]",e)
+				console.error("XML文本表达式解析异常，请检查是否手误：[fileName:"+this.currentURI+",el:"+el+"]",e)
 				return -1;
 			}
 		}else{
-			$log.warn("XML文本表达式解析异常，请检查是否手误：[fileName:"+this.currentURI+",el:"+el+"]")
+			console.warn("XML文本表达式解析异常，请检查是否手误：[fileName:"+this.currentURI+",el:"+el+"]")
 			return -1;
 		}
 	},
@@ -186,10 +186,10 @@ var Core = {
 			 }
 		}
 		this.next(doc);
-//		$log.error('aaa',ns);
+//		console.error('aaa',ns);
 	//},
 	//"parse*" : function(node){
-	//	$log.error("未支持标签："+node.tagName)
+	//	console.error("未支持标签："+node.tagName)
 	},
 	parsePHP:function(node){
     	var value = node.textContent || node.text;
@@ -276,7 +276,7 @@ function processChoose(node){
 //	if(text.charAt() != '$'){
 //		var end = findELEnd(text,-1);
 //		if(end<=0){
-//			$log.error('表达式异常')
+//			console.error('表达式异常')
 //			return -1;
 //		}else{
 //			var value = text.substring(1,end);
@@ -321,7 +321,7 @@ function processFor(node){
 		var value = findXMLAttribute(node);
 		var match = value.replace(/^\$\{(.+)\}$/,'$1').match(FOR_PATTERN);
 		if(!match){
-			throw $log.error("非法 for 循环信息",value);
+			throw console.error("非法 for 循环信息",value);
 		}
 		var var_ = match[1];
 		var status_ =match[2];
@@ -337,7 +337,7 @@ function seekFor(text){
 		var value = text.substring(1,end);
 		var match = value.match(FOR_PATTERN);
 		if(!match){
-			throw $log.error("非法 for 循环信息",value);
+			throw console.error("非法 for 循环信息",value);
 		}
 		var var_ = match[1];
 		var status_ =match[2];
@@ -371,10 +371,10 @@ function splitList(list){
 					}
 					if(begin2 != begin){
 						end = end.replace(/\]\s*$/,'');
-						$log.debug("[start,last] 语法 不是通用表达式，只能在for循环中使用。",list);
+						console.debug("[start,last] 语法 不是通用表达式，只能在for循环中使用。",list);
 						return [begin2,end];
 					}else{
-						$log.warn("range for 表达式(非通用表达式)推荐模式为：[start,last]，您提供的表达式为"+list);
+						console.warn("range for 表达式(非通用表达式)推荐模式为：[start,last]，您提供的表达式为"+list);
 						return [begin,end];
 					}
 				}catch(e){
@@ -397,7 +397,7 @@ function startFor(context,key,list,status_){
 	}else if(be.length ==1){
 		context.appendFor(key,list,status_);
 	}else{
-		$log.error("for表达式无效："+list);
+		console.error("for表达式无效："+list);
 	}
 }
 
@@ -413,7 +413,7 @@ function processVar(node){
 	    		if(code instanceof Array){
 	    			this.appendVar(name_,code[1]);
 	    		}else{
-	    			$log.warn("标签:"+node.tagName+"的value属性"+value+"建议设置为表达式，您的输入没有表达式，系统自动按静态文本处理");
+	    			console.warn("标签:"+node.tagName+"的value属性"+value+"建议设置为表达式，您的输入没有表达式，系统自动按静态文本处理");
 	    			this.appendVar(name_,stringifyJSON(code));
 	    		}
 	    	}else{
@@ -499,7 +499,7 @@ function _parseDefName(name){
 				try{
 					new Function(arg);
 				}catch(e){
-					$log.error("函数定义中参数表语法错误:"+arg+name,e);
+					console.error("函数定义中参数表语法错误:"+arg+name,e);
 					throw e;
 				}
 			}
@@ -510,7 +510,7 @@ function _parseDefName(name){
 			}else{
 				if(defaults.length){
 					var msg = "函数定义中参数表语法错误:默认参数值能出现在参数表最后:"+name;
-					$log.error(msg);
+					console.error(msg);
 					throw new Error(msg);
 				}
 				params.push(toid(arg));
@@ -529,7 +529,7 @@ function toid(n){
 	try{
 		new Function("return "+n);
 	}catch(e){
-		$log.error("无效id:"+n,e);
+		console.error("无效id:"+n,e);
 		throw e;
 	}
 	return n;
@@ -648,7 +648,7 @@ function setNodeURI(context,node){
 				uri = info.substring(i+2);
 			}
 			context.setCurrentURI(context.createURI(uri));
-			//$log.error(uri,info)
+			//console.error(uri,info)
 		}
 	}
 }
@@ -660,7 +660,7 @@ function parseInclude(node){
 	try{
 	    if(path!=null){
 	    	if(path.charAt() == '#'){
-	    		$log.warn("装饰器命名节点改用${pageName}模式了:(,您实用的模式还是:"+path);
+	    		console.warn("装饰器命名节点改用${pageName}模式了:(,您实用的模式还是:"+path);
 	    		path = '$'+path.substring(1);
 	    	}
 	    	if(path.charAt() == '$'){
@@ -668,7 +668,7 @@ function parseInclude(node){
 	    		setNodeURI(this,node);
 	    	}else{
 		        var uri = this.createURI(path);
-	    		//$log.warn(path,this.currentURI+'',url+'')
+	    		//console.warn(path,this.currentURI+'',url+'')
 		        var doc = this.loadXML(uri);
 		        this.setCurrentURI(uri);
 	    	}
@@ -685,7 +685,7 @@ function parseInclude(node){
 		        //alert([url,xpath,new XMLSerializer().serializeToString(d),doc.length])
 		    }
 		    if(selector != null){
-		    	$log.warn("目前尚不支持css selector 选择节点");
+		    	console.warn("目前尚不支持css selector 选择节点");
 		    }
 		    this.parse(doc)
 		}

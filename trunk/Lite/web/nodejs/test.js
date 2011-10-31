@@ -6,6 +6,7 @@ var fs = require('fs');
 var Path = require('path');
 var http = require('http');
 var root = "D:\\workspace\\Lite2\\web\\";
+
 var TemplateEngine = require("D:\\workspace\\Lite2\\build\\dest\\nodejs.js").TemplateEngine;
 var templateEngine = new TemplateEngine(root);
 //** 测试 

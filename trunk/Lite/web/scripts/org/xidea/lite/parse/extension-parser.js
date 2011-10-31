@@ -36,7 +36,7 @@ function formatName(el){
 	return tagName.toLowerCase();
 }
 
-$log.filters.push(function(msg){
+console.filters.push(function(msg){
 	if(nodeLocal){
 		var currentNode = nodeLocal.get();
 		if(currentNode){
@@ -72,17 +72,17 @@ function getLiteTagPosition(el){
 function loadExtObject(source){
 	try{
 		var p = /\b(?:document|xmlns|(?:parse|before|seek)\w*)\b/g;
-		var fn = new Function("$log",source+"\n return function(){return eval(arguments[0])}");
+		var fn = new Function("console",source+"\n return function(){return eval(arguments[0])}");
 		var m,o;
 		var objectMap = {};
 	}catch(e){
-		$log.error("扩展源码语法错误:",e,source)
+		console.error("扩展源码语法错误:",e,source)
 		throw e;
 	}
 	try{
-		fn = fn($log);
+		fn = fn(console);
 	}catch(e){
-		$log.error("扩展脚本装载失败：",source,e);
+		console.error("扩展脚本装载失败：",source,e);
 	}
 	while(m = p.exec(source)){
 		try{
@@ -153,11 +153,11 @@ ExtensionParser.prototype = {
 				subIndex = last;
 				chain = chain.getSubChain(last);
 			}
-//			$log.info("##",subIndex,String(fns[subIndex]));
+//			console.info("##",subIndex,String(fns[subIndex]));
 			fns[subIndex].call(chain,node,ns);
 		}else{
 			//if(node.name == 'onclick'){
-			//	$log.error(node.name,typeof fns[0],fns[0].call,fns[0])
+			//	console.error(node.name,typeof fns[0],fns[0].call,fns[0])
 			//}
 			fns[0].call(chain,node,ns);
 		}
@@ -191,7 +191,7 @@ ExtensionParser.prototype = {
 			}
 //			es = 4;
 		}catch(e){
-			$log.error("元素扩展解析异常",e)
+			console.error("元素扩展解析异常",e)
 			throw e;
 		}finally{
 		}
@@ -245,7 +245,7 @@ ExtensionParser.prototype = {
 //			var es = 10;
 			chain.next(node)
 		}catch(e){
-			$log.error("扩展解析异常：",e);
+			console.error("扩展解析异常：",e);
 		}
 	},
 	parseAttribute:function(node,context,chain){
@@ -274,7 +274,7 @@ ExtensionParser.prototype = {
 				}
 			}
 		}catch(e){
-			$log.error("属性扩展解析异常：",e)
+			console.error("属性扩展解析异常：",e)
 		}
 	},
 	parseNamespace:function(attr,context,chain){
@@ -298,10 +298,10 @@ ExtensionParser.prototype = {
 						return true;//自动补全的xmlns 不处理!
 					}
 				}
-				//$log.error(v,fp.namespaceParser);
+				//console.error(v,fp.namespaceParser);
 			}
 		}catch(e){
-			$log.error("名称空间解析异常：",es,e)
+			console.error("名称空间解析异常：",es,e)
 		}
 		return false;
 	},
@@ -333,7 +333,7 @@ ExtensionParser.prototype = {
 					ns = CORE_URI
 				}
 				if(ns == null){
-					$log.warn("文本解析时,查找名称空间失败,请检查是否缺少XML名称空间申明：[code:$"+match[0]+",prefix:"+prefix+",document:"+context.currentURI+"]")
+					console.warn("文本解析时,查找名称空间失败,请检查是否缺少XML名称空间申明：[code:$"+match[0]+",prefix:"+prefix+",document:"+context.currentURI+"]")
 				}else{
 					var fp = this.packageMap[ns];
 					if(fp){
@@ -347,16 +347,16 @@ ExtensionParser.prototype = {
 								return start+matchLength+rtv+1
 							}
 						}else{
-							$log.warn("文本解析时,找不到相关的解析函数,请检查模板源码,是否手误：[function:"+fn+",document:"+(context && context.currentURI)+"]")
+							console.warn("文本解析时,找不到相关的解析函数,请检查模板源码,是否手误：[function:"+fn+",document:"+(context && context.currentURI)+"]")
 							//return -1;
 						}
 					}else{
-						$log.warn("文本解析时,名称空间未注册实现程序,请检查lite.xml是否缺少语言扩展定义：[code:$"+match[0]+",namespace:"+ns+",prefix:"+prefix+",document:"+context.currentURI+"]")
+						console.warn("文本解析时,名称空间未注册实现程序,请检查lite.xml是否缺少语言扩展定义：[code:$"+match[0]+",namespace:"+ns+",prefix:"+prefix+",document:"+context.currentURI+"]")
 					}
 				}
 			}
 		}catch(e){
-			$log.error("文本解析异常：",e)
+			console.error("文本解析异常：",e)
 		}
 		//seek
 		return -1;

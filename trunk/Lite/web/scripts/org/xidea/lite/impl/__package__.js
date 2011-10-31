@@ -4,13 +4,13 @@ this.addScript('template-token.js',["PLUGIN_DEFINE",'VAR_TYPE','XA_TYPE','ELSE_T
 //基本认为是没用的。
 this.addScript('template-impl.js',["TemplateImpl"]
 				,'template-token.js'
-                ,["org.xidea.lite.Template","org.xidea.lite.util:selectByXPath",'org.xidea.lite.impl.js:JSTranslator','org.xidea.lite.parse:ParseContext','org.xidea.jsi:$log','org.xidea.el:evaluate']);
+                ,["org.xidea.lite.Template","org.xidea.lite.util:selectByXPath",'org.xidea.lite.impl.js:JSTranslator','org.xidea.lite.parse:ParseContext','org.xidea.jsi:console','org.xidea.el:evaluate']);
 
 this.addScript('translate-context.js','TranslateContext'
                 ,0
                 ,["org.xidea.lite.parse.OptimizeScope",
                 	"org.xidea.el:*",
                 	"org.xidea.lite.util:stringifyJSON",
-                	'org.xidea.jsi:$log']);
+                	'org.xidea.jsi:console']);
                 
 this.addDependence("*",'*',true);

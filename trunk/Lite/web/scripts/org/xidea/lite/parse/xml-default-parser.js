@@ -52,7 +52,7 @@ function parseDefaultXMLNode(node,context,chain){
 	            //this.println("<!-- ERROR： UNKNOW nodeType:"+node.nodeType+"-->")
 	    }
 	}catch(e){
-		$log.error('!!'+e);
+		console.error('!!'+e);
 	}
 }
 

@@ -74,7 +74,7 @@ function URI(path){
 	if(match){
 		setupURI(this,match);
 	}else{
-		$log.error("url must be absolute,"+path)
+		console.error("url must be absolute,"+path)
 	}
 
 }

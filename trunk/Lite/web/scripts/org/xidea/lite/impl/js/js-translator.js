@@ -110,7 +110,7 @@ JSTranslator.prototype = {
 		    	new Function(code);
 		    }
 	    }catch(e){
-	    	var error = $log.error("生成js代码失败:",e,code);
+	    	var error = console.error("生成js代码失败:",e,code);
 	        code = "return ("+stringifyJSON(error)+');';
 	    }
 		var result = [];

@@ -102,7 +102,7 @@ function _stringifyPHPLineArgs(line){//.*[\r\n]*
 			}else if(a == "'"){
 				return "\\'";
 			}else{
-				$log.error("非法输出行!!"+stringifyJSON(line));
+				console.error("非法输出行!!"+stringifyJSON(line));
 			}
 			return a == '\\'?'\\\\': "\\'";
 		}
@@ -179,7 +179,7 @@ PHPTranslateContext.prototype = new TCP({
 	        this.append("}");
 	    }catch(e){
 	        //alert(["编译失败：",buf.join(""),code])
-	        $log.error("PHP编译失败:"+this.id,e);
+	        console.error("PHP编译失败:"+this.id,e);
 	        throw e;
 	    }
 	    //this.append("return _$out.join('');");

@@ -4,7 +4,7 @@ function findLiteParamMap(value){
 	while(value){
 		var match = value.match(/^\s*([\w\$\_]+|'[^']*'|"[^"]*")\s*(?:[\:=]\s*([\s\S]+))\s*$/);
 		if(!match){
-			throw $log.error("非法参数信息",value);
+			throw console.error("非法参数信息",value);
 			return null;
 		}
 		value =match[2];

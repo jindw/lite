@@ -57,7 +57,7 @@ function findELEnd(text, elQuteBegin) {
 					if(end >0){
 						next = end;
 					}else{
-						$log.error("无效状态");
+						console.error("无效状态");
 					}
 				}
 			}

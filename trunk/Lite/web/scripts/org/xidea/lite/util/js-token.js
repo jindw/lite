@@ -158,7 +158,7 @@ function findExpSource(text){
 	    			case 'm':
 	    			break;
 	    			default:
-	    			//$log.error(text.substring(0,start-1)+'@',text)
+	    			//console.error(text.substring(0,start-1)+'@',text)
 	    			return text.substring(0,start-1);
 	    		}
 	    	}

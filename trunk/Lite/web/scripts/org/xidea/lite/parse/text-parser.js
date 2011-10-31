@@ -17,7 +17,7 @@ function parseText(text,context,textParsers){
     case EL_TYPE:
         break;
     default:
-    	$log.error("未知编码模式："+context.textType+text)
+    	console.error("未知编码模式："+context.textType+text)
     	return;
     }
 	var len = text.length;
@@ -55,7 +55,7 @@ function parseText(text,context,textParsers){
 				try {
 					start = nip.parseText(text, start, context);
 				} catch (e) {
-					$log.warn("尝试表达式解析失败:[source:"+text+",fileName:"+context.currentURI+"]",e);
+					console.warn("尝试表达式解析失败:[source:"+text+",fileName:"+context.currentURI+"]",e);
 				}
 				if (start <= p$) {
 					context.reset(mark);

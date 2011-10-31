@@ -63,7 +63,7 @@ function stringifyADD(el,context){
 		
 		var t1 = getELType(el[1]);
 		var t2 = getELType(el[2]);
-		//$log.error(t1,t2)
+		//console.error(t1,t2)
 		if(typesOnly(t1,t2,TYPE_STRING,TYPE_NUMBER)){
 			return value1+'.'+value2;
 		}
@@ -191,7 +191,7 @@ function stringifyINVOKE(el,context){
 				}else if(mp.test(prop)){
 					return args.replace('array',prop);
 				}else{
-					$log.warn("Math 不支持方法:"+prop+";Math 支持的方法有:random|"+mp.source.replace(/[^\w\|]/g,''))
+					console.warn("Math 不支持方法:"+prop+";Math 支持的方法有:random|"+mp.source.replace(/[^\w\|]/g,''))
 				}
 			}else if(owner === 'JSON'){
 				if(prop == "parse"){
@@ -199,11 +199,11 @@ function stringifyINVOKE(el,context){
 				}else if(prop =='stringify'){
 					return args.replace('array','json_encode');
 				}else{
-					$log.warn("JSON 不支持方法:"+prop+";JSON 只支持:stringify和parse方法")
+					console.warn("JSON 不支持方法:"+prop+";JSON 只支持:stringify和parse方法")
 				}
 			}else if(prop == 'reverse' && args == 'array()' && owner[0] == OP_INVOKE){
 				var info2 = parseInvoke(owner);
-				//$log.error(info2);
+				//console.error(info2);
 				if(info2[1] == 'concat'){
 					owner = info2[0];
 					owner = stringifyPHPEL2ID(owner,context,true)
@@ -223,7 +223,7 @@ function stringifyINVOKE(el,context){
 			return args.replace('array',"lite__"+owner)
 		}else{
 			//动态调用方式
-			//$log.error("!!!!!!!!!!!!",context.scope.varMap);
+			//console.error("!!!!!!!!!!!!",context.scope.varMap);
 			if(owner in context.scope.varMap || owner in context.scope.paramMap){
 				var fn = '$'+owner;
 			}else{
@@ -232,9 +232,9 @@ function stringifyINVOKE(el,context){
 			return 'lite_op__invoke('+fn+',null,'+args+')';
 		}
 	}else{
-		//$log.error("??????????",typeof owner,owner,context.scope.varMap);
+		//console.error("??????????",typeof owner,owner,context.scope.varMap);
 		owner = stringifyPHPEL2ID(owner,context,true)
-		//$log.error(owner);
+		//console.error(owner);
 		return 'lite_op__invoke('+owner+',null,'+args+')';
 		//throw new Error("Invalid Invoke EL");
 	}

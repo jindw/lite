@@ -199,7 +199,6 @@
 			<arg value="-outputExported" />
 			<arg value="${basedir}/build/dest/data-view.js" />
 		</java>
-		<!--
 		<echo>导出NodeJS版本</echo>
 		<java fork="true" failonerror="true" classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
 			<arg value="-scriptBase" />
@@ -209,7 +208,6 @@
 			<arg value="-outputExported" />
 			<arg value="${basedir}/build/dest/nodejs.js" />
 		</java>
-		-->
 	</target>
 	<target name="compressImpl">
 		<echo>压缩JSLite实现</echo>

@@ -36,7 +36,7 @@ function parse(uri,loader,hander) {
 		
 	}
 	function error(msg,pa){
-		$log.error(msg,uri+"@[line:"+pa[0]+",col:"+pa[1]+"]")
+		console.error(msg,uri+"@[line:"+pa[0]+",col:"+pa[1]+"]")
 	}
 	parseXML(xml,begin,end,text,cdata,doctype,ins,comm,error);
 }

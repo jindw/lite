@@ -72,10 +72,10 @@ function TemplateImpl(data,parseContext,runAsLiteCode){
 	        	rtv.compileData = data;
 	        	return rtv;
 	        }catch(e){
-	        	$log.error("翻译结果错误：",e,code)
+	        	console.error("翻译结果错误：",e,code)
 	            throw e;
 	        }
-	        //$log.warn(data+'')
+	        //console.warn(data+'')
         }
         this.compileData = data;
     }
@@ -110,7 +110,7 @@ TemplateImpl.prototype.render = function(context){
 	        return buf.join("");
 	    }
 	}catch(e){
-		$log.warn("模板渲染异常：",e,this.data+'');
+		console.warn("模板渲染异常：",e,this.data+'');
 	}
 }
 
@@ -171,7 +171,7 @@ function renderList(context,data,out){
 	                break;
 	            }
         	}catch(e){
-        		$log.debug("render error",item,e)
+        		console.debug("render error",item,e)
         	}
         }
     }

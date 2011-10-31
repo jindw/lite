@@ -22,7 +22,7 @@ function doOptimize(defMap,templateList){
 			//TODO:..
 			//pluginMap.put(cmd, plugin);
 		} catch (e) {
-			$log.warn("ParsePlugin initialize failed:" + config, e);
+			console.warn("ParsePlugin initialize failed:" + config, e);
 		}
 		return index;
 	});
@@ -113,7 +113,7 @@ ClientPlugin.prototype = {
 	before:function(){
 	},
 	optimize:function(){
-//		$log.info("optimize!!!",this.optimizedCall == null,this.inc);
+//		console.info("optimize!!!",this.optimizedCall == null,this.inc);
 		if(this.optimizedCall == null){
 			optimizeAllClient.apply(this,this.context);
 		}
@@ -124,7 +124,7 @@ ClientPlugin.prototype = {
 			if(defMap[n]){
 				result.push(defMap[n]);
 			}else{
-				$log.error("Defined function not found:"+n)
+				console.error("Defined function not found:"+n)
 			}
 		}
 		if(!this.first){
@@ -356,7 +356,7 @@ function buildTreeResult(result,defMap){
 							var name_ = config.name;
 							if(name_ in defMap){
 								if(stringifyJSON(parentNode) != stringifyJSON(defMap[name_])){
-									$log.warn("def "+name_+" is found before");
+									console.warn("def "+name_+" is found before");
 								}
 							}
 							defMap[name_]=parentNode;
@@ -389,7 +389,7 @@ function buildTreeResult(result,defMap){
 			}
 		}
 	}catch(e){
-		$log.error("中间代码异常：",result);
+		console.error("中间代码异常：",result);
 	}
 	return current;
 	//return defs.concat(current);

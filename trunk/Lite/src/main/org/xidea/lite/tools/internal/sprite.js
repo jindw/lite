@@ -10,6 +10,7 @@ var spriteConfig = null;
  * 
  */
 function spritePath(path,base){
+//	$log.info(path,base);
 	if(path.substring(0,base.length) == base){//需要放在相同的模块下
 		path = path.substring(base.length).replace(/\/?[^\/]+$/,'').replace(/\//g,'.');
 		return path+'.png';
@@ -94,10 +95,30 @@ function spriteImage(path,base){
 function getOffset(image){
 	return image.info.replace(/[^\d]/g,'') || 1;
 }
+function removeImages(images,flag){
+	var rtv = [];
+	for(var i=0;i<images.length;i++){
+		var image = images[i];
+		var info = image.info;
+		if(info && info.indexOf(flag)>=0){
+			console.info(info);
+			images.splice(i--,1);
+			rtv.push(image);
+		}
+	}
+	return rtv;
+	
+}
 function initOffset(images,repeat,maxWidth,maxHeight){
 	//repeatY  ->x
 	if(repeat == 'y'){
 		var offsetX = 0;
+		var last = removeImages(images,'r') //r 放最后，且只能有一个。
+		images.push.apply(images,last)
+		if(last.length >1){
+			console.error("repeatY 模式下， 最多只允许一个右对齐");
+			throw new Error("repeatY model can not have muti-right-align image");
+		}
 		for(var i=0;i<images.length;i++){
 			var image = images[i];
 			var bottom = image.info.indexOf('b')>=0
@@ -114,6 +135,17 @@ function initOffset(images,repeat,maxWidth,maxHeight){
 		//repeatX or no Repeat
 		//-y
 		var offsetY = 0;
+		var last = removeImages(images,'b') //b 放最后，且只能有一个。
+		images.push.apply(images,last)
+		if(last.length >1){
+			if(repeat=='x'){
+				console.error("repeatX 模式下， 最多只允许一个bottom对齐");
+				throw new Error("repeatX model can not have muti-bottom-align image");
+			}else{
+				console.warn("repeatX 模式下， 最多只允许一个bottom对齐, 自动尝试一下repeatY模式！");
+				return initOffset(images,'y',maxWidth,maxHeight);
+			}
+		}
 		for(var i=0;i<images.length;i++){
 			var image = images[i];
 			var right = image.info.indexOf('r')>=0
@@ -138,7 +170,7 @@ function initRepeatAndSize(images){
 		var image = images[i];
 		var resource=image.resource;
 		var info = image.info;
-		console.error(image.name,info)
+//		console.error(image.name,info)
 		if(info.indexOf('x')>=0){
 			repeatX.push(image)
 			if(!/x/.test(resource.repeat)){
@@ -203,10 +235,18 @@ function spriteCSS(path,base,dest,source){
 	return source.replace(/\bbackground\s*\:\s*url\(([^)]+)\)(.*?)(?=[;\}]|\/\*})/ig,
 		function(a,url,postfix){
 			url = url.replace(/['"]/g,'');
+			if(!/^\//.test(url)){
+				url = path.replace(/[^\/]+$/,'')+url;
+				url = url.replace(/[\/\\]\.[\/\\]|\\/g,'/');
+				while(url != (url = url.replace(/[^\/]+[\/]\.\.[\/]/,'/')));
+				url = url.replace(/\/\//g,'/');
+			}
 			if(path.indexOf(dest) == ''){//不能sprite 目标地址下的文件
 				return a;
 			}
+			
 			var destFile = dest + spritePath(url,base);
+//			$log.warn(destFile,url,base,dest);
 			if(destFile){
 				Env.getContentHash(destFile);
 				var spriteInfo = Env.get(destFile,SPRITE_KEY);
@@ -238,26 +278,26 @@ function getCSSPosition(fi,postfix){
 	var x = fi.x?-fi.x+'px':0;
 	var y = fi.y?-fi.y+'px':0;
 	var info = fi.info;
-	var info2 = info;
+	var info2 = postfix;
 	if(/[r]/.test(info)){
 		x = 'right';//'100%'
-		if(info2 == info2.replace(/(?:\bright\b)|100%/,'')){
-			console.error('css code error, right align images must declared as right position');
+		if(info2 == (info2 = info2.replace(/(?:\bright\b)|100%/,''))){
+			console.error('css code error, right align images must declared as right position,you gave：'+fi.name+':'+postfix);
 		}
 		if(/[b]/.test(info)){
 		   y = 'bottom';//'100%'
-		   if(info2 == info2.replace(/(?:\bbottom\b)|100%/,'')){
-		   		console.error('css code error, bottom align images must declared as bottom position');
+		   if(info2 == (info2 = info2.replace(/(?:\bbottom\b)|100%/,''))){
+		   		console.error('css code error, bottom align images must declared as bottom position,you gave：'+fi.name+':'+postfix);
 		   }
 		}
 	}else if(/[b]/.test(info)){
 		y = 'bottom';//'100%'
-		if(info2 == info2.replace(/(?:\bbottom\b)|100%/,'')){
-		   	console.error('css code error, bottom align images must declared as bottom position');
+		if(info2 == (info2 = info2.replace(/(?:\bbottom\b)|100%/,''))){
+		   	console.error('css code error, bottom align images must declared as bottom position,you gave：'+fi.name+':'+postfix);
 		}
 	}
-	if(info2 != info2.replace(/\d+%?|\b(?:left|right|center|top|bottom)\b/,'')){
-			console.error('css code error, position must same as filename flag[xyrb]');
+	if(info2 != (info2 = info2.replace(/\d+%?|\b(?:right|center|bottom)\b/,''))){//|top|left
+			console.error('css code error, position must same as filename flag[xyrb],you gave：'+fi.name+':'+postfix);
 	}
 	return x + ' '+ y;
 }

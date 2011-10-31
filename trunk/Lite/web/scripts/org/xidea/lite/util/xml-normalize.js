@@ -72,7 +72,7 @@ function normalizeTag(source,tag,uri,pos){
 			if( n2 !=n){
 				pos += '|'+n;
 				if(!(n2 in tag.nsMap)){
-					$log.error("missed namespace:"+n2,source);
+					console.error("missed namespace:"+n2,source);
 				}
 			}
 		}
@@ -199,7 +199,7 @@ function normalizeLiteXML(text,uri){
     				return '';
     			}
     			if(tag == null){
-    				$log.error("未开始标签:"+a,text)
+    				console.error("未开始标签:"+a,text)
     			}else{
     				tag = tag.parentTag
     			}

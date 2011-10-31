@@ -48,7 +48,7 @@ function parseTextLeaf(text,context){
 	if(typeof text == 'string'){
 		return parseText(text,context,context._textParsers)
 	}else{
-		$log.error("未知节点类型",typeof text,text)
+		console.error("未知节点类型",typeof text,text)
 		//chain.next(text);
 	}
 }
@@ -60,7 +60,7 @@ ParseContext.prototype = {
 	    case EL_TYPE :
 	        break;
 	    default:
-			$log.error("未知编码模式："+textType)
+			console.error("未知编码模式："+textType)
 			throw new Error();
 		}
 		
@@ -81,7 +81,7 @@ ParseContext.prototype = {
 	parse:function(source) {
 		var type = source.nodeType;
 		if(type>0){//xml
-			//$log.info(len,source && source.xml)
+			//console.info(len,source && source.xml)
 			this._topChain.next(source);
 		}else{//text
 			if(source instanceof URI){
@@ -111,7 +111,7 @@ ParseContext.prototype = {
 		
 	},
     createURI:function(path) {
-    	//$log.error(path,this.currentURI,this.config.root)
+    	//console.error(path,this.currentURI,this.config.root)
     	var base = this.config.root.toString();
     	if(path.indexOf(base) ==0){
     		path = path.substring(base.length-1);
@@ -127,7 +127,7 @@ ParseContext.prototype = {
     		//}
     	}else{
     		path= path.replace(/^[\\\/]/,'./');// /xxx=>./xxx
-    		//$log.warn(defaultBase+'',path,defaultBase.resolve(path)+'',defaultBase.authority)
+    		//console.warn(defaultBase+'',path,defaultBase.resolve(path)+'',defaultBase.authority)
     		
     		//console.log(path,defaultBase)
     		//console.log('###'+defaultBase.resolve(path))

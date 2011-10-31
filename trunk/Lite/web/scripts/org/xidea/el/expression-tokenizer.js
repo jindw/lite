@@ -64,7 +64,7 @@ var fns = {
 	parseError:function(msg){
 	    msg = msg+"\n@"+ this.start + "\n"
 				+ this.value.substring(this.start)+"\n----\n"+this.value
-		$log.error(msg);
+		console.error(msg);
 		throw new Error(msg);
 	},
 	findOperator :function() {// optimize json ,:[{}]

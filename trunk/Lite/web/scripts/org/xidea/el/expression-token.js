@@ -330,7 +330,7 @@ function getELType(el){
 						return TYPE_BOOLEAN;
 				}
 			}else if(arg1[0] == OP_GET){
-				//$log.warn(uneval(arg1));
+				//console.warn(uneval(arg1));
 				arg2 = arg1[2];
 				arg1 = arg1[1];
 				if(arg2[0] == VALUE_CONSTANTS){

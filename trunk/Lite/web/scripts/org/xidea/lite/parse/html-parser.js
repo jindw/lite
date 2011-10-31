@@ -55,7 +55,7 @@ var HTML = {
 		var autoform = this.getAttribute(AUTO_FORM_PREFIX);
 		if(autoform!=null){
 			var name_ = el.getAttribute('name');
-			//$log.warn(uneval(autoform),name_);
+			//console.warn(uneval(autoform),name_);
 			if(name_){
 				var type = el.getAttribute('type');
 				if(!/^(?:reset|button|submit)$/i.test(type)){
@@ -106,7 +106,7 @@ var HTML_EXT = {
 		var oldAutoform = this.getAttribute(AUTO_FORM_PREFIX);
 		try{
 			var prefix = findXMLAttribute(node,'*value');
-			//$log.info("#####",prefix);
+			//console.info("#####",prefix);
 			if(prefix == 'true'){
 				prefix = '';
 			}
@@ -127,7 +127,7 @@ var HTML_EXT = {
 			var value = findXMLAttribute(node,'*value');
 			this.setAttribute(XML_SPACE_TRIM,value == 'true'?true:value == 'false'?false:null);
     		
-//			$log.error(this.getClass(),XML_SPACE_TRIM,this.getAttribute(XML_SPACE_TRIM));
+//			console.error(this.getClass(),XML_SPACE_TRIM,this.getAttribute(XML_SPACE_TRIM));
     		
     		parseChildRemoveAttr(this,node);
     	}finally{
@@ -141,7 +141,7 @@ function buildMoved(tag){
 		var fn = Core[tag];
 		HTML_EXT[tag]= fn;
 		Core[tag] = function(){
-			$log.info("标签:"+tag+ " 已经从core到：html-ext上了！")
+			console.info("标签:"+tag+ " 已经从core到：html-ext上了！")
 			fn.apply(this,arguments);
 		}
 		return true;
@@ -221,7 +221,7 @@ function processJS(value){
 	if(value2 != value){
 		try{
 			new Function(value2);//属性中直接插入的脚本（没有语句，不可能是json变量）
-			//$log.error(value2)
+			//console.error(value2)
 			return value;
 		}catch(e){
 		}
@@ -252,7 +252,7 @@ function parseHtmlScript(el){
 				if(child.nodeType==3 || child.nodeType == 4){//text/cdata
 					buf.push(child.data);
 				}else{
-					$log.warn('script 中不能用嵌入html标签，建议将脚本放在 <![CDATA[...]]>中。');
+					console.warn('script 中不能用嵌入html标签，建议将脚本放在 <![CDATA[...]]>中。');
 				}
 				el.removeChild(child);
 			}

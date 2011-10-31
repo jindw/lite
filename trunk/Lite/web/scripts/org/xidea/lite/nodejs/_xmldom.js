@@ -21,7 +21,7 @@ DOMParser.prototype.parseFromString = function(text){
 	var t2 = +new Date();
 	var doc2 = new DOMImplementation().loadXML(text);
 	var t3 = +new Date();
-	$log.debug("时间差",t2-t1,t3-t2,doc2.documentElement.namespaceURI);
+	console.debug("时间差",t2-t1,t3-t2,doc2.documentElement.namespaceURI);
 	var isBrower = window.document && document.body
 	return isBrower ? doc : doc2;
 }

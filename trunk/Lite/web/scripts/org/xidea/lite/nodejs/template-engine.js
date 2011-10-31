@@ -1,60 +1,48 @@
-var fs = require('fs');
-var Path = require('path');
 function TemplateEngine(root){
-	var config = Path.resolve(root,'WEB-INF/lite.xml');
-	//console.log(Path.existsSync(config))
-	if(Path.existsSync(config)){
-		config = loadXMLFile(config,config+'');
-	}else{
-		config = null;
-	}
-	var root ='file:///'+ String(root).replace(/\\/g,'/');
-	//this.config.root.reserve(uri.path)
-	this.config = new ParseConfig(root,parseConfig(config));
-	//console.dir(this.config._groups);
+	this.root = root;
+	this.compiler = require('child_process').fork(__dirname + '/template-setup.js',[root]);
+	this.templateMap = {};
+	this.renderTask = {};
+	this.compiler.on('message', function(result) {
+		var res = result[0];
+		var fn = result[1];
+		//var featureMap = result[2];
+		var tpl = new (Template)(new Function(fn));
+		this.templateMap[res[0]] = tpl; 
+		for(var i=0;i<res.length;i++){
+//			fs.watchFile(filename, function(pre,next){
+//				
+//			})
+		}
+		var task = this.renderTask[path];
+		if(task){
+			delete this.renderTask[path];
+			for(var i=0;i<task.length;i++){
+				render.apply(null,task[i])
+			}
+		}
+	}); 
 }
 TemplateEngine.prototype.render=function(path,data,response){
-	var context = buildContext(this.config,path);
-	//console.dir(context.featureMap)
-	var litecode = context.toList();
-	var translator = new JSTranslator();//'.','/','-','!','%'
-	translator.liteImpl = 'liteImpl';//avoid inline jslib 
-	var jscode = translator.translate(litecode,true);
-	var fcode = jscode
-	var i = fcode.indexOf('charAt')
-	
-	//console.log(fcode.substr(i-100,300));
-	data =  window.eval("["+(fcode||null)+"][0]");
-	var tpl = new (Template)(data);
-	var data = tpl.render(data);
-	response.write(data,'utf-8')
+	var tpl = this.getTemplate(path);
+	if(tpl){
+		render(tpl,data,response);
+	}else{
+		(this.renderTask[path] || (this.renderTask[path] =[])).push([path,data,response]);
+		this.compiler.send({path:path });
+	}
 }
 
-function buildContext(config,path){
-	var context = new ParseContext(config,path);
-	context.loadXML = loadXML;
-	context.loadText = loadText;
-	var uri = context.createURI(path);
-	context.parse(uri);
-	return context;
+TemplateEngine.prototype.getTemplate=function(path){
+	var cache = this.templateMap[path];
+	var res = cache[0];
+	var tpl = cache[1];
+	if(res){
+		return tpl;
+	}
 }
-function loadText(uri){
-	var uri2 = this.config.root.resolve(uri.path.replace(/^\//,''));
-	var path = uri2.path.replace(/^[\/\\]([A-Z]\:[\/\\])/,'$1');
-	var text = fs.readFileSync(path,'utf-8');
-	//console.log(text);
-	return text;
-}
-function loadXML(uri){
-	this.setCurrentURI(uri);
-	var uri2 = this.config.root.resolve(uri.path.replace(/^\//,''));
-	var path = uri2.path.replace(/^[\/\\]([A-Z]\:[\/\\])/,'$1');
-	return loadXMLFile(path,uri)
-}
-function loadXMLFile(file,uri){
-	var text = fs.readFileSync(file,'utf-8');
-	var text = normalizeLiteXML(text,uri);
-	var xml = new DOMParser().parseFromString(text);
-	xml.documentURI = uri+'' || ''+file;
-	return xml;
+function render(tpl,data,response){
+	var rtv = tpl.render(data);
+	response.write(rtv,'utf-8')
+	return ;
 }

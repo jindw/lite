@@ -52,7 +52,7 @@ WebCompiler.prototype.save = function(){
 		window.eval('('+xhr.responseText+')')
 		return true;
 	}catch(e){
-		$log.info("编译失败:",xhr.responseText);
+		console.info("编译失败:",xhr.responseText);
 		return false;
 	}
 }

@@ -59,7 +59,7 @@ function parseConfig(doc){
 	if(len >= 1){
 		var root = new LiteGroup(lites.item(0))
 		if(len>1){
-			$log.error("配置文件只允许一个lite节点","您的文档中包含"+len+"个节点，后续节点将作为第一个节点子节点解析。");
+			console.error("配置文件只允许一个lite节点","您的文档中包含"+len+"个节点，后续节点将作为第一个节点子节点解析。");
 			for(var i=1;i<len;i++){
 				root.children.push(new LiteGroup(lites[i],this));
 			}
@@ -109,7 +109,7 @@ function LiteGroup(node,parentConfig){
 				this.children.push(new LiteGroup(child,this))
 				break;
 			default:
-				$log.warn("unknow nodeName:"+child.nodeName);
+				console.warn("unknow nodeName:"+child.nodeName);
 			}
 		}
 		child = child.nextSibling;
@@ -150,7 +150,7 @@ LiteGroup.prototype.initialize = function(){
 		if(!this.layout || this.layout.charAt() == '/'){
 			this.featureMap["http://www.xidea.org/lite/features/config-layout"] = this.layout;
 		}else{
-			$log.error("layout 必须为绝对地址('/'开始),你的设置为："+this.layout);
+			console.error("layout 必须为绝对地址('/'开始),你的设置为："+this.layout);
 		}
 		
 	}
@@ -161,13 +161,13 @@ function mergeContentType(thiz,parentConfig){
 	var contentType = thiz.contentType;//不从parent继承
 	/*========= init 3 vars==========*/
 	if(contentType!=null){
-		$log.info("contentType 用于同时指定 type 和charset 属性，如此需求更推荐您采用type和encoding代替")
+		console.info("contentType 用于同时指定 type 和charset 属性，如此需求更推荐您采用type和encoding代替")
 		var p = contentType.indexOf('charset=');
 		if(p>0){
 			var charset = contentType.substring(p+8);
 			if(encoding){
 				if(charset.toUpperCase() != encoding.toUpperCase()){
-					$log.info('encoding 与 contentType 不一致'+encoding+','+contentType
+					console.info('encoding 与 contentType 不一致'+encoding+','+contentType
 						+"; ");
 				}
 			}else{
@@ -177,7 +177,7 @@ function mergeContentType(thiz,parentConfig){
 		var contentType0 = contentType.replace(/\s*;.*$/,'');
 		if(type){
 			if(type.toUpperCase() != contentType0.toUpperCase()){
-				$log.error('type 与 contentType 不一致'+type+','+contentType0
+				console.error('type 与 contentType 不一致'+type+','+contentType0
 					+';type 设置将被忽略');
 			}
 		}

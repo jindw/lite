@@ -22,7 +22,7 @@ function buildTopChain(context){
 }
 
 function doNext(node){
-	//$log.info(typeof node,node&& node.tagName)
+	//console.info(typeof node,node&& node.tagName)
 	if (this.subIndex > 0) {
 		var next = this.getSubChain(this.subIndex - 1);
 	} else {
@@ -34,11 +34,11 @@ function doParse(node,chain){
 	try{
 		var parser = chain._nodeParsers[chain.index];
 		if(parser == null){
-			$log.error(parser,chain.index,chain._nodeParsers);
+			console.error(parser,chain.index,chain._nodeParsers);
 		}
 		parser(node,chain,chain);
 	}catch(e){
-		$log.error("解析器执行异常："+parser,e)
+		console.error("解析器执行异常："+parser,e)
 	}
 }
 function getSubChain(subIndex){

@@ -58,6 +58,7 @@ public class WebServer {
 		File webroot = new File(new File(WebServer.class.getResource("/")
 				.toURI()), "../../").getCanonicalFile().getAbsoluteFile();
 		// webroot = new File(webroot,"../build/dest/php-example");
+		webroot = new File(webroot,"../../JSideHosts/CSSSprite");
 		startServer(webroot);
 	}
 

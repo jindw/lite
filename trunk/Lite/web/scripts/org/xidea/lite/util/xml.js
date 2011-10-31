@@ -6,14 +6,14 @@ function loadLiteXML(uri,root){
 			}else if(uri.scheme == 'lite'){
 	    		var path = uri.path+(uri.query||'')+(uri.fragment || '');
 	    		path = path.replace(/^\//,'./');
-	    		//$log.warn(uri+'@'+path)
+	    		//console.warn(uri+'@'+path)
 	    		uri = root.resolve(path)+'';
 	    	}else{
 	    		uri+='';
 	    	}
 		}
         if(/^[\s\ufeff]*[<#]/.test(uri)){
-        	//$log.info(uri)
+        	//console.info(uri)
     	    var doc =parseXMLByText(uri.replace(/^[\s\ufeff]*/,''))
     	    //alert([data,doc.documentElement.tagName])
     	}else{
@@ -32,7 +32,7 @@ function loadLiteXML(uri,root){
     		}
     	}
 	}catch(e){
-		$log.error("文档解析失败:"+uri,e)
+		console.error("文档解析失败:"+uri,e)
 		throw e;
 	}
 	return doc;
@@ -112,9 +112,9 @@ function parseXMLByText(text,url){
 			//report normalizeLiteXML bug
 			return xml;
 		}
-	    $log.error("解析xml失败:",errors.join('\n'),text2);
+	    console.error("解析xml失败:",errors.join('\n'),text2);
     }catch(e){
-    	$log.error("解析xml失败:",e,text);
+    	console.error("解析xml失败:",e,text);
     }
     
 }
@@ -245,17 +245,17 @@ function findXMLAttribute(el,key){
 			var v = el.getAttribute(an);//ie bug: no hasAttribute
 			if(v || (typeof el.hasAttribute != 'undefined') && el.hasAttribute(an)){//ie bug
 				if(i>1 && key.charAt(0) != '#'){
-					$log.warn("标准属性名为："+key +'; 您采用的是：'+an);
+					console.warn("标准属性名为："+key +'; 您采用的是：'+an);
 				}
 				return v;
 			}
 		}
 	}
 	if(required){
-		$log.error("标记："+el.tagName+"属性：'"+key +"' 为必要属性。");
+		console.error("标记："+el.tagName+"属性：'"+key +"' 为必要属性。");
 	}
 	}catch(e){
-		$log.error(e)
+		console.error(e)
 	}
 	return null;
 }
@@ -264,11 +264,11 @@ function findXMLAttributeAsEL(el){
 	if(el !== null){
 		var el2 = el.replace(/^\s*\$\{([\s\S]*)\}\s*$/,"$1")
 		if(el == el2){
-			$log.warn("缺少表达式括弧,文本将直接按表达式返回",el);
+			console.warn("缺少表达式括弧,文本将直接按表达式返回",el);
 		}else{
 			el2 = el2.replace(/^\s+|\s+$/g,'');
 			if(!el2){
-				$log.warn("表达式内容为空:",el);
+				console.warn("表达式内容为空:",el);
 			}
 			el = el2;
 		}
