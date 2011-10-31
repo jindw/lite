@@ -3,7 +3,6 @@ var Path = require('path');
 var vm = require('vm');
 var Path = require('path');
 var scriptBase = Path.join(__dirname,'../../../../');
-var root = process.argv[2].replace(/\/?$/,'/');
 var $JSI = {
 	impl:{
 		loadText : loadSource,
@@ -38,20 +37,10 @@ try{
 	evalSource(g,"$import('org.xidea.lite.nodejs:XPathEvaluator')",'classpath:///$import');
 	evalSource(g,"$import('org.xidea.lite.impl.js:*')",'classpath:///$import');
 	evalSource(g,"$import('org.xidea.lite.impl:*')",'classpath:///$import');
-	evalSource(g,"$import('org.xidea.lite.nodejs:TemplateCompiler')",'classpath:///$import');
-	var TemplateCompiler = evalSource(g,"return TemplateCompiler;",'classpath:///$import');
+	evalSource(g,"$import('org.xidea.lite.nodejs:LiteCompiler')",'classpath:///$import');
+	var LiteCompiler = evalSource(g,"return LiteCompiler;",'classpath:///$import');
 }catch(e){
 	console.log('error'+e);
 	throw e;
 }
-
-
-var templateCompiler= new TemplateCompiler(root);
-
-
-process.on('message', function(config) {
-	var path = config.path;
-	var result = templateCompiler.compile(path);
-    //console.log('child got message:', m.root);
-    process.send({path:path,code:result[1]})
-});
+exports.LiteCompiler = LiteCompiler;

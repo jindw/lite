@@ -1,6 +1,6 @@
 var fs = require('fs');
 var Path = require('path');
-function TemplateCompiler(root){
+function LiteCompiler(root){
 	var config = Path.resolve(root,'WEB-INF/lite.xml');
 	//console.log(Path.existsSync(config))
 	if(Path.existsSync(config)){
@@ -13,7 +13,7 @@ function TemplateCompiler(root){
 	this.config = new ParseConfig(root,parseConfig(config));
 	//console.dir(this.config._groups);
 }
-TemplateCompiler.prototype.compile=function(path){
+LiteCompiler.prototype.compile=function(path){
 	var context = buildContext(this.config,path);
 	//console.dir(context.featureMap)
 	var litecode = context.toList();

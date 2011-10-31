@@ -1,6 +1,6 @@
-function TemplateEngine(root){
+function LiteEngine(root){
 	this.root = root;
-	this.compiler = require('child_process').fork(__dirname + '/template-setup.js',[root]);
+	this.compiler = require('child_process').fork(__dirname + '/lite-setup.js',[root]);
 	var templateMap = this.templateMap = {};
 	var renderTask = this.renderTask = {};
 	this.compiler.on('message', function(result) {
@@ -24,7 +24,7 @@ function TemplateEngine(root){
 		}
 	}); 
 }
-TemplateEngine.prototype.render=function(path,data,response){
+LiteEngine.prototype.render=function(path,data,response){
 	var tpl = this.templateMap[path];
 	if(tpl){
 		render(tpl,data,response);
@@ -104,4 +104,4 @@ Template.prototype = {
         });
 	}
 }
-exports.TemplateEngine = TemplateEngine;
+exports.LiteEngine = LiteEngine;

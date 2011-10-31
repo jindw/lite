@@ -4,7 +4,7 @@ this.addScript("_xmldom.js",["DOMParser","DOMNode","DOMNodeList"]
 this.addScript("_xmlxpath.js","XPathEvaluator",
 	["DOMNode", "DOMNodeList"]
 )
-this.addScript("template-compiler.js","TemplateCompiler",
+this.addScript("jsi-lite-compiler.js","LiteCompiler",
 	["DOMParser","XPathEvaluator"],
 	["org.xidea.lite:Template",
 	 "org.xidea.lite.parse:ParseConfig",

@@ -7,8 +7,8 @@ var fs = require('fs');
 var Path = require('path');
 
 var root =Path.join(__dirname,'..');
-var TemplateEngine = require('../scripts/org/xidea/lite/nodejs/template-engine.js').TemplateEngine
-var templateEngine = new TemplateEngine(root);
+var LiteEngine = require('../scripts/org/xidea/lite/nodejs/lite-engine.js').LiteEngine
+var templateEngine = new LiteEngine(root);
 
 var http = require('http');
 //** 测试 
