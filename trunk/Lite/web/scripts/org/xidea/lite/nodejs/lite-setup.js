@@ -1,4 +1,5 @@
-var LiteCompiler = require('./lite-compiler').LiteCompiler;
+//var LiteCompiler = require('./lite-compiler').LiteCompiler;
+var LiteCompiler = require('../../../../../../build/dest/nodejs').LiteCompiler;
 var root = process.argv[2].replace(/\/?$/,'/');
 var templateCompiler= new LiteCompiler(root);
 

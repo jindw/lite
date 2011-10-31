@@ -72,7 +72,7 @@ function getLiteTagPosition(el){
 function loadExtObject(source){
 	try{
 		var p = /\b(?:document|xmlns|(?:parse|before|seek)\w*)\b/g;
-		var fn = new Function("console",source+"\n return function(){return eval(arguments[0])}");
+		var fn = new Function("console","var window = this;"+source+"\n return function(){return eval(arguments[0])}");
 		var m,o;
 		var objectMap = {};
 	}catch(e){

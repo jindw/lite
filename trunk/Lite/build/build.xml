@@ -6,8 +6,8 @@
 	<available file="../JSA/build/dest/JSide.jar" property="JSAPath" value="web/WEB-INF/lib/JSI.jar;web/WEB-INF/classes;../JSA/build/dest/JSide.jar;" />
 
 	<target name="init">
-		<delete dir="build/dest/jslite"/>
-		<delete dir="build/dest/release"/>
+		<delete dir="build/dest/jslite" />
+		<delete dir="build/dest/release" />
 		<mkdir dir="build/dest/jslite" />
 		<mkdir dir="build/dest/release" />
 		<mkdir dir="build/dest/jslite/el" />
@@ -55,7 +55,7 @@
 		<copy todir="web/WEB-INF/classes">
 			<fileset dir="src/main">
 				<include name="**/*.*" />
-				<exclude name="**/script/**"/>
+				<exclude name="**/script/**" />
 			</fileset>
 			<fileset dir="web/scripts">
 				<include name="**/*.*" />
@@ -171,8 +171,8 @@
 		<java fork="true" classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
 			<arg value="-scriptBase" />
 			<arg value="${basedir}/web/scripts" />
-			<arg value="-internalPrefix"/>
-			<arg value="lite$"/>
+			<arg value="-internalPrefix" />
+			<arg value="lite$" />
 			<arg value="-config.features" />
 			<arg value=":Debug" />
 			<arg value="-exports" />
@@ -192,8 +192,8 @@
 		<java fork="true" failonerror="true" classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
 			<arg value="-scriptBase" />
 			<arg value="${basedir}/web/scripts" />
-			<arg value="-internalPrefix"/>
-			<arg value="dataView$"/>
+			<arg value="-internalPrefix" />
+			<arg value="dataView$" />
 			<arg value="-exports" />
 			<arg value="org.xidea.lite.web:DataView" />
 			<arg value="-outputExported" />
@@ -204,10 +204,30 @@
 			<arg value="-scriptBase" />
 			<arg value="${basedir}/web/scripts" />
 			<arg value="-exports" />
-			<arg value="org.xidea.lite.nodejs:TemplateEngine" />
+			<arg value="org.xidea.lite.nodejs:LiteCompiler" />
 			<arg value="-outputExported" />
 			<arg value="${basedir}/build/dest/nodejs.js" />
 		</java>
+	</target>
+	<target name="nodejs">
+		<echo>导出NodeJS版本</echo>
+		<java fork="true" failonerror="true" classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
+			<arg value="-scriptBase" />
+			<arg value="${basedir}/web/scripts" />
+			<arg value="-exports" />
+			<arg value="org.xidea.lite.nodejs:DOMParser" />
+			<arg value="org.xidea.lite.nodejs:XPathEvaluator" />
+			<arg value="org.xidea.lite.nodejs:LiteCompiler" />
+			<arg value="-outputExported" />
+			<arg value="${basedir}/build/dest/nodejs1.js" />
+		</java>
+		<echo file="${basedir}/build/dest/nodejs0.js">this.eval =function(){return eval(arguments[0])};var window = this;var $JSI = {impl:{log:console.info}};exports.LiteCompiler = LiteCompiler;</echo>
+		<concat destfile="${basedir}/build/dest/nodejs.js">
+			<filelist>
+				<file name="${basedir}/build/dest/nodejs0.js"/>
+				<file name="${basedir}/build/dest/nodejs1.js"/>
+			</filelist>
+		</concat>
 	</target>
 	<target name="compressImpl">
 		<echo>压缩JSLite实现</echo>
@@ -217,8 +237,8 @@
 		<java fork="true" failonerror="true" classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
 			<arg value="-scriptBase" />
 			<arg value="${basedir}/web/scripts" />
-			<arg value="-internalPrefix"/>
-			<arg value="liteImpl$"/>
+			<arg value="-internalPrefix" />
+			<arg value="liteImpl$" />
 			<arg value="-exports" />
 			<arg value="org.xidea.el:*" />
 			<arg value="org.xidea.lite.impl:*" />
@@ -257,8 +277,8 @@
 			<arg value="${basedir}/web/scripts" />
 			<arg value="-exports" />
 			<arg value="org.xidea.lite.*" />
-			<arg value="-internalPrefix"/>
-			<arg value="lite$"/>
+			<arg value="-internalPrefix" />
+			<arg value="lite$" />
 			<arg value="-outputExported" />
 			<arg value="${basedir}/build/dest/release/template.js" />
 		</java>
@@ -267,8 +287,8 @@
 			<arg value="${basedir}/web/scripts" />
 			<arg value="-exports" />
 			<arg value="org.xidea.lite.impl.js.liteWrapImpl" />
-			<arg value="-internalPrefix"/>
-			<arg value="liteWrapImpl$"/>
+			<arg value="-internalPrefix" />
+			<arg value="liteWrapImpl$" />
 			<arg value="-outputExported" />
 			<arg value="${basedir}/build/dest/release/lite-wrap-impl.js" />
 		</java>
@@ -282,31 +302,31 @@
 		<echo>liteWrap发布到 ${webdest}</echo>
 		<copy todir="${webdest}">
 			<fileset dir="build/dest/">
-				<include name="release/*.js"/>
+				<include name="release/*.js" />
 			</fileset>
 		</copy>
 		<echo>编译模板</echo>
 		<java jar="build/dest/Lite.jar" fork="true">
-			<arg value="-root"/>
-			<arg value="web"/>
-			<arg value="-translator"/>
-			<arg value="php"/>
-			<arg value="-output"/>
-			<arg value="${webdest}"/>
-			<arg value="-includes"/>
-			<arg value="/doc/guide/**"/>
-			<arg value="/doc/test.xhtml"/>
+			<arg value="-root" />
+			<arg value="web" />
+			<arg value="-translator" />
+			<arg value="php" />
+			<arg value="-output" />
+			<arg value="${webdest}" />
+			<arg value="-includes" />
+			<arg value="/doc/guide/**" />
+			<arg value="/doc/test.xhtml" />
 		</java>
 		<echo>发布测试数据</echo>
-		<mkdir dir="${webdest}/doc/test-data"/>
+		<mkdir dir="${webdest}/doc/test-data" />
 		<java classname="org.xidea.el.test.AutoELTest" classpath="web/WEB-INF/classes;web/WEB-INF/lib/junit.jar;build/dest/Lite.jar" fork="true">
-			<arg value="${webdest}"/>
+			<arg value="${webdest}" />
 		</java>
 		<java classname="org.xidea.lite.test.AutoSyntaxTest" classpath="web/WEB-INF/classes;web/WEB-INF/lib/junit.jar;build/dest/Lite.jar" fork="true">
-			<arg value="${webdest}"/>
+			<arg value="${webdest}" />
 		</java>
 		<java classname="org.xidea.lite.test.DocumentExampleTest" classpath="web/WEB-INF/classes;web/WEB-INF/lib/junit.jar;build/dest/Lite.jar" fork="true">
-			<arg value="${webdest}"/>
+			<arg value="${webdest}" />
 		</java>
 	</target>
 
@@ -318,7 +338,7 @@
 		</delete>
 		<zip comment="前端编译" file="build/dest/php-example-${version}.zip" encoding="GBK">
 			<fileset dir="web">
-				<include name="lite-service.php"/>
+				<include name="lite-service.php" />
 				<include name="example/test.php" />
 				<include name="example/test.xhtml" />
 			</fileset>
@@ -332,9 +352,9 @@
 		</zip>
 	</target>
 	<target name="javadoc">
-		<javadoc charset="UTF-8" docencoding="UTF-8"  encoding="UTF-8" sourcepath="src/main" destdir="web/doc/api/2_0" linksource="true">
+		<javadoc charset="UTF-8" docencoding="UTF-8" encoding="UTF-8" sourcepath="src/main" destdir="web/doc/api/2_0" linksource="true">
 			<fileset dir="src/main">
-				<include name="**.java"/>
+				<include name="**.java" />
 			</fileset>
 			<classpath>
 				<fileset dir="web/WEB-INF/lib">

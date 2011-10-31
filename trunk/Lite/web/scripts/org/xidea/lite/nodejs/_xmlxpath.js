@@ -11,6 +11,7 @@ XPathEvaluator.prototype.evaluate = function(xpath,currentNode){
 	}
 	return result;
 }
+
 //for nodejs
 window.XPathEvaluator = XPathEvaluator;
 //        //var nsResolver = xpe.createNSResolver(doc.documentElement);
