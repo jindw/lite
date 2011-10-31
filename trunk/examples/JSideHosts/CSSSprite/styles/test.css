@@ -57,10 +57,10 @@
 	border-top:1px solid rgb(239,228,176);
 }
 .message-foot{
-	background:url('../images/box/boxb.png') no-repeat left;
+	background:url('../images/box/boxb.png') no-repeat left bottom;
 }
 .message-foot div{
-	background:url('../images/box/boxb[r].png') no-repeat right;
+	background:url('../images/box/boxb[r].png') no-repeat right bottom;
 }
 
 .message-foot div div{
