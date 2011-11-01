@@ -229,7 +229,7 @@
 			</fileset>
 		</copy>
 		<echo>打包NodeJS脚本</echo>
-		<tar destfile="build/dest/nodelite.tar">
+		<tar destfile="build/dest/nodelite.tgz" compression="gzip">
 			<tarfileset prefix="package/" dir="build/dest/nodelite">
 				<include name="*.js" />
 			</tarfileset>
