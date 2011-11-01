@@ -1,13 +1,8 @@
-if(process.argv[2] == 'debug'){
-	console.info('debug model');
-	var LiteEngine = require('../scripts/org/xidea/lite/nodejs/lite-engine').LiteEngine
-}else{
-	var LiteEngine = require('./lite-engine').LiteEngine;
-}
+var LiteEngine = require('./lite-engine').LiteEngine;
 var vm = require('vm');
 var fs = require('fs');
 var Path = require('path');
-var root =__dirname.replace(/(?:\/WEB\-INF)?\/?/i,'/');
+var root = /^\//.test(process.argv[2])?process.argv[2] : __dirname.replace(/(?:\/WEB\-INF)?\/?/i,'/');
 var templateEngine = new LiteEngine(root);
 var http = require('http');
 function writeNotFound(response){
