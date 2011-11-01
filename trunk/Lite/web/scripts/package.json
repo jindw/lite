@@ -38,7 +38,7 @@
     "repositories": [
         {
             "type": "svn",
-            "url": "https://lite.googlecode.com/svn/trunk/Lite"
+            "url": "http://lite.googlecode.com/svn/trunk/Lite/web/scripts/"
         }
     ],
     "implements": [
@@ -47,7 +47,7 @@
     },
     "engines" : { "node" : ">=0.5" },
     "directories": {
-        "lib": "./web/scripts/"
+        "lib": "./"
     },
-    "main": "./web/scripts/org/xidea/lite/nodejs/lite-engine.js"
+    "main": "./org/xidea/lite/nodejs/lite-engine.js"
 }
