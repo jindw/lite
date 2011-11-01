@@ -240,7 +240,9 @@
 				<include name="package.json" />
 			</tarfileset>
 		</tar>
-		<tar destfile="build/dest/nodelite-source.tar" compression="gzip">
+	</target>
+	<target name="nodelite-source">
+		<tar destfile="build/dest/nodelite-source.tgz" compression="gzip">
 			<tarfileset prefix="package/" dir="web/scripts/">
 				<include name="package.json" />
 				<include name="**/*.js" />
