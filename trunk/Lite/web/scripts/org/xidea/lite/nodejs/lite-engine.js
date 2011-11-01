@@ -1,4 +1,5 @@
 function LiteEngine(root){
+	root =root.replace(/\/?$/,'/');
 	this.root = root;
 	this.compiler = require('child_process').fork(__dirname + '/lite-setup.js',[root]);
 	var templateMap = this.templateMap = {};
@@ -20,7 +21,8 @@ function LiteEngine(root){
 				}
 			}
 		}else{//clear cache
-			delete this.templateMap[path];
+			delete templateMap[path];
+			console.info('clear template cache:' ,path);
 		}
 	}); 
 }

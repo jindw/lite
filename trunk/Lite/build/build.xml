@@ -9,6 +9,7 @@
 		<delete dir="build/dest/jslite" />
 		<delete dir="build/dest/release" />
 		<mkdir dir="build/dest/jslite" />
+		<mkdir dir="build/dest/nodejs" />
 		<mkdir dir="build/dest/release" />
 		<mkdir dir="build/dest/jslite/el" />
 		<mkdir dir="build/dest/jslite/lite" />
@@ -199,17 +200,8 @@
 			<arg value="-outputExported" />
 			<arg value="${basedir}/build/dest/data-view.js" />
 		</java>
-		<echo>导出NodeJS版本</echo>
-		<java fork="true" failonerror="true" classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
-			<arg value="-scriptBase" />
-			<arg value="${basedir}/web/scripts" />
-			<arg value="-exports" />
-			<arg value="org.xidea.lite.nodejs:LiteCompiler" />
-			<arg value="-outputExported" />
-			<arg value="${basedir}/build/dest/nodejs.js" />
-		</java>
 	</target>
-	<target name="nodejs">
+	<target name="nodejs" depends="init">
 		<echo>导出NodeJS版本</echo>
 		<java fork="true" failonerror="true" classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
 			<arg value="-scriptBase" />
@@ -219,15 +211,23 @@
 			<arg value="org.xidea.lite.nodejs:XPathEvaluator" />
 			<arg value="org.xidea.lite.nodejs:LiteCompiler" />
 			<arg value="-outputExported" />
-			<arg value="${basedir}/build/dest/nodejs1.js" />
+			<arg value="${basedir}/build/dest/nodejs/lite-compiler1.js" />
 		</java>
-		<echo file="${basedir}/build/dest/nodejs0.js">this.eval =function(){return eval(arguments[0])};var window = this;var $JSI = {impl:{log:console.info}};exports.LiteCompiler = LiteCompiler;</echo>
-		<concat destfile="${basedir}/build/dest/nodejs.js">
+		<echo file="${basedir}/build/dest/nodejs/lite-compiler0.js">this.eval =function(){return eval(arguments[0])};var window = this;var $JSI = {impl:{log:console.info}};exports.LiteCompiler = LiteCompiler;</echo>
+		<concat destfile="${basedir}/build/dest/nodejs/lite-compiler.js">
 			<filelist>
-				<file name="${basedir}/build/dest/nodejs0.js"/>
-				<file name="${basedir}/build/dest/nodejs1.js"/>
+				<file name="${basedir}/build/dest/nodejs/lite-compiler0.js"/>
+				<file name="${basedir}/build/dest/nodejs/lite-compiler1.js"/>
 			</filelist>
 		</concat>
+		<delete  file="${basedir}/build/dest/nodejs/lite-compiler0.js"/>
+		<delete  file="${basedir}/build/dest/nodejs/lite-compiler1.js"/>
+		<copy todir="${basedir}/build/dest/nodejs/">
+			<fileset dir="${basedir}/web/scripts/org/xidea/lite/nodejs">
+				<include name="lite-engine.js"/>
+				<include name="lite-setup.js"/>
+			</fileset>
+		</copy>
 	</target>
 	<target name="compressImpl">
 		<echo>压缩JSLite实现</echo>
