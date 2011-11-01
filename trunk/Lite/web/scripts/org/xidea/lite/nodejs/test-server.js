@@ -64,5 +64,6 @@ function startTestServer(templateEngine,host,port){
 		}
 		
 	}).listen(port||1985,host||'127.0.0.1');
+	console.log('lite test server is started: http://'+(host||'127.0.0.1')+':' + (port||1985) )
 }
 exports.startTestServer = startTestServer;

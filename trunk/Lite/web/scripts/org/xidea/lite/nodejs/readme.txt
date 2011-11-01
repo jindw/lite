@@ -10,7 +10,9 @@ var liteEngine = new LiteEngine(root);
 			
 /*============== for simple test ===================*/
 var LiteEngine = require('lite').LiteEngine;
-var root =__dirname;
-var liteEngine = new LiteEngine(root);
+var liteEngine = new LiteEngine("./");
 //debug server
 liteEngine.startTestServer("127.0.0.1",1985);
+
+/*============= for line code test ==============*/ 
+new (require('lite').LiteEngine)('./').	startTestServer("127.0.0.1",1985);
