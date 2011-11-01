@@ -291,6 +291,8 @@
 			<arg value="liteWrapImpl$" />
 			<arg value="-outputExported" />
 			<arg value="${basedir}/build/dest/release/lite-wrap-impl.js" />
+			<arg value="-bootCached"/>
+			<arg value="org.xidea.lite.*" />
 		</java>
 	</target>
 	<target name="build" depends="compress,package,php-example">

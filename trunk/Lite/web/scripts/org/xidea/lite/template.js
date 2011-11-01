@@ -52,7 +52,7 @@ var liteWrap = function(replaceMap){
 	function tz(offset){
 		return offset?(offset>0?'-':offset*=-1||'+')+dl(offset/60,'00')+':'+dl(offset%60,'00'):'Z'
 	}
-	var liteImpl = {
+	liteImpl = {
 		//xt:0,xa:1,xp:2
 		0:function(txt,type){
 			return String(txt).replace(
@@ -105,19 +105,7 @@ var liteWrap = function(replaceMap){
 	        });
 		}
 	}
-	function loadImpl(){
-		loadImpl = null;
-    	impl = String(this.document && document.cookie || '').match(/LITE_COMPILE=([^;]+)/);
-    	impl = impl && impl[1];
-    	if(!impl){
-    		if(typeof $import == 'function'){
-    			return $import('org.xidea.lite.impl.js:liteWrapImpl');
-    		}
-    	}
-    	//
-    	var impl = impl || 'http://www.xidea.org/lite/release/lite-wrap-impl.js'
-    	document.write('<script src="'+impl+'"></script>')
-	}
+	Template.prototype = liteImpl;
 	function wrap(data,global){
 		var impl = null;
 		return typeof liteWrapImpl == 'function' ? liteWrapImpl(data,global):
@@ -126,14 +114,35 @@ var liteWrap = function(replaceMap){
 					if(typeof liteWrapImpl == 'function'){
 						impl = liteWrapImpl(data,global);
 					}else{
-						alert('liteWrapImpl not load');
+						document.cookie = 'LITE_COMPILER='+implUrl
+						//alert('liteWrapImpl not load');
+						location.reload();
 					}
 					
 				}
 				return impl.apply(this,arguments);
 			};
 	}
-	Template.prototype = liteImpl;
+	
+	//
+	function loadImpl(){
+		loadImpl = null;
+    	if(!implUrl){
+    		if(typeof $import == 'function'){
+    			return $import('org.xidea.lite.impl.js:liteWrapImpl');
+    		}
+    	}
+    	//
+    	document.write('<script src="'+implUrl+'"></script>')
+	}
+	
+	var implUrl =  String(this.document && document.cookie || '').match(/\bLITE_COMPILER=([^;]+)/);
+    implUrl = implUrl && implUrl[1];
+    if(implUrl){
+    	loadImpl();
+    }else{
+    	implUrl = 'http://www.xidea.org/lite/release/lite-wrap-impl.js'
+    }
 	return function(fn,global){
 	    loadImpl && loadImpl();
 	    return wrap(fn,global || liteImpl);

@@ -2,7 +2,7 @@
  */
 function liteWrapImpl(data,liteImpl){
 	var code = liteWrapCompile(Function.prototype.toString.apply(data,[]),'liteImpl')
-	data =  window.eval('(function(liteImpl){return '+code+'})');
+	data =  window.eval('(function(liteImpl){return '+code.replace(/^\s+/,'')+'})');
 	data = data(liteImpl);
     return data;
 }
