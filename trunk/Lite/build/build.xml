@@ -230,15 +230,21 @@
 		</copy>
 		<echo>打包NodeJS脚本</echo>
 		<tar destfile="build/dest/nodelite.tar">
-			<fileset dir="build/dest/nodelite">
+			<tarfileset prefix="package/" dir="build/dest/nodelite">
 				<include name="*.js" />
-			</fileset>
-			<fileset dir="web/WEB-INF/">
+			</tarfileset>
+			<tarfileset prefix="package/" dir="web/WEB-INF/">
 				<include name="node-test.js" />
-			</fileset>
-			<fileset dir="web/scripts/">
+			</tarfileset>
+			<tarfileset prefix="package/" dir="web/scripts/">
 				<include name="package.json" />
-			</fileset>
+			</tarfileset>
+		</tar>
+		<tar destfile="build/dest/nodelite-source.tar" >
+			<tarfileset prefix="package/" dir="web/scripts/">
+				<include name="package.json" />
+				<include name="**/*.js" />
+			</tarfileset>
 		</tar>
 	</target>
 	<target name="compressImpl">
@@ -321,7 +327,8 @@
 			</fileset>
 		</copy>
 		<echo>nodelite-${version}.tar发布到 ${webdest}/release</echo>
-		<copy tofile="${webdest}/release/nodelite-${version}.tar" file="build/dest/nodelite.tar"/>
+		<copy tofile="${webdest}/release/nodelite-${version}.tar"
+			file="build/dest/nodelite.tar"/>
 		<echo>编译模板</echo>
 		<java jar="build/dest/Lite.jar" fork="true">
 			<arg value="-root" />
