@@ -329,7 +329,7 @@
 			</fileset>
 		</copy>
 		<echo>nodelite-${version}.tar发布到 ${webdest}/release</echo>
-		<copy tofile="${webdest}/release/nodelite-${version}.tar"
+		<copy tofile="${webdest}/release/nodelite-${version}.tgz"
 			file="build/dest/nodelite.tar"/>
 		<echo>编译模板</echo>
 		<java jar="build/dest/Lite.jar" fork="true">
