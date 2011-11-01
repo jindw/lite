@@ -229,7 +229,7 @@
 			</fileset>
 		</copy>
 		<echo>打包NodeJS脚本</echo>
-		<zip destfile="build/dest/nodelite.zip">
+		<tar destfile="build/dest/nodelite.tar">
 			<fileset dir="build/dest/nodelite">
 				<include name="*.js" />
 			</fileset>
@@ -239,7 +239,7 @@
 			<fileset dir="web/scripts/">
 				<include name="package.json" />
 			</fileset>
-		</zip>
+		</tar>
 	</target>
 	<target name="compressImpl">
 		<echo>压缩JSLite实现</echo>
@@ -320,8 +320,8 @@
 				<include name="release/*.js" />
 			</fileset>
 		</copy>
-		<echo>nodelite-${version}.zip发布到 ${webdest}/release</echo>
-		<copy tofile="${webdest}/release/nodelite-${version}.zip" file="build/dest/nodelite.zip"/>
+		<echo>nodelite-${version}.tar发布到 ${webdest}/release</echo>
+		<copy tofile="${webdest}/release/nodelite-${version}.tar" file="build/dest/nodelite.tar"/>
 		<echo>编译模板</echo>
 		<java jar="build/dest/Lite.jar" fork="true">
 			<arg value="-root" />
