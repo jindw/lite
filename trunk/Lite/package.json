@@ -1,0 +1,56 @@
+{
+    "name": "lite",
+    "version": "2.0.11",
+    "description": "A cross platform template engine base on xml/html and javascript expression",
+    "keywords": [
+      "javascript",
+      "xhtml",
+      "html",
+      "Java",
+      "PHP",
+      "template"
+    ],
+    "maintainers": [{
+      "name": "jindw",
+      "email": "jindw@xidea.org",
+      "url": "http://www.xidea.org"
+    }],
+    "contributors": [
+      {"name":  "combbs",
+        "email": "combbs@gmail.com"
+      },{"name":  "wukexin.cn",
+        "email": "wukexin.cn@gmail.com"
+      },{ 
+        "name":  "sunrongyan",
+        "email": "sunrongyan@gmail.com"
+      }
+    ],
+    "bugs": {
+        "email": "jindw@xidea.org",
+        "url": "http://code.google.com/p/lite/issues/list"
+    },
+    "licenses": [
+        {
+            "type": "LGPL",
+            "url": "http://www.gnu.org/licenses/lgpl.html"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "svn",
+            "url": "https://lite.googlecode.com/svn/trunk/Lite"
+        }
+    ],
+    "implements": [
+    ],
+    "dependencies": {
+    },
+    "devDependencies" : {
+      "console.log" : "*"
+    },
+    "engines" : { "node" : ">=0.5" },
+    "directories": {
+        "lib": "./web/scripts/"
+    },
+    "main": "./web/scripts/org/xidea/lite/nodejs/lite-engine.js"
+}
