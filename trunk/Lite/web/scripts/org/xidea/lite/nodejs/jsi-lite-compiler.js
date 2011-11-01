@@ -17,6 +17,11 @@ LiteCompiler.prototype.compile=function(path){
 	var context = buildContext(this.config,path);
 	//console.dir(context.featureMap)
 	var litecode = context.toList();
+	var prefix = litecode.shift();
+	if(typeof prefix != 'string'){
+		litecode.unshift(prefix);
+		prefix = '';
+	}
 	var translator = new JSTranslator();//'.','/','-','!','%'
 	translator.liteImpl = 'liteImpl';//avoid inline jslib 
 	var jscode = translator.translate(litecode,false).replace(/^\s+/,'');
@@ -29,7 +34,7 @@ LiteCompiler.prototype.compile=function(path){
 		res[i] = res[i].path
 	}
 	var litecode = "(function(liteImpl){return "+jscode+"})";
-	return [res,litecode,featureMap];
+	return [res,litecode,featureMap,prefix];
 }
 
 function buildContext(config,path){

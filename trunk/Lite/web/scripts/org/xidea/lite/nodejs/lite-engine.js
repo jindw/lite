@@ -1,5 +1,5 @@
 function LiteEngine(root){
-	root =root.replace(/\/?$/,'/');
+	root =root.replace(/[\\\/]?$/,'/');
 	this.root = root;
 	this.compiler = require('child_process').fork(__dirname + '/lite-setup.js',[root]);
 	var templateMap = this.templateMap = {};
@@ -10,6 +10,7 @@ function LiteEngine(root){
 		if(code){
 			//var featureMap = result[2];
 			var tpl = new (Template)(eval('('+code+')'));
+			tpl['#prefix'] = result.prefix;
 			templateMap[path] = tpl; 
 			var task = renderTask[path];
 			if(task){
@@ -39,9 +40,31 @@ LiteEngine.prototype.startTestServer = function(host,port){
 	require('./test-server').startTestServer(this,host,port);
 }
 function render(tpl,data,response){
-	var rtv = tpl.render(data);
-	response.write(rtv,'utf-8');
-	response.end();
+	if(typeof data == 'function'){
+		//TODO,需要引擎级别实现异步,这里知识兼容一下接口
+		renderSync(tpl,callback,response)
+	}else{
+		var rtv = tpl.render(data);
+		response.write(tpl['#prefix'],'utf-8');
+		response.write(rtv,'utf-8');
+		response.end();
+	}
+}
+function renderSync(tpl,callback,response){
+	response.write(tpl['#prefix'],'utf-8');
+	var rtv = data(function(data){
+		if(tpl){
+			var rtv = tpl.render(data);
+			response.write(rtv,'utf-8');
+			response.end();
+		}
+	});
+	if(rtv){
+		var rtv = tpl.render(rtv);
+		response.write(rtv,'utf-8');
+		response.end();
+		tpl = null;
+	}
 }
 function Template(fn){
     this.render = fn(this);

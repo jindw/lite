@@ -2,9 +2,9 @@ var vm = require('vm');
 var fs = require('fs');
 var Path = require('path');
 var http = require('http');
-function writeNotFound(response){
+function writeNotFound(filepath,response){
      response.writeHead(404, {"Content-Type": "text/plain"});    
-     response.write("404 Not Found\n");    
+     response.write("404 Not Found \n filepath:"+filepath);    
      response.end();    
 }
 function writeFile(filepath,response){
@@ -55,10 +55,10 @@ function startTestServer(templateEngine,host,port){
 	    			}else if(stats.isFile()){
 	    				writeFile(filepath,response);
 	    			}else{
-	    				writeNotFound(response);   
+	    				writeNotFound(filepath,response);   
 	    			}
 	    		}else{
-	    			writeNotFound(response);   
+	    			writeNotFound(filepath,response);   
 	    		}
 	    	})
 		}
