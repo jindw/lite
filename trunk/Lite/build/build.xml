@@ -216,25 +216,26 @@
 		<echo file="${basedir}/build/dest/nodelite/lite-compiler0.js">this.eval =function(){return eval(arguments[0])};var window = this;var $JSI = {impl:{log:console.info}};exports.LiteCompiler = LiteCompiler;</echo>
 		<concat destfile="${basedir}/build/dest/nodelite/lite-compiler.js">
 			<filelist>
-				<file name="${basedir}/build/dest/nodelite/lite-compiler0.js"/>
-				<file name="${basedir}/build/dest/nodelite/lite-compiler1.js"/>
+				<file name="${basedir}/build/dest/nodelite/lite-compiler0.js" />
+				<file name="${basedir}/build/dest/nodelite/lite-compiler1.js" />
 			</filelist>
 		</concat>
-		<delete  file="${basedir}/build/dest/nodelite/lite-compiler0.js"/>
-		<delete  file="${basedir}/build/dest/nodelite/lite-compiler1.js"/>
+		<delete file="${basedir}/build/dest/nodelite/lite-compiler0.js" />
+		<delete file="${basedir}/build/dest/nodelite/lite-compiler1.js" />
 		<copy todir="${basedir}/build/dest/nodelite/">
 			<fileset dir="${basedir}/web/scripts/org/xidea/lite/nodejs">
-				<include name="lite-engine.js"/>
-				<include name="lite-setup.js"/>
+				<include name="lite-engine.js" />
+				<include name="lite-setup.js" />
+				<include name="test-server.js" />
+				<include name="readme.txt" />
 			</fileset>
 		</copy>
+
 		<echo>打包NodeJS脚本</echo>
 		<tar destfile="build/dest/nodelite.tgz" compression="gzip">
 			<tarfileset prefix="package/" dir="build/dest/nodelite">
 				<include name="*.js" />
-			</tarfileset>
-			<tarfileset prefix="package/" dir="web/WEB-INF/">
-				<include name="node-test.js" />
+				<include name="readme.txt" />
 			</tarfileset>
 			<tarfileset prefix="package/" dir="web/scripts/">
 				<include name="package.json" />
@@ -311,7 +312,7 @@
 			<arg value="liteWrapImpl$" />
 			<arg value="-outputExported" />
 			<arg value="${basedir}/build/dest/release/lite-wrap-impl.js" />
-			<arg value="-bootCached"/>
+			<arg value="-bootCached" />
 			<arg value="org.xidea.lite.*" />
 		</java>
 	</target>
@@ -329,8 +330,7 @@
 			</fileset>
 		</copy>
 		<echo>nodelite-${version}.tar发布到 ${webdest}/release</echo>
-		<copy tofile="${webdest}/release/nodelite-${version}.tgz"
-			file="build/dest/nodelite.tgz"/>
+		<copy tofile="${webdest}/release/nodelite-${version}.tgz" file="build/dest/nodelite.tgz" />
 		<echo>编译模板</echo>
 		<java jar="build/dest/Lite.jar" fork="true">
 			<arg value="-root" />

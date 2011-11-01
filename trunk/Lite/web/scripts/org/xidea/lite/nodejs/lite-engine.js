@@ -35,7 +35,9 @@ LiteEngine.prototype.render=function(path,data,response){
 		this.compiler.send({path:path });
 	}
 }
-
+LiteEngine.prototype.startTestServer = function(host,port){
+	require('./test-server').startTestServer(this,host,port);
+}
 function render(tpl,data,response){
 	var rtv = tpl.render(data);
 	response.write(rtv,'utf-8');

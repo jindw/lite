@@ -10,7 +10,7 @@ function LiteCompiler(root){
 	}
 	var root ='file:///'+ String(root).replace(/\\/g,'/');
 	//this.config.root.reserve(uri.path)
-	this.config = new ParseConfig(root,parseConfig(config));
+	this.config = new ParseConfig(root,config && parseConfig(config));
 	//console.dir(this.config._groups);
 }
 LiteCompiler.prototype.compile=function(path){
