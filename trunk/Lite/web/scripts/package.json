@@ -49,5 +49,5 @@
     "directories": {
         "lib": "./"
     },
-    "main": "./org/xidea/lite/nodejs/lite-engine.js"
+    "main": "./lite-engine.js"
 }
