@@ -7,7 +7,7 @@ if(process.argv[2] == 'debug'){
 var vm = require('vm');
 var fs = require('fs');
 var Path = require('path');
-var root =Path.join(__dirname,'../');
+var root =__dirname.replace(/(?:\/WEB\-INF)?\/?/i,'/');
 var templateEngine = new LiteEngine(root);
 var http = require('http');
 function writeNotFound(response){

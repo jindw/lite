@@ -9,7 +9,7 @@
 		<delete dir="build/dest/jslite" />
 		<delete dir="build/dest/release" />
 		<mkdir dir="build/dest/jslite" />
-		<mkdir dir="build/dest/nodejs" />
+		<mkdir dir="build/dest/nodelite" />
 		<mkdir dir="build/dest/release" />
 		<mkdir dir="build/dest/jslite/el" />
 		<mkdir dir="build/dest/jslite/lite" />
@@ -102,7 +102,7 @@
 			</manifest>
 			<fileset dir="web/scripts">
 				<include name="org/xidea/**/*.js" />
-				<exclude name="**/nodejs/*.*" />
+				<exclude name="**/nodelite/*.*" />
 			</fileset>
 			<fileset dir="src/php/">
 				<include name="lite/*.*" />
@@ -201,7 +201,7 @@
 			<arg value="${basedir}/build/dest/data-view.js" />
 		</java>
 	</target>
-	<target name="nodejs" depends="init">
+	<target name="nodelite" depends="init">
 		<echo>导出NodeJS版本</echo>
 		<java fork="true" failonerror="true" classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
 			<arg value="-scriptBase" />
@@ -211,18 +211,18 @@
 			<arg value="org.xidea.lite.nodejs:XPathEvaluator" />
 			<arg value="org.xidea.lite.nodejs:LiteCompiler" />
 			<arg value="-outputExported" />
-			<arg value="${basedir}/build/dest/nodejs/lite-compiler1.js" />
+			<arg value="${basedir}/build/dest/nodelite/lite-compiler1.js" />
 		</java>
-		<echo file="${basedir}/build/dest/nodejs/lite-compiler0.js">this.eval =function(){return eval(arguments[0])};var window = this;var $JSI = {impl:{log:console.info}};exports.LiteCompiler = LiteCompiler;</echo>
-		<concat destfile="${basedir}/build/dest/nodejs/lite-compiler.js">
+		<echo file="${basedir}/build/dest/nodelite/lite-compiler0.js">this.eval =function(){return eval(arguments[0])};var window = this;var $JSI = {impl:{log:console.info}};exports.LiteCompiler = LiteCompiler;</echo>
+		<concat destfile="${basedir}/build/dest/nodelite/lite-compiler.js">
 			<filelist>
-				<file name="${basedir}/build/dest/nodejs/lite-compiler0.js"/>
-				<file name="${basedir}/build/dest/nodejs/lite-compiler1.js"/>
+				<file name="${basedir}/build/dest/nodelite/lite-compiler0.js"/>
+				<file name="${basedir}/build/dest/nodelite/lite-compiler1.js"/>
 			</filelist>
 		</concat>
-		<delete  file="${basedir}/build/dest/nodejs/lite-compiler0.js"/>
-		<delete  file="${basedir}/build/dest/nodejs/lite-compiler1.js"/>
-		<copy todir="${basedir}/build/dest/nodejs/">
+		<delete  file="${basedir}/build/dest/nodelite/lite-compiler0.js"/>
+		<delete  file="${basedir}/build/dest/nodelite/lite-compiler1.js"/>
+		<copy todir="${basedir}/build/dest/nodelite/">
 			<fileset dir="${basedir}/web/scripts/org/xidea/lite/nodejs">
 				<include name="lite-engine.js"/>
 				<include name="lite-setup.js"/>
@@ -298,9 +298,18 @@
 	<target name="build" depends="compress,package,php-example">
 		<copy tofile="../TT/web/WEB-INF/lib/Lite-${version}.jar" file="build/dest/Lite.jar" />
 	</target>
-	<target name="publish" depends="build,compressWrap">
+	<target name="publish" depends="build,compressWrap,nodelite">
 		<available file="${basedir}/build/dest/" property="webdest" value="${basedir}/build/dest/web" />
 		<available file="../../xidea/lite" property="webdest" value="../../xidea/lite/" />
+		<echo>打包NodeJS脚本</echo>
+		<zip destfile="build/dest/nodelite.zip">
+			<fileset dir="build/dest/nodelite">
+				<include name="*.js" />
+			</fileset>
+			<fileset dir="web/WEB-INF/">
+				<include name="node-test.js" />
+			</fileset>
+		</zip>
 		<echo>liteWrap发布到 ${webdest}</echo>
 		<copy todir="${webdest}">
 			<fileset dir="build/dest/">
