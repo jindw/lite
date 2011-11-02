@@ -22,7 +22,7 @@
 </body>
 </html>]]></source>
 		<source path="/parent3.xhtml"><![CDATA[
-<?xml version="1.0" encoding="GBK">
+<?xml version="1.0" encoding="GBK"?>
 <html>
 <title><c:block name="title">默认标题3</c:block></title>
 <body>
@@ -49,7 +49,7 @@
     <c:block name="title">标题</c:block>
 </c:extends>]]></source>
 			<expect><![CDATA[
-<?xml version="1.0" encoding="GBK"><html>
+<?xml version="1.0" encoding="GBK"?><html>
 <title>标题</title>
 <body>
 	<div id="content">默认内容3</div>

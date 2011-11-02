@@ -11,18 +11,18 @@
 			<expect><![CDATA[<p>test2/test2</p>]]></expect>
 		</case>
 		<case title="capture">
-			<source><![CDATA[<p><c:var name="var1">${intValue}[${test2()}]</c:def><c:def
+			<source><![CDATA[<p><c:var name="var1">${intValue}[${test2()}]</c:var><c:def
 			 name="test2()">test2</c:def>{${var1}}</p>]]></source>
 			<expect><![CDATA[<p>{123[test2]}</p>]]></expect>
 		</case>
 		<case title="var">
-			<source><![CDATA[<p><c:var name="var1" value="${intValue+'['+test2()+']'}"></c:def><c:def
+			<source><![CDATA[<p><c:var name="var1" value="${intValue+'['+test2()+']'}"></c:var><c:def
 			 name="test2()">test2</c:def>{${var1}}</p>]]></source>
 			<expect><![CDATA[<p>{123[test2]}</p>]]></expect>
 		</case>
 		<case title="capture+var">
 			<source><![CDATA[<p><c:var name="var1" value="${'a'}"/><c:var
-			 name="var1">${intValue}[${test2()}${var1}<c:var name="var1" value="${'b'}"/>]${var1}</c:def><c:def
+			 name="var1">${intValue}[${test2()}${var1}<c:var name="var1" value="${'b'}"/>]${var1}</c:var><c:def
 			 name="test2()">test2</c:def>{${var1}}</p>]]></source>
 			<expect><![CDATA[<p>{123[test2a]b}</p>]]></expect>
 		</case>
