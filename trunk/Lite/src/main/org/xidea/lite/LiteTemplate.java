@@ -38,6 +38,7 @@ public class LiteTemplate implements Template {
 	public static final String FOR_KEY = "for";
 	public static final String FEATURE_CONTENT_TYPE = "http://www.xidea.org/lite/features/content-type";
 	public static final String FEATURE_ENCODING = "http://www.xidea.org/lite/features/encoding";
+	public static final String FEATURE_I18N = "http://www.xidea.org/lite/features/i18n";
 
 	protected ExpressionFactory expressionFactory = new ExpressionFactoryImpl();
 	protected Object[] items;// transient
@@ -446,6 +447,10 @@ public class LiteTemplate implements Template {
 
 	public String getEncoding() {
 		return this.featureMap.get(FEATURE_ENCODING);
+	}
+
+	public String getI18N() {
+		return this.featureMap.get(FEATURE_I18N);
 	}
 
 }

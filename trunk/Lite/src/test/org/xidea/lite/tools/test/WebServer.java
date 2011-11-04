@@ -106,6 +106,11 @@ public class WebServer {
 					String litecode = ht.getLitecode(path);
 					String phpcode = LiteCompiler.buildPHP(path, litecode);
 					String litecodepath = "/WEB-INF/litecode/" + path.replace('/', '^');
+					String i18n = ((LiteTemplate)ht.getTemplate(path)).getI18N();
+					if(i18n != null){
+						writeFile(litecodepath + ".i18n",
+								i18n.getBytes("utf-8"));
+					}
 					writeFile(litecodepath, litecode.getBytes("UTF-8"));
 					writeFile(litecodepath+".php", phpcode.getBytes(manager.getFeatureMap(path).get(LiteTemplate.FEATURE_ENCODING)));
 					

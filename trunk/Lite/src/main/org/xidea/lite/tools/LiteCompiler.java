@@ -165,9 +165,15 @@ public class LiteCompiler {
 				}
 				String litecodepath = "/WEB-INF/litecode/" + path.replace('/', '^');
 				String result = engine.getLitecode(path);
+				
 
 				String encoding = resourceManager.getFeatureMap(path).get(
 						LiteTemplate.FEATURE_ENCODING);
+				String i18n = ((LiteTemplate)engine.getTemplate(path)).getI18N();
+				if(i18n != null){
+					resultMap.put(litecodepath + ".i18n",
+							i18n.getBytes("utf-8"));
+				}
 				// 中间代码永远是UTF-8；但是静态文本中大大字符还是要确保安全。
 				this.resultMap.put(litecodepath, result.getBytes("utf-8"));
 				if (this.translator != null) {
@@ -176,6 +182,7 @@ public class LiteCompiler {
 						String code = buildPHP(path, result);
 						resultMap.put(litecodepath + ".php",
 								code.getBytes(encoding));
+						
 					}
 				}
 

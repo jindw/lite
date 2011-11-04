@@ -41,12 +41,30 @@ function writeDir(url,filepath,response){
 }
 function startTestServer(templateEngine,host,port){
 	var root = templateEngine.root;
+	var actionList = []
 	http.createServer(function (req, response) {
 		var url = req.url;
-		response.writeHead(200, {'Content-Type': 'text/html;charset=utf-8'});
+		var i = actionList.length;
+		while(i>0){
+			var action = actionList[--i];
+			var pattern = actionList[--i];
+			if(pattern.match(url)){
+				action(req,response);
+				return;
+			}
+		}
 		if(/\.xhtml$/.test(url)){
-			templateEngine.render(url,{},response);
+			var jsonpath = Path.join(root,url.replace(/\.xhtml$/,'.json'));
+	    	fs.stat(jsonpath,function(error,stats){
+	    		if(stats && stats.isFile()){
+					var json = fs.readFileSync(jsonpath,'utf8');
+					templateEngine.render(url,new Function('return '+json)(),response);
+	    		}else{
+	    			templateEngine.render(url,{},response);
+	    		}
+	    	})
 		}else{
+			response.writeHead(200, {'Content-Type': 'text/html;charset=utf-8'});
 			var filepath = Path.join(root,url);
 	    	fs.stat(filepath,function(error,stats){
 	    		if(stats){
@@ -64,6 +82,14 @@ function startTestServer(templateEngine,host,port){
 		}
 		
 	}).listen(port||1985,host||'127.0.0.1');
-	console.log('lite test server is started: http://'+(host||'127.0.0.1')+':' + (port||1985) )
+	console.log('lite test server is started: http://'+(host||'127.0.0.1')+':' + (port||1985) );
+	return {
+		addAction:function(path,action){
+			if('string' == typeof path){
+				path = new RegExp('^'+path.replace(/[^\w]/,'\\$&')+'$');
+			}
+			actionList.push(path, action);
+		}
+	}
 }
 exports.startTestServer = startTestServer;

@@ -24,6 +24,7 @@ import org.xidea.lite.parse.ParseConfig;
 import org.xidea.lite.parse.ParseContext;
 
 public class HotLiteEngine extends LiteEngine {
+	private static final String I18N_DATA_KEY = "#i18n-data";
 	private static final Log log = LogFactory.getLog(HotLiteEngine.class);
 	private HashMap<String, Object> lock = new HashMap<String, Object>();
 	private HashMap<String, Info> infoMap = new HashMap<String, Info>();
@@ -129,7 +130,10 @@ public class HotLiteEngine extends LiteEngine {
 		ParseContext context = createParseContext(path);
 		List<Object> items = parse(path, context);
 		List<File> files = getAssociatedFiles(context);
-		Template template = new LiteTemplate(items, context.getFeatureMap());
+
+		HashMap<String, String> featureMap = new HashMap<String, String>(context.getFeatureMap());
+		featureMap.put(LiteTemplate.FEATURE_I18N, (String)context.getAttribute(I18N_DATA_KEY));
+		Template template = new LiteTemplate(items, featureMap);
 
 		if (compiledBase != null && ParseUtil.isFile(compiledBase)) {
 			File file = new File(toCompiedURI(path));
@@ -205,7 +209,9 @@ public class HotLiteEngine extends LiteEngine {
 		List<String> resource = toAssociatedPaths(getAssociatedFiles(context));
 		result.add(resource);
 		result.add(items);
-		result.add(context.getFeatureMap());
+		HashMap<String, Object> featureMap = new HashMap<String, Object>(context.getFeatureMap());
+		featureMap.put(LiteTemplate.FEATURE_I18N, context.getAttribute(I18N_DATA_KEY));
+		result.add(featureMap);
 		return JSONEncoder.encode(result);
 
 	}

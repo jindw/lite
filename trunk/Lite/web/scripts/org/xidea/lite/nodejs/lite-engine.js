@@ -37,7 +37,7 @@ LiteEngine.prototype.render=function(path,data,response){
 	}
 }
 LiteEngine.prototype.startTestServer = function(host,port){
-	require('./test-server').startTestServer(this,host,port);
+	return require('./test-server').startTestServer(this,host,port);
 }
 function render(tpl,data,response){
 	if(typeof data == 'function'){
