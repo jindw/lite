@@ -77,7 +77,7 @@ th {
 							<c:for var="type" list="${['java','js','php']}">
 								<c:var name="error" value="${item[type]}" />
 								<td title="${error}" class="${error?'error':'pass'}"
-									onclick="$!{error && 'showText(this)' ||''}">
+									onclick="$!{error && 'showError(this)' ||''}">
 									${error?'显示错误':'测试通过'}</td>
 							</c:for>
 						</tr>
@@ -128,6 +128,12 @@ function addCase(title,result){
 		allErrorMap[n] += errorMap[n];
 	}
 	return showCase(title,result,errorMap);
+}
+function showError(e){
+	e.removeChild(e.firstChild);
+	var error  = e.getAttribute('title');
+	var expect = e.parentNode.firstChild.getAttribute('title');
+	e.appendChild(document.createTextNode(error+'\n\n======= not match the expected:======\n'+expect))
 }
 function showText(e){
 	e.removeChild(e.firstChild);

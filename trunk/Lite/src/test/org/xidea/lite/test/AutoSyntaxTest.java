@@ -219,22 +219,32 @@ public class AutoSyntaxTest {
 						Map<String, String> sourceMap = (Map<String, String>) args[0];
 						String model = (String) args[1];
 						String expect = (String) args[2];
+						boolean format = (Boolean) args[3];
 						Map<String, String> resultMap = LiteTest.runTemplate(
 								sourceMap, model, TEST_XHTML, expect);
 						HashMap<String, String> info = new HashMap<String, String>();
 						info.put("source", sourceMap.get(TEST_XHTML));
 						info.put("model", model);
 						info.put("expect", expect);
-						
+						String formatedExpected = null;
 						for (Map.Entry<String, String> entry : resultMap
 								.entrySet()) {
 							if (!entry.getKey().startsWith("#")) {
+								String value = entry.getValue();
 								if(expect == null){
-									expect = entry.getValue();
+									expect = value;
 								}
-								if (expect.equals(entry.getValue())) {
+								if (expect.equals(value)) {
 								} else {
-									info.put(entry.getKey(), entry.getValue());
+									if(format){
+										expect = formatedExpected == null?
+													(formatedExpected=LiteTest.normalizeXML(expect))
+													:formatedExpected;
+										value = LiteTest.normalizeXML(value);
+									}
+									if(!expect.equals(value)) {
+										info.put(entry.getKey(), value);
+									}
 								}
 							}
 						}
