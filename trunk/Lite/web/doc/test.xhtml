@@ -132,7 +132,7 @@ function addCase(title,result){
 function showError(e){
 	e.removeChild(e.firstChild);
 	var error  = e.getAttribute('title');
-	var expect = e.parentNode.firstChild.getAttribute('title');
+	var expect = e.parentNode.getElementsByTagName('td')[0].getAttribute('title');
 	e.appendChild(document.createTextNode(error+'\n\n======= not match the expected:======\n'+expect))
 }
 function showText(e){
