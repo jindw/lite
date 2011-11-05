@@ -118,7 +118,7 @@ JSTranslator.prototype = {
     		result.push("if('undefined' ==typeof ",context.liteImpl,"){",context.liteImpl,'=',INIT_SCRIPT,"}");
     	}
 	    result.push('\n',code.replace(/<\/script>/g,'<\\/script>'));
-	    return result.join("");
+	    return result.join("").replace(/^\s*[\r\n]+/,'');
 	}
 }
 /**

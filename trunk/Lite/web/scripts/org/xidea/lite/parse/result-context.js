@@ -127,10 +127,10 @@ ResultContext.prototype = {
 	},
 	toList:function(){
 		if(!this.optimized){
-		var result = optimizeResult(this.result);
-		var defMap = {};
-    	var pureCode = buildTreeResult(result,defMap);
-    	this.optimized = doOptimize(defMap,pureCode);
+			var result = optimizeResult(this.result);
+			var defMap = {};
+	    	var pureCode = buildTreeResult(result,defMap);
+	    	this.optimized = doOptimize(defMap,pureCode);
 		}
     	return this.optimized;
 	}

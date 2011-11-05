@@ -90,6 +90,25 @@
 			showResult(jscode);
 			updateResultRunner('js',litecode,jscode);
 		}
+		function compileToNodeJS(){
+			try{
+				var context = buildContext();
+				var litecode = context.toList();
+				var prefix = extractStaticPrefix(litecode);
+				
+				var translator = new JSTranslator();
+				translator.liteImpl = 'liteImpl';
+				var jscode = translator.translate(litecode);
+			}catch(e){
+				$log.error("测试失败：模板编译异常：",e);
+				return;
+			}
+			var nodecode = ['[(function(liteImpl){return (',jscode,')}),',
+						stringifyJSON(context.featureMap),',',
+						stringifyJSON(prefix),']'].join('');
+			showResult(nodecode);
+			updateResultRunner('NodeJS',litecode,nodecode);
+		}
 		function compileToPHP(){
 			try{
 				var context = buildContext();
@@ -116,7 +135,7 @@
 			updateResultRunner('java',litecode,null);
 		}
 		function updateResultRunner(type,litecode,runcode){
-			runStatus = {type:type,litecode:litecode,runcode:runcode}
+			runStatus = {type:type.toLowerCase(),litecode:litecode,runcode:runcode}
 			var runButton = document.getElementById("runButton");
 			runButton.disabled=false
 			runButton.value="运行("+type+")"
@@ -152,13 +171,20 @@
 						var url = 'http://litetest.sinaapp.com/?php='+encodeURIComponent(code)+'&t='+ +new Date();
 						loader.innerHTML = '<h2>load php result ....</h2><p>php 预览环境由新浪appengine提供。<a href="'+url+'">手动预览</a></p>';
 					
-					}else{
+					}else if(runStatus.type == 'java'){
 						var code = runStatus.litecode;
 						var model = stringifyJSON(data);
 						var url = 'http://www.xidea.org:1981/lite/doc/runner.jsp?code='
 							+encodeURIComponent(code)+'&model='
 							+encodeURIComponent(model)+'&'+ +new Date();
 						loader.innerHTML = '<h2>load java result ....</h2><p>java 预览环境由满江红开源组织提供。<a href="'+url+'">手动预览</a></p>';
+					}else if(runStatus.type == 'nodejs'){
+						var code = runStatus.runcode;
+						var model = stringifyJSON(data);
+						var url = 'http://www.xidea.org:1985/runner?code='
+							+encodeURIComponent(code)+'&model='
+							+encodeURIComponent(model)+'&'+ +new Date();
+						loader.innerHTML = '<h2>load nodejs result ....</h2><p>nodejs 预览环境由满江红开源组织提供。<a href="'+url+'">手动预览</a></p>';
 					}
 				}catch(e){
 				}
@@ -188,6 +214,7 @@
 		<div class="toolbar">
 			<input type="button" value="编译(JS)" onclick="compileToJS()" />
 			<input type="button" value="编译(PHP)" onclick="compileToPHP()" />
+			<input type="button" value="编译(NodeJS)" onclick="compileToNodeJS()" />
 			<input type="button" title="lite" value="编译(Java)" onclick="compileToLite()" />
 			<input type="button" id="runButton" disabled value="运行(?)"
 				onclick="runTemplate()" />

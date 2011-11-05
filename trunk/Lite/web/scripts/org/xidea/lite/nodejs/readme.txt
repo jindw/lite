@@ -1,18 +1,14 @@
-/*============== for use ===================*/
+
 var LiteEngine = require('lite').LiteEngine;
 var root =__dirname;
 var liteEngine = new LiteEngine(root);
 .....
-			
+	// 传入模板路径(以'/'开头)，模型对象(Object描述的key->value集)，
+	// response 对象:用于模板渲染时输出 head(response.writeHead())/内容(response.write())
+	// 并结束请求(response.end())
 	liteEngine.render(path,data,response);
-	liteEngine.render(path,callback,response);//传入模型的 callback方法，用于实现计算前输出。
-		
+	//传入模型生成函数，用于提前输出静态内容(如script标签)，优化加载性能。
+	liteEngine.render(path,callback,response);
 			
 /*============== for simple test ===================*/
-var LiteEngine = require('lite').LiteEngine;
-var liteEngine = new LiteEngine("./");
-//debug server
-liteEngine.startTestServer("127.0.0.1",1985);
-
-/*============= for line code test ==============*/ 
 new (require('lite').LiteEngine)('./').	startTestServer("127.0.0.1",1985);

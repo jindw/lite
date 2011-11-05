@@ -9,8 +9,7 @@ function LiteEngine(root){
 		var code = result.code;
 		if(code){
 			//var featureMap = result[2];
-			var tpl = new (Template)(eval('('+code+')'));
-			tpl['#prefix'] = result.prefix;
+			var tpl = new (Template)(eval('('+code+')'),result.featureMap,result.staticPrefix);
 			templateMap[path] = tpl; 
 			var task = renderTask[path];
 			if(task){
@@ -40,18 +39,18 @@ LiteEngine.prototype.startTestServer = function(host,port){
 	return require('./test-server').startTestServer(this,host,port);
 }
 function render(tpl,data,response){
+    response.writeHead(200, {"Content-Type": tpl.contentType});   
+	response.write(tpl.staticPrefix,'utf-8');
 	if(typeof data == 'function'){
 		//TODO,需要引擎级别实现异步,这里知识兼容一下接口
 		renderSync(tpl,callback,response)
 	}else{
 		var rtv = tpl.render(data);
-		response.write(tpl['#prefix'],'utf-8');
 		response.write(rtv,'utf-8');
 		response.end();
 	}
 }
 function renderSync(tpl,callback,response){
-	response.write(tpl['#prefix'],'utf-8');
 	var rtv = data(function(data){
 		if(tpl){
 			var rtv = tpl.render(data);
@@ -66,8 +65,12 @@ function renderSync(tpl,callback,response){
 		tpl = null;
 	}
 }
-function Template(fn){
-    this.render = fn(this);
+function Template(fn,featureMap,staticPrefix){
+    this.render = fn(new TemplateUnit());
+    this.featureMap = featureMap;
+    this.contentType = featureMap['http://www.xidea.org/lite/features/content-type'];
+    this.encoding = featureMap['http://www.xidea.org/lite/features/encoding'];
+    this.staticPrefix = staticPrefix ;
 }
 var replaceMap = {'"':'&#34;','<':'&lt;','&':'&#38;'};
 function replacer(c){return replaceMap[c]||c}
@@ -78,7 +81,8 @@ function dl(date,format){//3
 function tz(offset){
 	return offset?(offset>0?'-':offset*=-1||'+')+dl(offset/60,'00')+':'+dl(offset%60,'00'):'Z'
 }
-Template.prototype = {
+function TemplateUnit(){}
+TemplateUnit.prototype = {
 	//xt:0,xa:1,xp:2
 	0:function(txt,type){
 		return String(txt).replace(
@@ -132,3 +136,4 @@ Template.prototype = {
 	}
 }
 exports.LiteEngine = LiteEngine;
+exports.Template = Template;

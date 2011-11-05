@@ -18,6 +18,8 @@ this.addScript('parse-context.js','ParseContext'
 this.addScript('result-context.js','ResultContext'
                 ,0
                 ,['org.xidea.el.ExpressionTokenizer'
+                	,'org.xidea.lite.impl:PLUGIN_TYPE'
+                	,'org.xidea.lite.impl:PLUGIN_DEFINE'
                 	,'buildTreeResult'
                 	,'optimizeResult'
                 	,'doOptimize'
@@ -40,9 +42,13 @@ this.addScript('text-parser.js',['parseText']
 this.addScript('optimize-scope.js','OptimizeScope',
 				'org.xidea.el.*');
 
-this.addScript('optimize-util.js',['doOptimize','optimizeResult','buildTreeResult','PLUGIN_TYPE_MAP']
+this.addScript('optimize-util.js',['extractStaticPrefix','doOptimize','optimizeResult','buildTreeResult','PLUGIN_TYPE_MAP']
 				,'org.xidea.el.*'
 				,['OptimizeScope'
+					,"org.xidea.lite.impl:PLUGIN_DEFINE"
+					,"org.xidea.lite.impl:PLUGIN_TYPE"
+					,"org.xidea.lite.impl:CAPTURE_TYPE"
+					,"org.xidea.lite.impl:VAR_TYPE"
 					,"org.xidea.lite.util.stringifyJSON"
 					,"org.xidea.lite.impl.js:JSTranslator"
 					]);

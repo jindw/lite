@@ -1,6 +1,5 @@
-var fs = require('fs');
-var Path = require('path');
 function LiteCompiler(root){
+	var Path = require('path');
 	var config = Path.resolve(root,'WEB-INF/lite.xml');
 	//console.log(Path.existsSync(config))
 	if(Path.existsSync(config)){
@@ -17,14 +16,10 @@ LiteCompiler.prototype.compile=function(path){
 	var context = buildContext(this.config,path);
 	//console.dir(context.featureMap)
 	var litecode = context.toList();
-	var prefix = litecode.shift();
-	if(typeof prefix != 'string'){
-		litecode.unshift(prefix);
-		prefix = '';
-	}
+	var prefix = extractStaticPrefix(litecode);
 	var translator = new JSTranslator();//'.','/','-','!','%'
 	translator.liteImpl = 'liteImpl';//avoid inline jslib 
-	var jscode = translator.translate(litecode,false).replace(/^\s+/,'');
+	var jscode = translator.translate(litecode);
 	//console.log(fcode.substr(i-100,300));
 	
 	var res = context.getResources();
@@ -46,6 +41,7 @@ function buildContext(config,path){
 	return context;
 }
 function loadText(uri){
+	var fs = require('fs');
 	var uri2 = this.config.root.resolve(uri.path.replace(/^\//,''));
 	var path = uri2.path.replace(/^[\/\\]([A-Z]\:[\/\\])/,'$1');
 	var text = fs.readFileSync(path,'utf-8');
@@ -60,6 +56,7 @@ function loadXML(uri){
 }
 function loadXMLFile(file,uri){
 //	console.info(file);
+	var fs = require('fs');
 	var text = fs.readFileSync(file,'utf-8');
 	var text = normalizeLiteXML(text,uri);
 	var xml = new DOMParser().parseFromString(text);

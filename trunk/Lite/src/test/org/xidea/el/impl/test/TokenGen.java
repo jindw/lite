@@ -2,6 +2,7 @@ package org.xidea.el.impl.test;
 
 import static org.junit.Assert.fail;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,6 +16,15 @@ import org.xidea.el.impl.OperationStrategyImpl;
 
 public class TokenGen {
 	@SuppressWarnings("unchecked")
+	@Test public void test() throws UnsupportedEncodingException{
+		String[] code = "2C%22%B4%CE%BB%FA%BB%E1%A3%BA%A3%A9%3C%2F".split("%");
+		byte[] bts  =new byte[code.length];
+		for (int i = 0; i < bts.length; i++) {
+			bts[i] = (byte)Integer.parseInt(code[i], 16);
+		}
+		System.out.println(new String(bts,"GBK"));
+		
+	}
 	@Test
 	public void genFunctionsSupport()throws Exception {
 		ExpressionFactoryImpl exp = new ExpressionFactoryImpl();

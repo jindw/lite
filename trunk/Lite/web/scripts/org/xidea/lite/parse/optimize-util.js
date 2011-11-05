@@ -8,6 +8,25 @@
 			* 
  * @see org.xidea.lite.OptimizeContext#optimize();
  */
+function extractStaticPrefix(litecode){
+	var prefix = [];
+	var len = litecode.length;
+	for(var i=0;i<len;i++){
+		var item = litecode[i];
+		if(typeof item == 'string'){
+			prefix.push(item);
+			litecode.splice(i,1);
+			len--;
+			i--;
+		}else if(item instanceof Array){
+			if(item[0] == CAPTURE_TYPE || item[0] == VAR_TYPE || item[0] == PLUGIN_TYPE && item[2]['class'] == PLUGIN_DEFINE){
+			}else{
+				break;
+			}
+		}
+	}
+	return prefix.join('');
+}
 function doOptimize(defMap,templateList){
 	var pluginObjectList = [];
 	var optimizeContext = [templateList,defMap,pluginObjectList];

@@ -819,14 +819,14 @@ function addI18NData(context,i18nKey,content){
 	}
 	if(i18nKey in i18nObject){
 		i18nObject[i18nKey] = content;
-		i18nData = JSON.stringify(i18nObject)
+		i18nData = stringifyJSON(i18nObject)
 	}else{
 		if(i18nData == '{}'){
 			i18nData = '{'
 		}else{
 			i18nData = i18nData.slice(0,-1)+',';
 		}
-		i18nData = i18nData + '"'+i18nKey+'":' +JSON.stringify(content);
+		i18nData = i18nData + '"'+i18nKey+'":' +stringifyJSON(content);
 	}
 	
 	context.setAttribute("#i18n-data",i18nData);

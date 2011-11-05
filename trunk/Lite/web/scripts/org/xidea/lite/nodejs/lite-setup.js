@@ -51,6 +51,6 @@ var LiteCompiler = require('./lite-compiler').LiteCompiler;
 	    var res = result[0];
 //		console.info('resource config:' ,res);
 	    addTemplateWatch(path,res);
-	    process.send({path:path,action:'add',code:result[1],featureMap:result[2],prefix:result[3]})
+	    process.send({path:path,action:'add',code:result[1],featureMap:result[2],staticPrefix:result[3]})
 	});
 }();
