@@ -233,11 +233,11 @@
 
 		<echo>打包NodeJS脚本</echo>
 		<tar destfile="build/dest/nodelite.tgz" compression="gzip">
-			<tarfileset prefix="package/" dir="build/dest/nodelite">
+			<tarfileset prefix="lite/" dir="build/dest/nodelite">
 				<include name="*.js" />
 				<include name="readme.txt" />
 			</tarfileset>
-			<tarfileset prefix="package/" dir="web/scripts/">
+			<tarfileset prefix="lite/" dir="web/scripts/">
 				<include name="package.json" />
 			</tarfileset>
 		</tar>

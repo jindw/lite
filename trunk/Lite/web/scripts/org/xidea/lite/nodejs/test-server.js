@@ -127,6 +127,8 @@ function startTestServer(templateEngine,host,port){
 	    		}
 	    	})
 		}else if('/exit' == url){
+			response.write("server is closing!!");
+			response.end();
 			process.exit(0);
 		}else{
 			response.writeHead(200, {'Content-Type': 'text/html;charset=utf-8'});
