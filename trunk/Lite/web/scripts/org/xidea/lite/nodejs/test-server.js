@@ -126,6 +126,8 @@ function startTestServer(templateEngine,host,port){
 	    			templateEngine.render(url,{},response);
 	    		}
 	    	})
+		}else if('/exit' == url){
+			process.exit(0);
 		}else{
 			response.writeHead(200, {'Content-Type': 'text/html;charset=utf-8'});
 			var filepath = Path.join(root,url);

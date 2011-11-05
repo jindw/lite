@@ -1,6 +1,6 @@
 {
     "name": "lite",
-    "version": "2.0.13",
+    "version": "2.0.14",
     "description": "A cross platform template engine base on xml/html and javascript expression",
     "keywords": [
       "javascript",
