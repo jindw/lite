@@ -17,9 +17,13 @@ LiteCompiler.prototype.compile=function(path){
 	//console.dir(context.featureMap)
 	var litecode = context.toList();
 	var prefix = extractStaticPrefix(litecode);
-	var translator = new JSTranslator();//'.','/','-','!','%'
-	translator.liteImpl = 'liteImpl';//avoid inline jslib 
-	var jscode = translator.translate(litecode);
+	if(litecode.length){
+		var translator = new JSTranslator();//'.','/','-','!','%'
+		translator.liteImpl = 'liteImpl';//avoid inline jslib 
+		var jscode = translator.translate(litecode);
+	}else{//纯静态内容
+		var jscode = "function(){}";
+	}
 	//console.log(fcode.substr(i-100,300));
 	
 	var res = context.getResources();

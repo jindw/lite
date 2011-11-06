@@ -1,10 +1,36 @@
 <?php
 require_once("../WEB-INF/classes/lite/LiteEngine.php");
 $engine = new LiteEngine();
+$i18n_path = $engine->root.'/WEB-INF/i18n/zh/';
+if(@$_COOKIE["i18n_lang"] == 'en'){
+	$i18n_path = $engine->root.'/WEB-INF/i18n/en/';
+	if(realpath($i18n_path)){
+		$engine->i18ncode = $i18n_path;
+	}
+}
 $engine->debug = true;
 $engine->autocompile=false ;
 //初始化Lite Logo 的点阵数据 
 $path = @$_SERVER['PATH_INFO'] ;
+$action = @$_POST['i18n_action'];
+if($action == 'save'){
+	if(@$i18n_path){
+		$i18n_id =  $_POST['i18n_id'];
+		$i18n_value =  $_POST['i18n_value'];
+		$pos = strpos($i18n_id,'__');
+		$file = $i18n_path.substr($i18n_id,0,$pos).'.i18n';
+		if(file_exists($file)){
+			$i18n_data = json_decode(file_get_contents($file),true);
+		}else{
+			$i18n_data = array();
+		}
+		$i18n_data[$i18n_id] = $i18n_value;
+		file_put_contents($file,json_encode($i18n_data));
+		echo '{"success":true,"path":"'+$file+'"}';
+	}else{
+	}
+	exit();
+}
 
 if($path == '/guide/index.xhtml'){
         $ref = @$_SERVER['HTTP_REFERER'];

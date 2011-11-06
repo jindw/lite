@@ -9,7 +9,7 @@ this.addScript('json.js',["stringifyJSON","parseJSON"]);
 
 this.addScript('kv.js',["setByKey","getByKey","removeByKey"]);
 
-this.addScript('resource.js',["URI",'base64Encode']);
+this.addScript('resource.js',["URI",'base64Encode','i18nHash']);
 
 this.addScript('js-token.js',['partitionJavaScript','compressJS']);
 

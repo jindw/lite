@@ -12,7 +12,19 @@ var absURIPattern = /^[a-zA-Z][\w\.]*\:/;
 var uriChars = /\\|[\x22\x3c\x3e\x5c\x5e\x60\u1680\u180e\u202f\u205f\u3000]|[\x00-\x20]|[\x7b-\x7d]|[\x7f-\xa0]|[\u2000-\u200b]|[\u2028-\u2029]/g;
 var allEncodes = /[\x2f\x60]|[\x00-\x29]|[\x2b-\x2c]|[\x3a-\x40]|[\x5b-\x5e]|[\x7b-\uffff]/g;
 ///[\x22\x25\x3c\x3e\x5c\x5e\x60\u1680\u180e\u202f\u205f\u3000]|[\x00-\x20]|[\x7b-\x7d]|[\x7f-\xa0]|[\u2000-\u200b]|[\u2028-\u2029]/g;
-
+function i18nHash(path,i18nKey,text){
+	path = path.replace(/[^\w]|_/g,function(c){
+		return '_'+numberToString(100+c.charCodeAt(),62).slice(-2)
+	});
+	if(!i18nKey){
+		i18nKey = 0;
+		text = text.replace(/[^\s]/,function(c){
+			i18nKey = i18nKey + (i18nKey & 2) + c.charCodeAt();
+		})
+		i18nKey = numberToString(i18nKey,62)
+	}
+	return path +'__'+ i18nKey;
+}
 
 function encodeChar(i){
 	return "%"+(0x100+i).toString(16).substring(1)
@@ -114,7 +126,6 @@ URI.prototype = {
 	}
 }
 
-var b64codes = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='.split('');
 var btoa = window.btoa || function(bs){
 	var b64 = [];
     var bi = 0;
@@ -132,6 +143,16 @@ var btoa = window.btoa || function(bs){
     }
     return b64.join('');
 
+}
+var b64codes = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='.split('');
+function numberToString(value,radix){
+	var buf = [];
+	while(value>0){
+		var m = value%radix;
+		buf.push(b64codes[m]);
+		value = (value-m)/radix;
+	}
+	return buf.reverse().join('')
 }
 function utf8Replacer(c){
 	var n = c.charCodeAt();

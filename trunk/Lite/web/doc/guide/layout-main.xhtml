@@ -16,15 +16,51 @@
 				<div
 					style='left:${item[0]}px;top:${item[1]}px;width:${item[2]}px;height:${item[3]}px;'>&#160;</div>
 			</c:for>
-			
 		</div>
 		<h1>
 			<c:include path="$page" xpath="//xhtml:title/text()" />
-			
 		</h1>
-		<div style="position:absolute;top:20px;right:280px;">
-			<div><a href="">中文</a>|<a href="">English</a></div>
-			<div><a href="../test.xhtml">查看测试用例</a></div>
+		<div class="top-box">
+			<div id="i18n">
+				<span class="i18n_zh" onclick='i18n_reload("zh")'>中文</span>|
+				<span class='i18n_en' onclick='i18n_reload("en")'>English</span>
+				<div style='display:none'>
+				|<input type="checkbox" id='i18n_on' checked='checked'/>
+				<label for='i18n_on' title="右键点击内容片段在弹出框输入翻译">翻译</label>
+				</div>
+				<script>
+				//<![CDATA[
+				var cookie = ''+document.cookie;
+				var i18n_lang = cookie.replace(/^.*\bi18n_lang=([\w]+).*$/,'$1');
+				if(i18n_lang == cookie){i18n_lang = 'cn'}
+				function i18n_reload(i18n_lang){
+					document.cookie = 'i18n_lang='+i18n_lang;
+					location.reload();
+				}
+				document.getElementById('i18n').className ='i18n_'+ i18n_lang;
+				var i18n_on = document.getElementById('i18n_on')
+				document.body.oncontextmenu=function(event){
+					if(i18n_on.checked ||true){
+						var event = event || window.event;
+						var src = event.target || event.srcElement;
+						var id = src.getAttribute('data-i18n-key');
+						if(id){
+							var oldvalue = src.innerHTML;
+							var value = prompt('更正翻译('+i18n_lang+')：',oldvalue);
+							if(value && value != oldvalue){
+								var data = 'i18n_action=save&i18n_id='+encodeURIComponent(id)+'&i18n_value='+encodeURIComponent(value);
+								postData(location.href,data,function(){
+									src.innerHTML = value;
+								});
+							}
+							return false;
+						}	
+					}
+				}
+				//]]>
+				</script>
+			</div>
+			<div class="test"><a href="../test.xhtml">查看测试报表</a></div>
 		</div>
 		<div class="line" />
 	</div>

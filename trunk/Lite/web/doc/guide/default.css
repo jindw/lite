@@ -328,3 +328,19 @@ a:hover{
 .api .runner:after {
 	content:"示例...";
 }
+.top-box{
+	position:absolute;top:20px;right:280px;
+	font-size:12px;
+}
+.i18n_zh,.i18n_en{
+	color:#0479A7;
+	cursor:pointer;
+	padding-bottom:6px;
+}
+.i18n_zh .i18n_zh , .i18n_en .i18n_en{
+	color:#000;
+	font-weight:bold;
+	cursor:not-allowed;
+	
+	
+}

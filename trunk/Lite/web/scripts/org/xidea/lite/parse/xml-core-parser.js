@@ -768,40 +768,30 @@ function processBlock(node){
 		this.parse(childNodes);
 	}
 }
-function i18nHash(context,i18nKey,text){
-	var uri = context.currentURI;
-	var path = uri.schema == 'lite'? uri.path: String(uri);
-	path = path.replace(/[^\w]/g,'_');
-	if(!i18nKey){
-		i18nKey = 0;
-		text = text.replace(/[^\s]/,function(c){
-			i18nKey = i18nKey + (i18nKey & 2) + c.charCodeAt();
-		})
-		i18nKey = '_'+i18nKey;
-	}
-	return 'I18N.'+path +'__'+ i18nKey;
-}
+
 function processI18N(node){
 	var i18nKey = findXMLAttribute(node,'i18n');
+	var uri = this.currentURI;
+	var path = uri.scheme == 'lite'? uri.path: String(uri);
 	if(node.nodeType == 1){
 		var begin = this.mark();
 		this.parse(node.childNodes);
 		var content = this.reset(begin);
 		
-		i18nKey = i18nHash(this,i18nKey,node.textContent);
+		i18nKey = i18nHash(path,i18nKey,node.textContent);
 		//
-		this.parse("${"+i18nKey+"}");
+		this.parse("${I18N."+i18nKey+"}");
 	}else{
 		var el = node.ownerElement;
 		var node2 = el.cloneNode(false);
 		var begin = this.mark();
 		this.parse(el.textContent);
 		var content = this.reset(begin);
-		
-		
-		i18nKey = i18nHash(this,i18nKey,el.textContent);
-		node2.textContent = "${"+i18nKey+"}";
+
+		i18nKey = i18nHash(path,i18nKey,el.textContent);
+		node2.textContent = "${I18N."+i18nKey+"}";
 		node2.removeAttribute(node.name);
+		node2.setAttribute('data-i18n-key',i18nKey)
 		this.next(node2);
 	}
 	addI18NData(this,i18nKey,content);
@@ -810,10 +800,12 @@ function seekI18N(text){
 	
 }
 function addI18NData(context,i18nKey,content){
+	if(content.length == 1 && typeof content[0] == 'string'){
+		content = content[0];
+	}
 	var i18nData = context.getAttribute("#i18n-data");
 	var i18nObject = context.getAttribute("#i18n-object");
 	if(!i18nData){
-		i18nData = "{}";
 		i18nObject = {};
 		context.setAttribute("#i18n-object",i18nObject);
 	}
@@ -821,12 +813,12 @@ function addI18NData(context,i18nKey,content){
 		i18nObject[i18nKey] = content;
 		i18nData = stringifyJSON(i18nObject)
 	}else{
-		if(i18nData == '{}'){
-			i18nData = '{'
-		}else{
+		if(i18nData){
 			i18nData = i18nData.slice(0,-1)+',';
+		}else{
+			i18nData = '{';
 		}
-		i18nData = i18nData + '"'+i18nKey+'":' +stringifyJSON(content);
+		i18nData = i18nData + '"'+i18nKey+'":' +stringifyJSON(content)+'}';
 	}
 	
 	context.setAttribute("#i18n-data",i18nData);

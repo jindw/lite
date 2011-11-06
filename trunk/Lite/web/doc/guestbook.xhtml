@@ -112,28 +112,40 @@ function parseNL2BR(node){
 						function commitMessage(username,email,content){
 							try{
 								document.cookie = "lite_user="+encodeURI(username+'\n'+email);
-								var item = {username:username,email:email,content:content,postTime:+new Date()};
-								messageData.push(item);
-								messageContainer.innerHTML = renderMessage(messageData);
-								var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('MSXML2.XMLHTTP');
-								function messagePosted(){
-									
-								}
-								xhr.onreadystatechange = messagePosted;
 								var href = window.location.href;
 								href=href.replace(/\/doc\/guide\/(?:index\.php\/)/,'/doc/guide/index.php/')
-								xhr.open("POST",href,true);
+								
+								var item = {username:username,email:email,content:content,postTime:+new Date()};
+								messageData.push(item);
+								
+								messageContainer.innerHTML = renderMessage(messageData);
+								
+								
 								var data = 'username='+encodeURIComponent(username)+
 										'&email='+encodeURIComponent(email)+
 										'&content='+encodeURIComponent(content);
-								//xhr.setRequestHeader('Connection','close');
-								xhr.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
-								xhr.setRequestHeader('Accept','text/javascript, */*');
-								xhr.send(data);
+										
+								function messagePosted(){
+								}
+								postData(href,data,messagePosted)
 							}catch(e){
 								alert(e)
 							}
 							return false;
+						}
+						function postData(href,data,callback){
+							var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('MSXML2.XMLHTTP');
+							xhr.onreadystatechange = function(){
+								if(callback && xhr && xhr.readyState == 4){
+									callback(xhr);
+									xhr = null;
+								}
+							};
+							xhr.open("POST",href,true);
+							//xhr.setRequestHeader('Connection','close');
+							xhr.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
+							xhr.setRequestHeader('Accept','text/javascript, */*');
+							xhr.send(data);
 						}
 						//]]>
 		</script>

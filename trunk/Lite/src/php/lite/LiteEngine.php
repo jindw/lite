@@ -40,7 +40,7 @@ class LiteEngine{
 	 */
 	public $version = '2.0.0.0 Beta';
 	
-	function LiteEngine($root=null,$litecode=null){
+	function LiteEngine($root=null,$litecode=null,$i18ncode=null){
 		if(!$root){
 			$pos = strrpos(__FILE__,'WEB-INF');
 			$root = $pos ? substr(__FILE__,0,$pos) : $_SERVER['DOCUMENT_ROOT'];
@@ -50,6 +50,12 @@ class LiteEngine{
 			$this->litecode = $litecode.'/';
 		}else{
 			$this->litecode = $this->root.'WEB-INF/litecode/';
+		}
+		if($i18ncode){
+			$i18ncode = realpath($i18ncode);
+			if($i18ncode){
+				$this->i18ncode = strtr($i18ncode,'\\','/').'/';
+			}
 		}
 	}
 
@@ -84,6 +90,26 @@ class LiteEngine{
 	    $lite_engine = $old;
 	    error_reporting($error_level);
 	    mb_internal_encoding($encoding);
+	}
+}
+function lite_i18n(){
+	global $lite_engine;
+	$i18n = $lite_engine->i18ncode;
+	if($i18n){
+		$args = func_get_args();
+		$data = array();
+		foreach($args as $arg){
+			$path = $i18n.$arg.'.i18n';
+			if(file_exists($path)){
+				$data2 = json_decode(file_get_contents($path),true);
+				if($data2){
+					$data = array_merge($data,$data2);
+				}
+			}
+		}
+		return $data;
+	}else{
+		return array();
 	}
 }
 /**

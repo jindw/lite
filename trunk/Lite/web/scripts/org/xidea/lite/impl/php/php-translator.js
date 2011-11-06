@@ -28,6 +28,7 @@ var FOR_STATUS_KEY = '$__for';
 var VAR_LITE_TEMP="$__tmp";
 var ENCODING_KEY = 'http://www.xidea.org/lite/features/encoding';
 var CONTENT_TYPE_KEY = 'http://www.xidea.org/lite/features/content-type';
+var I18N_KEY = 'http://www.xidea.org/lite/features/i18n';
 
 //function checkEL(el){
 //    new Function("return "+el)
@@ -56,6 +57,8 @@ PHPTranslator.prototype = {
 	    context.htmlspecialcharsEncoding = context.encoding ;
 	    var contentType = this.featureMap && this.featureMap[CONTENT_TYPE_KEY];
 	    context.contentType = contentType;
+	    context.i18n = this.featureMap[I18N_KEY]
+	    context.resource = this.resource;
 	    
 		context.parse();
 		var code = context.toSource();
@@ -173,7 +176,27 @@ PHPTranslateContext.prototype = new TCP({
 			}
 			this.append("mb_internal_encoding('"+this.encoding+"');")
 			_appendFunctionName(this,this.scope);
+			
 			this.append("extract($__context__,EXTR_OVERWRITE);");
+			if(this.i18n){
+				var i18ncode = new Function("return "+this.i18n)();
+				var resource = this.resource;
+				var resourceMap = {};
+				var resourceList = [];
+				for(var i=0;i<resource.length;i++){
+					resourceMap[i18nHash(resource[i],'_').slice(0,-1)] = resource[i]
+				}
+				console.warn(resource,resourceMap)
+				for(var n in i18ncode){
+					n = n.substring(0,n.indexOf('__')+2);
+					if(n in resourceMap){
+						resourceList.push(n.slice(0,-2));
+						delete resourceMap[n];
+					}
+				}
+				this.append("$I18N = "+stringifyPHP(resourceList).replace(/^array/,'lite_i18n')+";")
+				this.append("$I18N = array_merge("+stringifyPHP(i18ncode)+",$I18N);")
+			}
 	        this.appendCode(this.scope.code);
 	        this.depth--;
 	        this.append("}");

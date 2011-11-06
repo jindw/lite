@@ -30,10 +30,14 @@ this.addScript('parse-chain.js','buildTopChain');
 this.addScript('xml-default-parser.js',['parseDefaultXMLNode','XML_SPACE_TRIM']);
 this.addScript('html-parser.js',['HTML','HTML_EXT']
                 ,'Core'
-                ,['XML_SPACE_TRIM',"org.xidea.el:findELEnd",'parseChildRemoveAttr','org.xidea.lite.util:*']);
+                ,['XML_SPACE_TRIM',"org.xidea.el:findELEnd",
+                'parseChildRemoveAttr','org.xidea.lite.util:*']);
 this.addScript('xml-core-parser.js',['Core','parseChildRemoveAttr']
                 ,0
-                ,["org.xidea.lite.impl.js:JSTranslator","org.xidea.el:findELEnd",'org.xidea.lite.parse:ParseContext','org.xidea.lite.util:*']);
+                ,["org.xidea.lite.impl.js:JSTranslator",
+                	"org.xidea.el:findELEnd",
+                	'org.xidea.lite.parse:ParseContext',
+                	'org.xidea.lite.util:*']);
 
 this.addScript('text-parser.js',['parseText']
                 ,0
@@ -42,7 +46,8 @@ this.addScript('text-parser.js',['parseText']
 this.addScript('optimize-scope.js','OptimizeScope',
 				'org.xidea.el.*');
 
-this.addScript('optimize-util.js',['extractStaticPrefix','doOptimize','optimizeResult','buildTreeResult','PLUGIN_TYPE_MAP']
+this.addScript('optimize-util.js',['extractStaticPrefix','doOptimize'
+					,'optimizeResult','buildTreeResult','PLUGIN_TYPE_MAP']
 				,'org.xidea.el.*'
 				,['OptimizeScope'
 					,"org.xidea.lite.impl:PLUGIN_DEFINE"

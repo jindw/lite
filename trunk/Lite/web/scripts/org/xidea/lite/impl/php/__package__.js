@@ -11,6 +11,7 @@ this.addScript('php-translator.js',["PHPTranslator"]
                 ,['php2jsBoolean','isSimplePHPEL',"stringifyPHP","stringifyPHPEL"
                 	,'org.xidea.jsi:console'
                 	,'org.xidea.lite.util:stringifyJSON'
+                	,'org.xidea.lite.util:i18nHash'
                 	]);
 
                 

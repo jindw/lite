@@ -18,6 +18,7 @@ import org.xidea.el.ExpressionInfo;
 import org.xidea.el.fn.ECMA262Impl;
 import org.xidea.el.impl.ExpressionFactoryImpl;
 import org.xidea.el.impl.ReflectUtil;
+import org.xidea.el.json.JSONDecoder;
 
 /**
  * 优化后的LiteTemplate实现 主要优化方向有: 1. StreamWriter 支持 2. 指令列表循环逆转
@@ -53,6 +54,11 @@ public class LiteTemplate implements Template {
 	public LiteTemplate(List<Object> list, Map<String, String> featureMap) {
 		this.featureMap = featureMap;
 		this.items = this.compile(list);
+		String i18n = featureMap.get(FEATURE_I18N);
+		if(i18n!=null){
+			Map<String, Object> i18nMap = JSONDecoder.decode(i18n);
+			this.addVar("I18N", i18nMap);
+		}
 	}
 
 

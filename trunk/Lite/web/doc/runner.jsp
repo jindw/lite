@@ -6,7 +6,10 @@
 		String callback = request.getParameter("callback");
 		java.util.List<Object> litecode = org.xidea.el.json.JSONDecoder.decode(code);
 		java.util.Map<String,Object> litemodel = org.xidea.el.json.JSONDecoder.decode(model);
-		org.xidea.lite.Template tpl = new org.xidea.lite.Template(litecode);
+		java.util.Map<String,String> featureMap = org.xidea.el.json.JSONDecoder.decode(
+			"{'http://www.xidea.org/lite/features/content-type':'text/html;charset=utf-8'"
+			+",'http://www.xidea.org/lite/features/encoding':'utf-8'}");
+		org.xidea.lite.LiteTemplate tpl = new org.xidea.lite.LiteTemplate(litecode,featureMap);
 		java.io.StringWriter out2 = new java.io.StringWriter();
 		tpl.render(litemodel, out2);
 		if(callback == null){
