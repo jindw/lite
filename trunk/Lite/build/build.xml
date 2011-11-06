@@ -347,6 +347,8 @@
 		<copy todir="${webdest}">
 			<fileset dir="web">
 				<include name="doc/guide/*.*" />
+				<include name="doc/**/*.php" />
+				<include name="WEB-INF/classes/lite/*.php" />
 			</fileset>
 		</copy>
 		<copy todir="${webdest}/WEB-INF/classes/lite/">
