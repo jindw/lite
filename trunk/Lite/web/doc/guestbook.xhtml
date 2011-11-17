@@ -73,7 +73,7 @@ function parseNL2BR(node){
 		<!-- 禁止IE用户 -->
 		<div>
 			<form method="POST"
-				onsubmit="return commitMessage(this)">
+				onsubmit="return commitMessage(this)||false">
 				<label>
 					大名:
 					<input name="username" required="required" />
@@ -113,6 +113,13 @@ function parseNL2BR(node){
 							var username = form.username.value;
 							var email = form.email.value;
 							var content = form.content.value
+							if(!/^[\w_\.\-\$\s]+@.+$/.test(email)){
+								confirm("无效email地址(Valid Email):"+email);
+								return false;
+							}else if(content.length<10||!content.replace(/\s+/g,'').replace(/^(.)(\1)+/,'')){
+								confirm("说点实际的吧？(Valid Content):"+content);
+								return false;
+							}
 							try{
 								document.cookie = "lite_user="+encodeURI(username+'\n'+email);
 								var href = window.location.href;
