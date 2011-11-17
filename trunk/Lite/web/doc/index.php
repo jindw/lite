@@ -72,18 +72,19 @@ if(strpos($path,".xhtml")>0){
 		if($ipinfo){
 			$ipinfo = json_decode($ipinfo,true);
 			if(is_array($ipinfo)){
-				if(@$ipinfo[$ip] && @$ipinfo[$ip]+5>mktime()){
-					$ipinfo[$ip] = mktime();
+				if(@$ipinfo[$ip] && @$ipinfo[$ip]+5>time()){
+					$ipinfo[$ip] = time();
 					@file_put_contents('ip.json',json_encode($ipinfo));
+					echo json_encode('{"error":"Forbidden!!!!\n: post too frequently!!"}');
 					exit();
 				}else{
-					$ipinfo[$ip] = mktime();
+					$ipinfo[$ip] = time();
 				}
 			}else{
-				$ipinfo =array($ip=>mktime());
+				$ipinfo =array($ip=>time());
 			}
 		}else{
-			$ipinfo =array($ip=>mktime());
+			$ipinfo =array($ip=>time());
 		}
 		$ipinfo && @file_put_contents('ip.json',json_encode($ipinfo));
 		
@@ -97,8 +98,9 @@ if(strpos($path,".xhtml")>0){
 		$item = array(
 			"username"=>$username,
 			"content"=>$content,
-			"postTime"=>mktime()*1000,
+			"postTime"=>time()*1000,
 			"ip"=>$ip,
+			'id'=>uniqid(),
 			"email"=>$email
 		);
 		array_push($data['messages'] ,$item);

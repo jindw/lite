@@ -73,7 +73,7 @@ function parseNL2BR(node){
 		<!-- 禁止IE用户 -->
 		<div>
 			<form method="POST"
-				onsubmit="return commitMessage(this.username.value,this.email.value,this.content.value) || (this.content.value='') || false">
+				onsubmit="return commitMessage(this)">
 				<label>
 					大名:
 					<input name="username" required="required" />
@@ -109,7 +109,10 @@ function parseNL2BR(node){
 							f.email.value = liteuser[1];
 						}
 						messageContainer.innerHTML = renderMessage(messageData);
-						function commitMessage(username,email,content){
+						function commitMessage(form){
+							var username = form.username.value;
+							var email = form.email.value;
+							var content = form.content.value
 							try{
 								document.cookie = "lite_user="+encodeURI(username+'\n'+email);
 								var href = window.location.href;
@@ -118,19 +121,37 @@ function parseNL2BR(node){
 								var item = {username:username,email:email,content:content,postTime:+new Date()};
 								messageData.push(item);
 								
-								messageContainer.innerHTML = renderMessage(messageData);
+								var html = renderMessage(messageData);
 								
 								
 								var data = 'username='+encodeURIComponent(username)+
 										'&email='+encodeURIComponent(email)+
 										'&content='+encodeURIComponent(content);
 										
-								function messagePosted(){
+								function messagePosted(xhr){
+									var content = xhr.responseText;
+									if(content){
+										try{
+											var msg = window.eval('('+content+')')
+											if(msg.success){
+												messageContainer.innerHTML = html;
+												form.content.value='';
+											}else{
+												alert("留言失败："+content);
+											}
+										}catch(e){
+											alert("留言失败："+content);
+										}
+									}else{
+										form.content.value='';
+									}
+									
 								}
 								postData(href,data,messagePosted)
 							}catch(e){
 								alert(e)
 							}
+							
 							return false;
 						}
 						function postData(href,data,callback){
