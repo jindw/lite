@@ -140,7 +140,7 @@ function parseNL2BR(node){
 									if(content){
 										try{
 											var msg = window.eval('('+content+')')
-											if(msg.success){
+											if(msg.id){
 												messageContainer.innerHTML = html;
 												form.content.value='';
 											}else{
