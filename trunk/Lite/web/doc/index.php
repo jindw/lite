@@ -67,6 +67,26 @@ if(strpos($path,".xhtml")>0){
 	}
 	$json = "..".preg_replace('/\.xhtml$/','.json',$path);
 	if($content){
+		$ip = $_SERVER["REMOTE_ADDR"];
+		$ipinfo = @file_get_contents('ip.json');
+		if($ipinfo){
+			$ipinfo = json_decode($ipinfo,true);
+			if(is_array($ipinfo)){
+				if(@$ipinfo[$ip] && @$ipinfo[$ip]+5>mktime()){
+					$ipinfo[$ip] = mktime();
+					@file_put_contents('ip.json',json_encode($ipinfo));
+					exit();
+				}else{
+					$ipinfo[$ip] = mktime();
+				}
+			}else{
+				$ipinfo =array($ip=>mktime());
+			}
+		}else{
+			$ipinfo =array($ip=>mktime());
+		}
+		$ipinfo && @file_put_contents('ip.json',json_encode($ipinfo));
+		
 		$username = $_POST["username"];
 		$email = $_POST["email"];
 		$data = @file_get_contents($json);
@@ -78,10 +98,12 @@ if(strpos($path,".xhtml")>0){
 			"username"=>$username,
 			"content"=>$content,
 			"postTime"=>mktime()*1000,
+			"ip"=>$ip,
 			"email"=>$email
 		);
 		array_push($data['messages'] ,$item);
 		$data = json_encode($data);
+		
 		file_put_contents($json,$data);
 		echo json_encode($item);
 		exit();

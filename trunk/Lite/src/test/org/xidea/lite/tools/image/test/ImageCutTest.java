@@ -19,7 +19,6 @@ public class ImageCutTest {
 		cutBox("8119041");
 
 		cutBox("8139041");
-		
 	}
 
 	private void cutBox(String name) throws IOException {

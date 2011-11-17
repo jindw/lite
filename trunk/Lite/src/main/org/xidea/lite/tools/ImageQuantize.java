@@ -263,14 +263,15 @@ public class ImageQuantize {
      * reduced in place.
      * @return The new color palette.
      */
-    public static int[] quantizeImage(int pixels[][], int max_colors) {
-        Cube cube = new Cube(pixels, max_colors);
+    public static int[] quantizeColor(int pixels[][], int max_colors) {
+        Cube cube = new Cube(pixels, max_colors,-1);
         cube.classification();
         cube.reduction();
         cube.assignment();
         return cube.colormap;
     }
-    
+
+
     static class Cube {
         int pixels[][];
         int max_colors;
@@ -286,24 +287,28 @@ public class ImageQuantize {
         // counter for the number of nodes in the tree
         int nodes;
 
-        Cube(int pixels[][], int max_colors) {
+        Cube(int pixels[][], int max_colors,int depth) {
             this.pixels = pixels;
             this.max_colors = max_colors;
 
-            int i = max_colors;
-            // tree_depth = log max_colors
-            //                 4
-            for (depth = 1; i != 0; depth++) {
-                i /= 4;
+			if (depth < 0) {
+				int i = max_colors;
+				// tree_depth = log max_colors
+				// 4
+				for (depth = 1; i != 0; depth++) {
+					i /= 4;
+				}
+				if (depth > 1) {
+					--depth;
+				}
+				depth *= 2;
+				if (depth > MAX_TREE_DEPTH) {
+					depth = MAX_TREE_DEPTH;
+				} else if (depth < 2) {
+					depth = 2;
+				}
             }
-            if (depth > 1) {
-                --depth;
-            }
-            if (depth > MAX_TREE_DEPTH) {
-                depth = MAX_TREE_DEPTH;
-            } else if (depth < 2) {
-                depth = 2;
-            }
+            this.depth = depth;
             
             root = new Node(this);
         }
@@ -667,15 +672,6 @@ public class ImageQuantize {
                 }
             }
 
-            /**
-             * Figure out the distance between this node and som color.
-             */
-            final static int distance(int color, int r, int g, int b) {
-                return (SQUARES[((color >> 16) & 0xFF) - r + MAX_RGB] +
-                        SQUARES[((color >>  8) & 0xFF) - g + MAX_RGB] +
-                        SQUARES[((color >>  0) & 0xFF) - b + MAX_RGB]);
-            }
-
             public String toString() {
                 StringBuffer buf = new StringBuffer();
                 if (parent == this) {
@@ -696,4 +692,26 @@ public class ImageQuantize {
             }
         }
     }
+    /**
+     * Figure out the distance between this node and som color.
+     */
+    final static int distance(int color, int r, int g, int b) {
+//        return (SQUARES[Math.abs(((color >> 16) & 0xFF) - r )] +
+//                SQUARES[Math.abs(((color >>  8) & 0xFF) - g) ] +
+//                SQUARES[Math.abs(((color >>  0) & 0xFF) - b) ]);
+        
+        return (SQUARES[((color >> 16) & 0xFF) - r + MAX_RGB] +
+                SQUARES[((color >>  8) & 0xFF) - g + MAX_RGB] +
+                SQUARES[((color >>  0) & 0xFF) - b + MAX_RGB]);
+
+    }
+    /**
+     * Figure out the distance between this node and som color.
+     */
+    final static int distance(int color1, int color2) {
+        return (SQUARES[((color1 >> 16) & 0xFF) - ((color2 >> 16) & 0xFF) + MAX_RGB] +
+                SQUARES[((color1 >>  8) & 0xFF) - ((color2 >> 8) & 0xFF) + MAX_RGB] +
+                SQUARES[((color1 >>  0) & 0xFF) - ((color2 >> 0) & 0xFF) + MAX_RGB]);
+    }
+
 }

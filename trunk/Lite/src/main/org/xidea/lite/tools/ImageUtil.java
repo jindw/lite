@@ -7,6 +7,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.awt.image.IndexColorModel;
 import java.awt.image.WritableRaster;
+import java.util.HashMap;
 
 public class ImageUtil {
 
@@ -22,35 +23,37 @@ public class ImageUtil {
 		canvas.setRGB(x, y, image.getWidth(), image.getHeight(), imgRGB, 0,
 				image.getWidth());
 	}
+
 	static String getRepeat(BufferedImage image) {
 		int width = image.getWidth();
 		int height = image.getHeight();
-		int xc = width/2;
-		int yc = height/2;
+		int xc = width / 2;
+		int yc = height / 2;
 		int cc = image.getRGB(xc, yc);
 		int c0 = image.getRGB(xc, 0);
 		int zc = image.getRGB(0, yc);
 		boolean repeatX = zc == cc;
 		boolean repeatY = c0 == cc;
-		if(repeatX || repeatY){
-			final int[] imgRGB = image.getRGB(0, 0, width, height, null, 0, width);
-			if(repeatX){
+		if (repeatX || repeatY) {
+			final int[] imgRGB = image.getRGB(0, 0, width, height, null, 0,
+					width);
+			if (repeatX) {
 				int p = 0;
-				outer:for(int i=0;i<height;i++){
-					int p0 =imgRGB[p++];
-					for(int j =1;j<width;j++){
-						if(p0 !=imgRGB[p++]){
+				outer: for (int i = 0; i < height; i++) {
+					int p0 = imgRGB[p++];
+					for (int j = 1; j < width; j++) {
+						if (p0 != imgRGB[p++]) {
 							repeatX = false;
 							break outer;
 						}
 					}
 				}
 			}
-			if(repeatY){
+			if (repeatY) {
 				int p = width;
-				outer:for(int i=width;i<height;i++){
-					for(int j =0;j<width;j++){
-						if(imgRGB[j] !=imgRGB[p++]){
+				outer: for (int i = width; i < height; i++) {
+					for (int j = 0; j < width; j++) {
+						if (imgRGB[j] != imgRGB[p++]) {
 							repeatY = false;
 							break outer;
 						}
@@ -58,7 +61,7 @@ public class ImageUtil {
 				}
 			}
 		}
-		return repeatX?(repeatY?"xy":"x"):(repeatY?"y":"");
+		return repeatX ? (repeatY ? "xy" : "x") : (repeatY ? "y" : "");
 	}
 
 	/**
@@ -101,15 +104,15 @@ public class ImageUtil {
 	 * Returns a two dimensional array of the <code>image</code>'s RGB values,
 	 * including transparency.
 	 */
-	static int[][] getRgb(BufferedImage image) {
+	private static int[][] getRgb(BufferedImage image) {
 		final int width = image.getWidth();
 		final int height = image.getHeight();
 
-		final int[][] rgb = new int[width][height];
+		final int[][] rgb = new int[height][width];
 
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
-				rgb[x][y] = image.getRGB(x, y);
+				rgb[y][x] = image.getRGB(x, y);
 			}
 		}
 
@@ -126,11 +129,13 @@ public class ImageUtil {
 		final BufferedImage mattedSource = matte(source, matteColor);
 
 		// Get two copies of RGB data (quantization will overwrite one)
-		final int[][] bitmap = getRgb(mattedSource);
+		final int[][] indexMap = getRgb(mattedSource);
 
 		// Quantize colors and shift palette by one for transparency color
 		// We'll keep transparency color black for now.
-		final int[] colors = ImageQuantize.quantizeImage(bitmap, maxColors);
+		final int[] colors = ImageQuantize.quantizeColor(indexMap, maxColors);
+
+		System.out.println(colors.length);
 		final int[] colorsWithAlpha = new int[colors.length + 1];
 		System.arraycopy(colors, 0, colorsWithAlpha, 1, colors.length);
 		colorsWithAlpha[0] = matteColor.getRGB();
@@ -144,15 +149,51 @@ public class ImageUtil {
 				BufferedImage.TYPE_BYTE_INDEXED, colorModel);
 		final WritableRaster raster = quantized.getRaster();
 		final int[][] rgb = getRgb(source);
-		for (int x = 0; x < width; x++) {
-			for (int y = 0; y < height; y++) {
-				final int value = (rgb[x][y] & 0xff000000) != 0x00000000 ? bitmap[x][y] + 1
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				if(x<width-4 && y<height-1){
+					if(indexMap[y][x] != indexMap[y+1][x] && isRepeat(indexMap[y],x,x+4) && isRepeat(rgb[y+1],x,x+4)){
+						int d1 = distance(rgb[y][x],rgb[y+1][x]);
+						int d2 = distance(colors[indexMap[y][x]],colors[indexMap[y+1][x]]);
+						int d10 = distance(colors[indexMap[y][x]],rgb[y][x]);
+						int d02 = distance(colors[indexMap[y+1][x]],rgb[y][x]);
+						if(x == 16){
+							//System.out.println(y+":\t"+d1+"/\t"+d2+"/\t"+d10+"/\t"+d02);
+						}
+						if(d1>4  && d2 <18 && d2>d1){
+							final int value1 = (rgb[y][x] & 0xff000000) != 0x00000000 ? indexMap[y][x] + 1
+									: 0;
+							final int value2 = (rgb[y+1][x] & 0xff000000) != 0x00000000 ? indexMap[y+1][x] + 1
+									: 0;
+							raster.setPixel(x, y, new int[] { value1});//x
+							raster.setPixel(x+1, y, new int[] {value2});//x+1
+							raster.setPixel(x+2, y, new int[] {Math.random()>0.3?value2:value1});//x+1
+							raster.setPixel(x+3, y, new int[] {value2});//x+1
+
+							indexMap[y+1][x+1] = indexMap[y][x];
+							//indexMap[y+1][x+2] = indexMap[y][x];
+							x+=3;
+							continue;
+						}
+					}
+				}
+				final int value = (rgb[y][x] & 0xff000000) != 0x00000000 ? indexMap[y][x] + 1
 						: 0;
 				raster.setPixel(x, y, new int[] { value });
 			}
 		}
-
 		return quantized;
 	}
+	static boolean isRepeat(int[] cs,int begin,int end){
+		do {
+			if(cs[begin] != cs[++begin]){
+				return false;
+			}
+		}while(begin < end);
+		return true;
+	}
 
+	static int distance(int c1, int c2) {
+		return ImageQuantize.distance(c1,c2);
+	}
 }
