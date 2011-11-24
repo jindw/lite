@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link href="styles/default.css" rel="stylesheet" type="text/css" />
+		<script src="scripts/require.js" />
+		<script>$import('image');</script>
+	</head>
+	<body>
+		<div id="main">
+			<img id="image" src="images/test.png" onload='ImageSprite.initialize(this)'/>
+			<div id="covers" onmousedown='ImageSprite.startBox(event)'
+			 onmouseup='ImageSprite.endBox(event)' onmousemove="ImageSprite.changeBox(event)">
+			</div>
+		</div>
+		<div id="toolbar">
+			<a href="#0" onclick="ImageSprite.prepare(FixBox)">切图标（删背景）</a>
+			<a href="#0" onclick="ImageSprite.prepare(LCRButton)">切按钮</a>
+			<hr/>
+			<canvas id="canvas" width="120" height="120"/>
+		</div>
+	</body>
+</html>

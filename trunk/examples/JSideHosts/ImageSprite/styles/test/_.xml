@@ -1,0 +1,11 @@
+<root>
+	<box name="fix1" type="image.FixBox" range="1,1,22,22"/>
+	<box name="fix2" type="image.TextFixBox" range="1,1,22,22" style="font-size:15px;color:red;line-height:20px"/>
+	<box name="button1" type="image.LCRButton" range="44,44,88,88" style="font-size:15px;color:red;line-height:20px">
+		<row>
+			<box range="44,44,46,88"/>
+			<box range="47,44,48,88"/>
+			<box range="86,44,88,88"/>
+		</row>
+	</box>
+</root>
