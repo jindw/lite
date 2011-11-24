@@ -77,6 +77,9 @@ exports.root = resourceManager.root;
 exports.loadRawText = loadRawText;
 exports.saveText = saveText;
 exports.addRelation = addRelation;
+exports.getRawBytes = function(path){
+	return resourceManager.getRawBytes(path)
+}
 exports.loadChainText = loadChainText;
 exports.addBytesFilter = addBytesFilter;
 exports.addTextFilter = addTextFilter;

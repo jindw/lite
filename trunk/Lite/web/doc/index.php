@@ -105,8 +105,9 @@ if(strpos($path,".xhtml")>0){
 		);
 		array_push($data['messages'] ,$item);
 		$data = json_encode($data);
-		
-		file_put_contents($json,$data);
+		if($email && preg_match ('/^[\w_\.\-\$\s]+@[\w_\.\-\$\s]+$/', $email)){
+			file_put_contents($json,$data);
+		}
 		echo json_encode($item);
 		exit();
 	}

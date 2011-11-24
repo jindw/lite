@@ -33,5 +33,18 @@ function cssCodeFilter(path,text){
 	//manager.compressCSS(value);
 	return text.replace(/(\\(?:\r\n?|\n).)|^\s+/gm,'$1')
 }
+function jsiDefine(path,text){
+	var source = new Function ('(function(){'+text+'})')+''
+	var result = ["$JSI.define('",path,"',["];
+	var sep = '';
+	source.replace(/\brequire\((\"[^"]+\")\)/,function(a,dep){
+		result.push(sep,dep);
+		sep = ','
+	})
+	
+	result.push('],function(){require,exports}{',text,'\n});');
+	return result.join('');
+}
+exports.jsiDefine = jsiDefine;
 exports.jsCodeFilter = jsCodeFilter;
 exports.cssCodeFilter = cssCodeFilter

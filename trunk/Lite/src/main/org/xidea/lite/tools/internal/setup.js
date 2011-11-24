@@ -10,6 +10,13 @@ var Code = require('org/xidea/lite/tools/internal/code')
  */
 Sprite.setupSprite('/images/','/images/_/');
 
+//$JSI amd js
+Env.addBytesFilter('**__define__.js',function(path){
+	return Env.getRawBytes(path.replace(/__define__\.js$/,'.js'));
+})
+
+Env.addTextFilter('**__define__.js',Code.jsiDefine)
+
 //js / html 过滤处理
 Env.addTextFilter('**.js',Merge.jsMergeFilter);
 Env.addTextFilter('**.js',Code.jsCodeFilter);
@@ -29,4 +36,5 @@ Env.addTextFilter("/**.xhtml",XHtml.xhtmlNormalizeFilter);
 /* 添加文档验证器 */
 Env.addDocumentFilter("/**.xhtml",XHtml.xhtmlValidateFilter);
 Env.addDocumentFilter("/**.xhtml",XHtml.xhtmlDOMFilter);
+
 
