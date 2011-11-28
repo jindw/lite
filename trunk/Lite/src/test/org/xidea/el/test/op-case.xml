@@ -71,4 +71,14 @@
 		<case>'abc'*123</case>
 		<case>NaN*123</case>
 	</unit>
+	<unit title="in 操作符">
+		<case>1 in [2,3,4]</case>
+		<case>2 in [4,5]</case>
+		<case>2 in [2,3,4]</case>
+		<case>4 in [4,5]</case>
+		<case>'a' in {a:1}</case>
+		<case>'1' in {'1':1,'a':2}</case>
+		<case>1 in {'1':1,'a':2}</case>
+		<case>'a' in {'1':1,'a':2}</case>
+	</unit>
 </test>

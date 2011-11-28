@@ -253,17 +253,15 @@ public class ExpressionParser extends JSONTokenizer {
 
 	private void addToken(TokenImpl token) {
 		int type = token.getType();
-		//invoke 处歧异在invoke解析时处理
+		//TODO: 疑问注释：invoke 在invoke解析时处理纠正歧异
 		if (type == BRACKET_BEGIN || type < 0) {
 			replacePrevious();
 		}
 		if(type == VALUE_VAR){
 			Object id = token.getParam();
-			Integer op ;
-			if("in".equals(id)){
+			Integer op = aliasMap.get(id);
+			if(op == null &&  "in".equals(id)){
 				op = OP_IN;
-			}else{
-				op = aliasMap.get(id);
 			}
 			if(op!=null){
 				int c = TokenImpl.getArgCount(op);

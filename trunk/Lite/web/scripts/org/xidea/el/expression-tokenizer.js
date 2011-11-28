@@ -41,6 +41,9 @@ var fns = {
 				    case 'null':
 				        this.addToken([VALUE_CONSTANTS,null]);
 				        break;
+//				    case 'in':
+//				        this.addToken([OP_IN,null]);
+//				        break;
 				    default:
     				    this.skipSpace(0);
     					if (this.previousType == OP_GET) {
@@ -271,7 +274,14 @@ var fns = {
 	},
 
 	addToken :function(token) {
-		switch (token[0]) {
+		var type= token[0];
+		if(type == VALUE_VAR){
+			if("in" == token[1]){
+				token[0] = type = OP_IN;
+			}
+		}
+		
+		switch (type) {
 		case BRACKET_BEGIN:
 			this.status = STATUS_BEGIN;
 			break;
@@ -285,7 +295,7 @@ var fns = {
 			break;
 		}
 		// previousType2 = this.previousType;
-		this.previousType = token[0];
+		this.previousType = type;
 		this.tokens.push(token);
 	},
 

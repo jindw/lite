@@ -125,6 +125,8 @@ function _evaluate(item,context){
         return arg1 < arg2;
     case OP_LTEQ:
         return arg1 <= arg2;
+    case OP_IN:
+        return arg1 in arg2;
 
 
     case OP_JOIN:

@@ -5,11 +5,11 @@ this.addScript('server-compiler.js',["WebCompiler"]
                    "org.xidea.lite.util.*",
                    "org.xidea.jsi:console"
                ]
-               ,"org.xidea.jsidoc.util:XMLHttpRequest");
+               ,"org.xidea.lite.util:XMLHttpRequest");
                
 this.addScript("data-view.js","DataView",
 				[
 					"org.xidea.lite.util:stringifyJSON"
-					,"org.xidea.jsidoc.util:XMLHttpRequest"
+					,"org.xidea.lite.util:XMLHttpRequest"
 					,"org.xidea.lite.util:base64Encode"
 				])

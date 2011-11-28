@@ -115,6 +115,7 @@ public class ELTest {
 
 	private static String runStepJS(String contextJSON, final String litecode) {
 		String jsResultString = (String) js.eval("JSON.stringify(evaluate("+ litecode + "," + contextJSON + "))");
+		//System.out.println("!!##"+jsResultString);
 		return encoder.encode(JSONDecoder.decode(jsResultString),new StringBuilder()).toString();
 	}
 
@@ -148,14 +149,16 @@ public class ELTest {
 				+ encoder.encode(source,new StringBuilder()).toString() + "))");
 		final Object javacode = optimizedFactory.parse(source);
 
+		System.out.println(litecode);
+		System.out.println(javacode);
 		TokenImpl jsc = TokenImpl.toToken((List<Object>) JSONDecoder
 				.decode(litecode));
 		jsc = jsc.optimize(ExpressionFactoryImpl.getInstance()
 				.getStrategy(), new HashMap<String, Object>());
-		Assert.assertEquals("Java 和 JS EL编译中间结果不一致：", encoder
-				.encode(javacode,new StringBuilder()).toString(), 
+		Assert.assertEquals("Java 和 JS EL编译中间结果不一致："+source, 
 				
-				encoder.encode(jsc,new StringBuilder()).toString().toString());
+				encoder.encode(jsc,new StringBuilder()).toString().toString(), 
+				encoder.encode(javacode,new StringBuilder()).toString());
 		return litecode;
 	}
 
