@@ -44,6 +44,8 @@ xxx?yy:zz
  * in 操作符
 {{{
 a in map ? true:false
+同JavaScript in 操作。
+对Java程序员来说，不同于 Collection的contains 方法， 而是类似 Map的containsKey方法。对数组的in操作
 }}}
 
  * 函数调用
