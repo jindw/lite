@@ -8,6 +8,8 @@ function LiteCompiler(root){
 		config = null;
 	}
 	var root ='file:///'+ String(root).replace(/\\/g,'/');
+	
+	console.info("root:",root);
 	//this.config.root.reserve(uri.path)
 	this.config = new ParseConfig(root,config && parseConfig(config));
 	//console.dir(this.config._groups);
@@ -47,7 +49,7 @@ function buildContext(config,path){
 function loadText(uri){
 	var fs = require('fs');
 	var uri2 = this.config.root.resolve(uri.path.replace(/^\//,''));
-	var path = uri2.path.replace(/^[\/\\]([A-Z]\:[\/\\])/,'$1');
+	var path = uri2.path.replace(/^[\/\\]([A-Z]\:[\/\\])/i,'$1');
 	var text = fs.readFileSync(path,'utf-8');
 	//console.log(text);
 	return text;
@@ -55,7 +57,9 @@ function loadText(uri){
 function loadXML(uri){
 	this.setCurrentURI(uri);
 	var uri2 = this.config.root.resolve(uri.path.replace(/^\//,''));
-	var path = uri2.path.replace(/^[\/\\]([A-Z]\:[\/\\])/,'$1');
+	
+	var path = uri2.path.replace(/^[\/\\]([A-Z]\:[\/\\])/i,'$1');
+	console.info("xml path:"+uri2,path)
 	return loadXMLFile(path,uri)
 }
 function loadXMLFile(file,uri){

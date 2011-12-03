@@ -783,7 +783,7 @@ function processI18N(node){
 		this.parse("${I18N."+i18nKey+"}");
 	}else{
 		var el = node.ownerElement;
-		var node2 = el.cloneNode(false);
+		var node2 = el.cloneNode(true)||el;
 		var begin = this.mark();
 		this.parse(el.textContent);
 		var content = this.reset(begin);
