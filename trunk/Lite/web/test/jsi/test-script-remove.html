@@ -1,0 +1,44 @@
+<html>
+<body>
+<script>
+console.log(+new Date())
+
+
+var s2 = document.createElement('script');
+s2.setAttribute('src','w2000.js');
+s2.setAttribute('data-src','w2000.js');
+document.body.appendChild(s2);
+s2.async = true;
+
+var s = document.createElement('script');
+s.setAttribute('src','w1000.js');
+s.setAttribute('data-src','w1000.js');
+document.body.appendChild(s);
+
+
+</script>
+<script>
+setTimeout(function(){
+	s.setAttribute("type","text/x-text")
+	s.removeAttribute('src');//ie 充分
+	//s.setAttribute('src','about:blank');
+	s.parentNode.removeChild(s);//chrome 充分条件
+},
+10)
+setTimeout(function(){
+	//s.setAttribute("type","text/x-text")
+	s2.removeAttribute('src');//ie 充分
+	//s.setAttribute('src','about:blank');
+	s2.parentNode.removeChild(s2);//chrome 充分条件
+},
+10)
+//opera firefox 无法中止。。,
+//firefox4+ 试用 currentScript.sync判断
+//opera 因为同步装载执行顺序， 不中止也不受影响
+
+console.info(s);
+console.info(s.async);
+
+</script>
+</body>
+</html>

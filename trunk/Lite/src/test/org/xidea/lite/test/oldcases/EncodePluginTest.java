@@ -62,9 +62,9 @@ public class EncodePluginTest extends HashMap<String, Object> {
 		}
 
 	}
-
-	public void put(Object key, Object value) {
-	}
+//
+//	public void put(String key, Object value) {
+//	}
 
 	public Object get(Object key) {
 		return value;

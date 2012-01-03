@@ -1,6 +1,26 @@
 var OP = window.DOMParser;
 function DOMParser(){
 }
+var inc = 0;
+function walk(d){
+	inc ++;
+	if(d.nodeType == 1){
+		//print(d.nodeName);
+	}
+	if(d.firstChild){
+		walk(d.firstChild);
+	}
+	if(d.nextSibling){
+		walk(d.nextSibling);
+	}
+	
+}
+DOMParser.prototype.test = function(doc){
+	var i0 = inc;
+	var d = +new Date;
+	walk(doc);
+	return (new Date - d)+'/'+(inc - i0)
+}
 DOMParser.prototype.parseFromString = function(text){
 	var t1 = +new Date();
 	if(OP){

@@ -29,7 +29,15 @@ function writeFile(filepath,response,prepostfix){
         }else{
         	response.write(file, "binary");  
         }
-          
+        var wait = filepath.replace(/^.*?(?:w(\d+)\.js)?$/g,'$1');
+        if(wait){
+        	console.log('wait:',wait)
+        	setTimeout(function(){
+        		response.end()
+        		console.log('wait end!')
+        	},1*wait);
+        	return;
+        }
         response.end();    
     });
 }
