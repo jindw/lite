@@ -189,6 +189,7 @@ function processDocumentType(node,context,chain){
     	var pubid = node.publicId;
     	var nodeName = node.nodeName;
 		var sysid = node.systemId;
+		if(sysid == '.'){sysid = null}
         if(pubid){
 			if(pubid == "org.xidea.lite.OUTPUT_DTD"){
 				if(sysid){
@@ -207,13 +208,13 @@ function processDocumentType(node,context,chain){
             context.append('">');
         }else if(sysid){
             context.append('<!DOCTYPE ');
-            context.append();
+            context.append(nodeName);
             context.append(' SYSTEM "');
             context.append(sysid);
             context.append('">');
         }else{
         	context.append("<!DOCTYPE ");
-			context.append(node.nodeName);
+			context.append(nodeName);
 			var sub = node.internalSubset;
             if(sub){
 				context.append(" [");

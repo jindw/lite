@@ -18,7 +18,7 @@ function walk(d){
 DOMParser.prototype.test = function(doc){
 	var i0 = inc;
 	var d = +new Date;
-	walk(doc);
+	walk(doc.document || doc);
 	return (new Date - d)+'/'+(inc - i0)
 }
 DOMParser.prototype.parseFromString = function(text){

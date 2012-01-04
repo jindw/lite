@@ -92,7 +92,9 @@ public class DefaultXMLNodeParser implements NodeParser<Node> {
 		DocumentType node = (DocumentType) node0;
 		String pubid = node.getPublicId();
 		String sysid = node.getSystemId();
-
+		if(sysid!= null && (sysid.length() == 0 || sysid.equals("."))){
+			sysid = null;
+		}
 		if (pubid != null) {
 			if (pubid.equals(DefaultEntityResolver.OUTPUT_DTD)) {
 				// 跳过容错补充dtd申明
@@ -106,12 +108,12 @@ public class DefaultXMLNodeParser implements NodeParser<Node> {
 			context.append(node.getNodeName());
 			context.append(" PUBLIC \"");
 			context.append(pubid);
-			if (sysid == null) {
+			if (sysid != null) {
 				context.append("\" \"");
 				context.append(sysid);
 			}
 			context.append("\">");
-		} else if (sysid != null && sysid.length() > 0 && !sysid.equals(".")) {
+		} else if (sysid != null) {
 			context.append("<!DOCTYPE ");
 			context.append(node.getNodeName());
 			context.append(" SYSTEM \"");
