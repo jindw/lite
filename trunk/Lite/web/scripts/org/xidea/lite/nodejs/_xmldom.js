@@ -21,6 +21,14 @@ DOMParser.prototype.test = function(doc){
 	walk(doc.document || doc);
 	return (new Date - d)+'/'+(inc - i0)
 }
+DOMParser.prototype.compare = function(d1, handle){
+	var d2 = handle.document;
+	compare(d1,d2);
+	
+}
+function compare(d1,d2){
+	
+}
 DOMParser.prototype.parseFromString = function(text){
 	var t1 = +new Date();
 	if(OP){
