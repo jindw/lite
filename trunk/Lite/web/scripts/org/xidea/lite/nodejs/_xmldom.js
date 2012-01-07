@@ -1,34 +1,7 @@
 var OP = window.DOMParser;
 function DOMParser(){
 }
-var inc = 0;
-function walk(d){
-	inc ++;
-	if(d.nodeType == 1){
-		//print(d.nodeName);
-	}
-	if(d.firstChild){
-		walk(d.firstChild);
-	}
-	if(d.nextSibling){
-		walk(d.nextSibling);
-	}
-	
-}
-DOMParser.prototype.test = function(doc){
-	var i0 = inc;
-	var d = +new Date;
-	walk(doc.document || doc);
-	return (new Date - d)+'/'+(inc - i0)
-}
-DOMParser.prototype.compare = function(d1, handle){
-	var d2 = handle.document;
-	compare(d1,d2);
-	
-}
-function compare(d1,d2){
-	
-}
+
 DOMParser.prototype.parseFromString = function(text){
 	var t1 = +new Date();
 	if(OP){
