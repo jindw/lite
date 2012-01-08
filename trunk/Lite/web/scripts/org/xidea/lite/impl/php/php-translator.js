@@ -1,4 +1,17 @@
-/*
+if(typeof require == 'function'){
+var XA_TYPE=require('../template-token').XA_TYPE;
+var ELSE_TYPE=require('../template-token').ELSE_TYPE;
+var EL_TYPE=require('../template-token').EL_TYPE;
+var XT_TYPE=require('../template-token').XT_TYPE;
+var TranslateContext=require('../translate-context').TranslateContext;
+var getELType=require('org/xidea/el/expression-token').getELType;
+var TYPE_ANY=require('org/xidea/el/expression-token').TYPE_ANY;
+var TYPE_BOOLEAN=require('org/xidea/el/expression-token').TYPE_BOOLEAN;
+var TYPE_NULL=require('org/xidea/el/expression-token').TYPE_NULL;
+var TYPE_NUMBER=require('org/xidea/el/expression-token').TYPE_NUMBER;
+var GLOBAL_DEF_MAP=require('org/xidea/lite/impl/js/js-translator').GLOBAL_DEF_MAP;
+var GLOBAL_VAR_MAP=require('org/xidea/lite/impl/js/js-translator').GLOBAL_VAR_MAP;
+}/*
  * List Template
  * License LGPL(您可以在任何地方免费使用,但请不要吝啬您对框架本身的改进)
  * http://www.xidea.org/project/lite/
@@ -438,3 +451,12 @@ PHPTranslateContext.prototype = new TCP({
     	return this.out.join('');
     }
 });
+if(typeof require == 'function'){
+exports.PHPTranslator=PHPTranslator;
+var php2jsBoolean=require('./php-el-translator').php2jsBoolean;
+var isSimplePHPEL=require('./php-el-translator').isSimplePHPEL;
+var stringifyPHP=require('./php-el-translator').stringifyPHP;
+var stringifyPHPEL=require('./php-el-translator').stringifyPHPEL;
+var stringifyJSON=require('org/xidea/lite/util/json').stringifyJSON;
+var i18nHash=require('org/xidea/lite/util/resource').i18nHash;
+}

@@ -1,7 +1,7 @@
 /**
  * 现在还只是一个憧憬，别当真
  */
-var compressJS = $import('org.xidea.lite.util.compressJS');
+var compressJS = function(a){return a};// $import('org.xidea.lite.util.compressJS');
 function JSTransform(code){
 	if(this instanceof JSTransform){
 		this.code = compressJS(code);

@@ -1,4 +1,7 @@
-/*
+if(typeof require == 'function'){
+var ELSE_TYPE=require('../template-token').ELSE_TYPE;
+var TranslateContext=require('../translate-context').TranslateContext;
+}/*
  * List Template
  * License LGPL(您可以在任何地方免费使用,但请不要吝啬您对框架本身的改进)
  * http://www.xidea.org/project/lite/
@@ -496,3 +499,11 @@ JSTranslateContext.prototype = new PT({
     	}
     }
 });
+
+if(typeof require == 'function'){
+exports.JSTranslator=JSTranslator;
+exports.GLOBAL_DEF_MAP=GLOBAL_DEF_MAP;
+exports.GLOBAL_VAR_MAP=GLOBAL_VAR_MAP;
+var stringifyJSEL=require('org/xidea/el/el-translator').stringifyJSEL;
+var stringifyJSON=require('org/xidea/lite/util/json').stringifyJSON;
+}

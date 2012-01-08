@@ -1,4 +1,6 @@
-/**
+if(typeof require == 'function'){
+var TYPE_MAP=require('org/xidea/el/expression-token').TYPE_MAP;
+}/**
  * 	
 	public OptimizePlugin getPlugin(List<Object> object);
 	public OptimizeScope parseScope(List<Object> children, List<String> params);
@@ -412,4 +414,26 @@ function buildTreeResult(result,defMap){
 	}
 	return current;
 	//return defs.concat(current);
+}
+
+if(typeof require == 'function'){
+exports.extractStaticPrefix=extractStaticPrefix;
+exports.doOptimize=doOptimize;
+exports.optimizeResult=optimizeResult;
+exports.buildTreeResult=buildTreeResult;
+exports.PLUGIN_TYPE_MAP=PLUGIN_TYPE_MAP;
+var OptimizeScope=require('./optimize-scope').OptimizeScope;
+var PLUGIN_DEFINE=require('org/xidea/lite/impl/template-token').PLUGIN_DEFINE;
+var PLUGIN_TYPE=require('org/xidea/lite/impl/template-token').PLUGIN_TYPE;
+var CAPTURE_TYPE=require('org/xidea/lite/impl/template-token').CAPTURE_TYPE;
+var VAR_TYPE=require('org/xidea/lite/impl/template-token').VAR_TYPE;
+var stringifyJSON=require('org/xidea/lite/util/json').stringifyJSON;
+var JSTranslator=require('org/xidea/lite/impl/js/js-translator').JSTranslator;
+var PLUGIN_DEFINE=require('org/xidea/lite/impl/template-token').PLUGIN_DEFINE;
+var VAR_TYPE=require('org/xidea/lite/impl/template-token').VAR_TYPE;
+var ELSE_TYPE=require('org/xidea/lite/impl/template-token').ELSE_TYPE;
+var PLUGIN_TYPE=require('org/xidea/lite/impl/template-token').PLUGIN_TYPE;
+var CAPTURE_TYPE=require('org/xidea/lite/impl/template-token').CAPTURE_TYPE;
+var IF_TYPE=require('org/xidea/lite/impl/template-token').IF_TYPE;
+var FOR_TYPE=require('org/xidea/lite/impl/template-token').FOR_TYPE;
 }

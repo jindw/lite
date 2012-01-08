@@ -4,10 +4,8 @@ package org.xidea.el.impl.test;
 import org.junit.Assert;
 import org.junit.Test;
 import org.xidea.el.Expression;
-import org.xidea.el.ExpressionFactory;
 import org.xidea.el.Invocable;
 import org.xidea.el.impl.ExpressionFactoryImpl;
-import org.xidea.el.impl.OperationStrategyImpl;
 
 
 public class MemberMethodAddTest {

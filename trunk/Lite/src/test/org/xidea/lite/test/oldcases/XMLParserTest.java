@@ -1,18 +1,13 @@
 package org.xidea.lite.test.oldcases;
 
 import java.io.ByteArrayInputStream;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.net.URI;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-
 
 import org.junit.After;
 import org.junit.Assert;
@@ -22,11 +17,8 @@ import org.w3c.dom.CDATASection;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xidea.el.json.JSONEncoder;
-import org.xidea.lite.LiteTemplate;
-import org.xidea.lite.impl.ParseContextImpl;
 import org.xidea.lite.impl.ParseUtil;
 import org.xidea.lite.impl.dtd.DefaultEntityResolver;
-import org.xidea.lite.parse.ParseContext;
 
 
 public class XMLParserTest {

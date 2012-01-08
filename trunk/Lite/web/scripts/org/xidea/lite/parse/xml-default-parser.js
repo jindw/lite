@@ -235,3 +235,11 @@ function processNotation(node,context,chain){
 //1 2
 
 
+
+if(typeof require == 'function'){
+exports.parseDefaultXMLNode=parseDefaultXMLNode;
+exports.XML_SPACE_TRIM=XML_SPACE_TRIM;
+var XA_TYPE=require('org/xidea/lite/impl/template-token').XA_TYPE;
+var EL_TYPE=require('org/xidea/lite/impl/template-token').EL_TYPE;
+var XT_TYPE=require('org/xidea/lite/impl/template-token').XT_TYPE;
+}

@@ -1,4 +1,7 @@
-function XPathEvaluator(){
+if(typeof require == 'function'){
+var DOMNode=require('./_xmldom').DOMNode;
+var DOMNodeList=require('./_xmldom').DOMNodeList;
+}function XPathEvaluator(){
 	
 }
 XPathEvaluator.prototype.evaluate = function(xpath,currentNode){
@@ -1734,3 +1737,7 @@ function __removeFirstArrayElement(oldArray) {
 
 }
 
+
+if(typeof require == 'function'){
+exports.XPathEvaluator=XPathEvaluator;
+}

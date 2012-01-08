@@ -1,4 +1,8 @@
-var DataView = {
+if(typeof require == 'function'){
+var stringifyJSON=require('org/xidea/lite/util/json').stringifyJSON;
+var XMLHttpRequest=require('org/xidea/lite/util/xhr').XMLHttpRequest;
+var base64Encode=require('org/xidea/lite/util/resource').base64Encode;
+}var DataView = {
 	render:function(path,templateModel,featureMap,serviceBase){
 		this.path = path;
 		this.modelPath = path.replace(/.\w+$/,'.json');
@@ -159,4 +163,7 @@ function xhrSave(serviceBase,data,callback){
 	xhr.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
 	xhr.setRequestHeader('Accept','text/javascript, */*');
 	xhr.send(data);
+}
+if(typeof require == 'function'){
+exports.DataView=DataView;
 }

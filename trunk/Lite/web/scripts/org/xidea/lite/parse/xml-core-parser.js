@@ -208,7 +208,13 @@ var Core = {
 var DOCUMENT_LAYOUT_PROCESSED = "http://www.xidea.org/lite/core/c:layout-processed";
 var CHOOSE_KEY = "http://www.xidea.org/lite/core/c:choose@value";
 var FOR_PATTERN = /\s*([\$\w_]+)\s*(?:,\s*([\w\$_]+))?\s*(?:\:|in)([\s\S]*)/;
-
+function _parseChild(context,node){
+	node = node.firstChild;
+	while(node){
+		context.parse(node)
+		node = node.nextSibling;
+	}
+}
 
 /**
  * node,attribute
@@ -668,9 +674,8 @@ function parseInclude(node){
 	    		setNodeURI(this,node);
 	    	}else{
 		        var uri = this.createURI(path);
-	    		//console.warn(path,this.currentURI+'',url+'')
 		        var doc = this.loadXML(uri);
-		        this.setCurrentURI(uri);
+	    		this.setCurrentURI(uri);
 	    	}
 	    }else{
 	    	var doc = this.loadXML(this.currentURI);
@@ -687,7 +692,9 @@ function parseInclude(node){
 		    if(selector != null){
 		    	console.warn("目前尚不支持css selector 选择节点");
 		    }
+		        
 		    this.parse(doc)
+		    
 		}
     }finally{
         this.setCurrentURI(parentURI);
@@ -775,7 +782,7 @@ function processI18N(node){
 	var path = uri.scheme == 'lite'? uri.path: String(uri);
 	if(node.nodeType == 1){
 		var begin = this.mark();
-		this.parse(node.childNodes);
+		_parseChild(this,node);
 		var content = this.reset(begin);
 		
 		i18nKey = i18nHash(path,i18nKey,node.textContent);
@@ -800,35 +807,35 @@ function seekI18N(text){
 	
 }
 function addI18NData(context,i18nKey,content){
-	if(content.length == 1 && typeof content[0] == 'string'){
+	if(typeof content != 'string' && content.length == 1){
 		content = content[0];
 	}
-	var i18nData = context.getAttribute("#i18n-data");
+	var i18nSource = context.getAttribute("#i18n-source");
 	var i18nObject = context.getAttribute("#i18n-object");
-	if(!i18nData){
+	if(!i18nObject){
 		i18nObject = {};
 		context.setAttribute("#i18n-object",i18nObject);
 	}
 	if(i18nKey in i18nObject){
 		i18nObject[i18nKey] = content;
-		i18nData = stringifyJSON(i18nObject)
+		i18nSource = stringifyJSON(i18nObject)
 	}else{
-		if(i18nData){
-			i18nData = i18nData.slice(0,-1)+',';
+		if(i18nSource){
+			i18nSource = i18nSource.slice(0,-1)+',';
 		}else{
-			i18nData = '{';
+			i18nSource = '{';
 		}
-		i18nData = i18nData + '"'+i18nKey+'":' +stringifyJSON(content)+'}';
+		i18nSource = i18nSource + '"'+i18nKey+'":' +stringifyJSON(content)+'}';
 	}
 	
-	context.setAttribute("#i18n-data",i18nData);
+	context.setAttribute("#i18n-data",i18nSource);
 }
 
 
 function parseChildRemoveAttr(context,node,ignoreSpace){
 	if(node.nodeType == 1){//child
+		var child = node.firstChild;
 		if(ignoreSpace){
-			var child = node.firstChild;
 			while(child){
 				if(child.nodeType != 3 || String(child.data).replace(/\s+/g,'')){
 					context.parse(child)
@@ -836,7 +843,10 @@ function parseChildRemoveAttr(context,node,ignoreSpace){
 				child = child.nextSibling;
 			}
 		}else{
-			context.parse(node.childNodes)
+			while(child){
+				context.parse(child)
+				child = child.nextSibling;
+			}
 		}
 	}else if(node.nodeType == 2){//attr
 		var el = node.ownerElement||node.selectSingleNode('..');
@@ -889,3 +899,20 @@ addAll(processBlock,null,"block","group");
 
 //属性与标签语法差异太大,不能用统一函数处理.
 addParser({parse:parseInclude,before:beforeInclude},"include");
+if(typeof require == 'function'){
+exports.Core=Core;
+exports.parseChildRemoveAttr=parseChildRemoveAttr;
+var findELEnd=require('org/xidea/el/el-util').findELEnd;
+var findLiteParamMap=require('org/xidea/lite/util/el').findLiteParamMap;
+var getLiteTagInfo=require('org/xidea/lite/util/xml-normalize').getLiteTagInfo;
+var stringifyJSON=require('org/xidea/lite/util/json').stringifyJSON;
+var selectByXPath=require('org/xidea/lite/util/xml').selectByXPath;
+var findXMLAttribute=require('org/xidea/lite/util/xml').findXMLAttribute;
+var findXMLAttributeAsEL=require('org/xidea/lite/util/xml').findXMLAttributeAsEL;
+var URI=require('org/xidea/lite/util/resource').URI;
+var i18nHash=require('org/xidea/lite/util/resource').i18nHash;
+var PLUGIN_DEFINE=require('org/xidea/lite/impl/template-token').PLUGIN_DEFINE;
+var XA_TYPE=require('org/xidea/lite/impl/template-token').XA_TYPE;
+var EL_TYPE=require('org/xidea/lite/impl/template-token').EL_TYPE;
+var XT_TYPE=require('org/xidea/lite/impl/template-token').XT_TYPE;
+}

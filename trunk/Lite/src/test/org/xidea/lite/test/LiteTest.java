@@ -22,7 +22,6 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 import org.w3c.dom.Document;
-import org.xidea.el.ExpressionFactory;
 import org.xidea.el.impl.ExpressionFactoryImpl;
 import org.xidea.el.json.JSONDecoder;
 import org.xidea.el.json.JSONEncoder;
@@ -39,7 +38,7 @@ import org.xidea.lite.parse.ParseContext;
 import org.xml.sax.SAXException;
 
 public class LiteTest {
-	private static JSIRuntime js = org.xidea.jsi.impl.RuntimeSupport.create();
+	private static JSIRuntime js = org.xidea.jsi.impl.v3.RuntimeSupport.create();
 	private static String phpcmd = "php";
 	private static String currentPHP;
 	static {

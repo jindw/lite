@@ -1,4 +1,8 @@
-/**
+if(typeof require == 'function'){
+var JSTranslator=require('./js-translator').JSTranslator;
+var ParseContext=require('org/xidea/lite/parse/parse-context').ParseContext;
+var loadLiteXML=require('org/xidea/lite/util/xml').loadLiteXML;
+}/**
  */
 function liteWrapImpl(data,liteImpl){
 	var code = liteWrapCompile(Function.prototype.toString.apply(data,[]),'liteImpl')
@@ -25,4 +29,8 @@ function liteWrapCompile(code,liteImplId){
 	translator.liteImpl = liteImplId || "liteImpl"
 	var code = translator.translate(parseContext.toList());
 	return code;
+}
+if(typeof require == 'function'){
+exports.liteWrapCompile=liteWrapCompile;
+exports.liteWrapImpl=liteWrapImpl;
 }

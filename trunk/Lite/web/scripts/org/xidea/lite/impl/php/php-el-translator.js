@@ -445,3 +445,40 @@ function isSimplePHPEL(value){
 function getELPriority(el) {
 	return getPriority(el[0]);
 }
+if(typeof require == 'function'){
+exports.stringifyPHPEL=stringifyPHPEL;
+exports.stringifyPHP=stringifyPHP;
+exports.php2jsBoolean=php2jsBoolean;
+exports.isSimplePHPEL=isSimplePHPEL;
+var getTokenParam=require('org/xidea/el/expression-token').getTokenParam;
+var getTokenParamIndex=require('org/xidea/el/expression-token').getTokenParamIndex;
+var findTokenText=require('org/xidea/el/expression-token').findTokenText;
+var getELType=require('org/xidea/el/expression-token').getELType;
+var addELQute=require('org/xidea/el/expression-token').addELQute;
+var OP_ADD=require('org/xidea/el/expression-token').OP_ADD;
+var OP_AND=require('org/xidea/el/expression-token').OP_AND;
+var OP_EQ=require('org/xidea/el/expression-token').OP_EQ;
+var OP_GET=require('org/xidea/el/expression-token').OP_GET;
+var OP_IN=require('org/xidea/el/expression-token').OP_IN;
+var OP_INVOKE=require('org/xidea/el/expression-token').OP_INVOKE;
+var OP_JOIN=require('org/xidea/el/expression-token').OP_JOIN;
+var OP_NE=require('org/xidea/el/expression-token').OP_NE;
+var OP_NOT=require('org/xidea/el/expression-token').OP_NOT;
+var OP_OR=require('org/xidea/el/expression-token').OP_OR;
+var OP_PUT=require('org/xidea/el/expression-token').OP_PUT;
+var OP_QUESTION=require('org/xidea/el/expression-token').OP_QUESTION;
+var OP_QUESTION_SELECT=require('org/xidea/el/expression-token').OP_QUESTION_SELECT;
+var TYPE_ANY=require('org/xidea/el/expression-token').TYPE_ANY;
+var TYPE_ARRAY=require('org/xidea/el/expression-token').TYPE_ARRAY;
+var TYPE_BOOLEAN=require('org/xidea/el/expression-token').TYPE_BOOLEAN;
+var TYPE_MAP=require('org/xidea/el/expression-token').TYPE_MAP;
+var TYPE_NULL=require('org/xidea/el/expression-token').TYPE_NULL;
+var TYPE_NUMBER=require('org/xidea/el/expression-token').TYPE_NUMBER;
+var TYPE_STRING=require('org/xidea/el/expression-token').TYPE_STRING;
+var VALUE_CONSTANTS=require('org/xidea/el/expression-token').VALUE_CONSTANTS;
+var VALUE_LIST=require('org/xidea/el/expression-token').VALUE_LIST;
+var VALUE_MAP=require('org/xidea/el/expression-token').VALUE_MAP;
+var VALUE_VAR=require('org/xidea/el/expression-token').VALUE_VAR;
+var getPriority=require('org/xidea/el/expression-tokenizer').getPriority;
+var GLOBAL_DEF_MAP=require('org/xidea/lite/impl/js/js-translator').GLOBAL_DEF_MAP;
+}

@@ -46,7 +46,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.UserDataHandler;
 import org.xidea.jsi.JSIRuntime;
-import org.xidea.jsi.impl.RuntimeSupport;
+import org.xidea.jsi.impl.v3.RuntimeSupport;
 import org.xidea.lite.impl.dtd.DefaultEntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -92,7 +92,6 @@ public class ParseUtil {
 		JSIRuntime rt = jsi.get();
 		if (rt == null) {
 			jsi.set(rt = RuntimeSupport.create());
-			rt.eval("$import('org.xidea.jsidoc.util:JSON')");
 			// ((RuntimeSupport)rt).setOptimizationLevel(-1);
 		}
 		return rt;

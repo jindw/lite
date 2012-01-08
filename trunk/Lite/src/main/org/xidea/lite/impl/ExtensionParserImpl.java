@@ -30,7 +30,7 @@ public class ExtensionParserImpl implements ExtensionParser {
 
 	public ExtensionParserImpl() {
 		Object fn = rt
-				.eval("(function(){return new ($import('org.xidea.lite.parse:ExtensionParser',{}))(this)})");
+				.eval("(function(){var p = {};$export('org/xidea/lite/parse',p);return new p.ExtensionParser(this)})");
 		impl = rt.invoke(CURRENT_LOCAL_NODE, fn);
 //		proxy = rt.wrapToJava(impl, ExtensionParser.class);
 		reset();

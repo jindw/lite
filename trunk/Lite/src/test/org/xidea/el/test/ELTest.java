@@ -24,7 +24,7 @@ import org.xidea.lite.parse.ParseContext;
 import org.xidea.lite.test.LiteTest;
 
 public class ELTest {
-	private static JSIRuntime js = org.xidea.jsi.impl.RuntimeSupport.create();
+	private static JSIRuntime js = org.xidea.jsi.impl.v3.RuntimeSupport.create();
 	private static ExpressionFactory optimizedFactory = new ExpressionFactoryImpl();
 	private static ExpressionFactory noneOptimizedFactory = new ExpressionFactoryImpl(){
 

@@ -1,7 +1,6 @@
 package org.xidea.lite.test.oldcases;
 
 import java.util.HashMap;
-import java.util.logging.Logger;
 
 import org.junit.Assert;
 import org.junit.Test;

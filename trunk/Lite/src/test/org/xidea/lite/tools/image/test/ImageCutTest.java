@@ -3,13 +3,11 @@ package org.xidea.lite.tools.image.test;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
-import java.text.NumberFormat;
 
 import javax.imageio.ImageIO;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.xidea.lite.tools.ImageUtil;
 import org.xidea.lite.tools.image.ImageCut;
 
 public class ImageCutTest {

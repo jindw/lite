@@ -1,13 +1,11 @@
 package org.xidea.el.json.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
-import java.io.StringWriter;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.xidea.el.impl.ExpressionImpl;
 import org.xidea.el.json.JSONEncoder;
 
 public class JSONEncoderTest {

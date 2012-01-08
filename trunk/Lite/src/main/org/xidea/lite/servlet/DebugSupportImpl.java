@@ -27,9 +27,9 @@ import org.xidea.el.json.JSONDecoder;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.jsi.JSIExportor;
 import org.xidea.jsi.JSILoadContext;
-import org.xidea.jsi.impl.ClasspathRoot;
-import org.xidea.jsi.impl.DefaultExportorFactory;
-import org.xidea.jsi.impl.JSIText;
+import org.xidea.jsi.impl.v2.ClasspathRoot;
+import org.xidea.jsi.impl.v2.DefaultExportorFactory;
+import org.xidea.jsi.impl.v2.JSIText;
 import org.xidea.lite.Template;
 import org.xidea.lite.impl.ParseUtil;
 
@@ -148,7 +148,7 @@ public class DebugSupportImpl implements DebugSupport {
 					+ "=load&" + PARAM_LITE_PATH + '=' + DATA_VIEW_JS_PATH
 					+ "'></script>\n");
 			out
-					.append("<script>if(!this.DataView && this.$import){$import('org.xidea.lite.web.DataView',true);}</script>\n");
+					.append("<script>if(!this.DataView && this.export){$export('org/xidea/lite/web/data-view');}</script>\n");
 
 			String model_view_impl = getCookie(request, "LITE_MODEL_VIEW_IMPL");
 			if (model_view_impl != null) {
@@ -246,7 +246,7 @@ public class DebugSupportImpl implements DebugSupport {
 					// File(root,"WEB-INF/classes").getAbsolutePath(),"UTF-8");
 					ClasspathRoot jsiRoot = new ClasspathRoot();
 					JSILoadContext context = jsiRoot
-							.$import("org.xidea.lite.web:DataView");
+							.$export("org.xidea.lite.web:DataView");
 					String result = exporter.export(context);
 					out.write(result);
 				}

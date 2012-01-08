@@ -9,7 +9,6 @@ import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.xidea.el.ExpressionFactory;
 import org.xidea.el.Reference;
 import org.xidea.el.impl.ExpressionImpl;
 import org.xidea.el.impl.ReflectUtil;

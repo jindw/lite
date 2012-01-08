@@ -278,3 +278,10 @@ function quteReqExp(x){
 		return '\\x'+(0x100 + x.charCodeAt()).toString(16).substring(1);
 	}
 }
+
+if(typeof require == 'function'){
+exports.parseConfig=parseConfig;
+var stringifyJSON=require('org/xidea/lite/util/json').stringifyJSON;
+var loadLiteXML=require('org/xidea/lite/util/xml').loadLiteXML;
+var findXMLAttribute=require('org/xidea/lite/util/xml').findXMLAttribute;
+}

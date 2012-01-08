@@ -1,4 +1,9 @@
-/*
+if(typeof require == 'function'){
+var ResultContext=require('./result-context').ResultContext;
+var ParseConfig=require('./config').ParseConfig;
+var URI=require('org/xidea/lite/util/resource').URI;
+var loadLiteXML=require('org/xidea/lite/util/xml').loadLiteXML;
+}/*
  * List Template
  * License LGPL(您可以在任何地方免费使用,但请不要吝啬您对框架本身的改进)
  * http://www.xidea.org/project/lite/
@@ -229,4 +234,17 @@ function buildResultWrapper(n){
 		var result = this._result;
 		return result[n].apply(result,arguments)
 	}
+}
+if(typeof require == 'function'){
+exports.ParseContext=ParseContext;
+var buildTopChain=require('./parse-chain').buildTopChain;
+var ExtensionParser=require('./extension-parser').ExtensionParser;
+var Extension=require('./extension').Extension;
+var parseDefaultXMLNode=require('./xml-default-parser').parseDefaultXMLNode;
+var parseText=require('./text-parser').parseText;
+var getByKey=require('org/xidea/lite/util/kv').getByKey;
+var setByKey=require('org/xidea/lite/util/kv').setByKey;
+var XA_TYPE=require('org/xidea/lite/impl/template-token').XA_TYPE;
+var EL_TYPE=require('org/xidea/lite/impl/template-token').EL_TYPE;
+var XT_TYPE=require('org/xidea/lite/impl/template-token').XT_TYPE;
 }

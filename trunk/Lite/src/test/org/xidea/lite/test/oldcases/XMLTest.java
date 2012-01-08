@@ -22,7 +22,6 @@ import org.junit.Test;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.lite.LiteTemplate;
 import org.xidea.lite.Template;
-import org.xidea.lite.impl.ParseUtil;
 
 
 public class XMLTest {

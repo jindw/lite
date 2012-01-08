@@ -2,12 +2,10 @@ this.addScript('browser-compiler.js',['liteWrapCompile',"liteWrapImpl"]
                ,[
                    "org.xidea.lite.impl.js:JSTranslator",
                    "org.xidea.lite.parse.*",
-                   "org.xidea.lite.util.*",
-                   "org.xidea.jsi:console"
+                   "org.xidea.lite.util.*"
                ]);
 
 this.addScript('js-translator.js',["JSTranslator",'GLOBAL_DEF_MAP',"GLOBAL_VAR_MAP"]
                 ,'org.xidea.lite.impl:*'
                 ,["org.xidea.el:stringifyJSEL",
-                	'org.xidea.lite.util:stringifyJSON',
-                	'org.xidea.jsi:console']);
+                	'org.xidea.lite.util:stringifyJSON']);

@@ -5,8 +5,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.xidea.el.impl.ExpressionFactoryImpl;
-import org.xidea.el.json.JSONTokenizer;
-import org.xidea.jsi.impl.RuntimeSupport;
+import org.xidea.jsi.impl.v3.RuntimeSupport;
 
 public class JSONTokenizerTest {
 

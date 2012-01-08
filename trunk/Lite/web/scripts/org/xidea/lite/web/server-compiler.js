@@ -1,4 +1,13 @@
-/**
+if(typeof require == 'function'){
+var PHPTranslator=require('org/xidea/lite/impl/php/php-translator').PHPTranslator;
+var ParseContext=require('org/xidea/lite/parse/parse-context').ParseContext;
+var ParseConfig=require('org/xidea/lite/parse/config').ParseConfig;
+var parseConfig=require('org/xidea/lite/parse/config-parser').parseConfig;
+var XMLHttpRequest=require('org/xidea/lite/util/xhr').XMLHttpRequest;
+var stringifyJSON=require('org/xidea/lite/util/json').stringifyJSON;
+var URI=require('org/xidea/lite/util/resource').URI;
+var base64Encode=require('org/xidea/lite/util/resource').base64Encode;
+}/**
  * var tf = liteFunction("<c:if test='${test}'></c:if>",{type:'xml',extension:'/scripts/lite-extends.js'})
  * var tf = liteTemplate("<c:if test='${test}'></c:if>",{type:'xml',extension:'/scripts/lite-extends.js'})
  */
@@ -55,4 +64,9 @@ WebCompiler.prototype.save = function(){
 		console.info("编译失败:",xhr.responseText);
 		return false;
 	}
+}
+
+if(typeof require == 'function'){
+exports.WebCompiler=WebCompiler;
+var XMLHttpRequest=require('org/xidea/lite/util/xhr').XMLHttpRequest;
 }

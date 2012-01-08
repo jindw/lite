@@ -123,3 +123,6 @@ function findRegExpEnd( text, regExpStart) {
 	}
 	return -1;
 }
+if(typeof require == 'function'){
+exports.findELEnd=findELEnd;
+}

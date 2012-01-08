@@ -147,7 +147,7 @@ public class LiteCompiler {
 	public static String buildPHP(String path, String litecode) {
 		JSIRuntime runtime = ParseUtil.getJSIRuntime();
 		Object translator = runtime
-				.eval("new ($import('org.xidea.lite.impl.php:PHPTranslator',{}))('"
+				.eval("new ($export('org/xidea/lite/impl/php/php-translator',{}))('"
 						+ path + "'," + litecode + ")");
 		return (String) runtime.invoke(translator, "translate");
 	}

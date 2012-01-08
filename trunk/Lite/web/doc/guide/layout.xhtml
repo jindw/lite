@@ -206,20 +206,18 @@ var xmlSourceMap = {};
 		<c:include path="layout-main.xhtml" />
 		<c:include path="layout-menu.xhtml" />
 		<c:include path="layout-dialog.xhtml" />
-		<script src="../boot.js" />
+		<script src="../require.js" />
 		<!--  
 		<script src="/scripts/boot.js"/>
 		-->
 		<script>
 			if(!this.ParseContext && this.$import){
-				$import('org.xidea.lite.web:*',true);
-				$import('org.xidea.jsi:$log',true);
-				$import('org.xidea.lite:Template',true);
-				$import('org.xidea.lite.impl.js:*',true);
-				$import('org.xidea.lite.impl.php:*',true);
-				$import('org.xidea.lite.parse:*',true);
-				$import('org.xidea.lite.util:*',true);
-				$import('org.xidea.lite.util:stringifyJSON',true);
+				$export('org/xidea/lite/');
+				$export('org/xidea/lite/impl/js');
+				$export('org/xidea/lite/impl/php');
+				$export('org/xidea/lite/web');
+				$export('org/xidea/lite/parse');
+				$export('org/xidea/lite/util');
 			}
 			</script>
 		<script>

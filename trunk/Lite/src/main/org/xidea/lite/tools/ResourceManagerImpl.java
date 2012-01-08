@@ -21,7 +21,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
 import org.xidea.jsi.JSIRuntime;
-import org.xidea.jsi.impl.RuntimeSupport;
+import org.xidea.jsi.impl.v3.RuntimeSupport;
 import org.xidea.lite.LiteTemplate;
 import org.xidea.lite.impl.ParseConfigImpl;
 import org.xidea.lite.impl.ParseUtil;
@@ -46,8 +46,7 @@ public class ResourceManagerImpl extends ParseConfigImpl implements
 		super(root, config);
 		this.root = new File(root);
 		// this.currentScript = root;
-		this.jsr
-				.eval("$import('org.xidea.jsidoc.util:JSON');var console=$import('org.xidea.jsi:$log');");
+//		this.jsr.eval("$import('org.xidea.jsidoc.util:JSON');var console=$import('org.xidea.jsi:$log');");
 		this.jsr.eval("var resourceManager=1;");
 		Object initfn = this.jsr.eval("(function(rm){resourceManager = rm;})");
 		this.jsr.invoke(this, initfn, this);

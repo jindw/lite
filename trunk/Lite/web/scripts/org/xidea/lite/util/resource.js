@@ -172,3 +172,9 @@ function base64Encode(data){
 	data = btoa(data) ;
 	return encodeURIComponent(data);
 }
+
+if(typeof require == 'function'){
+exports.URI=URI;
+exports.base64Encode=base64Encode;
+exports.i18nHash=i18nHash;
+}

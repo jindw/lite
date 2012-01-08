@@ -1,27 +1,18 @@
 package org.xidea.lite.test.oldcases;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URLEncoder;
-import java.util.Iterator;
 import java.util.Map;
-
-import javax.print.URIException;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xidea.el.impl.ReflectUtil;
 import org.xidea.lite.LiteTemplate;
-import org.xidea.lite.LiteEngine;
-import org.xidea.lite.impl.ParseContextImpl;
-import org.xidea.lite.impl.ParseUtil;
 import org.xidea.lite.parse.ParseContext;
 import org.xml.sax.SAXException;
 

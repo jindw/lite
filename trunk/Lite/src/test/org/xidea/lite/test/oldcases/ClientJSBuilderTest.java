@@ -1,33 +1,19 @@
 package org.xidea.lite.test.oldcases;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
-
-import javax.script.Invocable;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.xidea.el.Expression;
-import org.xidea.el.ExpressionFactory;
 import org.xidea.jsi.JSIRuntime;
-import org.xidea.jsi.impl.RuntimeSupport;
-import org.xidea.lite.LiteEngine;
-import org.xidea.lite.impl.ParseContextImpl;
+import org.xidea.jsi.impl.v3.RuntimeSupport;
 import org.xidea.lite.parse.ParseContext;
-import org.xidea.lite.parse.TextParser;
 import org.xml.sax.SAXException;
 
 public class ClientJSBuilderTest {

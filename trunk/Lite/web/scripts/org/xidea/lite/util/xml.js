@@ -1,4 +1,8 @@
-function loadLiteXML(uri,root){
+if(typeof require == 'function'){
+var normalizeLiteXML=require('./xml-normalize').normalizeLiteXML;
+var URI=require('./resource').URI;
+var XMLHttpRequest=require('./xhr').XMLHttpRequest;
+}function loadLiteXML(uri,root){
 	try{
 		if(uri instanceof URI){ 
 			if(uri.source){
@@ -285,3 +289,10 @@ function findXMLAttributeAsEL(el){
 //		return null;
 //	}
 //}
+
+if(typeof require == 'function'){
+exports.loadLiteXML=loadLiteXML;
+exports.selectByXPath=selectByXPath;
+exports.findXMLAttribute=findXMLAttribute;
+exports.findXMLAttributeAsEL=findXMLAttributeAsEL;
+}

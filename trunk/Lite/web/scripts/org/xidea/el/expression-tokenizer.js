@@ -1,4 +1,6 @@
-/*
+if(typeof require == 'function'){
+var JSONTokenizer=require('./json-tokenizer').JSONTokenizer;
+}/*
  * List Template
  * License LGPL(您可以在任何地方免费使用,但请不要吝啬您对框架本身的改进)
  * http://www.xidea.org/project/lite/
@@ -522,4 +524,32 @@ function rightEnd(currentType, priviousType) {
 	var priviousPriority = getPriority(priviousType);
 	var currentPriority = getPriority(currentType);
 	return currentPriority <= priviousPriority;
+}
+if(typeof require == 'function'){
+exports.getPriority=getPriority;
+exports.ExpressionTokenizer=ExpressionTokenizer;
+var hasTokenParam=require('./expression-token').hasTokenParam;
+var getTokenParam=require('./expression-token').getTokenParam;
+var hasTokenParam=require('./expression-token').hasTokenParam;
+var getTokenParamIndex=require('./expression-token').getTokenParamIndex;
+var getTokenLength=require('./expression-token').getTokenLength;
+var findTokenType=require('./expression-token').findTokenType;
+var BIT_PRIORITY=require('./expression-token').BIT_PRIORITY;
+var BIT_PRIORITY_SUB=require('./expression-token').BIT_PRIORITY_SUB;
+var OP_ADD=require('./expression-token').OP_ADD;
+var OP_GET=require('./expression-token').OP_GET;
+var OP_IN=require('./expression-token').OP_IN;
+var OP_INVOKE=require('./expression-token').OP_INVOKE;
+var OP_JOIN=require('./expression-token').OP_JOIN;
+var OP_NE=require('./expression-token').OP_NE;
+var OP_NEG=require('./expression-token').OP_NEG;
+var OP_POS=require('./expression-token').OP_POS;
+var OP_PUT=require('./expression-token').OP_PUT;
+var OP_QUESTION=require('./expression-token').OP_QUESTION;
+var OP_QUESTION_SELECT=require('./expression-token').OP_QUESTION_SELECT;
+var OP_SUB=require('./expression-token').OP_SUB;
+var VALUE_CONSTANTS=require('./expression-token').VALUE_CONSTANTS;
+var VALUE_LIST=require('./expression-token').VALUE_LIST;
+var VALUE_MAP=require('./expression-token').VALUE_MAP;
+var VALUE_VAR=require('./expression-token').VALUE_VAR;
 }

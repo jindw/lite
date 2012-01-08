@@ -166,3 +166,7 @@ function findExpSource(text){
 	    }
 	}
 }
+if(typeof require == 'function'){
+exports.partitionJavaScript=partitionJavaScript;
+exports.compressJS=compressJS;
+}

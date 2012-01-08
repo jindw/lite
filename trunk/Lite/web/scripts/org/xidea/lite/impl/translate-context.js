@@ -144,3 +144,18 @@ TranslateContext.prototype = {
     }
 }
 
+
+if(typeof require == 'function'){
+exports.TranslateContext=TranslateContext;
+var OptimizeScope=require('org/xidea/lite/parse/optimize-scope').OptimizeScope;
+var stringifyJSON=require('org/xidea/lite/util/json').stringifyJSON;
+var VAR_TYPE=require('./template-token').VAR_TYPE;
+var XA_TYPE=require('./template-token').XA_TYPE;
+var ELSE_TYPE=require('./template-token').ELSE_TYPE;
+var PLUGIN_TYPE=require('./template-token').PLUGIN_TYPE;
+var CAPTURE_TYPE=require('./template-token').CAPTURE_TYPE;
+var IF_TYPE=require('./template-token').IF_TYPE;
+var EL_TYPE=require('./template-token').EL_TYPE;
+var XT_TYPE=require('./template-token').XT_TYPE;
+var FOR_TYPE=require('./template-token').FOR_TYPE;
+}

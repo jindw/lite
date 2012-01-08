@@ -148,3 +148,9 @@ var liteWrap = function(replaceMap){
 	    return wrap(fn,global || liteImpl);
 	}
 }( {'"':'&#34;','<':'&lt;','&':'&#38;'});
+
+if(typeof require == 'function'){
+exports.Template=Template;
+exports.liteWrap=liteWrap;
+exports.liteImpl=liteImpl;
+}

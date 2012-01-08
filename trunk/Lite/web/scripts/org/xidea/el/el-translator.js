@@ -126,3 +126,23 @@ function stringifyPrefix(el,context){
     var opc = findTokenText(type);
 	return opc+value;
 }
+
+if(typeof require == 'function'){
+exports.stringifyJSEL=stringifyJSEL;
+var stringifyJSON=require('org/xidea/lite/util/json').stringifyJSON;
+var getTokenParam=require('./expression-token').getTokenParam;
+var getTokenParamIndex=require('./expression-token').getTokenParamIndex;
+var findTokenText=require('./expression-token').findTokenText;
+var addELQute=require('./expression-token').addELQute;
+var OP_GET=require('./expression-token').OP_GET;
+var OP_IN=require('./expression-token').OP_IN;
+var OP_INVOKE=require('./expression-token').OP_INVOKE;
+var OP_JOIN=require('./expression-token').OP_JOIN;
+var OP_PUT=require('./expression-token').OP_PUT;
+var OP_QUESTION=require('./expression-token').OP_QUESTION;
+var OP_QUESTION_SELECT=require('./expression-token').OP_QUESTION_SELECT;
+var VALUE_CONSTANTS=require('./expression-token').VALUE_CONSTANTS;
+var VALUE_LIST=require('./expression-token').VALUE_LIST;
+var VALUE_MAP=require('./expression-token').VALUE_MAP;
+var VALUE_VAR=require('./expression-token').VALUE_VAR;
+}

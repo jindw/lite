@@ -102,3 +102,7 @@ function stringifyObject(begin,buf,end,ident,depth){
         return begin + buf.join(',') + end;
     }
 }
+if(typeof require == 'function'){
+exports.stringifyJSON=stringifyJSON;
+exports.parseJSON=parseJSON;
+}

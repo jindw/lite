@@ -15,6 +15,4 @@ this.addScript('resource.js',["URI",'base64Encode','i18nHash']);
 
 this.addScript('js-token.js',['partitionJavaScript','compressJS']);
 
-this.addDependence("*",'org.xidea.jsi:console',true);
-
 //this.addDependence("xml.js","org.xidea.lite.nodejs:*",true);

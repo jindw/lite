@@ -1,4 +1,6 @@
-/*
+if(typeof require == 'function'){
+var getTokenParam=require('./expression-token').getTokenParam;
+}/*
  * List Template
  * License LGPL(您可以在任何地方免费使用,但请不要吝啬您对框架本身的改进)
  * http://www.xidea.org/project/lite/
@@ -149,3 +151,40 @@ function realValue(arg1){
     return arg1;
 }
 
+
+if(typeof require == 'function'){
+exports.evaluate=evaluate;
+exports.Expression=Expression;
+var ExpressionTokenizer=require('./expression-tokenizer').ExpressionTokenizer;
+var getTokenParam=require('./expression-token').getTokenParam;
+var getTokenParamIndex=require('./expression-token').getTokenParamIndex;
+var OP_ADD=require('./expression-token').OP_ADD;
+var OP_AND=require('./expression-token').OP_AND;
+var OP_DIV=require('./expression-token').OP_DIV;
+var OP_EQ=require('./expression-token').OP_EQ;
+var OP_EQ_STRICT=require('./expression-token').OP_EQ_STRICT;
+var OP_GET=require('./expression-token').OP_GET;
+var OP_GT=require('./expression-token').OP_GT;
+var OP_GTEQ=require('./expression-token').OP_GTEQ;
+var OP_IN=require('./expression-token').OP_IN;
+var OP_INVOKE=require('./expression-token').OP_INVOKE;
+var OP_JOIN=require('./expression-token').OP_JOIN;
+var OP_LT=require('./expression-token').OP_LT;
+var OP_LTEQ=require('./expression-token').OP_LTEQ;
+var OP_MOD=require('./expression-token').OP_MOD;
+var OP_MUL=require('./expression-token').OP_MUL;
+var OP_NE=require('./expression-token').OP_NE;
+var OP_NEG=require('./expression-token').OP_NEG;
+var OP_NE_STRICT=require('./expression-token').OP_NE_STRICT;
+var OP_NOT=require('./expression-token').OP_NOT;
+var OP_OR=require('./expression-token').OP_OR;
+var OP_POS=require('./expression-token').OP_POS;
+var OP_PUT=require('./expression-token').OP_PUT;
+var OP_QUESTION=require('./expression-token').OP_QUESTION;
+var OP_QUESTION_SELECT=require('./expression-token').OP_QUESTION_SELECT;
+var OP_SUB=require('./expression-token').OP_SUB;
+var VALUE_CONSTANTS=require('./expression-token').VALUE_CONSTANTS;
+var VALUE_LIST=require('./expression-token').VALUE_LIST;
+var VALUE_MAP=require('./expression-token').VALUE_MAP;
+var VALUE_VAR=require('./expression-token').VALUE_VAR;
+}

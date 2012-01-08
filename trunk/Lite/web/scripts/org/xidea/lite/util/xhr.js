@@ -31,3 +31,7 @@ if(!XMLHttpRequest && window.ActiveXObject){
         }
     };
 }
+
+if(typeof require == 'function'){
+exports.XMLHttpRequest=XMLHttpRequest;
+}

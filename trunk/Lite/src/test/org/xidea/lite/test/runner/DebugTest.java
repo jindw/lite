@@ -4,17 +4,10 @@ import org.mozilla.javascript.Callable;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextAction;
 import org.mozilla.javascript.ContextFactory;
-import org.mozilla.javascript.Kit;
 import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.debug.DebugFrame;
-import org.mozilla.javascript.debug.DebuggableScript;
-import org.mozilla.javascript.debug.Debugger;
-import org.mozilla.javascript.tools.debugger.Dim;
 import org.mozilla.javascript.tools.debugger.Main;
-import org.mozilla.javascript.tools.debugger.ScopeProvider;
 import org.mozilla.javascript.tools.shell.Global;
-import org.xidea.jsi.JSIRuntime;
-import org.xidea.jsi.impl.RuntimeSupport;
+import org.xidea.jsi.impl.v3.RuntimeSupport;
 
 public class DebugTest {
 	static RuntimeSupport rt = (RuntimeSupport) RuntimeSupport.create();

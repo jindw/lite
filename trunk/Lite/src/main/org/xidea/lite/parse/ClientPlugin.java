@@ -41,7 +41,7 @@ public class ClientPlugin implements OptimizePlugin, OptimizeScope {
 			result.add(context.getDefCode(n));
 		}
 		result.addAll(children);
-		StringBuilder code = new StringBuilder("$import('org.xidea.lite.impl.js:JSTranslator');");
+		StringBuilder code = new StringBuilder("$export('org/xidea/lite/impl/js/js-translator');");
 		code.append("(function(code,name,params,defaults){");
 		code.append("	var t = new JSTranslator(name,params,defaults);");
 		code.append("	t.liteImpl = ");

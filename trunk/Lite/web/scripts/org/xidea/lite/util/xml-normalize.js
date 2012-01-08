@@ -217,3 +217,7 @@ function normalizeLiteXML(text,uri){
 	}
     return text2;
 }
+if(typeof require == 'function'){
+exports.getLiteTagInfo=getLiteTagInfo;
+exports.normalizeLiteXML=normalizeLiteXML;
+}

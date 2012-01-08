@@ -1,7 +1,5 @@
 package org.xidea.el.impl.test;
 
-import static org.junit.Assert.*;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;

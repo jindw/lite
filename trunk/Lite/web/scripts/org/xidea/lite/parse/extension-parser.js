@@ -36,18 +36,18 @@ function formatName(el){
 	return tagName.toLowerCase();
 }
 
-console.filters.push(function(msg){
-	if(nodeLocal){
-		var currentNode = nodeLocal.get();
-		if(currentNode){
-			var p = getLiteTagPosition(currentNode);
-			if(p){
-				msg = p+'\n'+msg;
-			}
-		}
-	}
-	return msg;
-});
+//console.filters.push(function(msg){
+//	if(nodeLocal){
+//		var currentNode = nodeLocal.get();
+//		if(currentNode){
+//			var p = getLiteTagPosition(currentNode);
+//			if(p){
+//				msg = p+'\n'+msg;
+//			}
+//		}
+//	}
+//	return msg;
+//});
 
 function getLiteTagPosition(el){
 	var pos = getLiteTagInfo(el);
@@ -96,16 +96,6 @@ function loadExtObject(source){
 	return objectMap;
 }
 
-function copyParserMap(mapClazz,p,p2,key){
-	var map = p[key];
-	if(map){
-		var result = mapClazz.newInstance();
-		p2[key] = result;
-		for(var n in map){
-			result.put(n, map[n]);
-		}
-	}
-}
 
 function getParser(map,key){
 	var buf = [];
@@ -115,6 +105,17 @@ function getParser(map,key){
 		}
 	}
 	return buf.length ? buf:null;
+}
+
+function copyParserMap(mapClazz,p,p2,key){
+	var map = p[key];
+	if(map){
+		var result = mapClazz.newInstance();
+		p2.put(key ,result);
+		for(var n in map){
+			result.put(n, map[n]);
+		}
+	}
 }
 /**
  * 
@@ -132,8 +133,10 @@ ExtensionParser.prototype = {
 		for(var n in this.packageMap){
 			var p = this.packageMap[n];
 			var p2 = mapClazz.newInstance();
-			result[n]=p2;
-			p.namespaceParser && (p2.namespaceParser = p.namespaceParser);
+			result.put(n,p2);
+			if(p.namespaceParser){
+				p2.put('namespaceParser', p.namespaceParser);
+			}
 			copyParserMap(mapClazz,p,p2,"beforeMap")
 			
 			copyParserMap(mapClazz,p,p2,"typeMap")
@@ -412,4 +415,13 @@ ExtensionParser.prototype = {
 		//$end$ =>5
 		return 2;
 	}
+}
+
+if(typeof require == 'function'){
+exports.ExtensionParser=ExtensionParser;
+var getLiteTagInfo=require('org/xidea/lite/util/xml-normalize').getLiteTagInfo;
+var Extension=require('./extension').Extension;
+var Core=require('./xml-core-parser').Core;
+var HTML=require('./html-parser').HTML;
+var HTML_EXT=require('./html-parser').HTML_EXT;
 }

@@ -328,3 +328,7 @@ JSONTokenizer.prototype = {
 //	return parseInt(text, radix);
 //}
 
+
+if(typeof require == 'function'){
+exports.JSONTokenizer=JSONTokenizer;
+}

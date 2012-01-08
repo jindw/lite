@@ -19,3 +19,17 @@ var CAPTURE_TYPE = 9;// [9,[...],'var']
 var IF_KEY = "if";
 var FOR_KEY = "for";
 var PLUGIN_DEFINE = "org.xidea.lite.DefinePlugin";
+
+if(typeof require == 'function'){
+exports.PLUGIN_DEFINE=PLUGIN_DEFINE;
+exports.VAR_TYPE=VAR_TYPE;
+exports.XA_TYPE=XA_TYPE;
+exports.ELSE_TYPE=ELSE_TYPE;
+exports.PLUGIN_TYPE=PLUGIN_TYPE;
+exports.CAPTURE_TYPE=CAPTURE_TYPE;
+exports.IF_TYPE=IF_TYPE;
+exports.EL_TYPE=EL_TYPE;
+exports.BREAK_TYPE=BREAK_TYPE;
+exports.XT_TYPE=XT_TYPE;
+exports.FOR_TYPE=FOR_TYPE;
+}

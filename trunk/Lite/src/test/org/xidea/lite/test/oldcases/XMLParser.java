@@ -1,15 +1,8 @@
 package org.xidea.lite.test.oldcases;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringReader;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.List;
-import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -18,15 +11,11 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.xidea.lite.impl.ParseContextImpl;
 import org.xidea.lite.impl.TextNodeParser;
 import org.xidea.lite.impl.dtd.DefaultEntityResolver;
 import org.xidea.lite.parse.ParseContext;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-
-import com.sun.org.apache.bcel.internal.classfile.SourceFile;
 
 public class XMLParser extends TextNodeParser {
 	private static Log log = LogFactory.getLog(XMLParser.class);

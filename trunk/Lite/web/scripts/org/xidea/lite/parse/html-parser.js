@@ -1,4 +1,6 @@
-/*
+if(typeof require == 'function'){
+var Core=require('./xml-core-parser').Core;
+}/*
  * List Template
  * License LGPL(您可以在任何地方免费使用,但请不要吝啬您对框架本身的改进)
  * http://www.xidea.org/project/lite/
@@ -347,3 +349,15 @@ function countEescape(text, p$) {
 }
 //autoEncode("${a}",/^encodeURI*/,function(a){return 'encodeURI('+a+')'})
 /**/
+if(typeof require == 'function'){
+exports.HTML=HTML;
+exports.HTML_EXT=HTML_EXT;
+var XML_SPACE_TRIM=require('./xml-default-parser').XML_SPACE_TRIM;
+var findELEnd=require('org/xidea/el/el-util').findELEnd;
+var parseChildRemoveAttr=require('./xml-core-parser').parseChildRemoveAttr;
+var compressJS=require('org/xidea/lite/util/js-token').compressJS;
+var stringifyJSON=require('org/xidea/lite/util/json').stringifyJSON;
+var loadLiteXML=require('org/xidea/lite/util/xml').loadLiteXML;
+var findXMLAttribute=require('org/xidea/lite/util/xml').findXMLAttribute;
+var URI=require('org/xidea/lite/util/resource').URI;
+}

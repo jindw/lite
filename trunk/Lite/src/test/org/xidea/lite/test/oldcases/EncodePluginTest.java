@@ -8,7 +8,6 @@ import java.util.regex.Pattern;
 import junit.framework.Assert;
 
 import org.junit.Test;
-import org.xidea.el.ExpressionFactory;
 import org.xidea.el.impl.ExpressionFactoryImpl;
 import org.xidea.lite.EncodePlugin;
 

@@ -3,7 +3,6 @@ package org.xidea.el.impl.test;
 import java.util.List;
 import java.util.Map;
 
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.xidea.el.ExpressionToken;

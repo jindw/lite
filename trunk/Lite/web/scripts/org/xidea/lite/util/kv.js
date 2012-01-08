@@ -44,3 +44,8 @@ function setByKey(map,key,value){
 		values.push(value);
 	}
 }
+if(typeof require == 'function'){
+exports.setByKey=setByKey;
+exports.getByKey=getByKey;
+exports.removeByKey=removeByKey;
+}

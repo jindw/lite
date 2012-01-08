@@ -43,3 +43,6 @@ function findStatementEnd(text){
 	}while(end>=0)
 	return text.length;
 }
+if(typeof require == 'function'){
+exports.findLiteParamMap=findLiteParamMap;
+}

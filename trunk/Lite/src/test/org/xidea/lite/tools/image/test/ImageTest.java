@@ -5,17 +5,12 @@ import java.awt.Color;
 import java.awt.CompositeContext;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
-import java.text.NumberFormat;
 
 import javax.imageio.ImageIO;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.xidea.lite.tools.ImageUtil;
-import org.xidea.lite.tools.image.ImageCut;
 
 public class ImageTest {
 

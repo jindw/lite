@@ -13,7 +13,7 @@ this.addScript('expression-token.js',
 					//,"OP_*"
 					//,"TYPE_*"
 					]
-				,"org.xidea.jsi:console"
+				,0
 				,["evaluate",'getPriority']);
 				
 				
@@ -26,17 +26,15 @@ this.addScript('json-tokenizer.js','JSONTokenizer');
 
 this.addScript('expression-tokenizer.js',['getPriority','ExpressionTokenizer']
                 ,'JSONTokenizer'
-                ,["hasTokenParam",'org.xidea.jsi:console']);
+                ,["hasTokenParam"]);
 
 this.addScript('el-util.js','findELEnd'
-                ,0
-                ,'org.xidea.jsi:console');
+                ,0);
 
 this.addScript('el-translator.js',['stringifyJSEL']
                 ,0
                 ,[
-                	"org.xidea.lite.util:stringifyJSON",
-                	'org.xidea.jsi:console']);
+                	"org.xidea.lite.util:stringifyJSON"]);
 this.addDependence("*","expression-token.js",true);
 
 

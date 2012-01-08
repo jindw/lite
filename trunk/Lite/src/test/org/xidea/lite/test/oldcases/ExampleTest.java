@@ -20,8 +20,7 @@ import org.w3c.dom.NodeList;
 import org.xidea.el.json.JSONDecoder;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.jsi.JSIRuntime;
-import org.xidea.jsi.impl.JSIText;
-import org.xidea.jsi.impl.RuntimeSupport;
+import org.xidea.jsi.impl.v3.RuntimeSupport;
 import org.xidea.lite.LiteTemplate;
 import org.xidea.lite.impl.ParseUtil;
 import org.xidea.lite.parse.ParseContext;
@@ -64,7 +63,7 @@ public class ExampleTest {
 		menuURL = new File(webRoot, "menu.xml").toURI();
 		if((Boolean)eval("!window.$JSI")){
 			eval("this['javax.script.filename']='<boot.js>';");
-			eval(JSIText.loadText(this.getClass().getResourceAsStream(
+			eval(ParseUtil.loadTextAndClose(this.getClass().getResourceAsStream(
 					"/boot.js"), "utf-8"));
 		}
 		

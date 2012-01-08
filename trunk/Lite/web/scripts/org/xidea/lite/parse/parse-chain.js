@@ -67,3 +67,7 @@ function buildNext(thiz,index){
 	}
 	return null;
 }
+
+if(typeof require == 'function'){
+exports.buildTopChain=buildTopChain;
+}

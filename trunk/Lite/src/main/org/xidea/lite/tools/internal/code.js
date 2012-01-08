@@ -1,6 +1,6 @@
 var JSTransform = require('./jstransform').JSTransform;
 //通过jsi2 的语法，链接到老的类库
-var liteWrapCompile =  $import('org.xidea.lite.impl.js.liteWrapCompile');
+var liteWrapCompile =  Function.prototype;//$import('org.xidea.lite.impl.js.liteWrapCompile');
 var processURI = require('./uri').processURI;
 
 function jsCodeFilter(path,text){

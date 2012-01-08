@@ -118,3 +118,10 @@ function countEescape(text, p$) {
 	}
 	return 0;
 }
+
+if(typeof require == 'function'){
+exports.parseText=parseText;
+var XA_TYPE=require('org/xidea/lite/impl/template-token').XA_TYPE;
+var EL_TYPE=require('org/xidea/lite/impl/template-token').EL_TYPE;
+var XT_TYPE=require('org/xidea/lite/impl/template-token').XT_TYPE;
+}

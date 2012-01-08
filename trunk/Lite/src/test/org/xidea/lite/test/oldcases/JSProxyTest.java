@@ -9,7 +9,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.xidea.jsi.JSIRuntime;
-import org.xidea.jsi.impl.RuntimeSupport;
+import org.xidea.jsi.impl.v3.RuntimeSupport;
 import org.xidea.lite.parse.NodeParser;
 import org.xidea.lite.parse.TextParser;
 

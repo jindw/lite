@@ -135,8 +135,8 @@ public class ParseConfigImpl implements ParseConfig {
 	protected void reset(Document doc) {
 		JSIRuntime rt = ParseUtil.getJSIRuntime();
 		Object parseConfig = rt.eval("(function(doc){var om = {};"
-				+ "$import('org.xidea.lite.parse:parseConfig',om);"
-				+ "$import('org.xidea.lite.util.stringifyJSON',om);"
+				+ "$export('org/xidea/lite/parse',om);"
+				+ "$export('org/xidea/lite/util',om);"
 				+ "return om.stringifyJSON(om.parseConfig(doc));})");
 		String json = (String) rt.invoke(null, parseConfig, doc);
 		List<Map<String, Object>> groups = JSONDecoder.decode(json);

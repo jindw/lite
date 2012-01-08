@@ -58,7 +58,6 @@ this.addScript('optimize-util.js',['extractStaticPrefix','doOptimize'
 					,"org.xidea.lite.impl.js:JSTranslator"
 					]);
 this.addDependence("*",'org.xidea.lite.impl:*',true);
-this.addDependence("*",'org.xidea.jsi:console',false);
 
 
 /*

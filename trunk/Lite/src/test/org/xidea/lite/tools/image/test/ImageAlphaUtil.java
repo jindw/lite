@@ -1,15 +1,10 @@
 package org.xidea.lite.tools.image.test;
 
 import java.awt.Color;
-import java.awt.Image;
-import java.awt.Toolkit;
-import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.net.URL;
 
 import javax.imageio.ImageIO;
-import javax.swing.JFrame;
 
 import org.xidea.lite.tools.ImageUtil;
 

@@ -12,6 +12,6 @@
 	<classpathentry kind="lib" path="web/WEB-INF/lib/js.jar" sourcepath="E:/opensource/mozilla/rhino1_7R2-src.zip"/>
 	<classpathentry kind="lib" path="web/WEB-INF/lib/junit.jar" sourcepath="E:/opensource/junit/junit-4.9-src.jar"/>
 	<classpathentry kind="lib" path="web/WEB-INF/lib/JSI.jar"/>
-	<classpathentry kind="lib" path="web/WEB-INF/lib/JSide.jar"/>
+	<classpathentry kind="lib" path="web/WEB-INF/lib/fs.jar"/>
 	<classpathentry kind="output" path="web/WEB-INF/classes"/>
 </classpath>

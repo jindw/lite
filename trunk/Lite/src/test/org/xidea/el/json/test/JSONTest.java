@@ -11,7 +11,6 @@ import org.junit.Test;
 import org.xidea.el.impl.ExpressionImpl;
 import org.xidea.el.json.JSONDecoder;
 import org.xidea.el.json.JSONEncoder;
-import org.xidea.el.json.JSONTokenizer;
 
 @SuppressWarnings({"unused","unchecked"})
 public class JSONTest {

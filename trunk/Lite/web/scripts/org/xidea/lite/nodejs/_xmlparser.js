@@ -1589,3 +1589,10 @@ function __unescapeString(str) {
 }
 
 
+
+if(typeof require == 'function'){
+exports.XMLP=XMLP;
+exports.__escapeString=__escapeString;
+exports.__unescapeString=__unescapeString;
+exports.trim=trim;
+}

@@ -100,3 +100,7 @@ function formatName(tagName){
 	tagName = tagName.replace(/[\-]/g,"");
 	return tagName.toLowerCase();
 }
+
+if(typeof require == 'function'){
+exports.Extension=Extension;
+}

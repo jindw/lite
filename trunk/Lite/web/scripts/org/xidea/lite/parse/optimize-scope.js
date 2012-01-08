@@ -1,4 +1,13 @@
-/*
+if(typeof require == 'function'){
+var stringifyJSEL=require('org/xidea/el/el-translator').stringifyJSEL;
+var getTokenParam=require('org/xidea/el/expression-token').getTokenParam;
+var getTokenParamIndex=require('org/xidea/el/expression-token').getTokenParamIndex;
+var OP_GET=require('org/xidea/el/expression-token').OP_GET;
+var OP_IN=require('org/xidea/el/expression-token').OP_IN;
+var OP_INVOKE=require('org/xidea/el/expression-token').OP_INVOKE;
+var VALUE_CONSTANTS=require('org/xidea/el/expression-token').VALUE_CONSTANTS;
+var VALUE_VAR=require('org/xidea/el/expression-token').VALUE_VAR;
+}/*
  * List Template
  * License LGPL(您可以在任何地方免费使用,但请不要吝啬您对框架本身的改进)
  * http://www.xidea.org/project/lite/
@@ -263,3 +272,17 @@ function setForStatus(thiz,attrName){
 //	this.tree && walkEL(this,this.tree)
 //}
 
+
+if(typeof require == 'function'){
+exports.OptimizeScope=OptimizeScope;
+var VAR_TYPE=require('org/xidea/lite/impl/template-token').VAR_TYPE;
+var XA_TYPE=require('org/xidea/lite/impl/template-token').XA_TYPE;
+var ELSE_TYPE=require('org/xidea/lite/impl/template-token').ELSE_TYPE;
+var PLUGIN_TYPE=require('org/xidea/lite/impl/template-token').PLUGIN_TYPE;
+var CAPTURE_TYPE=require('org/xidea/lite/impl/template-token').CAPTURE_TYPE;
+var IF_TYPE=require('org/xidea/lite/impl/template-token').IF_TYPE;
+var EL_TYPE=require('org/xidea/lite/impl/template-token').EL_TYPE;
+var BREAK_TYPE=require('org/xidea/lite/impl/template-token').BREAK_TYPE;
+var XT_TYPE=require('org/xidea/lite/impl/template-token').XT_TYPE;
+var FOR_TYPE=require('org/xidea/lite/impl/template-token').FOR_TYPE;
+}

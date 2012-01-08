@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-import org.junit.Test;
 import org.xidea.lite.impl.HotLiteEngine;
 import org.xidea.lite.impl.ParseConfigImpl;
 

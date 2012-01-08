@@ -2,9 +2,7 @@ package org.xidea.lite.xml.test;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.StringReader;
 
 import javax.xml.parsers.SAXParser;
@@ -13,17 +11,13 @@ import javax.xml.parsers.SAXParserFactory;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xidea.jsi.JSIRuntime;
-import org.xidea.jsi.impl.JSIText;
-import org.xidea.jsi.impl.RuntimeSupport;
+import org.xidea.jsi.impl.v3.RuntimeSupport;
 import org.xidea.lite.impl.ParseUtil;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.DTDHandler;
-import org.xml.sax.EntityResolver;
 import org.xml.sax.ErrorHandler;
-import org.xml.sax.HandlerBase;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
-import org.xml.sax.ext.DefaultHandler2;
 import org.xml.sax.ext.EntityResolver2;
 import org.xml.sax.ext.LexicalHandler;
 

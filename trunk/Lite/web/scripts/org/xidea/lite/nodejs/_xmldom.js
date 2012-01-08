@@ -1,4 +1,9 @@
-var OP = window.DOMParser;
+if(typeof require == 'function'){
+var XMLP=require('./_xmlparser').XMLP;
+var __escapeString=require('./_xmlparser').__escapeString;
+var __unescapeString=require('./_xmlparser').__unescapeString;
+var trim=require('./_xmlparser').trim;
+}var OP = window.DOMParser;
 function DOMParser(){
 }
 
@@ -4246,3 +4251,8 @@ DOMNode.prototype.__defineGetter__('textContent',function(arg){
 	}
 	return this.nodeValue;
 });
+if(typeof require == 'function'){
+exports.DOMParser=DOMParser;
+exports.DOMNode=DOMNode;
+exports.DOMNodeList=DOMNodeList;
+}

@@ -13,7 +13,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.xidea.lite.LiteTemplate;
 import org.xidea.lite.Template;
-import org.xidea.lite.impl.ParseContextImpl;
 import org.xidea.lite.impl.TextNodeParser;
 import org.xidea.lite.parse.ParseContext;
 

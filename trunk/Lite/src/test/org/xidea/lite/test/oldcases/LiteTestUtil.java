@@ -9,7 +9,7 @@ import java.util.List;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xidea.jsi.JSIRuntime;
-import org.xidea.jsi.impl.RuntimeSupport;
+import org.xidea.jsi.impl.v3.RuntimeSupport;
 import org.xidea.lite.LiteTemplate;
 import org.xidea.lite.impl.ParseConfigImpl;
 import org.xidea.lite.impl.ParseContextImpl;

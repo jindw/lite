@@ -12,8 +12,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.xidea.el.impl.ReflectUtil;
 import org.xidea.el.json.JSONEncoder;
-import org.xidea.lite.LiteEngine;
-import org.xidea.lite.impl.ParseContextImpl;
 import org.xidea.lite.parse.ParseContext;
 
 

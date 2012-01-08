@@ -100,3 +100,8 @@ var defaultConfig = {
 			
 		}
 	}
+
+if(typeof require == 'function'){
+exports.ParseConfig=ParseConfig;
+var URI=require('org/xidea/lite/util/resource').URI;
+}
