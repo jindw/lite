@@ -1,9 +1,12 @@
-function copy(s,d){
-	for(var n in s){
-		d[n] = s[n];
-	}
-}
-copy(require('./image/box'),exports);
-copy(require('./image/fix-box'),exports);
-copy(require('./image/init'),exports);
-copy(require('./image/lcr-button'),exports);
+$export('image/box',exports);
+$export('image/fix-box',exports);
+$export('image/init',exports);
+$export('image/lcr-button',exports);
+
+
+require('image/box');
+require('image/fix-box');
+require('image/init');
+require('image/lcr-button');
+
+
