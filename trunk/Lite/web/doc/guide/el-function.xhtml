@@ -261,7 +261,14 @@ ${str.substring(1,2)}
 				_globals.push({style:style,title:title,name:n,impl:impl});
 			}
 		}
-		document.getElementById("functionTable").innerHTML = showFunctionTable({globals:_globals,memberMap:memberMap2});
+		document.getElementById("functionTable").innerHTML = 
+			showFunctionTable({
+				globals:_globals,
+				memberMap:memberMap2,
+				globalsRefMap:globalsRefMap,
+				memberRefMap:memberRefMap,
+				memberMap:memberMap
+			});
 		//alert(document.getElementById("functionTable").innerHTML)
 	}
 	showFilter()
