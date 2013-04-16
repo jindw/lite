@@ -137,8 +137,8 @@ public class ReflectUtilTest {
 	}
 	@Test
 	public void testGetValueType() {
-		Assert.assertEquals(int.class, ReflectUtil.getPropertyType(GetValueTypeBean.class, "getter"));
-		Assert.assertEquals(String.class, ReflectUtil.getPropertyType(GetValueTypeBean.class, "setter"));
+		Assert.assertEquals(int.class, ReflectUtil.getPropertyClass(GetValueTypeBean.class, "getter"));
+		Assert.assertEquals(String.class, ReflectUtil.getPropertyClass(GetValueTypeBean.class, "setter"));
 	}
 
 

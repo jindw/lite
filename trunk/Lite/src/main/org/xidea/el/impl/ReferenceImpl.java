@@ -20,13 +20,13 @@ class ReferenceImpl implements Reference {
 		if (base != null) {
 			Object context2 = getValue();
 			if (context2 == null) {
-				type = ReflectUtil.getPropertyType(base.getClass(), name);
+				type = ReflectUtil.getPropertyClass(base.getClass(), name);
 				base = null;
 			} else {
 				base = context2;
 			}
 		} else if (type != null) {
-			type = ReflectUtil.getPropertyType(type, name);
+			type = ReflectUtil.getPropertyClass(type, name);
 		}
 		name = key;
 		return this;
@@ -42,13 +42,13 @@ class ReferenceImpl implements Reference {
 
 	public Class<? extends Object> getType() {
 		if (type != null) {
-			return ReflectUtil.getPropertyType(type, name);
+			return ReflectUtil.getPropertyClass(type, name);
 		} else  if(base !=null){
 			Object value = getValue();
 			if (value != null) {
 				return value.getClass();
 			} else {
-				Class<? extends Object> t = ReflectUtil.getPropertyType(base
+				Class<? extends Object> t = ReflectUtil.getPropertyClass(base
 						.getClass(), name);
 				return t == null ? Object.class : t;
 			}

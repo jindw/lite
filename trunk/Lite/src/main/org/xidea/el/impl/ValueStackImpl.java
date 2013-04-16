@@ -25,7 +25,7 @@ public class ValueStackImpl implements Map<String, Object> {
 				Object result = ReflectUtil.getValue(context, key);
 				Class<?> clazz = context.getClass();
 				if (result != null
-						|| ReflectUtil.getPropertyType(clazz, key) != null) {
+						|| ReflectUtil.getPropertyClass(clazz, key) != null) {
 					return result;
 				}
 				if (key instanceof String) {
@@ -103,7 +103,7 @@ class RefrenceStackImpl extends ValueStackImpl {
 			Object context = stack[i];
 			if (context instanceof Map<?,?>) {
 				return new ReferenceImpl(context, key);
-			} else if (ReflectUtil.getPropertyType(context.getClass(), key) != null) {
+			} else if (ReflectUtil.getPropertyClass(context.getClass(), key) != null) {
 				return new ReferenceImpl(context, key);
 			}
 		}

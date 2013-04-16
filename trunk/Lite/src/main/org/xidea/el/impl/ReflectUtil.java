@@ -1,6 +1,8 @@
 package org.xidea.el.impl;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
@@ -9,6 +11,7 @@ import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +25,9 @@ public abstract class ReflectUtil {
 	private static final String LENGTH = "length";
 	private static final Map<Class<?>, Map<String, Method>> readerMap = new WeakHashMap<Class<?>, Map<String, Method>>();
 	private static final Map<Class<?>, Map<String, Method>> writerMap = new WeakHashMap<Class<?>, Map<String, Method>>();
-	private static final Map<Class<?>, Map<String, Class<?>>> typeMap = new WeakHashMap<Class<?>, Map<String, Class<?>>>();
+	private static final Map<Class<?>, Map<String, Type>> typeMap = new WeakHashMap<Class<?>, Map<String, Type>>();
+	private static final Map<Class<?>, Map<String, Field>> fieldMap = new WeakHashMap<Class<?>, Map<String, Field>>();
+	private static final Map<Class<?>, Constructor<?>> constructorMap = new WeakHashMap<Class<?>, Constructor<?>>();
 	private static Object initLock = new Object();;
 
 	public static Map<String, Method> getGetterMap(final Class<?> clazz) {
@@ -43,20 +48,38 @@ public abstract class ReflectUtil {
 		return propertyMap;
 	}
 
-	private static Map<String, Class<?>> getTypeMap(final Class<?> clazz) {
-		Map<String, Class<?>> propertyMap = typeMap.get(clazz);
-		if (propertyMap == null) {
+	private static Map<String, Type> getTypeMap(final Class<?> clazz) {
+		Map<String, Type > tMap = typeMap.get(clazz);
+		if (tMap == null) {
 			initProperties(clazz);
-			propertyMap = typeMap.get(clazz);
+			tMap = typeMap.get(clazz);
 		}
-		return propertyMap;
+		return tMap;
+	}
+
+	public static Map<String, Field> getFieldMap(final Class<?> clazz) {
+		Map<String, Field> fMap = fieldMap.get(clazz);
+		if (fMap == null) {
+			initProperties(clazz);
+			fMap = fieldMap.get(clazz);
+		}
+		return fMap;
 	}
 
 	private static void initProperties(final Class<?> clazz) {
 		synchronized (initLock) {
+			try {
+				Constructor<?> cons = clazz.getDeclaredConstructor();
+				if (!cons.isAccessible()) {
+					cons.setAccessible(true);
+				}
+				constructorMap.put(clazz, cons);
+			} catch (Exception e) {
+			}
 			HashMap<String, Method> getterMap = new HashMap<String, Method>();
 			HashMap<String, Method> setterMap = new HashMap<String, Method>();
-			HashMap<String, Class<?>> propertyMap = new HashMap<String, Class<?>>();
+			HashMap<String, Type> propertyMap = new HashMap<String, Type>();
+			HashMap<String, Field> dfMap = new HashMap<String, Field>();
 			try {
 				if (!clazz.equals(Object.class)) {
 					getterMap.putAll(getGetterMap(clazz.getSuperclass()));
@@ -74,22 +97,35 @@ public abstract class ReflectUtil {
 						if (type == Void.TYPE) {
 							if (params.length == 1 && name.startsWith("set")) {
 								type = params[0];
-								initMethod(setterMap, propertyMap, m, name
-										.substring(3));
+								initMethod(setterMap, propertyMap, m,
+										name.substring(3));
 							}
 						} else {
 							if (params.length == 0) {
-								if (name.startsWith("get")) {
-									initMethod(getterMap, propertyMap, m, name
-											.substring(3));
+								if (name.startsWith("get")
+										&& !name.equals("getClass")) {
+									initMethod(getterMap, propertyMap, m,
+											name.substring(3));
 								} else if (type == Boolean.TYPE
 										&& name.startsWith("is")) {
-									initMethod(getterMap, propertyMap, m, name
-											.substring(2));
+									initMethod(getterMap, propertyMap, m,
+											name.substring(2));
 								}
 							}
 						}
 					}
+				}
+				boolean nogs = propertyMap.isEmpty() ;
+				boolean isMember = clazz.isMemberClass();
+
+				Field[] fields = clazz.getDeclaredFields();
+				for (Field f : fields) {
+					f.setAccessible(true);
+					String name = f.getName();
+					if (nogs &&(isMember || 0<(f.getModifiers() & Modifier.PUBLIC))) {
+						propertyMap.put(name, f.getGenericType());
+					}
+					dfMap.put(name, f);
 				}
 			} catch (Exception e) {
 				log.warn("初始化属性集合异常", e);
@@ -97,26 +133,28 @@ public abstract class ReflectUtil {
 				readerMap.put(clazz, Collections.unmodifiableMap(getterMap));
 				writerMap.put(clazz, Collections.unmodifiableMap(setterMap));
 				typeMap.put(clazz, Collections.unmodifiableMap(propertyMap));
+
+				fieldMap.put(clazz, Collections.unmodifiableMap(dfMap));
 			}
 		}
 	}
 
 	private static void initMethod(Map<String, Method> propertyMap,
-			Map<String, Class<?>> typeMap, Method m, String name) {
+			Map<String, Type> typeMap, Method m, String name) {
 		if (name.length() > 0) {
 			char c = name.charAt(0);
 			if (Character.isUpperCase(c)) {
 				name = Character.toLowerCase(c) + name.substring(1);
 				m.setAccessible(true);
 				propertyMap.put(name, m);
-				Class<?> type = m.getReturnType();
+				Type type = m.getGenericReturnType();
 				if (type == Void.TYPE) {
 					type = m.getParameterTypes()[0];
 				}
-				Class<?> ot = typeMap.get(name);
+				Type ot = typeMap.get(name);
 				if (ot != null) {
 					if (ot != type) {
-						log.warn("属性类型冲突："+ot+"!="+type);
+						log.warn("属性类型冲突：" + ot + "!=" + type);
 					}
 				}
 				typeMap.put(name, type);
@@ -154,7 +192,7 @@ public abstract class ReflectUtil {
 			result = getParameterizedType(type, Map.class, 1);
 		}
 		if (result != null) {
-			return findClass(result);
+			return baseClass(result);
 		}
 		return Object.class;
 	}
@@ -169,13 +207,13 @@ public abstract class ReflectUtil {
 		if (Map.class.isAssignableFrom(clazz)) {
 			Type result = getParameterizedType(type, Map.class, 0);
 			if (result != null) {
-				return findClass(result);
+				return baseClass(result);
 			}
 		}
 		return Integer.TYPE;
 	}
 
-	private static Type getParameterizedType(Type type, Class<?> destClass,
+	public static Type getParameterizedType(Type type, Class<?> destClass,
 			int paramIndex) {
 		Class<?> clazz = null;
 		ParameterizedType pt = null;
@@ -200,16 +238,17 @@ public abstract class ReflectUtil {
 		for (int i = 0; i < ifs.length; i++) {
 			Class<?> ifc = ifs[i];
 			if (destClass.isAssignableFrom(ifc)) {
-				return getTureType(getParameterizedType(pis[i], destClass,
-						paramIndex), tps, ats);
+				return getTureType(
+						getParameterizedType(pis[i], destClass, paramIndex),
+						tps, ats);
 			}
 		}
 		Class<?> type2 = clazz.getSuperclass();
 		if (type2 != null) {
 			if (destClass.isAssignableFrom(type2)) {
-				return getTureType(getParameterizedType(clazz
-						.getGenericSuperclass(), destClass, paramIndex), tps,
-						ats);
+				return getTureType(
+						getParameterizedType(clazz.getGenericSuperclass(),
+								destClass, paramIndex), tps, ats);
 			}
 		}
 		throw new IllegalArgumentException("必须是Collection 子类");
@@ -234,19 +273,46 @@ public abstract class ReflectUtil {
 		return type;
 	}
 
-	private static Class<? extends Object> findClass(Type result) {
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public static <T> T newInstance(Class<T> clazz)
+			throws InstantiationException, IllegalAccessException {
+		try {
+			Constructor cons = constructorMap.get(clazz);
+			if(cons != null){
+				initProperties(clazz);
+				cons = constructorMap.get(clazz);
+				if(cons!= null){
+					return (T) cons.newInstance();
+				}
+			}
+			return clazz.newInstance();
+		} catch (Exception e) {
+			if(clazz.isMemberClass() && 0 == (clazz.getModifiers() & Modifier.STATIC)){
+				log.warn("请尽量避免用非静态的内部类存储数据",e);
+			}else{
+				log.warn("JavaBean 创建异常", e);
+			}
+			return null;
+		}
+
+	}
+
+	public static Class<? extends Object> baseClass(Type result) {
 		if (result instanceof Class<?>) {
 			return (Class<?>) result;
 		} else if (result instanceof ParameterizedType) {
-			return findClass(((ParameterizedType) result).getRawType());
+			return baseClass(((ParameterizedType) result).getRawType());
 		} else if (result instanceof WildcardType) {
-			return findClass(((WildcardType) result).getUpperBounds()[0]);
+			return baseClass(((WildcardType) result).getUpperBounds()[0]);
 		}
 		return null;
 	}
 
-	public static Class<? extends Object> getPropertyType(Type type, Object key) {
-		Class<?> clazz = findClass(type);
+	public static Class<?> getPropertyClass(Type type, Object key) {
+		return baseClass(getPropertyType(type, key));
+	}
+	public static Type getPropertyType(Type type, Object key) {
+		Class<?> clazz = baseClass(type);
 		if (clazz != null) {
 			if (clazz.isArray()) {
 				if (LENGTH.equals(key)) {
@@ -259,14 +325,13 @@ public abstract class ReflectUtil {
 			} else if (Map.class.isAssignableFrom(clazz)) {
 				return getValueType(type);
 			} else {
-				Class<?> pd = getTypeMap(clazz).get(String.valueOf(key));
+				Type pd = getTypeMap(clazz).get(String.valueOf(key));
 				if (pd != null) {
 					return pd;
 				}
 			}
 		}
 		return null;
-
 	}
 
 	public static Object getValue(Object context, Object key) {
@@ -307,13 +372,10 @@ public abstract class ReflectUtil {
 			try {
 
 				if (context instanceof Class<?>) {
-					return ((Class<?>) context).getField((String) key).get(
-							context);
+					return getFieldMap((Class<?>) context).get(key).get(null);
 				} else {
-					return context.getClass().getField((String) key).get(
-							context);
+					return getFieldMap(context.getClass()).get(key).get(context);
 				}
-			} catch (NoSuchFieldException e) {
 			} catch (Exception e) {
 				if (log.isDebugEnabled()) {
 					log.debug(e);
@@ -333,7 +395,8 @@ public abstract class ReflectUtil {
 	public static void setValue(Object base, Object key, Object value) {
 		if (base != null) {
 			try {
-				if (base.getClass().isArray()) {
+				Class<? extends Object> clazz = base.getClass();
+				if (clazz.isArray()) {
 					Array.set(base, toIndex(key), value);
 				} else if (base instanceof List<?>) {
 					((List<Object>) base).set(toIndex(key), value);
@@ -341,19 +404,21 @@ public abstract class ReflectUtil {
 				if (base instanceof Map) {
 					((Map<Object, Object>) base).put(key, value);
 				}
-				Method method = getSetterMap(base.getClass()).get(
-						String.valueOf(key));
+				String name = String.valueOf(key);
+				Method method = getSetterMap(clazz).get(name);
 				if (method != null) {
 					if (value != null) {
 						Class<?> type = method.getParameterTypes()[0];
-						if (!type.isInstance(value)) {
-							type = toWrapper(type);
-							if (Number.class.isAssignableFrom(type)) {
-								value = toValue((Number) value, type);
-							}
-						}
+						value = toWrapper(value, type);
 					}
 					method.invoke(base, value);
+				} else {
+					Field field = fieldMap.get(clazz).get(name);
+					if (value != null) {
+						Class<?> type = field.getType();
+						value = toWrapper(value, type);
+					}
+					field.set(base, value);
 				}
 			} catch (Exception e) {
 				if (log.isDebugEnabled()) {
@@ -362,6 +427,16 @@ public abstract class ReflectUtil {
 			}
 		}
 
+	}
+
+	private static Object toWrapper(Object value, Class<?> type) {
+		if (!type.isInstance(value)) {
+			type = toWrapper(type);
+			if (Number.class.isAssignableFrom(type)) {
+				value = toValue((Number) value, type);
+			}
+		}
+		return value;
 	}
 
 	public static Number toValue(Number value, Class<? extends Object> type) {

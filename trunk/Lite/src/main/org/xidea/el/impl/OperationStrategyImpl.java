@@ -327,7 +327,7 @@ public class OperationStrategyImpl implements OperationStrategy {
 			return ((Map<?, ?>) object).containsKey(skey);
 		}
 
-		return ReflectUtil.getPropertyType(clazz, skey) != null;
+		return ReflectUtil.getPropertyClass(clazz, skey) != null;
 	}
 
 	private Map<String, Invocable> requireMethodMap(

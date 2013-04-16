@@ -77,7 +77,7 @@
 			</classpath>
 		</javac>
 	</target>
-	<target name="package" depends="init,compress,compile">
+	<target name="package" depends="init,compile">
 		<delete>
 			<fileset dir="build/dest/">
 				<include name="Example-*.zip" />
@@ -89,9 +89,14 @@
 		<echo file="build/dest/jslite/el/__package__.js">this.setImplementation("org.xidea.lite.impl")</echo>
 		<echo file="build/dest/jslite/lite/parse/__package__.js">this.setImplementation("org.xidea.lite.impl")</echo>
 
-		<jar destfile="build/dest/JSEL.jar" compress="true">
+		<jar destfile="build/dest/JSEL.jar" compress="true" encoding="UTF-8">
 			<fileset dir="web/WEB-INF/classes">
 				<include name="org/xidea/el/**/*.class" />
+				<exclude name="**/*.js" />
+				<exclude name="**/test/**/*.*" />
+			</fileset>
+			<fileset dir="src/main">
+				<include name="org/xidea/el/**/*.java" />
 				<exclude name="**/*.js" />
 				<exclude name="**/test/**/*.*" />
 			</fileset>
