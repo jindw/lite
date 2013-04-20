@@ -1,10 +1,15 @@
 package org.xidea.el.json;
 
+import java.io.File;
 import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.net.URI;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -104,7 +109,13 @@ public class JSONEncoder {
 				} else if (object instanceof Collection<?>) {
 					printList(((Collection<?>) object).iterator(), out);
 				} else {
-					printMap(object, out);
+					if(object instanceof Enum){
+						printString(((Enum<?>)object).name(),out);
+					}else if(object instanceof URL || object instanceof URI || object instanceof File){
+						printString(object.toString(), out);
+					}else{
+						printMap(object, out);
+					}
 				}
 			} finally {
 				if (parent != null) {
@@ -195,16 +206,22 @@ public class JSONEncoder {
 	protected void printMap(Object object, StringBuilder out) {
 		out.append('{');
 		try {
-			Map<String, Method> props = getGetterMap(object.getClass());
+			Map<String, Object> props = getAccessorMap(object.getClass());
 			boolean first = true;
 			for (String name : props.keySet()) {
 				try {
-					Method accessor = props.get(name);
+					Object accessor = props.get(name);
 					if (accessor == null
 							|| (ignoreClassName && "class".equals(name))) {
 						continue;
 					}
-					Object value = accessor.invoke(object);
+					
+					Object value;
+					if(accessor instanceof Method){
+						value = ((Method)accessor).invoke(object);
+					}else{
+						value = ((Field)accessor).get(object);
+					}
 					if (first) {
 						first = false;
 					} else {
@@ -225,8 +242,10 @@ public class JSONEncoder {
 		out.append('}');
 	}
 
-	protected Map<String, Method> getGetterMap(Class<? extends Object> clazz) {
-		return ReflectUtil.getGetterMap(clazz);
+	protected Map<String, Object> getAccessorMap(Class<? extends Object> clazz) {
+		Map<String,Object> getterMap = new HashMap<String, Object>( ReflectUtil.getGetterMap(clazz));
+		getterMap.putAll(ReflectUtil.getFieldMap(clazz));
+		return getterMap;
 	}
 
 	protected void printMap(Map<?, ?> map,StringBuilder out) {

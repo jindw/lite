@@ -1,6 +1,7 @@
 package org.xidea.el.json;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -105,16 +106,31 @@ public class JSONTransformer {
 
 	@SuppressWarnings("unchecked")
 	public Object transform(Object value, Type type) {
+		if(type instanceof Class && ((Class<?>)type).isInstance(value)){
+			return value;
+		}
 		try {
 			Class<?> clazz = ReflectUtil.baseClass(type);
 			if (value instanceof String) {
 				if (clazz == Class.class) {
 					return Class.forName((String) value);
-				} else {
-					return clazz.getConstructor(String.class)
-							.newInstance(value);
+				} else if(Enum.class.isAssignableFrom(clazz)){
+					return ReflectUtil.getEnum(value, clazz);
+				}else if(Date.class.isAssignableFrom(clazz)){
+					return createDate( (String)value, clazz) ;
+				}else{
+					Constructor<?> c = null;
+					try{
+						c = clazz.getConstructor(String.class);
+					}catch(Exception e){
+						
+					}
+					if(c != null){
+						return c.newInstance(value);
+					}
 				}
-			} else if (value instanceof Map) {
+			}
+			if (value instanceof Map) {
 				@SuppressWarnings("rawtypes")
 				Map map = (Map) value;
 				String className = (String) map.get("class");
@@ -170,7 +186,7 @@ public class JSONTransformer {
 				return toSimpleValue(value, clazz);
 			}
 		} catch (Exception e) {
-			log.warn("JSON 类型异常:", e);
+			log.warn("JSON 类型异常:"+type+":"+value, e);
 			return null;
 		}
 	}
@@ -184,11 +200,17 @@ public class JSONTransformer {
 					transform(list.get(j), ReflectUtil.baseClass(listItemClazz)));
 		}
 	}
-
-	private Object toSimpleValue(Object value, Class<?> clazz)
+	@SuppressWarnings({ "rawtypes", "unchecked" }) 
+	private Object toSimpleValue(Object value, Class clazz)
 			throws ParseException, InstantiationException,
 			IllegalAccessException, InvocationTargetException,
 			NoSuchMethodException {
+		if (String.class == clazz) {
+			return (value).toString();
+		}
+		if(Enum.class.isAssignableFrom(clazz)){
+			return ReflectUtil.getEnum(value, clazz);
+		}
 		boolean isPrimitive = clazz.isPrimitive();
 		clazz = ReflectUtil.toWrapper(clazz);
 		if (Number.class.isAssignableFrom(clazz)) {
@@ -200,16 +222,25 @@ public class JSONTransformer {
 			}
 			return ReflectUtil.toValue((Number) value, clazz);
 		} else if (Boolean.class == clazz) {
-			if (isPrimitive && value == null) {
-				value = false;
+			if(value == null){
+				return isPrimitive?false:null;
 			}
-			return value;
+			if(value instanceof Boolean){
+				return value;
+			}else if (value instanceof Number){
+				return ((Number)value).floatValue() == 0;
+			}else if(value instanceof String){
+				String text = (String)value;
+				if(text.equalsIgnoreCase("true")){
+					return true;
+				}else if(text.equalsIgnoreCase("false")){
+					return false;
+				}
+			}
 		} else if (clazz == null || value == null
 				|| Map.class.isAssignableFrom(clazz)
 				|| Collection.class.isAssignableFrom(clazz)) {
 			return value;
-		} else if (String.class == clazz) {
-			return (value).toString();
 		} else if (Character.class == clazz) {
 			if (value instanceof String) {// 正常
 				value = ((String) value).charAt(0);
@@ -221,14 +252,25 @@ public class JSONTransformer {
 			return value;
 		} else if (Date.class.isAssignableFrom(clazz)) {
 			if (value instanceof String) {
-				return parseW3Date((String) value);
+				return createDate((String)value, clazz);
 			} else {
-				return clazz.getConstructor(Long.class).newInstance(
+				Class type = SecondOffsetDate.class.isAssignableFrom(clazz)?Integer.class:Long.class;
+				return clazz.getConstructor(type).newInstance(
 						((Number) value).longValue());
 			}
 		}
-		log.warn("JSON 类型异常" + clazz);
+		log.warn("JSON 类型异常" + clazz+":"+JSONEncoder.encode(value));
 		return null;
+	}
+
+	private Object createDate(String value, Class<?> clazz) throws ParseException,
+			InstantiationException, IllegalAccessException,
+			InvocationTargetException, NoSuchMethodException {
+		Date date =  parseW3Date(value);
+		if(clazz.isInstance(date)){
+			return date;
+		}
+		return clazz.getConstructor(Long.class).newInstance(date.getTime());
 	}
 
 }

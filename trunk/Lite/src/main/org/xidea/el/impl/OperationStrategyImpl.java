@@ -108,7 +108,7 @@ public class OperationStrategyImpl implements OperationStrategy {
 		return na.compare(n1, n2, ExpressionToken.OP_EQ);
 	}
 
-	@SuppressWarnings( { "unchecked" })
+	@SuppressWarnings( { "unchecked", "rawtypes" })
 	public Object evaluate(ExpressionToken item, Map<String, Object> vs) {
 		final int type = item.getType();
 		switch (type) {

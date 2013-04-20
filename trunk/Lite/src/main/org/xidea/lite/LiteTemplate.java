@@ -82,7 +82,7 @@ public class LiteTemplate implements Template {
 	 * 
 	 * @internal
 	 */
-	@SuppressWarnings( { "unchecked" })
+	@SuppressWarnings( { "unchecked", "rawtypes" })
 	protected Object[] compile(List<Object> datas) {
 		// Object[] result = datas.toArray();// ;
 		// reverse(result);

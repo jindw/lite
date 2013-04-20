@@ -42,9 +42,9 @@ public class DebugSupportImpl implements DebugSupport {
 		this.templateServlet = templateServlet;
 		this.contextPath = templateServlet.getServletContext().getContextPath();
 		json = new JSONEncoder(JSONEncoder.W3C_DATE_TIME_FORMAT, true, 32) {
-			Map<String, Method> fileGetterMap;
+			Map<String, Object> fileGetterMap;
 			{
-				fileGetterMap = new HashMap<String, Method>(ReflectUtil
+				fileGetterMap = new HashMap<String, Object>(ReflectUtil
 						.getGetterMap(File.class));
 				fileGetterMap.keySet().retainAll(
 						Arrays.asList("name", "path", "canonicalPath",
@@ -53,12 +53,12 @@ public class DebugSupportImpl implements DebugSupport {
 
 			}
 
-			public Map<String, Method> getGetterMap(
+			public Map<String, Object> getAccessorMap(
 					Class<? extends Object> clazz) {
 				if (clazz == File.class) {
 					return fileGetterMap;
 				}
-				return super.getGetterMap(clazz);
+				return super.getAccessorMap(clazz);
 			}
 		};
 	}

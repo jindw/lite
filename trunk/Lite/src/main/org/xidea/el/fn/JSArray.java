@@ -15,7 +15,7 @@ class JSArray extends JSObject implements Invocable {
 		return method.invoke(this, toList(thiz), args);
 	}
 
-	@SuppressWarnings({"unchecked"})
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	private final static Object toList(Object thiz) {
 		if (thiz instanceof Object[]) {
 			thiz = Arrays.asList((Object[])thiz);
@@ -111,7 +111,7 @@ class JSArray extends JSObject implements Invocable {
 		return thiz.size();
 	}
 
-	@SuppressWarnings({ "unchecked" })
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Object concat(List<Object> thiz, Object... args) {
 		List<Object> result = new ArrayList<Object>(thiz);
 		for (Object o : args) {

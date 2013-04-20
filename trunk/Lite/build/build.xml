@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="Lite" default="build" basedir="../">
+<project name="Lite" default="package" basedir="../">
 	<tstamp>
 		<format property="version" pattern="yyyyMMdd" />
 	</tstamp>
@@ -149,6 +149,7 @@
 		<copy tofile="build/dest/JSEL-${version}.jar" file="build/dest/JSEL.jar" />
 		<copy tofile="build/dest/Lite-${version}.jar" file="build/dest/Lite.jar" />
 		<copy tofile="build/dest/LiteRT-${version}.jar" file="build/dest/LiteRT.jar" />
+		<copy tofile="../zhidao-android/libs/JSEL.jar" file="build/dest/JSEL.jar" />
 
 	</target>
 	<target name="test">

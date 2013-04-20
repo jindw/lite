@@ -11,7 +11,6 @@ import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +27,7 @@ public abstract class ReflectUtil {
 	private static final Map<Class<?>, Map<String, Type>> typeMap = new WeakHashMap<Class<?>, Map<String, Type>>();
 	private static final Map<Class<?>, Map<String, Field>> fieldMap = new WeakHashMap<Class<?>, Map<String, Field>>();
 	private static final Map<Class<?>, Constructor<?>> constructorMap = new WeakHashMap<Class<?>, Constructor<?>>();
+	private static final Map<Class<? extends Enum<?>>,Object> enumMap = new HashMap<Class<? extends Enum<?>>, Object>();
 	private static Object initLock = new Object();;
 
 	public static Map<String, Method> getGetterMap(final Class<?> clazz) {
@@ -307,7 +307,40 @@ public abstract class ReflectUtil {
 		}
 		return null;
 	}
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public static Enum getEnum(Object value,Class clazz){
+		if(value instanceof String){
+			Class clazz2 = clazz;
+			return Enum.valueOf(clazz2, (String)value);
+		}else if(value instanceof Number){
+			Object es = enumMap.get(clazz);
+			try {
+				if (es == null) {
+					Method method = clazz.getMethod("valueOf",int.class);
+					if(method == null){
+						method = clazz.getMethod("values");
+						es =  method.invoke(null);
+					}else{
+						es = method;
+					}
+					enumMap.put(clazz, es);
+				}
 
+				int i = ((Number) value).intValue();
+				if (es instanceof Method) {
+					((Method) es).invoke(null, i);
+				} else {
+					for (Enum<?> e : (Enum[]) es) {
+						if (e.ordinal() == i) {
+							return e;
+						}
+					}
+				}
+			} catch (Exception e1) {
+			}
+		}
+		return null;
+	}
 	public static Class<?> getPropertyClass(Type type, Object key) {
 		return baseClass(getPropertyType(type, key));
 	}
