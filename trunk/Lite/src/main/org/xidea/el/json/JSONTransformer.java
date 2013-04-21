@@ -33,7 +33,7 @@ public class JSONTransformer {
 					"(?:" + "\\-(\\d{1,2})" + // DD3
 					// time
 					"(?:" + "T(\\d{2})\\:(\\d{2})" + // hour:4,minutes:5
-					"(?:\\:(\\d{2}(\\.\\d+)?))?" + // seconds//6
+					"(?:\\:(\\d{2}(?:\\.\\d+)?))?" + // seconds//6
 					"(Z|[+\\-]\\d{2}\\:?\\d{2})?" + // timeZone:7
 					")?" + ")?" +
 
@@ -72,6 +72,7 @@ public class JSONTransformer {
 			ca.clear();
 			String timeZone = m.group(7);
 			if (timeZone != null) {
+				//System.out.println(timeZone+"/"+TimeZone.getTimeZone("GMT" + timeZone));
 				ca.setTimeZone(TimeZone.getTimeZone("GMT" + timeZone));
 			}
 			ca.set(Calendar.YEAR, Integer.parseInt(m.group(1)));// year
@@ -91,8 +92,7 @@ public class JSONTransformer {
 						} else if (seconds.length() > 2) {
 							float f = Float.parseFloat(seconds);
 							ca.set(Calendar.SECOND, (int) f);
-							ca.set(Calendar.MILLISECOND,
-									((int) f * 1000) % 1000);
+							ca.set(Calendar.MILLISECOND,(int) (f * 1000) % 1000);
 						} else {
 							ca.set(Calendar.SECOND, Integer.parseInt(seconds));
 						}
