@@ -41,6 +41,18 @@ public class JSONDecoderTest {
 		assertEquals(str3,str4);
 		
 	}
+	public static class Wrapper<T>{
+		public List<T> list;
+	}
+	public static class T{
+		public Wrapper<Integer> data;
+	}
+	@Test
+	public void testG(){
+		String code = "{\"data\":{\"list\":[1,2]}}";
+		T t = decoder.decode(code, T.class);
+		System.out.println(t);
+	}
 
 	public int getInt0() {
 		return int0;

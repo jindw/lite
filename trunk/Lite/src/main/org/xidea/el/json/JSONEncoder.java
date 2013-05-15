@@ -9,9 +9,9 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,8 +31,7 @@ public class JSONEncoder {
 
 	private static Log log = LogFactory.getLog(JSONEncoder.class);
 
-	private static JSONEncoder encoder = new JSONEncoder(
-			W3C_DATE_TIME_MILLISECOND_FORMAT, true, 64);
+	private static JSONEncoder encoder = new JSONEncoder(W3C_DATE_TIME_MILLISECOND_FORMAT, true, 64);
 
 	private final boolean ignoreClassName;
 	private final String dateFormat;
@@ -206,21 +205,25 @@ public class JSONEncoder {
 	protected void printMap(Object object, StringBuilder out) {
 		out.append('{');
 		try {
-			Map<String, Object> props = getAccessorMap(object.getClass());
+			Class<? extends Object> clazz = object.getClass();
+			Set<String> props = getKeySet(clazz);
+			Map<String,Method> getterMap = ReflectUtil.getGetterMap(object.getClass());
+			Map<String,Field> fieldMap = ReflectUtil.getFieldMap(clazz);
 			boolean first = true;
-			for (String name : props.keySet()) {
+			for (String name : props) {
 				try {
-					Object accessor = props.get(name);
-					if (accessor == null
-							|| (ignoreClassName && "class".equals(name))) {
+					if (ignoreClassName && "class".equals(name)) {
 						continue;
 					}
-					
+					Method accessor = getterMap.get(name);
+					Field field;
 					Object value;
-					if(accessor instanceof Method){
-						value = ((Method)accessor).invoke(object);
+					if(accessor != null){
+						value = accessor.invoke(object);
+					}else if((field = fieldMap.get(name))!=null){
+						value =field.get(object);
 					}else{
-						value = ((Field)accessor).get(object);
+						continue;
 					}
 					if (first) {
 						first = false;
@@ -242,10 +245,8 @@ public class JSONEncoder {
 		out.append('}');
 	}
 
-	protected Map<String, Object> getAccessorMap(Class<? extends Object> clazz) {
-		Map<String,Object> getterMap = new HashMap<String, Object>( ReflectUtil.getGetterMap(clazz));
-		getterMap.putAll(ReflectUtil.getFieldMap(clazz));
-		return getterMap;
+	protected Set<String> getKeySet(Class<? extends Object> clazz) {
+		return ReflectUtil.getPropertySet(clazz);
 	}
 
 	protected void printMap(Map<?, ?> map,StringBuilder out) {

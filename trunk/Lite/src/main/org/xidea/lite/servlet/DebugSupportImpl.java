@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
@@ -53,12 +54,12 @@ public class DebugSupportImpl implements DebugSupport {
 
 			}
 
-			public Map<String, Object> getAccessorMap(
+			public Set<String> getKeySet(
 					Class<? extends Object> clazz) {
 				if (clazz == File.class) {
-					return fileGetterMap;
+					return fileGetterMap.keySet();
 				}
-				return super.getAccessorMap(clazz);
+				return super.getKeySet(clazz);
 			}
 		};
 	}

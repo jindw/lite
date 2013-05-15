@@ -31,10 +31,10 @@ public class JSONDateTest {
 		{
 			long n1 = System.nanoTime();
 			for (int i = 0; i < 100; i++) {
-				JSONDecoder.transform(t,Date.class);
+				new JSONDecoder(false).transform(t,Date.class);
 			}
 			System.out.println((System.nanoTime()-n1)/1000000d);
-			System.out.println(JSONEncoder.encode(JSONDecoder.transform(t,Date.class)));
+			System.out.println(JSONEncoder.encode(new JSONDecoder(false).transform(t,Date.class)));
 		}
 		{
 			long n1 = System.nanoTime();
