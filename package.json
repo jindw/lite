@@ -1,0 +1,21 @@
+{
+  "name": "lite",
+  "version": "3.0.0",
+  "description": "A cross platform template engine base on xml/html and javascript expression.",
+  "keywords": [ "javascript","xhtml","html","Java","PHP","template"],
+  "author": "jindw <jindw@xidea.org> (http://www.xidea.org)",
+  "homepage": "https://github.com/jindw/lite",
+  "repository": {"type": "git","url": "git://github.com/jindw/lite.git"},
+  "main": "./index.js",
+  "engines": {"node" : ">=0.5"},
+  "dependencies": {"js-el":"*","xmldom":"*"},
+  "devDependencies": {  },
+  "maintainers": [{"name": "jindw","email": "jindw@xidea.org","url": "http://www.xidea.org"}],
+  "contributors": [
+      {"name":  "wukexin.cn","email": "wukexin.cn@gmail.com" },
+      {"name":  "combbs", "email": "combbs@gmail.com" },
+      {"name":  "sunrongyan","email": "sunrongyan@gmail.com"}
+  ],
+  "bugs": {"email": "jindw@xidea.org","url": "http://github.com/jindw/lite/issues"},
+  "licenses": [{"type": "LGPL","url": "http://www.gnu.org/licenses/lgpl.html","MIT":"http://opensource.org/licenses/MIT"}]
+}
