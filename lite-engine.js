@@ -41,7 +41,7 @@ LiteEngine.prototype.render=function(path,model,req,response){
 	if(debug=='model'){
     	response.end(JSON.stringify(model));
     }else if(debug=='source'){
-    	require('fs').readFile(filepath, "binary", function(err, file) {    
+    	require('fs').readFile(require('path').resolve(this.root ,path.replace(/^[\\\/]/,'')), "binary", function(err, file) {    
         	if(err) {
             	response.writeHead(404, {"Content-Type": "text/plain"});   
             	response.end(err + "\n");    

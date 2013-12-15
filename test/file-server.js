@@ -27,8 +27,7 @@ function writeFile(root,url,response){
 	    	}
 	    }else{
 	    	response.writeHead(404, {"Content-Type": "text/plain"});    
-     		response.write("404 Not Found \n filepath:"+filepath);    
-     		response.end(); 
+     		response.end("404 Not Found \n filepath:"+filepath);    
 	    }
 	});
 }
@@ -36,8 +35,7 @@ function writeContent(filepath,response,prefix,postfix){
 	fs.readFile(filepath, "binary", function(err, file) {    
         if(err) {
             response.writeHead(500, {"Content-Type": "text/plain"});   
-            response.write(err + "\n");    
-            response.end();    
+            response.end(err + "\n");    
             return;    
         }
         var contentType = "text/html"
@@ -48,13 +46,13 @@ function writeContent(filepath,response,prefix,postfix){
         }
         response.writeHead(200, {"Content-Type": contentType+';charset=utf8'}); 
         if(prefix||postfix){
-         	response.write(prefix||'');
+         	prefix && response.write(prefix);
          	response.write(file, "binary"); 
-         	response.write(postfix||''); 
+         	postfix && response.write(postfix); 
+        	response.end();
         }else{
-        	response.write(file, "binary");  
-        }
-        response.end();    
+        	response.end(file, "binary");  
+        }    
     });
 }
 function writeIndex(filepath,response){
