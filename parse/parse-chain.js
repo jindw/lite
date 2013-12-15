@@ -31,15 +31,16 @@ function doNext(node){
 	doParse(node,next);
 }
 function doParse(node,chain){
-	try{
+	//try{
 		var parser = chain._nodeParsers[chain.index];
 		if(parser == null){
-			console.error(parser,chain.index,chain._nodeParsers);
+			console.error('解析栈异常',parser,chain.index,chain._nodeParsers);
 		}
 		parser(node,chain,chain);
-	}catch(e){
-		console.error("解析器执行异常："+parser,e)
-	}
+	//}catch(e){
+	//	console.error("解析器执行异常："+parser,e)
+	//	throw e;
+	//}
 }
 function getSubChain(subIndex){
 	if (this.subChains == null) {

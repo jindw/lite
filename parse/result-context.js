@@ -106,7 +106,7 @@ ResultContext.prototype = {
 	},
 	appendPlugin:function(clazz, config){
 		if(typeof config == 'string'){
-			config = JSON.parse('('+config+')');
+			config = JSON.parse(config);
 		}
 		config['class'] = clazz;
 		this.result.push([PLUGIN_TYPE,config]);

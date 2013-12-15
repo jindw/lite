@@ -12,7 +12,7 @@
  *               package="org.xidea.lite.xhtml"/>
  * 	  <include>**.xhtml</include>
  *    <group layout="/layout.xhtml">
- *       <feature name="http://www.xidea.org/feature/lite/html-javascript-compressor"
+ *       <config name="javascriptCompressor"
  *               package="org.jside.jsi.tools.JSACompressor"/>
  *       <include>/example/*.xhtml</include>
  *    </group>
@@ -22,11 +22,11 @@
  * 	{
  * 		"includes":"^[\\\\/]example[\\\\/][^\\\\/]*\.xhtml$",
  * 		"excludes":"",
- * 		"featureMap":{
- * 			"http://www.xidea.org/lite/features/layout":"/layout.xhtml",
- * 			"http://www.xidea.org/lite/features/encoding":"utf-8",
- * 			"http://www.xidea.org/lite/features/content-type":"text/html;charset=UTF-8",
- * 			"http://www.xidea.org/lite/features/html-javascript-compressor":"org.jside.jsi.tools.JSACompressor"
+ * 		"config":{
+ * 			"layout":"/layout.xhtml",
+ * 			"encoding":"utf-8",
+ * 			"contentType":"text/html;charset=UTF-8",
+ * 			"javascriptCompressor":"org.jside.jsi.tools.JSACompressor"
  * 		},
  * 		"extensionMap":[
  * 			{
@@ -38,9 +38,9 @@
  * 	{
  * 		"includes":"^.*\.xhtml$",
  * 		"excludes":"",
- * 		"featureMap":{
- * 			"http://www.xidea.org/lite/features/encoding":"utf-8",
- * 			"http://www.xidea.org/lite/features/content-type":"text/html;charset=UTF-8"
+ * 		"config":{
+ * 			"encoding":"utf-8",
+ * 			"contentType":"text/html;charset=UTF-8"
  * 		},
  * 		"extensionMap":{
  * 			"http://www.w3.org/1999/xhtml":["org.xidea.lite.xhtml"]
@@ -69,7 +69,7 @@ function parseConfig(doc){
 }
 function LiteGroup(node,parentConfig){
 	this.parentConfig = parentConfig || null
-	this.featureMap = {}
+	this.config = {}
 	this.encoding= findXMLAttribute(node,'encoding','charset');
 	this.type = findXMLAttribute(node,'type',"mime-type",'mimeType');
 	this.contentType = findXMLAttribute(node,'contentType','contextType');
@@ -83,7 +83,9 @@ function LiteGroup(node,parentConfig){
 		if(child.nodeType == 1){
 			switch(child.nodeName){
 			case 'feature':
-				this.featureMap[findXMLAttribute(child,'name','key','uri','url')] = 
+			case 'attribute':
+			case 'config':
+				this.config[findXMLAttribute(child,'name','key','uri','url')] = 
 						findXMLAttribute(child,'value','#text')
 				break;
 			case 'extension':
@@ -122,7 +124,7 @@ LiteGroup.prototype.toJSON = function(){
 	}
 	json.includes = this.includes;
 	json.excludes = this.excludes;
-	json.featureMap = this.featureMap;
+	json.config = this.config;
 	json.extensionMap = this.extensionMap;
 	result.push(json);
 	return result;
@@ -132,20 +134,20 @@ LiteGroup.prototype.initialize = function(){
 	this.initialize = Function.prototype;
 	var parentConfig = this.parentConfig
 	if(parentConfig){
-		var featureMap = {};
-		copy(parentConfig.featureMap,featureMap);
-		copy(this.featureMap,featureMap);
-		this.featureMap=featureMap;
+		var config = {};
+		copy(parentConfig.config,config);
+		copy(this.config,config);
+		this.config=config;
 		this.extensionMap = margeExtensionMap(parentConfig.extensionMap,this.extensionMap);
 	}
 	this.includes = compilePatterns(this.includes)
 	this.excludes = compilePatterns(this.excludes)
 	mergeContentType(this,parentConfig);
-	this.featureMap["http://www.xidea.org/lite/features/encoding"] = this.encoding;
-	this.featureMap["http://www.xidea.org/lite/features/content-type"] = this.contentType;
+	this.config["encoding"] = this.encoding;
+	this.config["contentType"] = this.contentType;
 	if(this.layout != null){
 		if(!this.layout || this.layout.charAt() == '/'){
-			this.featureMap["http://www.xidea.org/lite/features/config-layout"] = this.layout;
+			this.config["layout"] = this.layout;
 		}else{
 			console.error("layout 必须为绝对地址('/'开始),你的设置为："+this.layout);
 		}

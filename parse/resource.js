@@ -80,7 +80,10 @@ function URI(path){
 		path = String(path).replace(uriChars,uriReplace)
     }
     //normalize
-	path = path.replace(/\/\.\//g,'/');
+	path = path.replace(/\/\.\/|\\\.\\|\\/g,'/');
+	if(/^\/|^[a-z]\:\//i.test(path)){
+		path = 'file://'+path;
+	}
 	while(path != (path = path.replace(/[^\/]+\/\.\.\//g,'')));
 	var match = path.match(uriPattern);
 	if(match){

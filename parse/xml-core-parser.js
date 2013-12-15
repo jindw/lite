@@ -174,7 +174,8 @@ var Core = {
 			 		processExtends.call(this,attr);
 			 		return ;
 			 	}
-			 	var layout = this.getFeature('http://www.xidea.org/lite/features/config-layout');
+			 	var layout = this.configMap.layout;
+			 	console.log('layout:',layout,' of ',uri)
 			 	if(layout){
 			 		this.setAttribute('$page',doc);
 			 		var uri = this.createURI(layout);
@@ -888,7 +889,7 @@ addAll(processVar,seekVar,"var","set");
 addAll(parseOut,seekOut,"out");
 addAll(processDef,seekDef,"def",'macro');
 addAll(processClient,seekClient,"client");
-addAll(processI18N,seekI18N,'i18n')
+//addAll(processI18N,seekI18N,'i18n')
 
 //没有seeker
 addAll(processChoose,null,"choose");
@@ -899,6 +900,8 @@ addAll(processBlock,null,"block","group");
 
 //属性与标签语法差异太大,不能用统一函数处理.
 addParser({parse:parseInclude,before:beforeInclude},"include");
+
+
 if(typeof require == 'function'){
 exports.Core=Core;
 exports.parseChildRemoveAttr=parseChildRemoveAttr;

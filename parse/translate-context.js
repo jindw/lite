@@ -138,9 +138,9 @@ TranslateContext.prototype = {
         }
     },
     reset:function(){
-    	var text = this.out.join('');
+    	var out = this.out.concat();
     	this.out.length=0;
-    	return text;
+    	return out;
     }
 }
 

@@ -1,17 +1,15 @@
-if(typeof require == 'function'){
-var ResultContext=require('./result-context').ResultContext;
-var ParseConfig=require('./config').ParseConfig;
-var URI=require('./resource').URI;
-var loadLiteXML=require('./xml').loadLiteXML;
-}/*
+/*
  * List Template
  * License LGPL(您可以在任何地方免费使用,但请不要吝啬您对框架本身的改进)
  * http://www.xidea.org/project/lite/
  * @author jindw
  * @version $Id: template.js,v 1.4 2008/02/28 14:39:06 jindw Exp $
  */
+
+var ResultContext=require('./result-context').ResultContext;
+var URI=require('./resource').URI;
 var defaultBase = new URI("lite:///");
-//add as default
+
 /**
  * 模板解析上下文对象实现
  */
@@ -19,7 +17,7 @@ function ParseContext(config,path){
 	config = config || new ParseConfig();
     this.config = config;
 	this.currentURI = defaultBase;
-	this.featureMap = config.getFeatureMap(path);
+	this.configMap = config.getConfig(path);
     this.textType=0;
 	this._path = path;
 	this._attributeMap = [[],[],{}]
@@ -118,6 +116,8 @@ ParseContext.prototype = {
     createURI:function(path) {
     	//console.error(path,this.currentURI,this.config.root)
     	var base = this.config.root.toString();
+    	if(!path){return path}
+    	path = String(path);
     	if(path.indexOf(base) ==0){
     		path = path.substring(base.length-1);
     	}
@@ -167,6 +167,11 @@ ParseContext.prototype = {
     	this.setCurrentURI(path);
     	var doc = loadLiteXML(path,this.config.root);
     	this._context._loadTime+=(new Date()-t1);
+    	var root = doc && doc.documentElement;
+    	if(root){
+    		root.setAttribute('xmlns:xhtml',"http://www.w3.org/1999/xhtml")
+    		root.setAttribute('xmlns:c',"http://www.xidea.org/lite/core")
+    	}
     	return doc;
     },
     openStream:function(uri){
@@ -194,11 +199,11 @@ ParseContext.prototype = {
 	addExtension:function(ns,pkg){
 		this._extensionParser.addExtension(ns,pkg);
 	},
-	getFeature:function(key){
-		return this.featureMap[key];
+	getConfig:function(key){
+		return this.configMap[key];
 	},
-	getFeatureMap:function(){
-		return this.featureMap;
+	getConfigMap:function(){
+		return this.configMap;
 	},
     setCurrentURI:function(uri){
     	this._context.addResource(uri=new URI(uri));
@@ -217,7 +222,8 @@ ParseContext.prototype = {
     },
     createNew:function(){
     	var nc = new ParseContext(this.config,this.currentURI);
-    	nc.featureMap = this.featureMap;
+    	nc.config = this.config;
+    	nc.configMap = this.configMap;
     	nc._resources = this._resources;
     	return nc;
     },
@@ -265,8 +271,8 @@ function _setByKey(map,key,value){
 		values.push(value);
 	}
 }
-if(typeof require == 'function'){
-exports.ParseContext=ParseContext;
+
+var loadLiteXML=require('./xml').loadLiteXML;
 var buildTopChain=require('./parse-chain').buildTopChain;
 var ExtensionParser=require('./extension-parser').ExtensionParser;
 var Extension=require('./extension').Extension;
@@ -275,4 +281,7 @@ var parseText=require('./text-parser').parseText;
 var XA_TYPE=require('./template-token').XA_TYPE;
 var EL_TYPE=require('./template-token').EL_TYPE;
 var XT_TYPE=require('./template-token').XT_TYPE;
-}
+
+var ParseConfig=require('./config').ParseConfig;
+
+exports.ParseContext=ParseContext;

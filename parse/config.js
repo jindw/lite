@@ -12,10 +12,10 @@
  * 	{
  * 		"includes":["/example\\/*.xhtml"],
  * 		"excludes":[],
- * 		"featureMap":{
- *          "http://www.xidea.org/lite/features/encoding":"utf-8",
- * 			"http://www.xidea.org/lite/features/content-type":"text/html;charset=UTF-8",
- * 			"http://www.xidea.org/lite/features/html-javascript-compressor":"org.jside.jsi.tools.JSACompressor"
+ * 		"config":{
+ *          "encoding":"utf-8",
+ * 			"contentType":"text/html;charset=UTF-8",
+ * 			"javascriptCompressor":"org.jside.jsi.tools.JSACompressor"
  * 		},
  * 		"extensions":[
  * 			{
@@ -26,9 +26,9 @@
  * 	}
  * ]
  */
-var window = this;
 function ParseConfig(root,json){
-	this.root = new URI(root||(window && window.location?window.location.href.replace(/(.*?\w\/).*/,'$1'):'http://localhost/'));
+	this.root = new URI(root.replace(/[\\\/]*$/,'/'));
+	if(typeof json == 'string'){ json = parseConfig(json)}
 	if(json){
 		var result = [];
 		var i = json.length
@@ -63,13 +63,13 @@ function findGroup(groups,path,require){
 ParseConfig.prototype = {
 //	getDecotatorPage:function(path){
 //		var g = findGroup(this.config,path,null)
-//		return g && g.featureMap['http://www.xidea.org/lite/features/layout'];
+//		return g && g.config['layout'];
 //	},
-	getFeatureMap:function(path){
+	getConfig:function(path){
 		var result = {}
 		var g = findGroup(this._groups,path,null);
 		if(g){
-			copy(g.featureMap,result);
+			copy(g.config,result);
 		}
 		return result;
 	},
@@ -86,11 +86,11 @@ ParseConfig.prototype = {
 var defaultConfig = {
 		"includes":/./,//"/example\\/*.xhtml"
 		"excludes":/^$/,
-		"featureMap":{
+		"config":{
 			//必要属性（控制xml编译）
-			"http://www.xidea.org/lite/features/encoding":"utf-8",
+			"encoding":"utf-8",
 			//必要属性（控制xml编译）
-			"http://www.xidea.org/lite/features/content-type":"text/html;charset=UTF-8"
+			"contentType":"text/html;charset=UTF-8"
 		},
 		"extensionMap":{
 			////xhtml 编译不是自带的，需要自己定义
@@ -104,5 +104,6 @@ var defaultConfig = {
 
 if(typeof require == 'function'){
 exports.ParseConfig=ParseConfig;
+var parseConfig = require('./config-parser').parseConfig;
 var URI=require('./resource').URI;
 }

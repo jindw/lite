@@ -9,7 +9,7 @@
 
 var XML_SPACE_TRIM = "http://www.xidea.org/lite/attribute/h:trim-space" 
 function parseDefaultXMLNode(node,context,chain){
-	try{
+	//try{
 	    switch(node.nodeType){
 	        case 1: //NODE_ELEMENT 
 	            processElement(node,context,chain)
@@ -51,9 +51,9 @@ function parseDefaultXMLNode(node,context,chain){
 	        	chain.next(node);
 	            //this.println("<!-- ERROR： UNKNOW nodeType:"+node.nodeType+"-->")
 	    }
-	}catch(e){
-		console.error('!!'+e);
-	}
+	//}catch(e){
+	//	console.error('default xml node parse error:'+e);
+	//}
 }
 
 var htmlLeaf = /^(?:meta|link|img|br|hr|input)$/i;

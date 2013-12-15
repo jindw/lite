@@ -37,6 +37,7 @@ function parseLite(data){
 
 if(typeof require == 'function'){
 exports.parseLite=parseLite;
+exports.LiteEngine=require('./lite-engine').LiteEngine;
 var JSTranslator=require('./parse/js-translator').JSTranslator;
 var ParseContext=require('./parse/parse-context').ParseContext;
 }

@@ -123,7 +123,7 @@ function vistLite(context,code){
 					||className =='org.xidea.lite.DatePlugin'){
 					vistLite(context,item[1]);
 				}else{
-					console.info(item[2])
+					console.info('unknow plugin',item[2])
 				}
 				break;
 			case CAPTURE_TYPE:

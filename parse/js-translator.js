@@ -8,73 +8,7 @@ var TranslateContext=require('./translate-context').TranslateContext;
  * @author jindw
  * @version $Id: template.js,v 1.4 2008/02/28 14:39:06 jindw Exp $
  */
-//lite__def/lite__g/
-//lite__list
-//lite__encode
-//lite__init(0,name,fn);//set
-//lite__init(1,name,context);//get
-//lite__init(2,obj);//encode
-//lite__init(3,list);//tolist
-var INIT_SCRIPT = String(function(g){
-	function replacer(c){return g[c]||c}
-	var exp = [/[<&]/g,/[<&"]/g,/&(?:\w+|#\d+|#x[\da-f]+);|[<&"]/ig]
-	return {
-		//xt:0,xa:1,xp:2
-		0:function(txt,type){
-			return String(txt).replace(exp[type||0],replacer);
-		},
-		1:function(source,result,type) {
-			if(source instanceof Array){
-				return source;
-			}
-			var result = [];
-			if(typeof source == 'number'){
-				source = parseInt(source);
-				while(source >0){
-					result[--source] = source+1;
-				}
-			}else{
-				for(source in source){
-					result.push(source);
- 				}
-			}
-			return result;
-    	},
-		2: function(pattern,date){
-			//TODO:未考虑国际化偏移
-			date = date?new Date(date):new Date();
-			function dl(date,format){//3
-		        return format == 1?date : ("000"+date).slice(-format);
-		    }
-		    function tz(offset){
-		    	return offset?(offset>0?'-':offset*=-1,'+')+dl(offset/60,2)+':'+dl(offset%60,2):'Z'
-		    }
-	        return pattern.replace(/([YMDhms])\1*|\.s|TZD/g,function(format){
-	            switch(format.charAt()){
-	            case 'Y' :
-	                return dl(date.getFullYear(),format.length);
-	            case 'M' :
-	                return dl(date.getMonth()+1,format.length);
-	            case 'D' :
-	                return dl(date.getDate(),format.length);
-//	            case 'w' :
-//	                return date.getDay()+1;
-	            case 'h' :
-	                return dl(date.getHours(),format.length);
-	            case 'm' :
-	                return dl(date.getMinutes(),format.length);
-	            case 's' :
-	                return dl(date.getSeconds(),format.length);
-	            case '.':
-	            	return '.'+dl(date.getMilliseconds(),3);
-	            case 'T'://tzd
-	            	//国际化另当别论
-	            	return tz(date.getTimezoneOffset());
-	            }
-	        });
-		}
-	}
-}).replace(/^\s+|\s+$/g,'')+"({'\"':'&#34;','<':'&lt;','&':'&#38;'})";
+
 /**
  * JS原生代码翻译器实现
  */
@@ -88,49 +22,67 @@ function JSTranslator(name,params,defaults){
  */
 JSTranslator.prototype = {
 	translate:function(list,rtf){
-	    try{
-	    	//var result =  JSON.stringify(context.toList())
-	        //var list = context.toList();
+	    //try{
 		    var context = new JSTranslateContext(list,this.name,this.params,this.defaults);
 		    context.liteImpl = this.liteImpl || "lite_impl";
 		    context.parse();
 		    var code = context.toSource(rtf);//context.header +  context.body;
+		    //console.log('###'+code+'@@@')
 		    if(!this.name && !rtf){
 		    	new Function('return '+code);
 		    }else{
 		    	new Function(code);
 		    }
-	    }catch(e){
-	    	var error = console.error("生成js代码失败:",e,code);
-	        code = "return ("+JSON.stringify(error)+');';
-	    }
+	    //}catch(e){
+	    //	var error = console.error("生成js代码失败:",e,code);
+	     //   code = "return ("+JSON.stringify(error)+');';
+	    //}
 		var result = [];
-    	if(!this.liteImpl){
-    		result.push("if('undefined' ==typeof ",context.liteImpl,"){",context.liteImpl,'=',INIT_SCRIPT,"}");
-    	}
+    	//if(!this.liteImpl){
+    	//	result.push("if('undefined' ==typeof ",context.liteImpl,"){",context.liteImpl,'=',INIT_SCRIPT,"}");
+    	//}
 	    result.push('\n',code.replace(/<\/script>/g,'<\\/script>'));
 	    return result.join("").replace(/^\s*[\r\n]+/,'');
 	}
 }
 /**
  * <code>
-if(!this.lite__def){
-	${INIT_SCRIPT}
-}
-lite__def('add',function add(a,b){retur a+b});
+
 function(__context__){
-	var var1 = lite__init('var1',__context__);
-	var var2 = lite__init('var2',__context__);
-	var var3 = lite__init('var3',__context__);
+	var __out__ = [];
+	var var1 = __context__.var1;
+	var var2 = __context__.var2;
+	var var3 = __context__.var3;
+	
+	function __x__(){}
+	function __e__(){}
+	function __df__(){}
+	
+	function def(arg1){
+		var __out__ = [];
+		if(arg1){
+			__out__.push('[',arg1,']');
+		}
+		return __out__.join('');
+	}
+	function def2(){arg2}{
+		return '['+arg2+']';
+	}
 	....
+	return __out__.join('');
 }
+
  */
 function JSTranslateContext(code,name,params,defaults){
     TranslateContext.call(this,code,name,params,defaults);
     this.forStack = [];
     this.defaults = defaults;
-    this.impl_counter = {d:0,l:0,x:0};
+    
+	this.xmlEncoder = 0;
+	this.entityEncoder=0;
+	this.dateFormat = {hit:0};
 }
+
 
 var GLOBAL_DEF_MAP ={
 	"parseInt":1, 	
@@ -154,8 +106,8 @@ function copy(source,target){
 	}
 }
 
-function optimizeFunction(context,functionName,params,defaults,result){
-	var text = context.reset();
+function optimizeFunction(contents,functionName,params,defaults,vars){
+	var result = vars.concat();
 	var args = '__context__';
 	if(params){
 		args = params.join(',');
@@ -171,17 +123,18 @@ function optimizeFunction(context,functionName,params,defaults,result){
 		}
 		result.push('\t}\n');
 	}
+	var source = contents.join('')
 	var SP = /^\s*\__out__\.push\((?:(.*)\)\s*;?)\s*$/g;
-	if(SP.test(text)){
-		var c  =text.replace(SP,'$1');
+	if(SP.test(source)){
+		var c  =source.replace(SP,'$1');
 		if(c.indexOf(',')>0){
 			//安全方式吧.
-			text = "\treturn ["+c+"].join('');";
+			source = "\treturn ["+c+"].join('');";
 		}else{
-			text = "\treturn "+c+';';
+			source = "\treturn "+c+';';
 		}
 	}else{
-		text = "\tvar __out__=[]\n"+text+"\n\treturn __out__.join('');\n";
+		source = "\tvar __out__=[]\n"+source+"\n\treturn __out__.join('');\n";
 	}
 	if(functionName){
     	try{
@@ -193,7 +146,7 @@ function optimizeFunction(context,functionName,params,defaults,result){
     }else{
     	functionName = "function";
     }
-    return functionName+"("+args+'){\n'+result.join('')+text.replace(/^[\r\n]+/,'')+'\n}';
+    return functionName+"("+args+'){\n'+result.join('')+source.replace(/^[\r\n]+/,'')+'\n}';
 }
 function buildVars(context,scope,params){
 	var result = [];
@@ -208,21 +161,13 @@ function buildVars(context,scope,params){
 	for(var n in map){
 		if(n != '*' && !((n in GLOBAL_VAR_MAP)|| (n in varMap) || (n in paramMap))){
 			if(params){//no __context__
-				result.push('\tvar ',n,'=',context.liteImpl,'["',n,'"];\n');
+				//result.push('\tvar ',n,'=',context.liteImpl,'["',n,'"];\n');
 			}else{
-				result.push('\tvar ',n,'=("',n,'" in __context__? __context__:',context.liteImpl,')["',n,'"];\n');
+				//result.push('\tvar ',n,'=("',n,'" in __context__? __context__:',context.liteImpl,')["',n,'"];\n');
+				result.push('\tvar ',n,'=__context__["',n,'"];\n');
 			}
 			
 		}
-	}
-	if(context.impl_counter.x){
-		result.push('\tvar ',context.liteImpl,'_x=',context.liteImpl,'[0];\n');
-	}
-	if(context.impl_counter.l){
-		result.push('\tvar ',context.liteImpl,'_l=',context.liteImpl,'[1];\n');
-	}
-	if(context.impl_counter.d){
-		result.push('\tvar ',context.liteImpl,'_d=',context.liteImpl,'[2];\n');
 	}
 	return result;
 }
@@ -249,6 +194,101 @@ OutputItem.prototype.toString = function(){
 
 PT.prototype = TranslateContext.prototype
 JSTranslateContext.prototype = new PT({
+	getImplementSource : function(){
+		var buf = [''];
+		var c = this.xmlEncoder + this.entityEncoder;
+		if(c){
+			buf.push( "function __r__(c,e){return e||'&#'+c.charCodeAt()+';'}\n");
+			if(c>3){
+				this.optimizedEncoder = true;
+				buf.push("function __x__(source,e){return String(source).replace(e,__r__);}\n");
+			}
+		}
+		var df = this.dateFormat;
+		if(df.hit){
+var dlstart = df.isFixLen?'__dl__(':''	
+var dlend = df.isFixLen?',format.length)':''	
+if(dlstart)	buf.push(	"function __dl__(date,len){return len > 1? ('000'+date).slice(-len):date;}\n");
+if(df.T)		buf.push(	"function __tz__(offset){return offset?(offset>0?'-':offset*=-1,'+')+__dl__(offset/60,2)+':'+__dl__(offset%60,2):'Z'}\n");
+if(df)			buf.push(	"function __df__(pattern,date){\n");
+if(df)			buf.push(		"date = date?new Date(date):new Date();\n");
+if(df)			buf.push(        "return pattern.replace(/",
+												df.qute?"'[^']+'|\"[^\"]+\"|":'',
+												"([YMDhms])\\1*",
+												df['.']?"|\\.s":'',
+												df.T?"|TZD$":'',
+												"/g,function(format){\n");
+if(df)			buf.push(            "switch(format.charAt()){\n");
+if(df.Y)			buf.push(            "case 'Y' :return ",dlstart,"date.getFullYear()",dlend,";\n");
+if(df.M)			buf.push(            "case 'M' :return ",dlstart,"date.getMonth()+1",dlend,";\n");
+if(df.D)			buf.push(            "case 'D' :return ",dlstart,"date.getDate()",dlend,";\n");
+if(df.h)			buf.push(            "case 'h' :return ",dlstart,"date.getHours()",dlend,";\n");
+if(df.m)			buf.push(            "case 'm' :return ",dlstart,"date.getMinutes()",dlend,";\n");
+if(df.s)			buf.push(            "case 's' :return ",dlstart,"date.getSeconds()",dlend,";\n");
+if(df['.'])			buf.push(            "case '.':return '.'+",dlstart,"date.getMilliseconds(),3);\n");
+if(df.T)			buf.push(            "case 'T':return __tz__(date.getTimezoneOffset());\n");
+if(df.qute)			buf.push(            "case '\'':case '\"':return format.slice(1,-1);\n");
+if(df)				buf.push(            "default :return format;\n");
+if(df)			buf.push(            "}\n");
+if(df)			buf.push(        "});\n");
+if(df)			buf.push(    "}\n");
+		}
+		if(this.entityEncoder){
+			buf.push( 'var __e__ = /&(?:\w+|#\d+|#x[\da-f]+);|[<&"]/ig;\n');
+		}
+		return buf.join('');
+	},
+	createXMLEncoder : function(el,isAttr){
+		var thiz= this;
+		this.xmlEncoder ++;
+		el = thiz.stringifyEL(el);
+		return {toString:function(){
+			var e = (isAttr?'/[&<\\"]/g':'/[&<]/g');
+			if(thiz.optimizedEncoder){
+				return '__x__('+el+','+e+')';
+			}else{
+				return 'String('+el+').replace('+e+',__r__)'
+			}
+		}}
+	},
+	createEntityEncoder : function(el){
+		var thiz= this;
+		el = thiz.stringifyEL(el);
+		this.entityEncoder ++;
+		return {toString:function(){
+			if(thiz.optimizedEncoder){
+				return '__x__('+el+',__e__)';
+			}else{
+				return 'String('+el+').replace(__e__,__r__)'
+			}
+		}}
+	},
+	createDateFormat : function(pattern,date){
+		var thiz= this;
+		var df = this.dateFormat;
+		var patternSample=pattern[1];
+		var maxLen = 0;
+		if(pattern[0] != -1){//非常量,JSEL:VALUE_CONSTANTS
+			patternSample='YYMMDDhhmmss.sTZD';
+		}
+		patternSample.replace(/([YMDhms])\1*|\.s|TZD/g,function(c){
+			len = c.length;
+			c = c.charAt();
+			if(c == '"' || c== '\''){
+				df.qute = 1;
+			}
+			maxLen = Math.max(maxLen,df[c]=Math.max(df[c]||0,len));
+		})
+		//变量 ，JSEL:VALUE_VAR
+		df.isEL = df.isEL || date[0] != -2;
+		df.isFixLen = df.isFixLen || maxLen>1;
+		df.hit ++;
+		pattern = thiz.stringifyEL(pattern);
+		date = thiz.stringifyEL(date)
+		return {toString:function(){
+			return '__df__('+pattern+','+date+')';
+		}}
+	},
 	_output:function(){
 		var lastOut = this._lastOut;//不能用闭包var代替
 		var lastIndex = this.out.length-1;
@@ -262,36 +302,50 @@ JSTranslateContext.prototype = new PT({
 		return el?new Expression(el).toString(this):null;
 	},
 	parse:function(){
-		var code = this.scope.code;
 		var params = this.params;
 		this.depth=0;
 		this.out = [];
 	    //add function
 	    var fs = [];
 	    var defs = this.scope.defs;
+	    var thiz = this;
+	    var defVars = []
 	    for(var i=0;i<defs.length;i++){
 	        var def = this.scope.defMap[defs[i]];
-	        var n = def.name;
-	        this.depth++;
+	        this.depth+=4;
 	        this.appendCode(def.code);
 	        var vars = buildVars(this,def,def.params);
-	        var content = optimizeFunction(this,'',def.params,def.defaults,vars);
-	        this.depth--;
-	        fs.push(this.liteImpl,".",n,"=",content,",\n");
-	        this.impl_counter = {d:0,l:0,x:0};
+	        var contents = thiz.reset();
+	        defVars.push({
+	        	params:def.params,
+	        	defaults:def.defaults,
+	        	vars:vars,
+	        	name:def.name,
+	        	toString:function(){
+	        		return optimizeFunction(contents,this.name,this.params,this.defaults,this.vars);
+	        	}})
+	        this.depth-=4;
+	        //fs.push(this.liteImpl,".",def.name,"=",content,",\n");
 	    }
-	    this.header = fs.join('');
-	    
+	   
 	    try{
 	    	this.depth++;
-	        this.appendCode(code);
+	        this.appendCode(this.scope.code);
 	        this.depth--;
 	    }catch(e){
-	        //alert(["编译失败：",buf.join(""),code])
+	        //alert(["编译失败：",buf.join(""),this.scope.code])
 	        throw e;
 	    }
+	    
+		var s = this.getImplementSource();
+		if(s){
+			fs.push(s);
+		}
+	    this.header = '';
+	    
 	    var vars = buildVars(this,this.scope,this.params);
-	    this.body = optimizeFunction(this,this.name,this.params,this.defaults,vars);
+	    vars.unshift(fs.join(''));
+	    this.body = optimizeFunction(this.reset(),this.name,this.params,this.defaults,vars.concat(defVars));
 	    //this.append("return __out__.join('');");
 	},
 	
@@ -302,11 +356,9 @@ JSTranslateContext.prototype = new PT({
     	this._output(this.stringifyEL(item[1]))
     },
     appendXT:function(item){
-    	this.impl_counter.x++;
-        this._output(this.liteImpl,"_x(",this.stringifyEL(item[1]),")")
+        this._output(this.createXMLEncoder(item[1]))
     },
     appendXA:function(item){
-    	this.impl_counter.x++;
         //[7,[[0,"value"]],"attribute"]
         var el = item[1];
         var value = this.stringifyEL(el);
@@ -314,16 +366,17 @@ JSTranslateContext.prototype = new PT({
         if(attributeName){
         	var testId = this.allocateId(value);
         	if(testId != value){
+        		el = new Expression(testId).token;
             	this.append("var ",testId,"=",value);
         	}
             this.append("if(",testId,"!=null){");
             this.depth++;
-            this._output("' ",attributeName,"=\"',",this.liteImpl,"_x("+testId+",1),'\"'");
+            this._output(' ',attributeName,'="',this.createXMLEncoder(el,true),'"');
             this.depth--;
             this.append("}");
             this.freeId(testId);
         }else{
-        	this._output(this.liteImpl,"_x(",value,",1)")
+        	this._output(this.createXMLEncoder(el,true))
         }
     },
     appendVar:function(item){
@@ -339,12 +392,11 @@ JSTranslateContext.prototype = new PT({
         this.freeId(bufbak);
     },
     appendEncodePlugin:function(item){//&#233;&#0xDDS;
-    	this.impl_counter.x++;
-        this._output(this.liteImpl,'_x(',this.stringifyEL(item[1]),',2)')
+        this._output(this.createEntityEncoder(item[1]));
     },
     appendDatePlugin:function(pattern,date){//&#233;&#0xDDS;
-    	this.impl_counter.d++;
-        this._output(this.liteImpl,'_d(',this.stringifyEL(pattern[1]),',',this.stringifyEL(date[1]),')')
+    	this.dateFromat++;
+        this._output(this.createDateFormat(pattern[1],date[1]))
     },
     processIf:function(code,i){
         var item = code[i];
@@ -392,7 +444,6 @@ JSTranslateContext.prototype = new PT({
 		}
     },
     processFor:function(code,i){
-    	this.impl_counter.l++;
         var item = code[i];
         var indexId = this.allocateId();
         var lastIndexId = this.allocateId();
@@ -403,9 +454,11 @@ JSTranslateContext.prototype = new PT({
         var childCode = item[1];
         var forInfo = this.findForStatus(item)
         //初始化 items 开始
-        this.append("var ",itemsId,'=',this.liteImpl,"_l(",itemsEL,")");
+        this.append("var ",itemsId,'=',itemsEL,';');
         this.append("var ",indexId,"=0;")
-        this.append("var ",lastIndexId," = ",itemsId,".length-1;");
+        this.append("var ",lastIndexId," = (",
+        	itemsId,'=',itemsId,' instanceof Array?',itemsId,':Object.keys(',itemsId,')'
+        	,").length-1;");
         
         //初始化 for状态
         var forRef = forInfo.ref ;
@@ -485,7 +538,32 @@ JSTranslateContext.prototype = new PT({
     	}
     }
 });
-
+/*
+var INIT_SCRIPT = String(function(){
+	var __e__ = /&(?:\w+|#\d+|#x[\da-f]+);|[<&"]/ig;
+	function __x__(source,e){return String(source).replace(e,__r__);}
+	function __r__(c,e){return e||'&#'+c.charCodeAt()+';'}
+	
+	
+	function __dl__(date,format){return format == 1?date : ('000'+date).slice(-format);}
+	function __tz__(offset){return offset?(offset>0?'-':offset*=-1,'+')+__dl__(offset/60,2)+':'+__dl__(offset%60,2):'Z'}
+	function __df__(pattern,date){
+		date = date?new Date(date):new Date();
+        return pattern.replace(/([YMDhms])\1*|\.s|TZD/g,function(format){
+            switch(format.charAt()){
+            case 'Y' :return __dl__(date.getFullYear(),format.length);
+            case 'M' :return __dl__(date.getMonth()+1,format.length);
+            case 'D' :return __dl__(date.getDate(),format.length);
+            case 'h' :return __dl__(date.getHours(),format.length);
+            case 'm' :return __dl__(date.getMinutes(),format.length);
+            case 's' :return __dl__(date.getSeconds(),format.length);
+            case '.':return '.'+__dl__(date.getMilliseconds(),3);
+            case 'T':return __tz__(date.getTimezoneOffset());
+            }
+        })
+    }
+}).replace(/^\s+|\s+$/g,'')+"()";
+*/
 if(typeof require == 'function'){
 exports.JSTranslator=JSTranslator;
 exports.GLOBAL_DEF_MAP=GLOBAL_DEF_MAP;

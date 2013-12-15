@@ -1,57 +1,45 @@
-if(typeof require == 'function'){
-var URI=require('./resource').URI;
-}function loadLiteXML(uri,root){
+function loadLiteXML(uri,root){
 	try{
 		if(uri instanceof URI){ 
 			if(uri.source){
-				uri = uri.source;
+				return parseXMLByText(uri.source.replace(/^[\s\ufeff]*/,uri))
 			}else if(uri.scheme == 'lite'){
 	    		var path = uri.path+(uri.query||'')+(uri.fragment || '');
-	    		path = path.replace(/^\//,'./');
-	    		//console.warn(uri+'@'+path)
-	    		uri = root.resolve(path)+'';
+	    		path = root.resolve(path.replace(/^\//,'./'))+'';
 	    	}else{
-	    		uri+='';
+	    		var path = String(uri);
 	    	}
+		}else{
+			var path = String(uri);
 		}
-        if(/^[\s\ufeff]*[<#]/.test(uri)){
-        	//console.info(uri)
-    	    var doc =parseXMLByText(uri.replace(/^[\s\ufeff]*/,''))
-    	    //alert([data,doc.documentElement.tagName])
+        if(/^[\s\ufeff]*[<#]/.test(path)){
+    	    return parseXMLByText(path.replace(/^[\s\ufeff]*/,''),root)
     	}else{
     		//print(url)
-    		if(/^(?:\w+?\:\/\/|\/).*$/.test(uri)){
-	    	    var pos = uri.indexOf('#')+1;
-	    	    var xpath = pos && uri.substr(pos);
-	    	    var uri = pos?uri.substr(0,pos-1):uri;
-	    	    var doc = parseXMLByURL(uri);
+    		if(/^(?:\w+?\:\/\/|\/).*$/.test(path)){
+	    	    var pos = path.indexOf('#')+1;
+	    	    var xpath = pos && path.substr(pos);
+	    	    var path = pos?path.substr(0,pos-1):path;
+				var source = loadTextByPath(path.replace(/^file\:\/\/?/,''));
+				var doc = parseXMLByText(source,uri);
 	    	    if(xpath && doc.nodeType){
 	    	        doc = selectByXPath(doc,xpath);
 	    	    }
+	    	    return doc;
     		}else{
     			//文本看待
-    			return parseXMLByText(uri);
+    			return parseXMLByText(path);
     		}
     	}
 	}catch(e){
 		console.error("文档解析失败:"+uri,e)
 		throw e;
 	}
-	return doc;
 }
 function txt2xml(source){
 	return "<out xmlns='http://www.xidea.org/lite/core'><![CDATA["+
 			source.replace(/^\ufeff?#.*[\r\n]*/, "").replace(/]]>/, "]]]]><![CDATA[>")+
 			"]]></out>";
-}
-
-/**
- * @private
- */
-function parseXMLByURL(url){
-	//TODO: load xml from url
-	var source = loadTextByURL(url);
-	return parseXMLByText(source,url)
 }
 function addInst(xml,s){
     var p = /^\s*<\?(\w+)\s+(.*)\?>/;
@@ -66,68 +54,39 @@ function addInst(xml,s){
 	}
 	return xml;
 }
-function getParserError(root,depth){
-	if(root){
-		if(depth === undefined){
-			if(root.nodeType == 9){
-				root = root.documentElement;
-			}
-			depth = 2;//webkit: html/body/parseerror
-		}
-		if(root.tagName == "parsererror"){
-			if(this.XMLSerializer){
-				return new XMLSerializer().serializeToString(root) || "xml error";
-			}else{
-				return root.xml || root.textContent || "xml error"
-			}
-		}
-		if(depth>0){
-			return getParserError(root.firstChild,depth-1)
-		}
-	}
-	return false;
-}
+
 /**
  * @private
  */
-function parseXMLByText(text,url){
+function parseXMLByText(text,path){
 	if(!/^[\s\ufeff]*</.test(text)){
 		text = txt2xml(text);
 	}
 	try{
-	    var doc = new DOMParser({locator:{systemId:url,xmlns:{c:'http://www.xidea.org/lite/core'}}}).parseFromString(text)
-	    return  addInst(doc,text);
+	    var doc = new DOMParser({locator:{systemId:path},
+	    			xmlns:{c:'http://www.xidea.org/lite/core',
+	    				h:'http://www.xidea.org/lite/html-ext'}
+	    		}).parseFromString(text)
+	    return addInst(doc,text);
     }catch(e){
     	console.error("解析xml失败:",e,text);
     }
     
 }
 
-/**
- * @private
- */
-function getNamespaceMap(node){
-	var attributes = node.attributes;
-	var map = {};
-	for(var i = 0;i<attributes.length;i++){
-		var attribute = attributes[i] ||attributes.item(i);
-		var name = attribute.name;
-		if(/^xmlns(:.*)?$/.test(name)){
-			var value = attribute.value;
-			var prefix = name.substr(6) || value.replace(/^.*\/([^\/]+)\/?$/,'$1');
-			map[prefix] = value;
-		}
-	}
-	return map;
+function loadTextByPath(path){
+	var fs = require('fs');
+	var text = fs.readFileSync(path,'utf-8');
+	return text;
+}
+
+function selectByXPath(currentNode,xpath){
+	var nodes = xpathSelectNodes(currentNode,xpath);
+	nodes.item = nodeListItem;
+	return nodes;
 }
 function nodeListItem(i){
 	return this[i];
-}
-/**
- * TODO:貌似需要importNode
- */
-function selectByXPath(currentNode,xpath){
-	
 }
 function findXMLAttribute(el,key){
 	if(el.nodeType == 2){
@@ -157,7 +116,7 @@ function findXMLAttribute(el,key){
 		console.error("标记："+el.tagName+"属性：'"+key +"' 为必要属性。");
 	}
 	}catch(e){
-		console.error(e)
+		console.error('findXMLAttribute error:',e)
 	}
 	return null;
 }
@@ -181,9 +140,11 @@ function getLiteTagInfo(node){
 	return node.lineNumber + ','+ node.columnNumber+'@'+node.ownerDocument.documentURI;
 }
 
-
 if(typeof require == 'function'){
+var URI=require('./resource').URI;
 var DOMParser = require('xmldom').DOMParser;
+var xpathSelectNodes = require('xpath.js');
+
 exports.loadLiteXML=loadLiteXML;
 exports.selectByXPath=selectByXPath;
 exports.findXMLAttribute=findXMLAttribute;

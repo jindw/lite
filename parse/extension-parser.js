@@ -156,9 +156,9 @@ ExtensionParser.prototype = {
 				}
 			}
 //			es = 4;
-		}catch(e){
-			console.error("元素扩展解析异常",e)
-			throw e;
+		//}catch(e){
+		//	console.error("元素扩展解析异常",e)
+		//	throw e;
 		}finally{
 		}
 		var ext = this.packageMap[ns||''];
@@ -173,7 +173,7 @@ ExtensionParser.prototype = {
 		}
 	},
 	parse:function(node,context,chain){
-		try{
+		//try{
 //			var es = 0;
 			var type = node.nodeType;
 //			var es = 1;
@@ -210,9 +210,9 @@ ExtensionParser.prototype = {
 			}
 //			var es = 10;
 			chain.next(node)
-		}catch(e){
-			console.error("扩展解析异常：",e);
-		}
+		//}catch(e){
+		//	console.error("扩展解析异常：",e);
+		//}
 	},
 	parseAttribute:function(node,context,chain){
 		if(this.parseNamespace(node,context,chain)){
