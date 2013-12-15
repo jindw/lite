@@ -175,7 +175,7 @@ var Core = {
 			 		return ;
 			 	}
 			 	var layout = this.configMap.layout;
-			 	console.log('layout:',layout,' of ',uri)
+			 	//console.log('layout:',layout,' of ',uri)
 			 	if(layout){
 			 		this.setAttribute('$page',doc);
 			 		var uri = this.createURI(layout);

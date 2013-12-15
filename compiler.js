@@ -6,7 +6,7 @@ var JSTranslator = require('./parse/js-translator').JSTranslator;
 function LiteCompiler(root){
 	var root =String(path.resolve(root || './')).replace(/\\/g,'/');
 	var config = path.resolve(root,'WEB-INF/lite.xml');
-	if(path.existsSync(config)){
+	if(fs.existsSync(config)){
 		this.config = new ParseConfig(root,config);
 	}else{
 		this.config = new ParseConfig(root,null);

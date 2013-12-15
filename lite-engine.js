@@ -26,7 +26,7 @@ LiteEngine.prototype.onChange = function(path,code,config) {
 			for(var i=0;i<task.length;i++){
 				var args = task[i];
 				args[0] = tpl;
-				render.apply(null,args)
+				doRender.apply(null,args)
 			}
 		}
 	}else{//clear cache
@@ -34,44 +34,53 @@ LiteEngine.prototype.onChange = function(path,code,config) {
 		console.info('clear template cache:' ,path);
 	}
 }
-LiteEngine.prototype.render=function(path,data,response){
-	var tpl = this.templateMap[path];
-	if(tpl){
-		render(tpl,data,response);
-	}else{
-		(this.renderTask[path] || (this.renderTask[path] =[])).push([path,data,response]);
-		this.compiler.send({path:path });
+LiteEngine.prototype.render=function(path,model,req,response){
+    var cookie = String(req.headers.cookie);
+    var debug = cookie.replace(/(?:^|&[\s\S]*;\s*)LITE_DEBUG=(\w+)[\s\S]*$/,'$1');
+    debug = debug == cookie?false:debug;
+	if(debug=='model'){
+    	response.end(JSON.stringify(model));
+    }else if(debug=='source'){
+    	require('fs').readFile(filepath, "binary", function(err, file) {    
+        	if(err) {
+            	response.writeHead(404, {"Content-Type": "text/plain"});   
+            	response.end(err + "\n");    
+        	}else{
+        		response.writeHead(200, {"Content-Type": 'text/plain;charset=utf8'}); 
+         		response.end(file, "binary"); 
+        	}    
+    	});
+   	}else{
+		var tpl = this.templateMap[path];
+		if(tpl){
+			doRender(tpl,model,response);
+		}else{
+			(this.renderTask[path] || (this.renderTask[path] =[])).push([path,model,response]);
+			this.compiler.send({path:path });
+		}
 	}
 }
-function render(tpl,data,response){
+function doRender(tpl,model,response){
     response.writeHead(200, {"Content-Type": tpl.contentType});   
 	response.write(tpl.staticPrefix,'utf-8');
-	if(typeof data == 'function'){
+	if(typeof model == 'function'){
 		//TODO,需要引擎级别实现异步,这里知识兼容一下接口
-		renderSync(tpl,callback,response)
+		renderAsync(tpl,callback,response)
 	}else{
-		var rtv = tpl.render(data);
-		response.write(rtv,'utf-8');
-		response.end();
+		var rtv = tpl.render(model);
+		response.end(rtv);
 	}
 }
-function renderSync(tpl,callback,response){
-	var rtv = data(function(data){
+function renderAsync(tpl,callback,response){
+	callback(function(model){
 		if(tpl){
-			var rtv = tpl.render(data);
-			response.write(rtv,'utf-8');
-			response.end();
+			var rtv = tpl.render(model);
+			response.end(rtv);
 		}
 	});
-	if(rtv){
-		var rtv = tpl.render(rtv);
-		response.write(rtv,'utf-8');
-		response.end();
-		tpl = null;
-	}
 }
 function Template(code,config,staticPrefix){
- console.log(code)
+ 	//console.log(code)
 	try{
     this.impl = eval('['+code+'][0]');
     }catch(e){

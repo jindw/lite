@@ -23,9 +23,10 @@ require('./file-server').createServer(function (req, response,root) {
     	fs.stat(jsonpath,function(error,stats){
     		if(stats && stats.isFile()){
 				var json = fs.readFileSync(jsonpath,'utf8');
-				engine.render(url,new Function('return '+json)(),response);
+				var model = new Function('return '+json)();
+    			engine.render(url,model,req,response);
     		}else{
-    			engine.render(url,{},response);
+    			engine.render(url,{},req,response);
     		}
     	})
     	return true;
