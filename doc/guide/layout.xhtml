@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://www.xidea.org/lite/core"
+	xmlns:h="http://www.xidea.org/lite/html-ext"
+	h:trim="true">
+	<head>
+		<c:include path="$page" xpath="//xhtml:head/*" />
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+		<link href="default.css" rel="stylesheet" type="text/css" />
+		<link href="../codemirror/codemirror.css" rel="stylesheet" type="text/css" />
+		<link href="../codemirror/default.css" rel="stylesheet" type="text/css" />
+		<script src="../codemirror/codemirror.js" />
+		<script src="../codemirror/overlay.js" />
+		<script src="../codemirror/javascript.js" />
+		<script src="../codemirror/xml.js" />
+		<c:extension namespace="http://www.w3.org/1999/xhtml">
+			//<![CDATA[
+	var PATH_KEY = "http://www.xidea.org/lite/doc/guide/layout.xhtml#currentPathh";
+    function parseA(node){//连接简写，没有文本的时候，直接使用href作为文本节点
+    	var href = node.getAttribute('href');
+    	if(href && node.firstChild == null){
+    		node.appendChild(node.ownerDocument.createTextNode(href));
+    	}
+    	if(/\.xhtml/.test(href)){
+    		var uri = this.createURI(href);
+    		var root = this.config && this.config.root;
+    		var styleClass = node.getAttribute('class')||'';
+    		try{
+    			var path = this.getAttribute(PATH_KEY);
+    			if(!path){
+    				var paths = this.getResources();
+    				for(var i =0;i<paths.length;i++){
+    					var path = paths[i];
+    					if(/\.xhtml$/.test(path+'')){
+    						break;
+    					}
+    				}
+    				this.setAttribute(PATH_KEY,path);
+    			}
+    			//$log.error(path+'',uri+'');
+    			if((path+'').replace(/#.*|([\/])+/g,'$1') === (uri+'').replace(/#.*|([\/])+/g,'$1')){
+    				styleClass += ' current'
+    			}else{
+    				var file = root && !/^https?\:\/\//.test(root) && window.java && new java.io.File(new java.io.File(root),uri.path);
+    				//$log.error((path+'').replace(/#.*|([\/])+/g,'$1'),(uri+'').replace(/#.*|([\/])+/g,'$1'));
+    				if(root && uri.scheme == 'lite' && file && !file.exists()){
+    					styleClass += ' missed';
+    				}
+    			}
+    		}finally{
+    			if(styleClass){
+	    			node.setAttribute('class',styleClass);
+	    		}
+	    	}
+    	}
+    	this.next(node);
+    }
+    //]]>
+		</c:extension>
+		<c:extension namespace="http://www.xidea.org/lite/example">
+			//<![CDATA[
+var style = 'border: 1px solid #DFECF1;'
+    			+'font-family:"Courier New",monospace;'
+    			+'padding:4px;margin:4px;'
+    			+'font-size:12px;overflow:auto;'
+    			+'background-color:#EEE;border:1px solid #222;';
+function parseCode(node){
+    //代码高亮组件
+    var ts = [];
+    var text = String(node.textContent || node.text);
+    text = text.replace(/^\s*[\r\n]+|[\r\n]+\s*$/g,'');
+    text = text.split(/\r\n?|\n/);
+    var len = text.length;
+    text = text.join('\n');
+    while(true){
+    	var text2 = text.replace(/^[\t ]/mg,'');
+    	if(text.length - text2.length != len){
+    		break;
+    	}
+    	text = text2;
+    }
+	function encodeString(a){
+		return (0x10000 + a.charCodeAt()).toString(16).replace('1','\\u')
+	}
+	
+	text = text.replace(/[\\"'\r\n<]/g,encodeString)
+	text = '"'+text+'"';
+	var varName = node.getAttribute("var");
+	var alias = node.getAttribute("alias");
+	var path = node.getAttribute("path");
+	var model = node.getAttribute("model");
+	if(model){
+		if(/^\s*\{/.test(model)){
+			model = '"'+model.replace(/[\\"'\r\n<]/g,encodeString)+'"'
+		}
+	}else{
+		model='';
+	}
+	if(varName){
+		this.append("<script>" + varName+'=' +text+";<\/script>")
+		if(model){
+			this.append("<span class='runner' onclick='showExample("+model+','+varName+")'>执行</span>");
+		}
+	}else{
+		if(alias){
+			this.append("<script>" + alias+'=' +text+";<\/script>")
+		}
+		this.append("<div class='code'><script>renderSource("+text+','+(model||null)+",'"+path+"');<\/script></div>")
+	}
+};
+function parseNL2BR(node){
+	var text = String(node.textContent || node.text);
+	var varId = this.allocateId();
+	//生成内容
+	this.appendCapture(varId)
+	//以不编码的方式捕捉内容
+	var list = this.parseText(text,0);
+	this.appendAll(list);
+	this.appendEnd();
+	
+	//将生成内容按行劈成数组，循环安全输出
+	var forId = this.allocateId();
+	this.appendFor(forId,varId+".split('\\n')",null);
+	this.appendXT(forId);
+	this.append("<br/>");
+	this.appendEnd();
+}
+//]]>
+		</c:extension>
+		<style>
+			.cm-lite-el{ color:#d30;}
+			.cm-lite-tag{
+			color:#9933FF;font-weight:bold;}
+		</style>
+		<script>
+			//<![CDATA[
+var xmlSourceMap = {};
+		
+		CodeMirror.defineMode("litexml", function(config, parserConfig) {
+		  var litexmlOverlay = {
+		    token: function(stream, state) {
+		      if (stream.match("c:")) {
+		        while ((ch = stream.next()) != null)
+		          if (!/\w/.test(ch)) break;
+		        return "lite-tag";
+		      }else if (stream.match(/^(?:\$\!?\{)/)) {
+		        while ((ch = stream.next()) != null)
+		          if (ch == "}") break;
+		        return "lite-el";
+		      }
+		      while (stream.next() != null && !stream.match(/^\$\!?\{/, false)) {}
+		      return null;
+		    }
+		  };
+		  return CodeMirror.overlayParser(CodeMirror.getMode(config, parserConfig.backdrop || "xml"), litexmlOverlay);
+		});
+		var mirrors = [];
+		var jsons = [];
+		function placeMirror(node){
+			var s = document.getElementsByTagName('script');
+			var s = s[s.length-1];
+			s.parentNode.appendChild(node);
+		}
+		function renderSource(text,json,path){
+			if(json){
+				document.write("<div class='runner' onclick='showExample(jsons["+jsons.length+"],mirrors["+mirrors.length+"].getValue())'>执行</div>");
+				jsons.push(json);
+			}
+			var mirror =  CodeMirror(placeMirror, {
+  				value: text,
+  				//readOnly :true,
+  				mode:  {name:/^\s*</.test(text)?"litexml":"javascript",json:true}
+			});
+			mirrors.push(mirror);
+			if(path){
+				xmlSourceMap[path] = mirror;
+			}
+			return mirror;
+		}
+		function updateMirror(){
+			var i= mirrors.length;
+			while(i--){
+				mirrors[i].refresh();
+			}
+		}
+		function showNext(thiz,n,show,hide){
+			while(n = n.nextSibling){
+				if(n.nodeType == 1){
+					if(n.style.display=='none'){
+						n.style.display = 'block';
+						thiz.innerHTML = hide;
+						updateMirror();
+					}else{
+						n.style.display = 'none';
+						thiz.innerHTML = show;
+					}
+					break;
+				}
+			}
+		}
+		//]]>
+		</script>
+	</head>
+	<body>
+		
+		<c:include path="layout-main.xhtml" />
+		<c:include path="layout-menu.xhtml" />
+		<c:include path="layout-dialog.xhtml" />
+		<script src="../require.js" />
+		<!--  
+		<script src="/scripts/boot.js"/>
+		-->
+		<script>
+			if(!this.ParseContext && this.$import){
+				$export('org/xidea/lite/');
+				$export('org/xidea/lite/impl/js');
+				$export('org/xidea/lite/impl/php');
+				$export('org/xidea/lite/web');
+				$export('org/xidea/lite/parse');
+				$export('org/xidea/lite/util');
+			}
+			</script>
+		<script>
+			var menu = document.getElementById('menu');
+			var menuContent = menu.firstChild;
+			menuContent = menuContent.nodeType==1 ?menuContent:menuContent.nextSibling;
+			var as = document.body.getElementsByTagName('a');
+			var height = menu.scrollHeight;
+			for(var i = as.length;i--;){
+				var a = as.item(i);
+				if(/\bcurrent\b/.test(a.className)){
+					var t= a.offsetTop;
+					var bt = height - t;
+					//alert([height,t,bt])
+					if(bt<120){
+						menuContent.scrollTop = -bt+Math.min(150,height/3)+15
+					}
+					//a.parentNode.scrollIntoView();
+				} 
+			}
+		</script>
+	</body>
+</html>

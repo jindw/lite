@@ -1,0 +1,55 @@
+<html xmlns:x="http://www.xidea.org/lite/example" xmlns="http://www.w3.org/1999/xhtml"
+	xml:lang="zh-CN" dir="ltr">
+	<head>
+		<title>前端模板定义</title>
+	</head>
+	<body>
+		<p>前端模板是一段可以被翻译成JavaScript函数，能在客户端运行的模板片段。</p>
+		<h3>功能支持</h3>
+		<p>
+			<ul>
+				<li>指定/或者不指定参数生成JS函数。</li>
+				<li>自动复用后端模板中定义的模板函数。</li>
+			</ul>
+		</p>
+		<h3>用法示例</h3>
+		<ul>
+		<x:code model="{}">
+		<![CDATA[
+		<h:client name="buildList(list)">
+			<ul>
+				<c:for var="a" list="${list}">
+					<li><a href="${a.href}">${for.index}:${a.text}</a></li>
+				</c:for>
+			</ul>
+		</h:client>
+		<script>
+			var list = [
+				{href:'#1',text:'a1'},
+				{href:'#2',text:'a2'},
+				{href:'#3',text:'a3'}
+			];
+			document.write(buildList(list));
+		</script>
+		]]>
+		</x:code>
+		<br/><br/>
+		<x:code model="{}">
+		<![CDATA[
+		<h:client name="buildUser(id,sex,username='匆匆过客')">
+			<ul>
+				<li>用户id:${id}</li>
+				<li>性别:${sex==1?'男':'女'}</li>
+				<li>用户名:${username}</li>
+			</ul>
+		</h:client>
+		<script>
+			document.write(buildUser(123,1,'张三'));
+			document.write(buildUser(234,1));
+		</script>
+		]]>
+		</x:code>
+		<br/><br/>
+		</ul>
+	</body>
+</html>

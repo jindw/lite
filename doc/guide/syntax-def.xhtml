@@ -1,0 +1,39 @@
+<html xmlns:x="http://www.xidea.org/lite/example" xmlns="http://www.w3.org/1999/xhtml"
+	xml:lang="zh-CN" dir="ltr">
+	<head>
+		<title>函数定义</title>
+	</head>
+	<body>
+		<h3>功能支持</h3>
+		<p>
+			<ul>
+				<li>定义模板函数(返回模板渲染内容[string])。</li>
+				<li>定义参数和缺省参数。</li>
+				<li>函数定义可以同时备前端模板调用[<a href="syntax-client.xhtml"/>]。</li>
+			</ul>
+		</p>
+		<h3>用法示例</h3>
+		<ul>
+		<x:code model="{}">
+		<![CDATA[
+		<c:def name="max(a,b)">
+		${a>b?a:b}
+		</c:def>
+		<span>${max(1000,200)}</span>
+		]]>
+		</x:code>
+		<br/><br/>
+		<x:code model="{list:[{href:'#1',text:'a1'},{href:'#2',text:'a2'},{href:'#3',text:'a3'}]}">
+		<![CDATA[
+		<c:def name="showList(list,target='_blank')">
+			<c:for var="a" list="${list}">
+				<li><a href="${a.href}" target="${target}">${for.index}:${a.text}</a></li>
+			</c:for>
+		</c:def>
+		<ul>$!{showList(list)}</ul>
+		<ul>$!{showList(list,'_self')}</ul>
+		]]>
+		</x:code>
+		</ul>
+	</body>
+</html>

@@ -1,0 +1,98 @@
+<html xmlns:x="http://www.xidea.org/lite/example" xmlns="http://www.w3.org/1999/xhtml"
+	xml:lang="zh-CN" dir="ltr">
+	<head>
+		<title>模板继承</title>
+	</head>
+	<body>
+		<h3>功能支持</h3>
+		<p>
+			模板继承是一种被动包含的模板书写方式，Lite模板可以实现页面级别和元素级别两种层面的继承：
+			<ul>
+				<li>通过页面继承，我们可以方便网站的布局管理。</li>
+				<li>通过元素继承，我们可以实现更加高级的组件布局管理。</li>
+			</ul>
+		</p>
+		<h3>什么是模板继承</h3>
+
+		<p>
+			早期最常见的模板复用方式是include。然而，include只能实现
+			<strong title="相似是不行的！！！">内容完全相同</strong>
+			的小片段的模板复用。
+			然而，网页中更常见的是大布局的相似，而不是小单元的完全相同。
+		</p>
+		<p>
+			比如，有如下两个相似的网页结构：
+			<ul>
+				<x:code id="result1">
+			<![CDATA[
+			<html>
+			<head>
+			    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+				<title>标题1</title>
+				.... 完全相同的meta，link，scripts....
+			</head>
+			<body>
+				<div id="head">...完全相同的head....</div>
+				<div id="content">内容1...</div>
+				<div id="foot">... 完全相同的foot...</div>
+			</body>
+			</html>
+			]]>
+				</x:code>
+				<hr/>
+				<x:code>
+			<![CDATA[
+			<html>
+			<head>
+			    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+				<title>... 不同标题2...</title>
+				.... 完全相同的meta，link，scripts....
+			</head>
+			<body>
+				<div id="head">...完全相同的head....</div>
+				<div id="content">... 不同内容2</div>
+				<div id="foot">... 完全相同的foot...</div>
+			</body>
+			</html>
+			]]>
+				</x:code>
+				<p>按传统的include方式，我们需要把head，foot,befor-title,after-title
+					等等，拆成许多小碎片，而且纵使如此，我们也无法集中控制这些小碎片的组织形式。
+					然而，有了模板继承思想，一切都很方便了。
+				</p>
+				<p>首先，我们只需要定义一个公共的父页面：</p>
+				<x:code path="/parent.xhtml">
+			<![CDATA[
+			<html>
+			<head>
+			    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+				<title><c:block name="title"/></title>
+				.... 完全相同的meta，link，scripts....
+			</head>
+			<body>
+				<div id="head">...完全相同的head....</div>
+				<div id="content"><c:block name="content"/></div>
+				<div id="foot">... 完全相同的foot...</div>
+			</body>
+			</html>
+			]]>
+				</x:code>
+				<p>然后，每个具体模板可以如此：</p>
+
+				<x:code model="{}" expect="result1">
+			<![CDATA[
+			<c:extends path="parent.xhtml">
+			    <c:block name="title">标题1</c:block>
+			    <c:block name="content">内容1...</c:block>
+			</c:extends>
+			]]>
+				</x:code>
+			</ul>
+		</p>
+		<h3>什么是元素继承</h3>
+		<p>
+			元素继承与模板继承机制非常相似，只不过，元素继承是某个或者某组标签的行为，而不是整个页面的行为。
+		</p>
+		<p> 示例：待续...</p>
+	</body>
+</html>

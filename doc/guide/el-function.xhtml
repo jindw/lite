@@ -1,0 +1,276 @@
+<html
+	xmlns:x="http://www.xidea.org/lite/example"
+	xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-CN" dir="ltr">
+	<head>
+		<title>内置函数清单（PHP/Java）</title>
+	</head>
+	<body>
+	<!-- 
+lite_sort
+lite_group
+lite_filter
+lite_split
+lite_map
+lite_reduce
+	
+	 -->
+	<script>
+	var globalsRefMap = {
+		"decodeURI":"toplev.html#1120957",
+		"decodeURIComponent":"toplev.html#1119005",
+		"encodeURI":"toplev.html#1118346",
+		"encodeURIComponent":"toplev.html#1115986",
+		"eval":"toplev.html#1063795",
+		"Infinity":"toplev.html#1063963",
+		"isFinite":"toplev.html#1063988",
+		"isNaN":"toplev.html#1064024",
+		"NaN":"toplev.html#1064064",
+		"Number":"toplev.html#1064092",
+		"parseFloat":"toplev.html#1064132",
+		"parseInt":"toplev.html#1064173",
+		"String":"toplev.html#1064506",
+		
+		
+		"Array":"array.html#1193137",
+		"Boolean":"boolean.html#1193137",
+		"Date":"date.html#1193137",
+		"Function":"function.html#1193137",
+		"Math":"math.html#1193138",
+		"Number":"number.html#1193137",
+		"RegExp":"regexp.html#1193136",
+		"String":"string.html#1193137"
+	}
+        
+	var globals = [
+		"lite__parseInt($value, $radix=null) ",
+		"lite__parseFloat($value) ",
+		"lite__encodeURIComponent($item,$encoding='UTF-8')",
+		"lite__decodeURIComponent($item,$encoding='UTF-8')",
+		"lite__encodeURI($uri,$encoding='UTF-8')",
+		"lite__decodeURI($uri,$encoding='UTF-8')",
+		"lite__isFinite($op) ",
+		"lite__isNaN($op)",
+		"-eval"
+	];
+	var memberRefMap = {
+		"Math":{"abs":"math.html#1195395","acos":"math.html#1195429","asin":"math.html#1195485","atan":"math.html#1195541","atan2":"math.html#1195597","ceil":"math.html#1195654","cos":"math.html#1195695","exp":"math.html#1196408","floor":"math.html#1196455","log":"math.html#1196917","max":"math.html#1197362","min":"math.html#1197403","pow":"math.html#1197651","random":"math.html#1197697","round":"math.html#1197725","sin":"math.html#1197769","sqrt":"math.html#1197825","tan":"math.html#1194346"},
+		"JSON":{},
+		"Number":{
+			"toFixed":"number.html#1200964",
+			"toString":"number.html#1193464"
+		},
+		"String":{"anchor":"string.html#1196382","big":"string.html#1196447","blink":"string.html#1196495","bold":"string.html#1196546","charAt":"string.html#1196596","charCodeAt":"string.html#1196647","concat":"string.html#1196678","fixed":"string.html#1196715","fontcolor":"string.html#1196753","fontsize":"string.html#1196806","fromCharCode":"string.html#1225094","indexOf":"string.html#1196895","italics":"string.html#1196955","lastIndexOf":"string.html#1197005","link":"string.html#1198070","match":"string.html#1205239","replace":"string.html#1194258","search":"string.html#1194332","slice":"string.html#1194366","small":"string.html#1194405","split":"string.html#1194452","strike":"string.html#1194525","sub":"string.html#1194575","substr":"string.html#1194618","substring":"string.html#1194665","sup":"string.html#1194721","toLowerCase":"string.html#1194765","toSource":"string.html#1194796","Object.toSource":"object.html#1193320","toString":"string.html#1210667","Object.toString":"object.html#1193350","toUpperCase":"string.html#1194823","valueOf":"string.html#1210732","Object.valueOf":"object.html#1193540"
+		},
+		"Array":{"concat":"array.html#1194827","join":"array.html#1195456","pop":"array.html#1196003","push":"array.html#1196550","reverse":"array.html#1193641","shift":"array.html#1193677","slice":"array.html#1193713","splice":"array.html#1193766","sort":"array.html#1196882","toSource":"array.html#1193889","Object.toSource":"object.html#1193320","toString":"array.html#1193921","Object.toString":"object.html#1193350","unshift":"array.html#1193964","valueOf":"array.html#1202613","Object.valueOf":"object.html#1193540"},
+		"Date":{
+		"getDate":"date.html#1193537","getDay":"date.html#1193573","getFullYear":"date.html#1193607","getHours":"date.html#1193644","getMilliseconds":"date.html#1193677","getMinutes":"date.html#1193710","getMonth":"date.html#1193744","getSeconds":"date.html#1193778","getTime":"date.html#1193811","getTimezoneOffset":"date.html#1193844","getUTCDate":"date.html#1219395","getUTCDay":"date.html#1193904","getUTCFullYear":"date.html#1193940","getUTCHours":"date.html#1193973","getUTCMilliseconds":"date.html#1194006","getUTCMinutes":"date.html#1194039","getUTCMonth":"date.html#1194072","getUTCSeconds":"date.html#1194105","getYear":"date.html#1194138","parse":"date.html#1194184","setDate":"date.html#1194228","setFullYear":"date.html#1194264","setHours":"date.html#1194314","setMilliseconds":"date.html#1194367","setMinutes":"date.html#setMinutes","setMonth":"date.html#1194453","setSeconds":"date.html#1194498","setTime":"date.html#1194543","setUTCDate":"date.html#1194580","setUTCFullYear":"date.html#1194617","setUTCHours":"date.html#1194663","setUTCMilliseconds":"date.html#1194713","setUTCMinutes":"date.html#1194750","setUTCMonth":"date.html#1194796","setUTCSeconds":"date.html#1194838","setYear":"date.html#1194880","toGMTString":"date.html#1194931","toLocaleString":"date.html#1194970","toLocaleDateString":"date.html#toLocaleDateString","toLocaleTimeString":"date.html#toLocaleTimeString","toSource":"date.html#1195016","Object.toSource":"object.html#1193320","toString":"date.html#1206669","Object.toString":"object.html#1193350","toUTCString":"date.html#1195045","UTC":"date.html#1195078","valueOf":"date.html#1206897","Object.valueOf":"object.html#1193540"}
+	}
+	var memberMap = {
+		"String":[
+			"lite_member_charAt($obj, $index)",
+			"lite_member_charCodeAt($obj, $index)",
+			"lite_member_indexOf($obj, $needle, $from_index=0)",
+			"lite_member_lastIndexOf($obj, $needle, $from_index=null)",
+			"lite_member_toLowerCase($obj)",
+			"lite_member_toUpperCase($obj)",
+			"?lite_member_toLocaleLowerCase()",
+			"?lite_member_toLocaleUpperCase()",
+			"lite_member_substr($obj, $start, $length=false)",
+			"lite_member_substring($obj, $start, $end=null)",
+			"lite_member_split($obj, $separator=null, $limit=false)",
+			"lite_member_slice($obj, $start, $end=0)",
+			"lite_member_match($obj, $regexp)",
+			"lite_member_concat($obj)",
+			"?lite_member_search(regexp)",
+			"?valueOf",
+			"lite_member_replace($obj, $regexp, $replacement)"
+		],
+		"Array":[
+			"lite_member_slice($obj, $start, $end=0)",
+			"lite_member_join($obj, $separator=',')",
+			"lite_member_concat($obj)",
+			"?toLocaleString",
+			"?sort",
+			"-lite_member_pop($obj)",
+			"-lite_member_push($obj,$dummy)",
+			"-lite_member_shift($obj)",
+			"-lite_member_unshift($obj, $dummy)",
+			"-lite_member_splice($obj, $index=0, $count=0)",
+			"lite_member_reverse($obj)"
+
+		],
+		"Date":[
+			"lite_member_getFullYear($d)",
+			"lite_member_getYear($d)",
+			"lite_member_getMonth($d)",
+			"lite_member_getDay($d)",
+			"lite_member_getDate($d)",
+			"lite_member_getHours($d)",
+			"lite_member_getMinutes($d)",
+			"lite_member_getSeconds($d)"
+		],
+		"Number":[
+			"lite_member_toFixed($obj, $digits=0)",
+			"lite_member_toString($obj, $radix=10)",
+			"?toLocaleString",
+			"?valueOf",
+			"?toExponential",
+			"?toPrecision"
+		],
+		"JSON":[
+			"lite_member_stringify($obj, $arg, $from_enc=NULL)",
+			"lite_member_parse($obj,$arg,$from_enc=NULL){"
+		],
+		"Math":[
+			"lite_member_max($obj)",
+			"lite_member_min($obj)",
+			"lite_member_random($obj)",
+			"lite_member_floor($obj, $op)",
+			"lite_member_round($obj, $op)",
+			"lite_member_acos($obj,$arg)",
+			"lite_member_asin($obj,$arg)",
+			"lite_member_atan($obj,$arg)",
+			"lite_member_atan2($obj,$arg1,$arg2)",
+			"lite_member_cos($obj,$arg)",
+			"lite_member_sin($obj,$arg)",
+			"lite_member_sqrt($obj,$arg)",
+			"lite_member_tan($obj,$arg)",
+			"lite_member_ceil($obj,$arg)",
+			"lite_member_pow($obj,$arg1,$arg2)",
+			"lite_member_abs($obj,$arg1)",
+			"lite_member_log($obj,$arg)",
+			"lite_member_exp($obj,$arg)"
+		]
+	}
+		
+	</script>
+	
+	<c:client name="showFunctionTable">
+		<div style="float:left;height:220px;">
+			<h4>全局函数列表</h4>
+			<table border='1'>
+				<tr><th>函数名</th><th>参考标准</th></tr>
+				<c:for var="item" list="${globals}">
+				<tr style="${item.style}" title="${item.title}">
+					<td><a style="${item.style}" title="${item.title || item.impl}" href0="el-function-source.html#lite__${item.name}">${item.name}</a></td>
+					<td>
+						<!-- 
+						<a style="${item.style}" title="${item.title || item.impl}" href="el-function-source.html#lite__${item.name}">PHP 实现</a>
+						-->
+						<a style="${item.style}" title="${item.title}" href="http://www.xidea.org/project/jsidoc/js1.5/${globalsRefMap[item.name]}">JS API</a>
+					</td>
+				</tr>
+				</c:for>
+				<c:else><tr><td colspan="2">找不到匹配的函数</td></tr></c:else>
+			</table>
+		</div>
+		<c:for var="ownerName" list="${memberMap}">
+		<div style="float:left;overflow:auto;">
+			<h4>成员函数列表(<a href="http://www.xidea.org/project/jsidoc/js1.5/${globalsRefMap[ownerName]}">${ownerName}</a>)</h4>
+			<table border='1'>
+				<tr><th>方法名</th><th>参考标准</th></tr>
+				<c:for var="item" list="${memberMap[ownerName]}">
+				<tr style="${item.style}" title="${item.title}">
+					<td><a title="${item.title || item.impl}" href0="el-function-source.html#lite_member_${item.name}">${item.name}</a></td>
+					<!--
+					<td><a style="${item.style}" title="${item.title}" href="http://www.xidea.org/project/jsidoc/js1.5/${globalsRefMap[item.type]}">${item.type}</a></td>
+					-->
+					<td>
+						<!-- 
+						<a style="${item.style}" title="${item.title || item.impl}" href="el-function-source.html#lite_member_${item.name}">PHP 实现</a>
+						-->
+						<a style="${item.style}" title="${item.title}" href="http://www.xidea.org/project/jsidoc/js1.5/${memberRefMap[item.type][item.name]}">JS API</a>
+					</td>
+				</tr>
+				</c:for>
+				<c:else><tr><td colspan="2">找不到匹配的函数</td></tr></c:else>
+			</table>
+			</div>
+		</c:for>
+	</c:client>
+	<ul style="clean:both">
+		<label for="name" style="float:left">
+			<strong>输入过滤条件：</strong>
+			<input id="name" oninput="showFilter(this.value)" onpropertychange="showFilter(this.value)"/>
+		</label>
+		
+		<table border="1" style="float:left;">
+		<tr><td>图例：</td><td style="text-decoration:line-through;background-color:#960;" title="影响上下文函数">不支持！</td>
+		<td style="text-decoration:line-through;background-color:#cc6;" title="不常用函数">暂不支持。</td></tr></table>
+		<div style="float:right;">
+			<p>Lite 按照JavaScript语法规则，<br/>在PHP，Java等其他环境下实现的内置模板函数。</p>
+		<div  style="opacity:0.3;">
+			<x:code>
+<![CDATA[
+//函数调用表达式示例:
+${encodeURIComponent(text1)}
+${JSON.stringify(object)}
+${[a,b,c].concat(d,[e,f]).join('\n')}
+${str.substring(1,2)}
+]]>
+			</x:code></div>
+			</div>
+		<hr/>
+		
+	</ul>
+	<div id="functionTable"/>
+	<script>//<![CDATA[
+	function showFilter(key){
+		var memberMap2 = {};
+		if(key){
+			key = key.replace(/^\s+|\s+$/g,'').toLowerCase();
+		}
+		for(var m in memberMap){
+			var ms = memberMap[m];
+			var tm = m.toLowerCase().indexOf(key)>=0;
+			var _members = [];
+			memberMap2[m] = _members
+			for(var i=0;i<ms.length;i++){
+				var impl = ms[i];
+				var prefix = impl.match(/^[?\-]/);
+				var style = null,title = null;
+				var n = impl.replace(/lite_member_(\w+).*/,'$1')
+				if(prefix){
+					prefix = prefix[0];
+					impl = impl.substr(1);
+					title=prefix=='?'?"尚未实现":"副作用函数,不予实现!!!";
+					style ="text-decoration:line-through;background-color:"+ (prefix=='?'?'#cc6;':'#960;')
+				}else if(n == 'reverse'){
+					title="可控副作用函数,需要先调用concat复制本身，例如：concat().reverse()!!!";
+					style ="background-color:yellow;"
+				}
+				if(!key || tm || n.toLowerCase().indexOf(key)>=0){
+					_members.push({style:style,title:title,'type':m,name:n,impl:impl});
+				}
+			}
+		}
+		var _globals = [];
+		for(var i=0;i<globals.length;i++){
+			var impl = globals[i];
+			var prefix = impl.match(/^[?\-]/);
+			var style = null,title = null;
+			var n = impl.replace(/lite__(\w+).*/,'$1')
+			if(prefix){
+				prefix = prefix[0];
+				impl = impl.substr(1);
+				title=prefix=='?'?"尚未实现":"副作用函数,不予实现!!!";
+				style ="text-decoration:line-through;background-color:"+ (prefix=='?'?'#cc6;':'#960;')
+			}
+			
+			if(!key || n.toLowerCase().indexOf(key)>=0){
+				_globals.push({style:style,title:title,name:n,impl:impl});
+			}
+		}
+		document.getElementById("functionTable").innerHTML = 
+			showFunctionTable({
+				globals:_globals,
+				memberMap:memberMap2,
+				globalsRefMap:globalsRefMap,memberRefMap:memberRefMap
+			});
+		//alert(document.getElementById("functionTable").innerHTML)
+	}
+	showFilter()
+		//]]>
+	</script>
+	</body>
+</html>

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html xmlns:x="http://www.xidea.org/lite/example" xmlns="http://www.w3.org/1999/xhtml"
+	xml:lang="zh-CN" dir="ltr">
+	<head>
+		<title>编译命令</title>
+	</head>
+	<body>
+		<h3>为什么需要编译</h3>
+		<ul>
+			<li>Lite模板需要编译</li>
+			<li>
+				<a title="js/css/img">静态资源</a>
+				可以编译优化
+			</li>
+			<li>低级错误可以编译期检查</li>
+		</ul>
+		<h3>模板编译</h3>
+		<p>Lite模板是JavaScript编写的，也可以跑在Java环境下（通过内置的Rhino JavaScript引擎）。</p>
+		<ul>
+			<li>如果是Java后端环境，虽然可以即时按需编译，但也建议在上线前批量编译以提高运行效率。</li>
+			<li>如果是PHP环境，则必须编译后才能上线（调试期间的浏览器编译模式不应在线上开启）。</li>
+		</ul>
+		<p>执行编译命令的时候，将自动编译-includes参数能匹配的全部文件中的模板文件，如果开启-linked 参数，则模板关联的静态文件被一并处理。
+		（是否是模板文件由WEB-INF/lite.xml
+			配置文件决定，如果没有该配置，默认配置所有xhtml扩展名文件都是模板文件）。</p>
+
+		<h3>静态资源编译优化与检查</h3>
+		<p>Lite编译器不仅是编译模板，也可以做静态资源的编译优化。所以，上线编译是非常必要的。编译器默认可以做的工作包括如下：</p>
+		<ul>
+			<li>
+				脚本合并压缩。
+				<p>通过
+					!document.write("&lt;script
+					src='/static/js/absolute-path.js'>&lt;/script>");
+
+					方式聚合脚本，默认采用JSA压缩。
+					<a href="compiler-spec.xhtml#js">更多信息</a>
+					。
+				</p>
+			</li>
+			<li>
+				CSS合并压缩 与图片合并。
+				<p>
+					通过
+					!import url('/static/css/absolute-path.css');
+					方式聚合CSS,先聚合再压缩。
+					<a href="compiler-spec.xhtml#css">更多信息</a>
+					。
+				</p>
+			</li>
+			<li title="模板/css/js">
+				资源有效性检查、线上地址替换和自动缓存优化。
+				<p>我们推荐源码中都采用相对网站源码根目录的绝对地址方式书写资源地址。
+					然后，我们可以自动检测这些地址对应的静态文件是否存在，如有必要，根据自定义的规则自动替换成线上(如：CDN地址。
+				</p>
+				<p>
+					为了提高网页性能，我们需要做页面的缓存优化，这里，我们可以自动给所有静态资源添加内容hash，所以，只要你是基于Lite编译器的网站，你可以放心的
+					<strong>缓存一万年</strong>
+					，提高前端性能。
+				</p>
+				<p>
+					<i>如果在模板中，系统可以自动发现资源地址，如果在CSS中，建议都加上url(),如果在js中，都加上encodeURI()，以方便实现程序查找。
+					</i>
+					<a href="compiler-spec.xhtml#resoure">更多信息</a>
+					。
+				</p>
+			</li>
+			<li>
+				模板HTML规范检查。
+				<p>
+					检查HTML5规范之外的标签，属性，主要用于发现书写错误，改良编码习惯。
+					<a href="compiler-api.xhtml#htmlValidate">更多信息</a>
+					。
+				</p>
+			</li>
+		</ul>
+		<h3>如何执行编译</h3>
+		<ul>
+			<p>
+				<strong>示例</strong>
+			</p>
+			<x:code><![CDATA[
+			java -jar WEB-INF/lib/Lite.jar -output ../output -includes /**.js /**.xhtml -linked true -excludes /WEB-INF/** -translator php
+			]]></x:code>
+
+			<p
+				title="这是一个java执行命令，命令模式是: java -jar &lt;JARPATH> -arg value -args value1 value2">
+				在这个编译程序中，-jar 用于指定jar库（编译程序）的地址，必须放在最开始的位置；
+				其他参数紧随其后，无顺序。</p>
+			<p>
+				一般来说，你只需要include你的模板文件即可，静态资源可以通过指定
+				<a href="#linked">linked</a>
+				参数，通过模板对静态资源的关联(或者其他形式的文件关联，如css中的图片引用)自动间接包含进去！
+			</p>
+
+		</ul>
+		<h3>参数说明</h3>
+		<ul>
+			<li>
+				<strong>-root</strong>
+				<p>网站根目录（源代码）。可以是绝对地址或者相对于当前目录的相对地址。</p>
+				<p><i>在未指定该参数的时候，默认以当前目录为网站目录。</i></p>
+			</li>
+			<li>
+				<strong>-output</strong>
+				<p>编译目标目录（目标代码）。可以是绝对地址或者相对于当前目录的相对地址（当前目录<strong>不是</strong>指-root参数指定的目录）</p>
+			</li>
+			<li>
+				<strong>-includes</strong>
+				<p>
+					我们打包的文件中有两类：
+					<ul>
+						<li>
+							<strong>直接包含文件集：</strong>
+							编译命令指定的包含文件集
+						</li>
+						<li>
+							<strong>间接包含文件集：</strong>
+							文件编译过程分析得到的关联文件集（只有指定-linked参数为true的时候，间接包含生效）
+						</li>
+					</ul>
+				</p>
+				<p>
+					这个-includes参数就是用来指定直接包含文件的匹配模式集。
+					他可同时接受多个模式，通过空格分割，模式规则为：*
+					代表某个目录下的任意文件，**
+					代表任意文件和任意级子目录下的任意文件。
+					<x:code>
+				<![CDATA[
+				//目录module 下的任意xhtml扩展名的文件
+				/module/*.xhtml
+				
+				//目录module 下的任意文件和任意级任意子目录的任意文件
+				/module/**
+				
+				//任意一个js文件
+				/**.js
+				
+				//任意一个test目录下的文件
+				**/test/*
+				
+				//任意一个包含test文字的目录下的文件
+				**/*test*/*
+				]]>
+					</x:code>
+				</p>
+				<p>
+					直接包含的文件不一定能被打包，因为他可能被excludes 排除。
+					间接包含文件也不一定能被打包，因为间接包含也可以被excludes排除。
+				</p>
+			</li>
+			<li>
+				<strong>-linked</strong>
+				<a name="linked" />
+				<p>
+					该参数用来指定是否启用间接包含，间接包含是指自动将关联的静态资源做为间接包含文件一起打包。
+				</p>
+				<p>
+					<ul>
+						比如
+						<x:code><![CDATA[java -jar WEB-INF/lib/Lite.jar -includes /index.xhtml -linked true]]></x:code>
+						<br />
+						<x:code>
+				<![CDATA[
+				<!-- file:index.xhtml -->
+				...
+				<html>
+				<head>
+				<script src="/static/js/a.js"></script>
+				<link src="/static/css/a.css"></link>
+				</head>
+				<body>
+				....
+				]]>
+						</x:code>
+						<br />
+						<x:code>
+				<![CDATA[
+				/* file: /static/css/a.css*/
+				....
+				body{
+					background:url('/static/img/a.png');
+				}
+				....
+				]]>
+						</x:code>
+						<p>因为文件/index.xhtml 中存在：/static/js/a.js 和 /static/css/a.css 的引用;
+							/static/css/a.css 中存在图片：/static/img/a.png的引用。
+							系统会分析到他们之间的关联，自动间接包含：
+							/static/js/a.js,/static/css/a.css,/static/img/a.png 三个文件。
+				</p>
+					</ul>
+				</p>
+				<p>
+					<i>
+						该参数默认为false，如果需要自动打包关联文件，需要开启他：-linked true 。
+					</i>
+				</p>
+			</li>
+			<li>
+				<strong>-excludes</strong>
+				<p>剔除文件匹配模式集（用法类似-includes）。用于剔除-includes
+					产生的直接包含文件和编译过程中分析得到的间接包含文件中不应被打包的文件集合。</p>
+			</li>
+			<li>
+				<strong>-translator</strong>
+				<p>翻译目标代码（目前只支持php，java不需要翻译成目标代码，只需要有中间代码即可）。</p>
+			</li>
+		</ul>
+	</body>
+</html>

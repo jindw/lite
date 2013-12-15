@@ -1,0 +1,54 @@
+<html xmlns:x="http://www.xidea.org/lite/example" xmlns="http://www.w3.org/1999/xhtml"
+	xml:lang="zh-CN" dir="ltr">
+	<head>
+		<title>分支选择</title>
+	</head>
+	<body>
+		<h3>本质上是if/else语法的另外一种形式。</h3>
+		<ul>
+			<strong>示例：</strong>
+			<x:code model="{day:1}">
+				<![CDATA[
+				<div> 
+				  今天是：<span>
+						<c:choose value="${day}">
+							<c:when test="${0}">周一</c:when>
+							<c:when test="${1}">周二</c:when>
+							<c:when test="${2}">周三</c:when>
+							<c:when test="${3}">周四</c:when>
+							<c:when test="${4}">周五</c:when>
+							<c:when test="${5}">周六</c:when>
+							<c:otherwise>周日</c:otherwise>
+						</c:choose>
+					</span>
+				</div>
+				]]>
+			</x:code>
+		</ul>
+		<p>
+			<p>
+				<i>
+					小技巧1： JavaScript 数组和与或运算也可以解决类似问题：
+					<ul>
+					<x:code model="{day:1}">
+				<![CDATA[
+				<div>
+				今天是：<span>周${"一二三四五六日".charAt(day)}</span>
+				------------------
+				或者：
+				
+				今天是：<span>周${day == 0 && '一' ||
+								 day == 1 && '二' ||
+								 day == 2 && '三' || 
+								 day == 3 && '四' || 
+								 day == 4 && '五' || 
+								 day == 5 && '六' || 
+								 day == 6 && '日'}</span>
+				</div>
+				]]>
+					</x:code></ul>
+				</i>
+			</p>
+		</p>
+	</body>
+</html>

@@ -1,0 +1,19 @@
+<lite encoding="utf-8" type="text/html" xmlns="">
+	<!-- 
+	<extension namespace="http://www.w3c.org/1999/xhtml" package="org.xidea.lite.xhtml" />
+	-->
+	<group>
+		<group layout="/example/layout.xhtml">
+			<include>/example/*.xhtml</include>
+			<exclude>/example/*.xhtml</exclude>
+		</group>
+		<group layout="/doc/guide/layout.xhtml">
+			<include>/doc/guide/*.xhtml</include>
+		</group>
+		<group layout="/book/layout.xhtml">
+			<include>/book/*.xhtml</include>
+		</group>
+	</group>
+	<include>**.xhtml</include>
+</lite>
+

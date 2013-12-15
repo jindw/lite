@@ -1,0 +1,72 @@
+<html xmlns:x="http://www.xidea.org/lite/example" xmlns="http://www.w3.org/1999/xhtml"
+	xml:lang="zh-CN" dir="ltr">
+	<head>
+		<title>日期格式化</title>
+	</head>
+	<body>
+		<p>日期格式化本应是表达式中函数的功能，但是js函数中，我们无据可依，为了坚持我们一贯不作恶的风格，我们不打算随意添加新的内置函数；
+			所以，我们参照<a href="http://www.w3.org/TR/NOTE-datetime.html" title="有增加，有差异">w3c日期格式</a>设计了一个日期格式化标签语法（暂时不提供文本和属性语法）。</p>
+		<h3>格式字符说明</h3>
+		
+		<p>格式化主要分日期和时间两类，日期更大，全部采用大写(Y-M-D)； 时间小，全部采用小时(h:m:s)。</p>
+		<p>格式字符的重复次数也有玄机：
+			重复几次，表示至少占位几个字符（不够在前面补0,如: MM月DD日 -> 05月15日）；不重复，直接采用数字表示（不补0,如 :M月D日 -> 5月15日）；</p>
+		<p>当位数不够时，也<strong>不做截除</strong>！</p>
+		<p><i>年份说明：（因为存在<span title="如1981可表示为81">两位表示法</span>，效果类似被截断）。
+			如果Y重复两次，则年份采用两位表示法（如模式:"YY年"时，1981年可表示为:"81年"，一般不推荐这种方式）。</i>
+		</p>
+		<ul>
+			<li>Y 年
+				<p>常用方式: YYYY：四位年，YY：两位年， Y：年（不补零，现实中一般与四位年一致，公元1000年之前除外）</p>
+			</li>
+			<li>M 月
+				<p>常用方式：MM：两位月（01->12），M：月（1->12,不补零）</p>
+			</li>
+			<li>D 日
+				<p>常用方式：DD：两位日（01->31），D：日（1->31）</p>
+			</li>
+			<li>h 时
+				<p>常用方式：hh：两位时（00->23），h：时，时间表示为(0-23)，目前，我们尚不提供12小时+上下午式的格式化。</p>
+			</li>
+			<li>m 分
+				<p>常用方式：mm：两位分（00->59），m：分（0->59,<a title="应实现障碍，PHP环境下，与mm一致" href="#0">PHP例外</a>）</p>
+			</li>
+			<li>s 秒
+				<p>常用方式：ss：两位秒（00->59），s:秒(0->59,<a title="应实现障碍，PHP环境下，与ss一致" href="#0">PHP例外</a>)</p>
+			</li>
+			<li>.s 小数秒（一般不用）
+				<p>以小数方式表示秒一下的单位，比如8点20分3秒123毫秒 再模式hh:ss:mm.m下表示为：08:20:3.123</p>
+			</li>
+			<li>TZD 时区（一般不用）
+				<p>以w3c时间格式中时区的表示方法表示时区，比如：北京时间表示为：+08:00</p>
+			</li>
+		</ul>
+		<h3>示例：</h3>
+		<ul>
+			<x:code model="{date:+new Date()}">
+				<![CDATA[
+				<div> 
+				  今天是：<c:date-format pattern="YYYY-MM-DD" value="${date}"/>
+				  现在是：<c:date-format pattern="hh:mm:ss" value="${date}"/>
+				</div>
+				]]>
+			</x:code>
+		</ul>
+		<p>
+			<p>
+				<i>
+					小技巧1：我们可以通过自定义模板函数，实现日期格式化的函数支持：
+					<ul>
+					<x:code model2="{date:+new Date()}">
+				<![CDATA[
+				<c:def name='dateFormat(date)'><c:date-format pattern='YYYY-MM-DD hh:mm:ss' value='${date}'/></c:def>
+				<div>今天是：${dateFormat(date)}	</div>
+				]]>
+					</x:code>
+					
+					</ul>
+				</i>
+			</p>
+		</p>
+	</body>
+</html>

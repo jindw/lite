@@ -1,0 +1,99 @@
+<html xmlns:x="http://www.xidea.org/lite/example" xmlns="http://www.w3.org/1999/xhtml"
+	xml:lang="zh-CN" dir="ltr">
+	<head>
+		<title>其他标记语言特有的语法</title>
+	</head>
+	<body>
+		<h3>功能支持</h3>
+		<p>
+			<ul>
+				<li>
+					条件属性
+					<p>当属性输出 (如&lt;button disabled="${action.disabled || null}" ..)。
+						如果属性是一个唯一的表达式(没有其他语法或者文本)；且表达式值为null时(null 非
+						"null")，该属性将做为一个整理不被输出（属性名等也不会输出）
+					</p>
+				</li>
+				<li>自动HTML标签补全
+					<p>在上线编译的时候（Java命令批处理），能自动补全一些标签。</p>
+					<p>如：img 标签的width,height可以自动从文件内容中获取并自动设置。如果设置与文件内容不一致，可以自动打印提醒日志。</p>
+				</li>
+				<li>自动资源检查和自动hash填充
+					<p>在上线编译的时候，会专门做一些外链脚本，样式，图片的存在与否的检查，并能把这些静态资源地址自动添加hash值<i>（如：?@=3ef5wf，添加hash之后，我们就可以在服务器上设置永久缓存，已提高页面浏览体验）。</i></p>
+				</li>
+				<li>自动线下地址替换
+					<p>我们建议在编码的时候，按照源码位置书写资源链接（js/css/图片），并配置替换规则，线下调试的时候，可以实施修改，上线之后，可以自动替换成cdn上的地址。</p>
+				</li>
+			</ul>
+		</p>
+		<h3>用法示例</h3>
+		<ul>
+
+			<x:code var="autoformModel">
+			<![CDATA[
+			{
+				title:"特殊字符\"&&lt;",
+				cityList:["北京","杭州","上海"],
+				user:{name:"金大为",city:"杭州",married:true}
+			}
+			]]>
+			</x:code>
+			<x:code model="autoformModel">
+		<![CDATA[
+		<!-- 自动表单填充 -->
+		<form h:autoform="true">
+			大名：<input name="user.name" type="text"/>
+			城市：<select name="user.city">
+					<option c:for="${city:cityList}">${city}</option>
+				</select>
+			婚否： <input name="user.married" type="radio" value="true"/>是
+				  <input name="user.married" type="radio" value="false"/>否
+		</form>
+		]]>
+			</x:code>
+			<br />
+			<br />
+			<x:code var="htmlxmlModel">
+					<![CDATA[
+					{
+						title:"特殊字符\"&&lt;",
+						content:"危险代码&lt;script>alert(\"想做点坏事，能得逞吗？\") &lt;\/script>",
+						"disabled":null,
+						data:{p1:"属性1",p2:"属性2"}
+					}
+					]]>
+			</x:code>
+			<x:code model='htmlxmlModel'>
+					<![CDATA[
+					<!-- html/xml 条件属性
+							若 disabled 变量为null， 则disabled 属性不输出 -->
+					<input type="submit" disabled="${disabled}" value=""/>
+					
+					....
+					<!-- javascript自动编码(JSON.stringify) -->
+					<div onclick="alert(${content})">...</div>
+					<!-- URL 自动编码(encodeURIComponent) -->
+					<a href="/test?p1=${data.p1}&p2=${data.p2}&p3=${'中文自动编码'}">...</a>
+					<!-- html自动编码  -->
+					<p title="${title}">${content}</p>
+					<script>
+						//script 中的内容将自动放到CDATA块中，其内容不做自动编码
+						if(content.length<10){
+							alert(content.length);
+						}
+						alert(${content})
+					</script>
+					
+					
+					...
+					<!-- 自动Hash戳（用于设置服务器永久缓存）和文件缺失检查【该功能只在上线编译时启用】 -->
+					<link href="/styles/default.css" type="text/css" rel="stylesheet"/>
+					<script src="/scripts/boot.js"/>
+					<!-- 自动图片文件信息补全(width,height) 【该功能只在上线编译时启用】-->
+					<img src="/images/logo.png"/>
+					]]>
+			</x:code>
+
+		</ul>
+	</body>
+</html>

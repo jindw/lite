@@ -1,0 +1,18 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+<title>E4X 示例</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<script src="http://www.xidea.org/lite/release/template.js"></script>
+</head>
+<body>
+<script>
+	var tpl = liteWrap(function(color,text){
+		<div style="color:${color}">
+			测试模板：${text}
+		</div>
+		});
+	alert(tpl('red','没什么好说的'))
+</script>
+</body>
+</html>

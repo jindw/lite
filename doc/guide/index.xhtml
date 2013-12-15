@@ -1,0 +1,163 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:c2="http://www.xidea.org/lite/core"
+	xmlns:x="http://www.xidea.org/lite/example" xml:lang="zh-CN" dir="ltr">
+
+	<head>
+		<title>入门指南 </title>
+	</head>
+	<body>
+		<a name="what" />
+		<h3>什么是模板?</h3>
+		<p>
+			数据+
+			<strong>模板</strong>
+			=> 视图，这就是模板的价值和定位。
+		</p>
+		<p>
+			在Web开发中，前端工程师通常使用模板，将后端数据转化/拼装为一个前端可读的HTML内容
+			[
+			<a onclick='showNext(this,this.parentNode,"展开示例","隐藏示例");return false' href="#">展开示例</a>
+			]。
+		</p>
+		<div style="display:none">
+			<ul>
+				<h4>最简模板示例</h4>
+				<p>
+					以显示一个简单的个人信息为例，形式如：
+					<x:code>
+					<![CDATA[
+					<html>
+					<title>模板测试</title>
+					<body>
+					我是：张三,来自：北京
+					</body>
+					</html>
+					]]>
+					</x:code>
+				</p>
+				<p>
+					其中，姓名 "张三" 和城市 "北京" 需要从后端获取，后端数据模型如下：
+					<x:code alias="testModel">
+						{
+						"name": "张三",
+						"city":"北京"
+						}
+					</x:code>
+				</p>
+				<p>
+					为了实现上述内容的动态展示，我们需要编写一个简单的模板：
+					<script>var testModel = mirrors[mirrors.length-1].getValue();
+					</script>
+					<x:code model="testModel">
+					<![CDATA[
+					<html>
+						<title>模板测试</title>
+						<body>
+							我是：${name},来自：${city}
+						</body>
+					</html>
+					]]>
+					</x:code>
+				</p>
+			</ul>
+		</div>
+		<a name="style" />
+		<h3>Lite 模板快速参考 </h3>
+		<p>Lite 模板的主要功能包括：
+			<ul>
+				<li><a href="syntax-out.xhtml">变量/表达式输出</a></li>
+				<li><a href="syntax-if.xhtml">条件</a>/<a href="syntax-for.xhtml">循环控制</a></li>
+				<li><a href="syntax-def.xhtml">函数</a>/<a href="syntax-var.xhtml">变量申明</a></li>
+				<li><a href="syntax-extends.xhtml">模板继承</a>/<a href="syntax-include.xhtml">静态包含</a>/动态调用</li>
+				<li><strong>前端功能</strong>（如：
+				<a href="syntax-client.xhtml">前端模板</a>/
+				<a href="syntax-autoform.xhtml">自动表单</a>/
+				<a href="feature-autoencode.xhtml">HTML自动编码</a>）</li>
+			</ul>
+		</p>
+		<h3>Lite 模板风格 </h3>
+		<p>在Lite出现之前，已经有很多广泛运用的模板系统，Java中，Velocity，FreeMarker 算是先驱，
+			PHP中Smarty出现较早， 前端JavaScript模板， 太杂，成熟的不多，这里就不多说。</p>
+
+		<p>那么Lite存在的价值又在那里呢？</p>
+		<p> 与这些流行的模板系统不同， Lite有如下三大特点：</p>
+		<ul>
+			<li>
+				<strong>懂HTML/XML的语法,绝对安全</strong>
+				<p>在Lite环境下，你基本无法打破html自身约束，写不出有XSS漏洞的网页。</p>
+				<p>因为Lite
+					XML语法本身是基于标记去扩展的，他对文档中所有动态的和静态的内容，都有感知，他可以据此合理的自动优化，还可以在标记语法的基础上设计一些漂亮的语法特征。
+				</p>
+				<ul>
+					<li>
+						通过HTML/XML上下文实现的：
+						<a href="feature-autoencode.xhtml">自动编码</a>
+					</li>
+					<li>
+						通过过滤原生表单元素实现的：
+						<a href="syntax-autoform.xhtml">自动表单填充</a>
+					</li>
+					<li>
+						通过HTML/XML属性语义实现的：
+						<a href="feature-xml.xhtml#attribute">条件属性</a>
+					</li>
+					<li>
+						通过HTML/XML块结构和空格语义要求实现的：
+						<a href="syntax-trim.xhtml">标签空格控制</a>
+					</li>
+					<li>
+						通过过滤原生HTML/XML标签实现的：
+						<a href="feature-xml.xhtml#">自动HTML标签补全</a>
+					</li>
+				</ul>
+			</li>
+
+			<li>
+				<strong>基于 JavaScript</strong>
+				<p>
+					兼容JavaScript的表达式和函数库，方便前端工程师学习。
+					<x:code var="elModel">
+			<![CDATA[
+			{
+				"object":{"key":"value"},
+				"a":1,"b":2,"c":3,"d":4,"e":5,"f":6,
+				"array":[1,2,3,4],
+				"str":"testString"
+			}]]>
+					</x:code>
+					<x:code model="elModel">
+<![CDATA[
+<textarea>
+//表达式示例:
+${JSON.stringify(object)}
+${[a,b,c].concat(d,[e,f]).join(',')}
+${[a,b,c,d].concat(array).length}
+${str.charAt(0)}
+${str.substring(1,2)}
+</textarea>
+]]>
+					</x:code>
+				</p>
+				<p>
+					基于JavaScript的扩展机制，可以轻松扩展模板语法，方便前端工程师二次开发。
+				</p>
+				<p>
+					<i>
+						关于扩展的话题，本指南有一些简单介绍：
+						<a href="syntax-extension.xhtml" />
+					</i>
+				</p>
+			</li>
+			<!--
+				<li> 强大，集各大模板系统的优点于一身 <p> <ul> <li>编码安全</li> <li>模板继承</li>
+				<li>表达式</li> <li>逻辑控制</li> </ul> </p> </li>
+			-->
+			<li>
+				<strong>功能完备，前后端统一，跨平台的实现</strong>
+				<p>Lite
+					目前拥有功能强大且成熟的Java，PHP版本，支持目前主流和一些超前的模板编程方法，并且在前端JavaScript模板上，完全拥有与后端模板同样完备的功能。你可以在PHP，Java，乃至浏览器JavaScript中随意切换。
+				</p>
+				<p>而且，因为他中间代码的设计方法，非常方便迁移到其他平台。</p>
+			</li>
+		</ul>
+	</body>
+</html>

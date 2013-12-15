@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:x="http://www.xidea.org/lite/example" xmlns="http://www.w3.org/1999/xhtml"
+	xml:lang="zh-CN" dir="ltr">
+	<head>
+		<title>表达式变量/原子值/复合值</title>
+	</head>
+	<body>
+		<h3>表达式变量和表达式字面值(Literal)</h3>
+		<ul>
+			<x:code>
+				${username || "匆匆过客"}
+			</x:code>
+		</ul>
+		<p>上例中，username 是一个表达式变量，"匆匆过客" 是一个表达式常量，罗嗦，侮辱您的智商了：（</p>
+		<h3>值类型和书写方式</h3>
+		<p>
+			Lite的值类型，我们可以简单分为
+			<strong>
+				原子类型
+				</strong>
+			和
+			<strong>复合类型</strong>
+			。
+		</p>
+		<h4>原子类型</h4>
+		<ul>
+			<p>原子类型（常被翻译成原始类型）与JavaScript类似，书写语法也完全一致。</p>
+			<ul>
+				<li>
+					String
+					<p>
+						<i>字符串的申明方式有："字符串"，'字符串'</i>
+					</p>
+				</li>
+				<li>
+					Number
+					<p>
+						<i>Number，可以以10，8，16进制等不同方式申明，默认按10进制输出，需要转换进制输出，可以调用函数，如：\${(0755).toString(16)}
+						</i>
+					</p>
+				</li>
+				<li>
+					Boolean
+					<p>
+						<i>模板中Boolean值的输出，与JavaScript中一致，直接输出true，false。</i>
+					</p>
+				</li>
+				<li>
+					null
+					<p>
+						<i>模板中null值的输出，与JavaScript一致，直接输出null，而不是大多数模板系统中的不输出。</i>
+					</p>
+				</li>
+			</ul>
+		</ul>
+		<h4>复合类型</h4>
+		<ul>
+			<p>Lite 表达式中，复合类型支持有序系列（数组）和键值集合两种，书写语法与JavaScript 的数组和对象申明完全一致</p>
+			<ul>
+				<li>
+					有序系列:
+					<p>
+						可以通过javascript数组语法申明有序系列：
+						<x:code>${[1,2,3,4,5,'txt'].join('|')}</x:code>
+						<i>在JavaScript表现有数组，在Java中表现有数组，List，Collection等；PHP中表现有数组。</i>
+					</p>
+				</li>
+				<li>
+					键值集合：
+					<p>
+						可以通过javascript对象语法申明键值集合：
+						<x:code>
+						<![CDATA[
+						<c:var var="ampmMap" value="${  {AM:'上午',PM:'下午'}  }"/>
+						]]>
+						</x:code>
+						<i>在JavaScript表现有Object, 在Java中表现有Map，JavaBean；PHP中表现有关联数组。</i>
+					</p>
+				</li>
+			</ul>
+		</ul>
+	</body>
+</html>

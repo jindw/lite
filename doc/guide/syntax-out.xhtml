@@ -1,0 +1,114 @@
+<html xmlns:x="http://www.xidea.org/lite/example" xmlns="http://www.w3.org/1999/xhtml"
+	xml:lang="zh-CN" dir="ltr">
+	<head>
+		<title>输出语法</title>
+	</head>
+	<body>
+		<h3>功能支持</h3>
+		<ul>
+			<li>表达式输出
+				<p>将模板变量或表达式运算值按照指定规则输出。</p>
+			</li>
+			<li>日期格式化输出
+				<p>一种跨平台统一的日期格式化模式：<a href="syntax-date.xhtml" />。</p>
+			</li>
+		</ul>
+		<h3>表达式输出</h3>
+		<p>
+			输出动态数据是模板最基本的功能，Lite可以将表达式的值，通过如下三种方式输出：</p>
+		<ul>
+			<li>
+				<strong>HTML/XML自动编码输出（\${...}）。</strong>
+				<p>
+					在HTML/XML文本中，为了确保代码安全性， XML保留字符
+					<strong>(&lt;&amp;)</strong>
+					和属性中的
+					<strong>(")</strong>
+					都将被自动转义；
+				</p>
+				<p>
+					脚本/资源地址中的表达式，将自动加上JSON.stringify和encodeURIComponent。
+					</p>
+				<p>
+					关于自动编码的详细介绍，请参考：
+					<a href="feature-autoencode.xhtml">自动编码特性介绍</a>
+				</p>
+				<p>
+					自动编码的表达式，如果是属性的单一值，他还具备一个隐含的特设功能：条件属性输出！
+					<i>
+						<p>
+							在XML 属性中，如果属性值为单一表达式且运行时表达式值为
+							<strong>null</strong>，则整个属性不输出，否则自动按xml属性的编码规则(&lt;&amp;和
+							<strong>"</strong>
+							)，编码XML属性内容并输出。
+
+							这点在html 定值属性（如：disabled/checked/selected/...）输出时非常有用。
+						</p>
+					</i>
+				</p>
+
+			</li>
+			<li>
+				<strong>避免过度转义的安全输出（\$#{...}）。</strong>
+				<p>有的时候，特别是老的GBK中文环境下，我们数据库中存储有字符实体(如：&amp;#0x7C21;&amp;#0x7E41;);
+					默认的自动编码输出，在这些数据的输出展现的时候，不能直接用完全编码输出的方式。</p>
+			</li>
+			<li>
+				<strong>XSS风险自负的直接输出（\$!{...}）。</strong>
+				<p>慎用！！！</p>
+			</li>
+		</ul>
+		<h3>日期格式化输出语法</h3>
+		<p>
+			该详细功能请参考独立文档：<a href="syntax-date.xhtml" />
+		</p>
+				
+		<h3>示例</h3>
+		<ul>
+			<x:code var="blogModel">
+			<![CDATA[
+					{
+						author:{
+							//百度曾碰到过的严重xss漏洞。用户名带有关键字，导致该用户去哪哪瘫痪！
+							username:'危险分子 <script>',
+							//打破属性规则，插入危险代码
+							title:'坏蛋！ " onclick="alert(\'插入危险代码成功!!\')',
+							disabled:false
+						},
+						blog:{
+							'title':'html特殊字符：&<"',
+							'content':'lite应该怎么自动编码这些特殊字符呢？'+
+									'XML特殊字符有两个:&<，加上属性括弧",一共三个'+
+									'（LiteXML属性括弧一律自动转化为"）；'+
+									'只要编码好这些特殊字符，用户就很难插入危险代码了。\n\n'+
+									'但是，有的时候，特别是老的GBK中文环境下，我们数据库中存储有字符实体，比如：&#0x7C21;&#0x7E41;&#0x6F22;&#0x5B57;。'+
+									'我们还要让这些字符实体不过度转义。'
+						}
+					}
+			]]>
+			</x:code>
+
+			<x:code model="blogModel">
+			<![CDATA[
+			<!-- 自动编码，免遭一劫 -->
+			<span class="user" title="${author.title}">${author.username}</span>
+			
+			....
+			<!-- 条件属性就是方便（如果属性值为null，则整个属性不输出） -->
+			<input type="submit" value="发表留言" disabled="${author.disabled||null}"/>
+			
+			
+					
+			<!-- ${blog.title} 将按属性规则编码，确保不打破属性语义。 -->
+			<!-- ${blog.content} 将按属性xml文本编码，确保不被插入危险标签。 -->
+			<p title="${blog.title}">${blog.content}</p>
+			<!-- 避免过度转义： 网开一面的$#{...} 语法！-->
+			<p title="${blog.title}">$#{blog.content}</p>
+			
+			<!-- 不建议的危险代码 ,用户可以为所欲为，插入任意代码了！-->
+			<p title="$!{blog.title}">$!{blog.content}</p>
+			]]>
+			</x:code>
+		</ul>
+	</body>
+</html>

@@ -1,0 +1,72 @@
+<html xmlns:x="http://www.xidea.org/lite/example" xmlns="http://www.w3.org/1999/xhtml"
+	xml:lang="zh-CN" dir="ltr">
+	<head>
+		<title>自动HTML/XML编码</title>
+	</head>
+	<body>
+		<h3>功能支持</h3>
+		<ul>
+			<li>url参数自动编码</li>
+			<li>javascript变量自动编码</li>
+			<li>普通XML文本自动编码</li>
+			<li>普通XML属性自动编码</li>
+		</ul>
+		<p>Lite 模板系统能够根据模板的语言上下文，自动作出合理的编码，从源头杜绝XSS漏洞和不规范的代码书写方式。</p>
+		<p>
+			具体功能上将遵从如下六条规则
+			<ul>
+				<li>
+					普通的XML/HTML文本将按XML文本规则编码：必须编码
+					<strong>&amp;&lt;</strong>
+					两个XML特殊字符
+				</li>
+				<li>
+					普通的XML/HTML属性将按XML属性规则编码：必须编码
+					<strong>&<"</strong>
+					三个XML特殊字符（所有XML属性将自动规范为" 做为属性引号！）
+				</li>
+				<li>src,href,form@action等，属性中出现的模板变量，将先做自动url编码（encodeURI），再做html属性编码
+				</li>
+				<li>on* (事件脚本) 中出现的模板变量，将先做JSON.stringify 编码再做XML属性编码</li>
+				<li>script 中出现的模板变量，将做JSON.stringify
+					编码（script默认自动增加CDATA，所有不做XML编码）。</li>
+				<li>&lt;[CDATA[段，将不做XML编码，script节点将自动加上必要的CDATA段 </li>
+			</ul>
+		</p>
+		<h3>用法示例</h3>
+		<ul>
+
+			<x:code var="htmlxmlModel">
+					<![CDATA[
+					{
+						title:"特殊字符\"&&lt;",
+						url:"http://www.xidea.org/lite?test=测试#1234",
+						content:"危险代码&lt;script>alert(\"想做点坏事，能得逞吗？\") &lt;\/script>",
+						"disabled":null,
+						data:{p1:"属性1",p2:"属性2"}
+					}
+					]]>
+			</x:code>
+			<x:code model='htmlxmlModel'>
+					<![CDATA[
+					<!-- javascript自动编码(JSON.stringify) -->
+					<div onclick="alert(${content})">...</div>
+					<!-- URL 自动编码(encodeURI) -->
+					<a href="${url}">encodeURI转义</a>
+					<!--IE amp 问题 -->
+					<a href="?amp_1=${data.p1}&amp_2=${data.p2}&amp_p3=${'中文自动编码'}">...</a>
+					<!-- xml/html自动编码  -->
+					<p title="${title}">${content}</p>
+					<script>
+						//script 中的内容将自动放到CDATA块中，其内容不做自动编码
+						if(content.length<10){
+							alert(content.length);
+						}
+						alert(${content})
+					</script>
+					]]>
+			</x:code>
+
+		</ul>
+	</body>
+</html>

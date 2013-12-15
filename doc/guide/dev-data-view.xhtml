@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html
+	xmlns:x="http://www.xidea.org/lite/example"
+	xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-CN" dir="ltr">
+	<head>
+		<title>扩展数据模型调试器</title>
+	</head>
+	<body>
+		<h3>工作原理</h3>
+		<p>lite 的数据模型调试器基于服务端模板的调试cookie支持,我们通过LITE_DEBUG cookie 控制当前页面是否只显示为模板数据调试窗口。</p>
+		<p>这个数据调试窗口,我们可以加上诸多模板调试的功能.</p>
+		<p>而且,我们可以在这个窗口中插入一段我们自己编写的javascript代码,用来控制该视图.</p>
+		<p>待续.....</p>
+		<h3>如何扩展</h3>
+		<ul>
+			<li>重写DataView.render 方法
+			<x:code><![CDATA[
+			var defaultRender = DataView.render;
+			DataView.render = function(){
+				//在原有render之前打印一些样式如何?
+				document.write('<style>html body{background-color:red}</style>');
+				//别忘了运行默认的渲染器,除非你想自己完全控制代码调试界面
+				defaultRender.apply(this,arguments);
+				//在后面添加两个按钮吧?
+				document.write("<input type='button' value='测试' onclick=\"alert('hello world')\"/>");
+			}	
+			]]></x:code>
+			</li>
+			<li>覆盖DataView其他行为方法</li>
+			<li><p>待续.....</p></li>
+		</ul>
+	</body>
+</html>

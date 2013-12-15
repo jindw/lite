@@ -1,0 +1,109 @@
+<html xmlns:x="http://www.xidea.org/lite/example" xmlns="http://www.w3.org/1999/xhtml"
+	 dir="ltr">
+	<head>
+		<title>循环语法</title>
+	</head>
+	<body>
+		<h3>功能支持</h3>
+		<p>
+			Lite模板循环控制分四种情况：
+			<ul>
+				<li>对数组的循环。</li>
+				<li>对键值集合的键集循环（类js 的for in 语法）。</li>
+				<li>指定循环次数的循环。</li>
+				<li>指定循环区间的循环。</li>
+			</ul>
+			此外，Lite循环还有一个特色，
+			<strong>循环的空处理</strong>
+			（c:else 语法,见<a href="#forElse">示例2</a>）：
+		</p>
+		<p>
+			如果您希望得到循环状态信息，有一个for关键字可以帮你。
+		</p>
+		<h3>示例1（四种循环类型）</h3>
+		<ul>
+		
+		<x:code model="{}">
+		<![CDATA[
+			<label>时间：</label>
+			<!-- 最常见的是对数组循环 -->
+			<select name="year">
+				<c:for var="year" list="${[1981,1982,1983]}">
+					<option>${year}</option>
+				</c:for>
+			</select>年
+			<!-- 您还可以指定区间循环(偷个懒，还是属性模式简单,效果与标签模式一样)-->
+			<select name="month">
+				<option c:for="${month:[1..12]}">${month}</option>
+			</select>月
+			<!-- 您也可以对数字循环，数字循环的时候，var变量从1开始 -->
+			<select name="date">
+				<option c:for="${date:31}">${date}</option>
+			</select>日
+			<!-- 先申明一个循环对象 -->
+			<c:var name="apMap" value="${ {'AM':'上午','PM':'下午'} }"/>
+			<!-- 您还可以对对象key循环 -->
+			<select name="ap">
+				<c:for var="ap" list="${apMap}">
+					<option value='${ap}'>${apMap[ap]}</option>
+				</c:for>
+			</select>
+		]]>
+		</x:code>
+		</ul>
+		<a name="forElse"/>
+		<h3>示例2（循环空处理和for状态字）</h3>
+		<ul>
+			<x:code var="resultJsonModel">
+			{
+				"result":[
+					{"name":"张三","age":21},
+					{"name":"李四","age":22},
+					{"name":"王二","age":23}
+				]
+			}
+			</x:code>
+		<x:code model='resultJsonModel'>
+		<![CDATA[
+		<c:for var="item" list="${result}" status="outerFor">
+			<!-- 这里 ${for.dataFor} 等价于 ${outerFor.index} -->
+			<div>第${for.index}条数据属性值为：</div>
+			<div>
+				<p c:for="${key:item}">
+					第${outerFor.index}条数据的第${for.index}个属性，属性名：${key}；属性值：${item[key]}
+				</p>
+			</div>
+		</c:for>
+		<c:else>
+			<p>没有数据</p>
+		</c:else>
+		]]>
+		</x:code>
+		<p>
+			for 做为一个关键字，只包含两个属性 index 和lastIndex；在循环内不需要申明可以直接使用。
+			在循环嵌套的时候，for 关键字指向的是自己直接所在的循环的状态。
+		</p><p>
+			如果想在自循环中使用外部循环的状态，可以申明 status 别名，这样外部for循环状态将就在意在任意位置通过这个别名获取。
+		</p>
+		</ul>
+		<h3>示例3（反向循环，跳跃循环）</h3>
+		<ul>
+			<x:code model="{list:[1,2,3,4]}">
+			<![CDATA[
+			<!-- 通过数据的reverse 函数实现数组逆转
+				（reverse为有副作用的函数，为了消除副作用，需要concat复制后调用） -->
+			<c:for var="item" list="${list.concat().reverse()}">
+				<p>${item}</p>
+			</c:for>
+			
+			<!-- 对数组的偶数位循环 -->
+			<c:for var="item" list="${list}">
+				<p c:if="${(for.index+1)%2}">
+					${item}
+				</p>
+			</c:for>
+			]]>
+			</x:code>
+		</ul>
+	</body>
+</html>

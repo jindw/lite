@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html
+	xmlns:x="http://www.xidea.org/lite/example"
+	xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-CN" dir="ltr">
+	<head>
+		<title>表达式操作和函数</title>
+	</head>
+	<body>
+		<h3>操作符</h3>
+		<a name="op"/>
+		<p>Lite 模板操作符语义与JavaScript保持一致。支持主要的JavaScript运算符，包括:</p>
+		<ul>
+			<li>取属性: . []
+				<p><i>[] 一般用来取数组元素，如：\${array[0]}; </i></p>
+				<p><i>. 一般用来取对象属性，如：\${str.length}，这种情况也可以用下标语法\${str['length']}；两个运算符语义相同。</i></p>
+			</li>
+			<li>加(数值加和字符串连接)减乘除、取模：+ - * / %
+				<p><i>与JavaScript语义完全一致，+运算同时可以做数值加减和字符串连接，当操作数中有字符串时，采用字符连接语义。</i></p>
+			</li>
+			<li>比较运算：&lt; &lt;= > >= == != === !== 
+				<p><i>与JavaScript语义完全一致！</i></p>
+			</li>
+			<li>正/负/非/ + -  !
+				<p><i>与JavaScript语义完全一致！</i></p>
+			</li>
+			<li> 逻辑与 或 ：&amp;&amp;,|| ； 条件运算：test?a:b
+				<p><i>与JavaScript语义完全一致，&amp;&amp;||运算同时具有条件运算功能。
+				例如：
+				<x:code model="{a:0,b:'b',user:{name:null}}">
+				<![CDATA[<textarea>
+				<!-- 输出 str -->
+				${false||'str'}
+				<!-- 输出  true-->
+				${true||'str'}
+				<!-- 如下两个语法是等价的 -->
+				${a ? a : b} 等价于： ${a || b}
+				${user.name ? user.name : '匆匆过客'} 等价于 ${user.name || '匆匆过客'} 
+				</textarea>]]>
+				</x:code> 
+				</i>
+				
+				</p>
+				<p>
+				这三个表达式中，有一个要点：Boolean规则，这点上，Lite语法设计与JavaScript完全一致。</p>
+				<p><strong>只有 false,null,0,'' 四个值是false</strong>，其他都是真（包括空数组，空对象都是真值）。
+				</p>
+			</li> 
+		</ul>
+		<hr/>
+		<p title="一些不常用的JavaScript操作符">看在JavaScript的面子上，也支持位运算^_^</p>
+		<ul>
+			<li style="color:#CCC;" title="不常用">其他：&amp; 按位与 ,^ 按位异或 ,| 按位或, ~ 按位取反, 移位>>,>>>,&lt;&lt; </li>
+		</ul>
+		<p>但是还有如下两类操作符不予支持</p>
+		<ul style="color:#CCC;text-decoration:line-through">
+			<li>不支持对模板值有影响的操作符号，如赋值(=)，自增，自减(++,--,*=3,%=2...)等;</li>
+			<li>以及所有以字符为运算标识的操作符(delete,new,in,typeof,instanceof,...)</li>
+		</ul>
+		<h3>函数调用</h3>
+		<p>Lite 模板支持成员方法和普通函数两种函数调用方式。</p>
+		<p>其中成员方法包括标准JavaScript对象的成员方法，这些函数一般是模板系统内置。
+		<x:code model="{}">
+		<![CDATA[
+			${"abc".substring(1,2)}
+			${[1,2,3,4].join('|')}
+			${(1000).toString(16)}
+		]]>
+		</x:code>
+		</p>
+		<p>普通函数包括部分内置的JavaScript标准全局函数，同时模板中自定义的函数，也属于这一类型，调用方法完全一致（查看<a href="syntax-def.xhtml">函数定义语法参考</a>）。
+		<x:code model="{}">
+		<![CDATA[
+			${encodeURIComponent("汉字")}
+			${parseInt("100个")}]]>
+		</x:code>
+		</p>
+		<p>系统内置了JavaScript的大部分标准函数，详细情况请查看:<a href="el-function.xhtml"/>
+		</p>
+	</body>
+</html>

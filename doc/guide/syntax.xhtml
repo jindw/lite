@@ -1,0 +1,48 @@
+<html xmlns:x="http://www.xidea.org/lite/example" xmlns="http://www.w3.org/1999/xhtml"
+	xml:lang="zh-CN" dir="ltr">
+	<head>
+		<title>Lite语法概述</title>
+	</head>
+	<body>
+		<p>
+			Lite基本语法，命名为LiteXML，是一个基于XML的基本模板语法聚合，包括最基本的模板功能。 
+		</p>
+		<h3>LiteXML主要功能有</h3>
+		<ul>
+			<li><strong>输出语法</strong>
+				<p>表达式输出默认是自动编码的。其中属性的输出还隐含一个条件控制。</p>
+				<p><i>详情见：<a href="syntax-out.xhtml"/></i></p>
+			</li>
+			<li><strong>条件控制</strong>
+				<p>条件控制包含 <c:if/<c:else; <c:choose/<c:when 。两种书写风格 </p>
+				<p><i>详情见：<a href="syntax-if.xhtml"/>、<a href="syntax-choose.xhtml"/></i></p>
+			<p></p>
+			</li>
+			<li><strong>循环控制</strong>
+				<p>for 循环可以同时实现对 数组，对象(Map),和数字三种实体循环。</p>
+				<p><i>详情见：<a href="syntax-for.xhtml"/></i></p>
+			</li>
+			<li><strong>函数/变量申明</strong>
+				<p>通过 <c:var 语法申明变量、<c:def 语法申明函数。</p>
+				<p><i>详情见：<a href="syntax-var.xhtml"/>、<a href="syntax-def.xhtml"/></i></p>
+			<p></p>
+			</li>
+			<li><strong>模板继承</strong>
+				<p>通过  c:extension 语法实现模板继承,他不仅可以实现页面的继承，还能实现页面元素的继承。</p>
+				<p><i>详情见：<a href="syntax-extension.xhtml"/></i></p>
+			</li>
+			<li><strong>静态包含</strong>
+				<p>通过  c:include语法实现模板包含（不能包含不完整的节点片段），而且配合xpath，可以实现页面片段的包含。</p>
+				<p><i>详情见：<a href="syntax-include.xhtml"/></i></p>
+			</li>
+			<li><strong>前端模板</strong>
+				<p>同时支持前端模板是lite模板引擎的一大亮点。</p>
+				<p><i>详情见：<a href="syntax-client.xhtml"/></i></p>
+			</li>
+			<li><strong>自己扩展</strong>
+				<p>如果你觉得这些还不够用，那你就自己扩展吧。</p>
+				<p><i>详情见：<a href="syntax-extension.xhtml"/></i></p>
+			</li>
+		</ul>
+	</body>
+</html>

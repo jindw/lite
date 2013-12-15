@@ -1,0 +1,53 @@
+<html xmlns:x="http://www.xidea.org/lite/example" xmlns="http://www.w3.org/1999/xhtml"
+	xml:lang="zh-CN" dir="ltr">
+	<head>
+		<title>自动表单填充</title>
+	</head>
+	<body>
+		<h3>功能支持</h3>
+		<p>
+			<ul>
+				<li>select的自动选中
+					<p>在option 有selected 属性的时候，不做自动填充。</p>
+					<p>当select 没有multiple属性的时候，当且仅当name所对应的值与当前option对应的值渲染的字符串一致是，设置selected="selected"</p>
+					<p>当select 有multiple属性的时候，循环name所在的值，如果有与当前option value 字符串相等，则设置selected="selected"</p>
+				</li>
+				<li>textarea的自动填充
+					<p>当textarea 没有内容的时候，自动设置内容为：\${&lt;INPUT_NAME>}</p>
+				</li>
+				<li>普通input的自动填充
+					<p>这个比较简单，当autoform开启状态下，且input 没有指定value属性，且type!= image||radio||checkbox时，value自动设置为\${&lt;INPUT_NAME>}</p>
+				</li>
+				<li>radio/checkbox 的自动勾选
+					<p>实现方式与select option 的mutiple 和非mutiple相似。</p>
+				</li>
+			</ul>
+		</p>
+		<h3>用法示例</h3>
+		<ul>
+		
+		<x:code var="autoformModel">
+			<![CDATA[
+			{
+				title:"特殊字符\"&&lt;",
+				cityList:["北京","杭州","上海"],
+				user:{name:"金大为",city:"杭州",married:true}
+			}
+			]]>
+		</x:code>
+		<x:code model="autoformModel">
+		<![CDATA[
+		<!-- 自动表单填充 -->
+		<form h:autoform="true">
+			大名：<input name="user.name" type="text"/>
+			城市：<select name="user.city">
+					<option c:for="${city:cityList}">${city}</option>
+				</select>
+			婚否： <input name="user.married" type="radio" value="true"/>是
+				  <input name="user.married" type="radio" value="false"/>否
+		</form>
+		]]>
+		</x:code>
+		</ul>
+	</body>
+</html>

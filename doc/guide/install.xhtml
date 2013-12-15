@@ -1,0 +1,132 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:c2="http://www.xidea.org/lite/core"
+	xmlns:x="http://www.xidea.org/lite/example" xml:lang="zh-CN" dir="ltr">
+
+	<head>
+		<title>入门指南 </title>
+	</head>
+	<body>
+		<h3>Lite模板如何安装</h3>
+		<p>Lite 目前拥有Java，PHP，NodeJS三种成熟的服务端运行环境。</p>
+		<p>Lite设计为跨平台效果一致，可以用JSON模拟后台数据在任何平台上测试， 为了简化环境搭建，Lite有一个模板测试专用服务器，直接通过webstart启动。</p>
+		<p>
+			WebStart地址：
+			<a href="http://www.xidea.org/webstart/JSide.jnlp" />
+		</p>
+		<i>
+			这是一个Java WebStart 程序，需要Java5+。安装了Java5的同学可以直接点击链接运行，否则先安装JRE吧：
+		</i>
+		<p>
+			当能如果你有心自己搭建Apache +PHP 或者Tomcat, 或者 NodeJS，这也是允许的
+			[
+			<a href="#" onclick='showNext(this,this.parentNode,"展开安装说明","隐藏安装说明");return false'>隐藏安装说明</a>
+			]。
+		</p>
+		<ul style="display:block">
+			<li>
+				Java环境搭建
+				<p>
+					下载<a href="http://code.google.com/p/lite/downloads/list">Lite-YYYYMMDD.jar</a> 将其存放在WEB-INF/lib中。
+					在WEB-INF/web.xml中增加配置 <strong title="class name=org.xidea.lite.servlet.TemplateServlet">servlet</strong>
+					和  <strong title="一般配置为*.xhtml">servlet-mapping</strong>。
+				[
+					<a href="#" onclick='showNext(this,this.parentNode,"展开web.xml(Java)","隐藏web.xml(Java)");return false'>展开web.xml(Java)</a>
+				]</p>
+				<div style="display:none">
+					<x:code>
+					<![CDATA[
+<web-app xmlns="http://java.sun.com/xml/ns/j2ee" version="2.4">
+	<!-- base info  略.... -->
+	<!-- servlet info -->
+	<servlet>
+		<servlet-name>LiteXML</servlet-name>
+		<servlet-class>org.xidea.lite.servlet.TemplateServlet</servlet-class>
+		<!-- debug support config -->
+		<init-param>
+			<param-name>debugService</param-name>
+			<param-value>/.debug.xhtml</param-value>
+		</init-param>
+	</servlet>
+	<!-- servlet mapping info -->
+	<servlet-mapping>
+		<servlet-name>LiteXML</servlet-name>
+		<url-pattern>*.xhtml</url-pattern>
+	</servlet-mapping>
+	<!-- other info 略.... -->
+	
+</web-app>
+					]]></x:code>
+				</div>
+			</li>
+			<li>
+				php环境搭建
+				<p>下载<a href="http://code.google.com/p/lite/downloads/list"> php-example-YYYYMMDD.zip</a>。
+				直接解压到能运行PHP的网站目录中即可运行(浏览example目录下的test.php文件，如果服务器超时时间太短，第一次可能无法正确输出，刷新就好了)</p>
+			</li>
+			<li>
+				NodeJS环境搭建<a name="nodejs"/>
+				<ul>
+					<li>安装：<x:code> npm install lite</x:code>
+						<p><i>如果被墙了，也可手动下载<a href="http://code.google.com/p/lite/downloads/list"> nodelite-YYYYMMDD.tgz</a>，解压到当前目录的node_modules/目录下完成安装</i></p>
+					</li>
+					<li>简单测试:
+						<x:code>
+//启动测试服务器， 直接浏览模板，模板的同名json即模拟数据。
+new (require('lite').LiteEngine)('./').	startTestServer("127.0.0.1",1985);
+						</x:code>
+					</li>
+					<li>代码示例：
+						<x:code>
+						<![CDATA[
+var LiteEngine = require('lite').LiteEngine;
+var root =__dirname;
+var liteEngine = new LiteEngine(root);
+.....
+	// 传入模板路径(以'/'开头)，模型对象(Object描述的key->value集)，
+	// response 对象:用于模板渲染时输出 head(response.writeHead())/内容(response.write())
+	// 并结束请求(response.end())
+	liteEngine.render(path,data,response);
+	//传入模型生成函数，用于提前输出静态内容(如script标签)，优化加载性能。
+	liteEngine.render(path,callback,response);
+		
+						]]>
+						</x:code>
+					</li>
+				</ul>
+				
+			</li>
+			<li>
+				<strong>开发期间强烈建议实用调试服务器开发测试.</strong>
+			</li>
+		</ul>
+		<h3>如何配置</h3>
+		<p>
+			如果你采用的是UTF-8编码,那么你一般可以忽略掉Lite的配置(系统默认值).
+			如果您希望自定义一些信息(最常见的是 ContentType输出), 那么您需要手写lite.xml文件.
+			<x:code><![CDATA[
+			<lite encoding="utf-8">
+				<group contentType="application/wml;charset=utf-8">
+					<include>/*.wml</include>
+				</group>
+				<!-- contentType 默认值: contentType="text/html;charset=utf-8" -->
+				<group layout="/doc/guide/layout.xhtml">
+					<include>/doc/guide/*.xhtml</include>
+					<include>/doc/guide/*test*</include>
+				</group>
+				<group>
+					<include>/*.xhtml</include>
+				</group>
+			</lite>]]>
+			</x:code>
+			<p>匹配规则为: 分组匹配, 匹配即退出, 后续分组再配置也无效, 属性可从上级节点继承.</p>
+			<p>遍历文件时, 先 include 决定是否可能匹配, 再用exclude排除, 得出该文件最终是否匹配改组.</p>
+		</p>
+		<h3>调试环境如何使用</h3>
+		<p>
+			启动测试服务器后，有一个Lite Logo 半透明最前端显示在桌面右下角（允许拖拽），您可以选择需要测试的网站目录。选中目录后直接拖放至Logo窗口上。测试服务器自动切换网站目录，一个新的测试网站就搭建起来了。
+		</p>
+		<p>
+			从窗口上右键菜单中点击浏览网站，在文件列表上方有一个工具栏，从中选择部署Lite示例，系统将自动部署一批比较典型的Lite模板示例。
+			部署后，直接点击文件列表中的模板文件，即可自动浏览。
+		</p>
+	</body>
+</html>

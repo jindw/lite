@@ -1,0 +1,33 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:c2="http://www.xidea.org/lite/core"
+	xmlns:x="http://www.xidea.org/lite/example" xml:lang="zh-CN" dir="ltr">
+
+	<head>
+		<title>数据调试 </title>
+	</head>
+	<body>
+		<h3>查看数据模型</h3>
+		<ul>
+			<li>查看调试服务器模拟数据
+			
+				<p>在使用该功能之前,用户需要先收藏一个javascript执行链接(建议放在你浏览器的书签工具栏中):
+				 <a title="您可以点击一下试试^_^" href="javascript:document.cookie='LITE_DEBUG=model;expires='+new(Date)(+new(Date)+1000).toGMTString();location.reload()">查看模板数据</a></p>
+				<p>Lite 数据模拟和测试环境基于一种cookie通讯的机制.
+					如果用户需要检查某个网页, 先手动点击一个这个javascript链接浏览器就会展现一个基于JSON的数据查看视图.
+				</p>
+			</li>
+			<li>查看线上真实数据
+				<p>同样的功能也可以用在线上环境中. 但是需要确保数据调试模式是开启的状态, 默认情况下他根据您是否与服务器处在同一个局域网来设置。也就是说，如果你通过你服务器的局域网ip地址进去，就可以只针对你启用该功能。</p>
+			</li>
+		</ul>
+		<h3>修改数据模型</h3>
+		<ul>
+			<li>修改调试服务器模拟数据
+				<p>上面说的数据查看视图中,带有一系列工具按钮,如:刷新编译缓存,查看模板源码,修改数据模型等等</p>
+				<p>你可以修改大文本框中的json数据源, 点击测试模拟数据, 就可以看到数据修改之后的效果.</p>
+			</li>
+			<li>线上环境模拟数据
+				<p>同上,默认通过是否局域网ip地址来决定是否开启上述功能.</p>
+			</li>
+		</ul>
+	</body>
+</html>

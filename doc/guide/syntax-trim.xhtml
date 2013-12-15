@@ -1,0 +1,87 @@
+<html xmlns:x="http://www.xidea.org/lite/example" xmlns="http://www.w3.org/1999/xhtml"
+	xml:lang="zh-CN" dir="ltr">
+	<head>
+		<title>注释/语法空格控制</title>
+	</head>
+	<body>
+		<h3>功能支持</h3>
+		<p>
+			<ul>
+				<li>h:trim 语法与textarea/pre
+					<p>通过h:trim 属性（或者标签）指定如何清理语法空白，这个属性有三个可选参数：
+						<ul>
+							<li>true
+								<p>清理全部Text节点的前后空白，并将中间连续的空白变成仅有一个空白。</p>
+							</li>
+							<li>false
+								<p>安全的清理方式，值清理Text节点前后连续空白，且不完全清理，至少保留一个。</p>
+							</li>
+							<li>null
+								<p>不清理，保留全部空白，textarea pre 节点下，该设置会自动开启（他们都需要默认保留全部空白）。</p>
+							</li>
+						</ul>
+					</p>
+				</li>
+				<li>XML/HTML注释
+					<p>一般情况下，XML注释会自动当做模板注释被忽略掉(IE 条件注释除外)。</p>
+				</li>
+				<li>IE HTML条件注释
+					<p>IE 的条件注释中的内容，会单独当普通模板标签编译，所以，需要<strong title="做事情要有始有终的！">配对编写</strong>，否则将编译失败。</p>
+					<p>关于条件注释的详细介绍，请参考秦歌的这篇blog:</p>
+					<i><a href="http://dancewithnet.com/2006/06/06/ie-conditional-comments/"/></i>
+				</li>
+			</ul>
+		</p>
+		<h3>用法示例</h3>
+		<ul>
+		<x:code model="{}">
+		<![CDATA[
+		<html>
+		<body>
+		<!-- 这个注释会自动清理 -->
+		<!--[if IE 5]>
+			<p>IE 条件注释不能清理</p>
+			<p>但是你必须保证注释内的标签是完整的，不能有始（开始节点）无终（关闭节点）或者有终（关闭节点）无始（开始节点）</p>
+		<![endif]-->
+		
+		<!--[if IE9]><!-->
+			<p>IE 9 或者非IE展示此行</p>
+		<!--<![endif]-->
+		</body>
+		</html>
+		]]>
+		</x:code>
+		<br/><br/>
+		<x:code model="{}">
+		<![CDATA[
+		<!-- 从根节点上设置一个trim规则（全删除） -->
+		<html h:trim="true">
+			<!-- 这里多余的语法空白都会删除 -->
+			<head>
+				<title>test</title>
+			</head>
+			<body>
+				<p>中间的十个空格          也会压缩成一个</p>
+				<textarea>
+					这里的    语法空白会强制保留。
+				</textarea>
+				
+				<!-- textarea pre 外面都会因为html 设置了trim而全部删除 -->
+				<pre>
+					aa     bb
+				</pre>
+				
+				<p h:trim="null">
+					开辟了一块自留地，这里的空格将按默认规则，只压缩首尾多余的空格（连续两个或以上）
+				</p>
+				
+				<p h:trim="false">
+					再开辟一块自留地，这里的空格会全部保留。
+				</p>
+			</body>
+		</html>
+		]]>
+		</x:code>
+		</ul>
+	</body>
+</html>

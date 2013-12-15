@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html
+	xmlns:x="http://www.xidea.org/lite/example"
+	xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-CN" dir="ltr">
+	<head>
+		<title>初学者建议</title>
+	</head>
+	<body>
+		<h3>先悟透XML</h3>
+		<p>Lite XML 模板语法最大的特点是，她是基于HTML/XML的语法结构的模板语法，不是文本类型的模板语法。</p>
+		
+		<h3>放下字符串拼接的思维</h3>
+		<p>
+			在Lite XML 模板语法中，每一段输出都是一个有意义的语法单元。
+			我们不能以传统的字符串拼接的思维来看待Lite XML 否则，你会很困惑。
+			<ul>
+			<strong>示例1：</strong>
+			<x:code><![CDATA[
+			<div class="logo" title="${null}"/>
+			-------------------
+			输出是：
+			<div class="logo"></div>
+			而不是：
+			<div class="logo" title="null"/>
+			]]></x:code>
+			</ul><ul>
+			<strong>示例2：</strong>
+			<x:code><![CDATA[
+			<div onclick="alert('您好：'+${'匆匆过客'})"/>
+			-------------------
+			输出是：
+			<div onclick="alert(&#34;您好&#34;+&#34;匆匆过客&#34;)"></div>
+			而不是：
+			<div onclick="alert('您好：'+匆匆过客)"/>
+			]]></x:code>
+			</ul>
+		</p>
+		<h3>体验至上</h3>
+		<p>
+			如果要完全遵循XML 规范，其实并不是一件很愉快的事情， 为了提高使用体验，我们做了适当的XML容错。
+			容错之后， & &lt; 等XML 特殊字符，在不产生歧义的情况下，是可以兼容的。
+			<!-- 
+			<c:var name="a" value="${1}"/>
+			<c:var name="b" value="${1}"/>
+			${a<b-123}
+			<p><i>  常见于表达式中，建议表达式操作符，前后始终保留一个空格， 一避免可能的歧义。(\${a &lt;b>c} 中，&ltb> 就容易错误理解为一个b标签，加上空格就不会了 ) </i></p>
+			 -->
+			 <ul>
+			 <x:code><![CDATA[
+			 	<!-- <&容错处理 -->
+			 	<c:if test="${a<b && c>d}">test</c:if>
+			 	<!--  br hr img 免闭合容错 -->
+			 	<div>
+			 		<img src="/static/img/logo.png">
+			 		<br><hr>
+			 	</div>
+			 ]]></x:code>
+			 </ul>
+		</p>
+		<h3>不要打破XML语法结构</h3>
+		<p>
+			习惯了Smarty，Velocity等文本模板系统的同学，一定还记得那种直接从文本层面控制输出结构的痛快与刺激。
+			这些在LiteXML 中是很不推荐，也较难实现的。
+			<ul>
+			<strong>文本语法的自由</strong>
+			<x:code model="{list:[1,2,3,4]} "><![CDATA[
+			<code>
+				$for{item:list}
+				
+				$if{for.index == 0}<div>第一条数据： ${item},
+				$else{for.index == for.lastIndex}最后一条数据：${item}</div> 
+				$else$第${for.index+1}条数据：${item},$end$
+				
+				$end$
+			</code>
+			]]></x:code>
+			</ul>
+			<p>但是，这种语法是很难阅读和维护的，所以。LiteXML中，极不推荐这种做法。</p>
+			<strong>无法通过的Lite XML 语法</strong>
+			<ul>
+			<x:code model="{list:[1,2,3,4]}" error="true"><![CDATA[
+				<c:for var="item" list="${list}">
+					<c:if test="${for.index == 0}">
+						<div>第一条数据： ${item},
+					</c:if>
+					<c:else test="${for.index == for.lastIndex}">
+						最后一条数据：${item}</div> 
+					</c:else>
+					<c:else>
+						第${for.index+1}条数据：${item},$end$
+					</c:else>
+				</c:for>
+			]]></x:code>
+			</ul>
+		</p>
+	</body>
+</html>

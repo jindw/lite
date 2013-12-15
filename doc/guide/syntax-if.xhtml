@@ -1,0 +1,80 @@
+<html xmlns:x="http://www.xidea.org/lite/example" xmlns="http://www.w3.org/1999/xhtml"
+	xml:lang="zh-CN" dir="ltr">
+	<head>
+		<title>条件判断：if/else </title>
+	</head>
+	<body>
+		<h3>语法功能</h3>
+		<ul>
+			<li>
+				<strong>实现条件判断</strong>
+				<p>
+					无论你是什么编程语言，条件判断的规则都是JavaScript规则。
+					<p>
+						<i>空字符串"",false,0,null是false；其他都是真值（{},[]等，都是真值）。</i>
+					</p>
+				</p>
+				<p>
+					示例
+					<x:code model="{day:2}">
+				<![CDATA[
+				<span>
+				您好：
+					<c:if test="${displayName}">${displayName}</c:if>
+					<c:else test="${loginName}">${loginName}</c:else>
+					<c:else>匆匆过客</c:else>；
+				今天是：
+					<c:if test="${day>5}">休息</c:if>
+					<c:else>工作</c:else>日
+				</span>
+				]]>
+					</x:code>
+					<p>
+						<i>
+							小技巧1： JavaScript 与或运算（JavaScript与或技巧）和三目运算符号，也可以解决上述问题。语法如下：
+							<x:code model="{day:2}">
+				<![CDATA[
+				<span>您好：${displayName||loginName||'匆匆过客'}；今天是：${day>5?'休息':'工作'}日</span>
+				]]>
+							</x:code>
+						</i>
+					</p>
+				</p>
+
+			</li>
+			<li>
+				<strong>for 循环中的else 语法</strong>
+				<p>
+					else 语法可以直接接for循环，用来处理空循环分支
+					<x:code model="{result:[]}">
+				<![CDATA[
+				<c:for var="item" list="${result}">
+					${item}
+				</c:for>
+				<c:else>
+					没有你需要的数据
+				</c:else>
+				]]>
+					</x:code>
+				</p>
+				<p>
+					<i>
+						for 循环的详细介绍见：
+						<a href="syntax-for.xhtml" />
+					</i>
+				</p>
+			</li>
+		</ul>
+		<h3>相关参考</h3>
+		<ul>
+			<li>
+				if/else 的变种：choose/when 
+				<p><a href="syntax-choose.xhtml" /></p>
+			</li>
+			<li>
+				else 也可以用在for上
+				<p><a href="syntax-for.xhtml" /></p>
+			</li>
+		</ul>
+	</body>
+</html>

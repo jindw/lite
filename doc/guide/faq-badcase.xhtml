@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:x="http://www.xidea.org/lite/example" xmlns="http://www.w3.org/1999/xhtml"
+	xml:lang="zh-CN" dir="ltr">
+	<head>
+		<title>常犯错误分析</title>
+	</head>
+	<body>
+		<h3>表达式括弧不可嵌套</h3>
+		<ul>
+			<x:code model="{data:{key:'value1'}}" error="true">
+			<![CDATA[
+			<code>
+				//功能: 将变量data json化输出,采用函数JSON.stringify
+				//错误用法 :
+				${JSON.stringify(${data})}
+				//正确用法:
+				${JSON.stringify(data)}
+			</code>
+			]]>
+			</x:code>
+			<p>分析:不少新用户对表达式的理解不是很透彻, 总是吧变量等价于表达式, 把表达式中用到的全部变量都用表达式括弧包一下.这是不允许也没必要的.</p>
+
+		</ul>
+		<h3>表达式不能用来输出标签</h3>
+		<ul>
+			<x:code model="{user:{name:'张三',admin:true}}"  error="true">
+			<![CDATA[
+			<div>
+				//功能: 输出一个带 < strong> 标签的表达式
+				//错误用法 :
+				我是:${user.admin? '<strong>老大</strong>' : '小兵'}
+				//正确用法:
+				我是:<c:if test='${user.admin}'><strong>老大</strong></c:if>
+				<c:else>小兵</c:else>
+			</div>
+			]]>
+			</x:code>
+			<p>分析: 表达式只是文本的一部分. 标签会把文本分成多个独立的部分, 这些独立的部分不能再统一起来做表达式解析了.</p>
+			<p>在LiteXML语法提出系中, 标签是纲,文本次之,表达式只是文本的一部分. 有明确的层析关系.</p>
+		</ul>
+		<h3>标签必须严格匹配(包括html标签)</h3>
+		<ul>
+			<x:code  error="true">
+			<![CDATA[
+			<div>
+				//功能: 输出一个带< strong> 标签的表达式
+				//错误用法 :
+				我是:<c:if test='${user.admin}'><strong></c:else>
+					${user.name}
+					<c:if test='${user.admin}'></strong></c:else>
+				//正确用法:
+				我是:<c:if test='${user.admin}'><strong>${user.name}</strong></c:else>
+					<c:else>${user.name}</c:else>
+			</div>
+			]]>
+			</x:code>
+			<p>分析: html标签和模板标签一样,都是xml标签, 采用同一个xml解析器解析, 虽然我们有强大的<a href="http://code.google.com/p/lite/wiki/XMLNormalize">容错支持</a>, 
+			但是不匹配的标签,我们依然无法处理.</p>
+		</ul>
+		<h3>属性无需if</h3>
+		<ul>
+			<x:code model="{disabled:null}"  error="true">
+			<![CDATA[
+			<form>//错误用法 :
+				<input type="submit" value="disabled?提交"
+					<c:if test="${disabled}"> disabled="disabled"</c:if> 
+					>
+				//正确用法:
+				<input type="submit" value="disabled?提交"
+					disabled="${disabled}">
+			</form>
+			]]>
+			</x:code>
+			<p>分析:针对条件属性问题, 模板语法有内置支持: 当一个属性只有一个表达式内容, 且表达式值为null的时候('null' , '' ,0  不是 null), 表达式将整体不输出, 无需额外if判断. </p>
+		</ul>
+	</body>
+</html>

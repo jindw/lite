@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:x="http://www.xidea.org/lite/example" xmlns="http://www.w3.org/1999/xhtml"
+	xml:lang="zh-CN" dir="ltr">
+	<head>
+		<title>什么是表达式</title>
+	</head>
+	<body>
+		<h3>什么是表达式</h3>
+		<p>
+			引表达式是由值(变量和常量)与 运算(操作符、括号、函数调用) 组成的语法单元。
+		</p>
+		<p>
+			在Lite模板中，表达式通常用来输出内容或者给模板语法提供数据（如条件判断数据，循环数据）。在形式上，通过表达式括弧(
+			<strong>\${...}</strong>
+			)将表达式内容标记出来。
+		</p>
+		<p>
+			示例：
+			<x:code model='{"user":{"name":"张三","age":27}}'>
+<![CDATA[
+<html>
+<body>
+	<!--   简单变量值 -->
+	<p>您好：${user.name}</p> 
+	<!-- 比较表达式，给条件判断提供数据 -->
+	<c:if test="${user.age<28}">
+		<p>年轻的朋友，五四青年节有半天公假，可别忘了！</p>
+		<p>你一共还有${28 - user.age}次机会：）</p>
+	</c:if>
+	<c:else>
+		<p>可怜的中年人，五四青年节与你无缘了：（</p>
+	</c:else>
+</body>
+</html>
+]]>
+			</x:code>
+		</p>
+		<h3>相关参考</h3>
+		<ul>
+			<li>
+				表达式变量/字面常量/复合数据结构定义
+				<a href="el-value.xhtml" />
+			</li>
+			<li>
+				表达式操作符/函数
+				<a href="el-op.xhtml" />
+			</li>
+			<li>
+				系统内置函数
+				<a href="el-function.xhtml" />
+			</li>
+		</ul>
+	</body>
+</html>

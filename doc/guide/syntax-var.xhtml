@@ -1,0 +1,39 @@
+<html
+	xmlns:x="http://www.xidea.org/lite/example"
+	xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-CN" dir="ltr">
+	<head>
+		<title>变量申明</title>
+	</head>
+	<body>
+		<h3>语法功能</h3>
+		<p>
+		var 语法有两种使用方式。
+		<ul>
+			<li>通过表达式申明变量。</li>
+			<li>通过捕捉模板输出申明变量。</li>
+		</ul>
+		</p>
+		<h3>示例1</h3>
+		<ul>
+			<x:code model="{}">
+				<![CDATA[
+				<!-- 通过value 属性申明一个测试数组 -->
+				<c:var name="list" value='${ ["key1","key2","key3","key4"] }'/>
+				
+				<!-- 捕捉一段输出内容，申明为变量result（这段内容在申明处不会被直接输出） -->
+				<c:var name="result">
+					{
+					<c:for var="item" list="${list}">
+						${JSON.stringify(item)}:${for.index}
+						<c:if test="${for.index != for.lastIndex}">,</c:if>
+					</c:for>
+					}
+				</c:var>
+				
+				<!-- 输出申明对象 -->
+				<div>${result}</div>
+				]]>
+			</x:code>
+		</ul>
+	</body>
+</html>
