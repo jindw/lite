@@ -1,9 +1,9 @@
 var LiteEngine = require('../lite-engine').LiteEngine;
-var engine = new LiteEngine();
 var path = require('path');
 var fs = require('fs');
 var http = require('http');
-
+var root = path.resolve(__dirname,'../');
+var engine = new LiteEngine(root);
 
 
 require('./file-server').createServer(function (req, response,root) {
@@ -32,5 +32,5 @@ require('./file-server').createServer(function (req, response,root) {
     	return true;
 	}
 	
-},engine.root).listen(2012,'127.0.0.1');
-console.log('lite test server is started: http://127.0.0.1:2012');
+},root).listen(process.env.APP_PORT || 2012);
+console.log('lite test server is started: http://127.0.0.1:'+(process.env.APP_PORT || 2012));

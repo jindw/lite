@@ -206,20 +206,6 @@ var xmlSourceMap = {};
 		<c:include path="layout-main.xhtml" />
 		<c:include path="layout-menu.xhtml" />
 		<c:include path="layout-dialog.xhtml" />
-		<script src="../require.js" />
-		<!--  
-		<script src="/scripts/boot.js"/>
-		-->
-		<script>
-			if(!this.ParseContext && this.$import){
-				$export('org/xidea/lite/');
-				$export('org/xidea/lite/impl/js');
-				$export('org/xidea/lite/impl/php');
-				$export('org/xidea/lite/web');
-				$export('org/xidea/lite/parse');
-				$export('org/xidea/lite/util');
-			}
-			</script>
 		<script>
 			var menu = document.getElementById('menu');
 			var menuContent = menu.firstChild;

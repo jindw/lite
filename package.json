@@ -8,7 +8,7 @@
   "repository": {"type": "git","url": "git://github.com/jindw/lite.git"},
   "main": "./index.js",
   "engines": {"node" : ">=0.5"},
-  "dependencies": {"js-el":"*","xmldom":"*"},
+  "dependencies": {"js-el":"*","xmldom":"*","xpath.js":"*"},
   "devDependencies": {  },
   "maintainers": [{"name": "jindw","email": "jindw@xidea.org","url": "http://www.xidea.org"}],
   "contributors": [

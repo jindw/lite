@@ -6,15 +6,31 @@ function LiteEngine(root){
 	this.renderTask = {};
 	var thiz = this;
 	try{
-		this.compiler = require('child_process').fork(__dirname + '/process.js',[root]);
+		throw new Error();
+		this.compiler = require('child_process').fork(__dirname + '/process.js',['cpc',root]);
 		this.compiler.on('message', function(result){
 			thiz.onChange(result.path,result.code,result.config)
 		}); 
+		
 	}catch(e){
 		if(this.compiler == null){
-			//TODO:...
+			var thiz = this;
+			var setupCompiler = require('./process.js').setupCompiler;
+			var compiler = setupCompiler(root,function(cmd){
+					var action = cmd.action;
+					if(action == 'remove' || action == 'add'){
+						thiz.onChange(cmd.path,cmd.code,cmd.config)
+					}
+				});
+			this.compiler = {
+				send:compiler
+			}
+			
 		}
 	}
+}
+LiteEngine.prototype.requestCompile = function(path){
+	this.compiler.send(path);
 }
 LiteEngine.prototype.onChange = function(path,code,config) {
 	if(code){
@@ -56,7 +72,7 @@ LiteEngine.prototype.render=function(path,model,req,response){
 			doRender(tpl,model,response);
 		}else{
 			(this.renderTask[path] || (this.renderTask[path] =[])).push([path,model,response]);
-			this.compiler.send({path:path });
+			this.requestCompile(path);
 		}
 	}
 }
