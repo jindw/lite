@@ -81,18 +81,24 @@ function doRender(tpl,model,response){
 	response.write(tpl.staticPrefix,'utf-8');
 	if(typeof model == 'function'){
 		//TODO,需要引擎级别实现异步,这里知识兼容一下接口
-		renderAsync(tpl,callback,response)
+		renderAsync(tpl,model,response)
 	}else{
-		var rtv = tpl.render(model);
+		try{
+			var rtv = tpl.render(model);
+		}catch(e){
+			rtv = require('util').inspect(e,true);
+		}
 		response.end(rtv);
 	}
 }
-function renderAsync(tpl,callback,response){
-	callback(function(model){
-		if(tpl){
+function renderAsync(tpl,modelLoader,response){
+	modelLoader(function(model){
+		try{
 			var rtv = tpl.render(model);
-			response.end(rtv);
+		}catch(e){
+			rtv = require('util').inspect(e,true);
 		}
+		response.end(rtv);
 	});
 }
 function Template(code,config,staticPrefix){
