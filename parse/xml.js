@@ -15,8 +15,8 @@ function loadLiteXML(uri,root){
         if(/^[\s\ufeff]*[<#]/.test(path)){
     	    return parseXMLByText(path.replace(/^[\s\ufeff]*/,''),root)
     	}else{
-    		//print(url)
-    		if(/^(?:\w+?\:\/\/|\/).*$/.test(path)){
+    		//console.log(path,/^(?:\w+\:\/\/|\w\:\\|\/).*$/.test(path))
+    		if(/^(?:\w+\:\/\/|\w\:\\|\/).*$/.test(path)){
 	    	    var pos = path.indexOf('#')+1;
 	    	    var xpath = pos && path.substr(pos);
 	    	    var path = pos?path.substr(0,pos-1):path;

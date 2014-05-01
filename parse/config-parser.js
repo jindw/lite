@@ -53,6 +53,7 @@ function parseConfig(doc){
 	var doc = doc.nodeType?doc:loadLiteXML(doc);
 	var lites = doc.getElementsByTagName("lite");
 	var len = lites.length;
+	//console.log(new (require('xmldom').XMLSerializer)().serializeToString(doc))
 	if(len >= 1){
 		var root = new LiteGroup(lites.item(0))
 		if(len>1){

@@ -5,11 +5,17 @@ var ParseContext = require('./parse/parse-context').ParseContext;
 var JSTranslator = require('./parse/js-translator').JSTranslator;
 function LiteCompiler(root){
 	var root =String(path.resolve(root || './')).replace(/\\/g,'/');
-	var config = path.resolve(root,'WEB-INF/lite.xml');
+	var config = path.resolve(root,'lite.xml');
+	//console.log("@@@@"+config,fs.existsSync(config))
 	if(fs.existsSync(config)){
 		this.config = new ParseConfig(root,config);
 	}else{
-		this.config = new ParseConfig(root,null);
+		var config = path.resolve(root,'WEB-INF/lite.xml');
+		if(fs.existsSync(config)){
+			this.config = new ParseConfig(root,config);
+		}else{
+			this.config = new ParseConfig(root,null);
+		}
 	}
 	console.info("LiteCompiler root:",root);
 	
@@ -18,6 +24,7 @@ LiteCompiler.prototype.compile=function(path){
 	var context = new ParseContext(this.config,path);
 	var uri = context.createURI(path);
 	context.parse(uri);
+	//console.log("&&&",path)
 	//console.log(context.getConfigMap(path))
 	
 	var litecode = context.toList();

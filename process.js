@@ -64,13 +64,20 @@ function setupCompiler(root,callback){
 	}
 	//process.on('message', function(path) {
 	return (function(path){
-		var result = templateCompiler.compile(path);
-	    //console.log('child got message:', m.root);
-	    var res = result.resources;
-		//console.info('resource config:' ,res);
-	    addTemplateWatch(path,res);
-	    callback({path:path,action:'add',code:result.code,config:result.config,staticPrefix:result[3]})
-	    //process.send({path:path,action:'add',code:result.code,config:result.config,staticPrefix:result[3]})
+		try{
+			var result = templateCompiler.compile(path);
+		    //console.log('child got message:', m.root);
+		    var res = result.resources;
+			//console.info('resource config:' ,res);
+		    addTemplateWatch(path,res);
+		    callback({path:path,action:'add',code:result.code,config:result.config,staticPrefix:result[3]})
+		    //process.send({path:path,action:'add',code:result.code,config:result.config,staticPrefix:result[3]})
+	    }catch(e){
+	    	callback({path:path,action:'add',
+	    		code:"function(){return "+JSON.stringify(require('util').inspect(e,true))+"}",
+	    		config:{'contentType':'text/html',encoding:'utf-8'},
+	    		staticPrefix:''})
+	    }
 	});
 }
 exports.setupCompiler = setupCompiler;

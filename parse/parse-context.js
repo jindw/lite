@@ -159,14 +159,16 @@ ParseContext.prototype = {
     	if(path instanceof URI){
     	}else{
     		if(/^\s*</.test(path)){
-    			return loadLiteXML(path,this.config.root)
+    			doc = loadLiteXML(path,this.config.root)
     		}else{
     			path = new URI(path)
     		}
     	}
-    	this.setCurrentURI(path);
-    	var doc = loadLiteXML(path,this.config.root);
-    	this._context._loadTime+=(new Date()-t1);
+    	if(path instanceof URI){
+    		this.setCurrentURI(path);
+    		var doc = loadLiteXML(path,this.config.root);
+    		this._context._loadTime+=(new Date()-t1);
+    	}
     	var root = doc && doc.documentElement;
     	if(root){
     		root.setAttribute('xmlns:xhtml',"http://www.w3.org/1999/xhtml")
