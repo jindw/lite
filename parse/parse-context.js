@@ -33,6 +33,7 @@ function ParseContext(config,path){
  */
 function initializeParser(context,extensionMap){
 	var extensionParser = new ExtensionParser();
+	//console.dir(extensionMap)
 	for(var ns in extensionMap){
 		var exts = extensionMap[ns];
 		for(var len = exts.length,i=0;i<len;i++){

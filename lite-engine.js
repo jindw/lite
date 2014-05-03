@@ -47,7 +47,6 @@ LiteEngine.prototype.onChange = function(path,code,config) {
 				doRender.apply(null,args)
 			}
 		}
-	}else if(){
 	}else{//clear cache
 		delete this.templateMap[path];
 		console.info('clear template cache:' ,path);
@@ -89,7 +88,8 @@ function doRender(tpl,model,response){
 		try{
 			var rtv = tpl.render(model);
 		}catch(e){
-			rtv = require('util').inspect(e,true);
+			rtv = '<pre>'+require('util').inspect(e,true)+'\n\n'+(e.message +e.stack);
+			//throw e;
 		}
 		response.end(rtv);
 	}
@@ -99,17 +99,18 @@ function renderAsync(tpl,modelLoader,response){
 		try{
 			var rtv = tpl.render(model);
 		}catch(e){
-			rtv = require('util').inspect(e,true);
+			rtv = require('util').inspect(e,true)+'\n\n'+(e.message +e.stack);
 		}
 		response.end(rtv);
 	});
 }
 function Template(code,config,staticPrefix){
  	//console.log(code)
+ 	
 	try{
-    this.impl = eval('['+code+'][0]');
+    	this.impl = eval('['+code+'][0]');
     }catch(e){
-    throw e;
+    	this.impl = function(){throw e;};
     }
     this.config = config;
     this.contentType = config.contentType;

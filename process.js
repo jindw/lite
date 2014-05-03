@@ -74,7 +74,8 @@ function setupCompiler(root,callback){
 		    //process.send({path:path,action:'add',code:result.code,config:result.config,staticPrefix:result[3]})
 	    }catch(e){
 	    	callback({path:path,action:'error',
-	    		code:"function(){return "+JSON.stringify(require('util').inspect(e,true))+"}",
+	    		code:"function(){return '<pre>'+"+JSON.stringify(require('util').inspect(e,true)+
+					'\n\n'+(e.message +e.stack))+"}",
 	    		config:{'contentType':'text/html',encoding:'utf-8',error:e}
 	    	})
 	    }

@@ -60,6 +60,7 @@ function appendParser(ext,key,patternKey,fn,o){
 
 Extension.prototype={
 	initialize:function(objectMap){
+		//console.dir(objectMap)
 		for(var key in objectMap){
 			var o = objectMap[key];
 //			console.error("["+key+"]:"+o+"\n\n")

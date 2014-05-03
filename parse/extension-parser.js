@@ -355,9 +355,8 @@ ExtensionParser.prototype = {
 				var objectMap = {};
 				var packageObject = require(packageName);
 				for(var n in packageObject){
-					var match = n.match(/^(?:document|xmlns|on|parse|before|seek).*/);
-					if(match){
-						objectMap = packageObject[n];
+					if(n.match(/^(?:document|xmlns|on|parse|before|seek).*/)){
+						objectMap[n] = packageObject[n];
 					}
 				}
 			}else{
