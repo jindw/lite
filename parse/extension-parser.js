@@ -351,13 +351,13 @@ ExtensionParser.prototype = {
 	},
 	addExtension:function(namespace,packageName){
 		if(typeof packageName == 'string'){
-			if(/^[\w\.]+$/.test(packageName)){
+			if(/^[\w\.\/]+$/.test(packageName)){
 				var objectMap = {};
-				var packageObject = $import(packageName+':');
-				for(var n in packageObject.objectScriptMap){
+				var packageObject = require(packageName);
+				for(var n in packageObject){
 					var match = n.match(/^(?:document|xmlns|on|parse|before|seek).*/);
 					if(match){
-						var o = $import(packageObject.name+':'+n,objectMap);
+						objectMap = packageObject[n];
 					}
 				}
 			}else{

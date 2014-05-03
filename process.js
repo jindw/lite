@@ -73,10 +73,10 @@ function setupCompiler(root,callback){
 		    callback({path:path,action:'add',code:result.code,config:result.config,staticPrefix:result[3]})
 		    //process.send({path:path,action:'add',code:result.code,config:result.config,staticPrefix:result[3]})
 	    }catch(e){
-	    	callback({path:path,action:'add',
+	    	callback({path:path,action:'error',
 	    		code:"function(){return "+JSON.stringify(require('util').inspect(e,true))+"}",
-	    		config:{'contentType':'text/html',encoding:'utf-8'},
-	    		staticPrefix:''})
+	    		config:{'contentType':'text/html',encoding:'utf-8',error:e}
+	    	})
 	    }
 	});
 }

@@ -6,7 +6,7 @@ function LiteEngine(root){
 	this.renderTask = {};
 	var thiz = this;
 	try{
-		throw new Error();
+		//throw new Error();
 		this.compiler = require('child_process').fork(__dirname + '/process.js',['cpc',root]);
 		this.compiler.on('message', function(result){
 			thiz.onChange(result.path,result.code,result.config)
@@ -18,7 +18,7 @@ function LiteEngine(root){
 			var setupCompiler = require('./process.js').setupCompiler;
 			var compiler = setupCompiler(root,function(cmd){
 					var action = cmd.action;
-					if(action == 'remove' || action == 'add'){
+					if(action == 'remove' || action == 'add' || action=='error'){
 						thiz.onChange(cmd.path,cmd.code,cmd.config)
 					}
 				});
@@ -35,7 +35,9 @@ LiteEngine.prototype.requestCompile = function(path){
 LiteEngine.prototype.onChange = function(path,code,config) {
 	if(code){
 		var tpl = new Template(code,config,config.staticPrefix||'');
-		this.templateMap[path] = tpl; 
+		if(config.error == null){//发生错误的页面每次都需要重建？？
+			this.templateMap[path] = tpl; 
+		}
 		var task = this.renderTask[path];
 		if(task){
 			delete this.renderTask[path];
@@ -45,6 +47,7 @@ LiteEngine.prototype.onChange = function(path,code,config) {
 				doRender.apply(null,args)
 			}
 		}
+	}else if(){
 	}else{//clear cache
 		delete this.templateMap[path];
 		console.info('clear template cache:' ,path);
