@@ -31,9 +31,6 @@ var HTML = {
 		var match = text.match(/^\[if\s[^\]]+\]>|<!\[endif\]$/ig);
 		if(match){
 			if(match.length == 1){
-//				match = match[0];
-//				if(match.charAt() == '['){//start
-//					this.append('<!--'+match);
 				this.append('<!--'+text+'-->')
 			}else{
 				var len1 = match[0].length;
@@ -41,7 +38,7 @@ var HTML = {
 				var content = text.substring(len1,text.length - len2);
 				try{
 					if(/^\s*</.test(content)){
-						content = loadLiteXML(content,null);
+						content = this.loadXML(content);
 					}
 					//xml = this.xml.documentElement;
 				}catch(e){
@@ -348,7 +345,6 @@ function countEescape(text, p$) {
 	return 0;
 }
 //autoEncode("${a}",/^encodeURI*/,function(a){return 'encodeURI('+a+')'})
-/**/
 if(typeof require == 'function'){
 exports.HTML=HTML;
 exports.HTML_EXT=HTML_EXT;
@@ -356,7 +352,6 @@ var XML_SPACE_TRIM=require('./xml-default-parser').XML_SPACE_TRIM;
 var findELEnd=require('./el-util').findELEnd;
 var parseChildRemoveAttr=require('./xml-core-parser').parseChildRemoveAttr;
 var compressJS=require('./js-token').compressJS;
-var loadLiteXML=require('./xml').loadLiteXML;
 var findXMLAttribute=require('./xml').findXMLAttribute;
 var URI=require('./resource').URI;
 }

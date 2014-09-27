@@ -1,6 +1,5 @@
 var LiteCompiler = require('./compiler').LiteCompiler;
 
-var fs = require('fs');
 
 
 var isChild = process.argv[2]=='cpc';//child-process-compiler
@@ -48,7 +47,7 @@ function setupCompiler(root,callback){
 		}
 	}
 	function addResourceWatch(resourcePath){
-		fs.watch(require('path').join(root,resourcePath), function (event, filename) {
+		require('fs').watch(require('path').join(root,resourcePath), function (event, filename) {
 			//console.log('event is: ' + event,filename);
 			for(var tplPath in resourceMap[resourcePath]){
 				var tpl = templateMap[tplPath];
@@ -70,13 +69,13 @@ function setupCompiler(root,callback){
 		    var res = result.resources;
 			//console.info('resource config:' ,res);
 		    addTemplateWatch(path,res);
-		    callback({path:path,action:'add',code:result.code,config:result.config,staticPrefix:result[3]})
-		    //process.send({path:path,action:'add',code:result.code,config:result.config,staticPrefix:result[3]})
+		    callback({path:path,action:'add',code:result.code,config:result.config,prefix:result[3]})
+		    //process.send({path:path,action:'add',code:result.code,config:result.config,prefix:result[3]})
 	    }catch(e){
 	    	callback({path:path,action:'error',
 	    		code:"function(){return '<pre>'+"+JSON.stringify(require('util').inspect(e,true)+
 					'\n\n'+(e.message +e.stack))+"}",
-	    		config:{'contentType':'text/html',encoding:'utf-8',error:e}
+	    		config:{contentType:'text/html',encoding:'utf-8',error:e}
 	    	})
 	    }
 	});

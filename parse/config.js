@@ -26,9 +26,9 @@
  * 	}
  * ]
  */
-function ParseConfig(root,json){
+function ParseConfig(root,dom){
 	this.root = new URI(root.replace(/[\\\/]*$/,'/'));
-	if(typeof json == 'string'){ json = parseConfig(json)}
+	var json = parseConfig(dom);
 	if(json){
 		var result = [];
 		var i = json.length

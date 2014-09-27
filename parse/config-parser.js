@@ -50,7 +50,6 @@
  */
 
 function parseConfig(doc){
-	var doc = doc.nodeType?doc:loadLiteXML(doc);
 	var lites = doc.getElementsByTagName("lite");
 	var len = lites.length;
 	//console.log(new (require('xmldom').XMLSerializer)().serializeToString(doc))
@@ -281,6 +280,5 @@ function quteReqExp(x){
 
 if(typeof require == 'function'){
 exports.parseConfig=parseConfig;
-var loadLiteXML=require('./xml').loadLiteXML;
 var findXMLAttribute=require('./xml').findXMLAttribute;
 }

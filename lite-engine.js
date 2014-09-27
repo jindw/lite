@@ -9,17 +9,17 @@ function LiteEngine(root){
 		//throw new Error();
 		this.compiler = require('child_process').fork(__dirname + '/process.js',['cpc',root]);
 		this.compiler.on('message', function(result){
-			thiz.onChange(result.path,result.code,result.config)
+			thiz.onChange(result.path,result.code,result.config,result.prefix)
 		}); 
 		
 	}catch(e){
 		if(this.compiler == null){
 			var thiz = this;
 			var setupCompiler = require('./process.js').setupCompiler;
-			var compiler = setupCompiler(root,function(cmd){
-					var action = cmd.action;
+			var compiler = setupCompiler(root,function(result){
+					var action = result.action;
 					if(action == 'remove' || action == 'add' || action=='error'){
-						thiz.onChange(cmd.path,cmd.code,cmd.config)
+						thiz.onChange(result.path,result.code,result.config,result.prefix)
 					}
 				});
 			this.compiler = {
@@ -32,9 +32,9 @@ function LiteEngine(root){
 LiteEngine.prototype.requestCompile = function(path){
 	this.compiler.send(path);
 }
-LiteEngine.prototype.onChange = function(path,code,config) {
+LiteEngine.prototype.onChange = function(path,code,config,prefix) {
 	if(code){
-		var tpl = new Template(code,config,config.staticPrefix||'');
+		var tpl = new Template(code,config,prefix||'');
 		if(config.error == null){//发生错误的页面每次都需要重建？？
 			this.templateMap[path] = tpl; 
 		}
@@ -80,7 +80,7 @@ LiteEngine.prototype.render=function(path,model,req,response){
 }
 function doRender(tpl,model,response){
     response.writeHead(200, {"Content-Type": tpl.contentType});   
-	response.write(tpl.staticPrefix,'utf-8');
+	response.write(tpl.prefix,'utf-8');
 	if(typeof model == 'function'){
 		//TODO,需要引擎级别实现异步,这里知识兼容一下接口
 		renderAsync(tpl,model,response)
@@ -104,21 +104,27 @@ function renderAsync(tpl,modelLoader,response){
 		response.end(rtv);
 	});
 }
-function Template(code,config,staticPrefix){
+function Template(code,config,prefix){
  	//console.log(code)
  	
 	try{
     	this.impl = eval('['+code+'][0]');
     }catch(e){
+    	console.log(equire('util').inspect(e,true)+'\n\n'+(e.message +e.stack));
     	this.impl = function(){throw e;};
     }
     this.config = config;
     this.contentType = config.contentType;
     this.encoding = config.encoding;
-    this.staticPrefix = staticPrefix ;
+    this.prefix = prefix ;
 }
 Template.prototype.render = function(context){
-	return this.impl.call(null,context);
+	try{
+		return this.impl.call(null,context);
+	}catch(e){
+		console.log(this.impl+'')
+		throw e;
+	}
 }
 
 exports.LiteEngine = LiteEngine;

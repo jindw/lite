@@ -1,22 +1,27 @@
 var path = require('path');
-var fs = require('fs');
 var ParseConfig = require('./parse/config').ParseConfig;
 var ParseContext = require('./parse/parse-context').ParseContext;
 var JSTranslator = require('./parse/js-translator').JSTranslator;
-function LiteCompiler(root){
+var loadLiteXML = require('./parse/xml').loadLiteXML;
+function LiteCompiler(root,config){
 	var root =String(path.resolve(root || './')).replace(/\\/g,'/');
 	var config = path.resolve(root,'lite.xml');
-	//console.log("@@@@"+config,fs.existsSync(config))
-	if(fs.existsSync(config)){
-		this.config = new ParseConfig(root,config);
+	if(require('fs').existsSync(config)){
+		var dom = loadLiteXML(config);
+		//console.log(dom+'')
+		this.config = new ParseConfig(root,dom);
 	}else{
 		var config = path.resolve(root,'WEB-INF/lite.xml');
-		if(fs.existsSync(config)){
-			this.config = new ParseConfig(root,config);
+		if(require('fs').existsSync(config)){
+			var dom = loadLiteXML(config);
+			//console.log(dom+'')
+			this.config = new ParseConfig(root,dom);
 		}else{
 			this.config = new ParseConfig(root,null);
 		}
 	}
+	
+//	console.log("!"+config,fs.existsSync(config),this.config)
 	console.info("LiteCompiler root:",root);
 	
 }
@@ -43,7 +48,7 @@ LiteCompiler.prototype.compile=function(path){
 	while(i--){
 		res[i] = res[i].path
 	}
-	return {resources:res,code:jscode,config:config,statcPrefix:prefix};
+	return {resources:res,code:jscode,config:config,prefix:prefix};
 }
 exports.LiteCompiler = LiteCompiler;
 
