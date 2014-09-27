@@ -1,16 +1,18 @@
 var LiteCompiler = require('./compiler').LiteCompiler;
 
-
-
-var isChild = process.argv[2]=='cpc';//child-process-compiler
-
+//node path -root root -filter path#name
+var argv = process.argv;
+var isChild = argv[2]=='-root';//child-process-compiler
 if(isChild){
 	//{path:tplPath,action:'remove'}
-	var root = process.argv[3].replace(/\/?$/,'/');
+	var root = argv[3].replace(/\/?$/,'/');
+	if(argv[4] == '-filter' && argv[5]){
+		var filter = argv[5];
+	}
 	console.log('ischild:',root);
 	var compile = setupCompiler(root,function(cmd){
 		process.send(cmd)
-	});
+	},filter);
 	process.on('message', function(path){
 		compile(path);
 	});
@@ -19,8 +21,7 @@ if(isChild){
 /**
  * 
  */
-function setupCompiler(root,callback){
-	var templateCompiler= new LiteCompiler(root);
+function setupCompiler(root,callback,filters){
 	/**
 	 * template -> {resource1:true,resource2:true}
 	 */
@@ -30,7 +31,23 @@ function setupCompiler(root,callback){
 	 * 允许脏数据，发现脏数据要通过templateMap重新确定
 	 * resource -> {template1:true,template2:true}
 	 */
-	var resourceMap = {
+	var resourceMap = {}
+	/*
+	 * template compiler
+	 */
+	var templateCompiler= new LiteCompiler(root);
+	if(filters){
+		try{
+			if('string' == typeof filters ){
+				var args = filters.split('#');
+				var path = args[0];
+				var name = args[1];
+				filters = require(path)[name];
+			}
+			templateCompiler = filters(templateCompiler)
+		}catch(e){
+			console.error('filter init error:'+e);
+		}
 	}
 	function addTemplateWatch(path,resources){
 		var template = templateMap[path]={};

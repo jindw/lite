@@ -1,13 +1,14 @@
-function LiteEngine(root){
+function LiteEngine(root,config){
 	root = require('path').resolve(root || './')
 	root = root.replace(/[\\\/]*$/,'/');
 	this.root = root;
 	this.templateMap = {};
 	this.renderTask = {};
 	var thiz = this;
+	var filter = config&&config.filter;
 	try{
 		//throw new Error();
-		this.compiler = require('child_process').fork(__dirname + '/process.js',['cpc',root]);
+		this.compiler = require('child_process').fork(__dirname + '/process.js',['-root',root,'-filter',filter]);
 		this.compiler.on('message', function(result){
 			thiz.onChange(result.path,result.code,result.config,result.prefix)
 		}); 
@@ -21,7 +22,7 @@ function LiteEngine(root){
 					if(action == 'remove' || action == 'add' || action=='error'){
 						thiz.onChange(result.path,result.code,result.config,result.prefix)
 					}
-				});
+				},filter);
 			this.compiler = {
 				send:compiler
 			}

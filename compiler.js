@@ -1,11 +1,11 @@
-var path = require('path');
 var ParseConfig = require('./parse/config').ParseConfig;
 var ParseContext = require('./parse/parse-context').ParseContext;
 var JSTranslator = require('./parse/js-translator').JSTranslator;
 var loadLiteXML = require('./parse/xml').loadLiteXML;
 function LiteCompiler(root,config){
+	var path = require('path');
 	var root =String(path.resolve(root || './')).replace(/\\/g,'/');
-	var config = path.resolve(root,'lite.xml');
+	var config = config || path.resolve(root,'lite.xml');
 	if(require('fs').existsSync(config)){
 		var dom = loadLiteXML(config);
 		//console.log(dom+'')
@@ -20,13 +20,14 @@ function LiteCompiler(root,config){
 			this.config = new ParseConfig(root,null);
 		}
 	}
-	
-//	console.log("!"+config,fs.existsSync(config),this.config)
 	console.info("LiteCompiler root:",root);
 	
 }
+LiteCompiler.prototype.createParseContext = function(path){
+	return new ParseContext(this.config,path);
+}
 LiteCompiler.prototype.compile=function(path){
-	var context = new ParseContext(this.config,path);
+	var context = this.createParseContext(path);
 	var uri = context.createURI(path);
 	context.parse(uri);
 	//console.log("&&&",path)

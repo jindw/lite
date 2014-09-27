@@ -89,6 +89,7 @@ ParseContext.prototype = {
 			this._topChain.next(source);
 		}else{//text
 			if(source instanceof URI){
+				//console.log(source+this.loadXML)
 				source = this.loadXML(source);
 				if(typeof source == 'string'){
 					source=source.replace(/#.*[\r\n]*/,'');
