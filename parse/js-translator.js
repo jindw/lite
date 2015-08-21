@@ -12,18 +12,23 @@ var TranslateContext=require('./translate-context').TranslateContext;
 /**
  * JS原生代码翻译器实现
  */
-function JSTranslator(name,params,defaults){
+function JSTranslator(name,params,hasBuildIn,defaults){
     this.name = name;
     this.params = params;
     this.defaults = defaults;
-    this.liteDefined = false;
+    if(hasBuildIn != undefined){
+    	this.hasBuildIn =  hasBuildIn;
+    }
+    
 }
 /**
  */
 JSTranslator.prototype = {
+	hasBuildIn:true,
 	translate:function(list,rtf){
-	    //try{
+	    try{
 		    var context = new JSTranslateContext(list,this.name,this.params,this.defaults);
+		    context.hasBuildIn = this.hasBuildIn;
 		    context.liteImpl = this.liteImpl || "lite_impl";
 		    context.parse();
 		    var code = context.toSource(rtf);//context.header +  context.body;
@@ -33,10 +38,10 @@ JSTranslator.prototype = {
 		    }else{
 		    	new Function(code);
 		    }
-	    //}catch(e){
-	    //	var error = console.error("生成js代码失败:",e,code);
-	     //   code = "return ("+JSON.stringify(error)+');';
-	    //}
+		}catch(e){
+			var error = console.error("生成js代码失败:",e,code);
+			code = "return ("+JSON.stringify(error)+');';
+	    }
 		var result = [];
     	//if(!this.liteImpl){
     	//	result.push("if('undefined' ==typeof ",context.liteImpl,"){",context.liteImpl,'=',INIT_SCRIPT,"}");
@@ -135,7 +140,7 @@ function optimizeFunction(contents,functionName,params,defaults,vars){
 			source = "\treturn "+c+';';
 		}
 	}else{
-		source = "\tvar __out__=[]\n"+source+"\n\treturn __out__.join('');\n";
+		source = "\tvar __out__=[]\n"+source.replace(/^\s*\n|\s*\n\s*$/g,'')+"\n\treturn __out__.join('');\n";
 	}
 	if(functionName){
     	try{
@@ -147,7 +152,7 @@ function optimizeFunction(contents,functionName,params,defaults,vars){
     }else{
     	functionName = "function";
     }
-    return functionName+"("+args+'){\n'+result.join('')+source.replace(/^[\r\n]+/,'')+'\n}';
+    return functionName+"("+args+'){\n'+result.join('')+source.replace(/^[\r\n]+/,'')+'\n}\n';
 }
 function buildVars(context,scope,params){
 	var result = [];
@@ -156,7 +161,7 @@ function buildVars(context,scope,params){
 	var callMap = scope.callMap;
 	var varMap = scope.varMap;
 	var paramMap = scope.paramMap;
-	
+	//console.dir(scope)
 	copy(refMap,map);
 	copy(callMap,map);
 	for(var n in map){
@@ -196,43 +201,44 @@ OutputItem.prototype.toString = function(){
 PT.prototype = TranslateContext.prototype
 JSTranslateContext.prototype = new PT({
 	getImplementSource : function(){
+		if(this.hasBuildIn){return ''}
 		var buf = [''];
 		var c = this.xmlEncoder + this.entityEncoder;
 		if(c){
-			buf.push( "function __r__(c,e){return e||'&#'+c.charCodeAt()+';'}\n");
+			buf.push(" 	function __r__(c,e){return e||'&#'+c.charCodeAt()+';'}\n");
 			if(c>3){
 				this.optimizedEncoder = true;
-				buf.push("function __x__(source,e){return String(source).replace(e,__r__);}\n");
+				buf.push("	function __x__(source,e){return String(source).replace(e,__r__);}\n");
 			}
 		}
 		var df = this.dateFormat;
 		if(df.hit){
 var dlstart = df.isFixLen?'__dl__(':''	
 var dlend = df.isFixLen?',format.length)':''	
-if(dlstart)	buf.push(	"function __dl__(date,len){return len > 1? ('000'+date).slice(-len):date;}\n");
-if(df.T)		buf.push(	"function __tz__(offset){return offset?(offset>0?'-':offset*=-1,'+')+__dl__(offset/60,2)+':'+__dl__(offset%60,2):'Z'}\n");
-if(df)			buf.push(	"function __df__(pattern,date){\n");
-if(df)			buf.push(		"date = date?new Date(date):new Date();\n");
-if(df)			buf.push(        "return pattern.replace(/",
+if(dlstart)	buf.push("	function __dl__(date,len){return len > 1? ('000'+date).slice(-len):date;}\n");
+if(df.T)		buf.push("	function __tz__(offset){return offset?(offset>0?'-':offset*=-1,'+')+__dl__(offset/60,2)+':'+__dl__(offset%60,2):'Z'}\n");
+if(df)			buf.push("	function __df__(pattern,date){\n");
+if(df)			buf.push("		date = date?new Date(date):new Date();\n");
+if(df)			buf.push("	        return pattern.replace(/",
 												df.qute?"'[^']+'|\"[^\"]+\"|":'',
 												"([YMDhms])\\1*",
 												df['.']?"|\\.s":'',
 												df.T?"|TZD$":'',
 												"/g,function(format){\n");
-if(df)			buf.push(            "switch(format.charAt()){\n");
-if(df.Y)			buf.push(            "case 'Y' :return ",dlstart,"date.getFullYear()",dlend,";\n");
-if(df.M)			buf.push(            "case 'M' :return ",dlstart,"date.getMonth()+1",dlend,";\n");
-if(df.D)			buf.push(            "case 'D' :return ",dlstart,"date.getDate()",dlend,";\n");
-if(df.h)			buf.push(            "case 'h' :return ",dlstart,"date.getHours()",dlend,";\n");
-if(df.m)			buf.push(            "case 'm' :return ",dlstart,"date.getMinutes()",dlend,";\n");
-if(df.s)			buf.push(            "case 's' :return ",dlstart,"date.getSeconds()",dlend,";\n");
-if(df['.'])			buf.push(            "case '.':return '.'+",dlstart,"date.getMilliseconds(),3);\n");
-if(df.T)			buf.push(            "case 'T':return __tz__(date.getTimezoneOffset());\n");
-if(df.qute)			buf.push(            "case '\'':case '\"':return format.slice(1,-1);\n");
-if(df)				buf.push(            "default :return format;\n");
-if(df)			buf.push(            "}\n");
-if(df)			buf.push(        "});\n");
-if(df)			buf.push(    "}\n");
+if(df)			buf.push("	            switch(format.charAt()){\n");
+if(df.Y)			buf.push("	            case 'Y' :return ",dlstart,"date.getFullYear()",dlend,";\n");
+if(df.M)			buf.push("	            case 'M' :return ",dlstart,"date.getMonth()+1",dlend,";\n");
+if(df.D)			buf.push("	            case 'D' :return ",dlstart,"date.getDate()",dlend,";\n");
+if(df.h)			buf.push("	            case 'h' :return ",dlstart,"date.getHours()",dlend,";\n");
+if(df.m)			buf.push("	            case 'm' :return ",dlstart,"date.getMinutes()",dlend,";\n");
+if(df.s)			buf.push("	            case 's' :return ",dlstart,"date.getSeconds()",dlend,";\n");
+if(df['.'])			buf.push("	            case '.':return '.'+",dlstart,"date.getMilliseconds(),3);\n");
+if(df.T)			buf.push("	            case 'T':return __tz__(date.getTimezoneOffset());\n");
+if(df.qute)			buf.push("	            case '\'':case '\"':return format.slice(1,-1);\n");
+if(df)				buf.push("	            default :return format;\n");
+if(df)			buf.push("	            }\n");
+if(df)			buf.push("	        });\n");
+if(df)			buf.push("	    }\n");
 		}
 		if(this.entityEncoder){
 			buf.push( 'var __e__ = /&(?:\w+|#\d+|#x[\da-f]+);|[<&"]/ig;\n');
@@ -245,7 +251,7 @@ if(df)			buf.push(    "}\n");
 		el = thiz.stringifyEL(el);
 		return {toString:function(){
 			var e = (isAttr?'/[&<\\"]/g':'/[&<]/g');
-			if(thiz.optimizedEncoder){
+			if(thiz.optimizedEncoder||thiz.hasBuildIn){
 				return '__x__('+el+','+e+')';
 			}else{
 				return 'String('+el+').replace('+e+',__r__)'
@@ -257,7 +263,7 @@ if(df)			buf.push(    "}\n");
 		el = thiz.stringifyEL(el);
 		this.entityEncoder ++;
 		return {toString:function(){
-			if(thiz.optimizedEncoder){
+			if(thiz.optimizedEncoder || thiz.hasBuildIn){
 				return '__x__('+el+',__e__)';
 			}else{
 				return 'String('+el+').replace(__e__,__r__)'
@@ -323,7 +329,8 @@ if(df)			buf.push(    "}\n");
 	        	vars:vars,
 	        	name:def.name,
 	        	toString:function(){
-	        		return optimizeFunction(contents,this.name,this.params,this.defaults,this.vars);
+	        		var fn = optimizeFunction(contents,this.name,def.params,this.defaults,this.vars);
+	        		return String(fn).replace(/^(.)/mg,'\t$1');
 	        	}})
 	        this.depth-=4;
 	        //fs.push(this.liteImpl,".",def.name,"=",content,",\n");
@@ -372,7 +379,7 @@ if(df)			buf.push(    "}\n");
         	}
             this.append("if(",testId,"!=null){");
             this.depth++;
-            this._output(' ',attributeName,'="',this.createXMLEncoder(el,true),'"');
+            this._output('" '+attributeName+'=",',this.createXMLEncoder(el,true));
             this.depth--;
             this.append("}");
             this.freeId(testId);

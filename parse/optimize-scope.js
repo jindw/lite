@@ -77,7 +77,6 @@ function vistDef(context,item){
 	//def can not change!!. use cache
 	var def = item[-1]||new OptimizeScope(item[1],params);
 	def.name = config.name;
-	def.params = config.params;
 	def.defaults = config.defaults;
 	context.fors = context.fors.concat(def.fors)
 	context.defs.push(def.name);

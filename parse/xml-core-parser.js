@@ -581,7 +581,7 @@ function processClient(node){
  * <c:date-format pattern="" >
  */
 function dateFormat(node){
-	var value =  findXMLAttributeAsEL(node,'value') || 'null';
+	var value =  findXMLAttributeAsEL(node,'value','date','time','#text').replace(/^\s+|\s+$/g,'') || 'null';
 	var pattern = findXMLAttribute(node,'pattern');
 	if(pattern){
 		var pattern2 = pattern.replace(/^\s*\$\{([\s\S]+)\}\s*$/,'$1')
@@ -597,6 +597,8 @@ function dateFormat(node){
 	this.appendEnd();
 }
 Core.parseDateFormat = dateFormat
+Core.parseDate = dateFormat
+Core.parseTime = dateFormat
 function beforeInclude(attr){
 	var match = attr.value.match(/^([^#]*)(?:#(.*))?$/);
 	var path = match[1];

@@ -13,21 +13,21 @@
  * <a href="http://code.google.com/p/lite/wiki/Template"> 模版基础指令说明</a>
  * @public
  */
-function parseLite(data){
+function parseLite(data,params,builtInFn){
     var parseContext = new ParseContext();
     data = parseContext.loadXML(data);
     parseContext.parse(data);
     try{
-    	var translator = new JSTranslator("");
+    	var translator = new JSTranslator("",params,builtInFn);
     	//translator.liteImpl = "lite_impl"
-    	var code = translator.translate(parseContext.toList(),true);
-    	var fcode = "function(liteImpl){"+code+"}"
-        data =  new Function('liteImpl',code);
-        data.toString2=function(){//_$1 encodeXML
-            return fcode;
+    	var code = translator.translate(parseContext.toList(),false);
+        data =  new Function('return '+code).apply();
+        data.toString=function(){//_$1 encodeXML
+            return code;
         }
     	return data;
 	 }catch(e){
+	 	console.log(code)
 	 	console.error("翻译结果错误：",e,code)
 	    throw e;
 	 }

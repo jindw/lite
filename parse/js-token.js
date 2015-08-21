@@ -26,6 +26,9 @@ function compressJS(source){
 	}
 	return result.join('');
 }
+try{
+	var parseLite = require('lite').parseLite;
+}catch(e){}
 /**
  * 如何token
  * 如何补全; 能不补全就不补全
@@ -40,14 +43,26 @@ function partitionJavaScript(source){
 			var m = m[0];
 			var xml = m == '<'
 			if(m == '/' || xml){
-				var ex = (xml ?findXML:findExp)(result,source.substring(index));
-				if(ex){
-					m = ex;
+				var subsource = (xml ?findXML:findExp)(result,source.substring(index));
+				if(subsource){
+					m = subsource;
 					if(xml){
-						ex = 'new XML("'+ex.replace(/["\r\n]/g,jsReplace)+'")'
+						ex = 'new XML("'+subsource.replace(/["\r\n]/g,jsReplace)+'")'
 					}
 					concatable = false;
-					result.push(source.substring(0,index),ex);
+					//TODO: 内置 lite xml
+					var pre = result[result.length-1];
+					var tail = source.substring(m.length+index);
+					var preReg =  /\bparseLite\s*\(\s*$/;
+					var tailReg = /^\s*\)/;
+					if(xml && parseLite &&pre.test(preReg) && tailReg.test(tail) ){
+						result.pop();
+						subsource = parseLite(subsource);
+						source = tail.replace(tailReg,'');
+						continue;
+					}else{
+						result.push(source.substring(0,index),ex);
+					}
 				}else{
 					if(concatable){
 						result[result.length-1]+=source.substring(0,index+1)
@@ -127,12 +142,13 @@ function findExp(result,source){
 			if(/^['"]|^\/.+\/$/.test(line)){
 				break;
 			}
-			if(!/^(?:\b(?:new|instanceof|typeof)|[^\w_$\]})])$/.test(line)){
+			if(/^(?:\b(?:new|instanceof|typeof)|[^\w_$\]})])$/.test(line)){
+				//a /b 1.1/b (1+2)/b a++ /2
+				break;
+			}else{
 				// if(this.status != STATUS_EXPRESSION)
 				// is op / start
 				return findExpSource(source);
-			}else{
-				break;
 			}
 		}
 	}

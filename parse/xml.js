@@ -125,7 +125,9 @@ function findXMLAttributeAsEL(el){
     if(el !== null){
         var el2 = el.replace(/^\s*\$\{([\s\S]*)\}\s*$/,"$1")
         if(el == el2){
-            console.warn("缺少表达式括弧,文本将直接按表达式返回",el);
+        	if(el2){
+            	console.warn("缺少表达式括弧,文本将直接按表达式返回",el);
+        	}
         }else{
             el2 = el2.replace(/^\s+|\s+$/g,'');
             if(!el2){

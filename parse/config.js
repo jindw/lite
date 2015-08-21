@@ -27,8 +27,8 @@
  * ]
  */
 function ParseConfig(root,dom){
-	this.root = new URI(root.replace(/[\\\/]*$/,'/'));
-	var json = parseConfig(dom);
+	this.root = new URI(root && root.replace(/[\\\/]*$/,'/') || 'lite:///');
+	var json = dom && parseConfig(dom);
 	if(json){
 		var result = [];
 		var i = json.length
