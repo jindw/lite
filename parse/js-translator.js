@@ -211,6 +211,9 @@ JSTranslateContext.prototype = new PT({
 				buf.push("	function __x__(source,e){return String(source).replace(e,__r__);}\n");
 			}
 		}
+		if(this.forStack.hit){
+			buf.push("	if(!Object.keys)Object.keys=function(o){var r=[];for(var n in o){r.push(n)};return r;};\n")
+		}
 		var df = this.dateFormat;
 		if(df.hit){
 var dlstart = df.isFixLen?'__dl__(':''	
@@ -345,6 +348,12 @@ if(df)			buf.push("	    }\n");
 	        throw e;
 	    }
 	    
+	    //放在后面，这时 如下信息是正确的！
+		// this.xmlEncoder = 0;
+		//this.entityEncoder=0;
+		//this.dateFormat = {hit:0};
+		//this.forStack.hit = true
+		
 		var s = this.getImplementSource();
 		if(s){
 			fs.push(s);
@@ -452,6 +461,7 @@ if(df)			buf.push("	    }\n");
 		}
     },
     processFor:function(code,i){
+    	this.forStack.hit = true;
         var item = code[i];
         var indexId = this.allocateId();
         var lastIndexId = this.allocateId();
@@ -546,32 +556,7 @@ if(df)			buf.push("	    }\n");
     	}
     }
 });
-/*
-var INIT_SCRIPT = String(function(){
-	var __e__ = /&(?:\w+|#\d+|#x[\da-f]+);|[<&"]/ig;
-	function __x__(source,e){return String(source).replace(e,__r__);}
-	function __r__(c,e){return e||'&#'+c.charCodeAt()+';'}
-	
-	
-	function __dl__(date,format){return format == 1?date : ('000'+date).slice(-format);}
-	function __tz__(offset){return offset?(offset>0?'-':offset*=-1,'+')+__dl__(offset/60,2)+':'+__dl__(offset%60,2):'Z'}
-	function __df__(pattern,date){
-		date = date?new Date(date):new Date();
-        return pattern.replace(/([YMDhms])\1*|\.s|TZD/g,function(format){
-            switch(format.charAt()){
-            case 'Y' :return __dl__(date.getFullYear(),format.length);
-            case 'M' :return __dl__(date.getMonth()+1,format.length);
-            case 'D' :return __dl__(date.getDate(),format.length);
-            case 'h' :return __dl__(date.getHours(),format.length);
-            case 'm' :return __dl__(date.getMinutes(),format.length);
-            case 's' :return __dl__(date.getSeconds(),format.length);
-            case '.':return '.'+__dl__(date.getMilliseconds(),3);
-            case 'T':return __tz__(date.getTimezoneOffset());
-            }
-        })
-    }
-}).replace(/^\s+|\s+$/g,'')+"()";
-*/
+
 if(typeof require == 'function'){
 exports.JSTranslator=JSTranslator;
 exports.GLOBAL_DEF_MAP=GLOBAL_DEF_MAP;
