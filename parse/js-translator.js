@@ -205,10 +205,11 @@ JSTranslateContext.prototype = new PT({
 		var buf = [''];
 		var c = this.xmlEncoder + this.entityEncoder;
 		if(c){
-			buf.push(" 	function __r__(c,e){return e||'&#'+c.charCodeAt()+';'}\n");
 			if(c>3){
 				this.optimizedEncoder = true;
-				buf.push("	function __x__(source,e){return String(source).replace(e,__r__);}\n");
+				buf.push("	function __x__(source,e){return String(source).replace(e||/&(?!#\\d+;|#x[\\da-f]+;|[a-z]+;)|[<\"]/ig,function(c){return '&#'+c.charCodeAt()+';'});}\n");
+			}else{
+				buf.push(" 	function __r__(c){return '&#'+c.charCodeAt()+';'}\n");
 			}
 		}
 		if(this.forStack.hit){
@@ -244,7 +245,7 @@ if(df)			buf.push("	        });\n");
 if(df)			buf.push("	    }\n");
 		}
 		if(this.entityEncoder){
-			buf.push( 'var __e__ = /&(?:\w+|#\d+|#x[\da-f]+);|[<&"]/ig;\n');
+			buf.push( 'var __e__ = ;\n');
 		}
 		return buf.join('');
 	},
@@ -267,9 +268,9 @@ if(df)			buf.push("	    }\n");
 		this.entityEncoder ++;
 		return {toString:function(){
 			if(thiz.optimizedEncoder || thiz.hasBuildIn){
-				return '__x__('+el+',__e__)';
+				return '__x__('+el+')';
 			}else{
-				return 'String('+el+').replace(__e__,__r__)'
+				return 'String('+el+').replace(/&(?!#\\d+;|#x[\\da-f]+;|[a-z]+;)|[<"]/ig,__r__)'
 			}
 		}}
 	},
@@ -303,7 +304,7 @@ if(df)			buf.push("	    }\n");
 		var lastOut = this._lastOut;//不能用闭包var代替
 		var lastIndex = this.out.length-1;
 		if(lastOut &&  this.out[lastIndex] == lastOut){
-			lastOut.data.push(arguments)
+			[].push.apply(lastOut.data,arguments)
 		}else{
 			this.append(this._lastOut = new OutputItem(arguments));
 		}
@@ -388,7 +389,8 @@ if(df)			buf.push("	    }\n");
         	}
             this.append("if(",testId,"!=null){");
             this.depth++;
-            this._output('" '+attributeName+'=",',this.createXMLEncoder(el,true));
+            console.log('xa bug!!!!')
+            this._output("' "+attributeName+"=\"'",this.createXMLEncoder(el,true),"'\"'");
             this.depth--;
             this.append("}");
             this.freeId(testId);
