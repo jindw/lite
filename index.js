@@ -27,7 +27,7 @@ function parseLite(data,params,builtInFn){
         }
     	return data;
 	 }catch(e){
-	 	console.log(code)
+	 	console.log("<code>"+code+"</code>")
 	 	console.error("翻译结果错误：",e,code)
 	    throw e;
 	 }

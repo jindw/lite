@@ -26,20 +26,21 @@ function JSTranslator(name,params,hasBuildIn,defaults){
 JSTranslator.prototype = {
 	hasBuildIn:true,
 	translate:function(list,rtf){
-	    try{
-		    var context = new JSTranslateContext(list,this.name,this.params,this.defaults);
-		    context.hasBuildIn = this.hasBuildIn;
-		    context.liteImpl = this.liteImpl || "lite_impl";
-		    context.parse();
-		    var code = context.toSource(rtf);//context.header +  context.body;
-		    //console.log('###'+code+'@@@')
+	    
+		var context = new JSTranslateContext(list,this.name,this.params,this.defaults);
+		context.hasBuildIn = this.hasBuildIn;
+		context.liteImpl = this.liteImpl || "lite_impl";
+		context.parse();
+		var code = context.toSource(rtf);//context.header +  context.body;
+		//console.log('###'+code+'@@@')
+		try{
 		    if(!this.name && !rtf){
 		    	new Function('return '+code);
 		    }else{
 		    	new Function(code);
 		    }
 		}catch(e){
-			var error = console.error("生成js代码失败:",e,code);
+			var error = console.error("invalid code:",e,'<code>'+code+'</code>');
 			code = "return ("+JSON.stringify(error)+');';
 	    }
 		var result = [];
@@ -304,7 +305,7 @@ if(df)			buf.push("	    }\n");
 		var lastOut = this._lastOut;//不能用闭包var代替
 		var lastIndex = this.out.length-1;
 		if(lastOut &&  this.out[lastIndex] == lastOut){
-			[].push.apply(lastOut.data,arguments)
+			lastOut.data.push(arguments);
 		}else{
 			this.append(this._lastOut = new OutputItem(arguments));
 		}
@@ -389,8 +390,7 @@ if(df)			buf.push("	    }\n");
         	}
             this.append("if(",testId,"!=null){");
             this.depth++;
-            console.log('xa bug!!!!')
-            this._output("' "+attributeName+"=\"'",this.createXMLEncoder(el,true),"'\"'");
+            this._output("' "+attributeName+"=\"',",this.createXMLEncoder(el,true),",'\"'");
             this.depth--;
             this.append("}");
             this.freeId(testId);
@@ -403,12 +403,18 @@ if(df)			buf.push("	    }\n");
     },
     appendCapture:function(item){
         var childCode = item[1];
-        var varName = item[2];
-        var bufbak = this.allocateId();
-        this.append("var ",bufbak,"=__out__;__out__=[];");
-        this.appendCode(childCode);
-        this.append("var ",varName,"=__out__.join('');__out__=",bufbak,";");
-        this.freeId(bufbak);
+        if(childCode.length == 1 && childCode[0].constructor == String){
+        	item[1] = JSON.stringify(childCode[0]);
+        	this.appendVar(item);
+        }else{
+        	var varName = item[2];
+        	var bufbak = this.allocateId();
+        	this.append("var ",bufbak,"=__out__;__out__=[];");
+        
+        	this.appendCode(childCode);
+        	this.append("var ",varName,"=__out__.join('');__out__=",bufbak,";");
+        	this.freeId(bufbak);
+        }
     },
     appendEncodePlugin:function(item){//&#233;&#0xDDS;
         this._output(this.createEntityEncoder(item[1]));

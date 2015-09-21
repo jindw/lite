@@ -66,7 +66,7 @@ function parseXMLByText(text,path){
         var doc = new DOMParser({locator:{systemId:path},
                     xmlns:{c:'http://www.xidea.org/lite/core',
                         h:'http://www.xidea.org/lite/html-ext'}
-                }).parseFromString(text)
+                }).parseFromString(text,"text/html")
         return addInst(doc,text);
     }catch(e){
         console.error("解析xml失败:",e,text);
