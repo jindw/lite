@@ -8,25 +8,6 @@
 			* 
  * @see org.xidea.lite.OptimizeContext#optimize();
  */
-function extractStaticPrefix(litecode){
-	var prefix = [];
-	var len = litecode.length;
-	for(var i=0;i<len;i++){
-		var item = litecode[i];
-		if(typeof item == 'string'){
-			prefix.push(item);
-			litecode.splice(i,1);
-			len--;
-			i--;
-		}else if(item instanceof Array){
-			if(item[0] == CAPTURE_TYPE || item[0] == VAR_TYPE || item[0] == PLUGIN_TYPE && item[2]['class'] == PLUGIN_DEFINE){
-			}else{
-				break;
-			}
-		}
-	}
-	return prefix.join('');
-}
 function doOptimize(defMap,templateList){
 	var pluginObjectList = [];
 	var optimizeContext = [templateList,defMap,pluginObjectList];
@@ -136,7 +117,6 @@ ClientPlugin.prototype = {
 		if(this.optimizedCall == null){
 			optimizeAllClient.apply(this,this.context);
 		}
-		var jst = new JSTranslator(this.name,this.params,this.defaults);
 		var defMap = this.context[1]
 		var result = [];
 		for(var n in this.optimizedCall){
@@ -146,10 +126,13 @@ ClientPlugin.prototype = {
 				console.error("Defined function not found:"+n)
 			}
 		}
-		if(!this.first){
-			jst.liteImpl = jst.liteImpl || 'liteImpl';
-		}
-		var result = jst.translate(result.concat(this.children));
+		//if(!this.first){
+		//	jst.liteImpl = jst.liteImpl || 'liteImpl';
+		//}
+		//var result = jst.translate(result.concat(this.children));
+		
+		var jst = new JSTranslator();
+		var result = jst.translate(result.concat(this.children),{name:this.name,params:this.params,defaults:this.defaults});
 		this.children.length = 0;
 		this.children.push(result);
 	}
@@ -415,7 +398,7 @@ function buildTreeResult(result,defMap){
 }
 
 if(typeof require == 'function'){
-exports.extractStaticPrefix=extractStaticPrefix;
+//exports.extractStaticPrefix=extractStaticPrefix;
 exports.doOptimize=doOptimize;
 exports.optimizeResult=optimizeResult;
 exports.buildTreeResult=buildTreeResult;

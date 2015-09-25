@@ -23,7 +23,6 @@ function* test2(){
 	if ((yield* test()) && true) {
 		console.log(6);
 	};
-
 }
 
 var g = test2();

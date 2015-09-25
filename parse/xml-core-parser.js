@@ -310,6 +310,7 @@ function processFor(node){
 	}else{//attr
 		var value = findXMLAttribute(node);
 		var match = value.replace(/^\$\{(.+)\}$/,'$1').match(FOR_PATTERN);
+		//console.log('for:::',match,value)
 		if(!match){
 			throw console.error("非法 for 循环信息",value);
 		}
@@ -808,16 +809,20 @@ function _parseBlock(ctx,node){
 			config[n] = a.value;
 		}
 	}
-	ctx.append('<',tagName,' id="__lazy_module_',bid,'__"');
-	for(var n in config){
-		ctx.append(' ',n,'="',config[n],'"');
+	if(pluginName.match(/lazy/i)){
+		ctx.append('<',tagName,' id="__lazy_module_',bid,'__"');
+		for(var n in config){
+			ctx.append(' ',n,'="',config[n],'"');
+		}
+		ctx.append('>')
+		config.id=bid
+		ctx.appendPlugin(PLUGIN_MODULE,JSON.stringify(config));
+		parseChildRemoveAttr(ctx,node);
+		ctx.appendEnd();
+		ctx.append('</',tagName,'>')
+	}else{
+		parseChildRemoveAttr(ctx,node);
 	}
-	ctx.append('>')
-	config.id=bid
-	ctx.appendPlugin(PLUGIN_MODULE,JSON.stringify(config));
-	parseChildRemoveAttr(ctx,node);
-	ctx.appendEnd();
-	ctx.append('</',tagName,'>')
 }
 
 
@@ -898,7 +903,7 @@ addAll(processChoose,null,"choose");
 addAll(processWhen,null,"when");
 addAll(processOtherwise,null,"otherwise");
 addAll(processExtends,null,"extends","extend");
-addAll(processBlock,null,"module","lazy-module","block","group");
+addAll(processBlock,null,"module","lazy-module","lazy-block","block","group");
 
 //属性与标签语法差异太大,不能用统一函数处理.
 addParser({parse:parseInclude,before:beforeInclude},"include");

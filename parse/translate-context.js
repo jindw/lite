@@ -115,6 +115,7 @@ TranslateContext.prototype = {
     		}
     	}
     },
+    visitEL:function(){},
     //[PLUGIN_TYPE,child,config]
     processPlugin:function(child,config){
     	var pn = config['class'];

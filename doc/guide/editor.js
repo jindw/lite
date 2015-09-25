@@ -53,16 +53,6 @@ function showNext(thiz,n,show,hide){
 	}
 }
 
-
-var resultEditor = CodeMirror(placeMirror, {
-	value: '',
-	readOnly:true,
-	lineNumbers: true,
-	mode: {name:"litexml"}
-});
-
-var exampleRunner;
-var exampleResult
 function closeExample(){
 	exampleRunner.parentNode.style.display = 'none';
 }	
@@ -79,85 +69,8 @@ function showExample(json,template){
 	var runButton = document.getElementById("runButton");
 	runButton.disabled=true;
 }
-function buildContext(){
-	var context = new ParseContext();
-	var cached = {};
-	for(var path in xmlSourceMap){
-		cached[path] = xmlSourceMap[path].getValue();
-	}
-	cached["/source.xhtml"] = templateEditor.getValue();
-	var baseXMLLoader = context.loadXML;
-	context.loadXML = function(uri){
-		if(uri.path){
-			if(uri.path in cached){
-				uri = cached[uri.path];
-			}else{
-				console.warn("未知文件路径",uri.path)
-			}
-		}
-		return baseXMLLoader.call(context,uri);
-	}
-	context.parse(context.createURI('/source.xhtml'));
-	return context;
-}
-function compileToJS(){
-	try{
-		var context = buildContext();
-		var litecode = context.toList();
-		var translator = new JSTranslator();//'.','/','-','!','%'
-		translator.liteImpl = 'liteImpl';//avoid inline jslib 
-		var jscode = translator.translate(litecode);
-	}catch(e){
-		console.error("测试失败：模板编译异常：",e);
-		return;
-	}
-	showResult(jscode);
-	updateResultRunner('js',litecode,jscode);
-}
-function compileToNodeJS(){
-	try{
-		var context = buildContext();
-		var litecode = context.toList();
-		var prefix = extractStaticPrefix(litecode);
-		
-		var translator = new JSTranslator();
-		translator.liteImpl = 'liteImpl';
-		var jscode = translator.translate(litecode);
-	}catch(e){
-		console.error("测试失败：模板编译异常：",e);
-		return;
-	}
-	var nodecode = ['[(function(liteImpl){return (',jscode,')}),',
-				stringifyJSON(context.config),',',
-				stringifyJSON(prefix),']'].join('');
-	showResult(nodecode);
-	updateResultRunner('NodeJS',litecode,nodecode);
-}
-function compileToPHP(){
-	try{
-		var context = buildContext();
-		var litecode = context.toList();
-		var pt = new PHPTranslator("/test.xhtml".replace(/[\/\-\$\.!%]/g,'_'));//'.','/','-','!','%'
-		var phpcode = pt.translate(litecode);
-	}catch(e){
-		console.error("测试失败：模板编译异常：",e);
-		return;
-	}
-	showResult(phpcode);
-	updateResultRunner('php',litecode,phpcode);
-}
-function compileToLite(){
-	try{
-		var context = buildContext();
-		var litecode = context.toList();
-		var litecode = stringifyJSON(litecode);
-	}catch(e){
-		console.error("测试失败：模板编译异常：",e);
-		return;
-	}
-	showResult(litecode);
-	updateResultRunner('java',litecode,null);
-}
+
+
 function updateResultRunner(type,litecode,runcode){
 	runStatus = {type:type.toLowerCase(),litecode:litecode,runcode:runcode}
 	var runButton = document.getElementById("runButton");
@@ -165,6 +78,7 @@ function updateResultRunner(type,litecode,runcode){
 	runButton.value="运行("+type+")"
 }
 var runStatus = {}
+
 function runTemplate(){
 	try{
 		var js = jsonEditor.getValue();
@@ -174,43 +88,46 @@ function runTemplate(){
 		return;
 	}
 
-	if(runStatus.type == 'js'){
+	if(runStatus.type == 'js' || runStatus.type == 'nodejs'){
 		try{
 			var code = runStatus.runcode;
 			var tpl =  window.eval("("+(code||null)+")");
-			//alert(code)
-			
-			var result = tpl(data);
+			var out = [];
+			var resp = {
+				write:function(t){
+					out.push(t)
+				},
+				end:function(){
+					
+					showResult(out.join(''));
+				}
+			}
+			var nodejsMock = wrapResponse(resp);
+			var result = tpl(data,nodejsMock);
 		}catch(e){
 			console.error("测试失败：模板运行异常："+tpl+e);
 			return;
 		}
-		showResult(result);
 	}else {
 		var loader = document.getElementById('resultLoader');
 		loader.style.display = 'block';
+		console.log(runStatus.type)
 		try{
 			if(runStatus.type == 'php'){
-				var code = runStatus.runcode+'\nlite_template_test_xhtml(json_decode('+stringifyJSON(stringifyJSON(data))+',true));';
+				var code = runStatus.runcode+'\nlite_template_test_xhtml(json_decode('+JSON.stringify(JSON.stringify(data))+',true));';
 				var url = 'http://litetest.sinaapp.com/?php='+encodeURIComponent(code)+'&t='+ +new Date();
 				loader.innerHTML = '<h2>load php result ....</h2><p>php 预览环境由新浪appengine提供。<a href="'+url+'">手动预览</a></p>';
 			
 			}else if(runStatus.type == 'java'){
 				var code = runStatus.litecode;
-				var model = stringifyJSON(data);
+				var model = JSON.stringify(data);
 				var url = 'http://www.xidea.org:1981/lite/doc/runner.jsp?code='
 					+encodeURIComponent(code)+'&model='
 					+encodeURIComponent(model)+'&'+ +new Date();
 				loader.innerHTML = '<h2>load java result ....</h2><p>java 预览环境由满江红开源组织提供。<a href="'+url+'">手动预览</a></p>';
-			}else if(runStatus.type == 'nodejs'){
-				var code = runStatus.runcode;
-				var model = stringifyJSON(data);
-				var url = 'http://www.xidea.org:1985/runner?code='
-					+encodeURIComponent(code)+'&model='
-					+encodeURIComponent(model)+'&'+ +new Date();
-				loader.innerHTML = '<h2>load nodejs result ....</h2><p>nodejs 预览环境由满江红开源组织提供。<a href="'+url+'">手动预览</a></p>';
 			}
 		}catch(e){
+			console.error(e)
 		}
 		var s = document.createElement('script');
 		s.src = url +'&callback=showResult'
@@ -232,6 +149,10 @@ function showResult(result){
 	},100)
 }
 
+
+if(typeof CodeMirror == 'function'){
+var exampleRunner;
+var exampleResult;
 CodeMirror.defineMode("litexml", function(config, parserConfig) {
   var litexmlOverlay = {
     token: function(stream, state) {
@@ -250,3 +171,5 @@ CodeMirror.defineMode("litexml", function(config, parserConfig) {
   };
   return CodeMirror.overlayParser(CodeMirror.getMode(config, parserConfig.backdrop || "xml"), litexmlOverlay);
 });
+
+}

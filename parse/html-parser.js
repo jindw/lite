@@ -146,7 +146,8 @@ function buildMoved(tag){
 	}
 }
 
-while(buildMoved(moveList.pop()));
+//while(buildMoved(moveList.pop()));
+
 HTML_EXT.parseAutoform = HTML_EXT.beforeAutoform;
 HTML_EXT.parseTrim = HTML_EXT.beforeTrim;
 function toelv(value){

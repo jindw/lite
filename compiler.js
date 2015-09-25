@@ -34,11 +34,14 @@ LiteCompiler.prototype.compile=function(path){
 	//console.log(context.getConfigMap(path))
 	
 	var litecode = context.toList();
-	var prefix = '';//extractStaticPrefix(litecode);
 	if(litecode.length){
-		var translator = new JSTranslator();//'.','/','-','!','%'
+		var translator = new JSTranslator({
+			//liteImpl:liteImpl,
+			waitPromise:true
+		});//'.','/','-','!','%'
 		//translator.liteImpl = 'liteImpl';//avoid inline jslib 
-		var jscode = translator.translate(litecode);
+		var functionName = path.replace(/[^\w\_]/g,'_')
+		var jscode = translator.translate(litecode,{name:functionName});//,params:null,defaults:null
 	}else{//纯静态内容
 		var jscode = "function(){}";
 	}
@@ -49,7 +52,7 @@ LiteCompiler.prototype.compile=function(path){
 	while(i--){
 		res[i] = res[i].path
 	}
-	return {resources:res,code:jscode,config:config,prefix:prefix};
+	return {resources:res,code:jscode,config:config};
 }
 exports.LiteCompiler = LiteCompiler;
 

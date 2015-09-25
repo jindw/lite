@@ -5,6 +5,10 @@ html,body {
 	width:100%;
 	height:100%;
 }
+code{
+	background:#ddd;
+	margin:12px;
+}
 
 body,div,dl,dt,dd,ol,h1,h2,h3,h4,h5,h6,pre,code,
 form,fieldset,legend,input,button,textarea,p,blockquote,th,td {

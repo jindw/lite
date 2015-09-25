@@ -5,10 +5,9 @@
  * @author jindw
  * @version $Id: template.js,v 1.4 2008/02/28 14:39:06 jindw Exp $
  */
-if(typeof require == 'function'){
 var ELSE_TYPE=require('./template-token').ELSE_TYPE;
 var TranslateContext=require('./translate-context').TranslateContext;
-}
+var Expression=require('js-el').Expression;
 var GLOBAL_DEF_MAP ={
 	"parseInt":1, 	
 	"parseFloat":1, 	
@@ -25,16 +24,11 @@ var GLOBAL_VAR_MAP ={
 }
 copy(GLOBAL_DEF_MAP,GLOBAL_VAR_MAP);
 /**
+ * @param config {waitPromise:true,liteImpl:'liteImpl'}
  * JS原生代码翻译器实现
  */
-function JSTranslator(name,params,hasBuildIn,defaults){
-    this.name = name;
-    this.params = params;
-    this.defaults = defaults;
-    if(hasBuildIn != undefined){
-    	this.hasBuildIn =  hasBuildIn;
-    }
-    
+function JSTranslator(config){
+	this.config = config||{};
 }
 /**
  * <code>
@@ -121,55 +115,87 @@ function(__context__,__out__){
 }
  */
 JSTranslator.prototype = {
-	hasBuildIn:false,
-	translate:function(list,rtf){
-	    
-		var ctx = new JSTranslateContext(list,this.name,this.params,this.defaults);
-		ctx.waitPromise = true;
-		ctx.hasBuildIn = this.hasBuildIn;
-		ctx.liteImpl = this.liteImpl || "lite_impl";
+	/**
+	 * @param list
+	 * @param config {waitPromise:false,liteImpl:'liteImpl'}
+	 */
+	translate:function(list,config){
+		config = config||{};
+		var params = config.params;
+		var functionName = config.name;
+		var ctx = new JSTranslateContext(list,functionName,params,config.defaults);
+		var jsConfig = this.config || {};
+		var liteImpl = jsConfig.liteImpl
+		ctx.waitPromise = jsConfig.waitPromise && [];
+		ctx.hasBuildIn = !!liteImpl;
+		ctx.liteImpl = liteImpl && (typeof liteImpl == 'string'?liteImpl:'liteImpl');
 		ctx.parse();
-		var code = genSource(ctx,rtf);//ctx.header +  ctx.body;
+		var code = genSource(ctx);//ctx.header +  ctx.body;
 		//console.log('###'+code+'@@@')
+		
 		try{
-		    if(!this.name && !rtf){
-		    	new Function('return '+code);
-		    }else{
-		    	new Function(code);
-		    }
+		    var fn = new Function('return '+code);
+		    //if(params ==null|| params.length == 0) {
+		    	var scope = ctx.scope;
+		    	var refMap = scope.refMap;
+		    	var varMap = scope.varMap;
+		    	var externalRefs = Object.keys(refMap).filter(function(n){return !(n in varMap)})
+		    	if(externalRefs == 0 && params){
+		    		return 'function '+(functionName||'')+'(){return '+JSON.stringify(fn()()) + '}'
+		    	}
+		    //}
+		    
 		}catch(e){
 			var error = console.error("invalid code:",e,'<code>'+code+'</code>');
 			code = "return ("+JSON.stringify(error)+');';
-	    }
-		var result = [];
-    	//if(!this.liteImpl){
-    	//	result.push("if('undefined' ==typeof ",ctx.liteImpl,"){",ctx.liteImpl,'=',INIT_SCRIPT,"}");
-    	//}
-	    result.push('\n',code.replace(/<\/script>/g,'<\\/script>'));
-	    
-	    return result.join("").replace(/^\s*[\r\n]+/,'');
+		}
+		return code.replace(/<\/script>/g,'<\\/script>').replace(/^\s*[\r\n]+/,'');
 	}
 }
-function genSource(ctx,rtf){
+function genSource(ctx){
 	var header = ctx.header;
 	var body = ctx.body;
 	var functionName = ctx.name;
 	var params = ctx.params
 	var args = params?params.join(','):'__context__,__out__';
-	if(functionName){
-    	try{
-    		new Function("function "+functionName+"(){}");
-    		functionName = "function "+functionName;
-    	}catch(e){
-    		functionName += "=function";
-    	}
-    }else{
-    	functionName = "function";
-    }
+	var result = ['function ',functionName,"(",args,'){\n',header,'\n']
     if (ctx.waitPromise) {
-    	body = '\tfunction* __g__(){\n'+body+'\n\treturn __out__.join("");\n\t}'
-    };
-	return functionName+"("+args+'){\n'+header+'\n'+body+'\n}\n'
+    	result.push("\t__g__ = __g__();",
+			"function __n__(){",
+				"var n = __g__.next().value;",
+				"if(n instanceof Promise){",
+					"n.then(__n__);console.log('is promise',n)",
+				//"}else{",
+					//"console.log('is not promise',n)",
+					//"__n__()",
+				"}",
+			"};__n__();\n");
+		result.push('\tfunction* __g__(){\n',body,'\n\treturn __out__.join("");\n\t}\n}\n');
+	}else{
+		if(params){
+			
+			var m = body.match(/^\s*__out__\.push\((.*?)\);?\s*$/)
+			if(m){
+				var item = '\treturn ['+m[1]+']'
+				try{
+					new Function(item)
+					if(item.indexOf(',')>0){
+						result.push(item,'.join("");\n}')
+					}else{
+						result.push('\treturn ',m[1],';\n}');
+					}
+					
+					return result.join('');
+				}catch(e){}
+				
+			}
+			result.push('\tvar __out__ = [];\n');
+		}else{
+			result.push('\tvar __out__ = __out__||[];\n');
+		}
+		result.push(body,'\n\treturn __out__.join("");\n}\n');
+	}
+	return result.join('');
 }
 
 
@@ -180,7 +206,7 @@ function genDecFunction(contents,functionName,params,defaults,modelVarsDec){
 	var modelVarsDecAndParams = modelVarsDec.concat();
 	//生成参数表
 	var args = params?params.join(','):'__context__';
-	if(defaults && defaults.length){
+	if(params && defaults && defaults.length){
 		//处理默认参数
 		modelVarsDecAndParams.push('\tswitch(arguments.length){\n');
 		var begin = params.length - defaults.length
@@ -218,9 +244,9 @@ function genModelDecVars(ctx,scope,params){
 
 	var varMap = scope.varMap;
 	var paramMap = scope.paramMap;
-	//console.dir(scope)
+	//console.log('genModelDecVars::::',params)
 	copy(refMap,map);
-	copy(callMap,map);
+	//copy(callMap,map);
 	var vars = [];
 	for(var n in map){
 		if(n != '*' && !((n in GLOBAL_VAR_MAP)|| (n in varMap) || (n in paramMap))){
@@ -234,18 +260,8 @@ function genModelDecVars(ctx,scope,params){
 			
 		}
 	}
-	if(ctx.waitPromise){
+	if(!params && ctx.waitPromise){
 		result.push(vars.join('\n').replace(/.+/mg,'\tif($& instanceof Promise){$&.then(function(v){$& = v});}'),'\n');
-		result.push("\t__g__ = __g__();",
-			"function __n__(){",
-				"var n = __g__.next().value;",
-				"if(n instanceof Promise){",
-					"n.then(__n__);console.log('is promise',n)",
-				//"}else{",
-					//"console.log('is not promise',n)",
-					//"__n__()",
-				"}",
-			"};__n__();\n");
 	}
 	
 
@@ -422,9 +438,9 @@ JSTranslateContext.prototype.appendXA=function(item){
         	this.append("var ",testId,"=",value);
     	}
         this.append("if(",testId,"!=null){");
-        this.outputIndent++;
+        this.pushBlock();
         appendOutput(this,"' "+attributeName+"=\"'",createXMLEncoder(this,el,true),"'\"'");
-        this.outputIndent--;
+        this.popBlock();
         this.append("}");
         this.freeId(testId);
     }else{
@@ -460,18 +476,22 @@ JSTranslateContext.prototype.processIf=function(code,i){
     var childCode = item[1];
     var testEL = item[2];
     var test = this.stringifyEL(testEL);
-    this.append("if(",test,"){");
-    this.outputIndent++;
+    //var wel = genWaitEL(this,testEL);visited el before function call
+    //this.append('if(',wel?'('+wel+')||('+test+')':test,'){');
+    this.append('if(',test,'){');
+    this.pushBlock();
     this.appendCode(childCode)
-    this.outputIndent--;
+    this.popBlock();
     this.append("}");
     var nextElse = code[i+1];
     var notEnd = true;
+    this.pushBlock(true);
     while(nextElse && nextElse[0] == ELSE_TYPE){
         i++;
         var childCode = nextElse[1];
         var testEL = nextElse[2];
         var test = this.stringifyEL(testEL);
+        
         if(test){
         	var wel = genWaitEL(this,testEL);
             this.append('else if(',wel?'('+wel+')||('+test+')':test,'){');
@@ -479,12 +499,13 @@ JSTranslateContext.prototype.processIf=function(code,i){
             notEnd = false;
             this.append("else{");
         }
-        this.outputIndent++;
+        this.pushBlock();
         this.appendCode(childCode)
-        this.outputIndent--;
+        this.popBlock();
         this.append("}");
         nextElse = code[i+1];
     }
+    this.popBlock(true);
     return i;
 }
 JSTranslateContext.prototype.processFor=function(code,i){
@@ -516,13 +537,13 @@ JSTranslateContext.prototype.processFor=function(code,i){
         this.forStack.unshift(['for',indexId,lastIndexId]);
     }
     this.append("for(;",indexId,"<=",lastIndexId,";",indexId,"++){");
-    this.outputIndent++;
+    this.pushBlock();
     if(forRef){
         this.append(statusId,".index=",indexId,";");
     }
     this.append("var ",varNameId,"=",itemsId,"[",indexId,"];");
     this.appendCode(childCode);
-    this.outputIndent--;
+    this.popBlock();
     this.append("}");
     
 	if(forRef){
@@ -537,6 +558,7 @@ JSTranslateContext.prototype.processFor=function(code,i){
     var nextElse = code[i+1];
     var notEnd = true;
     var elseIndex = 0;
+    this.pushBlock(true);
     while(notEnd && nextElse && nextElse[0] == ELSE_TYPE){
         i++;
         elseIndex++;
@@ -553,23 +575,41 @@ JSTranslateContext.prototype.processFor=function(code,i){
             notEnd = false;
             this.append(ifstart,"(!",indexId,"){");
         }
-        this.outputIndent++;
+        this.pushBlock();
         this.appendCode(childCode)
-        this.outputIndent--;
+        this.popBlock();
         this.append("}");
         nextElse = code[i+1];
     }
+    this.popBlock(true);
     this.freeId(indexId);
     return i;
 }
-
+JSTranslateContext.prototype.pushBlock = function(ignoreIndent){
+	if(!ignoreIndent){
+		this.outputIndent++
+	}
+	var waitPromise = this.waitPromise;
+	if(waitPromise){
+		var topStatus = waitPromise[waitPromise.length-1]
+		waitPromise.push(topStatus?topStatus.concat():[])
+	}
+}
+JSTranslateContext.prototype.popBlock = function(ignoreIndent){
+	if(!ignoreIndent){
+		this.outputIndent--;
+	}
+	if(this.waitPromise){
+		this.waitPromise.pop()
+	}
+}
 
 JSTranslateContext.prototype.appendModulePlugin = function(child,config){
 	if(this.waitPromise){
 		this.append('__out__.lazy(function* __lazy_module_',config.id,'__(__out__){');
-		this.outputIndent++;
+		this.pushBlock();//TODO:lazy push, 最后执行的元素可以最后检测waitEL
 		this.appendCode(child)
-		this.outputIndent--;
+		this.popBlock();
 		this.append('})');
 	}else{
 		this.appendCode(child)
@@ -605,18 +645,23 @@ JSTranslateContext.prototype. getForAttribute= function(forName,forAttribute){
 }
 
 function genWaitEL(ctx,el){
-    var vars = Object.keys(new Expression(el).getVarMap());
-    var vars2 = [];
-    for(var i=0;i<vars.length;i++){
-    	var v = vars[i];
-    	if(v != 'for'){
-    		vars2.push(v)
-		}
-
-    }
-    if (vars2.length) {
-    	return 'yield* __out__.wait('+vars2.join(',')+')'
-    };
+	if(ctx.waitPromise){
+		var topWaitedVars = ctx.waitPromise[ctx.waitPromise.length-1];
+		
+	    var vars = Object.keys(new Expression(el).getVarMap());
+	    var vars2 = [];
+	    for(var i=0;i<vars.length;i++){
+	    	var v = vars[i];
+	    	if(v != 'for' && topWaitedVars.indexOf(v)<0){
+	    		vars2.push(v)
+	    		topWaitedVars.push(v)
+			}
+	
+	    }
+	    if (vars2.length) {
+	    	return 'yield* __out__.wait('+vars2.join(',')+')'
+	    };
+	}
     
 }
 function appendOutput(ctx){
@@ -670,9 +715,6 @@ function copy(source,target){
 		target[n] = source[n];
 	}
 }
-if(typeof require == 'function'){
 exports.JSTranslator=JSTranslator;
 exports.GLOBAL_DEF_MAP=GLOBAL_DEF_MAP;
 exports.GLOBAL_VAR_MAP=GLOBAL_VAR_MAP;
-var Expression=require('js-el').Expression;
-}

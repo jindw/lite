@@ -1,19 +1,19 @@
-var LiteCompiler = require('./compiler').LiteCompiler;
-
+var  configRoot = '-lite-engine-child-process-root';
+exports.configRoot = configRoot
 //node path -root root -filter path#name
 var argv = process.argv;
-var isChild = argv[2]=='-root';//child-process-compiler
+var isChild = argv[2]==configRoot;//child-process-compiler
 if(isChild){
 	//{path:tplPath,action:'remove'}
 	var root = argv[3].replace(/\/?$/,'/');
-	if(argv[4] == '-filter' && argv[5]){
-		var filter = argv[5];
+	if(argv[4] == '-configurator' && argv[5]){
+		var configurator = argv[5];
 	}
 	//console.log('ischild:',root);
 	var compile = setupCompiler(root,function(cmd){
 		//console.log('compile:',cmd)
 		process.send(cmd)
-	},filter);
+	},configurator);
 	process.on('message', function(path){
 		compile(path);
 	});
@@ -22,7 +22,7 @@ if(isChild){
 /**
  * 
  */
-function setupCompiler(root,callback,filters){
+function setupCompiler(root,callback,configurator){
 	/**
 	 * template -> {resource1:true,resource2:true}
 	 */
@@ -33,19 +33,24 @@ function setupCompiler(root,callback,filters){
 	 * resource -> {template1:true,template2:true}
 	 */
 	var resourceMap = {}
+	
+	var LiteCompiler = require('./compiler').LiteCompiler;
+	
 	/*
 	 * template compiler
 	 */
 	var templateCompiler= new LiteCompiler(root);
-	if(filters){
+	if(configurator){
+		console.log('filter:',configurator)
 		try{
-			if('string' == typeof filters ){
-				var args = filters.split('#');
+			if('string' == typeof configurator ){
+				var args = configurators.split('#');
 				var path = args[0];
 				var name = args[1];
-				filters = require(path)[name];
+				var configurator = require(path)[name];
+				templateCompiler.waitPromise = true
+				templateCompiler = configurator(templateCompiler)
 			}
-			templateCompiler = filters(templateCompiler)
 		}catch(e){
 			console.error('filter init error:'+e);
 		}
