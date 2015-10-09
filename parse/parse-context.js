@@ -88,7 +88,10 @@ ParseContext.prototype = {
 			//console.info(len,source && source.xml)
 			this._topChain.next(source);
 		}else{//text
+			
 			if(source instanceof URI){
+				var oldURI = this.currentURI;
+    			this.setCurrentURI(source);
 				//console.log(source+this.loadXML)
 				source = this.loadXML(source);
 				if(typeof source == 'string'){
@@ -111,6 +114,7 @@ ParseContext.prototype = {
 				}
 			}
 			this._topChain.next(source);
+			if(oldURI) this.setCurrentURI(oldURI)
 		}
 		
 		
@@ -167,7 +171,6 @@ ParseContext.prototype = {
     		}
     	}
     	if(path instanceof URI){
-    		this.setCurrentURI(path);
     		var doc = loadLiteXML(path,this.config.root);
     		this._context._loadTime+=(new Date()-t1);
     	}

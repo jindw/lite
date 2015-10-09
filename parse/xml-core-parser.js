@@ -608,7 +608,9 @@ function beforeInclude(attr){
 		if(path2.charAt() == '$') {
 			doc = this.getAttribute(path2);
 		}else{
-			var doc = this.loadXML(this.createURI(path))
+			var uri = this.createURI(path);
+			var doc = this.loadXML(uri)
+			//this.setCurrentURI(uri);
 		}
 	}else{
 		var doc = attr.ownerDocument;
@@ -625,6 +627,7 @@ function beforeInclude(attr){
 		}
 		this.process(element);
 	}
+	//this.setCurrentURI(oldURI);
 }
 function mergeAttribute(element,node){
 	if(node.nodeType == 2){
@@ -687,13 +690,36 @@ function parseInclude(node){
 		if(doc==null){
 			this.append("<strong style='color:red'>没找到包含节点："+this.currentURI+ node.value+"</strong>");
 		}else{
-		    if(xpath!=null){
+		    if(selector != null){
+		    	try{
+		    		//var  nwmatcher = require('nwmatcher');
+		    		var nwmatcher = require('nwmatcher');
+		    		var nw = nwmatcher({document:doc});
+		    		nw.configure( { USE_QSAPI: false, VERBOSITY: true } );
+		    		
+		    	}catch(e){
+		    		console.warn("module nwmatcher is required  for css selector!\n  npm install nwmatcher",e);
+		    		var nwmatcher = require('./nwmatcher');
+		    		var nw = nwmatcher({document:doc});
+		    		nw.configure( { USE_QSAPI: false, VERBOSITY: true } );
+		    	}
+		    	//console.log(nwmatcher+'')
+		    	if(nwmatcher){
+		    		
+		    		var list = nw.select(selector,doc);
+		    		if(list && list.length){
+		    			for(var i=0;i<list.length;i++){
+		    				this.parse(list[i])
+		    			}
+		    		}else{
+		    			console.warn("empty selection:"+selector)
+		    		}
+		    		return;
+		    	}
+		    }else if(xpath!=null){
 		    	var d = doc;
 		        doc = selectByXPath(doc,xpath);
 		        //alert([url,xpath,new XMLSerializer().serializeToString(d),doc.length])
-		    }
-		    if(selector != null){
-		    	console.warn("目前尚不支持css selector 选择节点");
 		    }
 		        
 		    this.parse(doc)

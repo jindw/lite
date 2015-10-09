@@ -14,7 +14,10 @@
  * @public
  */
 function parseLite(data,params,builtInFn){
-    var parseContext = new ParseContext();
+	var path = data && data.documentURI;
+    var root = path && data.root;
+	var parseContext = new ParseContext(root && new ParseConfig(root));
+    path && parseContext.setCurrentURI(path)
     data = parseContext.loadXML(data);
     parseContext.parse(data);
     try{
@@ -38,6 +41,7 @@ function parseLite(data,params,builtInFn){
 if(typeof require == 'function'){
 exports.parseLite=parseLite;
 exports.LiteEngine=require('./lite-engine').LiteEngine;
+var ParseConfig=require('./parse/config').ParseConfig;
 var JSTranslator=require('./parse/js-translator').JSTranslator;
 var ParseContext=require('./parse/parse-context').ParseContext;
 }
