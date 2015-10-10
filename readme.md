@@ -7,6 +7,26 @@ Install:
 
 Example:
 ====
+
+### client
+```javascript
+//inline template
+var tpl = <div>
+             hello ${user.name}
+             <c:if test="${user.messages}">
+                <c:for var="item" list="${user.messages}">
+                        <p>${item}</p>
+                </c:for>
+             </c:if>
+          </div>
+//single template file
+var tpl = liteXML("../tpl/test.tpl");
+
+//part template of single file(with css3 selector)
+var tpl = liteXML('../tpl/test.tpl#header)
+```
+
+### nodejs
 ```javascript
 var LiteEngine = require('lite').LiteEngine;
 var engine = new LiteEngine('./');
