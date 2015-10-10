@@ -8,7 +8,7 @@ Install:
 Example:
 ====
 
-### client
+### client(with jsi(https://github.com/jindw/jsi) debug server)
 ```javascript
 //inline template
 var tpl = <div>
@@ -23,7 +23,7 @@ var tpl = <div>
 var tpl = liteXML("../tpl/test.tpl");
 
 //part template of single file(with css3 selector)
-var tpl = liteXML('../tpl/test.tpl#header)
+var tpl = liteXML('../tpl/test.tpl#header')
 ```
 
 ### nodejs
