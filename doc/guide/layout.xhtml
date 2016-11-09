@@ -2,17 +2,11 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:c="http://www.xidea.org/lite/core"
 	xmlns:h="http://www.xidea.org/lite/html-ext"
-	h:trim="true">
+	h:trim="false">
 	<head>
 		<c:include path="$page" xpath="//xhtml:head/*" />
 		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
 		<link href="default.css" rel="stylesheet" type="text/css" />
-		<link href="../codemirror/codemirror.css" rel="stylesheet" type="text/css" />
-		<link href="../codemirror/default.css" rel="stylesheet" type="text/css" />
-		<script src="../codemirror/codemirror.js" />
-		<script src="../codemirror/overlay.js" />
-		<script src="../codemirror/javascript.js" />
-		<script src="../codemirror/xml.js" />
 		<c:extension namespace="http://www.w3.org/1999/xhtml">
 			//<![CDATA[
 	var PATH_KEY = "http://www.xidea.org/lite/doc/guide/layout.xhtml#currentPathh";
@@ -79,33 +73,32 @@ function parseCode(node){
     	}
     	text = text2;
     }
-	function encodeString(a){
-		return (0x10000 + a.charCodeAt()).toString(16).replace('1','\\u')
-	}
 	
-	text = text.replace(/[\\"'\r\n<]/g,encodeString)
-	text = '"'+text+'"';
 	var varName = node.getAttribute("var");
 	var alias = node.getAttribute("alias");
 	var path = node.getAttribute("path");
-	var model = node.getAttribute("model");
+	var model = node.getAttribute("model");//有模型就可以执行
+
+	text = JSON.stringify(text).replace(/(\]\]|script)>/g,'$1\\>');
 	if(model){
 		if(/^\s*\{/.test(model)){
-			model = '"'+model.replace(/[\\"'\r\n<]/g,encodeString)+'"'
+			model = JSON.stringify(model).replace(/(\]\]|script)>/g,'$1\\>');
 		}
 	}else{
-		model='';
+		model=null;
 	}
+	var guid = '__id__'+new Date().getTime()+'_'+(Math.random()*100 | 0);
+	this.append("<script>//<![CDATA[\n" + guid+'=[' +text+','+model+"];\n//]"+"]>\n<\/script>\n")
 	if(varName){
-		this.append("<script>" + varName+'=' +text+";<\/script>")
+		this.append("<script>//<![CDATA[\n" + varName+'=' +guid+"[0];\n//]"+"]>\n<\/script>\n")
 		if(model){
-			this.append("<span class='runner' onclick='showExample("+model+','+varName+")'>执行</span>");
+			this.append("<span class='runner' onclick='showExample("+guid+"[0],"+varName+")'>执行</span>");
 		}
 	}else{
 		if(alias){
-			this.append("<script>" + alias+'=' +text+";<\/script>")
+			this.append("<script>" + alias+'=' +guid+"[0];\n<\/script>\n")
 		}
-		this.append("<div class='code'><script>renderSource("+text+','+(model||null)+",'"+path+"');<\/script></div>")
+		this.append("<div class='code'><script>renderSource("+guid+"[0],"+guid+"[1],'"+path+"');<\/script></div>")
 	}
 };
 function parseNL2BR(node){
@@ -127,85 +120,20 @@ function parseNL2BR(node){
 }
 //]]>
 		</c:extension>
+	</head>
+	<body>
+		
 		<style>
 			.cm-lite-el{ color:#d30;}
 			.cm-lite-tag{
 			color:#9933FF;font-weight:bold;}
 		</style>
-		<script>
-			//<![CDATA[
-var xmlSourceMap = {};
-		
-		CodeMirror.defineMode("litexml", function(config, parserConfig) {
-		  var litexmlOverlay = {
-		    token: function(stream, state) {
-		      if (stream.match("c:")) {
-		        while ((ch = stream.next()) != null)
-		          if (!/\w/.test(ch)) break;
-		        return "lite-tag";
-		      }else if (stream.match(/^(?:\$\!?\{)/)) {
-		        while ((ch = stream.next()) != null)
-		          if (ch == "}") break;
-		        return "lite-el";
-		      }
-		      while (stream.next() != null && !stream.match(/^\$\!?\{/, false)) {}
-		      return null;
-		    }
-		  };
-		  return CodeMirror.overlayParser(CodeMirror.getMode(config, parserConfig.backdrop || "xml"), litexmlOverlay);
-		});
-		var mirrors = [];
-		var jsons = [];
-		function placeMirror(node){
-			var s = document.getElementsByTagName('script');
-			var s = s[s.length-1];
-			s.parentNode.appendChild(node);
-		}
-		function renderSource(text,json,path){
-			if(json){
-				document.write("<div class='runner' onclick='showExample(jsons["+jsons.length+"],mirrors["+mirrors.length+"].getValue())'>执行</div>");
-				jsons.push(json);
-			}
-			var mirror =  CodeMirror(placeMirror, {
-  				value: text,
-  				//readOnly :true,
-  				mode:  {name:/^\s*</.test(text)?"litexml":"javascript",json:true}
-			});
-			mirrors.push(mirror);
-			if(path){
-				xmlSourceMap[path] = mirror;
-			}
-			return mirror;
-		}
-		function updateMirror(){
-			var i= mirrors.length;
-			while(i--){
-				mirrors[i].refresh();
-			}
-		}
-		function showNext(thiz,n,show,hide){
-			while(n = n.nextSibling){
-				if(n.nodeType == 1){
-					if(n.style.display=='none'){
-						n.style.display = 'block';
-						thiz.innerHTML = hide;
-						updateMirror();
-					}else{
-						n.style.display = 'none';
-						thiz.innerHTML = show;
-					}
-					break;
-				}
-			}
-		}
-		//]]>
-		</script>
-	</head>
-	<body>
-		
+		<script src="http://www.xidea.org/lite/codemirror/o.js" />
+		<script src='editor.js'></script>
 		<c:include path="layout-main.xhtml" />
 		<c:include path="layout-menu.xhtml" />
 		<c:include path="layout-dialog.xhtml" />
+		
 		<script>
 			var menu = document.getElementById('menu');
 			var menuContent = menu.firstChild;

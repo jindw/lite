@@ -7,6 +7,7 @@
  */
 var CORE_URI = "http://www.xidea.org/lite/core"
 var PLUGIN_NATIVE = "org.xidea.lite.NativePlugin"
+var PLUGIN_MODULE = "org.xidea.lite.ModulePlugin"
 var Core = {
 	xmlns : function(){},
 	seek:function(text){
@@ -192,30 +193,12 @@ var Core = {
 	//"parse*" : function(node){
 	//	console.error("未支持标签："+node.tagName)
 	},
-	parsePHP:function(node){
-    	var value = node.textContent || node.text;
-    	this.appendPlugin(PLUGIN_NATIVE,'{"type":"php"}');
-    	parseChildRemoveAttr(this,node);
-    	this.appendEnd();
-	},
-	parseJS:function(node){
-    	var value = node.textContent || node.text;
-    	this.appendPlugin(PLUGIN_NATIVE,'{"type":"js"}');
-    	parseChildRemoveAttr(this,node);
-    	this.appendEnd();
-	},
 	parseComment:function(){}
 }
 var DOCUMENT_LAYOUT_PROCESSED = "http://www.xidea.org/lite/core/c:layout-processed";
 var CHOOSE_KEY = "http://www.xidea.org/lite/core/c:choose@value";
 var FOR_PATTERN = /\s*([\$\w_]+)\s*(?:,\s*([\w\$_]+))?\s*(?:\:|in)([\s\S]*)/;
-function _parseChild(context,node){
-	node = node.firstChild;
-	while(node){
-		context.parse(node)
-		node = node.nextSibling;
-	}
-}
+
 
 /**
  * node,attribute
@@ -366,9 +349,7 @@ function splitList(list){
 					var begin = list.substring(0,dd);
 					var end = list.substring(dd+2);
 					new Function("return "+begin+'-'+end);//for x4e
-					
 					var begin2 = begin.replace(/^\s*\[/,'');
-					
 					if(begin2 != begin){
 						try{
 							new Function("return "+begin);
@@ -776,8 +757,8 @@ function processExtends(node){
 function processBlock(node){
 	var extendsConfig = this.getAttribute("#extends");
 	var value = findXMLAttribute(node,"name","id");
-	var childNodes = node.nodeType == 1?node.childNodes:node.ownerElement||node.selectSingleNode('..');
-		
+	//console.log(node.nodeType,node.tagName,'%%%%',node.ownerElement)
+
 	if(extendsConfig){//
 		var blockMap = extendsConfig.blockMap;
 		var cached = value && (value in blockMap) && blockMap[value];
@@ -788,77 +769,59 @@ function processBlock(node){
 					//set current uri
 					setNodeURI(this,cached);
 					extendsConfig.parse=true;
-					this.parse(cached);
+					//this.parse(cached);
+					_parseBlock(this,cached);
 				}finally{
 	        		this.setCurrentURI(parentURI);
 				}
 			}else{
-				this.parse(childNodes);
+				//this.parse(childNodes);
+				_parseBlock(this,node);
 			}
 		}else{
 			if(!cached){
-				blockMap[value] = childNodes;
+				blockMap[value] = node;
 			}
 		}
 	}else{
-		this.parse(childNodes);
-	}
-}
+		_parseBlock(this,node);
 
-function processI18N(node){
-	var i18nKey = findXMLAttribute(node,'i18n');
-	var uri = this.currentURI;
-	var path = uri.scheme == 'lite'? uri.path: String(uri);
-	if(node.nodeType == 1){
-		var begin = this.mark();
-		_parseChild(this,node);
-		var content = this.reset(begin);
-		
-		i18nKey = i18nHash(path,i18nKey,node.textContent);
-		//
-		this.parse("${I18N."+i18nKey+"}");
-	}else{
-		var el = node.ownerElement;
-		var node2 = el.cloneNode(true)||el;
-		var begin = this.mark();
-		this.parse(el.textContent);
-		var content = this.reset(begin);
+	}
+}
+function _parseBlock(ctx,node){
+	//function parseModule(node){
+	var bid = puid(ctx);
+	var config={};
+	var attrs = node.attributes ;
+	var tagName =  'div';
+	var pluginName = node.nodeName; 
+	if(!attrs){
+		attrs = node.ownerElement.attributes;
+		tagName = node.ownerElement.nodeName;
+	}
 
-		i18nKey = i18nHash(path,i18nKey,el.textContent);
-		node2.textContent = "${I18N."+i18nKey+"}";
-		node2.removeAttribute(node.name);
-		node2.setAttribute('data-i18n-key',i18nKey)
-		this.next(node2);
-	}
-	addI18NData(this,i18nKey,content);
-}
-function seekI18N(text){
-	
-}
-function addI18NData(context,i18nKey,content){
-	if(typeof content != 'string' && content.length == 1){
-		content = content[0];
-	}
-	var i18nSource = context.getAttribute("#i18n-source");
-	var i18nObject = context.getAttribute("#i18n-object");
-	if(!i18nObject){
-		i18nObject = {};
-		context.setAttribute("#i18n-object",i18nObject);
-	}
-	if(i18nKey in i18nObject){
-		i18nObject[i18nKey] = content;
-		i18nSource = JSON.stringify(i18nObject)
-	}else{
-		if(i18nSource){
-			i18nSource = i18nSource.slice(0,-1)+',';
-		}else{
-			i18nSource = '{';
+	//console.log(tagName,node.nodeName)
+	for(var i=0,len = attrs.length;i<len;i++){
+		var a = attrs.item(i);
+		var n = a.name;
+		if(!n.match(/\:|^id$/i)){
+			config[n] = a.value;
 		}
-		i18nSource = i18nSource + '"'+i18nKey+'":' +JSON.stringify(content)+'}';
 	}
-	
-	context.setAttribute("#i18n-data",i18nSource);
+	ctx.append('<',tagName,' id="__lazy_module_',bid,'__"');
+	for(var n in config){
+		ctx.append(' ',n,'="',config[n],'"');
+	}
+	ctx.append('>')
+	config.id=bid
+	ctx.appendPlugin(PLUGIN_MODULE,JSON.stringify(config));
+	parseChildRemoveAttr(ctx,node);
+	ctx.appendEnd();
+	ctx.append('</',tagName,'>')
 }
+
+
+
 
 
 function parseChildRemoveAttr(context,node,ignoreSpace){
@@ -878,7 +841,10 @@ function parseChildRemoveAttr(context,node,ignoreSpace){
 			}
 		}
 	}else if(node.nodeType == 2){//attr
+		//console.log('do child remove:'+node)
+		//throw new Error();
 		var el = node.ownerElement||node.selectSingleNode('..');
+		//console.log(node.nodeName,node.namespaceURI);
 		el.removeAttributeNode(node);
 		context.parse(el);//||node.selectSingleNode('parent::*'));
 	}else {//other
@@ -886,9 +852,17 @@ function parseChildRemoveAttr(context,node,ignoreSpace){
 	}
 }
 
-
-
-
+function puid(ctx){
+	var oldId = ctx.__increaceID||0;;
+	return ctx.__increaceID = ++oldId
+}
+function _parseChild(context,node){
+	node = node.firstChild;
+	while(node){
+		context.parse(node)
+		node = node.nextSibling;
+	}
+}
 
 
 
@@ -924,11 +898,13 @@ addAll(processChoose,null,"choose");
 addAll(processWhen,null,"when");
 addAll(processOtherwise,null,"otherwise");
 addAll(processExtends,null,"extends","extend");
-addAll(processBlock,null,"block","group");
+addAll(processBlock,null,"module","lazy-module","block","group");
 
 //属性与标签语法差异太大,不能用统一函数处理.
 addParser({parse:parseInclude,before:beforeInclude},"include");
 
+
+require('./i18n').setup(Core)
 
 if(typeof require == 'function'){
 exports.Core=Core;
@@ -940,7 +916,6 @@ var selectByXPath=require('./xml').selectByXPath;
 var findXMLAttribute=require('./xml').findXMLAttribute;
 var findXMLAttributeAsEL=require('./xml').findXMLAttributeAsEL;
 var URI=require('./resource').URI;
-var i18nHash=require('./resource').i18nHash;
 var PLUGIN_DEFINE=require('./template-token').PLUGIN_DEFINE;
 var XA_TYPE=require('./template-token').XA_TYPE;
 var EL_TYPE=require('./template-token').EL_TYPE;

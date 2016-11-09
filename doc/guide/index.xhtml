@@ -36,7 +36,7 @@
 				</p>
 				<p>
 					其中，姓名 "张三" 和城市 "北京" 需要从后端获取，后端数据模型如下：
-					<x:code alias="testModel">
+					<x:code alias="testModel" path="/testmodel.json">
 						{
 						"name": "张三",
 						"city":"北京"
@@ -45,7 +45,7 @@
 				</p>
 				<p>
 					为了实现上述内容的动态展示，我们需要编写一个简单的模板：
-					<script>var testModel = mirrors[mirrors.length-1].getValue();
+					<script>var testModel = editorMap['/testmodel.json'].getValue();
 					</script>
 					<x:code model="testModel">
 					<![CDATA[

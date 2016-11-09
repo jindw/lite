@@ -148,7 +148,9 @@ ExtensionParser.prototype = {
 						if(fn && an in ext.beforeMap){
 	//						es = 2.1
 							//el.removeAttributeNode(attr);
+							//attr.ownerElement = el;
 							fn.call(chain,attr);
+							//
 	//						es =2.2
 							return true;
 						}

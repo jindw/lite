@@ -26,8 +26,8 @@ function TranslateContext(code,name,params){
      * 当前scope的信息(包括变量,引用,函数调用信息,for状态,函数集...) 
      */
     this.scope = new OptimizeScope(code,params);
-    this.idMap = {};
-    this.depth = 0;
+    this.allocateIdMap = {};
+    this.outputIndent = 0;
 
 }
 
@@ -50,8 +50,8 @@ TranslateContext.prototype = {
     	}
         var i = 0;
         while(true){
-            if(!this.idMap[i]){
-                this.idMap[i] = true;
+            if(!this.allocateIdMap[i]){
+                this.allocateIdMap[i] = true;
                 return ID_PREFIX+i.toString(36);
             }
             i++;
@@ -60,7 +60,7 @@ TranslateContext.prototype = {
     freeId:function(id){
     	var len = ID_PREFIX.length;
         if(id.substring(0,len) == ID_PREFIX){
-        	delete this.idMap[id.substring(len)];
+        	delete this.allocateIdMap[id.substring(len)];
         }
     },
     /**
@@ -71,32 +71,42 @@ TranslateContext.prototype = {
     		if(typeof item == 'string'){
     			this.appendStatic(item)
     		}else{
-    			switch(item && item[0]){
+                var type = item && item[0];
+    			switch(type){
                 case EL_TYPE:
+                    this.visitEL(item[1],type)
                     this.appendEL(item);
                     break;
                 case XT_TYPE:
+                    this.visitEL(item[1],type)
                     this.appendXT(item);
     			    break;
                 case XA_TYPE:
+                    this.visitEL(item[1],type)
                     this.appendXA(item);
                     break;
                 case VAR_TYPE:
+                    this.visitEL(item[1],type)
                     this.appendVar(item);
                     break;
                 case CAPTURE_TYPE:
-                    this.appendCapture(item);
+                    this.visitEL(null,type)
+                    this.processCapture(item);
                     break;
     			case PLUGIN_TYPE://not support
-    				this.processPlugin(item);
+                    this.visitEL(item[2],type)
+    				this.processPlugin(item[1],item[2]);
     				break;
                 case IF_TYPE:
+                    this.visitEL(item[2],type)
                     i = this.processIf(code,i);
                     break;
                 case FOR_TYPE:
+                    this.visitEL(item[2],type)
                     i = this.processFor(code,i);
                     break;
                 case ELSE_TYPE:
+                    this.visitEL(item[2],type)
                 	i = this.processElse(code,i);
     				break;
                 default:
@@ -105,32 +115,38 @@ TranslateContext.prototype = {
     		}
     	}
     },
-    processPlugin:function(item){
-    	var pn = item[2]['class'];
+    //[PLUGIN_TYPE,child,config]
+    processPlugin:function(child,config){
+    	var pn = config['class'];
     	switch(pn.replace(/^org\.xidea\.lite\.(?:parse\.)?/,'')){
     	case 'EncodePlugin':
-    		this.appendEncodePlugin(item[1][0]);
+    		this.appendEncodePlugin(child[0]);
     		break;
     	case 'DatePlugin':
-    		this.appendDatePlugin(item[1][0],item[1][1]);
+    		this.appendDatePlugin(child[0],child[1]);
     		break;
     	case 'NativePlugin':
-    		this.appendNativePlugin(item);
+    		this.appendNativePlugin(child,config);
     		break;
-    	case 'DefinePlugin':
-    		break;
+        case 'ModulePlugin':
+            this.appendModulePlugin(child,config);
+            break;
+        case 'DefinePlugin':
+            //全局自动处理
+            break;
     	case 'ClientPlugin':
+            //编译期消灭
     	default:
-			console.error("程序bug(插件需要预处理):"+pn,item[2]);
+			console.error("程序bug(插件需要预处理):"+pn,config);
     	}
     },
     processElse:function(code,i){
     	throw Error('问题指令(无主else,else 指令必须紧跟if或者for)：'+code,i);
     },
     append:function(){
-        var depth = this.depth;
+        var outputIndent = this.outputIndent;
         this.out.push("\n");
-        while(depth--){
+        while(outputIndent--){
             this.out.push("\t")
         }
         for(var i=0;i<arguments.length;i++){

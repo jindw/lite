@@ -9,8 +9,9 @@ if(isChild){
 	if(argv[4] == '-filter' && argv[5]){
 		var filter = argv[5];
 	}
-	console.log('ischild:',root);
+	//console.log('ischild:',root);
 	var compile = setupCompiler(root,function(cmd){
+		//console.log('compile:',cmd)
 		process.send(cmd)
 	},filter);
 	process.on('message', function(path){
@@ -86,9 +87,10 @@ function setupCompiler(root,callback,filters){
 		    var res = result.resources;
 			//console.info('resource config:' ,res);
 		    addTemplateWatch(path,res);
-		    callback({path:path,action:'add',code:result.code,config:result.config,prefix:result[3]})
+		    callback({path:path,action:'add',code:result.code,config:result.config})
 		    //process.send({path:path,action:'add',code:result.code,config:result.config,prefix:result[3]})
 	    }catch(e){
+	    	throw e;
 	    	callback({path:path,action:'error',
 	    		code:"function(){return '<pre>'+"+JSON.stringify(require('util').inspect(e,true)+
 					'\n\n'+(e.message +e.stack))+"}",

@@ -61,7 +61,7 @@ function partitionJavaScript(source){
 						source = tail.replace(tailReg,'');
 						continue;
 					}else{
-						result.push(source.substring(0,index),ex);
+						result.push(source.substring(0,index),subsource);
 					}
 				}else{
 					if(concatable){

@@ -119,7 +119,8 @@ function vistLite(context,code){
 				}else if(className == 'org.xidea.lite.parse.ClientPlugin'){
 					//doFindClient(item);
 				}else if(className == 'org.xidea.lite.EncodePlugin' 
-					||className =='org.xidea.lite.DatePlugin'){
+					||className =='org.xidea.lite.DatePlugin'
+					||className =='org.xidea.lite.ModulePlugin'){
 					vistLite(context,item[1]);
 				}else{
 					console.info('unknow plugin',item[2])

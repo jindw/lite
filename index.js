@@ -24,13 +24,14 @@ function parseLite(data,params,builtInFn){
     	var translator = new JSTranslator("",params,builtInFn);
     	//translator.liteImpl = "lite_impl"
     	var code = translator.translate(parseContext.toList(),false);
+        //console.log(code)
         data =  new Function('return '+code).apply();
         data.toString=function(){//_$1 encodeXML
             return code;
         }
     	return data;
 	 }catch(e){
-	 	console.log("<code>"+code+"</code>")
+	 	//console.log("<code>"+code+"</code>")
 	 	console.error("翻译结果错误：",e,code)
 	    throw e;
 	 }
