@@ -22,13 +22,15 @@ Example:
 var LiteEngine = require('lite').LiteEngine;
 var engine = new LiteEngine('./');
 require('http').createServer(function (request, response) {
-    //
+    //template path
+    var path = '/index.xhtml';
+    //model(available data and unavailable data(pending Promise))
     var model = {
         title:'static first and promise auto wait test'
         data1:model1Promise,//output available contents first and wait until the promise is ready!!
         data2:model2Promise
     };
-    engine.render(request.url,model,request,response);
+    engine.render(path,model,request,response);
 }).listen(2012);
 ```
 
