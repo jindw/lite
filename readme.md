@@ -6,8 +6,8 @@ Install:
 >npm install lite
 
 
-Innovative features 
-====
+Innovative Features 
+-------
 1. Available content parallel download and unavailable content auto wait
 2. Automatic Bigpiple+Bigrender Support
 
