@@ -27,9 +27,9 @@ require('http').createServer(function (request, response) {
     * render(url,model,request,response)
 
 
-### Web Browser (with jsi(https://github.com/jindw/jsi) debug server)
+### Web Browser
 ```javascript
-
+//autocompile via jsi(https://github.com/jindw/jsi) 
 //single template file
 var tpl = require("../tpl/test.tpl");
 var model = {user:...}
