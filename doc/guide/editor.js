@@ -88,7 +88,7 @@ function runTemplate(){
 		return;
 	}
 
-	if(runStatus.type == 'js' || runStatus.type == 'nodejs'){
+	if(/nodejs|js|javascript/.test(runStatus.type)){
 		try{
 			var code = runStatus.runcode;
 			var tpl =  window.eval("("+(code||null)+")");
@@ -112,6 +112,10 @@ function runTemplate(){
 		var loader = document.getElementById('resultLoader');
 		loader.style.display = 'block';
 		console.log(runStatus.type)
+		if(true){
+			showResult('无模拟环境，无法测试运用...');
+			return;
+		}
 		try{
 			if(runStatus.type == 'php'){
 				var code = runStatus.runcode+'\nlite_template_test_xhtml(json_decode('+JSON.stringify(JSON.stringify(data))+',true));';
@@ -137,7 +141,7 @@ function runTemplate(){
 function showResult(result){
 	var resultSource = document.getElementById('resultSource');
 	exampleResult.style.display = 'block';
-	resultEditor.setValue(result);
+	resultEditor.setValue(result||'结果生成失败...');
 	var n = 0;
 	var i = setInterval(function a(){
 		resultSource.style.opacity = n/10;

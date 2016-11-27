@@ -667,20 +667,21 @@ JSTranslateContext.prototype.findForAttribute= function(forName,forAttribute){
 function genWaitEL(ctx,el){
 	if(ctx.waitPromise){
 		var topWaitedVars = ctx.waitPromise[ctx.waitPromise.length-1];
+		if(topWaitedVars){
+		    var vars = Object.keys(new Expression(el).getVarMap());
+		    var vars2 = [];
+		    for(var i=0;i<vars.length;i++){
+		    	var v = vars[i];
+		    	if(v != 'for' && topWaitedVars.indexOf(v)<0){
+		    		vars2.push(v)
+		    		topWaitedVars.push(v)
+				}
 		
-	    var vars = Object.keys(new Expression(el).getVarMap());
-	    var vars2 = [];
-	    for(var i=0;i<vars.length;i++){
-	    	var v = vars[i];
-	    	if(v != 'for' && topWaitedVars.indexOf(v)<0){
-	    		vars2.push(v)
-	    		topWaitedVars.push(v)
+		    }
+		    if (vars2.length) {
+		    	return 'yield* __out__.wait('+vars2.join(',')+')'
+		    };
 			}
-	
-	    }
-	    if (vars2.length) {
-	    	return 'yield* __out__.wait('+vars2.join(',')+')'
-	    };
 	}
     
 }

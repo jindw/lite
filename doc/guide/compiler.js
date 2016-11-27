@@ -53,13 +53,10 @@ function compileToJS(){
 		var litecode = context.toList();
 		var translator = new JSTranslator();//'.','/','-','!','%'
 		var jscode = translator.translate(litecode);
-	}catch(e){
-		console.error("测试失败：模板编译异常：",e);
-		throw e;
-		return;
+	}finally{
+		showResult(jscode);
+		updateResultRunner('JavaScript',litecode,jscode);
 	}
-	showResult(jscode);
-	updateResultRunner('js',litecode,jscode);
 }
 function compileToNodeJS(){
 	try{
@@ -67,13 +64,11 @@ function compileToNodeJS(){
 		var litecode = context.toList();
 		var translator = new JSTranslator({waitPromise:true});
 		var jscode = translator.translate(litecode);
-	}catch(e){
-		console.error("测试失败：模板编译异常：",e);
-		return;
+	}finally{
+		var nodecode = jscode;
+		showResult(nodecode);
+		updateResultRunner('NodeJS',litecode,nodecode);
 	}
-	var nodecode = jscode;
-	showResult(nodecode);
-	updateResultRunner('NodeJS',litecode,nodecode);
 }
 function compileToPHP(){
 	try{
@@ -84,24 +79,19 @@ function compileToPHP(){
 			path:"/test.xhtml".replace(/[\/\-\$\.!%]/g,'_')
 		});//'.','/','-','!','%'
 		var phpcode = pt.translate(litecode);
-	}catch(e){
-		console.error("测试失败：模板编译异常：",e);
-		throw e;
-		return;
+	}finally{
+		showResult(phpcode);
+		updateResultRunner('PHP',litecode,phpcode);
 	}
-	showResult(phpcode);
-	updateResultRunner('php',litecode,phpcode);
 }
 function compileToLite(){
 	try{
 		var context = buildContext();
 		var litecode = context.toList();
 		var litecode = JSON.stringify(litecode);
-	}catch(e){
-		console.error("测试失败：模板编译异常：",e);
-		return;
+	}finally{
+		showResult(litecode);
+		updateResultRunner('Java',litecode,null);
 	}
-	showResult(litecode);
-	updateResultRunner('java',litecode,null);
 }
 
