@@ -262,9 +262,7 @@
 			<p>有时候，我们需要吧一些有换行的文本显示成换行，但是，有希望代码是编码安全的。通常，这种功能只能通过内置函数实现。
 				现在，我们尝试用一个插件解决这个问题。
 			</p>
-			<x:code model="{text: ' abc \ ndef \ nghi \ n
-				<script>
-					该编码的还是的编码<\/script>'}">
+			<x:code model="{text: '第一行\n第二行\n第三行\n<script>//第四行是一段源码<\/script>'}">
 			<![CDATA[
 			<html xmlns:x="http://www.xidea.org/lite/example">
 			<head>
@@ -300,53 +298,44 @@
 			]]>
 			</x:code>
 		</ul>
-		<h3>真实运用示例</h3>
+		<h3>真实运用示例
+			[
+			<a onclick='showNext(this,this.parentNode,"展开示例","隐藏示例");return false' href="#">展开示例</a>
+			]</h3>
 		<ul>
-			<p>该文档系统中，有个常用的模板语法扩展:代码着色语法，该语法的书写形式如：。</p>
+			<p>代码着色语法书写形式如下：</p>
 			<x:code><![CDATA[
 			<!-- modelVar 属性用来指定一个模板数据模型，如果存在，她会生成一个运行按钮 -->
 			<x:code model="modelVar"><![CDATA[
 				...这里你可以任意书写源码了,系统会自动作色...
 			]]>]]&gt;&lt;/x:code>
 			</x:code>
-			<p>这个插件的实现在吗在layout.xhtml 中。片段如下。</p>
+			<p>这个插件的实现在吗在layout.xhtml 中。摘录如下：</p>
 			<x:code>
 				<![CDATA[
 <c:extension namespace="http://www.xidea.org/lite/example">
 	<![CDATA[
-		var style = 'border: 1px solid #DFECF1;'
-    			+'font-family:"Courier New",monospace;'
-    			+'padding:4px;margin:4px;'
-    			+'font-size:12px;overflow:auto;'
-    			+'background-color:#EEE;border:1px solid #222;';
 		//代码高亮标签解析器
 		function parseCode(node){
-			var text = String(node.textContent || node.text);
-			//清理相同的前置缩进
-			text = text.replace(/^\s*[\r\n]+|[\r\n]+\s*$/g,'');
+			var text = String(node.textContent);
+			//清理相同的前置缩进,不因为html自动缩进影响代码格式
 			while(/^(?:[\t ].*[\r\n]*)*$/.test(text)){
 				text = text.replace(/^[\t ](.*)/mg,'$1');
 			}
 			text = JSON.stringify(text);
-			//用于申明多行字符串
-			var varName = node.getAttribute("var");
-			if(varName){
-				this.append("<script>" + varName+'=' +text+";<\/script>")
-			}else{
-				var model = node.getAttribute("model");
-				if(model){
-					if(/^\s*\{$/.test(model)){
-						model = JSON.stringify(text)
-					}
-					model = ','+model+'';
-				}
-				this.append("<div class='code'><script>renderSource("+text+model+");<\/script></div>")
+
+			//如果源码是模板，指定数据模型后需要生成一个运行测试按钮
+			var model = node.getAttribute("model");
+			if(model){
+				text = text+ ','+model;
 			}
+			this.append("<div class='code'><script>renderSource("+text+");<\/script></div>")
 		};
 ]]>
-				]]&gt;
-				&lt;/c:extension>
+	]]&gt;
+&lt;/c:extension>
 			</x:code>
+			<p>该文档系统中，有个常用的模板语法扩展:代码着色语法就是通过模板扩展来方便书写的。</p>
 		</ul>
 	</body>
 </html>

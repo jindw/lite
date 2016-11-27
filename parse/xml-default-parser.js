@@ -5,9 +5,14 @@
  * @author jindw
  * @version $Id: template.js,v 1.4 2008/02/28 14:39:06 jindw Exp $
  */
-
-
-var XML_SPACE_TRIM = "http://www.xidea.org/lite/attribute/h:trim-space" 
+//import {XA_TYPE,EL_TYPE,XT_TYPE} from './template-token';
+//export var XML_SPACE_TRIM = "http://www.xidea.org/lite/attribute/h:trim-space" 
+//export 
+var XA_TYPE = require('./template-token').XA_TYPE;
+var EL_TYPE = require('./template-token').EL_TYPE;
+var XT_TYPE = require('./template-token').XT_TYPE;
+exports.parseDefaultXMLNode = parseDefaultXMLNode;
+var XML_SPACE_TRIM =exports.XML_SPACE_TRIM = "http://www.xidea.org/lite/attribute/h:trim-space" 
 function parseDefaultXMLNode(node,context,chain){
 	//try{
 	    switch(node.nodeType){
@@ -235,11 +240,3 @@ function processNotation(node,context,chain){
 //1 2
 
 
-
-if(typeof require == 'function'){
-exports.parseDefaultXMLNode=parseDefaultXMLNode;
-exports.XML_SPACE_TRIM=XML_SPACE_TRIM;
-var XA_TYPE=require('./template-token').XA_TYPE;
-var EL_TYPE=require('./template-token').EL_TYPE;
-var XT_TYPE=require('./template-token').XT_TYPE;
-}

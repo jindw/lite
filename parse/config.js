@@ -14,13 +14,12 @@
  * 		"excludes":[],
  * 		"config":{
  *          "encoding":"utf-8",
- * 			"contentType":"text/html;charset=UTF-8",
- * 			"javascriptCompressor":"org.jside.jsi.tools.JSACompressor"
+ * 			"contentType":"text/html;charset=UTF-8"
  * 		},
  * 		"extensions":[
  * 			{
- * 				"namespace":"http://www.w3.org/1999/xhtml",
- * 				"package":"org.xidea.lite.xhtml"
+ * 				"namespace":"http://www.xidea.org/lite/core",
+ * 				"package":"lite/parse/i18n"
  * 			}
  * 		]
  * 	}

@@ -1,11 +1,6 @@
 
-var i18nHash=require('./resource').i18nHash;
 var findXMLAttribute=require('./xml').findXMLAttribute;
-exports.setup = function(Core){
-	Core.beforeI18n =processI18N;
-	Core.parseI18n =processI18N;
 
-}
 function processI18N(node){
 	if (node.nodeType == 2) {
 		var el = node.ownerElement;
@@ -88,3 +83,35 @@ function addI18NData(context,i18nKey,content){
 	context.setAttribute("#i18n-data",i18nSource);
 }
 
+
+function i18nHash(path,i18nKey,text){
+	path = path.replace(/[^\w]|_/g,function(c){
+		return '_'+numberToString(100+c.charCodeAt(),62).slice(-2)
+	});
+	if(!i18nKey){
+		i18nKey = 0;
+		text = text.replace(/[^\s]/,function(c){
+			i18nKey = i18nKey + (i18nKey & 2) + c.charCodeAt();
+		})
+		i18nKey = numberToString(i18nKey,62)
+	}
+	return path +'__'+ i18nKey;
+}
+var b64codes = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='.split('');
+function numberToString(value,radix){
+	var buf = [];
+	while(value>0){
+		var m = value%radix;
+		buf.push(b64codes[m]);
+		value = (value-m)/radix;
+	}
+	return buf.reverse().join('')
+}
+
+
+
+exports.setup = function(Core){
+	Core.beforeI18n =processI18N;
+	Core.parseI18n =processI18N;
+}
+exports.i18nHash = i18nHash;

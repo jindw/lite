@@ -8,8 +8,10 @@ Install:
 
 Innovative Features 
 -------
-1. Available content parallel download and unavailable content auto wait
-2. Automatic Bigpiple+Bigrender Support
+1. Automatic BigPiple+BigRender Support.
+2. Automatic encoding based on HTML semantic context.
+3. Available contents transmitted immediately  and unavailable content auto wait.
+
 
 Example:
 ====
@@ -47,7 +49,7 @@ var model = {user:...}
 var html = tpl(model);
 
 
-//inline template function
+//inline template function(ECMA4XML)
 var tplFunction = function(user){
     return <div>
              hello ${user.name}
@@ -70,8 +72,6 @@ var tplString = <div>
           </div>;
 
 ```
-
-
 
 ### Other Server Side Impl
 

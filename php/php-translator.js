@@ -484,5 +484,5 @@ var php2jsBoolean=require('./php-el-translator').php2jsBoolean;
 var isSimplePHPEL=require('./php-el-translator').isSimplePHPEL;
 var stringifyPHP=require('./php-el-translator').stringifyPHP;
 var stringifyPHPEL=require('./php-el-translator').stringifyPHPEL;
-var i18nHash=require('../parse/resource').i18nHash;
+var i18nHash=require('../parse/i18n').i18nHash;
 }

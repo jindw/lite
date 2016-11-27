@@ -19,9 +19,6 @@ if(isChild){
 	});
 }
 
-/**
- * 
- */
 function setupCompiler(root,callback,configurator){
 	/**
 	 * template -> {resource1:true,resource2:true}
