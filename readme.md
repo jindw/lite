@@ -26,11 +26,13 @@ var engine = new LiteEngine('./');
 require('http').createServer(function (request, response) {
     //template path
     var path = '/index.xhtml';
+    var data1Promise = APIProxy.getDataAsPromise('http://api.xxx.com/search?keyword=data1&...')
+    var data2Promise = APIProxy.getDataAsPromise('http://api.xxx.com/search?keyword=data2&...')
     //model(available data and unavailable data(pending Promise))
     var model = {
         title:'static first and promise auto wait test'
-        data1:model1Promise,//output available contents first and wait until the promise is ready!!
-        data2:model2Promise
+        data1:data1Promise,//output available contents first and wait until the promise is ready!!
+        data2:data2Promise
     };
     engine.render(path,model,request,response);
 }).listen(2012);

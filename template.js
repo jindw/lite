@@ -22,22 +22,39 @@ Template.prototype.render = function(context,response){
 	}
 }
 function wrapResponse(resp){
+	
+	var lazyList = [];
+	var buf=[];
+	var bufLen=0;
 	return {
-		lazyList:[],
 		push:function(){
 			for(var len = arguments.length, i = 0;i<len;i++){
 				//console.log(arguments[i])
-				resp.write(arguments[i]);
+				var txt = arguments[i];
+				buf.push(txt)
+				if((bufLen+=txt)>1024){
+					resp.write(buf.join(''));
+					buf = [];
+					bufLen = 0;
+				}
+				//resp.write(arguments[i]);
 			}
+		},
+		join:function(){
+			resp.write(buf.join(''));
+			buf = [];
+			if(!doMutiLazyLoad(lazyList,resp)){
+				resp.end();
+			}
+		},
+		flush:function(){
+			resp.write(buf.join(''));
+			buf = [];
+			bufLen = 0;
 		},
 		wait:modelWait,
 		lazy:function(g){
-			this.lazyList.push(g);
-		},
-		join:function(){
-			if(!doMutiLazyLoad(this.lazyList,resp)){
-				resp.end();
-			}
+			lazyList.push(g);
 		}
 	}
 }
@@ -52,7 +69,10 @@ function* modelWait(){
 	}
 }*/
 try{
-	var modelWait = Function('return function* modelWait(){var i = arguments.length;while(i--){if (arguments[i] instanceof Promise) {yield arguments[i]}}}')()
+	var modelWait = Function('return function* modelWait(){' +
+			'var i = arguments.length;while(i--){if (arguments[i] instanceof Promise) {' +
+			'this.flush();'+
+			'yield arguments[i]}}}')()
 }catch(e){
 	console.error('es6 yield is not support!!');
 	var modelWait = function(){
@@ -63,13 +83,15 @@ try{
 function doMutiLazyLoad(lazyList,resp){
 	var len = lazyList.length;
 	var dec = len;
+	var first = true;
 	for(var i = 0;i<len;i++){
 		startModule(lazyList[i],[]);
 	}
 
 	//console.log('lazy module:',len,lazyList)
 	function startModule(g,r){
-		var id = g.name;
+		var id = g.name;//__lazy_module_\d+__
+		r.flush = function(){};
 		r.wait = modelWait;
 		g = g(r);
 		function next(){
@@ -79,7 +101,12 @@ function doMutiLazyLoad(lazyList,resp){
 				//console.log('done');
 				var rtv = r.join('');
 				//console.log('#$%$###### item',rtv)
-				resp.write('<script>moduleLoaded("'+id+'",'+JSON.stringify(rtv)+')</script>')
+				//
+				//resp.write('<script>(this.__module_loaded__||function(id,h){document.getElementById(id).innerHTML=h})("'+id+'",'+JSON.stringify(rtv)+')</script>')
+				resp.write('<script>'+
+				(first?'!this__module_loaded__&&(this.__module_loaded__=function(id,h){document.getElementById(id).innerHTML=h});':'')
+				+'__lazy_module_loaded__("'+id+'",'+JSON.stringify(rtv)+')</script>')
+				first = false;
 				if(--dec == 0){
 					//console.log('#$%$######end')
 					resp.end();

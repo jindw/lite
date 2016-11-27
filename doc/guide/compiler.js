@@ -1,3 +1,6 @@
+//jsi export ./compiler.js -f compressed -o .c.js
+//require('jsi/lib/exports').exportScript(from,['./compiler.js']
+
 //var parseLite = require('../../index.js').parseLite
 var editorMap = editorMap || {};
 var ParseContext = require('../../parse/parse-context.js').ParseContext;

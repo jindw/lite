@@ -289,11 +289,16 @@ function genBuildInSource(ctx){
 			buf.push(" 	function __r__(c){return '&#'+c.charCodeAt()+';'}\n");
 		}
 	}
+	
+	if(ctx.safeGetter){
+		buf.push('	function __get__(o,p,a){try{return a?o[p].apply(o,a):o[p]}catch(e){return e}}\n')
+	}
 	//if(ctx.entityEncoder){buf.push( 'var __e__ = __x__;\n');}
 	if(ctx.forStack.hit){
 		//ie7,ie8
 		buf.push("	if(!Object.keys)Object.keys=function(o){var r=[];for(var n in o){r.push(n)};return r;};\n")
 	}
+	
 	var df = ctx.dateFormat;
 	if(df.hit){
 var dlstart = df.isFixLen?'__dl__(':''	
@@ -361,6 +366,7 @@ function JSTranslateContext(code,name,params,defaults){
 	this.xmlEncoder = 0;
 	this.entityEncoder=0;
 	this.dateFormat = {hit:0};
+	this.safeGetter = {hit:0}
 }
 JSTranslateContext.prototype = new TranslateContext();
 
@@ -546,15 +552,6 @@ JSTranslateContext.prototype.processFor=function(code,i){
     this.popBlock();
     this.append("}");
     
-	if(forRef){
-		this.freeId(statusId);
-		this.forStack.shift();
-	}else if(forAttr){
-		this.forStack.shift();
-	}
-    
-    this.freeId(lastIndexId);
-    this.freeId(itemsId);;
     var nextElse = code[i+1];
     var notEnd = true;
     var elseIndex = 0;
@@ -582,6 +579,15 @@ JSTranslateContext.prototype.processFor=function(code,i){
         nextElse = code[i+1];
     }
     this.popBlock(true);
+    
+	if(forRef){
+		this.freeId(statusId);
+		this.forStack.shift();
+	}else if(forAttr){
+		this.forStack.shift();
+	}
+    this.freeId(lastIndexId);
+    this.freeId(itemsId);;
     this.freeId(indexId);
     return i;
 }
@@ -631,15 +637,29 @@ JSTranslateContext.prototype.getForName = function(){
 	var f = this.forStack[0];
 	return f && f[0];
 };
+JSTranslateContext.prototype.genGetCode = function(owner,property){
 
+	//safe
+	if(this.safeGetter){
+		this.safeGetter.hit = true;
+		return '__get__('+owner+','+property+')'
+	}else{
+		//fast
+		if(/^"[a-zA-Z_\$][_\$\w]*"$/.test(property)){
+			return owner+'.'+property.slice(1,-1);
+		}else{
+			return owner+'['+property+']';
+		}
+	}
+};
 
-JSTranslateContext.prototype. getForAttribute= function(forName,forAttribute){
-	var f = this.forStack[0];
-	if(f && f[0] == forName){
-		if(forAttribute == 'index'){
-			return f[1];
-		}else if(forAttribute == 'lastIndex'){
-			return f[2];
+JSTranslateContext.prototype.findForAttribute= function(forName,forAttribute){
+	var stack = this.forStack;
+	var index = forName == 'index'?1:(forName == 'lastIndex'?2:0);
+	for(var i=0;index && i<stack.length;i++){
+		var s = stack[i];
+		if(s && s[0] == forName){
+			return s[index];
 		}
 	}
 }

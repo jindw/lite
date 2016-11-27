@@ -1,0 +1,54 @@
+<html xmlns:x="http://www.xidea.org/lite/example" xmlns="http://www.w3.org/1999/xhtml"
+	xml:lang="zh-CN" dir="ltr">
+	<head>
+		<title>自动性能优化</title>
+	</head>
+	<body>
+		<h3>后端数据就绪前内容提前输出</h3>
+		<p>原理： 模型数据通过Promise抽象，先将模型引用抛给模板系统，让渲染期间按需等待模型，避免个别过慢接口影响整体性能</p>
+		<p>
+
+			<x:code>
+		<![CDATA[
+var LiteEngine = require('lite').LiteEngine;
+var engine = new LiteEngine('./');
+require('http').createServer(function (request, response) {
+
+	//get data promise(data is not available)
+    var data1Promise = APIProxy.getDataAsPromise('http://api.xxx.com/search?keyword=data1&...')
+    var data2Promise = APIProxy.getDataAsPromise('http://api.xxx.com/search?keyword=data2&...')
+    //template path
+    var path = '/index.xhtml';
+
+    //model(available data and unavailable data(pending Promise))
+    var model = {
+        title:'static first and promise auto wait test'
+        data1:data1Promise,//output available contents first and wait until the promise is ready!!
+        data2:data2Promise
+    };
+    engine.render(path,model,request,response);
+}).listen(2012);
+]]>
+			</x:code>
+		</p>
+		<h3>输出优先级控制（BigPiple）</h3>
+		<p>原理： 避免个别过慢接口影响整体性能，允许各个接口并行下载，先到先得</p>
+		<p>
+			<x:code model="{slowApiData:'...'}">
+		<![CDATA[
+		<html>
+		<body>
+		<c:lazy-module>
+			......
+			${slowApiData}
+		</c:lazy-module>
+		<body>
+		</html>
+		]]>
+			</x:code>
+		</p>
+		<h3>渲染优先级控制（BigRender）</h3>
+		<p>原理： 避免生成过多的html节点影响页面性能</p>
+		<p>TBD...</p>
+	</body>
+</html>
