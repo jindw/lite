@@ -15,7 +15,11 @@ function LiteEngine(root,config){
 	try{
 		//throw new Error();
 		var configRoot = require('./process').configRoot
-		this.compiler = require('child_process').fork(__dirname + '/process.js',[configRoot,root,'-configurator',configurator||'']);
+		var args = [configRoot,root]
+		if(configurator){
+			args.push('-configurator',configurator);
+		}
+		this.compiler = require('child_process').fork(__dirname + '/process.js',args);
 		this.compiler.on('message', function(result){
 			//console.log(Object.keys(result))
 			thiz.onChange(result.path,result.code,result.config)

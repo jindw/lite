@@ -18,8 +18,24 @@ Example:
 
 
 
-### NodeJS Example
+### Simple NodeJS Example
 
+```javascript
+var LiteEngine = require('lite').LiteEngine;
+var engine = new LiteEngine('./');
+require('http').createServer(function (request, response) {
+    //template path
+    var path = '/index.xhtml';
+    var model = {
+        title:'static first and promise auto wait test',
+        user:{name:'jindw',age:35}
+    };
+    engine.render(path,model,request,response);
+}).listen(2012);
+```
+
+
+### NodeJS Promise Wait Example
 ```javascript
 var LiteEngine = require('lite').LiteEngine;
 var engine = new LiteEngine('./');

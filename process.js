@@ -20,6 +20,7 @@ if(isChild){
 }
 
 function setupCompiler(root,callback,configurator){
+	var fs = require('fs');
 	/**
 	 * template -> {resource1:true,resource2:true}
 	 */
@@ -38,7 +39,7 @@ function setupCompiler(root,callback,configurator){
 	 */
 	var templateCompiler= new LiteCompiler(root);
 	if(configurator){
-		console.log('filter:',configurator)
+		//console.log('filter:',configurator)
 		try{
 			if('string' == typeof configurator ){
 				var args = configurators.split('#');
@@ -67,7 +68,7 @@ function setupCompiler(root,callback,configurator){
 		}
 	}
 	function addResourceWatch(resourcePath){
-		require('fs').watch(require('path').join(root,resourcePath), function (event, filename) {
+		fs.watch(require('path').join(root,resourcePath), function (event, filename) {
 			//console.log('event is: ' + event,filename);
 			for(var tplPath in resourceMap[resourcePath]){
 				var tpl = templateMap[tplPath];
@@ -83,8 +84,19 @@ function setupCompiler(root,callback,configurator){
 	}
 	//process.on('message', function(path) {
 	return (function(path){
+		
+		
 		try{
-			var result = templateCompiler.compile(path);
+			if(fs.existsSync(root+path)){
+				var result = templateCompiler.compile(path);
+			}else{
+				result = {resources:['./'],
+					litecode:[],
+					jscode:'function(c,out){out.push("File Not Found:'+path+'");return out.join()}',
+					config:{}
+				};
+			}
+			
 		    //console.log('child got message:', m.root);
 		    var res = result.resources;
 			//console.info('resource config:' ,res,result);

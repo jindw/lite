@@ -34,8 +34,10 @@ LiteCompiler.prototype.createParseContext = function(path){
 	return new ParseContext(this.config,path);
 }
 LiteCompiler.prototype.compile=function(path){
+	var root = this.config.root;
 	var context = this.createParseContext(path);
 	var uri = context.createURI(path);
+	
 	context.parse(uri);
 	//console.log("&&&",path)
 	//console.log(context.getConfigMap(path))
