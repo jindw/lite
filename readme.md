@@ -20,14 +20,22 @@ Example:
 
 ### Simple NodeJS Example
 
+```html
+<html>
+<head><title>${title}</title></head>
+<body>
+This is ${user.name}.
+I am ${user.age} years old this year
+</body>
+</html>
+```
 ```javascript
 var LiteEngine = require('lite').LiteEngine;
 var engine = new LiteEngine('./');
 require('http').createServer(function (request, response) {
-    //template path
     var path = '/index.xhtml';
     var model = {
-        title:'static first and promise auto wait test',
+        title:'simple test',
         user:{name:'jindw',age:35}
     };
     engine.render(path,model,request,response);
@@ -42,8 +50,8 @@ var engine = new LiteEngine('./');
 require('http').createServer(function (request, response) {
     //template path
     var path = '/index.xhtml';
-    var data1Promise = APIProxy.getDataAsPromise('http://api.xxx.com/search?keyword=data1&...')
-    var data2Promise = APIProxy.getDataAsPromise('http://api.xxx.com/search?keyword=data2&...')
+    var data1Promise = APIProxy.getDataAsPromise('http://api.xxx.com/user?name=zhangshan&...')
+    var data2Promise = APIProxy.getDataAsPromise('http://api.xxx.com/user?name=lisi&...')
     //model(available data and unavailable data(pending Promise))
     var model = {
         title:'static first and promise auto wait test'
