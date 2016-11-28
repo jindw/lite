@@ -41,9 +41,6 @@ var GLOBAL_VAR_MAP=require('../parse/js-translator').GLOBAL_VAR_MAP;
 
 var FOR_STATUS_KEY = '$__for';
 var VAR_LITE_TEMP="$__tmp";
-var ENCODING_KEY = 'http://www.xidea.org/lite/features/encoding';
-var CONTENT_TYPE_KEY = 'http://www.xidea.org/lite/features/content-type';
-var I18N_KEY = 'http://www.xidea.org/lite/features/i18n';
 
 //function checkEL(el){
 //    new Function("return "+el)
@@ -51,36 +48,40 @@ var I18N_KEY = 'http://www.xidea.org/lite/features/i18n';
 
 /**
  * JS原生代码翻译器实现
+ * @param config {waitPromise:false,liteImpl:'liteImpl'}
  */
-function PHPTranslator(option,data){
-	this.waitPromise = option.waitPromise;
-    this.id = (option.path||option).replace(/[\/\-\$\.!%]/g,'_');
-    this.featureMap = {}
-    if(data){
-    	this.resource=data[0]
-    	this.code = data[1];
-    	this.featureMap = data[2];
-    }
+function PHPTranslator(config){
+	this.waitPromise = config.waitPromise;
+	//TODO: replace 'lite__**' to config.liteImpl**
+	this.liteImpl = config.liteImpl||'lite__'
 }
 
 PHPTranslator.prototype = {
-	translate:function(list){
+	/**
+	 * 
+	 * @param config {name:'functionName',
+	 * 			//params:['arg1','arg2'],defaults:['arg2value']
+	 * 			encoding:'utf-8',
+	 * 			contentType:'text/html',
+	 * 			i18n:{},
+	 * 			resources:['/path1.xhtml','/path2.xhtml']
+	 * 		}
+	 */
+	translate:function(list,config){
 	    //var result =  JSON.stringify(context.toList())
-		var context = new PHPTranslateContext(list||this.code,this.id);
+		var context = new PHPTranslateContext(list||this.code,config.name);
 		context.waitPromise = this.waitPromise;
-		context.elPrefix = '';//:
-							//'@';//*/
+		context.htmlspecialcharsEncoding = context.encoding =  config.encoding ||"UTF-8";
+		context.contentType =  config.contentType;
 		
-		context.encoding = this.featureMap && this.featureMap[ENCODING_KEY] ||"UTF-8";
-	    context.htmlspecialcharsEncoding = context.encoding ;
-	    var contentType = this.featureMap && this.featureMap[CONTENT_TYPE_KEY];
-	    context.contentType = contentType;
-	    context.i18n = this.featureMap[I18N_KEY]
-	    context.resource = this.resource;
+		//i18n config
+		context.i18n = config.i18n
+		//for i18n find config
+		context.resources = config.resources;
+		
 		context.parse();
 		var code = context.toSource();
-	    return '<?php'+code ;
-		
+		return '<?php'+code ;
 	}
 }
 function PHPTranslateContext(code,id){
@@ -195,15 +196,15 @@ PHPTranslateContext.prototype = new TCP({
 			_appendFunctionName(this,this.scope);
 			
 			this.append("extract($__context__,EXTR_OVERWRITE);");
-			if(this.i18n && this.resource){
+			if(this.i18n && this.resources){
 				var i18ncode = new Function("return "+this.i18n)();
-				var resource = this.resource;
+				var resources = this.resources;
 				var resourceMap = {};
 				var resourceList = [];
-				for(var i=0;i<resource.length;i++){
-					resourceMap[i18nHash(resource[i],'_').slice(0,-1)] = resource[i]
+				for(var i=0;i<resources.length;i++){
+					resourceMap[i18nHash(resources[i],'_').slice(0,-1)] = resources[i]
 				}
-				console.warn(resource,resourceMap)
+				console.warn(resources,resourceMap)
 				for(var n in i18ncode){
 					n = n.substring(0,n.indexOf('__')+2);
 					if(n in resourceMap){

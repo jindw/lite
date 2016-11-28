@@ -244,43 +244,10 @@ function compilePatterns(ps){
 	return ps.join('|')||null;
 }
 
-function buildURIMatcher(pattern){
-	var matcher = /\*+|[^\*\\\/]+?|[\\\/]/g;
-	var buf = ["^"];
-	var m
-	matcher.lastIndex = 0;
-	while (m = matcher.exec(pattern)) {
-		var item = m[0];
-		var len = item.length;
-		var c = item.charAt(0);
-		if (c == '*') {
-			if (len > 1) {
-				buf.push(".*");
-			} else {
-				buf.push("[^\\\\/]*");
-			}
-		} else if(len == 1 && c == '/' || c == '\\') {
-			buf.push("[\\\\/]");
-		}else{
-			buf.push(item.replace(/[^\w]/g,quteReqExp));
-		}
-	}
-	buf.push("$");
-	return buf.join('');
-}
-function quteReqExp(x){
-	switch(x){
-	case '.':
-		return '\\.';
-	case '\\':
-		return '\\\\';
-	default:
-		return '\\x'+(0x100 + x.charCodeAt()).toString(16).substring(1);
-	}
-}
 
 if(typeof require == 'function'){
 exports.parseConfig=parseConfig;
+var buildURIMatcher = require('./resource').buildURIMatcher
 var loadLiteXML = require('./xml').loadLiteXML;
 var findXMLAttribute=require('./xml').findXMLAttribute;
 }

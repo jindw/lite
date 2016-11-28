@@ -117,16 +117,17 @@ function(__context__,__out__){
 JSTranslator.prototype = {
 	/**
 	 * @param list
-	 * @param config {waitPromise:false,liteImpl:'liteImpl'}
+	 * @param config {name:'functionName',params:['arg1','arg2'],defaults:['arg2value']}
 	 */
 	translate:function(list,config){
 		config = config||{};
 		var params = config.params;
 		var functionName = config.name;
 		var ctx = new JSTranslateContext(list,functionName,params,config.defaults);
-		var jsConfig = this.config || {};
-		var liteImpl = jsConfig.liteImpl
-		ctx.waitPromise = jsConfig.waitPromise && [];
+		
+		var translatorConfig = this.config || {};
+		var liteImpl = translatorConfig.liteImpl
+		ctx.waitPromise = translatorConfig.waitPromise && [];
 		ctx.hasBuildIn = !!liteImpl;
 		ctx.liteImpl = liteImpl && (typeof liteImpl == 'string'?liteImpl:'liteImpl');
 		ctx.parse();
@@ -631,10 +632,15 @@ JSTranslateContext.prototype.visitEL= function (el,type){
 };
 
 JSTranslateContext.prototype.getVarName = function(name){
+	if(name == 'for'){
+		console.error('invalue getVarName:')
+		//throw new Error()
+	}
 	return name;
 };
 JSTranslateContext.prototype.getForName = function(){
 	var f = this.forStack[0];
+	//console.log('getForName:',f[0])
 	return f && f[0];
 };
 JSTranslateContext.prototype.genGetCode = function(owner,property){
@@ -655,7 +661,7 @@ JSTranslateContext.prototype.genGetCode = function(owner,property){
 
 JSTranslateContext.prototype.findForAttribute= function(forName,forAttribute){
 	var stack = this.forStack;
-	var index = forName == 'index'?1:(forName == 'lastIndex'?2:0);
+	var index = forAttribute == 'index'?1:(forAttribute == 'lastIndex'?2:0);
 	for(var i=0;index && i<stack.length;i++){
 		var s = stack[i];
 		if(s && s[0] == forName){

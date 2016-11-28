@@ -1,5 +1,8 @@
-function compressJS(source){
-	if(source.search(/^(?:\s|\/[*\/])/m)<0){
+
+var uncompressed = /^[\t ]{2}|^\s*\/\/|\/\**[\r\n]/m;
+function compressJS0(source){
+	source = String(source).replace(/\r\n?/g,'\n');
+	if(source.search(uncompressed)<0){
 		return source;
 	}
 	var ps = partitionJavaScript(source);
@@ -21,66 +24,121 @@ function compressJS(source){
 			
 		default:
 			//result.push(item.replace(/^[ \t]+/gm,''));//被切开的语法块，前置换行，可能上上一个语法的结束语法，不能删除
-			result.push(item.replace(/^[\t ]+|([\r\n])\s+/g,'$1'));
+			//console.log('%%<',item.replace(/^(\r\n?|\n)+|(\s)+/gm,'$1$2'),">%%")
+			result.push(item.replace(/(\n)+|([^\S\r\n])+/gm,'$1$2').replace(/(?:([\r\n])+\s*)+/g,'$1'));
 		}
 	}
 	return result.join('');
 }
-try{
-	var parseLite = require('lite').parseLite;
-}catch(e){}
+var compressCache = [[],[]]
+
+function compressJS(source,id){
+	var result = source;
+	var keys = compressCache[0];
+	var values = compressCache[1];
+	var i = keys.indexOf(source);
+	if(i>=0){
+		keys.push(keys.splice(i,1)[0])
+		result = values.splice(i,1)[0]
+		values.push(result);
+		return result
+	};
+	var sample = source.slice(source.length/10,source.length/1.1);
+	//console.log(sample.length )
+	if(sample.length < 200 || sample.match(uncompressed)){
+		//console.log('\n=======\n',s);
+		try{
+			result= compressJS0(source,id);
+		}catch(e){
+			//console.log(e)
+			result= compressJS0('this.x='+source,id).replace(/^this.x=|(});$/g,'$1') ;
+		}
+		//console.log('\&&&&\n',s,"====");
+	}
+	keys.push(source);
+	values.push(result);
+	if(keys.length>64){
+		keys.shift();
+		values.shift();
+	}
+	return result;
+}
+var TYPE_COMMENT=0, TYPE_SOURCE =1, TYPE_STRING =2, TYPE_REGEXP=3;
 /**
  * 如何token
  * 如何补全; 能不补全就不补全
  */
 function partitionJavaScript(source){
-	var regexp = /'(?:\\.|[^'])*'|"(?:\\.|[^"])*"|\/\/.*|\/\*([^*]+|\*[^\/])*\*\/|[\/<]/;
-	var m,result = [],concatable=false;//not comment string regexp
+	/* *
+	var exp1 = /\\.|[^\\\r\n\[\/]+/   // ']' is valid char
+	var exp2 = /\[(?:\\.|[^\\\r\n\]])+]\]/    //'[' '/' is valid in []
+	var exp = /\/(?:\\.|[^\\\r\n\[\/]+|\[(?:\\.|[^\\\r\n\]])+]\])*\/(?:[img]*\b|(?=[^\w]))/
+	var xml = /<(?=(?:[A-Za-z_][\w_\-\.]*(?:\:[\w\-\.]*)?)(?:\s*\/?>|\s+\w))/i
+	/* */
+	var regexp = /'(?:\\.|[^'])*'|"(?:\\.|[^"])*"|\/\/.*|\/\*[\s\S]*?\*\/|\/(?=[^*\/].*\/(?:[img]*\b|[^\w]))|<(?=(?:[A-Za-z_][\w_\-\.]*(?:\:[\w\-\.]*)?)(?:\s*\/?>|\s+\w))/i;
+	var m,result = [],latestType=-1;//not comment string regexp
+	source = source.replace(/\r\n|\r/g,'\n');
+	function append(token,type){
+		//console.log([token,type])
+		if(token){
+			if(latestType == type){
+				result[result.length-1]+=token;
+			}else{
+				result.push(token);
+				latestType = type;
+			}
+		}
+	}
+	//console.log(source)
 	regexp.lastIndex = 0;
 	while(m = regexp.exec(source)){
+		//console.log('line:'+m)
 		if(m){
 			var index = m.index;
 			var m = m[0];
 			var xml = m == '<'
+			
+			//console.log(m)
 			if(m == '/' || xml){
-				var subsource = (xml ?findXML:findExp)(result,source.substring(index));
-				if(subsource){
-					m = subsource;
+				append(source.substring(0,index),TYPE_SOURCE)
+				var m2 = (xml ?findXML:findExp)(result,source.substring(index));
+				//console.log("exp:"+source.substr(index,5))
+				if(m2){
+					m = m2;
 					if(xml){
-						ex = 'new XML("'+subsource.replace(/["\r\n]/g,jsReplace)+'")'
-					}
-					concatable = false;
-					//TODO: 内置 lite xml
-					var pre = result[result.length-1];
-					var tail = source.substring(m.length+index);
-					var preReg =  /\bparseLite\s*\(\s*$/;
-					var tailReg = /^\s*\)/;
-					if(xml && parseLite &&pre.test(preReg) && tailReg.test(tail) ){
-						result.pop();
-						subsource = parseLite(subsource);
-						source = tail.replace(tailReg,'');
-						continue;
+						append('new XML(',TYPE_SOURCE)
+						append('"'+m.replace(/["\r\n\\]/g,jsReplace)+'"',TYPE_STRING)
+						append(')',TYPE_SOURCE)
 					}else{
-						result.push(source.substring(0,index),subsource);
+						append(m,TYPE_REGEXP)
 					}
 				}else{
-					if(concatable){
-						result[result.length-1]+=source.substring(0,index+1)
-					}else{
-						result.push(source.substring(0,index+1))
-					}
-					concatable = true;
+					//避免误判为xml或者regexp
+					append(m.replace(/^\//,'\t\/'),TYPE_SOURCE);
 				}
-			}else{
-				result.push(source.substring(0,index),m);
-				concatable  = false;
+			}else{//string,comment,other-source
+				append(source.substring(0,index),TYPE_SOURCE)
+				switch(m.charAt()){
+				case '\'':
+				case '\"':
+					append(m,TYPE_STRING);//string
+					break;
+				case '/':
+					var m2 = m.charAt(1);
+					if(m2=='*' || m2 == '/'){//?maby code?
+						append(m,TYPE_COMMENT);//string
+						break;
+					}
+				default:
+					append(m,TYPE_SOURCE);//code
+				}
 			}
 			source = source.substring(m.length+index);
 		}else{
 			break;
 		}
 	}
-	result.push(source);
+	append(source,TYPE_SOURCE);
 	return result;
 }
 /**
@@ -94,7 +152,7 @@ if(i)alert(1)//...
 
  */
 function findXML(result,source){
-	var tag = source.match(/^<([a-zA-Z_][\w_\-\.]*(?:\:[\w_\-\.]+)?)(?:\s*[\/>]|\s+[\w_])/);
+	var tag = source.match(/^<([a-z_][\w_\-\.]*(?:\:[a-z_][\w_\-\.]*)?)(?:\s*[\/>]|\s+[\w_])/i);
 	if(tag){
 		tag = tag[1];
 		tag = tag.replace(/\.\-/g,'\\$&');
@@ -121,33 +179,34 @@ function jsReplace(c){
 		case '\r':
 			return '\\r';
 		case '\n':
-			return '\\n';
+			return '\\n\\\n';
 		case '"':
 			return '\\"';
+		case '\\':
+			return '\\\\';
 		
 	}
 }
+
+
 /**
- * 
  * ''/b/ // a
  * /xxx\///2; /**\/ //b=2; 
- *
  */
 function findExp(result,source){
 	var i = result.length;
 	while(i--){
 		var line = result[i];
+		//console.log(["reg check line:",line])
 		if(!/^\/[\/*]|^\s+$/.test(line)){//ignore common or space
 			line = line.replace(/\s+$/,'');
-			if(/^['"]|^\/.+\/$/.test(line)){
+			if(/^['"]|^\/.+\/$/.test(line)){//regexp,string can't lead the regexp
 				break;
-			}
-			if(/^(?:\b(?:new|instanceof|typeof)|[^\w_$\]})])$/.test(line)){
-				//a /b 1.1/b (1+2)/b a++ /2
+			}else if(/\b(?:new|instanceof|typeof)$/.test(line)){//operator can lead regexp value
+				return findExpSource(source);
+			}else if(/(?:[)\]}]|[\w_]|--|\+\+)$/.test(line)){//value-token, postfix-operator-token,++/-- can't lead the regexp;
 				break;
 			}else{
-				// if(this.status != STATUS_EXPRESSION)
-				// is op / start
 				return findExpSource(source);
 			}
 		}
@@ -158,6 +217,7 @@ function findExpSource(text){
 	var depth=0,c,start = 1;
 	while(c = text.charAt(start++)){
 		if(c =='\n' || c == '\r'){
+			//console.log('line end for reg search!')
 			return;
 		}
 	    if(c=='['){
@@ -167,6 +227,7 @@ function findExpSource(text){
 	    }else if (c == '\\') {
 	        start++;
 	    }else if(depth == 0 && c == '/'){
+	    	outer:
 	    	while(c = text.charAt(start++)){
 	    		switch(c){
 	    			case 'g':
@@ -174,13 +235,22 @@ function findExpSource(text){
 	    			case 'm':
 	    			break;
 	    			default:
-	    			//console.error(text.substring(0,start-1)+'@',text)
-	    			return text.substring(0,start-1);
+	    			if(/\w/.test(c)){
+	    				//console.log('invalid regexp flag:'+c)
+	    				return null;
+	    			}else{
+	    				break outer;
+	    			}
 	    		}
 	    	}
+	    	//console.error(text.substring(0,start-1)+'@',text)
+	    	text = text.substring(0,start-1);
+	    	//console.log(text)
+	    	return text;
 	    	
 	    }
 	}
+	//console.log('file end for reg search!')
 }
 if(typeof require == 'function'){
 exports.partitionJavaScript=partitionJavaScript;

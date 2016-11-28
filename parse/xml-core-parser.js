@@ -150,6 +150,7 @@ var Core = {
 	},
 	parse9 : function(doc,ns){
 		var isProcessed = this.getAttribute(DOCUMENT_LAYOUT_PROCESSED);
+		//console.log(doc.documentURI+'',isProcessed)
 		if(!isProcessed){
 			 this.setAttribute(DOCUMENT_LAYOUT_PROCESSED,true);
 			 var root = doc.documentElement;
@@ -176,13 +177,16 @@ var Core = {
 			 		return ;
 			 	}
 			 	var layout = this.configMap.layout;
-			 	//console.log('layout:',layout,' of ',uri)
 			 	if(layout){
-			 		this.setAttribute('$page',doc);
 			 		var uri = this.createURI(layout);
-					//this.currentURI = uri;
-			 		//doc = this.loadXML(uri);
-			 		this.parse(uri);
+			 		if(uri != String(this.currentURI)){//layout != this
+			 			this.setAttribute('$page',doc);
+				 		//console.log('layout:',this.currentURI+'',' of ',uri+'')
+						//this.currentURI = uri;
+				 		//doc = this.loadXML(uri);
+				 		this.parse(uri);
+			 		}
+			 		
 			 		return ;
 			 	}
 			 }

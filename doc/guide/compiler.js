@@ -74,11 +74,12 @@ function compileToPHP(){
 	try{
 		var context = buildContext();
 		var litecode = context.toList();
+		var id = "/test.xhtml".replace(/[\/\-\$\.!%]/g,'_');
 		var pt = new PHPTranslator({
-			waitPromise:true,
-			path:"/test.xhtml".replace(/[\/\-\$\.!%]/g,'_')
+			waitPromise:true
 		});//'.','/','-','!','%'
-		var phpcode = pt.translate(litecode);
+		
+		var phpcode = pt.translate(litecode,{name:id});
 	}finally{
 		showResult(phpcode);
 		updateResultRunner('PHP',litecode,phpcode);

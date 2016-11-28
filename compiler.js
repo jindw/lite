@@ -2,24 +2,31 @@ var ParseConfig = require('./parse/config').ParseConfig;
 var ParseContext = require('./parse/parse-context').ParseContext;
 var JSTranslator = require('./parse/js-translator').JSTranslator;
 var loadLiteXML = require('./parse/xml').loadLiteXML;
-function LiteCompiler(root,config){
+function LiteCompiler(root,options){
+	options = options || {};
 	var path = require('path');
 	var root =String(path.resolve(root || './')).replace(/\\/g,'/');
-	var config = config || path.resolve(root,'lite.xml');
-	if(require('fs').existsSync(config)){
-		var dom = loadLiteXML(config);
+	var compileDir  = options.compileDir;
+	var configPath = options.configPath || path.resolve(root,'lite.xml');
+	
+	if(require('fs').existsSync(configPath)){
+		var dom = loadLiteXML(configPath);
 		//console.log(dom+'')
 		this.config = new ParseConfig(root,dom);
-	}else{
-		var config = path.resolve(root,'WEB-INF/lite.xml');
-		if(require('fs').existsSync(config)){
-			var dom = loadLiteXML(config);
+	}else if(!options.configPath){
+		configPath = path.resolve(root,'WEB-INF/lite.xml');
+		if(require('fs').existsSync(configPath)){
+			var dom = loadLiteXML(configPath);
 			//console.log(dom+'')
 			this.config = new ParseConfig(root,dom);
-		}else{
-			this.config = new ParseConfig(root,null);
 		}
 	}
+	this.config = this.config || new ParseConfig(root,null);
+	
+	this.translator = new JSTranslator({
+		//liteImpl:liteImpl,
+		waitPromise:true
+	});
 	console.info("LiteCompiler root:",root);
 	
 }
@@ -35,13 +42,9 @@ LiteCompiler.prototype.compile=function(path){
 	
 	var litecode = context.toList();
 	if(litecode.length){
-		var translator = new JSTranslator({
-			//liteImpl:liteImpl,
-			waitPromise:true
-		});//'.','/','-','!','%'
 		//translator.liteImpl = 'liteImpl';//avoid inline jslib 
 		var functionName = path.replace(/[^\w\_]/g,'_')
-		var jscode = translator.translate(litecode,{name:functionName});//,params:null,defaults:null
+		var jscode = this.translator.translate(litecode,{name:functionName});//,params:null,defaults:null
 	}else{//纯静态内容
 		var jscode = "function(){}";
 	}
@@ -52,7 +55,7 @@ LiteCompiler.prototype.compile=function(path){
 	while(i--){
 		res[i] = res[i].path
 	}
-	return {resources:res,code:jscode,config:config};
+	return {resources:res,litecode:litecode,jscode:jscode,config:config};
 }
 exports.LiteCompiler = LiteCompiler;
 

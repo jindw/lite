@@ -172,12 +172,12 @@ class LiteService{
 			$litefile = $litecode.'/'.strtr($path,'/','^');
     		$phpfile = $litefile.'.php';
 			if(file_exists($phpfile)){unlink($phpfile);}
-			for($i=0;$i<10240 && !file_exists($phpfile);$i++){echo "\n";flush();}
+			for($i=0;$i<10240 && !file_exists($phpfile);$i++){echo " ";flush();}
 			$i = 30;//最长等待30妙
 			
 			while(!file_exists($phpfile) && ($i-->0)){sleep(1);}
 			//echo '<hr/>compile complete!!!<hr/>';
-			echo "\n<script>document.body.innerHTML = '';document.open();</script>\n";
+			echo "\n<script>(document.body||{}).innerHTML = '';document.open();</script>\n";
 			return true;
 		}
 	}

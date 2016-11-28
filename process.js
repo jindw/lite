@@ -87,11 +87,12 @@ function setupCompiler(root,callback,configurator){
 			var result = templateCompiler.compile(path);
 		    //console.log('child got message:', m.root);
 		    var res = result.resources;
-			//console.info('resource config:' ,res);
+			//console.info('resource config:' ,res,result);
 		    addTemplateWatch(path,res);
-		    callback({path:path,action:'add',code:result.code,config:result.config})
+		    callback({path:path,action:'add',code:result.jscode,config:result.config})
 		    //process.send({path:path,action:'add',code:result.code,config:result.config,prefix:result[3]})
 	    }catch(e){
+	    	//console.log(e)
 	    	throw e;
 	    	callback({path:path,action:'error',
 	    		code:"function(){return '<pre>'+"+JSON.stringify(require('util').inspect(e,true)+

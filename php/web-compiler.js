@@ -37,17 +37,18 @@ WebCompiler.prototype.compile = function(path){
 	    context.parse(context.createURI(path));
 		this.compileTime = (new Date() - t - (context._loadTime ||0))
 		var res = context.getResources();
-		var featureMap = context.getConfigMap();
+		var configMap = context.getConfigMap();
 		var i = res.length;
 		while(i--){
 			res[i] = res[i].path
 		}
-		var litecode = context.toList();
-		litecode = [res,litecode,featureMap];
-		this.litecode = JSON.stringify(litecode)
+		var code = context.toList();
+		this.litecode = JSON.stringify([res,code,configMap])
 		var t = +new Date();
-		var pt = new PHPTranslator(path,litecode);//'.','/','-','!','%'
-		this.phpcode = pt.translate(litecode[1]);
+		var pt = new PHPTranslator({waitPromise:true});//'.','/','-','!','%'
+		this.phpcode = pt.translate(code,{
+			name:path.replace(/[\.\/\-!%]/g,'_')
+		});
 		//console.error(this.litecode)
 		//console.error(this.phpcode)
 		this.translateTime = (new Date() - t );
@@ -75,7 +76,7 @@ WebCompiler.prototype.save = function(){
 	xhr.open("POST", this.base, false);
 	//contentType:  'application/x-www-form-urlencoded',
 	xhr.setRequestHeader("Content-Type",'application/x-www-form-urlencoded');
-	try{xhr.setRequestHeader("Content-Length",''+post.length);}catch(e){}
+	//try{xhr.setRequestHeader("Content-Length",''+post.length);}catch(e){}
 	xhr.send(post);
 	try{
 		window.eval('('+xhr.responseText+')')

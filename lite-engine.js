@@ -17,6 +17,7 @@ function LiteEngine(root,config){
 		var configRoot = require('./process').configRoot
 		this.compiler = require('child_process').fork(__dirname + '/process.js',[configRoot,root,'-configurator',configurator||'']);
 		this.compiler.on('message', function(result){
+			//console.log(Object.keys(result))
 			thiz.onChange(result.path,result.code,result.config)
 		}); 
 		
@@ -41,6 +42,7 @@ LiteEngine.prototype.requestCompile = function(path){
 	this.compiler.send(path);
 }
 LiteEngine.prototype.onChange = function(path,code,config) {
+	//console.log(path,(code).length,config)
 	if(code){
 		var tpl = new Template(code,config);
 		if(config.error == null){//发生错误的页面每次都需要重建？？
