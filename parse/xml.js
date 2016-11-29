@@ -76,7 +76,11 @@ function parseXMLByText(text,path){
 
 function loadTextByPath(path){
     var fs = require('fs');
+    try{
     var text = fs.readFileSync(path,'utf-8');
+    }catch(e){
+    	return fs.readFileSync(decodeURI(path),'utf-8');
+    }
     return text;
 }
 

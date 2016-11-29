@@ -2,6 +2,27 @@ var ParseConfig = require('./parse/config').ParseConfig;
 var ParseContext = require('./parse/parse-context').ParseContext;
 var JSTranslator = require('./parse/js-translator').JSTranslator;
 var loadLiteXML = require('./parse/xml').loadLiteXML;
+var buildURIMatcher = require('./parse/resource').buildURIMatcher
+
+exports.LiteCompiler = LiteCompiler;
+
+exports.execute = function(args){
+	var options = {};
+	var key = '';
+	for(var i=2;i<args.length;i++){
+		var arg = args[i];
+		if(arg.charAt() == '-'){
+			key = arg.substr(1)
+			options[key] = [];
+		}else{
+			options[key].push(arg)
+		}
+	}
+	//console.log(options)
+	compile(options.root,options.dest,options.translator,
+		options.includes,options.excludes)
+}
+
 function LiteCompiler(root,options){
 	options = options || {};
 	var path = require('path');
@@ -59,5 +80,50 @@ LiteCompiler.prototype.compile=function(path){
 	}
 	return {resources:res,litecode:litecode,jscode:jscode,config:config};
 }
-exports.LiteCompiler = LiteCompiler;
+
+
+
+//exports.compile = compile;
+function compile(root,dest,translator,includes,excludes){
+	var fs = require('fs')
+	var path = require('path')
+	root = fs.realpathSync(root || './');
+	console.log('root:',root)
+	dest = dest || path.join(root,'.litecode');
+	var compiler = new LiteCompiler(root);
+	includes = includes && includes.length && new RegExp(includes.map(buildURIMatcher).join('|'))
+	excludes = excludes && excludes.length && new RegExp(excludes.map(buildURIMatcher).join('|'))
+	function loadFile(dir){
+		fs.readdir(dir,function(err,files){
+			for(var i=0;i<files.length;i++){
+				var n = files[i];
+				var file = dir+'/'+n;
+				console.warn(file)
+				var stat = fs.statSync(file);
+				if(stat.isFile()){
+					var p = path.relative(root,file).replace(/^[\/\\]?|\\/g,'/');
+					if(excludes && excludes.test(p)){
+						continue;
+					}
+					if(includes ? includes.test(p):/\.xhtml$/.test(p)){
+						//console.log(path.join(dest,p))
+						
+						var result = compiler.compile(p);
+						var id = p.slice(1).replace(/[^\w\-]/g,'^');
+						fs.writeFile(path.join(dest,id)+'.js',result.jscode,function(err){
+							//console.log(err)
+						})
+						//dest.writeFile(path.join(dest,p))
+					}
+					//console.log(p)
+				}else if(n.charAt() != '.' &&stat.isDirectory() ){
+					loadFile(file)
+				}
+			}
+		});
+	}
+	loadFile(root);
+}
+
+
 

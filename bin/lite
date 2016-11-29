@@ -1,0 +1,7 @@
+#!/usr/bin/env node --debug
+//// 调试方法
+//// 修改第一行脚本
+//// #!/usr/bin/env node --debug
+
+var args = process.argv.concat();
+require('../compiler').execute(args);
