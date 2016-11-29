@@ -19,7 +19,7 @@ exports.execute = function(args){
 		}
 	}
 	//console.log(options)
-	compile(options.root,options.dest,options.translator,
+	compile(options.root,options.output,options.translator,
 		options.includes,options.excludes)
 }
 
@@ -84,12 +84,13 @@ LiteCompiler.prototype.compile=function(path){
 
 
 //exports.compile = compile;
-function compile(root,dest,translator,includes,excludes){
+function compile(root,output,translator,includes,excludes){
 	var fs = require('fs')
 	var path = require('path')
 	root = fs.realpathSync(root || './');
-	console.log('root:',root)
-	dest = dest || path.join(root,'.litecode');
+	output = output || path.join(root,'.litecode');
+	fs.mkdirSync(output);
+	console.log('compile lite @'+root,{})
 	var compiler = new LiteCompiler(root);
 	includes = includes && includes.length && new RegExp(includes.map(buildURIMatcher).join('|'))
 	excludes = excludes && excludes.length && new RegExp(excludes.map(buildURIMatcher).join('|'))
@@ -98,7 +99,7 @@ function compile(root,dest,translator,includes,excludes){
 			for(var i=0;i<files.length;i++){
 				var n = files[i];
 				var file = dir+'/'+n;
-				console.warn(file)
+				//console.warn(file)
 				var stat = fs.statSync(file);
 				if(stat.isFile()){
 					var p = path.relative(root,file).replace(/^[\/\\]?|\\/g,'/');
@@ -106,12 +107,12 @@ function compile(root,dest,translator,includes,excludes){
 						continue;
 					}
 					if(includes ? includes.test(p):/\.xhtml$/.test(p)){
-						//console.log(path.join(dest,p))
+						console.log(path.join(output,p))
 						
 						var result = compiler.compile(p);
 						var id = p.slice(1).replace(/[^\w\-]/g,'^');
-						fs.writeFile(path.join(dest,id)+'.js',result.jscode,function(err){
-							//console.log(err)
+						fs.writeFile(path.join(output,id)+'.js',result.jscode,function(err){
+							console.log(err)
 						})
 						//dest.writeFile(path.join(dest,p))
 					}
