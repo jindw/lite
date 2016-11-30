@@ -677,31 +677,14 @@ function parseInclude(node){
 			this.append("<strong style='color:red'>没找到包含节点："+this.currentURI+ node.value+"</strong>");
 		}else{
 		    if(selector != null){
-		    	try{
-		    		//var  nwmatcher = require('nwmatcher');
-		    		var nwmatcher = require('nwmatcher');
-		    		var nw = nwmatcher({document:doc});
-		    		nw.configure( { USE_QSAPI: false, VERBOSITY: true } );
-		    		
-		    	}catch(e){
-		    		console.warn("module nwmatcher is required  for css selector!\n  npm install nwmatcher",e);
-		    		var nwmatcher = require('./nwmatcher');
-		    		var nw = nwmatcher({document:doc});
-		    		nw.configure( { USE_QSAPI: false, VERBOSITY: true } );
-		    	}
-		    	//console.log(nwmatcher+'')
-		    	if(nwmatcher){
-		    		
-		    		var list = nw.select(selector,doc);
-		    		if(list && list.length){
-		    			for(var i=0;i<list.length;i++){
-		    				this.parse(list[i])
-		    			}
-		    		}else{
-		    			console.warn("empty selection:"+selector)
-		    		}
-		    		return;
-		    	}
+		    	var list = querySelectorAll.apply(doc,selector);;
+	    		if(list && list.length){
+	    			for(var i=0;i<list.length;i++){
+	    				this.parse(list[i])
+	    			}
+	    		}else{
+	    			console.warn("empty selection:"+selector)
+	    		}
 		    }else if(xpath!=null){
 		    	var d = doc;
 		        doc = selectByXPath(doc,xpath);
@@ -920,6 +903,7 @@ exports.Core=Core;
 exports.parseChildRemoveAttr=parseChildRemoveAttr;
 var findELEnd=require('./el-util').findELEnd;
 var findLiteParamMap=require('./el-util').findLiteParamMap;
+var querySelectorAll = reuqire('./xml').querySelectorAll;
 var getLiteTagInfo=require('./xml').getLiteTagInfo;
 var selectByXPath=require('./xml').selectByXPath;
 var findXMLAttribute=require('./xml').findXMLAttribute;

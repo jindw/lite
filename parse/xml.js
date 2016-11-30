@@ -67,6 +67,14 @@ function parseXMLByText(text,path){
                     xmlns:{c:'http://www.xidea.org/lite/core',
                         h:'http://www.xidea.org/lite/html-ext'}
                 }).parseFromString(text,"text/html")
+        if(!doc.querySelectorAll){//init querySelector
+			var elp = doc.documentElement.constructor.prototype;
+			elp.querySelector = querySelector;
+			elp.querySelectorAll = querySelectorAll;
+			elp = doc.constructor.prototype;
+			elp.querySelector = querySelector;
+			elp.querySelectorAll = querySelectorAll;
+        }
         return addInst(doc,text);
     }catch(e){
         console.error("解析xml失败:",e,text);
@@ -82,6 +90,23 @@ function loadTextByPath(path){
     	return fs.readFileSync(decodeURI(path),'utf-8');
     }
     return text;
+}
+function selectorInit(node){
+	var doc = node.ownerDocument||node;
+	var nw = doc.nwmatcher;
+	if(!nw){
+		nw = doc.nwmatcher = nwmatcher({document:doc});
+		nw.configure( { USE_QSAPI: false, VERBOSITY: true } );
+	}
+	return nw;
+}
+function querySelectorAll(selector){
+	var nodes = selectorInit(this).select(selector,this);
+	nodes.item = nodeListItem;
+	return nodes;
+}
+function querySelector(selector){
+	return selectorInit(this).first(selector,this)
 }
 
 function selectByXPath(currentNode,xpath){
@@ -146,14 +171,15 @@ function getLiteTagInfo(node){
     return node.lineNumber + ','+ node.columnNumber+'@'+node.ownerDocument.documentURI;
 }
 
-if(typeof require == 'function'){
+var nwmatcher = require('./nwmatcher');
 var URI=require('./resource').URI;
 var DOMParser = require('xmldom').DOMParser;
 var xpathSelectNodes = require('xpath.js');
 
+exports.querySelector = querySelector;
+exports.querySelectorAll = querySelectorAll;
 exports.loadLiteXML=loadLiteXML;
 exports.selectByXPath=selectByXPath;
 exports.findXMLAttribute=findXMLAttribute;
 exports.findXMLAttributeAsEL=findXMLAttributeAsEL;
 exports.getLiteTagInfo = getLiteTagInfo;
-}
