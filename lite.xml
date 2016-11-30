@@ -1,6 +1,6 @@
 <lite encoding="utf-8" type="text/html" xmlns="">
 	<!-- 
-	<extension namespace="http://www.w3c.org/1999/xhtml" package="org.xidea.lite.xhtml" />
+	<extension namespace="http://www.w3c.org/1999/xhtml" package="lite-extension-example" />
 	-->
 	<group>
 		<group layout="/example/layout.xhtml">
