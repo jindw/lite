@@ -745,8 +745,6 @@ function processExtends(node){
 function processBlock(node){
 	var extendsConfig = this.getAttribute("#extends");
 	var value = findXMLAttribute(node,"name","id");
-	//console.log(node.nodeType,node.tagName,'%%%%',node.ownerElement)
-
 	if(extendsConfig){//
 		var blockMap = extendsConfig.blockMap;
 		var cached = value && (value in blockMap) && blockMap[value];
@@ -903,7 +901,7 @@ exports.Core=Core;
 exports.parseChildRemoveAttr=parseChildRemoveAttr;
 var findELEnd=require('./el-util').findELEnd;
 var findLiteParamMap=require('./el-util').findLiteParamMap;
-var querySelectorAll = reuqire('./xml').querySelectorAll;
+var querySelectorAll = require('./xml').querySelectorAll;
 var getLiteTagInfo=require('./xml').getLiteTagInfo;
 var selectByXPath=require('./xml').selectByXPath;
 var findXMLAttribute=require('./xml').findXMLAttribute;

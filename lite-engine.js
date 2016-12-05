@@ -1,6 +1,6 @@
 var Template = require('./template').Template
 
-function LiteEngine(root,config){
+function LiteEngine(root,options){
 	root = require('path').resolve(root || './')
 	root = root.replace(/[\\\/]*$/,'/');
 	this.root = root;
@@ -11,8 +11,11 @@ function LiteEngine(root,config){
 	 * 
 	 * configurator: modulename#configuratorMethod(compiler)
 	 */
-	var configurator = config&&config.configurator;
+	var configurator = options&&options.configurator;
 	try{
+		if(configurator instanceof Function){
+			throw new Error();//function can config can not post to sub process!!
+		}
 		//throw new Error();
 		var configRoot = require('./process').configRoot
 		var args = [configRoot,root]

@@ -38,6 +38,7 @@ function setupCompiler(root,callback,configurator){
 	 * template compiler
 	 */
 	var templateCompiler= new LiteCompiler(root);
+	templateCompiler.waitPromise = true
 	if(configurator){
 		//console.log('filter:',configurator)
 		try{
@@ -46,8 +47,9 @@ function setupCompiler(root,callback,configurator){
 				var path = args[0];
 				var name = args[1];
 				var configurator = require(path)[name];
-				templateCompiler.waitPromise = true
-				templateCompiler = configurator(templateCompiler)
+				configurator(templateCompiler)
+			}else if(configurator instanceof Function){
+				configurator(templateCompiler)
 			}
 		}catch(e){
 			console.error('filter init error:'+e);

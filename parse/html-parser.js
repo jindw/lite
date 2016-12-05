@@ -256,7 +256,18 @@ function parseHtmlScript(el){
 				el.removeChild(child);
 			}
 			buf = processJS(buf.join(''));
+			var async = el.hasAttribute('async') || el.hasAttribute('defer');
 			var doc = el.ownerDocument;
+			var rexp = /\brequire\((['"][\.\-\w@\/]+["'])\)|^\s*\/(?:\/.*|\*[\s\S]*?\*\/)|'(?:[^'\\\r\n]|\\.)*'|"(?:[^"\\\r\n]|\\.)*"/g;
+			var deps = [];
+			var m;
+			while(m = rexp.exec(buf)){
+				console.log(m)
+				m[1] && deps.push(m[1]);
+			}
+			if(deps.length){
+				buf = '__define_run__(['+deps.join(',')+'],function(){'+buf+'\n},'+async+')'
+			}
 			if(buf.search(/[<&]/)>=0){
 				el.appendChild(doc.createTextNode('/*'));
 				el.appendChild(doc.createCDATASection('*/'+buf+'//'));

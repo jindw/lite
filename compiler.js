@@ -90,7 +90,7 @@ function compile(root,output,translator,includes,excludes){
 	root = fs.realpathSync(root || './');
 	output = output || path.join(root,'.litecode');
 	fs.mkdirSync(output);
-	console.log('compile lite @'+root,{})
+	//console.log('compile lite @'+root,{})
 	var compiler = new LiteCompiler(root);
 	includes = includes && includes.length && new RegExp(includes.map(buildURIMatcher).join('|'))
 	excludes = excludes && excludes.length && new RegExp(excludes.map(buildURIMatcher).join('|'))
