@@ -5,9 +5,6 @@
  * @author jindw
  * @version $Id: template.js,v 1.4 2008/02/28 14:39:06 jindw Exp $
  */
-
-
-
 var appendForStart = require('./syntax-util').appendForStart;
 var parseChildRemoveAttr=require('./syntax-util').parseChildRemoveAttr;
 var findLiteParamMap=require('./syntax-util').findLiteParamMap;
@@ -41,7 +38,6 @@ var Core = {
 		this.addExtension(ns,source);
 	},
 	parseComment:function(){},
-	
 	seek:function(text){
 		var end = findELEnd(text,0);
 		if(end>0){
@@ -125,8 +121,8 @@ var Core = {
 	
 }
 exports.Core=Core;
-Core.parseTime = Core.parseDate = Core.parseDateFormat;
 
+Core.parseTime = Core.parseDate = Core.parseDateFormat;
 addParserAndAttrInterceptor(processIf,'if')
 addParserAndAttrInterceptor(processElse,'else');
 addParserAndAttrInterceptor(processElif,"elseif","elif");
@@ -279,11 +275,11 @@ function processDef(node){
 function processClient(node){
 	var name_ = findXMLAttribute(node,'*name','id');
 	var config = parseDefName(name_);
-	this.append("<script>//<![CDATA[\n");
+	this.appendText("<script>//<![CDATA[\n");
 	this.appendPlugin("org.xidea.lite.parse.ClientPlugin",JSON.stringify(config));
 	parseChildRemoveAttr(this,node);
 	this.appendEnd();
-	this.append("//]]></script>")
+	this.appendText("//]]></script>")
 }
 
 function processInclude(node){
@@ -317,7 +313,7 @@ function _parseInclude(node){
 	    	var doc = node.ownerDocument
 	    }
 		if(doc==null){
-			this.append("<strong style='color:red'>没找到包含节点："+this.currentURI+ node.value+"</strong>");
+			this.appendText("<strong style='color:red'>没找到包含节点："+this.currentURI+ node.value+"</strong>");
 		}else{
 		    if(selector != null){
 		    	var list = querySelectorAll.apply(doc,selector);;
@@ -359,7 +355,7 @@ function _interceptInclude(attr){
 		var doc = attr.ownerDocument;
 	}
 	if(doc==null){
-		this.append("<strong style='color:red'>没找到包含节点："+this.currentURI+ attr.value+"</strong>");
+		this.appendText("<strong style='color:red'>没找到包含节点："+this.currentURI+ attr.value+"</strong>");
 	}else{
 		var attrs = selectByXPath(doc, xpath);
 		var element = attr.ownerElement || attr.selectSingleNode('..');

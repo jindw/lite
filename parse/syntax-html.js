@@ -19,7 +19,8 @@ var XML_SPACE_TRIM=require('./parse-xml').XML_SPACE_TRIM;
  * none: 
  */
 var AUTO_FORM_PREFIX = "http://www.xidea.org/lite/attribute/h:autofrom" 
-var AUTO_FORM_SELETED = "http://www.xidea.org/lite/attribute/h:autofrom#selected" 
+var AUTO_FORM_SELETED = "http://www.xidea.org/lite/attribute/h:autofrom#selected"
+var WRAP_SCRIPT_USE = "http://www.xidea.org/lite/attribute/h:wrap_script_use"
 var HTML = {
 	xmlns : function(){},
 	/* 处理IE条件注视 */
@@ -63,7 +64,7 @@ var HTML_EXT = {
 
 exports.HTML=HTML;
 exports.HTML_EXT=HTML_EXT;
-
+exports.wrapScript = wrapScript;
 
 
 /* html form auto value*/
@@ -150,7 +151,7 @@ function parseConditionComment(comm){//comment
 	var match = text.match(/^\[if\s[^\]]+\]>|<!\[endif\]$/ig);
 	if(match){
 		if(match.length == 1){
-			this.append('<!--'+text+'-->')
+			this.appendText('<!--'+text+'-->')
 		}else{
 			var len1 = match[0].length;
 			var len2 = match[1].length
@@ -162,9 +163,9 @@ function parseConditionComment(comm){//comment
 				//xml = this.xml.documentElement;
 			}catch(e){
 			}
-			this.append('<!--'+match[0]);
+			this.appendText('<!--'+match[0]);
 			this.parse(content);
-			this.append(match[1]+'-->');
+			this.appendText(match[1]+'-->');
 		}
 	}
 	
@@ -249,36 +250,13 @@ function preservedParse(node){
 		this.setAttribute(XML_SPACE_TRIM,oldSpace);
 	}
 }
-function processJS(value){
-	var value2 = value.replace(/^\s*\$\{([\s\S]+)\}\s*$/,'return $1');
-	if(value2 != value){
-		try{
-			new Function(value2);//属性中直接插入的脚本（没有语句，不可能是json变量）
-			//console.error(value2)
-			return value;
-		}catch(e){
-		}
-	}
-	value = compressJS(value);
-	return autoEncode(value,/^\s*JSON\s*\.*/,replaceJSON);
-}
-function replaceJSON(v){
-	return "JSON.stringify("+v+")";
-}
-function replaceURI(v){
-	return "encodeURI("+v+")";
-}
-function autoURIEncoder(attr){
-	var value = attr.value;
-	attr.value = autoEncode(value,/^\s*encodeURI*/,replaceURI,encodeURI);
-	this.next(attr);
-}
 
 function parseHtmlScript(el){
 	var oldSpace = this.getAttribute(XML_SPACE_TRIM);
 	this.setAttribute(XML_SPACE_TRIM,false);
 	try{
 		if(!el.hasAttribute('src')){
+			var wrap_script = this.getAttribute(WRAP_SCRIPT_USE);
 			var child;
 			var buf = [];
 			while(child = el.firstChild){
@@ -289,24 +267,15 @@ function parseHtmlScript(el){
 				}
 				el.removeChild(child);
 			}
-			buf = processJS(buf.join(''));
-			var async = el.hasAttribute('async') || el.hasAttribute('defer');
-			var doc = el.ownerDocument;
-			var rexp = /\brequire\((['"][\.\-\w@\/]+["'])\)|^\s*\/(?:\/.*|\*[\s\S]*?\*\/)|'(?:[^'\\\r\n]|\\.)*'|"(?:[^"\\\r\n]|\\.)*"/g;
-			var deps = [];
-			var m;
-			while(m = rexp.exec(buf)){
-				console.log(m)
-				m[1] && deps.push(m[1]);
+			var source = processJS(this,buf.join(''));
+			if(wrap_script){
+				wrapScript(source,wrap_script)
 			}
-			if(deps.length){
-				buf = '__define_run__(['+deps.join(',')+'],function(){'+buf+'\n},'+async+')'
-			}
-			if(buf.search(/[<&]/)>=0){
+			if(source.search(/[<&]/)>=0){
 				el.appendChild(doc.createTextNode('/*'));
-				el.appendChild(doc.createCDATASection('*/'+buf+'//'));
+				el.appendChild(doc.createCDATASection('*/'+source+'//'));
 			}else{
-				el.appendChild(doc.createTextNode(buf));
+				el.appendChild(doc.createTextNode(source));
 			}
 		}
 		this.next(el);
@@ -314,15 +283,56 @@ function parseHtmlScript(el){
 		this.setAttribute(XML_SPACE_TRIM,oldSpace);
 	}
 }
-
+function wrapScript(source,wrap_script_method){
+	var callMatch = source.match(/^\s*([\w\.]+)\(([\s\S]*)\)\s*;?\s*$/);
+	var callMethod = callMatch && callMatch[1];
+	if(!/^(?:__define_run__|(?:\w+\.)?use)$/.test(callMethod)){
+		var rexp = /\brequire\((['"][\.\-\w@\/]+["'])\)|^\s*\/(?:\/.*|\*[\s\S]*?\*\/)|'(?:[^'\\\r\n]|\\.)*'|"(?:[^"\\\r\n]|\\.)*"/g;
+		var deps = [];
+		var m;
+		while(m = rexp.exec(source)){
+			m[1] && deps.push(m[1]);
+		}
+		//if(deps.length){
+		source = wrap_script_method + '(['+deps.join(',')+'],function(){'+source+'\n})'
+		//}
+	}
+	return source;
+}
 
 function parseHtmlEventAttr(attr){
-	attr.value = processJS(attr.value);
+	attr.value = processJS(this,attr.value);
 	this.next(attr);
 }
 
-
-function autoEncode(value,pattern,replacer,replacer2){
+function processJS(ctx,value){
+	var value2 = value.replace(/^\s*\$\{([\s\S]+)\}\s*$/,'return $1');//当行属性脚本
+	if(value2 != value){
+		try{
+			new Function(value2);//属性中直接插入的脚本（没有语句，不可能是json变量）
+			//console.error(value2)
+			return value;//直接当普通脚本输出
+		}catch(e){
+		}
+	}
+	value = compressJS(value);
+	return autoEncode(value,/^\s*JSON\s*\.\s*stringify\s*\(/,replaceJSON);
+}
+function replaceJSON(v){
+	return "JSON.stringify("+v+")";
+}
+function replaceURI(v){
+	return "encodeURI("+v+")";
+}
+function autoURIEncoder(attr){
+	var value = attr.value;
+	attr.value = autoEncode(value,/^\s*encodeURI\s*\(/,replaceURI,encodeURI);
+	this.next(attr);
+}
+/**
+ * TODO: 自动编码压缩再解码
+ */
+function autoEncode(value,pattern,elReplacer,staticReplacer){
 	var p = -1;
 	var result = [];
 	while(true){
@@ -333,11 +343,11 @@ function autoEncode(value,pattern,replacer,replacer2){
 				if(p2>0){
 					var el = value.substring(p+2,p2);
 					if(!pattern.test(el)){
-						el = replacer(el);
+						el = elReplacer(el);
 					}
 					var prefix = value.substring(0,p);
-					if(replacer2){
-						prefix = replacer2(prefix);
+					if(staticReplacer){
+						prefix = staticReplacer(prefix);
 					}
 					result.push(prefix,'${',el,'}');
 					value = value.substring(p2+1)
@@ -350,8 +360,8 @@ function autoEncode(value,pattern,replacer,replacer2){
 			break;
 		}
 	}
-	if(replacer2){
-		value = replacer2(value);
+	if(staticReplacer){
+		value = staticReplacer(value);
 	}
 	if(result.length){
 		result.push(value);

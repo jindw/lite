@@ -1,7 +1,8 @@
 var DOCUMENT_LAYOUT_PROCESSED = "http://www.xidea.org/lite/core/c:layout-processed";
 var setNodeURI = require('./syntax-util').setNodeURI
-var findXMLAttribute =  require('./xml').findXMLAttribute
 var parseChildRemoveAttr =  require('./syntax-util').parseChildRemoveAttr
+var findXMLAttribute =  require('./xml').findXMLAttribute
+var wrapScript = require('./syntax-html').wrapScript;
 var PLUGIN_MODULE = "org.xidea.lite.ModulePlugin"
 
 
@@ -138,20 +139,14 @@ function processBlock(node){
 }
 
 
-function existURI(ctx,path){
+function loadText(ctx,path){
 	var uri = ctx.createURI(path);
-	if(uri.scheme == 'lite'){
-		var path = uri.path+(uri.query||'');
-		path = path.replace(/^\//,'./')
-		uri = ctx.config.root.resolve(path);
-	}
-	if(uri.scheme == 'file'){
-		return require('fs').existsSync(uri.path);
-	}
+	return ctx.loadText(uri);
 }
 
 function processWidget(node){
 	var ctx = this;
+	var lazy = node.nodeName.match(/lazy/i);
 	var currentURI = ctx.currentURI;
 	var src =  findXMLAttribute(node,"path");
 	var uri = ctx.createURI(src);
@@ -170,7 +165,8 @@ function processWidget(node){
 		res.parentNode && res.parentNode.removeChild(res);
 		fragment.appendChild(res)
 	}
-	if(existURI(ctx,cssPath)){
+	var source = loadText(ctx,cssPath);
+	if(source){
 		var s = doc.createElement('link');
 		s.setAttribute('rel','stylesheet');
 		s.setAttribute('type','text/css');
@@ -198,21 +194,27 @@ function processWidget(node){
 	}else{
 		fragment.appendChild(doc.documentElement)
 	}
-	
-	if(existURI(ctx,jsPath)){
+	var source = loadText(ctx,jsPath);
+	if(source){
 		var s = doc.createElement('script');
-		s.setAttribute('src',jsPath);
+		//s.setAttribute('src',jsPath);
+		source = wrapScript(source,'__define_run__')
+		s.appendChild(doc.createTextNode(source));
 		fragment.appendChild(s)
 	}
 	try{
 		node.nodeType == 1 && node.removeAttribute('path');
-		var config={};
-		var tagName = _appendLazyStart(ctx,node,config);
-		parseChildRemoveAttr(ctx,node);
-		tagName && ctx.append('</',tagName,'>')
-		ctx.appendPlugin(PLUGIN_MODULE,JSON.stringify(config));
-		this.parse(fragment);
-		ctx.appendEnd();
+		if(lazy){
+			var config={};
+			var tagName = _appendLazyStart(ctx,node,config);
+			parseChildRemoveAttr(ctx,node);
+			tagName && ctx.appendText('</'+tagName+'>')
+			ctx.appendPlugin(PLUGIN_MODULE,JSON.stringify(config));
+			this.parse(fragment);
+			ctx.appendEnd();
+		}else{
+			this.parse(fragment);
+		}
 	}finally{
 		this.currentURI = currentURI;
 	}
@@ -234,7 +236,7 @@ function _parseBlock(ctx,node){
 		ctx.appendPlugin(PLUGIN_MODULE,JSON.stringify(config));
 		parseChildRemoveAttr(ctx,node);
 		ctx.appendEnd();
-		ctx.append('</',tagName,'>')
+		tagName && ctx.append('</'+tagName+'>')
 	}
 }
 function _appendLazyStart(ctx,node,config){
@@ -249,11 +251,11 @@ function _appendLazyStart(ctx,node,config){
 				config[n] = a.value;
 			}
 		}
-		ctx.append('<div data-lazy-widget-id="',blockId,'"');
+		ctx.appendText('<div data-lazy-widget-id="',blockId,'"');
 		for(var n in config){
-			ctx.append(' ',n,'="',config[n],'"');
+			ctx.appendText(' ',n,'="',config[n],'"');
 		}
-		ctx.append('>')
+		ctx.appendText('>')
 		config.id=blockId
 		return 'div';
 	}else{

@@ -37,12 +37,11 @@ ResultContext.prototype = {
 	 * 添加静态文本（不编码）
 	 * @param <String>text
 	 */
-	append:function( text){
+	appendText:function( text){
 		for(var len = arguments.length,i=0;i<len;i++){
 			this.result.push(String(arguments[i]));
 		}
 		//this.result.push.apply(this.result,arguments)
-		
 	},
 
 	/**

@@ -67,7 +67,7 @@ var scriptTag = /^script$/i
 function processElement(node,context,chain){
     var attributes = node.attributes;
     var tagName = node.tagName;
-    context.append('<'+tagName);
+    context.appendText('<'+tagName);
     for (var i=0; i<attributes.length; i++) {
         try{
             //htmlunit bug...
@@ -78,10 +78,10 @@ function processElement(node,context,chain){
         context.parse(attr)
     }
     if(htmlLeaf.test(tagName)){
-        context.append('/>')
+        context.appendText('/>')
         return ;
     }
-    context.append('>')
+    context.appendText('>')
     var child = node.firstChild
     if(child){
     	///if(htmlReserved.test(tagName)){
@@ -91,7 +91,7 @@ function processElement(node,context,chain){
             context.parse(child)
         }while(child = child.nextSibling)
     }
-    context.append('</'+node.tagName+'>')
+    context.appendText('</'+node.tagName+'>')
 }
 
 //parser attribute
@@ -118,7 +118,7 @@ function processAttribute(node,context,chain){
     }
     if(isDynamic && !isStatic){
         //remove attribute;
-        //context.append(" "+name+'=""');
+        //context.appendText(" "+name+'=""');
         if(buf.length > 1){
             //TODO:....
             throw new Error("属性内只能有单一EL表达式！！");
@@ -130,14 +130,14 @@ function processAttribute(node,context,chain){
             }
         }
     }
-    context.append((/^on/.test(name)?'\n':' ')+name+'="');
+    context.appendText((/^on/.test(name)?'\n':' ')+name+'="');
     if(/^xmlns$/i.test(name)){
         if(buf[0] == 'http://www.xidea.org/lite/xhtml'){
             buf[0] = 'http://www.w3.org/1999/xhtml'
         }
     }
     context.appendAll(buf);
-    context.append('"');
+    context.appendText('"');
 }
 function processTextNode(node,context,chain){
     var data = String(node.data);
@@ -154,9 +154,9 @@ function processTextNode(node,context,chain){
 }
 
 function processCDATA(node,context,chain){
-    context.append("<![CDATA[");
+    context.appendText("<![CDATA[");
     context.appendAll(context.parseText(node.data,EL_TYPE));
-    context.append("]]>");
+    context.appendText("]]>");
 }
 function processEntityReference(){
     return null;//not support
@@ -165,7 +165,7 @@ function processEntity(){
     return null;//not support
 }
 function processProcessingInstruction(node,context,chain){
-    context.append("<?"+node.nodeName+" "+node.data+"?>");
+    context.appendText("<?"+node.nodeName+" "+node.data+"?>");
 }
 function processComment(){
     return null;//not support
@@ -189,7 +189,7 @@ function processDocument(node,context,chain){
  */
 function processDocumentType(node,context,chain){
     if(node.xml){
-        context.append(node.xml);
+        context.appendText(node.xml);
     }else{
     	var pubid = node.publicId;
     	var nodeName = node.nodeName;
@@ -198,35 +198,35 @@ function processDocumentType(node,context,chain){
         if(pubid){
 			if(pubid == "org.xidea.lite.OUTPUT_DTD"){
 				if(sysid){
-					context.append(decodeURIComponent(sysid));
+					context.appendText(decodeURIComponent(sysid));
 				}
 				return;
 			}
-            context.append('<!DOCTYPE ');
-            context.append(nodeName);
-            context.append(' PUBLIC "');
-            context.append(pubid);
+            context.appendText('<!DOCTYPE ');
+            context.appendText(nodeName);
+            context.appendText(' PUBLIC "');
+            context.appendText(pubid);
             if (sysid == null) {
-            	context.append( '" "');
-            	context.append(sysid);
+            	context.appendText( '" "');
+            	context.appendText(sysid);
             }
-            context.append('">');
+            context.appendText('">');
         }else if(sysid){
-            context.append('<!DOCTYPE ');
-            context.append(nodeName);
-            context.append(' SYSTEM "');
-            context.append(sysid);
-            context.append('">');
+            context.appendText('<!DOCTYPE ');
+            context.appendText(nodeName);
+            context.appendText(' SYSTEM "');
+            context.appendText(sysid);
+            context.appendText('">');
         }else{
-        	context.append("<!DOCTYPE ");
-			context.append(nodeName);
+        	context.appendText("<!DOCTYPE ");
+			context.appendText(nodeName);
 			var sub = node.internalSubset;
             if(sub){
-				context.append(" [");
-				context.append(sub);
-				context.append("]");
+				context.appendText(" [");
+				context.appendText(sub);
+				context.appendText("]");
 			}
-			context.append(">");
+			context.appendText(">");
         }
     }
 }

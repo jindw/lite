@@ -168,11 +168,19 @@ ParseContext.prototype = {
 			path = path.replace(/^\//,'./')
 			uri = this.config.root.resolve(path);
 		}
-		var xhr = new XMLHttpRequest();
-		xhr.open("GET",uri,false)
-		xhr.send('');
-		////text/xml,application/xml...
-		return xhr.responseText;
+		if(uri.scheme == 'file'){
+			var fs = require('fs');
+			var path = uri.path;
+			if(fs.existsSync(path)){
+				return fs.readFileSync(path).toString()
+			}
+		}else{
+			var xhr = new XMLHttpRequest();
+			xhr.open("GET",uri,false)
+			xhr.send('');
+			////text/xml,application/xml...
+			return xhr.responseText;
+		}
 	},
 	loadXML:function(path){
 		var t1 = +new Date();

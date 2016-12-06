@@ -93,7 +93,7 @@ function appendText(context,text, encode,  escapeQute){
 		}
 		text = text.replace(replaceExp,xmlReplacer);
 	}
-	context.append(text);
+	context.appendText(text);
 }
 function xmlReplacer(c){
     switch(c){
@@ -110,7 +110,7 @@ function xmlReplacer(c){
     }
 }
 function nextPosition(context, text, p$) {
-	context.append(text.substring(p$, p$ + 1));
+	context.appendText(text.substring(p$, p$ + 1));
 	return p$ + 1;
 }
 
