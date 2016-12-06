@@ -127,7 +127,7 @@ JSTranslator.prototype = {
 		
 		var translatorConfig = this.config || {};
 		var liteImpl = translatorConfig.liteImpl
-		ctx.waitPromise = translatorConfig.waitPromise && [];
+		ctx.waitPromise = translatorConfig.waitPromise && [[]];
 		ctx.hasBuildIn = !!liteImpl;
 		ctx.liteImpl = liteImpl && (typeof liteImpl == 'string'?liteImpl:'liteImpl');
 		ctx.parse();
@@ -483,7 +483,7 @@ JSTranslateContext.prototype.processIf=function(code,i){
     var childCode = item[1];
     var testEL = item[2];
     var test = this.stringifyEL(testEL);
-    //var wel = genWaitEL(this,testEL);visited el before function call
+    //var wel = genWaitEL(this,testEL);visited el intercept function call
     //this.append('if(',wel?'('+wel+')||('+test+')':test,'){');
     this.append('if(',test,'){');
     this.pushBlock();
@@ -613,7 +613,7 @@ JSTranslateContext.prototype.popBlock = function(ignoreIndent){
 
 JSTranslateContext.prototype.appendModulePlugin = function(child,config){
 	if(this.waitPromise){
-		this.append('__out__.lazy(function* __lazy_module_',config.id,'__(__out__){');
+		this.append('__out__.lazy(function* __lazy_widget_',config.id,'__(__out__){');
 		this.pushBlock();//TODO:lazy push, 最后执行的元素可以最后检测waitEL
 		this.appendCode(child)
 		this.popBlock();
@@ -687,7 +687,7 @@ function genWaitEL(ctx,el){
 		    if (vars2.length) {
 		    	return 'yield* __out__.wait('+vars2.join(',')+')'
 		    };
-			}
+		}
 	}
     
 }

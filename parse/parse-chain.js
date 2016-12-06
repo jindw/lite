@@ -5,6 +5,9 @@
  * @author jindw
  * @version $Id: template.js,v 1.4 2008/02/28 14:39:06 jindw Exp $
  */
+
+exports.buildTopChain=buildTopChain;
+
 /**
  * 解析链对象
  */
@@ -69,6 +72,3 @@ function buildNext(thiz,index){
 	return null;
 }
 
-if(typeof require == 'function'){
-exports.buildTopChain=buildTopChain;
-}

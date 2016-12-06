@@ -1,0 +1,269 @@
+var DOCUMENT_LAYOUT_PROCESSED = "http://www.xidea.org/lite/core/c:layout-processed";
+var setNodeURI = require('./syntax-util').setNodeURI
+var findXMLAttribute =  require('./xml').findXMLAttribute
+var parseChildRemoveAttr =  require('./syntax-util').parseChildRemoveAttr
+var PLUGIN_MODULE = "org.xidea.lite.ModulePlugin"
+
+
+
+exports.parse$9 = parseDocument;
+exports.parseExtends = exports.interceptExtends = processExtends
+//alise
+//exports.parseExtend =  exports.interceptExtend = processExtends
+exports.parseBlock = exports.interceptBlock = processBlock;
+exports.parseWidget = exports.interceptWidget =processWidget;
+
+//addParserAndAttrInterceptor(processBlock,"module","lazy-module","lazy-block","block","group");
+//var PLUGIN_DEFINE=require('./template-token').PLUGIN_DEFINE;
+function parseDocument(doc,ns){//for extends syntax!! Document.nodeType == 9
+	var isProcessed = this.getAttribute(DOCUMENT_LAYOUT_PROCESSED);
+	//console.log(doc.documentURI+'',isProcessed)
+	if(!isProcessed){
+		this.setAttribute(DOCUMENT_LAYOUT_PROCESSED,true);
+		var root = doc.documentElement;
+		var ln = root.localName || root.nodeName.replace(/^w+\:/,'');
+		if((ln == 'extends' || ln == 'extend') &&  root.namespaceURI == ns){
+			processExtends.call(this,root);
+			return ;
+		}else{
+			try{
+				var attr = root.getAttributeNodeNS(ns,"extends") || root.getAttributeNodeNS(ns,"extend");
+			}catch(e){
+				var attrs = root.attributes;
+				var i = attrs.length-1;
+				while(i-->0){
+					var a = attrs.item(i);
+					if(a.namespaceURI == ns && /^(?:w+\:)?extends?$/.test(a.nodeName)){
+						attr = a;
+						break;
+					}
+				}
+			}
+			if(attr != null){
+				processExtends.call(this,attr);
+				return ;
+			}
+			var layout = this.configMap.layout;
+			if(layout){
+				var uri = this.createURI(layout);
+				if(uri != String(this.currentURI)){//layout != this
+					this.setAttribute('$page',doc);
+					//console.log('layout:',this.currentURI+'',' of ',uri+'')
+					//this.currentURI = uri;
+					//doc = this.loadXML(uri);
+					this.parse(uri);
+				}
+				
+				return ;
+			}
+		}
+	}
+	this.next(doc);
+}
+
+function processExtends(node){
+	var oldConfig = this.getAttribute("#extends");
+	var el = node.nodeType == 1?node:node.ownerElement|| node.selectSingleNode('..');
+	var root = el == el.ownerDocument.documentElement;
+	var extendsConfig = {blockMap:{},parse:false,root:root};
+	if(oldConfig){
+		if(oldConfig.parse){//解析进行时
+			if(root){//模板继承
+				if(extendsConfig.root){
+					//this.reset(0);
+				}
+				extendsConfig = oldConfig;
+				extendsConfig.parse = false;
+			}else{
+				extendsConfig.root = false;
+			}
+		}else{//查找进行时
+			return;
+		}
+	}
+	
+	this.setAttribute("#extends" ,extendsConfig);
+	var parentURI = findXMLAttribute(node,"*path","value","parent");
+	//childNodes
+	var uri = this.createURI(parentURI);
+	var parentNode = this.loadXML(uri);
+	if(!root){//元素继承
+		parentNode = parentNode.documentElement;
+	}
+	var i = this.mark();
+	parseChildRemoveAttr(this,node);
+	this.reset(i);
+    var parentURI = this.currentURI;
+	try{
+		this.setCurrentURI(uri);
+		extendsConfig.parse=true;
+		this.parse(parentNode);
+	}finally{
+        this.setCurrentURI(parentURI);
+	}
+	this.setAttribute("#extends" ,oldConfig);
+}
+
+function processBlock(node){
+	var extendsConfig = this.getAttribute("#extends");
+	var value = findXMLAttribute(node,"name","id");
+	if(extendsConfig){//
+		var blockMap = extendsConfig.blockMap;
+		var cached = value && (value in blockMap) && blockMap[value];
+		if(extendsConfig.parse){
+			if(cached){
+				var parentURI = this.currentURI;
+				try{
+					//set current uri
+					setNodeURI(this,cached);
+					extendsConfig.parse=true;
+					//this.parse(cached);
+					_parseBlock(this,cached);
+				}finally{
+	        		this.setCurrentURI(parentURI);
+				}
+			}else{
+				//this.parse(childNodes);
+				_parseBlock(this,node);
+			}
+		}else{
+			if(!cached){
+				blockMap[value] = node;
+			}
+		}
+	}else{
+		_parseBlock(this,node);
+
+	}
+}
+
+
+function existURI(ctx,path){
+	var uri = ctx.createURI(path);
+	if(uri.scheme == 'lite'){
+		var path = uri.path+(uri.query||'');
+		path = path.replace(/^\//,'./')
+		uri = ctx.config.root.resolve(path);
+	}
+	if(uri.scheme == 'file'){
+		return require('fs').existsSync(uri.path);
+	}
+}
+
+function processWidget(node){
+	var ctx = this;
+	var currentURI = ctx.currentURI;
+	var src =  findXMLAttribute(node,"path");
+	var uri = ctx.createURI(src);
+	var doc = ctx.loadXML(uri);
+	
+	//var lessPath = src.replace(/\.\w+$/,'.less');
+	var cssPath = src.replace(/\.\w+$/,'.css');
+	var jsPath = src.replace(/\.\w+$/,'.js');
+	
+	var fragment = doc.createDocumentFragment();
+	var body = doc.getElementsByTagName('body')[0];
+	var resources = doc.getElementsByTagName('link');
+	var i= resources.length-1
+	while(i-->0){
+		var res = resources[i];
+		res.parentNode && res.parentNode.removeChild(res);
+		fragment.appendChild(res)
+	}
+	if(existURI(ctx,cssPath)){
+		var s = doc.createElement('link');
+		s.setAttribute('rel','stylesheet');
+		s.setAttribute('type','text/css');
+		s.setAttribute('href',cssPath);
+		//console.log('css!!!!'+s)
+		fragment.appendChild(s)
+	}
+	if(body){
+		var res = body.firstChild;
+		//console.log(body+'')
+		while(res!=null){
+			//console.log('!!!'+node.nodeType+node.nextSibling)
+			var next = res.nextSibling;
+			fragment.appendChild(res)//append will be removed from old tree!
+			res = next;
+		}
+		body.parentNode.removeChild(body)
+		var resources = doc.getElementsByTagName('script');
+		var i= resources.length-1
+		while(i-->0){
+			var res = resources[i];
+			res.parentNode && res.parentNode.removeChild(res);
+			fragment.appendChild(res)
+		}
+	}else{
+		fragment.appendChild(doc.documentElement)
+	}
+	
+	if(existURI(ctx,jsPath)){
+		var s = doc.createElement('script');
+		s.setAttribute('src',jsPath);
+		fragment.appendChild(s)
+	}
+	try{
+		node.nodeType == 1 && node.removeAttribute('path');
+		var config={};
+		var tagName = _appendLazyStart(ctx,node,config);
+		parseChildRemoveAttr(ctx,node);
+		tagName && ctx.append('</',tagName,'>')
+		ctx.appendPlugin(PLUGIN_MODULE,JSON.stringify(config));
+		this.parse(fragment);
+		ctx.appendEnd();
+	}finally{
+		this.currentURI = currentURI;
+	}
+}
+/**
+ * node src 指向的src 是延迟载入
+ * node 子节点放 loading 子页面
+ */
+function parseLazyWidget(node){
+	
+}
+
+function _parseBlock(ctx,node){
+	if(!node.nodeName.match(/lazy/i)){
+		parseChildRemoveAttr(ctx,node);
+	}else{
+		var config={};
+		var tagName = _appendLazyStart(ctx,node,config);
+		ctx.appendPlugin(PLUGIN_MODULE,JSON.stringify(config));
+		parseChildRemoveAttr(ctx,node);
+		ctx.appendEnd();
+		ctx.append('</',tagName,'>')
+	}
+}
+function _appendLazyStart(ctx,node,config){
+	var blockId = genBlockID(ctx);
+	//var elementId = '__lazy_module_'+blockId+'__';
+	if(node.nodeType == 1){
+		var attrs = node.attributes ;
+		for(var i=0,len = attrs.length;i<len;i++){
+			var a = attrs.item(i);
+			var n = a.name;
+			if(!n.match(/\:|^id$/i)){
+				config[n] = a.value;
+			}
+		}
+		ctx.append('<div data-lazy-widget-id="',blockId,'"');
+		for(var n in config){
+			ctx.append(' ',n,'="',config[n],'"');
+		}
+		ctx.append('>')
+		config.id=blockId
+		return 'div';
+	}else{
+		node.ownerElement.setAttribute('data-lazy-widget-id',blockId);
+		config.id=blockId
+	}
+
+	
+}
+function genBlockID(ctx){
+	var oldId = ctx.__increaceBlockID||0;;
+	return ctx.__increaceBlockID = ++oldId
+}

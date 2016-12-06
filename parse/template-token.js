@@ -1,7 +1,7 @@
 /*
  * List Template
  * License LGPL(您可以在任何地方免费使用,但请不要吝啬您对框架本身的改进)
- * http://www.xidea.org/project/lite/
+ * http://www.xidea.org/lite/
  * @author jindw
  * @version $Id: template.js,v 1.4 2008/02/28 14:39:06 jindw Exp $
  */
@@ -20,7 +20,6 @@ var IF_KEY = "if";
 var FOR_KEY = "for";
 var PLUGIN_DEFINE = "org.xidea.lite.DefinePlugin";
 
-if(typeof require == 'function'){
 exports.PLUGIN_DEFINE=PLUGIN_DEFINE;
 exports.VAR_TYPE=VAR_TYPE;
 exports.XA_TYPE=XA_TYPE;
@@ -32,4 +31,3 @@ exports.EL_TYPE=EL_TYPE;
 exports.BREAK_TYPE=BREAK_TYPE;
 exports.XT_TYPE=XT_TYPE;
 exports.FOR_TYPE=FOR_TYPE;
-}

@@ -14,6 +14,24 @@ var defaultNodeLocal={
 	}
 }
 var nodeLocal = defaultNodeLocal;
+
+var Extension=require('./extension').Extension;
+var HTML=require('./syntax-html').HTML;
+var HTML_EXT=require('./syntax-html').HTML_EXT;
+var getLiteTagInfo=require('./xml').getLiteTagInfo;
+//初始化 Core 模块
+var Core=require('./syntax-core').Core;
+exports.ExtensionParser=ExtensionParser;
+copyTo(require('./syntax-core-block'),Core);
+
+copyTo(require('./syntax-i18n'),Core);
+copyTo(require('./syntax-text'),Core);
+
+function copyTo(from,to){
+	for(var n in from){
+		to[n]=from[n];
+	}
+}
 function ExtensionParser(newNodeLocal){
 	if(newNodeLocal){
 		nodeLocal = newNodeLocal;
@@ -34,7 +52,7 @@ function formatName(el){
 
 function loadExtObject(source){
 	try{
-		var p = /\b(?:document|xmlns|(?:parse|before|seek)\w*)\b/g;
+		var p = /\b(?:document|xmlns|(?:parse|intercept|seek)\w*)\b/g;
 		var fn = new Function("console","var window = this;"+source+"\n return function(){return eval(arguments[0])}");
 		var m,o;
 		var objectMap = {};
@@ -60,7 +78,7 @@ function loadExtObject(source){
 }
 
 
-function getParser(map,key){
+function findPatternParser(map,key){
 	var buf = [];
 	for(var n in map){
 		if(new RegExp('^'+n.replace(/\*/g,'.*')+'$').test(key)){
@@ -87,7 +105,7 @@ function copyParserMap(mapClazz,p,p2,key){
 	public boolean parseDocument(Document node, ParseContext context,ParseChain chain);
 	public boolean parseNamespace(Attr node, ParseContext context, ParseChain chain);
 	public boolean parseAttribute(Attr attr, ParseContext context, ParseChain chain);
-	public boolean parseBefore(Attr attr, ParseContext context,
+	public boolean parseIntercept(Attr attr, ParseContext context,
 			ParseChain previousChain, String name);
  */
 ExtensionParser.prototype = {
@@ -100,7 +118,7 @@ ExtensionParser.prototype = {
 			if(p.namespaceParser){
 				p2.put('namespaceParser', p.namespaceParser);
 			}
-			copyParserMap(mapClazz,p,p2,"beforeMap")
+			copyParserMap(mapClazz,p,p2,"interceptMap")
 			
 			copyParserMap(mapClazz,p,p2,"typeMap")
 			copyParserMap(mapClazz,p,p2,"tagMap")
@@ -110,24 +128,6 @@ ExtensionParser.prototype = {
 			copyParserMap(mapClazz,p,p2,"seekMap")
 		}
 		return result
-	},
-	doParse:function (node,fns,chain,ns){
-		var last = fns.length-1;
-		if(last>0){
-			var subIndex = chain.subIndex;
-			if(subIndex <0){
-				subIndex = last;
-				chain = chain.getSubChain(last);
-			}
-//			console.info("##",subIndex,String(fns[subIndex]));
-			fns[subIndex].call(chain,node,ns);
-		}else{
-			//if(node.name == 'onclick'){
-			//	console.error(node.name,typeof fns[0],fns[0].call,fns[0])
-			//}
-			fns[0].call(chain,node,ns);
-		}
-		return true;
 	},
 	parseElement:function(el, context,chain){
 //		context.setAttribute(CURRENT_NODE_KEY,el)
@@ -143,9 +143,9 @@ ExtensionParser.prototype = {
 					var ext = this.packageMap[ans];
 					var an = formatName(attr);
 	//				es = 2
-					if (ext && ext.beforeMap) {
-						var fn = ext.beforeMap[an];
-						if(fn && an in ext.beforeMap){
+					if (ext && ext.interceptMap) {
+						var fn = ext.interceptMap[an];
+						if(fn && an in ext.interceptMap){
 	//						es = 2.1
 							//el.removeAttributeNode(attr);
 							//attr.ownerElement = el;
@@ -168,9 +168,9 @@ ExtensionParser.prototype = {
 		if(ext && ext.tagMap){
 			if(n in ext.tagMap){
 				var fns = ext.tagMap[n];
-				return this.doParse(el,fns,chain);
-			}else if(fns = getParser(ext.patternTagMap,n)){
-				return this.doParse(el,fns,chain);
+				return doParse(el,fns,chain);
+			}else if(fns = findPatternParser(ext.patternTagMap,n)){
+				return doParse(el,fns,chain);
 			}
 		}
 	},
@@ -202,9 +202,9 @@ ExtensionParser.prototype = {
 						//objectMap.namespaceURI = namespace
 						var p = this.packageMap[ns];
 						if(p && p.typeMap){
-							var fns = p.typeMap[type];
+							var fns = p.typeMap['$'+type];
 							if(fns){
-								return this.doParse(node,fns,chain,ns);
+								return doParse(node,fns,chain,ns);
 							}
 						}
 					}
@@ -233,11 +233,11 @@ ExtensionParser.prototype = {
 //			var es=4;
 			if(ext && ext.attributeMap){
 				if(n in ext.attributeMap){
-					return this.doParse(node,ext.attributeMap[n],chain);
+					return doParse(node,ext.attributeMap[n],chain);
 				}else{
-					var fns = getParser(ext.patternAttributeMap,n);
+					var fns = findPatternParser(ext.patternAttributeMap,n);
 					if(fns){
-						return this.doParse(node,fns,chain);
+						return doParse(node,fns,chain);
 					}
 				}
 			}
@@ -357,7 +357,7 @@ ExtensionParser.prototype = {
 				var objectMap = {};
 				var packageObject = require(packageName);
 				for(var n in packageObject){
-					if(n.match(/^(?:document|xmlns|on|parse|before|seek).*/)){
+					if(n.match(/^(?:document|xmlns|on|parse|intercept|seek).*/)){
 						objectMap[n] = packageObject[n];
 					}
 				}
@@ -381,12 +381,22 @@ ExtensionParser.prototype = {
 	}
 }
 
-if(typeof require == 'function'){
-exports.ExtensionParser=ExtensionParser;
-var Extension=require('./extension').Extension;
-var Core=require('./xml-core-parser').Core;
-var HTML=require('./html-parser').HTML;
-var HTML_EXT=require('./html-parser').HTML_EXT;
 
-var getLiteTagInfo=require('./xml').getLiteTagInfo;
+function doParse (node,fns,chain,ns){
+	var last = fns.length-1;
+	if(last>0){
+		var subIndex = chain.subIndex;
+		if(subIndex <0){
+			subIndex = last;
+			chain = chain.getSubChain(last);
+		}
+//			console.info("##",subIndex,String(fns[subIndex]));
+		fns[subIndex].call(chain,node,ns);
+	}else{
+		//if(node.name == 'onclick'){
+		//	console.error(node.name,typeof fns[0],fns[0].call,fns[0])
+		//}
+		fns[0].call(chain,node,ns);
+	}
+	return true;
 }

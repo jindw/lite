@@ -5,6 +5,11 @@
  * @author jindw
  * @version $Id: template.js,v 1.4 2008/02/28 14:39:06 jindw Exp $
  */
+
+var XA_TYPE=require('./template-token').XA_TYPE;
+var EL_TYPE=require('./template-token').EL_TYPE;
+var XT_TYPE=require('./template-token').XT_TYPE;
+exports.parseText=parseText;
 /**
  * for extension text parser
  */
@@ -119,9 +124,4 @@ function countEescape(text, p$) {
 	return 0;
 }
 
-if(typeof require == 'function'){
-exports.parseText=parseText;
-var XA_TYPE=require('./template-token').XA_TYPE;
-var EL_TYPE=require('./template-token').EL_TYPE;
-var XT_TYPE=require('./template-token').XT_TYPE;
-}
+

@@ -96,7 +96,19 @@ LiteEngine.prototype.render=function(path,model,req,response){
 	}
 }
 function doRender(tpl,model,response){
-    response.writeHead(200, {"Content-Type": tpl.contentType});   
+	
+	if(!response.headersSent){
+		//var statusCode = response.statusCode || 200;
+		//var contentType = response.getHeader('content-type') || tpl.contentType
+		//response.writeHead(statusCode, {"Content-Type": contentType});
+		if(!response.statusCode ){
+			response.statusCode  = 200;
+		}
+		if(response.getHeader('content-type') == null){
+			response.setHeader('content-type', tpl.contentType)
+		}
+	}
+	//console.log(response.getHeader('content-type'),response.headersSent)
 	try{
 		tpl.render(model,response);
 	}catch(e){

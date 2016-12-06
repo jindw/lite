@@ -90,7 +90,7 @@ function doMutiLazyLoad(lazyList,resp){
 
 	//console.log('lazy module:',len,lazyList)
 	function startModule(g,r){
-		var id = g.name;//__lazy_module_\d+__
+		var id = g.name.replace(/^[^\d]+|[^\d]+$/g,'');//__lazy_module_\d+__
 		r.flush = function(){};
 		r.wait = modelWait;
 		g = g(r);
@@ -104,8 +104,8 @@ function doMutiLazyLoad(lazyList,resp){
 				//
 				//resp.write('<script>(this.__module_loaded__||function(id,h){document.getElementById(id).innerHTML=h})("'+id+'",'+JSON.stringify(rtv)+')</script>')
 				resp.write('<script>'+
-				(first?'!this__module_loaded__&&(this.__module_loaded__=function(id,h){document.getElementById(id).innerHTML=h});':'')
-				+'__lazy_module_loaded__("'+id+'",'+JSON.stringify(rtv)+')</script>')
+				(first?'!this.__widget_loaded__&&(this.__widget_loaded__=function(id,h){document.querySelector(id).innerHTML=h});':'')
+				+'__widget_loaded__("*[data-lazy-widget-id=\''+id+'\']",'+JSON.stringify(rtv).replace(/<\/script>/ig,'<\\/script>')+')</script>')
 				first = false;
 				if(--dec == 0){
 					//console.log('#$%$######end')

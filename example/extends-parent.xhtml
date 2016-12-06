@@ -6,8 +6,9 @@
 	.... 完全相同的meta，link，scripts....
 </head>
 <body>
-	<div id="head">...完全相同的head....</div>
+	<div id="head">...完全相同的head...<a href="${'中文链接'}" href2="${'中文链接'}" onclick="alert(${'z中文'})">test link</a>.</div>
 	<div id="content"><c:block name="content"/></div>
+	<article c:widget="widget.xhtml">1111</article>
 	<div id="foot">... 完全相同的foot...</div>
 </body>
 </html>

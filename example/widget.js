@@ -1,0 +1,1 @@
+alert('test widget same named js!')

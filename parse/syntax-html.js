@@ -1,6 +1,5 @@
-if(typeof require == 'function'){
-var Core=require('./xml-core-parser').Core;
-}/*
+
+/*
  * List Template
  * License LGPL(您可以在任何地方免费使用,但请不要吝啬您对框架本身的改进)
  * http://www.xidea.org/project/lite/
@@ -8,7 +7,11 @@ var Core=require('./xml-core-parser').Core;
  * @version $Id: template.js,v 1.4 2008/02/28 14:39:06 jindw Exp $
  */
  
- 
+var findELEnd=require('./el-util').findELEnd;
+var parseChildRemoveAttr=require('./syntax-util').parseChildRemoveAttr;
+var compressJS=require('./js-token').compressJS;
+var findXMLAttribute=require('./xml').findXMLAttribute;
+var XML_SPACE_TRIM=require('./parse-xml').XML_SPACE_TRIM;
 /**
  * false:preserved
  * true:trim all 
@@ -19,137 +22,169 @@ var AUTO_FORM_PREFIX = "http://www.xidea.org/lite/attribute/h:autofrom"
 var AUTO_FORM_SELETED = "http://www.xidea.org/lite/attribute/h:autofrom#selected" 
 var HTML = {
 	xmlns : function(){},
-	/**
-	 * <!--[if IE]><p>11</p><![endif]-->
-	 * 
-	 * <!--[if IE 8]><!-->
-	 *   <p>aa</p>
-	 * <!--<![endif]-->
-	 */
-	parse8:function(comm){//comment
-		var text = comm.textContent || comm.data;
-		var match = text.match(/^\[if\s[^\]]+\]>|<!\[endif\]$/ig);
-		if(match){
-			if(match.length == 1){
-				this.append('<!--'+text+'-->')
-			}else{
-				var len1 = match[0].length;
-				var len2 = match[1].length
-				var content = text.substring(len1,text.length - len2);
-				try{
-					if(/^\s*</.test(content)){
-						content = this.loadXML(content);
-					}
-					//xml = this.xml.documentElement;
-				}catch(e){
-				}
-				this.append('<!--'+match[0]);
-				this.parse(content);
-				this.append(match[1]+'-->');
-			}
-		}
-		
-	},
-	parseInput:function(el){
-		var autoform = this.getAttribute(AUTO_FORM_PREFIX);
-		if(autoform!=null){
-			var name_ = el.getAttribute('name');
-			//console.warn(uneval(autoform),name_);
-			if(name_){
-				var type = el.getAttribute('type');
-				if(!/^(?:reset|button|submit)$/i.test(type)){
-					if(/^(?:checkbox|radio)$/i.test(type)){
-						if(!el.hasAttribute('checked')){
-							buildCheck2select(this,el,name_,'checked',/checkbox/i.test(type));
-							return ;
-						}
-					}else if(!el.hasAttribute('value')){
-						el.setAttribute('value', "${"+name_+"}");
-					}
-				}
-			}
-		}
-		this.next(el);
-	},
-	parseTextArea:function(el){
-		var autoform = this.getAttribute(AUTO_FORM_PREFIX);
-		var hasValue = el.hasAttribute('value');//value added for textarea
-		if(hasValue){
-			el.textContent = el.getAttribute('value');
-		}else if(autoform!=null && !el.hasChildNodes()){
-			var name_ = el.getAttribute('name');
-			el.textContent = "${"+ name_ + "}";
-		}
-		this.next(el);
-	},
-	parseSelect:function(el){
-		var multiple = el.hasAttribute('multiple');
-		this.setAttribute(AUTO_FORM_SELETED,[el.getAttribute('name'),multiple]);//不清理也无妨
-		this.next(el);
-	},
-	parseOption:function(el){
-		var autoform = this.getAttribute(AUTO_FORM_PREFIX);
-		if(autoform!=null){
-			var name_multiple = this.getAttribute(AUTO_FORM_SELETED);
-			if(name_multiple){
-				buildCheck2select(this,el,name_multiple[0],'selected',name_multiple[1]);
-				return;
-			}
-		}
-		this.next(el);
-	}
+	/* 处理IE条件注视 */
+	parse$8:parseConditionComment,
+	/* 处理自动表单填充 */
+	parseSelect:parseSelect,
+	parseOption:parseOption,
+	parseInput:parseInput,
+	parseTextArea:parseTextArea,
+	/* 处理 script中的模板变量(JSON.stringify)*/
+	parseScript : parseHtmlScript,
+	parseHead:parseHtmlHead,
+
+	/* 处理保留空白的html节点 */
+	parsePre : preservedParse,
+	//parseTextArea = preservedParse;//processed on auto form
+
+	/* 处理 html 事件中的模板变量(JSON.stringify) (ELEMENT_NODE == 2)*/
+	"onon*":parseHtmlEventAttr,
+	
+	/* 处理html 资源地址属性中的模板变量（encodeURI） */
+	//if(tagName=='link'){
+	//}else if(/^a/i.test(tagName)){
+	onhref:autoURIEncoder,
+	//	if(/^form$/i.test(tagName)){
+	onaction:autoURIEncoder,
+	//if(/^(?:script|img|button)$/i.test(tagName)){
+	//}else if(/^(?:a|frame|iframe)$/i.test(tagName)){
+	onsrc:autoURIEncoder,
+
 }
+
 var HTML_EXT = {
 	xmlns : function(){},
-	beforeAutoform:function(node){
-		var oldAutoform = this.getAttribute(AUTO_FORM_PREFIX);
-		try{
-			var prefix = findXMLAttribute(node,'*value');
-			//console.info("#####",prefix);
-			if(prefix == 'true'){
-				prefix = '';
+	interceptAutoform:interceptAutoform,
+	interceptTrim:interceptTrim,
+	
+	parseAutoform:interceptAutoform,
+	parseTrim:interceptTrim,
+}
+
+exports.HTML=HTML;
+exports.HTML_EXT=HTML_EXT;
+
+
+
+/* html form auto value*/
+function parseHtmlHead(node){
+	
+}
+function parseInput(el){
+	var autoform = this.getAttribute(AUTO_FORM_PREFIX);
+	if(autoform!=null){
+		var name_ = el.getAttribute('name');
+		//console.warn(uneval(autoform),name_);
+		if(name_){
+			var type = el.getAttribute('type');
+			if(!/^(?:reset|button|submit)$/i.test(type)){
+				if(/^(?:checkbox|radio)$/i.test(type)){
+					if(!el.hasAttribute('checked')){
+						buildCheck2select(this,el,name_,'checked',/checkbox/i.test(type));
+						return ;
+					}
+				}else if(!el.hasAttribute('value')){
+					el.setAttribute('value', "${"+name_+"}");
+				}
 			}
-			this.setAttribute(AUTO_FORM_PREFIX,prefix);
-    		parseChildRemoveAttr(this,node);
-    	}finally{
-			this.setAttribute(AUTO_FORM_PREFIX,oldAutoform);
 		}
-	},
-	/**
-	 * safe
-	 * any
-	 * none
-	 */
-	beforeTrim:function(node){
-		var oldSpace = this.getAttribute(XML_SPACE_TRIM);
-		try{
-			var value = findXMLAttribute(node,'*value');
-			this.setAttribute(XML_SPACE_TRIM,value == 'true'?true:value == 'false'?false:null);
-    		
+	}
+	this.next(el);
+}
+function parseTextArea(el){
+	var oldSpace = this.getAttribute(XML_SPACE_TRIM);
+	this.setAttribute(XML_SPACE_TRIM,false);
+	var autoform = this.getAttribute(AUTO_FORM_PREFIX);
+	var hasValue = el.hasAttribute('value');//value added for textarea
+	if(hasValue){
+		el.textContent = el.getAttribute('value');
+	}else if(autoform!=null && !el.hasChildNodes()){
+		var name_ = el.getAttribute('name');
+		el.textContent = "${"+ name_ + "}";
+	}
+	this.next(el);
+	this.setAttribute(XML_SPACE_TRIM,oldSpace);
+}
+function parseSelect(el){
+	var multiple = el.hasAttribute('multiple');
+	this.setAttribute(AUTO_FORM_SELETED,[el.getAttribute('name'),multiple]);//不清理也无妨
+	this.next(el);
+}
+function parseOption(el){
+	var autoform = this.getAttribute(AUTO_FORM_PREFIX);
+	if(autoform!=null){
+		var name_multiple = this.getAttribute(AUTO_FORM_SELETED);
+		if(name_multiple){
+			buildCheck2select(this,el,name_multiple[0],'selected',name_multiple[1]);
+			return;
+		}
+	}
+	this.next(el);
+}
+function interceptAutoform(node){
+	var oldAutoform = this.getAttribute(AUTO_FORM_PREFIX);
+	try{
+		var prefix = findXMLAttribute(node,'*value');
+		//console.info("#####",prefix);
+		if(prefix == 'true'){
+			prefix = '';
+		}
+		this.setAttribute(AUTO_FORM_PREFIX,prefix);
+		parseChildRemoveAttr(this,node);
+	}finally{
+		this.setAttribute(AUTO_FORM_PREFIX,oldAutoform);
+	}
+}
+
+
+
+/**
+ * <!--[if IE]><p>11</p><![endif]-->
+ * 
+ * <!--[if IE 8]><!-->
+ *   <p>aa</p>
+ * <!--<![endif]-->
+ */
+function parseConditionComment(comm){//comment
+	var text = comm.textContent || comm.data;
+	var match = text.match(/^\[if\s[^\]]+\]>|<!\[endif\]$/ig);
+	if(match){
+		if(match.length == 1){
+			this.append('<!--'+text+'-->')
+		}else{
+			var len1 = match[0].length;
+			var len2 = match[1].length
+			var content = text.substring(len1,text.length - len2);
+			try{
+				if(/^\s*</.test(content)){
+					content = this.loadXML(content);
+				}
+				//xml = this.xml.documentElement;
+			}catch(e){
+			}
+			this.append('<!--'+match[0]);
+			this.parse(content);
+			this.append(match[1]+'-->');
+		}
+	}
+	
+}
+/**
+ * safe
+ * any
+ * none
+ */
+function interceptTrim(node){
+	var oldSpace = this.getAttribute(XML_SPACE_TRIM);
+	try{
+		var value = findXMLAttribute(node,'*value');
+		this.setAttribute(XML_SPACE_TRIM,value == 'true'?true:value == 'false'?false:null);
 //			console.error(this.getClass(),XML_SPACE_TRIM,this.getAttribute(XML_SPACE_TRIM));
-    		parseChildRemoveAttr(this,node);
-    	}finally{
-			this.setAttribute(XML_SPACE_TRIM,oldSpace);
-		}
+		parseChildRemoveAttr(this,node);
+	}finally{
+		this.setAttribute(XML_SPACE_TRIM,oldSpace);
 	}
 }
-var moveList = ['parseclient','parse2client','seekclient'];
-function buildMoved(tag){
-	if(tag){
-		var fn = Core[tag];
-		HTML_EXT[tag]= fn;
-		Core[tag] = function(){
-			console.info("标签:"+tag+ " 已经从core到：html-ext上了！")
-			fn.apply(this,arguments);
-		}
-		return true;
-	}
-}
-
-//while(buildMoved(moveList.pop()));
-
-HTML_EXT.parseAutoform = HTML_EXT.beforeAutoform;
-HTML_EXT.parseTrim = HTML_EXT.beforeTrim;
 function toelv(value){
 	if(value){
 		var elv = value.replace(/^\$\{([\s\S]+)\}$/,'$1');
@@ -202,7 +237,6 @@ function buildCheck2select(context,el,name_,checkName,multiple){
 		context.next(el);
 		context.appendEnd();
 	}
-	
 }
 
 /* html parse */
@@ -234,7 +268,7 @@ function replaceJSON(v){
 function replaceURI(v){
 	return "encodeURI("+v+")";
 }
-function forceURIParse(attr){
+function autoURIEncoder(attr){
 	var value = attr.value;
 	attr.value = autoEncode(value,/^\s*encodeURI*/,replaceURI,encodeURI);
 	this.next(attr);
@@ -287,26 +321,6 @@ function parseHtmlEventAttr(attr){
 	this.next(attr);
 }
 
-/* 处理 script中的模板变量(JSON.stringify)*/
-HTML.parseScript = parseHtmlScript;
-
-/* 处理 html 事件中的模板变量(JSON.stringify) (ELEMENT_NODE == 2)*/
-HTML["parse2on*"] = parseHtmlEventAttr;
-
-/* 处理html 资源地址属性中的模板变量（encodeURI） */
-//if(tagName=='link'){
-//}else if(/^a/i.test(tagName)){
-HTML.parse2href=forceURIParse;
-//	if(/^form$/i.test(tagName)){
-HTML.parse2action=forceURIParse;
-//if(/^(?:script|img|button)$/i.test(tagName)){
-//}else if(/^(?:a|frame|iframe)$/i.test(tagName)){
-HTML.parse2src=forceURIParse;
-
-/* 处理保留空白的html节点 */
-
-HTML.parsePre = preservedParse;
-HTML.parseTextArea = preservedParse;
 
 function autoEncode(value,pattern,replacer,replacer2){
 	var p = -1;
@@ -356,13 +370,4 @@ function countEescape(text, p$) {
 	return 0;
 }
 //autoEncode("${a}",/^encodeURI*/,function(a){return 'encodeURI('+a+')'})
-if(typeof require == 'function'){
-exports.HTML=HTML;
-exports.HTML_EXT=HTML_EXT;
-var XML_SPACE_TRIM=require('./xml-default-parser').XML_SPACE_TRIM;
-var findELEnd=require('./el-util').findELEnd;
-var parseChildRemoveAttr=require('./xml-core-parser').parseChildRemoveAttr;
-var compressJS=require('./js-token').compressJS;
-var findXMLAttribute=require('./xml').findXMLAttribute;
-var URI=require('./resource').URI;
-}
+

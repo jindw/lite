@@ -10,18 +10,32 @@ var ResultContext=require('./result-context').ResultContext;
 var URI=require('./resource').URI;
 var defaultBase = new URI("lite:///");
 
+
+var loadLiteXML=require('./xml').loadLiteXML;
+var buildTopChain=require('./parse-chain').buildTopChain;
+var ExtensionParser=require('./extension-parser').ExtensionParser;
+var Extension=require('./extension').Extension;
+var parseDefaultXMLNode=require('./parse-xml').parseDefaultXMLNode;
+var parseText=require('./parse-text').parseText;
+var XA_TYPE=require('./template-token').XA_TYPE;
+var EL_TYPE=require('./template-token').EL_TYPE;
+var XT_TYPE=require('./template-token').XT_TYPE;
+var ParseConfig=require('./config').ParseConfig;
+
+exports.ParseContext=ParseContext;
+
 /**
  * 模板解析上下文对象实现
  */
 function ParseContext(config,path){
 	config = config || new ParseConfig();
-    this.config = config;
+	this.config = config;
 	this.currentURI = defaultBase;
 	this.configMap = config.getConfig(path);
-    this.textType=0;
+	this.textType=0;
 	this._path = path;
 	this._attributeMap = [[],[],{}]
-    this._result = new ResultContext();
+	this._result = new ResultContext();
 	this._context = this;
 	this._result._context = this;
 	this._resources = [];
@@ -43,7 +57,7 @@ function initializeParser(context,extensionMap){
 	context._nodeParsers = [parseTextLeaf,parseDefaultXMLNode,parseExtension];
 	context._textParsers = [extensionParser];
 	context._extensionParser = extensionParser;
-    context._topChain = buildTopChain(context);
+	context._topChain = buildTopChain(context);
 }
 function parseExtension(node,context,chain){//extension
 	return context._extensionParser.parse(node,context,chain);
@@ -60,10 +74,10 @@ ParseContext.prototype = {
 	parseText:function(source, textType) {
 		switch(textType){
 		case XA_TYPE :
-	    case XT_TYPE :
-	    case EL_TYPE :
-	        break;
-	    default:
+		case XT_TYPE :
+		case EL_TYPE :
+			break;
+		default:
 			console.error("未知编码模式："+textType)
 			throw new Error();
 		}
@@ -76,12 +90,12 @@ ParseContext.prototype = {
 		var result = this.reset(mark);
 		return result;
 	},
-    /**
-     * 调用解析链顶解析器解析源码对象
-     * @param 文本源代码内容或xml源代码文档对象。
-     * @public
-     * @abstract
-     */
+	/**
+	 * 调用解析链顶解析器解析源码对象
+	 * @param 文本源代码内容或xml源代码文档对象。
+	 * @public
+	 * @abstract
+	 */
 	parse:function(source) {
 		var type = source.nodeType;
 		if(type>0){//xml
@@ -91,7 +105,7 @@ ParseContext.prototype = {
 			
 			if(source instanceof URI){
 				var oldURI = this.currentURI;
-    			this.setCurrentURI(source);
+				this.setCurrentURI(source);
 				//console.log(source+this.loadXML)
 				source = this.loadXML(source);
 				if(typeof source == 'string'){
@@ -119,78 +133,68 @@ ParseContext.prototype = {
 		
 		
 	},
-    createURI:function(path) {
-    	//console.error(path,this.currentURI,this.config.root)
-    	var base = this.config.root.toString();
-    	if(!path){return path}
-    	path = String(path);
-    	if(path.indexOf(base) ==0){
-    		path = path.substring(base.length-1);
-    	}
-    	var cu = this.currentURI;
-    	if(cu){
-    		//if(cu.scheme == 'data'){
-    		//	return new URI(cu);
-    		//}else{
-    		//console.log(path,cu)
-    		//console.log('???'+cu.resolve(path))
-    		return cu.resolve(path);
-    		//}
-    	}else{
-    		path= path.replace(/^[\\\/]/,'./');// /xxx=>./xxx
-    		//console.warn(defaultBase+'',path,defaultBase.resolve(path)+'',defaultBase.authority)
-    		
-    		//console.log(path,defaultBase)
-    		//console.log('###'+defaultBase.resolve(path))
-    		return defaultBase.resolve(path);
-    	}
-    	
-    	
-    },
-    loadText:function(uri){
-    	//only for java
-    	if(uri.scheme == 'lite'){
-    		var path = uri.path+(uri.query||'');
-    		path = path.replace(/^\//,'./')
-    		uri = this.config.root.resolve(path);
-    	}
-    	var xhr = new XMLHttpRequest();
-	    xhr.open("GET",uri,false)
-	    xhr.send('');
-	    ////text/xml,application/xml...
-	    return xhr.responseText;
-    },
-    loadXML:function(path){
-    	var t1 = +new Date();
-    	if(path instanceof URI){
-    	}else{
-    		if(/^\s*</.test(path)){
-    			doc = loadLiteXML(path,this.config.root)
-    		}else{
-    			path = new URI(path)
-    		}
-    	}
-    	if(path instanceof URI){
-    		var doc = loadLiteXML(path,this.config.root);
-    		this._context._loadTime+=(new Date()-t1);
-    	}
-    	var root = doc && doc.documentElement;
-    	if(root){
-    		root.setAttribute('xmlns:xhtml',"http://www.w3.org/1999/xhtml")
-    		root.setAttribute('xmlns:c',"http://www.xidea.org/lite/core")
-    	}
-    	return doc;
-    },
-    openStream:function(uri){
-//    	//only for java
-//    	if(uri.scheme == 'lite'){
-//    		var path = uri.path+(uri.query||'');
-//    		path = path.replace(/^\//,'./')
-//    		uri = this.config.root.resolve(path);
-//    	}
-//    	return Packages.org.xidea.lite.impl.ParseUtil.openStream(uri)
-		throw new Error("only for java");
-    },
+	createURI:function(path) {
+		//console.error(path,this.currentURI,this.config.root)
+		var base = this.config.root.toString();
+		if(!path){return path}
+		path = String(path);
+		if(path.indexOf(base) ==0){
+			path = path.substring(base.length-1);
+		}
+		var cu = this.currentURI;
+		if(cu){
+			//if(cu.scheme == 'data'){
+			//	return new URI(cu);
+			//}else{
+			//console.log(path,cu)
+			//console.log('???'+cu.resolve(path))
+			return cu.resolve(path);
+			//}
+		}else{
+			path= path.replace(/^[\\\/]/,'./');// /xxx=>./xxx
+			//console.warn(defaultBase+'',path,defaultBase.resolve(path)+'',defaultBase.authority)
+			
+			//console.log(path,defaultBase)
+			//console.log('###'+defaultBase.resolve(path))
+			return defaultBase.resolve(path);
+		}
+		
+		
+	},
+	loadText:function(uri){
+		//only for java
+		if(uri.scheme == 'lite'){
+			var path = uri.path+(uri.query||'');
+			path = path.replace(/^\//,'./')
+			uri = this.config.root.resolve(path);
+		}
+		var xhr = new XMLHttpRequest();
+		xhr.open("GET",uri,false)
+		xhr.send('');
+		////text/xml,application/xml...
+		return xhr.responseText;
+	},
+	loadXML:function(path){
+		var t1 = +new Date();
+		if(path instanceof URI){
+		}else{
+			if(/^\s*</.test(path)){
+				doc = loadLiteXML(path,this.config.root)
+			}else{
+				path = new URI(path)
+			}
+		}
+		if(path instanceof URI){
+			var doc = loadLiteXML(path,this.config.root);
+			this._context._loadTime+=(new Date()-t1);
+		}
+		var root = doc && doc.documentElement;
+		if(root){
+			root.setAttribute('xmlns:xhtml',"http://www.w3.org/1999/xhtml")
+			root.setAttribute('xmlns:c',"http://www.xidea.org/lite/core")
+		}
+		return doc;
+	},
 	setAttribute:function(key,value){
 		_setByKey(this._context._attributeMap,key,value)
 	},
@@ -212,29 +216,29 @@ ParseContext.prototype = {
 	getConfigMap:function(){
 		return this.configMap;
 	},
-    setCurrentURI:function(uri){
-    	this._context.addResource(uri=new URI(uri));
-    	this._context.currentURI = uri;
-    },
-    addResource:function(uri){
-    	for(var rs = this._resources, i=0;i<rs.length;i++){
-    		if(rs[i]+'' == uri){
-    			return ;
-    		}
-    	}
-    	this._resources.push(uri);
-    },
-    getResources:function(){
-    	return this._resources;
-    },
-    createNew:function(){
-    	var nc = new ParseContext(this.config,this.currentURI);
-    	nc.config = this.config;
-    	nc.configMap = this.configMap;
-    	nc._resources = this._resources;
-    	return nc;
-    },
-    _loadTime :0
+	setCurrentURI:function(uri){
+		this._context.addResource(uri=new URI(uri));
+		this._context.currentURI = uri;
+	},
+	addResource:function(uri){
+		for(var rs = this._resources, i=0;i<rs.length;i++){
+			if(rs[i]+'' == uri){
+				return ;
+			}
+		}
+		this._resources.push(uri);
+	},
+	getResources:function(){
+		return this._resources;
+	},
+	createNew:function(){
+		var nc = new ParseContext(this.config,this.currentURI);
+		nc.config = this.config;
+		nc.configMap = this.configMap;
+		nc._resources = this._resources;
+		return nc;
+	},
+	_loadTime :0
 }
 var rm = ResultContext.prototype;
 for(var n in rm){
@@ -279,16 +283,3 @@ function _setByKey(map,key,value){
 	}
 }
 
-var loadLiteXML=require('./xml').loadLiteXML;
-var buildTopChain=require('./parse-chain').buildTopChain;
-var ExtensionParser=require('./extension-parser').ExtensionParser;
-var Extension=require('./extension').Extension;
-var parseDefaultXMLNode=require('./xml-default-parser').parseDefaultXMLNode;
-var parseText=require('./text-parser').parseText;
-var XA_TYPE=require('./template-token').XA_TYPE;
-var EL_TYPE=require('./template-token').EL_TYPE;
-var XT_TYPE=require('./template-token').XT_TYPE;
-
-var ParseConfig=require('./config').ParseConfig;
-
-exports.ParseContext=ParseContext;

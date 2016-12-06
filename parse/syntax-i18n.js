@@ -1,5 +1,7 @@
-
 var findXMLAttribute=require('./xml').findXMLAttribute;
+exports.interceptI18n =processI18N;
+exports.parseI18n =processI18N;
+exports.i18nHash = i18nHash;
 
 function processI18N(node){
 	if (node.nodeType == 2) {
@@ -108,10 +110,3 @@ function numberToString(value,radix){
 	return buf.reverse().join('')
 }
 
-
-
-exports.setup = function(Core){
-	Core.beforeI18n =processI18N;
-	Core.parseI18n =processI18N;
-}
-exports.i18nHash = i18nHash;

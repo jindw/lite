@@ -2,7 +2,7 @@
  * Lite JS 扩展规范：
  * 一个js包中：
  *            函数 document 为通用文档解释器  
- *            所有 before<Attribute> 为当前名称空间属性解析器
+ *            所有 intercept<Attribute> 为当前名称空间属性解析器
  *            函数 xmlns 为当前名称空间属性解释器,未定义或者空函数时则该属性不输出
  *            所有 on<Attribute> 为当前名称空间元素普通属性（无名称空间的属性）的解释器
  *            所有 parse<TagName> 为当前名称空间元素（Element）解释器
@@ -10,7 +10,7 @@
  */
 function Extension(){
 	this.namespaceParser = null;
-	this.beforeMap = null;
+	this.interceptMap = null;
 	this.typeMap = null;
 	this.tagMap = null;
 	this.patternTagMap = null;
@@ -66,26 +66,26 @@ Extension.prototype={
 //			console.error("["+key+"]:"+o+"\n\n")
 			if(o instanceof Function){
 				var dest = null;
-				var match = key.match(/^(parse|seek|before|xmlns)(.*)/);
-				var prefix = match[1];
-				var fn = formatName(match[2]);
-				if(prefix == "parse"){//""?".."
+				var match = key.match(/^(parse|seek|intercept|xmlns|on)(.*)/);
+				var prefix =match&& match[1];
+				var fn = match &&formatName(match[2]);
+				if(prefix == "parse"){
 					var c = fn.charAt(0);
 					fn = fn.replace(/^[12]/,'');
-					if(c == '2'){
-						appendParser(this,"attributeMap","patternAttributeMap",fn,o);
-					}else if(c <'0' || c > '9' || c == '1'){
-						appendParser(this,"tagMap","patternTagMap",fn,o);
-					}else{
+					if( c == '$'){//type parser(eg : comment parser,document parser)
 						if(!this.typeMap){
 							this.typeMap = {};
 						}
 						add(this.typeMap,fn,o);
+					}else{
+						appendParser(this,"tagMap","patternTagMap",fn,o);
 					}
+				}else if(prefix == "on"){
+					appendParser(this,"attributeMap","patternAttributeMap",fn,o);
 				}else if(prefix == "xmlns"){
 					this.namespaceParser = o;
-				}else if(prefix == "before"){
-					dest = this.beforeMap ||(this.beforeMap={});
+				}else if(prefix == "intercept"){
+					dest = this.interceptMap ||(this.interceptMap={});
 					dest[fn] = o;
 				}else if(prefix == "seek"){//""?".."
 					dest = this.seekMap ||(this.seekMap={});
