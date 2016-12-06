@@ -1,4 +1,6 @@
 var DOCUMENT_LAYOUT_PROCESSED = "http://www.xidea.org/lite/core/c:layout-processed";
+
+var HTML_URI = "http://www.w3.org/1999/xhtml"
 var setNodeURI = require('./syntax-util').setNodeURI
 var parseChildRemoveAttr =  require('./syntax-util').parseChildRemoveAttr
 var findXMLAttribute =  require('./xml').findXMLAttribute
@@ -167,7 +169,8 @@ function processWidget(node){
 	}
 	var source = loadText(ctx,cssPath);
 	if(source){
-		var s = doc.createElement('link');
+		var s = doc.createElementNS(HTML_URI,'link');
+		//s.namespaceURI = doc.documentElement.namespaceURI;
 		s.setAttribute('rel','stylesheet');
 		s.setAttribute('type','text/css');
 		s.setAttribute('href',cssPath);
@@ -196,7 +199,7 @@ function processWidget(node){
 	}
 	var source = loadText(ctx,jsPath);
 	if(source){
-		var s = doc.createElement('script');
+		var s = doc.createElementNS(HTML_URI,'script');
 		//s.setAttribute('src',jsPath);
 		source = wrapScript(source,'__define_run__')
 		s.appendChild(doc.createTextNode(source));

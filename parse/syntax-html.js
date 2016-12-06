@@ -33,6 +33,8 @@ var HTML = {
 	/* 处理 script中的模板变量(JSON.stringify)*/
 	parseScript : parseHtmlScript,
 	parseHead:parseHtmlHead,
+	parseHtml:parseHtml,
+	parseLink:parseLink,
 
 	/* 处理保留空白的html节点 */
 	parsePre : preservedParse,
@@ -68,8 +70,37 @@ exports.wrapScript = wrapScript;
 
 
 /* html form auto value*/
-function parseHtmlHead(node){
-	
+function parseHtmlHead(head){
+	this.setAttribute(parseHtmlHead,true);
+	var doc = head.ownerDocument;
+	head.appendChild(doc.createTextNode('$!{__head_styles__}'));
+	this.next(head);
+	this.setAttribute(parseHtmlHead,undefined);
+}
+function parseHtml(html){
+	var mark = this.mark();
+	var links = [];
+	this.setAttribute(parseHtml,links)
+	this.next(html);
+	var result = this.reset(mark);
+	this.appendCapture('__head_styles__');
+	this.setAttribute(parseHtmlHead,true)
+	for(var i = 0;i<links.length;i++){
+		this.parse(links[i]);
+	}
+	this.setAttribute(parseHtmlHead,undefined)
+	this.appendEnd();
+	this.appendAll(result);
+	//console.log('#$$$$'+this.getAttribute(parseHtml))
+}
+function parseLink(link){
+	var list = this.getAttribute(parseHtml)
+	if(list && !this.getAttribute(parseHtmlHead)){
+		list.push(link)
+	}else{
+		this.next(link);
+	}
+	//console.log(list,'#'+this.getAttribute(parseHtmlHead))
 }
 function parseInput(el){
 	var autoform = this.getAttribute(AUTO_FORM_PREFIX);
@@ -256,6 +287,7 @@ function parseHtmlScript(el){
 	this.setAttribute(XML_SPACE_TRIM,false);
 	try{
 		if(!el.hasAttribute('src')){
+			var doc = el.ownerDocument;
 			var wrap_script = this.getAttribute(WRAP_SCRIPT_USE);
 			var child;
 			var buf = [];
