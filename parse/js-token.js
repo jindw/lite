@@ -1,11 +1,11 @@
 
 var uncompressed = /^[\t ]{2}|^\s*\/\/|\/\**[\r\n]/m;
-function compressJS0(source){
+function tokenCompress(source,file,root){
 	source = String(source).replace(/\r\n?/g,'\n');
 	if(source.search(uncompressed)<0){
 		return source;
 	}
-	var ps = partitionJavaScript(source);
+	var ps = partitionJavaScript(source,file,root);
 	var result = [];
 	for(var i =0;i<ps.length;i++){
 		var item = ps[i];
@@ -30,36 +30,33 @@ function compressJS0(source){
 	}
 	return result.join('');
 }
-var compressCache = [[],[]]
-
-function compressJS(source,id){
-	var result = source;
-	var keys = compressCache[0];
-	var values = compressCache[1];
-	var i = keys.indexOf(source);
+var compressedCache = []
+function compressJS(source,file,root){
+	source = source.replace(/^\/\*[\s\S]*?\*\/\s*/g,'')
+	var i = compressedCache.indexOf(source);
 	if(i>=0){
-		keys.push(keys.splice(i,1)[0])
-		result = values.splice(i,1)[0]
-		values.push(result);
-		return result
+		if(i%2 == 0){
+			var kv = compressedCache.splice(i,2)
+			compressedCache.push(kv[0],kv[1]);
+			return kv[1];
+		}else{
+			return source;
+		}
 	};
+	var result = source;
 	var sample = source.slice(source.length/10,source.length/1.1);
 	//console.log(sample.length )
 	if(sample.length < 200 || sample.match(uncompressed)){
-		//console.log('\n=======\n',s);
 		try{
-			result= compressJS0(source,id);
+			result= tokenCompress(source,file,root);
 		}catch(e){
-			//console.log(e)
-			result= compressJS0('this.x='+source,id).replace(/^this.x=|(});$/g,'$1') ;
+			result= tokenCompress('this.x='+source,file,root).replace(/^this.x=|(});$/g,'$1') ;
 		}
-		//console.log('\&&&&\n',s,"====");
 	}
-	keys.push(source);
-	values.push(result);
-	if(keys.length>64){
-		keys.shift();
-		values.shift();
+	compressedCache.push(source,result);
+	if(compressedCache.length>64){
+		compressedCache.shift();
+		compressedCache.shift();
 	}
 	return result;
 }
@@ -68,7 +65,7 @@ var TYPE_COMMENT=0, TYPE_SOURCE =1, TYPE_STRING =2, TYPE_REGEXP=3;
  * 如何token
  * 如何补全; 能不补全就不补全
  */
-function partitionJavaScript(source){
+function partitionJavaScript(source,file,root){
 	/* *
 	var exp1 = /\\.|[^\\\r\n\[\/]+/   // ']' is valid char
 	var exp2 = /\[(?:\\.|[^\\\r\n\]])+]\]/    //'[' '/' is valid in []
@@ -89,6 +86,35 @@ function partitionJavaScript(source){
 			}
 		}
 	}
+	function appendXML(xml){
+		var preIndex = result.length-1;
+		var prev = result[preIndex];
+		//(param1,param2){return <xml/>}
+		var preFunctionMatch = prev.match(/(?:(\([\w\s,]*\))(\{\s*(?:return\s*)?))?$/);
+		if(preFunctionMatch){
+			var params =  preFunctionMatch[1];
+			var functionQute = preFunctionMatch[2];
+			//console.log("###",match)
+		}
+		var args = params&&params.replace(/[\s()]/g,'').split(',')||[];
+		var fn = parseTemplate(xml,file,{
+			root:root,
+			params:args||[]
+		})
+		
+		var fnCode = String(fn).replace(/^\s+|\s+$/g,'');
+		if(functionQute){
+			prev = prev.slice(0,prev.length-preFunctionMatch[0].length+1);
+			result[preIndex] = prev+fnCode.replace(/^[^(]+.|\}[^}]*$/g,'')
+		}else{
+			var m = fnCode.match(/^function\([\w\s,]*\)\{\s*return/);
+			if(m){
+				result[preIndex] = prev+fnCode.substring(m[0].length).replace(/;?\s*\}[^}]*$/,'')
+			}else{
+				result[preIndex] = prev+'('+fnCode+')()';
+			}
+		}
+	}
 	//console.log(source)
 	regexp.lastIndex = 0;
 	while(m = regexp.exec(source)){
@@ -106,9 +132,7 @@ function partitionJavaScript(source){
 				if(m2){
 					m = m2;
 					if(xml){
-						append('new XML(',TYPE_SOURCE)
-						append('"'+m.replace(/["\r\n\\]/g,jsReplace)+'"',TYPE_STRING)
-						append(')',TYPE_SOURCE)
+						appendXML(m);
 					}else{
 						append(m,TYPE_REGEXP)
 					}
@@ -174,18 +198,30 @@ function findXML(result,source){
 		return null;
 	}
 }
-function jsReplace(c){
-	switch(c){
-		case '\r':
-			return '\\r';
-		case '\n':
-			return '\\n\\\n';
-		case '"':
-			return '\\"';
-		case '\\':
-			return '\\\\';
-		
+
+function parseTemplate(xml,file,options){
+	var m = xml.match(/^([\w\-\/\.]+)(#.*)?$/)
+	if(m){
+		var attr = m[2];
+		//console.log(file,m)
+		var buf =["<c:include path='",m[1],"' "];
+		if(attr && attr.length>1){
+			buf.push('selector="',attr.substr(1).replace(/["]/g,'&#34;'),'"/>')
+		}else{
+			buf.push('/>')
+		}
+		xml = buf.join('')
 	}
+	//console.log('inline xml file:',root,file)
+	var parser = new (require('xmldom').DOMParser)({
+			locator:{systemId:file||options.root},
+			xmlns:{
+				c:'http://www.xidea.org/lite/core',
+				h:'http://www.xidea.org/lite/html-ext'
+			}
+		});
+	xml = parser.parseFromString(xml,'text/html');
+	return require('lite').parseLite(xml,options);
 }
 
 

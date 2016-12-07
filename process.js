@@ -1,8 +1,8 @@
-var  configRoot = '-lite-engine-child-process-root';
-exports.configRoot = configRoot
+var  configRootKey = '-lite-engine-child-process-root';
+exports.configRootKey = configRootKey
 //node path -root root -filter path#name
 var argv = process.argv;
-var isChild = argv[2]==configRoot;//child-process-compiler
+var isChild = argv[2]==configRootKey;//child-process-compiler
 if(isChild){
 	//{path:tplPath,action:'remove'}
 	var root = argv[3].replace(/\/?$/,'/');

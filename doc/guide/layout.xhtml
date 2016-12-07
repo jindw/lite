@@ -88,17 +88,17 @@ function parseCode(node){
 		model=null;
 	}
 	var guid = '__id__'+new Date().getTime()+'_'+(Math.random()*100 | 0);
-	this.append("<script>//<![CDATA[\n" + guid+'=[' +text+','+model+"];\n//]"+"]>\n<\/script>\n")
+	this.appendText("<script>//<![CDATA[\n" + guid+'=[' +text+','+model+"];\n//]"+"]>\n<\/script>\n")
 	if(varName){
-		this.append("<script>//<![CDATA[\n" + varName+'=' +guid+"[0];\n//]"+"]>\n<\/script>\n")
+		this.appendText("<script>//<![CDATA[\n" + varName+'=' +guid+"[0];\n//]"+"]>\n<\/script>\n")
 		if(model){
-			this.append("<span class='runner' onclick='showExample("+guid+"[0],"+varName+")'>执行</span>");
+			this.appendText("<span class='runner' onclick='showExample("+guid+"[0],"+varName+")'>执行</span>");
 		}
 	}else{
 		if(alias){
-			this.append("<script>" + alias+'=' +guid+"[0];\n<\/script>\n")
+			this.appendText("<script>" + alias+'=' +guid+"[0];\n<\/script>\n")
 		}
-		this.append("<div class='code'><script>renderSource("+guid+"[0],"+guid+"[1],'"+path+"');<\/script></div>")
+		this.appendText("<div class='code'><script>renderSource("+guid+"[0],"+guid+"[1],'"+path+"');<\/script></div>")
 	}
 };
 function parseNL2BR(node){
@@ -115,7 +115,7 @@ function parseNL2BR(node){
 	var forId = this.allocateId();
 	this.appendFor(forId,varId+".split('\\n')",null);
 	this.appendXT(forId);
-	this.append("<br/>");
+	this.appendText("<br/>");
 	this.appendEnd();
 }
 //]]>

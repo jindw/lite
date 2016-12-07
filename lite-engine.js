@@ -1,73 +1,118 @@
 var Template = require('./template').Template
-
+exports.getTemplateId = getTemplateId;
+exports.LiteEngine = LiteEngine;
 function LiteEngine(root,options){
+	options = options || {}
+	this.litecache = options.litecache;
+	this.released = options.released;//root && root == options.litecache
 	root = require('path').resolve(root || './')
 	root = root.replace(/[\\\/]*$/,'/');
 	this.root = root;
 	this.templateMap = {};
 	this.renderTask = {};
-	var thiz = this;
-	/**
-	 * 
-	 * configurator: modulename#configuratorMethod(compiler)
-	 */
-	var configurator = options&&options.configurator;
+	if(!this.released){
+		this.compiler = initCompiler(this, options.configurator);
+	}
+}
+/**
+ * @param engine
+ * @param configurator: modulename#configuratorMethod(compiler)
+ */
+function initCompiler(engine,configurator){
 	try{
 		if(configurator instanceof Function){
 			throw new Error();//function can config can not post to sub process!!
 		}
 		//throw new Error();
-		var configRoot = require('./process').configRoot
-		var args = [configRoot,root]
+		var root = engine.root;
+		var configRootKey = require('./process').configRootKey
+		var args = [configRootKey,root]
 		if(configurator){
 			args.push('-configurator',configurator);
 		}
-		this.compiler = require('child_process').fork(__dirname + '/process.js',args);
-		this.compiler.on('message', function(result){
+		var compiler = require('child_process').fork(__dirname + '/process.js',args);
+		compiler.on('message', function(result){
 			//console.log(Object.keys(result))
-			thiz.onChange(result.path,result.code,result.config)
+			engine.onChange(result.path,result.code,result.config)
 		}); 
-		
+		return compiler;
 	}catch(e){
-		if(this.compiler == null){
-			var thiz = this;
-			var setupCompiler = require('./process.js').setupCompiler;
-			var compiler = setupCompiler(root,function(result){
-					var action = result.action;
-					if(action == 'remove' || action == 'add' || action=='error'){
-						thiz.onChange(result.path,result.code,result.config)
-					}
-				},configurator);
-			this.compiler = {
-				send:compiler
-			}
-			
+		var setupCompiler = require('./process.js').setupCompiler;
+		var sender = setupCompiler(root,function(result){
+				var action = result.action;
+				if(action == 'remove' || action == 'add' || action=='error'){
+					engine.onChange(result.path,result.code,result.config)
+				}
+			},configurator);
+		return {
+			send:sender
 		}
+		
 	}
 }
 LiteEngine.prototype.requestCompile = function(path){
-	this.compiler.send(path);
+	if(this.released){
+		var id = getTemplateId(path);
+		var file = require('path').join(this.litecache,id+'.js');
+		this.onChange(path,null,{liteFile:file})
+	}else{
+		this.compiler.send(path);
+	}
 }
 LiteEngine.prototype.onChange = function(path,code,config) {
 	//console.log(path,(code).length,config)
-	if(code){
-		var tpl = new Template(code,config);
-		if(config.error == null){//发生错误的页面每次都需要重建？？
-			this.templateMap[path] = tpl; 
+	if(config&&config.liteFile){
+		try{
+			var tpl = require(config.liteFile);
+			tpl = new Template(tpl.template,tpl.config);
+		}catch(e){
+			console.error(e)
+			code = "function(context,out){var err = 'template:"+config.liteFile+" not found!!';console.error(err);out.push(err);return out.join('')}";
+			var tpl = new Template(code,config);
 		}
-		var task = this.renderTask[path];
-		if(task){
-			delete this.renderTask[path];
-			for(var i=0;i<task.length;i++){
-				var args = task[i];
-				args[0] = tpl;
-				doRender.apply(null,args)
-			}
+		
+	}else if(code && config.error == null){
+		//发生错误的页面每次都需要重建？？
+		var id = getTemplateId(path);
+		var file = this.updateLitecache(id,code,config)
+		try{
+			var tpl = require(file);
+			tpl = new Template(tpl.template || code,tpl.config);
+		}catch(e){
+			console.error(e);
+			var tpl = new Template(code,config);
 		}
+		this.templateMap[path] = tpl; 
 	}else{//clear cache
 		delete this.templateMap[path];
+		//this.updateLitecache(id) //调试模式下每次都更新
 		console.info('clear template cache:' ,path);
+		return;
 	}
+	var task = this.renderTask[path];
+	if(task){
+		delete this.renderTask[path];
+		for(var i=0;i<task.length;i++){
+			var args = task[i];
+			args[0] = tpl;
+			doRender.apply(null,args)
+		}
+	}
+}
+LiteEngine.prototype.updateLitecache = function(id,code,config){
+	var litecache = this.litecache;
+	var fs = require('fs');
+	if(litecache && fs.existsSync(litecache)){
+		var file = require('path').join(litecache,id+'.js');
+		if(code){
+			var source = ['exports.template=',code,';\nexports.config = ',JSON.stringify(config)].join('')
+			fs.writeFileSync(file,source);
+			return file;
+		}else{
+			fs.unlinkFileSync(file)
+		}
+	}
+	
 }
 LiteEngine.prototype.render=function(path,model,req,response){
     var cookie = String(req.headers.cookie);
@@ -96,7 +141,6 @@ LiteEngine.prototype.render=function(path,model,req,response){
 	}
 }
 function doRender(tpl,model,response){
-	
 	if(!response.headersSent){
 		//var statusCode = response.statusCode || 200;
 		//var contentType = response.getHeader('content-type') || tpl.contentType
@@ -105,7 +149,7 @@ function doRender(tpl,model,response){
 			response.statusCode  = 200;
 		}
 		if(response.getHeader('content-type') == null){
-			response.setHeader('content-type', tpl.contentType)
+			response.setHeader('content-type', tpl.contentType||'text/html;charset=utf-8')
 		}
 	}
 	//console.log(response.getHeader('content-type'),response.headersSent)
@@ -118,4 +162,8 @@ function doRender(tpl,model,response){
 	}
 }
 
-exports.LiteEngine = LiteEngine;
+function getTemplateId(path){
+	////path.replace(/[^\w\_]/g,'_')
+	return path.slice(1).replace(/[^\w\_]/g,'_');
+}
+

@@ -3,7 +3,7 @@ var ParseContext = require('./parse/parse-context').ParseContext;
 var JSTranslator = require('./parse/js-translator').JSTranslator;
 var loadLiteXML = require('./parse/xml').loadLiteXML;
 var buildURIMatcher = require('./parse/resource').buildURIMatcher
-
+var getTemplateId = require('./lite-engine').getTemplateId
 exports.LiteCompiler = LiteCompiler;
 
 exports.execute = function(args){
@@ -19,7 +19,9 @@ exports.execute = function(args){
 		}
 	}
 	//console.log(options)
-	compile(options.root,options.output,options.translator,
+	var root = options.root && options.root[0];
+	var output = options.output && options.output[0];
+	compile(root,output,options.translator,
 		options.includes,options.excludes)
 }
 
@@ -66,7 +68,7 @@ LiteCompiler.prototype.compile=function(path){
 	var litecode = context.toList();
 	if(litecode.length){
 		//translator.liteImpl = 'liteImpl';//avoid inline jslib 
-		var functionName = path.replace(/[^\w\_]/g,'_')
+		var functionName = getTemplateId(path);
 		var jscode = this.translator.translate(litecode,{name:functionName});//,params:null,defaults:null
 	}else{//纯静态内容
 		var jscode = "function(){}";
@@ -89,7 +91,7 @@ function compile(root,output,translator,includes,excludes){
 	var path = require('path')
 	root = fs.realpathSync(root || './');
 	output = output || path.join(root,'.litecode');
-	fs.mkdirSync(output);
+	if(!fs.existsSync(output))fs.mkdirSync(output);
 	//console.log('compile lite @'+root,{})
 	var compiler = new LiteCompiler(root);
 	includes = includes && includes.length && new RegExp(includes.map(buildURIMatcher).join('|'))
@@ -107,12 +109,12 @@ function compile(root,output,translator,includes,excludes){
 						continue;
 					}
 					if(includes ? includes.test(p):/\.xhtml$/.test(p)){
-						console.log(path.join(output,p))
-						
+						console.log('compile:',path.join(output,p))
 						var result = compiler.compile(p);
-						var id = p.slice(1).replace(/[^\w\-]/g,'^');
-						fs.writeFile(path.join(output,id)+'.js',result.jscode,function(err){
-							console.log(err)
+						var source = ['exports.template=',result.jscode,';\nexports.config = ',JSON.stringify(result.config)].join('')
+						var id = getTemplateId(p);
+						fs.writeFile(path.join(output,id)+'.js',source,function(err,path){
+							//console.log(err,path)
 						})
 						//dest.writeFile(path.join(dest,p))
 					}
@@ -125,6 +127,4 @@ function compile(root,output,translator,includes,excludes){
 	}
 	loadFile(root);
 }
-
-
 

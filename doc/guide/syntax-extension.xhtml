@@ -184,7 +184,7 @@
 							for (var i=0; i<attributes.length; i++) {
 							    var attr = attributes.item(i);
 							    if(/readonly|autofocus|checked|disabled|required/.test(attr.name)){
-							    	this.append(" "+attr.name)
+							    	this.appendText(" "+attr.name)
 							    }else{
 							    	this.parse(attr);
 							    }
@@ -235,7 +235,7 @@
 					var text = String(node.textContent || node.text);
 					text = text.replace(/^\s*[\r\n]+|[\r\n]+\s*$/g,'');
 					var varName = node.getAttribute('var');
-					this.append("<script>var "
+					this.appendText("<script>var "
 						+varName+'='+JSON.stringify(text)
 						+";<\/script>");
 				}
@@ -283,7 +283,7 @@
 					var forId = this.allocateId();
 					this.appendFor(forId,varId+".split('\\n')",null);
 					this.appendXT(forId);
-					this.append("<br/>");
+					this.appendText("<br/>");
 					this.appendEnd();
 				}
 				]]>]]<![CDATA[>
@@ -329,7 +329,7 @@
 			if(model){
 				text = text+ ','+model;
 			}
-			this.append("<div class='code'><script>renderSource("+text+");<\/script></div>")
+			this.appendText("<div class='code'><script>renderSource("+text+");<\/script></div>")
 		};
 ]]>
 	]]&gt;

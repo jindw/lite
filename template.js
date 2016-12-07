@@ -2,7 +2,7 @@ function Template(code,config){
  	//console.log(code)
  	
 	try{
-    	this.impl = eval('['+code+'][0]');
+    	this.impl = code instanceof Function?code:eval('['+code+'][0]');
     }catch(e){
     	//console.error(config.path,require('util').inspect(e,true)+'\n\n'+(e.message +e.stack));
     	this.impl = function(){throw e;};

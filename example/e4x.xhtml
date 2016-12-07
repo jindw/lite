@@ -7,11 +7,11 @@
 </head>
 <body>
 <script>
-	var tpl = liteWrap(function(color,text){
-		<div style="color:${color}">
+	var tpl = function(color,text){
+		return <div style="color:${color}">
 			测试模板：${text}
 		</div>
-		});
+	};
 	alert(tpl('red','没什么好说的'))
 </script>
 </body>

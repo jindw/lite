@@ -3,7 +3,8 @@ var path = require('path');
 var fs = require('fs');
 var http = require('http');
 var root = path.resolve(__dirname,'../');
-var engine = new LiteEngine(root);
+var litecache = path.join(root,'.litecache');
+var engine = new LiteEngine(root,{litecache:litecache,released:true});
 
 
 require('./file-server').createServer(function (req, response,root) {
