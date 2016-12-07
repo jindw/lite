@@ -64,8 +64,7 @@ function parseXMLByText(text,path){
     }
     try{
         var doc = new DOMParser({locator:{systemId:path},
-                    xmlns:{c:'http://www.xidea.org/lite/core',
-                        h:'http://www.xidea.org/lite/html-ext'}
+                    xmlns:defaultNSMap
                 }).parseFromString(text,"text/html")
         if(!doc.querySelectorAll){//init querySelector
 			var elp = doc.documentElement.constructor.prototype;
@@ -171,11 +170,13 @@ function getLiteTagInfo(node){
     return node.lineNumber + ','+ node.columnNumber+'@'+node.ownerDocument.documentURI;
 }
 
+var defaultNSMap = {c:'http://www.xidea.org/lite/core',h:'http://www.xidea.org/lite/html-ext'}
 var nwmatcher = require('./nwmatcher');
 var URI=require('./resource').URI;
 var DOMParser = require('xmldom').DOMParser;
 var xpathSelectNodes = require('xpath.js');
 
+exports.defaultNSMap = defaultNSMap;
 exports.querySelector = querySelector;
 exports.querySelectorAll = querySelectorAll;
 exports.loadLiteXML=loadLiteXML;

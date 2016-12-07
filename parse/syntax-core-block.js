@@ -15,6 +15,7 @@ exports.parseExtends = exports.interceptExtends = processExtends
 //exports.parseExtend =  exports.interceptExtend = processExtends
 exports.parseBlock = exports.interceptBlock = processBlock;
 exports.parseWidget = exports.interceptWidget =processWidget;
+exports.parseLazyWidget = exports.interceptLazyWidget =processWidget;
 
 //addParserAndAttrInterceptor(processBlock,"module","lazy-module","lazy-block","block","group");
 //var PLUGIN_DEFINE=require('./template-token').PLUGIN_DEFINE;
