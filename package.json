@@ -1,6 +1,6 @@
 {
   "name": "lite",
-  "version": "3.1.4",
+  "version": "3.1.7",
   "description": "A cross platform template engine base on xml/html and javascript expression.",
   "keywords": [ "javascript","xhtml","html","Java","PHP","template"],
   "author": "jindw <jindw@xidea.org> (http://www.xidea.org)",

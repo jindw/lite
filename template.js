@@ -13,7 +13,7 @@ function Template(code,config){
 }
 Template.prototype.render = function(context,response){
 	try{
-		this.impl.call(null,context,wrapResponse(response));
+		this.impl.call(null,context,wrapResponse(this,response));
 	}catch(e){
 		console.warn(this.impl+'');
 		var rtv = require('util').inspect(e,true)+'\n\n'+(e.message +e.stack);
@@ -21,8 +21,12 @@ Template.prototype.render = function(context,response){
 		throw e;
 	}
 }
-function wrapResponse(resp){
-	
+Template.prototype.lazyAppend =function(resp,id,content,index,count){
+	//(first?'!this.__widget_loaded__&&(this.__widget_loaded__=function(id,h){document.querySelector(id).innerHTML=h});':'')
+	content = JSON.stringify(content).replace(/<\/script>/ig,'<\\/script>');
+	resp.write('<script>__widget_loaded__("*[data-lazy-widget-id=\''+id+'\']",'+content+')</script>')
+}
+function wrapResponse(tpl,resp){
 	var lazyList = [];
 	var buf=[];
 	var bufLen=0;
@@ -31,21 +35,28 @@ function wrapResponse(resp){
 			for(var len = arguments.length, i = 0;i<len;i++){
 				//console.log(arguments[i])
 				var txt = arguments[i];
-				buf.push(txt)
-				if((bufLen+=txt)>1024){
+				if(bufLen>1024){
 					resp.write(buf.join(''));
 					buf = [];
 					bufLen = 0;
 				}
+				buf.push(txt)
+				bufLen+=txt.length
 				//resp.write(arguments[i]);
 			}
 		},
 		join:function(){
+			var last = buf.pop();
+			var matchEnd = last && last.match(/<\/html>\s*$/i);
+			if(matchEnd){
+				matchEnd = matchEnd[0];
+				buf.push(last.slice(0,-matchEnd.length))
+			}
 			resp.write(buf.join(''));
 			buf = [];
-			if(!doMutiLazyLoad(lazyList,resp)){
-				resp.end();
-			}
+			doMutiLazyLoad(tpl,lazyList,resp,function(){
+				resp.end(matchEnd||'');
+			})
 		},
 		flush:function(){
 			resp.write(buf.join(''));
@@ -80,48 +91,36 @@ try{
 	}
 }
 
-function doMutiLazyLoad(lazyList,resp){
+function doMutiLazyLoad(tpl,lazyList,resp,onComplete){
 	var len = lazyList.length;
-	var dec = len;
-	var first = true;
-	for(var i = 0;i<len;i++){
-		startModule(lazyList[i],[]);
-	}
-
-	//console.log('lazy module:',len,lazyList)
-	function startModule(g,r){
-		var id = g.name.replace(/^[^\d]+|[^\d]+$/g,'');//__lazy_module_\d+__
-		r.flush = function(){};
-		r.wait = modelWait;
-		g = g(r);
-		function next(){
-			var n = g.next();
-			//console.log('do next:',n)
-			if(n.done){
-				//console.log('done');
-				var rtv = r.join('');
-				//console.log('#$%$###### item',rtv)
-				//
-				//resp.write('<script>(this.__module_loaded__||function(id,h){document.getElementById(id).innerHTML=h})("'+id+'",'+JSON.stringify(rtv)+')</script>')
-				resp.write('<script>'+
-				(first?'!this.__widget_loaded__&&(this.__widget_loaded__=function(id,h){document.querySelector(id).innerHTML=h});':'')
-				+'__widget_loaded__("*[data-lazy-widget-id=\''+id+'\']",'+JSON.stringify(rtv).replace(/<\/script>/ig,'<\\/script>')+')</script>')
-				first = false;
-				if(--dec == 0){
-					//console.log('#$%$######end')
-					resp.end();
-				}
-				return rtv;
-			}else{
-				 n.value.then(next);
-				 //console.log('is promise',n.value)
-			}
+	var index = 0;
+	if(len){
+		for(var i = 0;i<len;i++){
+			startModule(lazyList[i],[]);
 		}
-
-		//console.log('lazy module:',id)
-		next();
+		function startModule(g,r){
+			var id = g.name.replace(/^[^\d]+|[^\d]+$/g,'');//__lazy_module_\d+__
+			r.flush = function(){};
+			r.wait = modelWait;
+			g = g(r);
+			function next(){
+				var n = g.next();
+				if(n.done){
+					var content = r.join('');
+					tpl.lazyAppend(resp,id,content,index,len)
+					if(++index >= len){
+						onComplete();
+					}
+					return content;
+				}else{
+					 n.value.then(next);
+				}
+			}
+			next();
+		}
+	}else{
+		onComplete();
 	}
-	return len;
 }
 exports.wrapResponse = wrapResponse;
 exports.Template = Template;

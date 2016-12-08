@@ -19,12 +19,12 @@ function LiteEngine(root,options){
  * @param configurator: modulename#configuratorMethod(compiler)
  */
 function initCompiler(engine,configurator){
+	var root = engine.root;
 	try{
 		if(configurator instanceof Function){
 			throw new Error();//function can config can not post to sub process!!
 		}
 		//throw new Error();
-		var root = engine.root;
 		var configRootKey = require('./process').configRootKey
 		var args = [configRootKey,root]
 		if(configurator){
@@ -59,16 +59,19 @@ LiteEngine.prototype.requestCompile = function(path){
 		this.compiler.send(path);
 	}
 }
+LiteEngine.prototype.createTemplate  = function(code,config){
+	return new Template(tpl.template,tpl.config);
+}
 LiteEngine.prototype.onChange = function(path,code,config) {
 	//console.log(path,(code).length,config)
 	if(config&&config.liteFile){
 		try{
 			var tpl = require(config.liteFile);
-			tpl = new Template(tpl.template,tpl.config);
+			tpl = this.createTemplate(tpl.template,tpl.config);
 		}catch(e){
 			console.error(e)
 			code = "function(context,out){var err = 'template:"+config.liteFile+" not found!!';console.error(err);out.push(err);return out.join('')}";
-			var tpl = new Template(code,config);
+			var tpl = this.createTemplate(code,config);
 		}
 		
 	}else{
@@ -81,13 +84,13 @@ LiteEngine.prototype.onChange = function(path,code,config) {
 			if(file && this.updateLitecache(file,code,config)){
 				try{
 					var tpl = require(file);
-					tpl = new Template(tpl.template || code,tpl.config);
+					tpl = this.createTemplate(tpl.template || code,tpl.config);
 				}catch(e){
 					console.error(e);
-					var tpl = new Template(code,config);
+					var tpl = this.createTemplate(code,config);
 				}
 			}else{
-				var tpl = new Template(code,config);
+				var tpl = this.createTemplate(code,config);
 			}
 			this.templateMap[path] = tpl; 
 		}else{//clear cache
@@ -124,6 +127,7 @@ LiteEngine.prototype.updateLitecache = function(file,code,config){
 	}
 }
 LiteEngine.prototype.render=function(path,model,req,response){
+    path = path.replace(/\\/g,'/').replace(/^\/?/,'/');
     var cookie = String(req.headers.cookie);
     var debug = cookie.replace(/(?:^|&[\s\S]*;\s*)LITE_DEBUG=(\w+)[\s\S]*$/,'$1');
     debug = debug == cookie?false:debug;
