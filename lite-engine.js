@@ -71,23 +71,32 @@ LiteEngine.prototype.onChange = function(path,code,config) {
 			var tpl = new Template(code,config);
 		}
 		
-	}else if(code && config.error == null){
-		//发生错误的页面每次都需要重建？？
-		var id = getTemplateId(path);
-		var file = this.updateLitecache(id,code,config)
-		try{
-			var tpl = require(file);
-			tpl = new Template(tpl.template || code,tpl.config);
-		}catch(e){
-			console.error(e);
-			var tpl = new Template(code,config);
+	}else{
+		var litecache = this.litecache;
+		if(litecache){
+			var id = getTemplateId(path);
+			var file = require('path').join(this.litecache,id+'.js');
 		}
-		this.templateMap[path] = tpl; 
-	}else{//clear cache
-		delete this.templateMap[path];
-		//this.updateLitecache(id) //调试模式下每次都更新
-		console.info('clear template cache:' ,path);
-		return;
+		if(code && config.error == null){//发生错误的页面每次都需要重建？？
+			if(file && this.updateLitecache(file,code,config)){
+				try{
+					var tpl = require(file);
+					tpl = new Template(tpl.template || code,tpl.config);
+				}catch(e){
+					console.error(e);
+					var tpl = new Template(code,config);
+				}
+			}else{
+				var tpl = new Template(code,config);
+			}
+			this.templateMap[path] = tpl; 
+		}else{//clear cache
+			delete this.templateMap[path];
+			delete require.cache[require.resolve(file)]
+			//this.updateLitecache(id) //调试模式下每次都更新
+			console.info('clear template cache:' ,path);
+			return;
+		}
 	}
 	var task = this.renderTask[path];
 	if(task){
@@ -99,20 +108,20 @@ LiteEngine.prototype.onChange = function(path,code,config) {
 		}
 	}
 }
-LiteEngine.prototype.updateLitecache = function(id,code,config){
-	var litecache = this.litecache;
+LiteEngine.prototype.updateLitecache = function(file,code,config){
 	var fs = require('fs');
-	if(litecache && fs.existsSync(litecache)){
-		var file = require('path').join(litecache,id+'.js');
+	var dir = file.replace(/[^\\\/]+$/,'');
+	if(fs.existsSync(dir)){
 		if(code){
 			var source = ['exports.template=',code,';\nexports.config = ',JSON.stringify(config)].join('')
 			fs.writeFileSync(file,source);
 			return file;
 		}else{
-			fs.unlinkFileSync(file)
+			fs.existsSync(file) && fs.unlinkSync(file)
 		}
+	}else{
+		console.error('litecache dir not exists:'+dir)
 	}
-	
 }
 LiteEngine.prototype.render=function(path,model,req,response){
     var cookie = String(req.headers.cookie);
