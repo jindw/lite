@@ -60,7 +60,7 @@ LiteEngine.prototype.requestCompile = function(path){
 	}
 }
 LiteEngine.prototype.createTemplate  = function(code,config){
-	return new Template(tpl.template,tpl.config);
+	return new Template(code,config);
 }
 LiteEngine.prototype.onChange = function(path,code,config) {
 	//console.log(path,(code).length,config)
@@ -95,7 +95,9 @@ LiteEngine.prototype.onChange = function(path,code,config) {
 			this.templateMap[path] = tpl; 
 		}else{//clear cache
 			delete this.templateMap[path];
-			delete require.cache[require.resolve(file)]
+			if(file){
+				delete require.cache[require.resolve(file)]
+			}
 			//this.updateLitecache(id) //调试模式下每次都更新
 			console.info('clear template cache:' ,path);
 			return;
