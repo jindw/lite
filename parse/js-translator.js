@@ -147,8 +147,9 @@ JSTranslator.prototype = {
 		    //}
 		    
 		}catch(e){
-			var error = console.error("invalid code:",e,'<code>'+code+'</code>');
-			code = "return ("+JSON.stringify(error)+');';
+			var error = ["invalid code:",e,'<code>'+code+'</code>'].join('');
+			console.log(error)
+			code = 'function '+(functionName||'')+'(){return '+JSON.stringify(error)+';}';
 		}
 		return code.replace(/<\/script>/g,'<\\/script>').replace(/^\s*[\r\n]+/,'');
 	}

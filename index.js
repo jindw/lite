@@ -13,7 +13,7 @@
  */
 function parseLite(data,config){
 	var path = data && data.documentURI;
-	var root = config&&config.root || path&&path.replace(/[^\/\\]+$/,'');
+	var root = config&&config.root || path&&String(path).replace(/[^\/\\]+$/,'');
 	var parseContext = new ParseContext(root && new ParseConfig(root));
 	path && parseContext.setCurrentURI(path)
 	data = parseContext.loadXML(data);

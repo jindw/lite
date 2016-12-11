@@ -102,7 +102,7 @@ function runTemplate(){
 					showResult(out.join(''));
 				}
 			}
-			var nodejsMock = wrapResponse(resp);
+			var nodejsMock = wrapResponse(resp,tpl);
 			var result = tpl(data,nodejsMock);
 		}catch(e){
 			console.error("测试失败：模板运行异常："+tpl+e);
@@ -150,7 +150,7 @@ function showResult(result){
 			resultSource.style.opacity = 1;
 			clearInterval(i);
 		}
-	},100)
+	},30)
 }
 
 

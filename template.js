@@ -13,7 +13,7 @@ function Template(code,config){
 }
 Template.prototype.render = function(context,response){
 	try{
-		this.impl.call(null,context,wrapResponse(this,response));
+		this.impl.call(null,context,wrapResponse(response,this));
 	}catch(e){
 		console.warn(this.impl+'');
 		var rtv = require('util').inspect(e,true)+'\n\n'+(e.message +e.stack);
@@ -26,7 +26,7 @@ Template.prototype.lazyAppend =function(resp,id,content,index,count){
 	content = JSON.stringify(content).replace(/<\/script>/ig,'<\\/script>');
 	resp.write('<script>__widget_loaded__("*[data-lazy-widget-id=\''+id+'\']",'+content+')</script>')
 }
-function wrapResponse(tpl,resp){
+function wrapResponse(resp,tpl){
 	var lazyList = [];
 	var buf=[];
 	var bufLen=0;

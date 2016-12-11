@@ -64,10 +64,19 @@ function compileToNodeJS(){
 		var litecode = context.toList();
 		var translator = new JSTranslator({waitPromise:true});
 		var jscode = translator.translate(litecode);
-	}finally{
+		
 		var nodecode = jscode;
 		showResult(nodecode);
 		updateResultRunner('NodeJS',litecode,nodecode);
+	}catch(e){
+		try{
+			new Function('return function*(){yield 1;}')
+		}catch(e){
+			showResult('/**\n' +
+					' * 生成nodejs 代码失败，请在支持es6 yield 语法的浏览器（chrome）上测试）\n' +
+					'*/');
+			updateResultRunner('NodeJS',litecode,nodecode);
+		}
 	}
 }
 function compileToPHP(){
