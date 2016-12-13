@@ -3,11 +3,11 @@ exports.getTemplateId = getTemplateId;
 exports.LiteEngine = LiteEngine;
 function LiteEngine(root,options){
 	options = options || {}
-	this.litecache = options.litecache;
+	var path = require('path');
+	var litecache = options.litecache;
+	this.litecache = litecache && path.resolve(litecache);
 	this.released = options.released;//root && root == options.litecache
-	root = require('path').resolve(root || './')
-	root = root.replace(/[\\\/]*$/,'/');
-	this.root = root;
+	this.root = path.resolve(root || './').replace(/[\\\/]*$/,'/');
 	this.templateMap = {};
 	this.renderTask = {};
 	if(!this.released){
@@ -96,7 +96,7 @@ LiteEngine.prototype.onChange = function(path,code,config) {
 		}else{//clear cache
 			delete this.templateMap[path];
 			if(file){
-				delete require.cache[require.resolve(file)]
+				delete require.cache[file];//require.resolve(file)]
 			}
 			//this.updateLitecache(id) //调试模式下每次都更新
 			console.info('clear template cache:' ,path);
