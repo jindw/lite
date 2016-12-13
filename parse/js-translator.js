@@ -381,6 +381,8 @@ JSTranslateContext.prototype.parse=function(){
     var thiz = this;
     var defVars = []
     //生成函数定义
+    var waitPromise = this.waitPromise;
+    this.waitPromise = null;
     for(var i=0;i<defs.length;i++){
         var def = this.scope.defMap[defs[i]];
         this.outputIndent=1;
@@ -399,6 +401,7 @@ JSTranslateContext.prototype.parse=function(){
         		return String(fn).replace(/^(.)/mg,'\t$1');
         	}});
     }
+    this.waitPromise = waitPromise;
     try{
     	this.outputIndent=0;
     	this.outputIndent++;

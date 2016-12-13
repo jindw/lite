@@ -12,11 +12,13 @@
  * @public
  */
 function parseLite(data,config){
-	var path = data && data.documentURI;
+	var path = config&&config.path ||data && data.documentURI;
 	var root = config&&config.root || path&&String(path).replace(/[^\/\\]+$/,'');
 	var parseContext = new ParseContext(root && new ParseConfig(root));
 	path && parseContext.setCurrentURI(path)
-	data = parseContext.loadXML(data);
+	if(typeof data == 'string'){
+		data = parseContext.loadXML(data);
+	}
 	parseContext.parse(data);
 	try{
 		if(config instanceof Array){
