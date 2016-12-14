@@ -17,6 +17,7 @@ var findXMLAttribute=require('./xml').findXMLAttribute;
 var findXMLAttributeAsEL=require('./xml').findXMLAttributeAsEL;
 var URI=require('./resource').URI;
 var PLUGIN_DEFINE=require('./template-token').PLUGIN_DEFINE;
+var XML_SPACE_ONELINE = require('./parse-xml').XML_SPACE_ONELINE
 var EL_TYPE=require('./template-token').EL_TYPE;
 var XT_TYPE = require('./template-token').XT_TYPE;
 var XA_TYPE = require('./template-token').XA_TYPE;
@@ -275,11 +276,14 @@ function processDef(node){
 function processClient(node){
 	var name_ = findXMLAttribute(node,'*name','id');
 	var config = parseDefName(name_);
+	var oneline = this.getAttribute(XML_SPACE_ONELINE);
+	this.setAttribute(XML_SPACE_ONELINE,true);
 	this.appendText("<script>//<![CDATA[\n");
 	this.appendPlugin("org.xidea.lite.parse.ClientPlugin",JSON.stringify(config));
 	parseChildRemoveAttr(this,node);
 	this.appendEnd();
 	this.appendText("//]]></script>")
+	this.setAttribute(XML_SPACE_ONELINE,oneline);
 }
 
 function processInclude(node){

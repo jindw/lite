@@ -61,7 +61,6 @@ function setupCompiler(root,callback,configurator){
 		var tplWatcherMap= resourceWatcherMap[resourcePath] || (resourceWatcherMap[resourcePath] = {});
 		var oldWatcher = tplWatcherMap[tplPath]
 		if(oldWatcher){
-			return;
 			oldWatcher.close();
 		}
 		

@@ -13,6 +13,7 @@ var EL_TYPE = require('./template-token').EL_TYPE;
 var XT_TYPE = require('./template-token').XT_TYPE;
 exports.parseDefaultXMLNode = parseDefaultXMLNode;
 var XML_SPACE_TRIM =exports.XML_SPACE_TRIM = "http://www.xidea.org/lite/attribute/h:trim-space" 
+var XML_SPACE_ONELINE = exports.XML_SPACE_ONELINE = "http://www.xidea.org/lite/attribute/h:space-oneline" 
 function parseDefaultXMLNode(node,context,chain){
 	//try{
 	    switch(node.nodeType){
@@ -118,7 +119,7 @@ function processAttribute(node,context,chain){
     }
     if(isDynamic && !isStatic){
         //remove attribute;
-        //context.appendText(" "+name+'=""');
+        //context.appendText(" "+name+"=''");
         if(buf.length > 1){
             //TODO:....
             throw new Error("属性内只能有单一EL表达式！！");
@@ -130,25 +131,26 @@ function processAttribute(node,context,chain){
             }
         }
     }
-    context.appendText((/^on/.test(name)?'\n':' ')+name+'="');
+    var space = (/^on/i.test(name)?'\n':' ');// on 事件换行有利于调试
+    context.appendText(space+name+"='");
     if(/^xmlns$/i.test(name)){
         if(buf[0] == 'http://www.xidea.org/lite/xhtml'){
             buf[0] = 'http://www.w3.org/1999/xhtml'
         }
     }
     context.appendAll(buf);
-    context.appendText('"');
+    context.appendText("'");
 }
 function processTextNode(node,context,chain){
     var data = String(node.data);
     //context.appendAll(context.parseText(data.replace(/^\s*([\r\n])\s*|\s*([\r\n])\s*$|^(\s)+|(\s)+$/g,"$1$2$3$4"),XT_TYPE))
     
-	var space = context.getAttribute(XML_SPACE_TRIM);
-    //不用回车js序列化后更短
-    if(space == true){
-    	data = data.replace(/^\s*|\s*$|(\s)\s+/g,"$1");
-    }else if(space != false){
-   		data = data.replace(/^\s*([\r\n])\s*|\s*([\r\n])\s*$|^(\s)+|(\s)+$/g,"$1$2$3$4");
+	var trim = context.getAttribute(XML_SPACE_TRIM);
+	var oneline = context.getAttribute(XML_SPACE_ONELINE);
+    if(trim == true){//尽可能剔除
+    	data = data.replace(/^\s*|\s*$|(\s)\s+/g,oneline?' ':"$1");
+    }else if(trim != false){//保留换行
+   		data = data.replace(/^\s*([\r\n])\s*|\s*([\r\n])\s*$|^(\s)+|(\s)+$/g,oneline?' ':"$1$2$3$4");
     }
     context.appendAll(context.parseText(data,XT_TYPE))
 }

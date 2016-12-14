@@ -16,7 +16,7 @@ exports.parseText=parseText;
 function parseText(text,context,textParsers){
 	switch(context.textType){
     case XA_TYPE :
-        var qute = '"';
+        var qute = "'";
     case XT_TYPE :
         var encode = true;  
     case EL_TYPE:

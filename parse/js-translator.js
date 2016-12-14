@@ -446,11 +446,12 @@ JSTranslateContext.prototype.appendXA=function(item){
     	var testId = this.allocateId(value);
     	if(testId != value){
     		el = new Expression(testId).token;
-        	this.append("var ",testId,"=",value);
+        	this.append("var ",testId,"=",value,';');
     	}
         this.append("if(",testId,"!=null){");
         this.pushBlock();
-        appendOutput(this,"' "+attributeName+"=\"'",createXMLEncoder(this,el,true),"'\"'");
+        appendOutput(this,'" '+attributeName+'=\'"',createXMLEncoder(this,el,true),"\"'\"");
+        //appendOutput(this,"' "+attributeName+"=\"'",createXMLEncoder(this,el,true),"'\"'");
         this.popBlock();
         this.append("}");
         this.freeId(testId);
@@ -718,7 +719,7 @@ function createXMLEncoder(thiz,el,isAttr){
 	thiz.xmlEncoder ++;
 	el = thiz.stringifyEL(el);
 	return {toString:function(){
-		var e = (isAttr?'/[&<\\"]/g':'/[&<]/g');
+		var e = (isAttr?"/[&<']/g":'/[&<]/g');
 		if(thiz.optimizedEncoder||thiz.hasBuildIn){
 			return '__x__('+el+','+e+')';
 		}else{

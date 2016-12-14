@@ -248,16 +248,19 @@ function _appendLazyStart(ctx,node,config){
 	//var elementId = '__lazy_module_'+blockId+'__';
 	if(node.nodeType == 1){
 		var attrs = node.attributes ;
+		var attrMap = {}
 		for(var i=0,len = attrs.length;i<len;i++){
 			var a = attrs.item(i);
 			var n = a.name;
 			if(!n.match(/\:|^id$/i)){
+				attrMap[n] = a;
 				config[n] = a.value;
 			}
 		}
 		ctx.appendText('<div data-lazy-widget-id="',blockId,'"');
-		for(var n in config){
-			ctx.appendText(' ',n,'="',config[n],'"');
+		for(var n in attrMap){
+			//ctx.appendText(' ',n,"='",config[n],"'");
+			ctx.parse(attrMap[n])
 		}
 		ctx.appendText('>')
 		config.id=blockId
@@ -270,6 +273,7 @@ function _appendLazyStart(ctx,node,config){
 	
 }
 function genBlockID(ctx){
-	var oldId = ctx.__increaceBlockID||0;;
-	return ctx.__increaceBlockID = ++oldId
+	var oldId = ctx.getAttribute(genBlockID)||0;
+	ctx.setAttribute(genBlockID,++oldId)
+	return oldId
 }
