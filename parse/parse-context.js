@@ -268,7 +268,7 @@ function _getByKey(map,key){
 	var keys = map[0];
 	var values = map[1];
 	var i = keys.length;
-	while(i--){
+	while(i-->0){
 		if(key === keys[i]){
 			return values[i];
 		}
@@ -281,7 +281,7 @@ function _setByKey(map,key,value){
 		var keys = map[0];
 		var values = map[1];
 		var i = keys.length;
-		while(i--){
+		while(i-->=0){
 			if(key === keys[i]){
 				values[i] = value;
 				if(value === undefined){

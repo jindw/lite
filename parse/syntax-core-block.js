@@ -199,10 +199,12 @@ function processWidget(node){
 		fragment.appendChild(doc.documentElement)
 	}
 	var source = loadText(ctx,jsPath);
+	//TODO:...
+	////(first?'!this.__widget_arrived&&(this.__widget_arrived=function(id,h){document.querySelector(id).innerHTML=h});':'')
 	if(source){
 		var s = doc.createElementNS(HTML_URI,'script');
 		//s.setAttribute('src',jsPath);
-		source = wrapScript(source,'__define_run__')
+		source = wrapScript(source,'__widget_arrived')
 		s.appendChild(doc.createTextNode(source));
 		fragment.appendChild(s)
 	}
@@ -257,7 +259,7 @@ function _appendLazyStart(ctx,node,config){
 				config[n] = a.value;
 			}
 		}
-		ctx.appendText('<div data-lazy-widget-id="',blockId,'"');
+		ctx.appendText('<div data-lazy-widget="',blockId,'"');
 		for(var n in attrMap){
 			//ctx.appendText(' ',n,"='",config[n],"'");
 			ctx.parse(attrMap[n])
@@ -266,7 +268,7 @@ function _appendLazyStart(ctx,node,config){
 		config.id=blockId
 		return 'div';
 	}else{
-		node.ownerElement.setAttribute('data-lazy-widget-id',blockId);
+		node.ownerElement.setAttribute('data-lazy-widget',blockId);
 		config.id=blockId
 	}
 

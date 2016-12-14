@@ -22,6 +22,7 @@ var getLiteTagInfo=require('./xml').getLiteTagInfo;
 //初始化 Core 模块
 var Core=require('./syntax-core').Core;
 exports.ExtensionParser=ExtensionParser;
+copyTo(require('./alive'),Core);
 copyTo(require('./syntax-core-block'),Core);
 
 copyTo(require('./syntax-i18n'),Core);
@@ -144,12 +145,13 @@ ExtensionParser.prototype = {
 					var an = formatName(attr);
 	//				es = 2
 					if (ext && ext.interceptMap) {
-						var fn = ext.interceptMap[an];
-						if(fn && an in ext.interceptMap){
+						var fns = an in ext.interceptMap?ext.interceptMap[an]: findPatternParser(ext.patternInterceptMap,an);
+						if(fns){
 	//						es = 2.1
 							//el.removeAttributeNode(attr);
 							//attr.ownerElement = el;
-							fn.call(chain,attr);
+							//fn.call(chain,attr);
+							doParse (attr,fns,chain,ns)
 							//
 	//						es =2.2
 							return true;
@@ -382,7 +384,7 @@ ExtensionParser.prototype = {
 }
 
 
-function doParse (node,fns,chain,ns){
+function doParse (node,fns,chain){//,ns){
 	var last = fns.length-1;
 	if(last>0){
 		var subIndex = chain.subIndex;
@@ -391,12 +393,12 @@ function doParse (node,fns,chain,ns){
 			chain = chain.getSubChain(last);
 		}
 //			console.info("##",subIndex,String(fns[subIndex]));
-		fns[subIndex].call(chain,node,ns);
+		fns[subIndex].call(chain,node)//,ns);
 	}else{
 		//if(node.name == 'onclick'){
 		//	console.error(node.name,typeof fns[0],fns[0].call,fns[0])
 		//}
-		fns[0].call(chain,node,ns);
+		fns[0].call(chain,node);//,ns);
 	}
 	return true;
 }

@@ -22,9 +22,9 @@ Template.prototype.render = function(context,response){
 	}
 }
 Template.prototype.lazyAppend =function(resp,id,content,index,count){
-	//(first?'!this.__widget_loaded__&&(this.__widget_loaded__=function(id,h){document.querySelector(id).innerHTML=h});':'')
+	//(first?'!this.__widget_arrived&&(this.__widget_arrived=function(id,h){document.querySelector(id).innerHTML=h});':'')
 	content = JSON.stringify(content).replace(/<\/script>/ig,'<\\/script>');
-	resp.write('<script>__widget_loaded__("*[data-lazy-widget-id=\''+id+'\']",'+content+')</script>')
+	resp.write('<script>__widget_arrived("*[data-lazy-widget-id=\''+id+'\']",'+content+')</script>')
 }
 function wrapResponse(resp,tpl){
 	var lazyList = [];
@@ -41,7 +41,9 @@ function wrapResponse(resp,tpl){
 					bufLen = 0;
 				}
 				buf.push(txt)
-				bufLen+=txt.length
+				if(txt){
+					bufLen+=txt.length
+				}
 				//resp.write(arguments[i]);
 			}
 		},
@@ -55,7 +57,7 @@ function wrapResponse(resp,tpl){
 			resp.write(buf.join(''));
 			buf = [];
 			doMutiLazyLoad(tpl,lazyList,resp,function(){
-				resp.end(matchEnd||'');
+				resp.end(matchEnd||last||'');
 			})
 		},
 		flush:function(){

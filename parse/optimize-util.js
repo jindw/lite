@@ -130,7 +130,6 @@ ClientPlugin.prototype = {
 		//	jst.liteImpl = jst.liteImpl || 'liteImpl';
 		//}
 		//var result = jst.translate(result.concat(this.children));
-		
 		var jst = new JSTranslator();
 		var result = jst.translate(result.concat(this.children),{name:this.name,params:this.params,defaults:this.defaults});
 		this.children.length = 0;

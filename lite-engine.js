@@ -30,6 +30,7 @@ function initCompiler(engine,configurator){
 		if(configurator){
 			args.push('-configurator',configurator);
 		}
+		throw new Error();
 		var compiler = require('child_process').fork(__dirname + '/process.js',args);
 		compiler.on('message', function(result){
 			//console.log(Object.keys(result))
@@ -129,8 +130,11 @@ LiteEngine.prototype.updateLitecache = function(file,code,config){
 	}
 }
 LiteEngine.prototype.render=function(path,model,req,response){
+	if(arguments.length == 3){
+		response = req;req=null;
+	}
     path = path.replace(/\\/g,'/').replace(/^\/?/,'/');
-    var cookie = String(req.headers.cookie);
+    var cookie = String(req && req.headers.cookie);
     var debug = cookie.replace(/(?:^|&[\s\S]*;\s*)LITE_DEBUG=(\w+)[\s\S]*$/,'$1');
     debug = debug == cookie?false:debug;
 	if(debug=='model'){

@@ -10,12 +10,17 @@
  */
 function Extension(){
 	this.namespaceParser = null;
-	this.interceptMap = null;
 	this.typeMap = null;
+	
+	this.interceptMap = null;
+	this.patternInterceptMap = null;
+	
 	this.tagMap = null;
 	this.patternTagMap = null;
+	
 	this.attributeMap = null;
 	this.patternAttributeMap = null;
+	
 	this.seekMap = null;
 }
 function add(m,fn,o){
@@ -25,36 +30,36 @@ function add(m,fn,o){
 		m[fn] = [o];
 	}
 }
-function appendParser(ext,key,patternKey,fn,o){
-	var m = ext[key];
+function appendParser(extension,key,patternKey,fn,o){
+	var namedMap = extension[key];
 	if(fn.indexOf('*')>=0){//is pattern parser 
-		var pm = ext[patternKey];
-		if(!pm){
-			ext[patternKey] = pm = {};
+		var patternMap = extension[patternKey];
+		if(!patternMap){
+			extension[patternKey] = patternMap = {};
 		}
-		add(pm,fn,o);//添加 patternParser
+		add(patternMap,fn,o);//添加 patternParser
 		//console.info(patternKey,fn,pm)
-		if(m){//扫描已有 parser 添加 patternParser
+		if(namedMap){//扫描已有 parser 添加 patternParser
 			var p = new RegExp('^'+fn.replace(/\*/g,'.*')+'$');
-			for(var n in m){
+			for(var n in namedMap){
 				if(p.test(n)){
-					add(m,n,o);
+					add(namedMap,n,o);
 				}
 			}
 		}
 	}else{//普通parser
-		if(!m){//创建时，自动扫描已有pattern Parser
-			ext[key] = m = {};
-			var pm = ext[patternKey];
-			if(pm){
-				for(var p in pm){
+		if(!namedMap){//创建时，自动扫描已有pattern Parser
+			extension[key] = namedMap = {};
+			var patternMap = extension[patternKey];
+			if(patternMap){
+				for(var p in patternMap){
 					if(new RegExp('^'+p.replace(/\*/g,'.*')+'$').test(fn)){
-						add(m,fn,pm[p]);
+						add(namedMap,fn,patternMap[p]);
 					}
 				}
 			}
 		}
-		add(m,fn,o);
+		add(namedMap,fn,o);
 	}
 }
 
@@ -85,20 +90,26 @@ Extension.prototype={
 				}else if(prefix == "xmlns"){
 					this.namespaceParser = o;
 				}else if(prefix == "intercept"){
-					dest = this.interceptMap ||(this.interceptMap={});
-					dest[fn] = o;
+					appendParser(this,"interceptMap","patternInterceptMap",fn,o);
+					//dest = this.interceptMap ||(this.interceptMap={});
+					//dest[fn] = o;
 				}else if(prefix == "seek"){//""?".."
 					dest = this.seekMap ||(this.seekMap={});
 					dest[fn] = o;
 				}
 			}
 		}
+		//this.interceptMap && console.log(Object.keys(this.interceptMap));
 	}
-	
 }
 
 function formatName(tagName){
+	tagName = tagName.replace(/\$([\da-f]{4})/ig,function(a,c){
+		return String.fromCharCode(parseInt(c,16))
+	})
+	//console.log(tagName)
 	tagName = tagName.replace(/[\-]/g,"");
+	
 	return tagName.toLowerCase();
 }
 

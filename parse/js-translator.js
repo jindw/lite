@@ -22,6 +22,7 @@ var GLOBAL_VAR_MAP ={
 	"JSON":1,
 	"Math":1
 }
+var  ID_EXP = /^[a-z\$\_][\w\$]*$/
 copy(GLOBAL_DEF_MAP,GLOBAL_VAR_MAP);
 /**
  * @param config {waitPromise:true,liteImpl:'liteImpl'}
@@ -131,7 +132,9 @@ JSTranslator.prototype = {
 		ctx.hasBuildIn = !!liteImpl;
 		ctx.liteImpl = liteImpl && (typeof liteImpl == 'string'?liteImpl:'liteImpl');
 		ctx.parse();
-		var code = genSource(ctx);//ctx.header +  ctx.body;
+		
+		var functionPrefix = genFunctionPrefix(functionName)
+		var code = genSource(ctx,functionPrefix);//ctx.header +  ctx.body;
 		//console.log('###'+code+'@@@')
 		
 		try{
@@ -142,25 +145,34 @@ JSTranslator.prototype = {
 		    	var varMap = scope.varMap;
 		    	var externalRefs = Object.keys(refMap).filter(function(n){return !(n in varMap)})
 		    	if(externalRefs == 0 && params){
-		    		return 'function '+(functionName||'')+'(){return '+JSON.stringify(fn()()) + '}'
+		    		return functionPrefix+'(){return '+JSON.stringify(fn()()) + '}'
 		    	}
 		    //}
 		    
 		}catch(e){
 			var error = ["invalid code:",e,'<code>'+code+'</code>'].join('');
 			console.log(error)
-			code = 'function '+(functionName||'')+'(){return '+JSON.stringify(error)+';}';
+			code = functionPrefix+'(){return '+JSON.stringify(error)+';}';
 		}
 		return code.replace(/<\/script>/g,'<\\/script>').replace(/^\s*[\r\n]+/,'');
 	}
 }
-function genSource(ctx){
+function genFunctionPrefix(functionName){
+	if(functionName.match(ID_EXP)){
+		return 'function '+functionName;
+	}else if(functionName.match(/[\.\[]/)){
+		return functionName+'=function'
+	}else{
+		return 'function'
+	}
+	
+}
+function genSource(ctx,functionPrefix){
 	var header = ctx.header;
 	var body = ctx.body;
-	var functionName = ctx.name;
 	var params = ctx.params
 	var args = params?params.join(','):'__context__,__out__';
-	var result = ['function ',functionName,"(",args,'){\n',header,'\n']
+	var result = [functionPrefix,"(",args,'){\n',header,'\n']
     if (ctx.waitPromise) {
     	result.push("\t__g__ = __g__();",
 			"function __n__(){",
@@ -175,7 +187,6 @@ function genSource(ctx){
 		result.push('\tfunction* __g__(){\n',body,'\n\treturn __out__.join("");\n\t}\n}\n');
 	}else{
 		if(params){
-			
 			var m = body.match(/^\s*__out__\.push\((.*?)\);?\s*$/)
 			if(m){
 				var item = '\treturn ['+m[1]+']'

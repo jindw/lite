@@ -318,7 +318,7 @@ function parseHtmlScript(el){
 function wrapScript(source,wrap_script_method){
 	var callMatch = source.match(/^\s*([\w\.]+)\(([\s\S]*)\)\s*;?\s*$/);
 	var callMethod = callMatch && callMatch[1];
-	if(!/^(?:__define_run__|(?:\w+\.)?use)$/.test(callMethod)){
+	if(!/^(?:__widget_arrived|(?:\w+\.)?use)$/.test(callMethod)){
 		var rexp = /\brequire\((['"][\.\-\w@\/]+["'])\)|^\s*\/(?:\/.*|\*[\s\S]*?\*\/)|'(?:[^'\\\r\n]|\\.)*'|"(?:[^"\\\r\n]|\\.)*"/g;
 		var deps = [];
 		var m;

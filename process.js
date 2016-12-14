@@ -123,7 +123,7 @@ function setupCompiler(root,callback,configurator){
 		    callback({path:path,action:'add',code:result.jscode,config:result.config})
 		    //process.send({path:path,action:'add',code:result.code,config:result.config,prefix:result[3]})
 	    }catch(e){
-	    	//console.log(e)
+	    	console.log(e)
 	    	//throw e;
 	    	callback({path:path,action:'error',
 	    		code:"function(){return '<pre>'+"+JSON.stringify(require('util').inspect(e,true)+

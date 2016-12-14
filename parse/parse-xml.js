@@ -131,7 +131,8 @@ function processAttribute(node,context,chain){
             }
         }
     }
-    var space = (/^on/i.test(name)?'\n':' ');// on 事件换行有利于调试
+	var oneline = context.getAttribute(XML_SPACE_ONELINE);
+    var space = (!oneline &&/^on/i.test(name)?'\n':' ');// on 事件换行有利于调试
     context.appendText(space+name+"='");
     if(/^xmlns$/i.test(name)){
         if(buf[0] == 'http://www.xidea.org/lite/xhtml'){
