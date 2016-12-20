@@ -81,49 +81,44 @@ LiteCompiler.prototype.compile=function(path){
 		res[i] = res[i].path
 	}
 	return {resources:res,litecode:litecode,jscode:jscode,config:config};
-}
-
-
+};
 
 //exports.compile = compile;
 function compile(root,output,translator,includes,excludes){
-	var fs = require('fs')
-	var path = require('path')
+	var fs = require('fs');
+	var path = require('path');
 	root = fs.realpathSync(root || './');
 	output = output || path.join(root,'.litecode');
 	if(!fs.existsSync(output))fs.mkdirSync(output);
 	//console.log('compile lite @'+root,{})
 	var compiler = new LiteCompiler(root);
-	includes = includes && includes.length && new RegExp(includes.map(buildURIMatcher).join('|'))
-	excludes = excludes && excludes.length && new RegExp(excludes.map(buildURIMatcher).join('|'))
+	includes = includes && includes.length && new RegExp(includes.map(buildURIMatcher).join('|'));
+	excludes = excludes && excludes.length && new RegExp(excludes.map(buildURIMatcher).join('|'));
 	function loadFile(dir){
-		fs.readdir(dir,function(err,files){
-			for(var i=0;i<files.length;i++){
-				var n = files[i];
-				var file = dir+'/'+n;
-				//console.warn(file)
-				var stat = fs.statSync(file);
-				if(stat.isFile()){
-					var p = path.relative(root,file).replace(/^[\/\\]?|\\/g,'/');
-					if(excludes && excludes.test(p)){
-						continue;
-					}
-					if(includes ? includes.test(p):/\.xhtml$/.test(p)){
-						console.log('compile:',path.join(output,p))
-						var result = compiler.compile(p);
-						var source = ['exports.template=',result.jscode,';\nexports.config = ',JSON.stringify(result.config)].join('')
-						var id = getTemplateId(p);
-						fs.writeFile(path.join(output,id)+'.js',source,function(err,path){
-							//console.log(err,path)
-						})
-						//dest.writeFile(path.join(dest,p))
-					}
-					//console.log(p)
-				}else if(n.charAt() != '.' &&stat.isDirectory() ){
-					loadFile(file)
+		var files = fs.readdirSync(dir);
+		for(var i=0;i<files.length;i++){
+			var n = files[i];
+			var file = dir+'/'+n;
+			//console.warn(file)
+			var stat = fs.statSync(file);
+			if(stat.isFile()){
+				var p = path.relative(root,file).replace(/^[\/\\]?|\\/g,'/');
+				if(excludes && excludes.test(p)){
+					continue;
 				}
+				if(includes ? includes.test(p):/\.xhtml$/.test(p)){
+					console.log('compile:',path.join(output,p))
+					var result = compiler.compile(p);
+					var source = ['exports.template=',result.jscode,';\nexports.config = ',JSON.stringify(result.config)].join('');
+					var id = getTemplateId(p);
+					fs.writeFileSync(path.join(output,id)+'.js',source);
+					//dest.writeFile(path.join(dest,p))
+				}
+				//console.log(p)
+			}else if(n.charAt() != '.' &&stat.isDirectory() ){
+				loadFile(file)
 			}
-		});
+		}
 	}
 	loadFile(root);
 }
