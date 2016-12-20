@@ -30,3 +30,13 @@ var response = {
 	}
 }
 engine.render('/test.xhtml',{},response)
+
+
+var parseLite =  require('../index').parseLite;
+
+var root =path.dirname( path.resolve(__dirname));
+console.log(root)
+//var xml = fs.
+var example1 = parseLite('/example/extends-page.xhtml',{root:root})
+var html = example1({})
+console.log(html)

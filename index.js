@@ -12,11 +12,21 @@
  * @public
  */
 function parseLite(data,config){
-	var path = config&&config.path ||data && data.documentURI;
-	var root = config&&config.root || path&&String(path).replace(/[^\/\\]+$/,'');
+	var root = config&&config.root;
+	var path = config&&config.path;
+	if(!path){
+		if(typeof data == 'string' && /^\//.test(data)){
+			path = data;
+		}else{
+			path = data.documentURI;//dom
+		}
+	}
+	
+	root = root || String(path).replace(/[^\/\\]+$/,'');
 	var parseContext = new ParseContext(root && new ParseConfig(root));
 	path && parseContext.setCurrentURI(path)
 	if(typeof data == 'string'){
+		//console.log(path,parseContext.currentURI)
 		data = parseContext.loadXML(data);
 	}
 	parseContext.parse(data);

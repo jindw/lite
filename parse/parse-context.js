@@ -189,7 +189,8 @@ ParseContext.prototype = {
 			if(/^\s*</.test(path)){
 				doc = loadLiteXML(path,this.config.root)
 			}else{
-				path = new URI(path)
+				path = this.createURI(path);//new URI(path)
+				//console.log(path)
 			}
 		}
 		if(path instanceof URI){
@@ -225,7 +226,10 @@ ParseContext.prototype = {
 		return this.configMap;
 	},
 	setCurrentURI:function(uri){
-		this._context.addResource(uri=new URI(uri));
+		if(typeof uri == 'string'){
+			uri = this.createURI(uri);
+		}
+		this._context.addResource(uri);
 		this._context.currentURI = uri;
 	},
 	addResource:function(uri){

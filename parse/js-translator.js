@@ -123,7 +123,7 @@ JSTranslator.prototype = {
 	translate:function(list,config){
 		config = config||{};
 		var params = config.params;
-		var functionName = config.name;
+		var functionName = config.name||'';
 		var ctx = new JSTranslateContext(list,functionName,params,config.defaults);
 		
 		var translatorConfig = this.config || {};
