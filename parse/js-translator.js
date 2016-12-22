@@ -124,7 +124,7 @@ JSTranslator.prototype = {
 		config = config||{};
 		var params = config.params;
 		var functionName = config.name||'';
-		var ctx = new JSTranslateContext(list,functionName,params,config.defaults);
+		var ctx = new JSTranslateContext(list,params,config.defaults);
 		
 		var translatorConfig = this.config || {};
 		var liteImpl = translatorConfig.liteImpl
@@ -174,16 +174,16 @@ function genSource(ctx,functionPrefix){
 	var args = params?params.join(','):'__context__,__out__';
 	var result = [functionPrefix,"(",args,'){\n',header,'\n']
     if (ctx.waitPromise) {
-    	result.push("\t__g__ = __g__();",
-			"function __n__(){",
-				"var n = __g__.next().value;",
-				"if(n instanceof Promise){",
+    	result.push("\t__g__ = __g__();\n",
+			"\tfunction __n__(){\n",
+				"\t\tvar n = __g__.next().value;\n",
+				"\t\tif(n instanceof Promise){",
 					"n.then(__n__);console.log('is promise',n)",
 				//"}else{",
 					//"console.log('is not promise',n)",
 					//"__n__()",
-				"}",
-			"};__n__();\n");
+				"}\n",
+			"\t};\n\t__n__();\n");
 		result.push('\tfunction* __g__(){\n',body,'\n\treturn __out__.join("");\n\t}\n}\n');
 	}else{
 		if(params){
@@ -371,8 +371,8 @@ function createDateFormat(ctx,pattern,date){
 	}}
 }
 
-function JSTranslateContext(code,name,params,defaults){
-    TranslateContext.call(this,code,name,params,defaults);
+function JSTranslateContext(code,params,defaults){
+    TranslateContext.call(this,code,params,defaults);
     this.forStack = [];
     this.defaults = defaults;
     
@@ -487,7 +487,10 @@ JSTranslateContext.prototype.processCapture = function(item){
     }else{
     	var varName = item[2];
     	var bufbak = this.allocateId();
-    	this.append("var ",bufbak,"=__out__;__out__=[];");
+    	this.append("var ",bufbak,"=__out__;__out__=[];")
+    	if(this.waitPromise){
+    		this.append("__out__.wait=",bufbak,'.wait;');
+    	}
     
     	this.appendCode(childCode);
     	this.append("var ",varName,"=__out__.join('');__out__=",bufbak,";");

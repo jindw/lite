@@ -1,5 +1,5 @@
 var parseLite = require('lite').parseLite;
-var fn = parseLite("<xml attr='${b}'>" +
+var fn = parseLite("<xml attr='${b}${a}'>" +
 		"<c:def name='xx(w)'>{{${w}}}</c:def>" +
 		"${xx(123)}/${a.b}/${a}" +
 		"<c:date date='${a.b}'>${ab}</c:date>" +

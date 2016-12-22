@@ -85,7 +85,7 @@ PHPTranslator.prototype = {
 	}
 }
 function PHPTranslateContext(code,id){
-    TranslateContext.call(this,code,null);
+    TranslateContext.call(this,code);
     this.id = id;
 }
 function TCP(pt){

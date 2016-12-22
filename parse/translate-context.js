@@ -13,11 +13,7 @@ var XML_ENCODE_XT = 2;
 /**
  * @extends LiteContext
  */
-function TranslateContext(code,name,params){
-    /**
-     * 函数名称 可以是null
-     */
-    this.name = name;
+function TranslateContext(code,params){
     /**
      * 当前域下的参数表[可以为null,null和空数组表示的意思不同]
      */

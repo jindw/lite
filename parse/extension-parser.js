@@ -53,7 +53,7 @@ function formatName(el){
 
 function loadExtObject(source){
 	try{
-		var p = /\b(?:document|xmlns|(?:parse|intercept|seek)\w*)\b/g;
+		var p = /\b(?:document|xmlns|(?:parse|intercept|seek|on)\w*)\b/g;
 		var fn = new Function("console","var window = this;"+source+"\n return function(){return eval(arguments[0])}");
 		var m,o;
 		var objectMap = {};

@@ -1,0 +1,34 @@
+<test>
+	<unit title="输出语法/日期格式化语法">
+		<model>
+		{
+		quteAttr:"value' onclick='alert(1)",
+		url:"a&amp;bb=1&amp;c=\"",
+		script:"alert(1&#60;2)",
+		array:[1],
+		date1 : +new Date(1981,7-1,25)
+		}
+		
+		</model>
+		<case format="true" title="属性自动编码与不编码">
+			<source><![CDATA[<xml value="${quteAttr}" value2="$!{quteAttr}">${quteAttr}/$!{quteAttr}</xml>]]></source>
+			<expect><![CDATA[<xml value="value&#39; onclick=&#39;alert(1)" value2="value" onclick="alert(1)">value' onclick='alert(1)/value' onclick='alert(1)</xml>]]></expect>
+		</case>
+		<case format="true" title="html uri和json自动编码">
+			<source><![CDATA[<a href="${url}" onclick="${script}" ondblclick="alert(${array})">a</a>]]></source>
+			<expect><![CDATA[<a href="a&amp;bb=1&amp;c=%22" onclick="alert(1&#60;2)" ondblclick="alert([1])">a</a>]]></expect>
+		</case>
+		<case>
+			<source><![CDATA[<c:date-format pattern="YYYY-MM-DD" value="${date1}"/>]]></source>
+			<expect>1981-07-25</expect>
+		</case>
+		<case>
+			<source><![CDATA[
+<c:date-format pattern="YYYY/M/DD"/>
+<c:date-format pattern="YYYY年M月DD日"/>
+<c:date-format pattern="DD日MM月 hh:mm:ss"/>
+<c:date-format pattern=" hh:mm:ss"/>
+]]></source>
+		</case>
+	</unit>
+</test>

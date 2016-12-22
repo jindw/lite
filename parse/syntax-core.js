@@ -104,8 +104,9 @@ var Core = {
 	 * <c:date-format pattern="" >
 	 */
 	parseDateFormat:function(node){
-		var value =  findXMLAttributeAsEL(node,'value','date','time','#text').replace(/^\s+|\s+$/g,'') || 'null';
 		var pattern = findXMLAttribute(node,'pattern');
+		var value =  findXMLAttributeAsEL(node,'value','date','time','#text') || 'null';
+		value = value.replace(/^\s+|\s+$/g,'')
 		if(pattern){
 			var pattern2 = pattern.replace(/^\s*\$\{([\s\S]+)\}\s*$/,'$1')
 			if(pattern2 == pattern){

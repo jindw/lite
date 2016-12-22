@@ -62,7 +62,7 @@ function compileToNodeJS(){
 	try{
 		var context = buildContext();
 		var litecode = context.toList();
-		var translator = new JSTranslator({waitPromise:true});
+		var translator = new JSTranslator({waitPromise:Math.random()>.5});
 		var jscode = translator.translate(litecode);
 		
 		var nodecode = jscode;

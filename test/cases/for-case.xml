@@ -1,0 +1,46 @@
+<test>
+	<unit title="循环控制">
+		<model>
+		{
+		array:[0,'',null],
+		string:"JSON 功能测试'\"",
+		object:{aa:1,bB:2,CC:[1]}
+		}
+		</model>
+		<case>
+			<source><![CDATA[<c:for var="f1" list="${array}">${for.index}</c:for>]]></source>
+			<expect>012</expect>
+		</case>
+		<case>
+			<source><![CDATA[<c:for var="f1" list="${3}">${for.index}${for.lastIndex}</c:for>]]></source>
+			<expect>021222</expect>
+		</case>
+		<case title="for 优化">
+			<source><![CDATA[<c:for
+			 var="f1" list="${{a:1,b:2}}">${for.index}<c:for
+			 var="f2" list='${1}'>${f1}${for.index}</c:for></c:for>]]></source>
+			<expect>0a01b0</expect>
+		</case>
+		<case title="for 优化">
+			<source><![CDATA[<c:for
+			 var="f1" list="${{a:1,b:2}}"><c:for
+			 var="f2" list='${1}'>${f1}${for.index}</c:for>${for.lastIndex}</c:for>]]></source>
+			<expect>a01b01</expect>
+		</case>
+		<case title="for else">
+			<source><![CDATA[<c:for
+			 var="f1" list="${[0]}">for</c:for><c:else>else</c:else>]]></source>
+			<expect>for</expect>
+		</case>
+		<case title="for else">
+			<source><![CDATA[<c:for
+			 var="f1" list="${0}">for</c:for><c:else>else</c:else>]]></source>
+			<expect>else</expect>
+		</case>
+		<case title="for else">
+			<source><![CDATA[<c:for
+			 var="f1" list="${[]}">for</c:for><c:else>else</c:else>]]></source>
+			<expect>else</expect>
+		</case>
+	</unit>
+</test>
