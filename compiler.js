@@ -69,7 +69,7 @@ LiteCompiler.prototype.compile=function(path){
 	if(litecode.length){
 		//translator.liteImpl = 'liteImpl';//avoid inline jslib 
 		var functionName = getTemplateId(path);
-		var jscode = this.translator.translate(litecode,{name:functionName});//,params:null,defaults:null
+		var jscode = this.translator && this.translator.translate(litecode,{name:functionName});//,params:null,defaults:null
 	}else{//纯静态内容
 		var jscode = "function(){}";
 	}

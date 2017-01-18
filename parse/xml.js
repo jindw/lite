@@ -59,6 +59,7 @@ function addInst(xml,s){
  * @private
  */
 function parseXMLByText(text,path){
+	text = String(text)
     if(!/^[\s\ufeff]*</.test(text)){
         text = txt2xml(text);
     }
