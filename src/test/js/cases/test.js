@@ -3,24 +3,46 @@ var path = require('path');
 var xmldom = require('xmldom');
 var ns = fs.readdirSync(__dirname);
 
-var ParseConfig=require('lite/parse/config').ParseConfig;
-var JSTranslator=require('lite/parse/js-translator').JSTranslator;
-var ParseContext=require('lite/parse/parse-context').ParseContext;
-var wrapResponse = require('lite/template.js').wrapResponse
+var ParseConfig=require('lite/src/main/js/parse/config').ParseConfig;
+var JSTranslator=require('lite/src/main/js/parse/js-translator').JSTranslator;
+var ParseContext=require('lite/src/main/js/parse/parse-context').ParseContext;
+var wrapResponse = require('lite/src/main/js/template.js').wrapResponse
+var g=start();
+resume()
 
-for(var i=0;i<ns.length;i++){
-	var n = ns[i];
-	if(/\.xml$/.test(n)){
-		var p = path.join(__dirname,n);
-		var xml = fs.readFileSync(p).toString();
-		xml = new xmldom.DOMParser().parseFromString(xml,'text/xml');
-		xml.documentURI = p
-		testFile(xml);
-		
+function resume(value){
+	var v = g.next(value);
+	if(!v.done){
+		value = v.value;
+		if(value instanceof Promise){
+			value.then(resumeSuccess,resumeError)
+		}else{
+			resumeSuccess(value)
+		}
 	}
 }
-function testFile(dom){
+function resumeSuccess(value){
+	resume(value)
+}
+function resumeError(value){
+	g.throw(value);
+	resumeSuccess();
+}
+function *start(){
+	for(var i=0;i<ns.length;i++){
+		var n = ns[i];
+		if(/\.xml$/.test(n)){
+			var p = path.join(__dirname,n);
+			var xml = fs.readFileSync(p).toString();
+			xml = new xmldom.DOMParser().parseFromString(xml,'text/xml');
+			xml.documentURI = p
+			yield* testFile(xml,n);
+		}
+	}
+}
+function *testFile(dom,fileName){
 	var es = dom.getElementsByTagName('unit');
+	console.info('test file:'+fileName)
 	for(var i=0;i<es.length;i++){
 		var unit = es[i];
 		var title = unit.getAttribute('title');
@@ -36,50 +58,59 @@ function testFile(dom){
 			}
 		}
 		
-		console.warn('Test Unit:'+title+';file:'+dom.documentURI.replace(/.*\//,'')+Object.keys(fileMap))
+		console.info('\tTest Unit:'+title)
 		for(var j=0;j<cases.length;j++){
-			testCase(cases[j],fileMap)
+			yield *testCase(cases[j],fileMap)
 		}
 	}
 }
-function testCase(node,fileMap){
+function * testCase(node,fileMap){
 	var title = node.getAttribute('title');
 	var source = getSource(node,'source');
 	var expect = getSource(node,'expect');
 	var model = readJson(getSource(node,'model',true));
-	console.warn('Test Case:'+title);//+';source:'+source);
+	console.warn('\t\tTest Case:',title||'anonymous');//+';source:'+source);
 	var fn = parseLite(source,{fileMap:fileMap});
 	//console.log(node.ownerDocument.documentURI,model)
 	//var result = fn(model);
 	var out = [];
-	var resp = {
-		write : function(t){
-			out.push(t)
-		},
-		end:function(last){
-			last && out.push(last);
-			assertDomEquals(out.join(''),expect)
-		}
-	}
-	var nodejsMock = wrapResponse(resp,fn);
 	//console.log('@@@@@',nodejsMock.wait)
 	try{
-	fn(model,nodejsMock);
+		var promise = new Promise(function(resolve,reject){
+				var resp = {
+					write : function(t){
+						out.push(t)
+					},
+					end:function(last){
+						last && out.push(last);
+						var result = out.join('');
+						var error = assertDomEquals(expect,result)
+						if(error){
+							reject(error);
+						}else{
+							resolve(result)
+						}
+					}
+				}
+				var nodejsMock = wrapResponse(resp,fn);
+				fn(model,nodejsMock);
+		});
+		yield promise;
 	}catch(e){
-		console.log(e.stack)
-		console.log(fn+'')
+		var fileName = node.ownerDocument.documentURI.replace(/.*\//,'')
+		console.error('\t\t\terror @file:'+fileName,';line:',node.lineNumber)
+		console.error('\t\t\t'+e)
+		//console.error(e.stack)
+		console.error(fn+'')
 	}
-	
-	
-	//var xml = new xmldom.DOMParser().parseFromString(xml,'text/xml');
-	//console.log([source,expect,model])
 }
-function assertDomEquals(result,expect){
+function assertDomEquals(expect,result){
 	if(result != expect){
-		result = formatXML(result)
-		expect = formatXML(expect)
+		result = formatXML(result.replace(/\r\n?|\n/g,'\n'))
+		expect = formatXML(expect.replace(/\r\n?|\n/g,'\n'))
 		if(String(result)!= expect){
-			console.error([result,'!=', expect].join(''))
+			//console.error()
+			return [expect,'!=', result].join('')
 		}
 	}
 }
@@ -91,7 +122,7 @@ function formatXML(xml){
 		return xml;
 	}
 	try{
-	var doc = new xmldom.DOMParser().parseFromString(xml,'text/xml');
+	var doc = new xmldom.DOMParser({errorHandler:function(){}}).parseFromString(xml,'text/xml');
 	return doc.toString(false,function(node){
 		if(node.nodeType == 3){
 			node.data = node.data.replace(/^\s+|\s+$|\s\s+/g,'\n');
@@ -107,7 +138,7 @@ function getSource(node,tagName,findParent){
 	var child = node.firstChild;
 	while(child){
 		if(child.nodeType ==1 && child.tagName == tagName){
-			return child.textContent;
+			return child.textContent.replace(/\r\n?|\n/g,'\n');
 		}
 		child = child.nextSibling;
 	}
@@ -146,7 +177,7 @@ function parseLite(data,config){
 		if(uri.path in fileMap){
 			uri = fileMap[uri.path];
 		}
-		return loadXML.apply(this,arguments)
+		return loadXML.apply(this,arguments,{errorHandler:function(){}})
 	}
 	parseContext.parse(data);
 	try{

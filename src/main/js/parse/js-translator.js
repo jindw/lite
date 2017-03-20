@@ -167,6 +167,7 @@ function genFunctionPrefix(functionName){
 	}
 	
 }
+//function n2(v){if(p[0]){p[0] = p[0](v)};__n__()}
 function genSource(ctx,functionPrefix){
 	var header = ctx.header;
 	var body = ctx.body;
@@ -176,13 +177,14 @@ function genSource(ctx,functionPrefix){
     if (ctx.waitPromise) {
     	result.push("\t__g__ = __g__();\n",
 			"\tfunction __n__(){\n",
-				"\t\tvar n = __g__.next().value;\n",
-				"\t\tif(n instanceof Promise){",
-					"n.then(__n__);console.log('is promise',n)",
+				"\t\tvar p = __g__.next(),n=p.value;\n",
+				"\t\tif(n instanceof Promise){\n",
+				//"\t\t\tfunction n2(v){p[0]&&(p[0] = p[0](v));__n__()}\n",
+				"\t\t\tn.then(__n__,__n__);\n",//"console.log('is promise',n)",
 				//"}else{",
 					//"console.log('is not promise',n)",
 					//"__n__()",
-				"}\n",
+				"\t\t}\n",
 			"\t};\n\t__n__();\n");
 		result.push('\tfunction* __g__(){\n',body,'\n\treturn __out__.join("");\n\t}\n}\n');
 	}else{
@@ -549,7 +551,7 @@ JSTranslateContext.prototype.processFor=function(code,i){
     this.append("var ",itemsId,'=',itemsEL,';');
     this.append("var ",indexId,"=0;")
     this.append("var ",lastIndexId," = (",
-    	itemsId,'=',itemsId,' instanceof Array?',itemsId,':Object.keys(',itemsId,')'
+    	itemsId,'=',itemsId,' instanceof Array?',itemsId,':Object.keys(',itemsId,'||0)'
     	,").length-1;");
     
     //初始化 for状态

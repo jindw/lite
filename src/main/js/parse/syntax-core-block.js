@@ -155,11 +155,18 @@ function processWidget(node){
 	var currentURI = ctx.currentURI;
 	var src =  findXMLAttribute(node,"path");
 	var uri = ctx.createURI(src);
-	var doc = ctx.loadXML(uri);
+	
 	
 	//var lessPath = src.replace(/\.\w+$/,'.less');
-	var cssPath = src.replace(/\.\w+$/,'.css');
-	var jsPath = src.replace(/\.\w+$/,'.js');
+	if(src == null){
+		console.error('src is null!!')
+		return;
+	}else{
+		
+		var doc = ctx.loadXML(uri);
+		var cssPath = src.replace(/\.\w+$/,'.css');
+		var jsPath = src.replace(/\.\w+$/,'.js');
+	}
 	
 	var fragment = doc.createDocumentFragment();
 	var body = doc.getElementsByTagName('body')[0];
@@ -170,7 +177,7 @@ function processWidget(node){
 		res.parentNode && res.parentNode.removeChild(res);
 		fragment.appendChild(res)
 	}
-	var source = loadText(ctx,cssPath);
+	var source = cssPath && loadText(ctx,cssPath);
 	if(source){
 		var s = doc.createElementNS(HTML_URI,'link');
 		//s.namespaceURI = doc.documentElement.namespaceURI;
@@ -200,7 +207,7 @@ function processWidget(node){
 	}else{
 		fragment.appendChild(doc.documentElement)
 	}
-	var source = loadText(ctx,jsPath);
+	var source = jsPath && loadText(ctx,jsPath);
 	//TODO:...
 	////(first?'!this.__widget_arrived&&(this.__widget_arrived=function(id,h){document.querySelector(id).innerHTML=h});':'')
 	if(source){

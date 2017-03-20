@@ -6,7 +6,7 @@
   "author": "jindw <jindw@xidea.org> (http://www.xidea.org)",
   "homepage": "https://github.com/jindw/lite",
   "repository": {"type": "git","url": "git://github.com/jindw/lite.git"},
-  "main": "./index.js",
+  "main": "./src/main/js/index.js",
   "engines": {"node" : ">=0.5"},
   "dependencies": {"js-el":"*","xmldom":"*","xpath.js":"*"},
   "devDependencies": {  },

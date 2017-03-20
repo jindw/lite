@@ -23,12 +23,19 @@
 			<expect>1981-07-25</expect>
 		</case>
 		<case>
-			<source><![CDATA[
-<c:date-format pattern="YYYY/M/DD"/>
-<c:date-format pattern="YYYY年M月DD日"/>
-<c:date-format pattern="DD日MM月 hh:mm:ss"/>
-<c:date-format pattern=" hh:mm:ss"/>
-]]></source>
+			<model>{date:new Date(2001,10,2,12,13,14,100)}</model>
+			<source><![CDATA[<div>
+<c:date-format pattern="YYYY/M/DD" value="${date}"/>
+<c:date-format pattern="YYYY年M月DD日" value="${date}"/>
+<c:date-format pattern="DD日MM月 hh:mm:ss" value="${date}"/>
+<c:date-format pattern=" hh:mm:ss" value="${date}"/>
+</div>]]></source>
+		<expect><![CDATA[<div>
+2001/11/02
+2001年11月02日
+02日11月 12:13:14
+12:13:14
+ </div>]]></expect>
 		</case>
 	</unit>
 </test>

@@ -100,22 +100,22 @@ function doMutiLazyLoad(tpl,lazyList,resp,onComplete){
 		for(var i = 0;i<len;i++){
 			startModule(lazyList[i],[]);
 		}
-		function startModule(g,r){
+		function startModule(g,result){
 			var id = g.name.replace(/^[^\d]+|[^\d]+$/g,'');//__lazy_module_\d+__
-			r.flush = function(){};
-			r.wait = modelWait;
-			g = g(r);
-			function next(){
-				var n = g.next();
-				if(n.done){
-					var content = r.join('');
+			result.flush = function(){};
+			result.wait = modelWait;
+			g = g(result);
+			function next(newValue){
+				var holder = g.next();
+				if(holder.done){
+					var content = result.join('');
 					tpl.lazyAppend(resp,id,content,index,len)
 					if(++index >= len){
 						onComplete();
 					}
 					return content;
 				}else{
-					 n.value.then(next);
+					holder.value.then(next,next)
 				}
 			}
 			next();

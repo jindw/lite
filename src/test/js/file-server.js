@@ -59,7 +59,9 @@ function writeIndex(filepath,response){
 	fs.readdir(filepath, function(err, files) { 
 		files.sort(); 
 		for(var i=0;i<files.length;i++){
-			response.write("<a href='"+files[i]+"'>"+files[i]+'</a><hr/>','utf8');
+			if(files[i].charAt() != '.'){
+				response.write("<a href='"+files[i]+"'>"+files[i]+'</a><hr/>','utf8');
+			}
 		}
 		response.end();
 	});

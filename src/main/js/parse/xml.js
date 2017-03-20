@@ -1,8 +1,8 @@
-function loadLiteXML(uri,root){
+function loadLiteXML(uri,root,options){
     try{
         if(uri instanceof URI){ 
             if(uri.source){
-                return parseXMLByText(uri.source.replace(/^[\s\ufeff]*/,uri))
+                return parseXMLByText(uri.source.replace(/^[\s\ufeff]*/,uri,options))
             }else if(uri.scheme == 'lite'){
                 var path = uri.path+(uri.query||'')+(uri.fragment || '');
                 path = root.resolve(path.replace(/^\//,'./'))+'';
@@ -13,7 +13,7 @@ function loadLiteXML(uri,root){
             var path = String(uri);
         }
         if(/^[\s\ufeff]*[<#]/.test(path)){
-            return parseXMLByText(path.replace(/^[\s\ufeff]*/,''),root)
+            return parseXMLByText(path.replace(/^[\s\ufeff]*/,''),root,options)
         }else{
             //console.log(path,/^(?:\w+\:\/\/|\w\:\\|\/).*$/.test(path))
             if(/^(?:\w+\:\/\/|\w\:\\|\/).*$/.test(path)){
@@ -21,14 +21,14 @@ function loadLiteXML(uri,root){
                 var xpath = pos && path.substr(pos);
                 var path = pos?path.substr(0,pos-1):path;
                 var source = loadTextByPath(path.replace(/^file\:\/\/?/,''));
-                var doc = parseXMLByText(source,uri);
+                var doc = parseXMLByText(source,uri,options);
                 if(xpath && doc.nodeType){
                     doc = selectByXPath(doc,xpath);
                 }
                 return doc;
             }else{
                 //文本看待
-                return parseXMLByText(path);
+                return parseXMLByText(path,options);
             }
         }
     }catch(e){
@@ -58,15 +58,16 @@ function addInst(xml,s){
 /**
  * @private
  */
-function parseXMLByText(text,path){
+function parseXMLByText(text,path,options){
 	text = String(text)
     if(!/^[\s\ufeff]*</.test(text)){
         text = txt2xml(text);
     }
     try{
-        var doc = new DOMParser({locator:{systemId:path},
-                    xmlns:defaultNSMap
-                }).parseFromString(text,"text/html")
+    	options = Object.create(options||{});//errorHandler
+    	options.locator={systemId:path}
+    	options.xmlns=defaultNSMap
+        var doc = new DOMParser(options).parseFromString(text,"text/html")
         if(!doc.querySelectorAll){//init querySelector
 			var elp = doc.documentElement.constructor.prototype;
 			elp.querySelector = querySelector;

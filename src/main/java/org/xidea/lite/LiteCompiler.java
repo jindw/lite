@@ -27,7 +27,7 @@ public class LiteCompiler {
 	public LiteCompiler(File root) throws ScriptException{
 		this.root = root.getAbsoluteFile();
 		engine = new ScriptEngineManager().getEngineByExtension("js");
-		engine.eval(new InputStreamReader(LiteCompiler.class.getResourceAsStream("./lite-java-proxy.js")));
+		engine.eval(new InputStreamReader(LiteCompiler.class.getResourceAsStream("./js-java-proxy.js")));
 		engine.eval("var root = "+JSONEncoder.encode(this.root.getAbsolutePath())+";");
 		engine.eval("var LiteCompiler = require('lite/compiler').LiteCompiler");
 		engine.eval("var liteCompiler = new LiteCompiler(root)");

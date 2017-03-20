@@ -51,8 +51,9 @@ function parseLite(data,config){
 
 
 if(typeof require == 'function'){
+exports = module.exports = require('./lite-engine').LiteEngine
 exports.parseLite=parseLite;
-exports.LiteEngine=require('./lite-engine').LiteEngine;
+exports.LiteEngine=exports;
 var ParseConfig=require('./parse/config').ParseConfig;
 var JSTranslator=require('./parse/js-translator').JSTranslator;
 var ParseContext=require('./parse/parse-context').ParseContext;
