@@ -20,6 +20,7 @@ var XML_SPACE_TRIM=require('./parse-xml').XML_SPACE_TRIM;
  */
 var AUTO_FORM_PREFIX = "http://www.xidea.org/lite/attribute/h:autofrom" 
 var AUTO_FORM_SELETED = "http://www.xidea.org/lite/attribute/h:autofrom#selected"
+var HAS_LAZY_WIDGET = "http://www.xidea.org/lite/core/c:widget#has-lazy";
 var WRAP_SCRIPT_USE = "http://www.xidea.org/lite/attribute/h:wrap_script_use"
 var HTML = {
 	xmlns : function(){},
@@ -71,31 +72,50 @@ exports.wrapScript = wrapScript;
 
 /* html form auto value*/
 function parseHtmlHead(head){
-	this.setAttribute(parseHtmlHead,true);
+	this.setAttribute(parseHtmlHead,0);
 	var doc = head.ownerDocument;
-	head.appendChild(doc.createTextNode('$!{__head_styles__}'));
 	this.next(head);
-	this.setAttribute(parseHtmlHead,undefined);
+	this.setAttribute(parseHtmlHead,this.mark());
+}
+function __widget_arrived(id,data){
+	if(data instanceof Function){
+		if(/^lazy/.test(id)){
+			__widget_arrived[id]=data;
+		}else{
+			data();
+		}
+	}else{
+		document.querySelector('[data-widget='+id+']').innerHTML=data;
+		if(data=__widget_arrived[id]){
+			delete __widget_arrived[id];
+			data();
+		}
+		
+	}
 }
 function parseHtml(html){
-	var mark = this.mark();
 	var links = [];
 	this.setAttribute(parseHtml,links)
 	this.next(html);
-	var result = this.reset(mark);
-	this.appendCapture('__head_styles__');
-	this.setAttribute(parseHtmlHead,true)
-	for(var i = 0;i<links.length;i++){
-		this.parse(links[i]);
+	var headMark = this.getAttribute(parseHtmlHead);
+	if(headMark){
+		var hasLazyWidget = this.getAttribute(HAS_LAZY_WIDGET);
+		var result = this.reset(headMark);
+		for(var i = 0;i<links.length;i++){
+			this.next(links[i]);
+		}
+		if(hasLazyWidget){
+			var createScript = "<script>var __widget_arrived=__widget_arrived||"+String(__widget_arrived).replace(/[\r\n\t]|\s*(=)\s*/g,'$1')+'</script>'
+			this.appendText(createScript)
+		}
+		this.appendAll(result);
 	}
-	this.setAttribute(parseHtmlHead,undefined)
-	this.appendEnd();
-	this.appendAll(result);
 	//console.log('#$$$$'+this.getAttribute(parseHtml))
 }
 function parseLink(link){
 	var list = this.getAttribute(parseHtml)
-	if(list && !this.getAttribute(parseHtmlHead)){
+	var headMark = this.getAttribute(parseHtmlHead);
+	if(list && headMark > 0){
 		list.push(link)
 	}else{
 		this.next(link);

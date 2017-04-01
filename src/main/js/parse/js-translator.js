@@ -73,43 +73,35 @@ function(__context__,__out__){
 
 
 	//gen output2
-	//return function(){
+	//return function*(){
 		//gen model vars
 		var $var1 = __context__.var1;
 		var $var2 = __context__.var2;
 		var $var3 = __context__.var3;
-		
-		var it = g();
-		if($var1 instanceof Promise){$var1.then(function(v){$var1 = v});}
-		if($var2 instanceof Promise){$var1.then(function(v){$var12= v});}
-		function next(){
-			var next = it.next();
-			if(next instanceof Promise){next.then(next);}
-		}
-		next();
 
-		function* g(){
-			yield* __out__.wait(var1,var2);
-			__out__.push(var1.x,var2.y);
+        var1 = yield var1;
+        var2 = yield var2;
 
-			yield* __out__.wait(var3);
-			if(var3){
-				__out__.push(var3)
-			}
-			__out__.push(var3)
+        __out__.push(var1.x,var2.y);
 
-			//bigpiple 输出
-			__out__.lazy(function* __lazy__id__(__out__){
-				if(var1){
-					__out__.push(var1)
-				}
-				__out__.push(var1)
-			});
-			__out__.push('<div id="__lazy__id__" style="display:block" class="lazy"></div>');
-			
-			....
-			//return __out__.join('');//__out__.end();
-		}
+        var3 = yield var3;
+        if(var3){
+            __out__.push(var3)
+        }
+        __out__.push(var3)
+
+        //bigpiple 输出
+        __out__.push(function* __lazy__id__(__out__){
+            if(var1){
+                __out__.push(var1)
+            }
+            __out__.push(var1)
+        });
+        __out__.push('<div id="__lazy__id__" style="display:block" class="lazy"></div>');
+
+        ....
+        //return __out__.join('');//__out__.end();
+
 
 		
 	}
@@ -128,12 +120,21 @@ JSTranslator.prototype = {
 		
 		var translatorConfig = this.config || {};
 		var liteImpl = translatorConfig.liteImpl
-		ctx.waitPromise = translatorConfig.waitPromise && [[]];
+		
+		if(translatorConfig.waitPromise){
+			var tops = [];
+			var scope = ctx.scope;
+			var vars = {};
+			copy(scope.varMap,vars);
+			copy(scope.callMap,vars);
+			tops.push.apply(tops,Object.keys(vars))
+			ctx.waitPromise =  [tops];
+		}
 		ctx.hasBuildIn = !!liteImpl;
 		ctx.liteImpl = liteImpl && (typeof liteImpl == 'string'?liteImpl:'liteImpl');
 		ctx.parse();
 		
-		var functionPrefix = genFunctionPrefix(functionName)
+		var functionPrefix = genFunctionPrefix(ctx,functionName)
 		var code = genSource(ctx,functionPrefix);//ctx.header +  ctx.body;
 		//console.log('###'+code+'@@@')
 		
@@ -157,13 +158,14 @@ JSTranslator.prototype = {
 		return code.replace(/<\/script>/g,'<\\/script>').replace(/^\s*[\r\n]+/,'');
 	}
 }
-function genFunctionPrefix(functionName){
+function genFunctionPrefix(ctx,functionName){
+    var fnkey = ctx.waitPromise?'function*':'function'
 	if(functionName.match(ID_EXP)){
-		return 'function '+functionName;
+		return fnkey+' '+functionName;
 	}else if(functionName.match(/[\.\[]/)){
-		return functionName+'=function'
+		return functionName+'='+fnkey
 	}else{
-		return 'function'
+		return fnkey
 	}
 	
 }
@@ -174,42 +176,27 @@ function genSource(ctx,functionPrefix){
 	var params = ctx.params
 	var args = params?params.join(','):'__context__,__out__';
 	var result = [functionPrefix,"(",args,'){\n',header,'\n']
-    if (ctx.waitPromise) {
-    	result.push("\t__g__ = __g__();\n",
-			"\tfunction __n__(){\n",
-				"\t\tvar p = __g__.next(),n=p.value;\n",
-				"\t\tif(n instanceof Promise){\n",
-				//"\t\t\tfunction n2(v){p[0]&&(p[0] = p[0](v));__n__()}\n",
-				"\t\t\tn.then(__n__,__n__);\n",//"console.log('is promise',n)",
-				//"}else{",
-					//"console.log('is not promise',n)",
-					//"__n__()",
-				"\t\t}\n",
-			"\t};\n\t__n__();\n");
-		result.push('\tfunction* __g__(){\n',body,'\n\treturn __out__.join("");\n\t}\n}\n');
-	}else{
-		if(params){
-			var m = body.match(/^\s*__out__\.push\((.*?)\);?\s*$/)
-			if(m){
-				var item = '\treturn ['+m[1]+']'
-				try{
-					new Function(item)
-					if(item.indexOf(',')>0){
-						result.push(item,'.join("");\n}')
-					}else{
-						result.push('\treturn ',m[1],';\n}');
-					}
-					
-					return result.join('');
-				}catch(e){}
-				
-			}
-			result.push('\tvar __out__ = [];\n');
-		}else{
-			result.push('\tvar __out__ = __out__||[];\n');
-		}
-		result.push(body,'\n\treturn __out__.join("");\n}\n');
-	}
+    if(params){
+        var m = body.match(/^\s*__out__\.push\((.*?)\);?\s*$/)
+        if(m){
+            var item = '\treturn ['+m[1]+']'
+            try{
+                new Function(item)
+                if(item.indexOf(',')>0){
+                    result.push(item,'.join("");\n}')
+                }else{
+                    result.push('\treturn ',m[1],';\n}');
+                }
+
+                return result.join('');
+            }catch(e){}
+
+        }
+        result.push('\tvar __out__ = [];\n');
+    }else{
+        result.push('\tvar __out__ = __out__||[];\n');
+    }
+    result.push(body,'\n\treturn __out__.join("");\n}\n');
 	return result.join('');
 }
 
@@ -275,18 +262,6 @@ function genModelDecVars(ctx,scope,params){
 			
 		}
 	}
-	if(!params && ctx.waitPromise){
-		result.push(vars.join('\n').replace(/.+/mg,'\tif($& instanceof Promise){$&.then(function(v){$& = v});}'),'\n');
-	}
-	
-
-	/**
-	 	
-		if($var1 instanceof Promise){$var1.then(function(v){$var1 = v});}
-		if($var2 instanceof Promise){$var1.then(function(v){$var12= v});}
-		
-		
-	 */
 	return result;
 }
 /**
@@ -355,7 +330,7 @@ function createDateFormat(ctx,pattern,date){
 		patternSample='YYMMDDhhmmss.sTZD';
 	}
 	patternSample.replace(/([YMDhms])\1*|\.s|TZD/g,function(c){
-		len = c.length;
+		var len = c.length;
 		c = c.charAt();
 		if(c == '"' || c== '\''){
 			df.qute = 1;
@@ -395,7 +370,7 @@ JSTranslateContext.prototype.parse=function(){
     var defVars = []
     //生成函数定义
     var waitPromise = this.waitPromise;
-    this.waitPromise = null;
+    this.waitPromise = null;//函数内部不能用wait Promise
     for(var i=0;i<defs.length;i++){
         var def = this.scope.defMap[defs[i]];
         this.outputIndent=1;
@@ -430,6 +405,9 @@ JSTranslateContext.prototype.parse=function(){
 	//this.entityEncoder=0;
 	//this.dateFormat = {hit:0};
 	//this.forStack.hit = true
+	if(this.waitPromise){
+		this.waitPromise[this.waitPromise.length-1].push()
+	}
 	var  headers = [];
     var headers = genModelDecVars(this,this.scope,this.params);
 	var buildIn = genBuildInSource(this);
@@ -490,10 +468,6 @@ JSTranslateContext.prototype.processCapture = function(item){
     	var varName = item[2];
     	var bufbak = this.allocateId();
     	this.append("var ",bufbak,"=__out__;__out__=[];")
-    	if(this.waitPromise){
-    		this.append("__out__.wait=",bufbak,'.wait;');
-    	}
-    
     	this.appendCode(childCode);
     	this.append("var ",varName,"=__out__.join('');__out__=",bufbak,";");
     	this.freeId(bufbak);
@@ -504,9 +478,9 @@ JSTranslateContext.prototype.processIf=function(code,i){
     var childCode = item[1];
     var testEL = item[2];
     var test = this.stringifyEL(testEL);
-    //var wel = genWaitEL(this,testEL);visited el intercept function call
-    //this.append('if(',wel?'('+wel+')||('+test+')':test,'){');
-    this.append('if(',test,'){');
+    var wel = genWaitEL(this,testEL);
+    //visited el intercept function call
+    this.append('if(',wel?'('+wel+',1)&&('+test+')':test,'){');
     this.pushBlock();
     this.appendCode(childCode)
     this.popBlock();
@@ -514,6 +488,7 @@ JSTranslateContext.prototype.processIf=function(code,i){
     var nextElse = code[i+1];
     var notEnd = true;
     this.pushBlock(true);
+    var nestedElseIf = 0;
     while(nextElse && nextElse[0] == ELSE_TYPE){
         i++;
         var childCode = nextElse[1];
@@ -521,8 +496,10 @@ JSTranslateContext.prototype.processIf=function(code,i){
         var test = this.stringifyEL(testEL);
         
         if(test){
+            this.pushBlock(true);
+            nestedElseIf++;
         	var wel = genWaitEL(this,testEL);
-            this.append('else if(',wel?'('+wel+')||('+test+')':test,'){');
+            this.append('else if(',wel?'('+wel+',1)&&('+test+')':test,'){');
         }else{
             notEnd = false;
             this.append("else{");
@@ -532,6 +509,9 @@ JSTranslateContext.prototype.processIf=function(code,i){
         this.popBlock();
         this.append("}");
         nextElse = code[i+1];
+    }
+    while(nestedElseIf--){
+        this.popBlock(true);
     }
     this.popBlock(true);
     return i;
@@ -577,6 +557,7 @@ JSTranslateContext.prototype.processFor=function(code,i){
     var nextElse = code[i+1];
     var notEnd = true;
     var elseIndex = 0;
+    var nestedElseIf = 0
     this.pushBlock(true);
     while(notEnd && nextElse && nextElse[0] == ELSE_TYPE){
         i++;
@@ -586,10 +567,13 @@ JSTranslateContext.prototype.processFor=function(code,i){
         var test = this.stringifyEL(testEL);
         var ifstart = elseIndex >1 ?'else if' :'if';
         if(test){
+            this.pushBlock(true);
+            nestedElseIf++;
         	var wel = genWaitEL(this,testEL);
-            this.append(ifstart,
-            	'(',wel?'('+wel+')|| !':'!'
-            			,indexId,'&&(',test,')){');
+            this.append(ifstart,'(',
+            	'!',indexId,
+            	wel?'&&('+wel+',1)':'',
+            	'&&(',test,')){');
         }else{
             notEnd = false;
             this.append(ifstart,"(!",indexId,"){");
@@ -599,6 +583,9 @@ JSTranslateContext.prototype.processFor=function(code,i){
         this.popBlock();
         this.append("}");
         nextElse = code[i+1];
+    }
+    while(nestedElseIf--){
+        this.popBlock(true);
     }
     this.popBlock(true);
     
@@ -634,7 +621,7 @@ JSTranslateContext.prototype.popBlock = function(ignoreIndent){
 
 JSTranslateContext.prototype.appendModulePlugin = function(child,config){
 	if(this.waitPromise){
-		this.append('__out__.lazy(function* __lazy_widget_',config.id,'__(__out__){');
+		this.append('__out__.push(function* __widget_',config.id,'(__out__){');
 		this.pushBlock();//TODO:lazy push, 最后执行的元素可以最后检测waitEL
 		this.appendCode(child)
 		this.popBlock();
@@ -703,10 +690,10 @@ function genWaitEL(ctx,el){
 		    		vars2.push(v)
 		    		topWaitedVars.push(v)
 				}
-		
 		    }
 		    if (vars2.length) {
-		    	return 'yield* __out__.wait('+vars2.join(',')+')'
+		        return vars2.join(',').replace(/[^,]+/g,'$&=yield $&')
+		    	//return 'yield* __out__.wait('+vars2.join(',')+')'
 		    };
 		}
 	}

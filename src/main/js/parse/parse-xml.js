@@ -12,6 +12,7 @@ var XA_TYPE = require('./template-token').XA_TYPE;
 var EL_TYPE = require('./template-token').EL_TYPE;
 var XT_TYPE = require('./template-token').XT_TYPE;
 var Expression=require('js-el').Expression;
+
 var XML_SPACE_TRIM =exports.XML_SPACE_TRIM = "http://www.xidea.org/lite/attribute/h:trim-space" 
 var XML_SPACE_ONELINE = exports.XML_SPACE_ONELINE = "http://www.xidea.org/lite/attribute/h:space-oneline" 
 

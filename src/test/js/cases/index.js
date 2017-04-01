@@ -1,107 +1,97 @@
 var fs = require('fs');
 var path = require('path');
 var xmldom = require('xmldom');
-var ns = fs.readdirSync(__dirname);
+var assert = require('assert')
 
 var ParseConfig=require('lite/src/main/js/parse/config').ParseConfig;
 var JSTranslator=require('lite/src/main/js/parse/js-translator').JSTranslator;
 var ParseContext=require('lite/src/main/js/parse/parse-context').ParseContext;
 var wrapResponse = require('lite/src/main/js/template.js').wrapResponse
-var g=start();
-resume()
+var asf = require('asf')
 
-function resume(value){
-	var v = g.next(value);
-	if(!v.done){
-		value = v.value;
-		if(value instanceof Promise){
-			value.then(resumeSuccess,resumeError)
-		}else{
-			resumeSuccess(value)
+describe('xml cases loader', function (done){
+	start();
+ })
+
+
+
+function start(){
+	var fileNames = fs.readdirSync(__dirname);
+	for(var i=0;i<fileNames.length;i++){
+		var fileName = fileNames[i];
+		if(/\.xml$/.test(fileName)){
+			describe('test case filename:'+fileName,function(){ 
+				var p = path.join(__dirname,fileName);
+				var xml = fs.readFileSync(p).toString();
+				xml = new xmldom.DOMParser().parseFromString(xml,'text/xml');
+				xml.documentURI = p
+				testFile(xml,fileName);
+			})
 		}
 	}
 }
-function resumeSuccess(value){
-	resume(value)
-}
-function resumeError(value){
-	g.throw(value);
-	resumeSuccess();
-}
-function *start(){
-	for(var i=0;i<ns.length;i++){
-		var n = ns[i];
-		if(/\.xml$/.test(n)){
-			var p = path.join(__dirname,n);
-			var xml = fs.readFileSync(p).toString();
-			xml = new xmldom.DOMParser().parseFromString(xml,'text/xml');
-			xml.documentURI = p
-			yield* testFile(xml,n);
-		}
-	}
-}
-function *testFile(dom,fileName){
+function testFile(dom,fileName){
 	var es = dom.getElementsByTagName('unit');
-	console.info('test file:'+fileName)
+	//console.info('test file:'+fileName)
 	for(var i=0;i<es.length;i++){
 		var unit = es[i];
 		var title = unit.getAttribute('title');
 		var cases = dom.getElementsByTagName('case');
 		var sources = dom.getElementsByTagName('source');
 		var fileMap = {};
-		
-		for(var j=0;j<sources.length;j++){
-			var s = sources[j];
-			var p = s.getAttribute('path');
-			if(p){
-				fileMap[p] = s.textContent;
+		describe('test unit:['+i+']'+title,function(){ 
+			for(var j=0;j<sources.length;j++){
+				var s = sources[j];
+				var p = s.getAttribute('path');
+				if(p){
+					fileMap[p] = s.textContent;
+				}
 			}
-		}
-		
-		console.info('\tTest Unit:'+title)
-		for(var j=0;j<cases.length;j++){
-			yield *testCase(cases[j],fileMap)
-		}
+			
+			//console.info('\tTest Unit:'+title,cases.length)
+			for(var j=0;j<cases.length;j++){
+				var caseNode = cases[j];
+				var title = caseNode.getAttribute('title');
+				it('test case:'+title,buildCase(caseNode,fileMap));
+			}
+		});
 	}
 }
-function * testCase(node,fileMap){
+function buildCase(node,fileMap){
+
 	var title = node.getAttribute('title');
 	var source = getSource(node,'source');
 	var expect = getSource(node,'expect');
 	var model = readJson(getSource(node,'model',true));
-	console.warn('\t\tTest Case:',title||'anonymous');//+';source:'+source);
+	//console.warn('\t\tTest Case:',title||'anonymous');//+';source:'+source);
+	var Template = require('lite/src/main/js/template').Template;//Template.prototype.lazyArrived
 	var fn = parseLite(source,{fileMap:fileMap});
+	console.log(fn+'')
+	var tpl = new Template(fn,{path:'/test.xhtml#'+title})
 	//console.log(node.ownerDocument.documentURI,model)
 	//var result = fn(model);
-	var out = [];
-	//console.log('@@@@@',nodejsMock.wait)
-	try{
-		var promise = new Promise(function(resolve,reject){
-				var resp = {
-					write : function(t){
-						out.push(t)
-					},
-					end:function(last){
-						last && out.push(last);
-						var result = out.join('');
-						var error = assertDomEquals(expect,result)
-						if(error){
-							reject(error);
-						}else{
-							resolve(result)
-						}
-					}
+	
+	return function(done){
+		try{
+			var out = [];
+			var resp = {
+				write : function(t){
+					out.push(t)
+				},
+				end:function(last){
+					last && out.push(last);
+					var result = out.join('');
+					var error = assertDomEquals(expect,result)
+					done(error)
 				}
-				var nodejsMock = wrapResponse(resp,fn);
-				fn(model,nodejsMock);
-		});
-		yield promise;
-	}catch(e){
-		var fileName = node.ownerDocument.documentURI.replace(/.*\//,'')
-		console.error('\t\t\terror @file:'+fileName,';line:',node.lineNumber)
-		console.error('\t\t\t'+e)
-		//console.error(e.stack)
-		console.error(fn+'')
+			}
+			//var responseMock = wrapResponse(resp,tpl);
+			tpl.render(model,resp)['catch'](String);
+		}catch(e){
+			var fileName = node.ownerDocument.documentURI.replace(/.*\//,'')
+			console.error('\t\t\terror @file:'+fileName,';line:',node.lineNumber)
+			done(e)
+		}
 	}
 }
 function assertDomEquals(expect,result){
@@ -110,7 +100,7 @@ function assertDomEquals(expect,result){
 		expect = formatXML(expect.replace(/\r\n?|\n/g,'\n'))
 		if(String(result)!= expect){
 			//console.error()
-			return [expect,'!=', result].join('')
+			return ['expected:\n',expect,'\nbut(!=)\n', result].join('')
 		}
 	}
 }
@@ -148,11 +138,6 @@ function getSource(node,tagName,findParent){
 	}
 }
 
-
-
-
-
-
 function parseLite(data,config){
 	var root = config&&config.root;
 	var path = config&&config.path;
@@ -178,6 +163,15 @@ function parseLite(data,config){
 			uri = fileMap[uri.path];
 		}
 		return loadXML.apply(this,arguments,{errorHandler:function(){}})
+	}
+	parseContext.loadText = function(uri){
+		
+		if(uri.path in fileMap){
+			console.log('css',uri.path,fileMap[uri.path])
+			return fileMap[uri.path];
+		}
+		//console.log("gggg",uri)
+		return fileMap[uri]
 	}
 	parseContext.parse(data);
 	try{

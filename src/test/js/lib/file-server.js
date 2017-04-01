@@ -67,4 +67,4 @@ function writeIndex(filepath,response){
 	});
 	
 }
-exports.createServer = createServer;
+module.exports = createServer;

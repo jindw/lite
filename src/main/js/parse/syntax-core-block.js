@@ -1,4 +1,5 @@
 var DOCUMENT_LAYOUT_PROCESSED = "http://www.xidea.org/lite/core/c:layout-processed";
+var HAS_LAZY_WIDGET = "http://www.xidea.org/lite/core/c:widget#has-lazy";
 
 var HTML_URI = "http://www.w3.org/1999/xhtml"
 var setNodeURI = require('./syntax-util').setNodeURI
@@ -149,35 +150,22 @@ function loadText(ctx,path){
 	return ctx.loadText(uri);
 }
 
-function processWidget(node){
-	var ctx = this;
-	var lazy = node.nodeName.match(/lazy/i);
-	var currentURI = ctx.currentURI;
-	var src =  findXMLAttribute(node,"path");
-	var uri = ctx.createURI(src);
-	
-	
-	//var lessPath = src.replace(/\.\w+$/,'.less');
-	if(src == null){
-		console.error('src is null!!')
-		return;
-	}else{
-		
-		var doc = ctx.loadXML(uri);
-		var cssPath = src.replace(/\.\w+$/,'.css');
-		var jsPath = src.replace(/\.\w+$/,'.js');
-	}
-	
-	var fragment = doc.createDocumentFragment();
+function extractWidgetResource(ctx,src,doc,resourceFragment,bodyFragment){
+	var cssPath = src.replace(/\.\w+$/,'.css');
+	var jsPath = src.replace(/\.\w+$/,'.js');
 	var body = doc.getElementsByTagName('body')[0];
-	var resources = doc.getElementsByTagName('link');
-	var i= resources.length-1
-	while(i-->0){
-		var res = resources[i];
-		res.parentNode && res.parentNode.removeChild(res);
-		fragment.appendChild(res)
+	//append any style && links
+	var links = doc.getElementsByTagName('link');
+	console.log('links length:',links.length)
+	for(var i=0,len= links.length;i<len;i++){
+		var res = links[i];
+		//res.parentNode && res.parentNode.removeChild(res);
+		resourceFragment.appendChild(res)
+		
+		
 	}
 	var source = cssPath && loadText(ctx,cssPath);
+	console.log('css',cssPath,source)
 	if(source){
 		var s = doc.createElementNS(HTML_URI,'link');
 		//s.namespaceURI = doc.documentElement.namespaceURI;
@@ -185,61 +173,79 @@ function processWidget(node){
 		s.setAttribute('type','text/css');
 		s.setAttribute('href',cssPath);
 		//console.log('css!!!!'+s)
-		fragment.appendChild(s)
+		resourceFragment.appendChild(s)
 	}
+	
+	//append outbody scripts;
 	if(body){
 		var res = body.firstChild;
 		//console.log(body+'')
 		while(res!=null){
 			//console.log('!!!'+node.nodeType+node.nextSibling)
 			var next = res.nextSibling;
-			fragment.appendChild(res)//append will be removed from old tree!
+			bodyFragment.appendChild(res)//append will be removed from old tree!
 			res = next;
 		}
-		body.parentNode.removeChild(body)
-		var resources = doc.getElementsByTagName('script');
-		var i= resources.length-1
-		while(i-->0){
-			var res = resources[i];
-			res.parentNode && res.parentNode.removeChild(res);
-			fragment.appendChild(res)
-		}
 	}else{
-		fragment.appendChild(doc.documentElement)
+		bodyFragment.appendChild(doc.documentElement)
 	}
+	//append javascript resources;
 	var source = jsPath && loadText(ctx,jsPath);
-	//TODO:...
-	////(first?'!this.__widget_arrived&&(this.__widget_arrived=function(id,h){document.querySelector(id).innerHTML=h});':'')
-	if(source){
-		var s = doc.createElementNS(HTML_URI,'script');
-		//s.setAttribute('src',jsPath);
-		source = wrapScript(source,'__widget_arrived')
-		s.appendChild(doc.createTextNode(source));
-		fragment.appendChild(s)
+	return source;
+}
+/**
+ * widget body 外允许放link和script 节点，这些节点会直接嵌入（预装载）。
+ */
+function processWidget(node){
+	var ctx = this;
+	var lazy = node.nodeName.match(/lazy/i);
+	var currentURI = ctx.currentURI;
+	var widgetPath =  findXMLAttribute(node,"path");
+	var uri = ctx.createURI(widgetPath);
+	
+	
+	//var lessPath = src.replace(/\.\w+$/,'.less');
+	if(widgetPath == null){
+		console.error('widget path is null!!')
+		return;
 	}
+	var ownerDoc = node.ownerDocument;
+	var doc = ctx.loadXML(uri);
+	var resourceFragment = ownerDoc.createDocumentFragment();
+	var bodyFragment = ownerDoc.createDocumentFragment();
+	var widgetScript = extractWidgetResource(ctx,widgetPath,doc,resourceFragment,bodyFragment)
 	try{
+		this.parse(resourceFragment);
 		node.nodeType == 1 && node.removeAttribute('path');
+		var config={};
+		var tagName = _appendWidgetStart(ctx,node,config,lazy);
+		var widgetId = config.id;
 		if(lazy){
-			var config={};
-			var tagName = _appendLazyStart(ctx,node,config);
+			ctx.setAttribute(HAS_LAZY_WIDGET,true)
 			parseChildRemoveAttr(ctx,node);
 			tagName && ctx.appendText('</'+tagName+'>')
 			ctx.appendPlugin(PLUGIN_MODULE,JSON.stringify(config));
-			this.parse(fragment);
+			this.parse(bodyFragment);
 			ctx.appendEnd();
 		}else{
-			this.parse(fragment);
+			this.parse(bodyFragment);
+			tagName && ctx.appendText('</'+tagName+'>')
+		}
+		
+		if(widgetScript){
+			var s = doc.createElementNS(HTML_URI,'script');
+			console.log(widgetScript)
+			widgetScript = wrapWidgetScript(widgetId,widgetScript)
+			console.log(widgetScript)
+			s.appendChild(doc.createTextNode(widgetScript));
+			this.parse(s)
 		}
 	}finally{
 		this.currentURI = currentURI;
 	}
 }
-/**
- * node src 指向的src 是延迟载入
- * node 子节点放 loading 子页面
- */
-function parseLazyWidget(node){
-	
+function wrapWidgetScript(id,source){
+	return '__widget_arrived('+JSON.stringify(id)+',function(){'+source+'})'
 }
 
 function _parseBlock(ctx,node){
@@ -247,15 +253,15 @@ function _parseBlock(ctx,node){
 		parseChildRemoveAttr(ctx,node);
 	}else{
 		var config={};
-		var tagName = _appendLazyStart(ctx,node,config);
 		ctx.appendPlugin(PLUGIN_MODULE,JSON.stringify(config));
 		parseChildRemoveAttr(ctx,node);
 		ctx.appendEnd();
-		tagName && ctx.append('</'+tagName+'>')
 	}
 }
-function _appendLazyStart(ctx,node,config){
+function _appendWidgetStart(ctx,node,config,lazy){
 	var blockId = genBlockID(ctx);
+	var widgetId = lazy?'lazy_'+blockId:'w_'+blockId;
+	config.id = widgetId
 	//var elementId = '__lazy_module_'+blockId+'__';
 	if(node.nodeType == 1){
 		var attrs = node.attributes ;
@@ -268,20 +274,16 @@ function _appendLazyStart(ctx,node,config){
 				config[n] = a.value;
 			}
 		}
-		ctx.appendText('<div data-lazy-widget="',blockId,'"');
+		ctx.appendText('<div data-widget="',widgetId,'"');
 		for(var n in attrMap){
 			//ctx.appendText(' ',n,"='",config[n],"'");
 			ctx.parse(attrMap[n])
 		}
 		ctx.appendText('>')
-		config.id=blockId
 		return 'div';
 	}else{
-		node.ownerElement.setAttribute('data-lazy-widget',blockId);
-		config.id=blockId
+		node.ownerElement.setAttribute('data-widget',widgetId);
 	}
-
-	
 }
 function genBlockID(ctx){
 	var oldId = ctx.getAttribute(genBlockID)||0;

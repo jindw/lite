@@ -11,32 +11,38 @@
 //console.log( g.next().value.a);
 //console.log( g.next());
 
+var LiteEngine = require('lite');
 
-var LiteEngine = require('../lite-engine').LiteEngine;
-var path = require('path');
-var root = path.resolve(__dirname);
-var litecache = path.join(root,'.litecache');
-var engine = new LiteEngine(root,{litecache:litecache,released:false});
-var buf = [];
-var response = {
-	write:function(){
-		buf.push.apply(buf,arguments)
-	},
-	getHeader:function(){},
-	setHeader:function(){},
-	end:function(){
-		buf.push.apply(buf,arguments)
-		console.log(buf.join(''))
-	}
-}
-engine.render('/test.xhtml',{},response)
+describe('in process && out process the same',function(){
+	it('inprocess',function(){
+		var path = require('path');
+		var buf = [];
+		var response = {
+			write:function(){
+				buf.push.apply(buf,arguments)
+			},
+			//setHeader:function(){},
+			end:function(){
+				buf.push.apply(buf,arguments)
+				console.log(buf.join(''))
+			}
+		}
+		
+		var root = path.resolve(__dirname);
+		var litecache = path.join(root,'.litecache');
+		var engine = new LiteEngine(root,{litecache:litecache,released:false});
+		engine.render('/test.xhtml',{},response).then(function(rtv){
+			console.log(rtv,buf.join('').length)
+		})
+		
+		var parseLite =  require('../../main/js/index').parseLite;
+		
+		var root =path.dirname( path.resolve(__dirname,'../../'));
+		console.log(root)
+		//var xml = fs.
+		var example1 = parseLite('/doc/example/extends-page.xhtml',{root:root})
+		var html = example1({})
+		console.log(html)
+	})
+});
 
-
-var parseLite =  require('../index').parseLite;
-
-var root =path.dirname( path.resolve(__dirname));
-console.log(root)
-//var xml = fs.
-var example1 = parseLite('/example/extends-page.xhtml',{root:root})
-var html = example1({})
-console.log(html)

@@ -25,7 +25,7 @@ function parseLite(data,config){
 	root = root || String(path).replace(/[^\/\\]+$/,'');
 	var parseContext = new ParseContext(root && new ParseConfig(root));
 	path && parseContext.setCurrentURI(path)
-	if(typeof data == 'string'){
+	if(typeof data == 'string' && /^\s*<|>\s*$/.test(data)){
 		//console.log(path,parseContext.currentURI)
 		data = parseContext.loadXML(data);
 	}

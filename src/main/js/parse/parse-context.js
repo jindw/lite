@@ -175,6 +175,7 @@ ParseContext.prototype = {
 				return fs.readFileSync(path).toString()
 			}
 		}else{
+			//throw new Error(JSON.stringify(this.config))
 			var xhr = new XMLHttpRequest();
 			xhr.open("GET",uri,false)
 			xhr.send('');

@@ -1,9 +1,11 @@
-var LiteEngine = require('lite').LiteEngine;
+var LiteEngine = require('lite');
+var createServer = require('./file-server')
 var path = require('path');
 var fs = require('fs');
 var http = require('http');
 var root = path.resolve(__dirname,'../../../');
 var litecache = path.join(root,'.litecache');
+
 console.log(litecache)
 var engine = new LiteEngine(root,{litecache:litecache,released:false});
 
@@ -15,15 +17,17 @@ function toPromiseModel(model){
 	return model2;
 }
 function bindPromise(value){
-	return new Promise(function(accept,reject){
+	var p = new Promise(function(accept,reject){
 			if(Math.random()>.5){
-				setTimeout(reject(new Error()),Math.random()*1000);
+				setTimeout(function(){reject(new Error("###"))},Math.random()*1000);
 			}else{
-				setTimeout(accept(value),Math.random()*1000);
+				setTimeout(function(){accept(value)},Math.random()*1000);
 			}
 		});
+	p['catch'](String);
+	return p;
 }
-require('./file-server').createServer(function (req, response,root) {
+createServer(function (req, response,root) {
 	var url = req.url;
 	var param = {};
 	var p = url.indexOf('?');
@@ -42,9 +46,9 @@ require('./file-server').createServer(function (req, response,root) {
 				var json = fs.readFileSync(jsonpath,'utf8');
 				var model = new Function('return '+json)();
 				model = toPromiseModel(model)
-				engine.render(url,model,req,response);
+				engine.render(url,model,req,response)['catch'](function(e){console.error(e)});
 			}else{
-				engine.render(url,{},req,response);
+				engine.render(url,{},req,response)['catch'](function(e){console.error(e)});
 			}
 		})
 		return true;

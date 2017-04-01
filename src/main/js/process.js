@@ -1,13 +1,20 @@
 var  configRootKey = '-lite-engine-child-process-root';
-exports.configRootKey = configRootKey
-//node path -root root -filter path#name
-var argv = process.argv;
-var isChild = argv[2]==configRootKey;//child-process-compiler
-if(isChild){
+var pathModule = require('path');
+var fs = require('fs');
+exports.build = buildCompiler
+tryInitProcess();
+function tryInitProcess(){
+	//node path -root root -filter path#name
+	var argv = process.argv;
+	var index = argv.indexOf(configRootKey);
+	if(index<0){
+		return;
+	}
+	//var isChild = argv[2]==configRootKey;//child-process-compiler
 	//{path:tplPath,action:'remove'}
-	var root = argv[3].replace(/\/?$/,'/');
-	if(argv[4] == '-configurator' && argv[5]){
-		var configurator = argv[5];
+	var root = argv[index+1].replace(/\/?$/,'/');
+	if(argv[index+2] == '-configurator' && argv[index+3]){
+		var configurator = argv[index+3];
 	}
 	//console.log('ischild:',root);
 	var compile = setupCompiler(root,function(cmd){
@@ -18,9 +25,33 @@ if(isChild){
 		compile(path);
 	});
 }
-
+/**
+ * @param engine
+ * @param configurator: modulename#configuratorMethod(compiler)
+ */
+function buildCompiler(engine,onAction,configurator){
+	var root = engine.root;
+	try{//try build compiler on new thread!
+		if(configurator instanceof Function){
+			throw new Error();//function can config can not post to sub process!!
+		}
+		throw new Error();
+		var args = [configRootKey,root]
+		if(configurator){
+			args.push('-configurator',configurator);
+		}
+		var compiler = require('child_process').fork(__dirname + '/process.js',args);
+		compiler.on('message',onAction); 
+		return compiler;
+	}catch(e){
+		var setupCompiler = require('./process.js').setupCompiler;
+		var sender = setupCompiler(root,onAction,configurator);
+		return {
+			send:sender
+		}
+	}
+}
 function setupCompiler(root,callback,configurator){
-	var fs = require('fs');
 	var LiteCompiler = require('./compiler').LiteCompiler;
 	var templateCompiler= new LiteCompiler(root);
 	
@@ -55,7 +86,7 @@ function setupCompiler(root,callback,configurator){
 		if(resourcePath.match(/[\\\/]$/)){//ignore dir
 			return;
 		}
-		var file = require('path').join(root,resourcePath);
+		var file = pathModule.join(root,resourcePath);
 		var options = { persistent: true, recursive: false };
 		
 		var tplWatcherMap= resourceWatcherMap[resourcePath] || (resourceWatcherMap[resourcePath] = {});
@@ -89,7 +120,7 @@ function setupCompiler(root,callback,configurator){
 		//console.log('filter:',configurator)
 		try{
 			if('string' == typeof configurator ){
-				var args = configurators.split('#');
+				var args = configurator.split('#');
 				var path = args[0];
 				var name = args[1];
 				var configurator = require(path)[name];
@@ -103,34 +134,35 @@ function setupCompiler(root,callback,configurator){
 	}
 	//process.on('message', function(path) {
 	return (function(path){
-		
-		
+		var tplFile = pathModule.join(root,path);
 		try{
-			if(fs.existsSync(root+path)){
+			if(fs.existsSync(tplFile)){
+				var tplExist = true;
 				var result = templateCompiler.compile(path);
+				
+		    	addTemplateWatch(path,result.resources);
 			}else{
-				result = {resources:['./'],
-					litecode:[],
-					jscode:'function(c,out){out.push("File Not Found:'+path+'");return out.join()}',
-					config:{}
-				};
+		    	addTemplateWatch(path,[tplFile.replace(/[^\\\/]+$/,'')]);
+				throw new Error("\nFile Not Found:"+path);
 			}
-			
-		    //console.log('child got message:', m.root);
-		    var res = result.resources;
-			//console.info('resource config:' ,res,result);
-		    addTemplateWatch(path,res);
-		    callback({path:path,action:'add',code:result.jscode,config:result.config})
+		    var message = {
+		    	path:path,
+		    	action:'update',
+		    	code:result.jscode,
+		    	config:result.config};
 		    //process.send({path:path,action:'add',code:result.code,config:result.config,prefix:result[3]})
 	    }catch(e){
-	    	console.log(e)
-	    	//throw e;
-	    	callback({path:path,action:'error',
-	    		code:"function(){return '<pre>'+"+JSON.stringify(require('util').inspect(e,true)+
-					'\n\n'+(e.message +e.stack))+"}",
-	    		config:{contentType:'text/html',encoding:'utf-8',error:e}
-	    	})
+	    	console.error(e)
+			var error = [path+" compile error",e.message,e.stack].join('\n');
+			var jscode = 'function(c,out){out.push("<pre>",'+JSON.stringify(error)+',"</pre>");return out.join()}'
+	    	var message = {
+	    		path:path,
+	    		action:'error',
+	    		code:jscode,
+	    		config:{statusCode:'500',contentType:'text/html;encoding=utf-8'}
+	    	}
 	    }
+		callback(message)
 	});
 }
 exports.setupCompiler = setupCompiler;

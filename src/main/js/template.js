@@ -1,127 +1,133 @@
+var asf = require('asf')
 function Template(code,config){
  	//console.log(code)
- 	
 	try{
-    	this.impl = code instanceof Function?code:eval('['+code+'][0]');
+    	var fn = code instanceof Function?code:eval('['+code+'][0]');
     }catch(e){
     	//console.error(config.path,require('util').inspect(e,true)+'\n\n'+(e.message +e.stack));
-    	this.impl = function(){throw e;};
+    	var fn = function (){throw e;};
     }
-    this.config = config;
-    this.contentType = config.contentType;
-    this.encoding = config.encoding;
+    this.fn = fn
+    this.impl = asf(fn)
+    this.config = config||{};
 }
-Template.prototype.render = function(context,response){
-	try{
-		this.impl.call(null,context,wrapResponse(response,this));
-	}catch(e){
-		console.warn(this.impl+'');
-		var rtv = require('util').inspect(e,true)+'\n\n'+(e.message +e.stack);
-		response.end(rtv);
-		throw e;
-	}
+Template.prototype.render = function(context,out){
+	var impl = this.impl;
+    var out = wrapResponse(out,this);
+    var path = this.config.path;
+    for(var n in context){
+        var v = context[n];
+        if(v instanceof Promise){
+            context[n] = v['catch'](function(e){
+                console.error('error on render:'+path,e);
+            })
+        }
+    }
+    return new Promise(function(resolve,reject){
+        try{
+    		impl(context,out).then(resolve,reject);
+    	}catch(e){
+    	    try{
+                //console.warn(this.impl+'');
+                var rtv = String(e.message +e.stack);
+                out.end(rtv);
+    		}catch(e){
+    		}
+    		reject(rtv);
+    	}
+    })
+
 }
-Template.prototype.lazyAppend =function(resp,id,content,index,count){
+Template.prototype.lazyArrived =function(resp,id,content,index,count){
 	//(first?'!this.__widget_arrived&&(this.__widget_arrived=function(id,h){document.querySelector(id).innerHTML=h});':'')
 	content = JSON.stringify(content).replace(/<\/script>/ig,'<\\/script>');
-	resp.write('<script>__widget_arrived("*[data-lazy-widget-id=\''+id+'\']",'+content+')</script>')
+//	__widget_arrived = __widget_arrived || function (id,content){
+//		document.querySelector("[data-lazy-widget="+id+"]").innerHTML = content;
+//	}
+	resp.write('<script>__widget_arrived("'+id+'",'+content+')</script>')
 }
 function wrapResponse(resp,tpl){
 	var lazyList = [];
 	var buf=[];
 	var bufLen=0;
+	var MAX_BUFFER = 1024;
+	var size = 0
 	return {
 		push:function(){
-			for(var len = arguments.length, i = 0;i<len;i++){
-				//console.log(arguments[i])
-				var txt = arguments[i];
-				if(bufLen>1024){
-					resp.write(buf.join(''));
-					buf = [];
-					bufLen = 0;
-				}
-				buf.push(txt)
-				if(txt){
-					bufLen+=txt.length
-				}
-				//resp.write(arguments[i]);
-			}
+		    var len = arguments.length
+		    if(len){
+		        for(var i = 0;i<len;i++){
+                    //console.log(arguments[i])
+                    var text = arguments[i];
+                    if(text instanceof Function){
+                        lazyList.push(text);
+                    }else{
+                       if(bufLen>MAX_BUFFER){
+                            this.push();//flush
+                        }
+                        buf.push(text)
+                        if(text){
+                            bufLen+=text.length
+                        }
+                    }
+                }
+		    }else{//flush
+		        var text = buf.join('');
+		        size += text.length;
+		        resp.write(text);
+                buf = [];
+                bufLen = 0;
+            }
 		},
-		join:function(){
+		join:function(){//end
 			var last = buf.pop();
-			var matchEnd = last && last.match(/<\/html>\s*$/i);
+			var matchEnd = last && last.match(/(?:<\/body>\s*)?<\/html>\s*$/i);
 			if(matchEnd){
 				matchEnd = matchEnd[0];
 				buf.push(last.slice(0,-matchEnd.length))
+			}else{
+			    matchEnd = '';
+			    buf.push(last);
 			}
-			resp.write(buf.join(''));
-			buf = [];
-			doMutiLazyLoad(tpl,lazyList,resp,function(){
-				resp.end(matchEnd||last||'');
+			this.push();//flush
+			return new Promise(function(resolve,reject){
+                doMutiLazyLoad(tpl,lazyList,resp,function(error){
+                    resp.end(matchEnd);
+                    size+=matchEnd.length;
+                    error.length ? reject(error) : resolve(size);
+                })
 			})
-		},
-		flush:function(){
-			resp.write(buf.join(''));
-			buf = [];
-			bufLen = 0;
-		},
-		wait:modelWait,
-		lazy:function(g){
-			lazyList.push(g);
 		}
-	}
-}
-/*
-//俺的编辑器，混淆器有问题
-function* modelWait(){
-	var i = arguments.length;
-	while(i--){
-		if (arguments[i] instanceof Promise) {
-			yield arguments[i]
-		}
-	}
-}*/
-try{
-	var modelWait = Function('return function* modelWait(){' +
-			'var i = arguments.length;while(i--){if (arguments[i] instanceof Promise) {' +
-			'this.flush();'+
-			'yield arguments[i]}}}')()
-}catch(e){
-	console.error('es6 yield is not support!!');
-	var modelWait = function(){
-		return {done:true}
 	}
 }
 
 function doMutiLazyLoad(tpl,lazyList,resp,onComplete){
 	var len = lazyList.length;
-	var index = 0;
+	var arrivedIndex = 0;
+	var errors = []
 	if(len){
 		for(var i = 0;i<len;i++){
-			startModule(lazyList[i],[]);
+			var fn = lazyList[i];
+			var id = fn.name.replace(/^__widget_/g,'');//__widget_\d+__
+			startModule(id,asf(fn),[]);
 		}
-		function startModule(g,result){
-			var id = g.name.replace(/^[^\d]+|[^\d]+$/g,'');//__lazy_module_\d+__
-			result.flush = function(){};
-			result.wait = modelWait;
-			g = g(result);
-			function next(newValue){
-				var holder = g.next();
-				if(holder.done){
-					var content = result.join('');
-					tpl.lazyAppend(resp,id,content,index,len)
-					if(++index >= len){
-						onComplete();
-					}
-					return content;
-				}else{
-					holder.value.then(next,next)
-				}
-			}
-			next();
+		function startModule(id,g,result){
+            function oneComplete(error){
+                var content = result.join('');
+                tpl.lazyArrived(resp,id,content,arrivedIndex,len)
+                if(++arrivedIndex >= len){
+                    onComplete(errors);
+                }
+            }
+            function oneError(error){
+                result.push(error);
+                errors.push(error)
+                oneComplete()
+            }
+			g(result).then(oneComplete,oneError);
 		}
 	}else{
-		onComplete();
+		onComplete([]);
 	}
 }
 exports.wrapResponse = wrapResponse;

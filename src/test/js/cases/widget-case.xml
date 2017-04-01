@@ -1,0 +1,61 @@
+<test>
+	<unit title="文件包含语法">
+		<model>
+		{
+		array:[1,2,3,'4',5.5,'',true,null,false,[1,2],{a:1,b:2},[]],
+		string:"JSON 功能测试'\"",
+		object:{aa:1,bB:2,CC:[1]}
+		}
+		</model>
+		
+		<case title="simple widget body">
+			<source><![CDATA[<html><body><header/><c:widget path="/test/widget0.xhtml"/></body></html>]]></source>
+			<expect><![CDATA[<html><body><header></header><div data-widget="w_1"><body2><div class="content"><p>content</p></div><div>[]</div></body2></div></body></html>]]></expect>
+		</case>
+		<source path="/test/widget0.xhtml"><![CDATA[<body2><div class="content"><p>content</p></div><div>[]</div></body2>]]></source>
+		
+		
+		<case title="simple widget body">
+			<source><![CDATA[<html><body><header/><c:widget path="/test/widget1.xhtml"/></body></html>]]></source>
+			<expect><![CDATA[<html><body><header></header><div data-widget="w_1"><div class="content"><p>content</p></div><div>[]</div></div></body></html>]]></expect>
+		</case>
+		<source path="/test/widget1.xhtml"><![CDATA[<html><body><div class="content"><p>content</p></div><div>[]</div></body></html>]]></source>
+		
+		
+		
+		
+		<case title="widget body with css no head">
+			<source><![CDATA[<html><header></header><body><c:widget path="/test/widget2.xhtml"/></body></html>]]></source>
+			<expect><![CDATA[<html><header></header><body><link rel="stylesheet" type="text/css" href="/test/widget2.css"/><div data-widget="w_1"><div class="content"><p>content</p></div><div>[]</div></div></body></html>]]></expect>
+		</case>
+		<source path="/test/widget2.xhtml"><![CDATA[<html><body><div class="content"><p>content</p></div><div>[]</div></body></html>]]></source>
+		<source path="/test/widget2.css">body{color:red}</source>
+		
+		<case title="widget body with css to head">
+			<source><![CDATA[<html><head></head><body><c:widget path="/test/widget2.1.xhtml"/></body></html>]]></source>
+			<expect><![CDATA[<html><head></head><link href="xx.css"/><link rel="stylesheet" type="text/css" href="/test/widget2.1.css"/><body><div data-widget="w_1"><div class="content"><p>content</p></div><div>[]</div></div></body></html>]]></expect>
+		</case>
+		<source path="/test/widget2.1.xhtml"><![CDATA[<html><link href="xx.css"/><body><div class="content"><p>content</p></div><div>[]</div></body></html>]]></source>
+		<source path="/test/widget2.1.css">body{color:red}</source>
+		
+		
+		<case title="widget body with css && js">
+			<source><![CDATA[<html><head/><body><c:widget path="/test/widget3.xhtml"/></body></html>]]></source>
+			<expect><![CDATA[<html><head></head><link rel="stylesheet" type="text/css" href="/test/widget3.css"/><body><div data-widget="w_1"><div class="content"><p>content</p></div><div>[]</div></div><script>__widget_arrived("w_1",function(){require('testmodule1');testmodule1();})</script></body></html>]]></expect>
+		</case>
+		<source path="/test/widget3.xhtml"><![CDATA[<html><body><div class="content"><p>content</p></div><div>[]</div></body></html>]]></source>
+		<source path="/test/widget3.css">body{color:red}</source>
+		<source path="/test/widget3.js">require('testmodule1');testmodule1();</source>
+		
+		
+		
+		<case title="lazy widget body with css && js">
+			<source><![CDATA[<html><head/><body><c:lazy-widget path="/test/widget3.xhtml"/></body></html>]]></source>
+			<expect><![CDATA[<html><head></head><link 
+	rel="stylesheet" type="text/css" href="/test/widget3.css"/><script
+			>var __widget_arrived=__widget_arrived||function __widget_arrived(id,data){if(data instanceof Function){if(/^lazy/.test(id)){__widget_arrived[id]=data;}else{data();}}else{document.querySelector('[data-widget='+id+']').innerHTML=data;if(data=__widget_arrived[id]){delete __widget_arrived[id];data();}}}</script><body><div
+					 data-widget="lazy_1"></div><script>__widget_arrived("lazy_1",function(){require('testmodule1');testmodule1();})</script><script
+					 >__widget_arrived("lazy_1","<div class='content'><p>content</p></div><div>[]</div>")</script></body></html>]]></expect>
+		</case>
+	</unit>
+</test>
