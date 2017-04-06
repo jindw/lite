@@ -300,7 +300,7 @@ function _parseInclude(node){
     var selector = findXMLAttribute(node,'selector');
     var parentURI = this.currentURI;
 	try{
-	    if(path!=null){
+	    if(path){
 	    	if(path.charAt() == '#'){
 	    		console.warn("装饰器命名节点改用${pageName}模式了:(,您实用的模式还是:"+path);
 	    		path = '$'+path.substring(1);
@@ -314,21 +314,24 @@ function _parseInclude(node){
 	    		this.setCurrentURI(uri);
 	    	}
 	    }else{
-	    	var doc = this.loadXML(this.currentURI);
-	    	var doc = node.ownerDocument
+	    	//var doc = this.loadXML(this.currentURI);
+	    	var doc = node.ownerDocument.cloneNode(true);
 	    }
 		if(doc==null){
 			this.appendText("<strong style='color:red'>没找到包含节点："+this.currentURI+ node.value+"</strong>");
 		}else{
 		    if(selector != null){
-		    	var list = querySelectorAll.apply(doc,selector);;
+		    	var list = querySelectorAll.call(doc,selector);;
+		    	//console.log('#####')
 	    		if(list && list.length){
 	    			for(var i=0;i<list.length;i++){
+	    			//console.log(list[i]+'/'+i)
 	    				this.parse(list[i])
 	    			}
 	    		}else{
 	    			console.warn("empty selection:"+selector)
 	    		}
+	    		return;
 		    }else if(xpath!=null){
 		    	var d = doc;
 		        doc = selectByXPath(doc,xpath);

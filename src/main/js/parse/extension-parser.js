@@ -229,16 +229,15 @@ ExtensionParser.prototype = {
 			var ns = node.namespaceURI || el && el.namespaceURI||'';
 			var ext = this.packageMap[ns];
 			var n = formatName(node);
-			if(n == '__i' && ns == CORE_URI){
-				return true;
-			}
 //			var es=4;
 			if(ext && ext.attributeMap){
 				if(n in ext.attributeMap){
+					//node = node.cloneNode(true);
 					return doParse(node,ext.attributeMap[n],chain);
 				}else{
 					var fns = findPatternParser(ext.patternAttributeMap,n);
 					if(fns){
+						//node = node.cloneNode(true);
 						return doParse(node,fns,chain);
 					}
 				}

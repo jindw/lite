@@ -93,7 +93,7 @@ function tryDebug(root,path,model,request,response){
 function doRender(tpl,model,response){
 	if(response.headersSent ===  false){
 		var config = tpl.config||{};
-		console.log(response.statusCode )
+		//console.log(response.statusCode )
 		if(response.statusCode == 200 && config.statusCode){
 			response.statusCode  = config.statusCode;
 		}

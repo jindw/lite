@@ -152,8 +152,12 @@ function parseChildRemoveAttr(context,node,ignoreSpace){
 		//throw new Error();
 		var el = node.ownerElement||node.selectSingleNode('..');
 		//console.log(node.nodeName,node.namespaceURI);
-		el.removeAttributeNode(node);
-		context.parse(el);//||node.selectSingleNode('parent::*'));
+		try{
+			el.removeAttributeNode(node);
+			context.parse(el);//||node.selectSingleNode('parent::*'));
+		}finally{
+			el.setAttributeNode(node)
+		}
 	}else {//other
 		context.parse(node)
 	}

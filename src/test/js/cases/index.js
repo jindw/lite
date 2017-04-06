@@ -66,7 +66,7 @@ function buildCase(node,fileMap){
 	//console.warn('\t\tTest Case:',title||'anonymous');//+';source:'+source);
 	var Template = require('lite/src/main/js/template').Template;//Template.prototype.lazyArrived
 	var fn = parseLite(source,{fileMap:fileMap});
-	console.log(fn+'')
+	//console.log(fn+'')
 	var tpl = new Template(fn,{path:'/test.xhtml#'+title})
 	//console.log(node.ownerDocument.documentURI,model)
 	//var result = fn(model);
