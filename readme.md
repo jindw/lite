@@ -68,7 +68,7 @@ require('http').createServer(function (request, response) {
 
 ### NodeJS Example（Automatic Bigpiple && BigRender Optimization）
 
-```
+```xml
 <html>
 <head>...</head>
 <body>
