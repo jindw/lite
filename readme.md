@@ -43,7 +43,7 @@ require('http').createServer(function (request, response) {
 ```
 
 
-### NodeJS Promise Wait Example
+### NodeJS Example（Automatic Data Loading Optimization）
 ```javascript
 var LiteEngine = require('lite').LiteEngine;
 var engine = new LiteEngine('./');
@@ -66,37 +66,26 @@ require('http').createServer(function (request, response) {
     * render(url,model,request,response)
 
 
-### Web Browser
-```javascript
-//autocompile via jsi(https://github.com/jindw/jsi) 
-//single template file
-var tpl = require("../tpl/test.tpl");
-var model = {user:...}
-var html = tpl(model);
+### NodeJS Example（Automatic Bigpiple && BigRender Optimization）
 
+```xml
+<html>
+<head>...</head>
+<body>
+<div c:widget="widget/header.xhtml"/>
+<div c:lazy-widget="widget/module1.xhtml">
+    <!-- module1 source will build as a inner generator function, 
+        and flush as __widget_arrived callback(...) when data prepared  -->
+    loading module1...
+</div>
+<div c:lazy-widget="widget/module2.xhtml">
+    loading module2...
+</div>
+<div c:lazy-widget="widget/module3.xhtml">loading module3...</div>
+<div c:widget="widget/footer.xhtml"/>
 
-//inline template function(ECMA4XML)
-var tplFunction = function(user){
-    return <div>
-             hello ${user.name}
-             <c:if test="${user.messages}">
-                <c:for var="item" list="${user.messages}">
-                        <p>${item}</p>
-                </c:for>
-             </c:if>
-          </div>
-}
-//inline template string
-var user = ...
-var tplString = <div>
-             hello ${user.name}
-             <c:if test="${user.messages}">
-                <c:for var="item" list="${user.messages}">
-                        <p>${item}</p>
-                </c:for>
-             </c:if>
-          </div>;
-
+</body>
+</html>
 ```
 
 ### Other Server Side Impl
