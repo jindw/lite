@@ -7,8 +7,8 @@
 		}
 		</model>
 		<case title="嵌套函数定义">
-			<source><![CDATA[<p><c:def name="test1()">${test2()}</c:def><c:def name="test2()">test2</c:def>${test2()}/${test1()}</p>]]></source>
-			<expect><![CDATA[<p>test2/test2</p>]]></expect>
+			<source><![CDATA[<p><c:def name="test1()">[${test2()}]</c:def><c:def name="test2()">test2</c:def>${test2()}/${test1()}</p>]]></source>
+			<expect><![CDATA[<p>test2/[test2]</p>]]></expect>
 		</case>
 		<case title="capture">
 			<source><![CDATA[<p><c:var name="var1">${intValue}[${test2()}]</c:var><c:def

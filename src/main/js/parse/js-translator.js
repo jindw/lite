@@ -382,10 +382,11 @@ JSTranslateContext.prototype.parse=function(){
         defVars.push({
         	params:def.params,
         	defaults:def.defaults,
+        	contents:contents,
         	vars:vars,
         	name:def.name,
         	toString:function(){
-        		var fn = genDecFunction(contents,this.name,def.params,def.defaults,[]);
+        		var fn = genDecFunction(this.contents,this.name,this.params,this.defaults,[]);
         		return String(fn).replace(/^(.)/mg,'\t$1');
         	}});
     }

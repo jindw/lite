@@ -81,7 +81,7 @@ function buildCase(node,fileMap){
 				end:function(last){
 					last && out.push(last);
 					var result = out.join('');
-					var error = assertDomEquals(expect,result)
+					var error = assertDomEquals(expect,result,fn)
 					done(error)
 				}
 			}
@@ -94,13 +94,13 @@ function buildCase(node,fileMap){
 		}
 	}
 }
-function assertDomEquals(expect,result){
+function assertDomEquals(expect,result,code){
 	if(result != expect){
 		result = formatXML(result.replace(/\r\n?|\n/g,'\n'))
 		expect = formatXML(expect.replace(/\r\n?|\n/g,'\n'))
 		if(String(result)!= expect){
 			//console.error()
-			return ['expected:\n',expect,'\nbut(!=)\n', result].join('')
+			return ['expected:\n',expect,'\nbut(!=)\n', result,code&&('\n'+code)].join('')
 		}
 	}
 }
