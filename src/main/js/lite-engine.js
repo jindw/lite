@@ -1,6 +1,6 @@
 var Template = require('./template').Template
 var fs = require('fs');
-exports.getTemplateId = getTemplateId;
+var getTemplateId = require('./compiler').getTemplateId;
 exports.LiteEngine = LiteEngine;
 function LiteEngine(root,options){
 	options = options || {}
@@ -197,9 +197,5 @@ function getTemplateModuleFile(engine,path){
 		var id = getTemplateId(path);
 		return require('path').join(engine.litecache,id+'.js');
 	}
-}
-function getTemplateId(path){
-	////path.replace(/[^\w\_]/g,'_')
-	return path.slice(1).replace(/[^\w\_]/g,'_');
 }
 

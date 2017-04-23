@@ -1,9 +1,6 @@
 package org.xidea.lite;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
+import java.io.*;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,7 +21,7 @@ import org.xidea.el.impl.ReflectUtil;
  * 
  * 简单的实现请参考:
  * 
- * @see org.xidea.lite.test.SimpleLiteTemplate
+ * #see org.xidea.lite.test.SimpleLiteTemplate
  * @author jindawei
  * 
  */
@@ -53,11 +50,6 @@ public class LiteTemplate implements Template {
 	public LiteTemplate(List<Object> list, Map<String, String> featureMap) {
 		this.config = featureMap;
 		this.items = this.compile(list);
-//		String i18n = featureMap.get(FEATURE_I18N);
-//		if(i18n!=null){
-//			Map<String, Object> i18nMap = JSONDecoder.decode(i18n);
-//			this.addVar("I18N", i18nMap);
-//		}
 	}
 
 
@@ -77,9 +69,11 @@ public class LiteTemplate implements Template {
 	}
 
 	/**
+     * internal method
 	 * 编译模板数据,递归将元List数据转换为直接的数组，并编译el
-	 * 
-	 * @internal
+     * @param datas 模板中间数组代码
+     * @return 编译优化结果
+	 *
 	 */
 	@SuppressWarnings( { "unchecked", "rawtypes" })
 	protected Object[] compile(List<Object> datas) {
@@ -149,9 +143,9 @@ public class LiteTemplate implements Template {
 	}
 
 	/**
-	 * @param cmd
-	 * @param result
-	 * @return skip it  DefinePugin or Process Error (should be skipped and remove from instruction)
+	 * @param cmd 插件代码
+	 * @param result 当前结果
+	 * @return skip it？  DefinePugin or Process Error (should be skipped and remove from instruction)
 	 */
 	@SuppressWarnings( { "unchecked" })
 	protected boolean compilePlugin(final Object[] cmd, List<Object[]> result) {
@@ -186,6 +180,9 @@ public class LiteTemplate implements Template {
 	public void render(Object context, Appendable out) throws IOException {
 		Map<String, Object> contextMap = this.expressionFactory.wrapAsContext(context);
 		render(contextMap, items, out);
+        if(out instanceof Flushable){
+            ((Flushable)out).flush();
+        }
 	}
 	public void render(final Map<String,Object> context,
 			final Object[] children, final Appendable out) {
@@ -293,7 +290,7 @@ public class LiteTemplate implements Template {
 		}
 	}
 
-	/**
+	/*
 	 * @param context
 	 * @param data
 	 * @param out
@@ -451,33 +448,33 @@ public class LiteTemplate implements Template {
 	}
 
 	public String getEncoding() {
-		return this.config.get(FEATURE_ENCODING);
+		String encoding  = this.config.get(FEATURE_ENCODING);
+		return encoding == null?"utf-8":encoding;
 	}
+    static class Break extends RuntimeException {
+        private static final long serialVersionUID = 1L;
+        int depth;
 
+        protected Break(int depth) {
+            this.depth = depth;
+        }
+    }
+
+    static class ForStatus {
+        int index = -1;
+        int lastIndex;
+
+        ForStatus(int end) {
+            this.lastIndex = end - 1;
+        }
+
+        public int getIndex() {
+            return index;
+        }
+
+        public int getLastIndex() {
+            return lastIndex;
+        }
+    }
 }
 
-class Break extends RuntimeException {
-	private static final long serialVersionUID = 1L;
-	int depth;
-
-	protected Break(int depth) {
-		this.depth = depth;
-	}
-}
-
-class ForStatus {
-	int index = -1;
-	int lastIndex;
-
-	ForStatus(int end) {
-		this.lastIndex = end - 1;
-	}
-
-	public int getIndex() {
-		return index;
-	}
-
-	public int getLastIndex() {
-		return lastIndex;
-	}
-}

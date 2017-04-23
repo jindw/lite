@@ -88,6 +88,61 @@ require('http').createServer(function (request, response) {
 </html>
 ```
 
+### Java spring mvc
+
+```java
+
+/**
+ * Created by jindw on 17/2/25.
+ */
+@Configuration
+@EnableWebMvc
+public class DemoConfig {
+    /**
+     * 模板源代码存储目录
+     */
+    @Value("src/main/resources/templates")
+    private File templatePath;
+    /**
+     * 模板编译中间代码存储目录
+     */
+    private File compiledCachePath;
+
+    /**
+     * 注册视图解析器
+     */
+    @Bean
+    public ViewResolver getLiteResolver() {
+        final HotLiteEngine engine =   new HotLiteEngine(templatePath,compiledCachePath);
+        return (String viewName, Locale locale) -> {
+            final Template tpl = engine.getTemplate(viewName + ".xhtml");
+            return tpl == null ? null : new View() {
+                @Override
+                public String getContentType() {
+                    return tpl.getContentType();
+                }
+                @Override
+                public void render(Map<String, ?> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+                    tpl.render(model, response.getWriter());
+                }
+            };
+        };
+    }
+}
+
+```
+
+
+```xml
+
+        <dependency>
+            <groupId>org.xidea</groupId>
+            <artifactId>lite</artifactId>
+            <version>3.1.13</version>
+        </dependency>
+```
+
+
 ### Other Server Side Impl
 
 ```php

@@ -1,0 +1,34 @@
+<test>
+	<unit title="文件包含语法">
+		<model>
+		{
+		array:[1,2,3,'4',5.5,'',true,null,false,[1,2],{a:1,b:2},[]],
+		string:"JSON 功能测试'\"",
+		object:{aa:1,bB:2,CC:[1]}
+		}
+		</model>
+		<source path="/test/include1.xhtml"><![CDATA[<html><body><div class="content"></div><div class="include">[<c:include path="sub/include2.xhtml"/>]</div></body></html>]]></source>
+		<source path="/test/include2.xhtml"><![CDATA[<span>include2</span>]]></source>
+		<source path="/test/sub/include2.xhtml"><![CDATA[<c:include path="../include2.xhtml"/>]]></source>
+		<case title="include  external document">
+			<source><![CDATA[<c:include path="/test/include1.xhtml"/>]]></source>
+			<expect><![CDATA[<html><body><div class="content"></div><div class="include">[<span>include2</span>]</div></body></html>]]></expect>
+		</case>
+		<case title="include xpath @ external document">
+			<source><![CDATA[<c:include path="/test/include1.xhtml" xpath="//div[@class='include']"/>]]></source>
+			<expect><![CDATA[<div class="include">[<span>include2</span>]</div>]]></expect>
+		</case>
+		<case title="include xpath @ current document">
+			<source><![CDATA[<html><body><div title="abc">123</div><c:include xpath="//div[@title='abc']"/></body></html>]]></source>
+			<expect><![CDATA[<html><body><div title="abc">123</div><div title="abc">123</div></body></html>]]></expect>
+		</case>
+		<case title="include selector @ current document">
+			<source><![CDATA[<html><body><div title="abc">123</div><c:include selector="div"/></body></html>]]></source>
+			<expect><![CDATA[<html><body><div title="abc">123</div><div title="abc">123</div></body></html>]]></expect>
+		</case>
+		<case title="include selector @ external document">
+			<source><![CDATA[<html><body><div title="abc">123</div><c:include path="/test/include1.xhtml" selector=".include"/></body></html>]]></source>
+			<expect><![CDATA[<html><body><div title="abc">123</div><div class="include">[<span>include2</span>]</div></body></html>]]></expect>
+		</case>
+	</unit>
+</test>

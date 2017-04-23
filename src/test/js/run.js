@@ -1,5 +1,5 @@
 var LiteEngine = require('lite');
-var createServer = require('./file-server')
+var createServer = require('./lib/file-server')
 var path = require('path');
 var fs = require('fs');
 var http = require('http');

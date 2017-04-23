@@ -148,7 +148,7 @@ function setupCompiler(root,callback,configurator){
 		    var message = {
 		    	path:path,
 		    	action:'update',
-		    	code:result.jscode,
+		    	code:result.code,
 		    	config:result.config};
 		    //process.send({path:path,action:'add',code:result.code,config:result.config,prefix:result[3]})
 	    }catch(e){

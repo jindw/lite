@@ -1,5 +1,6 @@
 package org.xidea.lite;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -13,7 +14,6 @@ import org.apache.commons.logging.LogFactory;
 import org.xidea.el.json.JSONDecoder;
 
 public class LiteEngine implements TemplateEngine {
-	@SuppressWarnings("unused")
 	private static final Log log = LogFactory.getLog(LiteEngine.class);
 	protected URI compiledBase;
 	/**
@@ -29,24 +29,12 @@ public class LiteEngine implements TemplateEngine {
 			this.compiledBase = compiledBase.normalize();
 		}
 	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xidea.lite.ITemplateEngine#render(java.lang.String,
-	 * java.lang.Object, java.io.Writer)
-	 */
 	public void render(String path, Object context, Writer out)
 			throws IOException {
 		getTemplate(path).render(context, out);
 		out.flush();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xidea.lite.ITemplateEngine#getTemplate(java.lang.String)
-	 */
 	public Template getTemplate(String path) throws IOException {
 		Template template = templateMap.get(path);
 		if (template == null) {
@@ -58,11 +46,6 @@ public class LiteEngine implements TemplateEngine {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xidea.lite.ITemplateEngine#clear(java.lang.String)
-	 */
 	public void clear(String path) {
 		templateMap.remove(path);
 	}
@@ -70,28 +53,40 @@ public class LiteEngine implements TemplateEngine {
 	@SuppressWarnings("unchecked")
 	protected Template createTemplate(String path) throws IOException {
 		// [resources,litecode,config]
-		List<Object> data = JSONDecoder.decode(getLitecode(path));
-		List<Object> list = (List<Object>) data.get(1);
-		Map<String, String> featureMap = (Map<String, String>) data.get(2);
-		return new LiteTemplate(list, featureMap);
+		String litecode = getLitecode(path);
+		if(litecode !=null){
+			List<Object> data = JSONDecoder.decode(litecode);
+			List<Object> list = (List<Object>) data.get(1);
+			Map<String, String> featureMap = (Map<String, String>) data.get(2);
+			return new LiteTemplate(list, featureMap);
+		}else{
+			log.error("template not found!"+path+'@'+compiledBase);
+			return null;
+		}
 	}
 
 	protected String getLitecode(String path) {
+		
 		try {
-			URI uri = compiledBase.resolve(path.substring(1));
-			InputStream in;
-			if ("classpath".equals(compiledBase.getScheme())) {
-				String bp = compiledBase.normalize().getPath();
+			InputStream in ;
+			URI uri = compiledBase.resolve(compiledBase.getPath()+path);
+			String scheme = compiledBase.getScheme();
+			if ("classpath".equals(scheme)) {
+				String bp = uri.normalize().getPath();
 				in = LiteEngine.class.getResourceAsStream(bp);
-			} else {
-				in = uri.toURL().openStream();
+			}else if ("file".equals(scheme) && !new File(uri).exists()) {
+				return null;
+			}else{
+				
+				in =  uri.toURL().openStream();
 			}
-			return loadText(in);
+			if( in !=null ){
+				return loadText(in);
+			}
 		} catch (IOException e) {
 			log.error(e);
-			return null;
 		}
-
+		return null;
 	}
 
 	private String loadText(InputStream in) throws IOException {

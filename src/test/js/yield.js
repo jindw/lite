@@ -10,7 +10,8 @@ function resetDir(workDir){
 	}
 	try{
 		var dirs = fs.readdirSync(workDir);
-		for(var d of dirs){
+		for(var i=0;i<dirs.length;i++){
+			var d = dirs[i];
 			fs.unlinkSync(path.join(workDir,d))
 		}
 	}catch(e){}

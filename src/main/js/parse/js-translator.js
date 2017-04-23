@@ -532,7 +532,7 @@ JSTranslateContext.prototype.processFor=function(code,i){
     this.append("var ",itemsId,'=',itemsEL,';');
     this.append("var ",indexId,"=0;")
     this.append("var ",lastIndexId," = (",
-    	itemsId,'=',itemsId,' instanceof Array?',itemsId,':Object.keys(',itemsId,'||0)'
+    	itemsId,'=',itemsId,' instanceof Array?',itemsId,':',itemsId,' instanceof Object ?Object.keys(',itemsId,'):[]'
     	,").length-1;");
     
     //初始化 for状态
@@ -701,22 +701,26 @@ function genWaitEL(ctx,el){
     
 }
 function appendOutput(ctx){
+	//console.log('!!!'+JSON.stringify(arguments))
 	var outList = ctx.out;
-	var lastOutGroup = ctx._lastOutGroup;//不能用闭包var代替
 	var lastIndex = outList.length-1;
-	var args = outList.splice.call(arguments,1);
+	var args = [].splice.call(arguments,1,arguments.length-1);
+	
+	var lastOutGroup = ctx._lastOutGroup;//不能用闭包var代替
 	if(lastOutGroup &&  outList[lastIndex] === lastOutGroup){
 		lastOutGroup.list.push.apply(lastOutGroup.list,args)
 	}else{
 		ctx.append(ctx._lastOutGroup = new OutputGroup(args));
 	}
+	//console.log('!!!'+ctx._lastOutGroup.list)
+	//console.log('###'+args);
 }
 
 function OutputGroup(args){
 	this.list = args;
 }
 OutputGroup.prototype.toString = function(){
-	return '__out__.push(' + this.list.join(',')+');'
+	return '__out__.push('+this.list.join(',')+');'
 }
 
 function createXMLEncoder(thiz,el,isAttr){

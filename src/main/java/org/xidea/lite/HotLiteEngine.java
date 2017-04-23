@@ -1,9 +1,6 @@
 package org.xidea.lite;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -27,13 +24,16 @@ public class HotLiteEngine extends LiteEngine {
 	private File root;
 
 	public HotLiteEngine(File root, File cached) {
-		super(cached.toURI());
+		super(cached==null?null:cached.toURI());
 		this.root = root;
 		this.cached = cached;
 		try {
 			this.compiler = new LiteCompiler(root);
-		} catch (ScriptException e) {
-			throw new RuntimeException(e);
+        } catch (FileNotFoundException e) {
+            log.error(e.getMessage());
+            throw new LinkageError(e.getMessage());
+        } catch (ScriptException e) {
+            throw new RuntimeException(e);
 		}
 	}
 
@@ -71,10 +71,12 @@ public class HotLiteEngine extends LiteEngine {
 	}
 
 	private void saveCache(String path, String litecode) {
-		if (cached != null && cached.exists()) {
+		//System.out.println("save cached:"+(cached != null && cached.exists())+cached);
+		if (cached != null && cached.exists() && cached.canWrite()) {
 			try {
 				File file = new File(cached, path);
 				file.getParentFile().mkdirs();
+				//System.out.println(file);
 				OutputStreamWriter out = new OutputStreamWriter(
 						new FileOutputStream(file), "UTF-8");
 				out.write(litecode);
@@ -93,7 +95,7 @@ public class HotLiteEngine extends LiteEngine {
 			String litecode = null;
 			Info entry = infoMap.get(path);
 			if (entry == null ||entry.isModified()) {
-				if (cached != null) {
+				if (cached != null && cached.exists() ) {
 					litecode = super.getLitecode(path);
 					if (litecode != null) {
 						entry = new Info(root, litecode);
@@ -106,10 +108,12 @@ public class HotLiteEngine extends LiteEngine {
 					}
 				}
 				if (litecode == null) {
+                    long time = System.currentTimeMillis();
 					litecode = compiler.compile(path);
+                    long passed = System.currentTimeMillis() - time;
 					if (litecode != null) {
 						entry = new Info(root, litecode);
-						log.info("编译成功！ 文件关联：" + path + ":\t"
+						log.info("编译成功！耗时："+passed/1000.0+"妙； 文件关联：" + path + ":\t"
 								+ Arrays.asList(entry.files));
 						infoMap.put(path, entry);
 						saveCache(path, litecode);
@@ -130,7 +134,7 @@ public class HotLiteEngine extends LiteEngine {
 		Map<String, String> config;
 
 		Info(File root, String litecode) {
-			long t1 = System.currentTimeMillis();
+			//long t1 = System.currentTimeMillis();
 			List<Object> data = JSONDecoder.decode(litecode);
 			@SuppressWarnings("unchecked")
 			List<String> resources = (List<String>) data.get(0);
@@ -147,7 +151,7 @@ public class HotLiteEngine extends LiteEngine {
 				files[i] = new File(root, resources.get(i).substring(1));
 			}
 			this.lastModified = getLastModified(this.files);
-			System.out.println(System.currentTimeMillis()-t1);
+			//System.out.println(System.currentTimeMillis()-t1);
 		}
 
 		Info(List<File> files) {

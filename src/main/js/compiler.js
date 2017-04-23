@@ -3,8 +3,12 @@ var ParseContext = require('./parse/parse-context').ParseContext;
 var JSTranslator = require('./parse/js-translator').JSTranslator;
 var loadLiteXML = require('./parse/xml').loadLiteXML;
 var buildURIMatcher = require('./parse/resource').buildURIMatcher
-var getTemplateId = require('./lite-engine').getTemplateId
+exports.getTemplateId = getTemplateId
 exports.LiteCompiler = LiteCompiler;
+function getTemplateId(path){
+	////path.replace(/[^\w\_]/g,'_')
+	return path.slice(1).replace(/[^\w\_]/g,'_');
+}
 
 exports.execute = function(args){
 	var options = {};
@@ -45,10 +49,10 @@ function LiteCompiler(root,options){
 		}
 	}
 	this.config = this.config || new ParseConfig(root,null);
-	
+	var waitPromise = 'waitPromise' in options?options.waitPromise:true;
 	this.translator = new JSTranslator({
 		//liteImpl:liteImpl,
-		waitPromise:true
+		waitPromise:waitPromise
 	});
 	console.info("LiteCompiler root:",root);
 	
@@ -80,7 +84,7 @@ LiteCompiler.prototype.compile=function(path){
 	while(i--){
 		res[i] = res[i].path
 	}
-	return {resources:res,litecode:litecode,jscode:jscode,config:config};
+	return {resources:res,litecode:litecode,code:jscode,config:config,path:path};
 };
 
 //exports.compile = compile;

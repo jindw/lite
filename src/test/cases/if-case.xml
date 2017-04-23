@@ -1,0 +1,35 @@
+<test>
+	<unit title="条件控制">
+		<model>
+		{
+		array:[0,'',null],
+		string:"JSON 功能测试'\"",
+		object:{aa:1,bB:2,CC:[1]}
+		}
+		</model>
+		<case title="simple if([...])">
+			<source><![CDATA[<c:if test="${array}">if</c:if><c:else test="${string}">else</c:else>]]></source>
+			<expect>if</expect>
+		</case>
+		<case title="simple if([])">
+			<source><![CDATA[<c:if test="${[]}">if</c:if><c:else test="${string}">else</c:else>]]></source>
+			<expect>if</expect>
+		</case>
+		<case title="simple if(!object)-else hited">
+			<source><![CDATA[<c:if test="${!array}">if</c:if><c:else test="${string}">else-if</c:else><c:else>else</c:else>]]></source>
+			<expect>else-if</expect>
+		</case>
+		<case title="simple if(0) else hited">
+			<source><![CDATA[<c:if test="${array[0]}">if</c:if><c:else>else</c:else>]]></source>
+			<expect>else</expect>
+		</case>
+		<case title="simple if('') else hited">
+			<source><![CDATA[<c:if test="${array[1]}">if</c:if><c:else>else</c:else>]]></source>
+			<expect>else</expect>
+		</case>
+		<case title="simple if(null) else hited">
+			<source><![CDATA[<c:if test="${array[2]}">if</c:if><c:else test="${!object}">else-if</c:else><c:else>else</c:else>]]></source>
+			<expect>else</expect>
+		</case>
+	</unit>
+</test>
