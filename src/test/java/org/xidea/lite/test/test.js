@@ -1,5 +1,6 @@
 var testRoot;
-var LiteCompiler = require('lite/src/main/js/compiler').LiteCompiler;
+//var LiteCompiler = require('lite/src/main/js/compiler').LiteCompiler;
+var LiteCompiler = require('lite/src/main/java/org/xidea/lite/java-packed')('lite/src/main/js/compiler').LiteCompiler
 var PHPTranslator=require('lite/src/main/php/php-translator').PHPTranslator;
 var xmldom = require('xmldom');
 var DOMParser = xmldom.DOMParser;
@@ -30,6 +31,18 @@ LiteCompiler.prototype.createParseContext = function(path){
 		return doc;
 		//console.log(path)
 	}
+
+
+
+    ctx.loadText = function(uri){
+
+        if(uri.path in testResourceMap){
+            //console.log('css',uri.path,testResourceMap[uri.path])
+            return testResourceMap[uri.path];
+        }
+        //console.log("gggg",uri)
+        return testResourceMap[uri]
+    }
 	return ctx;
 }
 function buildTemplate(resourceMap,path){

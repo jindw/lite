@@ -8,6 +8,8 @@ import java.io.Writer;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -20,7 +22,7 @@ public class LiteEngine implements TemplateEngine {
 	 * WeakHashMap 回收的太快了?
 	 */
 	protected Map<String, Template> templateMap = new java.util.WeakHashMap<String, Template>();
-
+	protected ExecutorService executorService = Executors.newScheduledThreadPool(8);//最多允许是个并发写装载的lazy_widget
 	protected LiteEngine() {
 	}
 
@@ -58,7 +60,7 @@ public class LiteEngine implements TemplateEngine {
 			List<Object> data = JSONDecoder.decode(litecode);
 			List<Object> list = (List<Object>) data.get(1);
 			Map<String, String> featureMap = (Map<String, String>) data.get(2);
-			return new LiteTemplate(list, featureMap);
+			return new LiteTemplate(executorService,list, featureMap);
 		}else{
 			log.error("template not found!"+path+'@'+compiledBase);
 			return null;

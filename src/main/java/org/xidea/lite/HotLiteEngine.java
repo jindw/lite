@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.script.ScriptException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,7 +31,7 @@ public class HotLiteEngine extends LiteEngine {
         } catch (FileNotFoundException e) {
             log.error(e.getMessage());
             throw new LinkageError(e.getMessage());
-        } catch (ScriptException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
 		}
 	}
@@ -124,7 +123,7 @@ public class HotLiteEngine extends LiteEngine {
 			throw new RuntimeException(e);
 		}
 		Info entry = infoMap.get(path);
-		return new LiteTemplate(entry.items, entry.config);
+		return new LiteTemplate(executorService,entry.items, entry.config);
 	}
 
 	static class Info {

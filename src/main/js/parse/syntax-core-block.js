@@ -156,7 +156,7 @@ function extractWidgetResource(ctx,src,doc,resourceFragment,bodyFragment){
 	var body = doc.getElementsByTagName('body')[0];
 	//append any style && links
 	var links = doc.getElementsByTagName('link');
-	console.log('links length:',links.length)
+	//console.log('links length:',links.length)
 	for(var i=0,len= links.length;i<len;i++){
 		var res = links[i];
 		//res.parentNode && res.parentNode.removeChild(res);
@@ -165,7 +165,7 @@ function extractWidgetResource(ctx,src,doc,resourceFragment,bodyFragment){
 		
 	}
 	var source = cssPath && loadText(ctx,cssPath);
-	console.log('css',cssPath,source)
+	//console.log('css',cssPath,source)
 	if(source){
 		var s = doc.createElementNS(HTML_URI,'link');
 		//s.namespaceURI = doc.documentElement.namespaceURI;
@@ -215,33 +215,34 @@ function processWidget(node){
 	var bodyFragment = ownerDoc.createDocumentFragment();
 	var widgetScript = extractWidgetResource(ctx,widgetPath,doc,resourceFragment,bodyFragment)
 	try{
-		this.parse(resourceFragment);
+		ctx.parse(resourceFragment);
 		node.nodeType == 1 && node.removeAttribute('path');
 		var config={};
 		var tagName = _appendWidgetStart(ctx,node,config,lazy);
 		var widgetId = config.id;
+		//console.error("!!!lazy",lazy)
 		if(lazy){
 			ctx.setAttribute(HAS_LAZY_WIDGET,true)
 			parseChildRemoveAttr(ctx,node);
 			tagName && ctx.appendText('</'+tagName+'>')
 			ctx.appendPlugin(PLUGIN_MODULE,JSON.stringify(config));
-			this.parse(bodyFragment);
+			ctx.parse(bodyFragment);
 			ctx.appendEnd();
 		}else{
-			this.parse(bodyFragment);
+			ctx.parse(bodyFragment);
 			tagName && ctx.appendText('</'+tagName+'>')
 		}
 		
 		if(widgetScript){
 			var s = doc.createElementNS(HTML_URI,'script');
-			console.log(widgetScript)
+			//console.log(widgetScript)
 			widgetScript = wrapWidgetScript(widgetId,widgetScript)
-			console.log(widgetScript)
+			//console.log(widgetScript)
 			s.appendChild(doc.createTextNode(widgetScript));
-			this.parse(s)
+			ctx.parse(s)
 		}
 	}finally{
-		this.currentURI = currentURI;
+		ctx.currentURI = currentURI;
 	}
 }
 function wrapWidgetScript(id,source){

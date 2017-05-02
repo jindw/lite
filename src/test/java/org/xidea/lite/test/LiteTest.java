@@ -25,6 +25,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,11 +36,14 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xidea.el.impl.ExpressionFactoryImpl;
 import org.xidea.el.json.JSONDecoder;
 import org.xidea.el.json.JSONEncoder;
+import org.xidea.lite.FutureWaitStack;
 import org.xidea.lite.LiteCompiler;
 import org.xidea.lite.LiteTemplate;
 import org.xidea.lite.Template;
@@ -51,6 +55,8 @@ public class LiteTest {
 	private static String currentPHP;
 	private static DocumentBuilder documentBuilder;
 	public static final ScriptEngine engine;
+	private static ExecutorService executorService =  Executors.newScheduledThreadPool(8);
+	private static final Log log = LogFactory.getLog(LiteTest.class);
 	public final static File projectRoot;
 	static {
 		String mbload = execPhp("echo extension_loaded('mbstring')?'true':'false';");
@@ -119,7 +125,7 @@ public class LiteTest {
 		HashMap<String, Object> context = new HashMap<String, Object>();
 		context.put("date", new Date().getTime());
 		String expected = testTemplate(sm, context, "/s.xhtml", null);
-		System.out.println(expected);
+		log.info(expected);
 	}
 
 	@Test
@@ -132,7 +138,7 @@ public class LiteTest {
 		HashMap<String, Object> context = new HashMap<String, Object>();
 		context.put("date", new Date().getTime());
 		String expected = testTemplate(sm, context, "/s.xhtml", null);
-		System.out.println(expected);
+		log.info(expected);
 	}
 
 	@Test
@@ -144,7 +150,7 @@ public class LiteTest {
 		HashMap<String, Object> context = new HashMap<String, Object>();
 		context.put("date", new Date());
 		String expected = testTemplate(sm, context, "/s.xhtml", null);
-		System.out.println(expected);
+		log.info(expected);
 	}
 
 	static String testTemplate(Map<String, String> relativeSourceMap,
@@ -152,6 +158,25 @@ public class LiteTest {
 			SAXException {
 		return runTemplate(relativeSourceMap, context, path, expected).get(
 				"#expect");
+	}
+	static ExecutorService executor =java.util.concurrent.Executors.newSingleThreadExecutor();
+
+	public static HashMap<String,Object> randomWaitWrap( HashMap<String,Object> contextObject){
+		for (Map.Entry<String,Object> entry:contextObject.entrySet()){
+			final Object value = entry.getValue();
+			if(FutureWaitStack.futureClass!= null && !FutureWaitStack.futureClass.isInstance(value) &&
+					Math.random()>0) {
+				entry.setValue(executor.submit(new Callable<Object>() {
+					public Object call() throws Exception{
+						//System.out.println("!! wait :10"+value);
+						Thread.sleep(10);
+						return value;
+					}
+				}));
+			}
+		}
+		return contextObject;
+
 	}
 
 	/**
@@ -179,10 +204,11 @@ public class LiteTest {
 		List<Object> litecode = (List<Object>) compileResultMap.get("litecode");
 		//System.out.println(litecode);
 		//System.out.println(config);
-		Template tpl = new LiteTemplate(litecode, config);
+		Template tpl = new LiteTemplate(executorService,litecode, config);
 		String contextJSON = JSONEncoder.encode(contextObject);
 		StringWriter out = new StringWriter();
-		tpl.render(contextObject, out);
+
+		tpl.render(randomWaitWrap(contextObject), out);
 		String javaresult = out.toString();
 		String jsresult = runNativeJS(compileResult, contextJSON);
 		String phpresult = runNativePHP(compileResult, contextJSON);

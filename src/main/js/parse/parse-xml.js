@@ -127,7 +127,7 @@ function processAttribute(node,context,chain){
             for(var i = 0;i<buf.length;i++){
             	if(buf[i][0] == XA_TYPE){
             		buf[i] = '('+new Expression(buf[i][1])+')';
-            		console.log(buf[i])
+            		//console.log(buf[i])
             	}else{
             		throw new Error("属性内不能混合多条不安全的表达式输出！！");
             	}

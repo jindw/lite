@@ -2,6 +2,7 @@ package org.xidea.lite;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Map;
@@ -21,12 +22,21 @@ public class LiteCompiler {
 			FileNotFoundException {
 		this.root = root.getAbsoluteFile();
 		engine = new ScriptEngineManager().getEngineByExtension("js");
-		engine.eval(new InputStreamReader(LiteCompiler.class
-				.getResourceAsStream("java-proxy.js")));
-		engine.eval("var root = "
-				+ JSONEncoder.encode(this.root.getAbsolutePath()) + ";");
+		//System.out.println(engine.getClass());
 
 		try {
+			engine.put("__java_engine",engine);
+			InputStream packed = LiteCompiler.class.getResourceAsStream("java-packed.js");
+			if(packed != null) {
+				engine.eval(new InputStreamReader(packed));
+			}else {
+				InputStream proxy = LiteCompiler.class.getResourceAsStream("java-proxy.js");
+				if (proxy != null) {
+					engine.eval(new InputStreamReader(proxy));
+				}
+			}
+			engine.eval("var root = "
+					+ JSONEncoder.encode(this.root.getAbsolutePath()) + ";");
 			engine.eval("var compilerModule = require('lite/src/main/js/compiler')");
 			Boolean available = (Boolean) engine
 					.eval("!!(compilerModule && compilerModule.LiteCompiler)");

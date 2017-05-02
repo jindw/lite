@@ -31,6 +31,9 @@ public class DefinePlugin implements RuntimePlugin,Invocable {
 			} catch (Exception e) {
 				log.warn("无法装载扩展：" + type,e);
 			}
+			template.addVar(name, instance);
+		}else{
+			template.addVar(name, this);
 		}
 		
 	}

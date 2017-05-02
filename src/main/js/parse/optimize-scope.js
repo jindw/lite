@@ -1,7 +1,4 @@
-if(typeof require == 'function'){
-var Expression=require('js-el').Expression;
-
-}/*
+/*
  * List Template
  * License LGPL(您可以在任何地方免费使用,但请不要吝啬您对框架本身的改进)
  * http://www.xidea.org/project/lite/
@@ -9,6 +6,20 @@ var Expression=require('js-el').Expression;
  * @version $Id: template.js,v 1.4 2008/02/28 14:39:06 jindw Exp $
  */
 
+
+exports.OptimizeScope=OptimizeScope;
+
+var Expression=require('js-el').Expression;
+var VAR_TYPE=require('./template-token').VAR_TYPE;
+var XA_TYPE=require('./template-token').XA_TYPE;
+var ELSE_TYPE=require('./template-token').ELSE_TYPE;
+var PLUGIN_TYPE=require('./template-token').PLUGIN_TYPE;
+var CAPTURE_TYPE=require('./template-token').CAPTURE_TYPE;
+var IF_TYPE=require('./template-token').IF_TYPE;
+var EL_TYPE=require('./template-token').EL_TYPE;
+var BREAK_TYPE=require('./template-token').BREAK_TYPE;
+var XT_TYPE=require('./template-token').XT_TYPE;
+var FOR_TYPE=require('./template-token').FOR_TYPE;
 function OptimizeScope(code,params){
 
 	this.code = code;
@@ -248,17 +259,3 @@ function setForStatus(thiz,attrName){
 //	this.tree && walkEL(this,this.tree)
 //}
 
-
-if(typeof require == 'function'){
-exports.OptimizeScope=OptimizeScope;
-var VAR_TYPE=require('./template-token').VAR_TYPE;
-var XA_TYPE=require('./template-token').XA_TYPE;
-var ELSE_TYPE=require('./template-token').ELSE_TYPE;
-var PLUGIN_TYPE=require('./template-token').PLUGIN_TYPE;
-var CAPTURE_TYPE=require('./template-token').CAPTURE_TYPE;
-var IF_TYPE=require('./template-token').IF_TYPE;
-var EL_TYPE=require('./template-token').EL_TYPE;
-var BREAK_TYPE=require('./template-token').BREAK_TYPE;
-var XT_TYPE=require('./template-token').XT_TYPE;
-var FOR_TYPE=require('./template-token').FOR_TYPE;
-}

@@ -1,0 +1,29 @@
+<test>
+    <unit title="lazy widget 语法测试">
+
+        <model>
+            {
+            array:[1,2,3,'4',5.5,'',true,null,false,[1,2],{a:1,b:2},[]],
+            string:"JSON 功能测试'\"",
+            object:{aa:1,bB:2,CC:[1]}
+            }
+        </model>
+
+
+
+        <source path="/test/widget3.xhtml"><![CDATA[<html><body><div class="content"><p>content</p></div><div>[]</div></body></html>]]></source>
+        <source path="/test/widget3.css">body{color:red}</source>
+        <source path="/test/widget3.js">require('testmodule1');testmodule1();</source>
+
+
+
+        <case title="lazy widget body with css &amp;&amp; js">
+            <source><![CDATA[<html><head/><body><c:lazy-widget path="/test/widget3.xhtml">..</c:lazy-widget></body></html>]]></source>
+            <expect><![CDATA[<html><head></head><link
+	rel="stylesheet" type="text/css" href="/test/widget3.css"/><script
+			>var __widget_arrived=__widget_arrived||function __widget_arrived(id,data){if(data instanceof Function){if(/^lazy/.test(id)){__widget_arrived[id]=data;}else{data();}}else{document.querySelector('[data-widget='+id+']').innerHTML=data;if(data=__widget_arrived[id]){delete __widget_arrived[id];data();}}}</script><body><div
+					 data-widget="lazy_1">..</div><script>__widget_arrived("lazy_1",function(){require('testmodule1');testmodule1();})</script><script
+					 >__widget_arrived("lazy_1","<div class='content'><p>content</p></div><div>[]</div>")</script></body></html>]]></expect>
+        </case>
+    </unit>
+</test>

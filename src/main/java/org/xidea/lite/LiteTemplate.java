@@ -2,10 +2,9 @@ package org.xidea.lite;
 
 import java.io.*;
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -15,6 +14,7 @@ import org.xidea.el.ExpressionInfo;
 import org.xidea.el.fn.ECMA262Impl;
 import org.xidea.el.impl.ExpressionFactoryImpl;
 import org.xidea.el.impl.ReflectUtil;
+import org.xidea.el.json.JSONEncoder;
 
 /**
  * 优化后的LiteTemplate实现 主要优化方向有: 1. StreamWriter 支持 2. 指令列表循环逆转
@@ -41,15 +41,45 @@ public class LiteTemplate implements Template {
 	protected Object[] items;// transient
 	protected Map<String, String> config;
 
+	private transient  int modulePlugin = 0;
 	private transient int forCount = 0;
 
+	private ExecutorService executorService = Executors.newScheduledThreadPool(10);
 
 	protected LiteTemplate() {
 	}
 
-	public LiteTemplate(List<Object> list, Map<String, String> featureMap) {
+	public LiteTemplate(ExecutorService executorService, List<Object> list, Map<String, String> featureMap) {
+		this.executorService = executorService;
 		this.config = featureMap;
 		this.items = this.compile(list);
+		if(modulePlugin>0){//append last
+			int lastIndex = this.items.length - 1;
+			Object item = this.items[lastIndex];
+			if(item instanceof Object[]){
+				Object[] node = (Object[])item;
+				if(((Number)node[0]).intValue() == STATIC_BCS_TYPE){
+					item = node[1];
+				}
+			}
+			if(item instanceof String){
+				String last = (String)item;
+				String prefix = last.replaceFirst("(?:<\\/body>\\s*)?<\\/html>\\s*$","");
+				String postfix = last.substring(prefix.length());
+				this.items[lastIndex] = translateText(prefix);
+				ArrayList<Object> items = new ArrayList<Object>(Arrays.asList(this.items));
+				Object[] cmd = new Object[3];
+				cmd[0] = PLUGIN_TYPE;
+				cmd[PLUGIN_POS] = new ModulePlugin.Appender();
+				items.add(cmd);//
+				if(postfix.length()>0){
+					items.add(translateText(postfix));
+				}
+				this.items = items.toArray();
+			}
+
+
+		}
 	}
 
 
@@ -131,18 +161,25 @@ public class LiteTemplate implements Template {
 				}
 				result.add(cmd);
 			} else {
-				String cs = (String) item;// 长字符串切片
-				try {
-					result.add(new Object[]{STATIC_BCS_TYPE,cs.getBytes(this.getEncoding()),cs.toCharArray(),cs});
-				} catch (UnsupportedEncodingException e) {
-					log.error("编码异常",e);
-				}
+				result.add(translateText((String) item));
 			}
 		}
 		return result.toArray();
 	}
 
+	private Object[] translateText( String item) {
+		String cs = item;// 长字符串切片
+		try {
+            return new Object[]{STATIC_BCS_TYPE,cs,cs.toCharArray(),cs.getBytes(this.getEncoding())};
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+	}
+
 	/**
+	 * "org.xidea.lite.ModulePlugin"
+	 * "org.xidea.lite.DefinePlugin"
+	 * "org.xidea.lite.DatePlugin"
 	 * @param cmd 插件代码
 	 * @param result 当前结果
 	 * @return skip it？  DefinePugin or Process Error (should be skipped and remove from instruction)
@@ -158,13 +195,19 @@ public class LiteTemplate implements Template {
 			ReflectUtil.setValues(addon, config);
 			Object[] children = compile((List<Object>) cmd[1]);
 			addon.initialize(this, children);
-			if (addonType == DefinePlugin.class) {// definePlugin no status care
+			if (addonType == ModulePlugin.class) {// definePlugin no status care
+				((ModulePlugin)addon).setExecutorService(executorService);
+				this.modulePlugin++;
+				cmd[PLUGIN_POS] = addon;
+				return false;
+			}else if (addonType == DefinePlugin.class) {// definePlugin no status care
 				forCount = forCount0;
-				((DefinePlugin)addon).execute(null, null);
+				return true;
 			}else{
 				cmd[PLUGIN_POS] = addon;
 				return false;
 			}
+
 		} catch (Exception e) {
 			log.error("装载扩展失败", e);
 		}
@@ -178,7 +221,7 @@ public class LiteTemplate implements Template {
 	 * java.io.Appendable)
 	 */
 	public void render(Object context, Appendable out) throws IOException {
-		Map<String, Object> contextMap = this.expressionFactory.wrapAsContext(context);
+		Map<String, Object> contextMap = FutureWaitStack.wrap(expressionFactory.wrapAsContext(context));
 		render(contextMap, items, out);
         if(out instanceof Flushable){
             ((Flushable)out).flush();
@@ -192,13 +235,13 @@ public class LiteTemplate implements Template {
 				final Object[] data = (Object[]) item;
 				switch ((Integer) data[0]) {
 				case STATIC_BCS_TYPE:
-					if(out instanceof OutputStream){
-						((OutputStream)out).write((byte[])data[1]);
-					}else if(out instanceof Writer){
+					if(out instanceof Writer){
 						((Writer)out).write((char[])data[2]);
-					}else{
+					//}else if(out instanceof OutputStream){
+					//	((OutputStream)out).write((byte[])data[3]);
+					}else {
 						/* @see java.lang.StringBuilder#append(String)*/
-						out.append((String)data[3]);
+						out.append((String)data[1]);
 					}
 					break;
 				case EL_TYPE:// ":el":
@@ -249,14 +292,20 @@ public class LiteTemplate implements Template {
 				if (log.isInfoEnabled()) {
 					log.info("模板渲染异常",e);
 				}
+				//e.printStackTrace();
 			}
 		}
 	}
 
 	private void prossesPlugin(Map<String,Object> context, Object[] data, Appendable out)
 			throws Exception {
-		RuntimePlugin addon = (RuntimePlugin) data[PLUGIN_POS];
-		addon.execute(context, out);
+		try {
+			RuntimePlugin addon = (RuntimePlugin) data[PLUGIN_POS];
+			addon.execute(context, out);
+		}catch (Exception e){
+			System.out.println(JSONEncoder.encode(data));
+			e.printStackTrace();;
+		}
 	}
 
 	protected void processExpression(Map<String,Object> context, Object[] data,

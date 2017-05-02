@@ -33,59 +33,56 @@ import org.xml.sax.SAXException;
 
 @RunWith(Parameterized.class)
 public class AutoSyntaxTest {
-	private static final String TEST_XHTML = "/test.xhtml";
+	static final String TEST_XHTML = "/test.xhtml";
 
 	static ExpressionFactory expressionFactory = ExpressionFactoryImpl
 			.getInstance();
 
-	static String[] casefiles = {  "if-case.xml",
-			"choose-case.xml", "for-case.xml", "def-case.xml",
-	"extends-case.xml",		
-	"include-case.xml" ,
-	"extension-case.xml",
-	"out-case.xml"};
-	static Collection<Object[]> params = null;
 
 	private Map<String, String> resultMap;
 
 
-    //@Parameter(0)  
-	public String currentFile;
-    //@Parameter(1)  
-	public String currentCase;
-
-	private TestItem currentItem;
-
+	protected TestItem currentItem;
 	//
 	@Parameters(name="{index} -{0}")
 	
 	public static Collection<Object[]> getParams() {
-		if (params == null) {
-			ArrayList<Object[]> rtv = new ArrayList<Object[]>();
-			for (String file : casefiles) {
-				Map<String, List<Object[]>> cases;
-				try {
-					cases = loadCases(file);
-					for (List<Object[]> args : cases.values()) {
-						rtv.addAll(args);
-					}
-				} catch (ScriptException e) {
-					System.out.println("case load failed!"+file);
-					e.printStackTrace();
+		String[] casefiles = {
+				"choose-case.xml",
+				"def-case.xml",
+				"extends-case.xml",
+				"extension-case.xml",
+				"for-case.xml",
+				"if-case.xml",
+				"include-case.xml" ,
+				"out-case.xml",
+				"widget-case.xml"};
+
+		//System.out.println(getParams(casefiles));
+		return getParams(casefiles);
+
+	}
+
+	static Collection<Object[]> getParams(String[] casefiles) {
+		ArrayList<Object[]> rtv = new ArrayList<Object[]>();
+		for (String file : casefiles) {
+			Map<String, List<Object[]>> cases;
+			try {
+				cases = loadCases(file);
+				for (List<Object[]> args : cases.values()) {
+					rtv.addAll(args);
 				}
-
+			} catch (Exception e) {
+				System.out.println("case load failed!"+file);
+				e.printStackTrace();
 			}
-			params = rtv;
 
-//			System.out.println(JSONEncoder.encode(rtv));
 		}
-		return params;
+		return rtv;
 	}
 
 	// public AutoTest(){}
 	public AutoSyntaxTest(TestItem item) throws IOException, SAXException {
-		currentFile = item.file;
-		currentCase = item.title;
 		this.currentItem = item;
 		try {
 			HashMap<String,Object> ctx = JSONDecoder.decode(item.model);
@@ -129,11 +126,11 @@ public class AutoSyntaxTest {
 				value=value.replace("&quot;", "&#34;").replace("&lt;", "&#60;");
 			}
 		}
-		Assert.assertEquals( "运行结果有误：#" +currentItem.source+"\n\n",
+		Assert.assertEquals( type+" 运行结果有误：#" +currentItem.source+"\n\n",
 				currentItem.expect, value);
 	}
 
-	private static Map<String, List<Object[]>> loadCases(final String path) throws ScriptException {
+	static Map<String, List<Object[]>> loadCases(final String path) throws Exception {
 		LinkedHashMap<String, List<Object[]>> caseMap = new LinkedHashMap<String, List<Object[]>>();
 		Document doc;
 		try {
@@ -171,7 +168,7 @@ public class AutoSyntaxTest {
 						String title = case0.getAttribute("title") ;
 						String model = getChildContent(case0, "model",
 								defaultModel);
-						if(title.isEmpty()){
+						if(title.length()==0){
 							title = unitTitle+'['+j+']';
 						}
 						if(defaultModel != model){
@@ -190,7 +187,7 @@ public class AutoSyntaxTest {
 						//}else{
 							result.add(new Object[] { item });
 						//}
-						
+
 					}
 				}
 			}
@@ -211,12 +208,12 @@ public class AutoSyntaxTest {
 		String source;
 		String model;
 		String expect;
-		
+
 		boolean format;
 		public String toString(){
 			return file+'#'+title;
 		}
-		
+
 	}
 	private static String getChildContent(Node e, String tagName,
 			String defaultText) {
@@ -232,71 +229,4 @@ public class AutoSyntaxTest {
 		return defaultText;
 	}
 
-	public static void main(String[] arg) throws Exception {
-		File root;
-		if (arg.length > 0) {
-			root = new File(arg[0]);
-		} else {
-			root = new File(
-					new File(AutoSyntaxTest.class.getResource("/").toURI()),
-					"../../");
-		}
-		File dest = new File(root, "doc/test-data/test-syntax.json");
-		Writer out = new OutputStreamWriter(new FileOutputStream(dest));
-		try {
-
-			ArrayList<Object> allResult = new ArrayList<Object>();
-			for (String file : casefiles) {
-				Map<String, List<Object[]>> cases = loadCases(file);
-				for (Map.Entry<String, List<Object[]>> unitEntry : cases
-						.entrySet()) {
-					String title = unitEntry.getKey();
-					ArrayList<Object> unitResult = new ArrayList<Object>();
-					unitResult.add(title);
-					for (Object[] args : unitEntry.getValue()) {
-						Map<String, String> sourceMap = (Map<String, String>) args[0];
-						String model = (String) args[1];
-						String expect = (String) args[2];
-						boolean format = (Boolean) args[3];
-						HashMap<String,Object> ctx = JSONDecoder.decode(model);
-						Map<String, String> resultMap = LiteTest.runTemplate(
-								sourceMap, ctx, TEST_XHTML, expect);
-						HashMap<String, String> info = new HashMap<String, String>();
-						info.put("source", sourceMap.get(TEST_XHTML));
-						info.put("model", model);
-						info.put("expect", expect);
-						String formatedExpected = null;
-						for (Map.Entry<String, String> entry : resultMap
-								.entrySet()) {
-							if (!entry.getKey().startsWith("#")) {
-								String value = entry.getValue();
-								if(expect == null){
-									expect = value;
-								}
-								if (expect.equals(value)) {
-								} else {
-									if(format){
-										expect = formatedExpected == null?
-													(formatedExpected=LiteTest.normalizeXML(expect))
-													:formatedExpected;
-										value = LiteTest.normalizeXML(value);
-									}
-									if(!expect.equals(value)) {
-										info.put(entry.getKey(), value);
-									}
-								}
-							}
-						}
-						unitResult.add(info);
-					}
-					allResult.add(unitResult);
-				}
-			}
-			out.write(JSONEncoder.encode(allResult));
-			out.flush();
-		} finally {
-			System.out.println("语法测试结果写入:" + dest);
-			out.close();
-		}
-	}
 }

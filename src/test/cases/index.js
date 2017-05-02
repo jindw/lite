@@ -167,7 +167,7 @@ function parseLite(data,config){
 	parseContext.loadText = function(uri){
 		
 		if(uri.path in fileMap){
-			console.log('css',uri.path,fileMap[uri.path])
+			//console.log('css',uri.path,fileMap[uri.path])
 			return fileMap[uri.path];
 		}
 		//console.log("gggg",uri)
