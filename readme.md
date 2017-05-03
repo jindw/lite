@@ -138,7 +138,7 @@ public class DemoConfig {
         <dependency>
             <groupId>org.xidea</groupId>
             <artifactId>lite</artifactId>
-            <version>3.1.13</version>
+            <version>3.1.15</version>
         </dependency>
 ```
 
