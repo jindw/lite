@@ -145,8 +145,9 @@ function processBlock(node){
 }
 
 
-function loadText(ctx,path){
+function loadTextAndTraceResource(ctx,path){
 	var uri = ctx.createURI(path);
+    ctx.setCurrentURI(uri);//trace resource
 	return ctx.loadText(uri);
 }
 
@@ -164,7 +165,8 @@ function extractWidgetResource(ctx,src,doc,resourceFragment,bodyFragment){
 		
 		
 	}
-	var source = cssPath && loadText(ctx,cssPath);
+	var source = cssPath && loadTextAndTraceResource(ctx,cssPath);
+
 	//console.log('css',cssPath,source)
 	if(source){
 		var s = doc.createElementNS(HTML_URI,'link');
@@ -190,7 +192,7 @@ function extractWidgetResource(ctx,src,doc,resourceFragment,bodyFragment){
 		bodyFragment.appendChild(doc.documentElement)
 	}
 	//append javascript resources;
-	var source = jsPath && loadText(ctx,jsPath);
+	var source = jsPath && loadTextAndTraceResource(ctx,jsPath);
 	return source;
 }
 /**
@@ -200,6 +202,7 @@ function processWidget(node){
 	var ctx = this;
 	var lazy = node.nodeName.match(/lazy/i);
 	var currentURI = ctx.currentURI;
+
 	var widgetPath =  findXMLAttribute(node,"path");
 	var uri = ctx.createURI(widgetPath);
 	
@@ -213,7 +216,9 @@ function processWidget(node){
 	var doc = ctx.loadXML(uri);
 	var resourceFragment = ownerDoc.createDocumentFragment();
 	var bodyFragment = ownerDoc.createDocumentFragment();
+	//extract widget resource and set currentURL
 	var widgetScript = extractWidgetResource(ctx,widgetPath,doc,resourceFragment,bodyFragment)
+    ctx.setCurrentURI(uri);
 	try{
 		ctx.parse(resourceFragment);
 		node.nodeType == 1 && node.removeAttribute('path');
@@ -242,7 +247,7 @@ function processWidget(node){
 			ctx.parse(s)
 		}
 	}finally{
-		ctx.currentURI = currentURI;
+		ctx.setCurrentURI(currentURI);
 	}
 }
 function wrapWidgetScript(id,source){

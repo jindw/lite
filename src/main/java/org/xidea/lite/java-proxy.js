@@ -130,10 +130,11 @@ var require = function(){
 		return exports;
 	}
 }()
-var isJavaEnv = typeof java == 'object' && typeof java.io == 'object' && typeof java.io.File == 'function'
+
 //console.log(typeof java.io.File,typeof java)
 require.cached = {
     fs:function(require,exports,m){
+        var isJavaEnv = typeof java == 'object' && typeof java.io == 'object' && typeof java.io.File == 'function'
         if(!isJavaEnv){
             m.exports = module.require('fs');
             return;
@@ -162,6 +163,7 @@ require.cached = {
         }
     },
     path : function(require,exports,m,__filename,__dirname){
+        var isJavaEnv = typeof java == 'object' && typeof java.io == 'object' && typeof java.io.File == 'function'
         if(!isJavaEnv){
             m.exports = module.require('path');
             return;
@@ -179,7 +181,7 @@ require.cached = {
 
 
 
-if(!isJavaEnv && typeof module == 'object'){//for node client
+if(typeof process =='object' && process.argv instanceof Array && typeof module == 'object'){//for node client
     module.exports = require;
     //require.cached.path = function(require,exports,m){m.exports = module.require('path')};
 
