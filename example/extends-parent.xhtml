@@ -1,0 +1,16 @@
+<!doctype html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title><c:block name="title"/></title>
+	.... 完全相同的meta，link，scripts....
+</head>
+<body h:trim="true">
+	<div id="head">...完全相同的head...<a href="${'中文链接'}" href2="${'中文链接'}" onclick="alert(${'z中文'})">test link</a>.</div>
+	<div id="content"><c:block name="content"/></div>
+	<article c:lazy-widget="widget.xhtml"><img/></article>
+
+
+	<div id="foot">... 完全相同的foot...</div>
+</body>
+</html>

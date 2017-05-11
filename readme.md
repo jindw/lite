@@ -43,7 +43,7 @@ require('http').createServer(function (request, response) {
 ```
 
 
-### NodeJS Example（Automatic Data Loading Optimization）
+### NodeJS Promise Wait Example
 ```javascript
 var LiteEngine = require('lite').LiteEngine;
 var engine = new LiteEngine('./');
@@ -66,82 +66,38 @@ require('http').createServer(function (request, response) {
     * render(url,model,request,response)
 
 
-### NodeJS Example（Automatic Bigpiple && BigRender Optimization）
+### Web Browser
+```javascript
+//autocompile via jsi(https://github.com/jindw/jsi) 
+//single template file
+var tpl = require("../tpl/test.tpl");
+var model = {user:...}
+var html = tpl(model);
 
-```xml
-<html>
-<head>...</head>
-<body>
-<div c:widget="widget/header.xhtml"/>
-<div c:lazy-widget="widget/module1.xhtml">
-    <!-- module1 source will build as a inner generator function, 
-        and flush as __widget_arrived callback(...) when data prepared  -->
-    loading module1...
-</div>
-<div c:lazy-widget="widget/module2.xhtml">
-    loading module2...
-</div>
-<div c:lazy-widget="widget/module3.xhtml">loading module3...</div>
-<div c:widget="widget/footer.xhtml"/>
 
-</body>
-</html>
-```
-
-### Java spring mvc
-
-```java
-
-/**
- * Created by jindw on 17/2/25.
- */
-@Configuration
-@EnableWebMvc
-public class DemoConfig {
-    /**
-     * 模板源代码存储目录
-     */
-    @Value("src/main/resources/templates")
-    private File templatePath;
-    /**
-     * 模板编译中间代码存储目录
-     */
-    private File compiledCachePath;
-
-    /**
-     * 注册视图解析器
-     */
-    @Bean
-    public ViewResolver getLiteResolver() {
-        final HotLiteEngine engine =   new HotLiteEngine(templatePath,compiledCachePath);
-        return (String viewName, Locale locale) -> {
-            final Template tpl = engine.getTemplate(viewName + ".xhtml");
-            return tpl == null ? null : new View() {
-                @Override
-                public String getContentType() {
-                    return tpl.getContentType();
-                }
-                @Override
-                public void render(Map<String, ?> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
-                    tpl.render(model, response.getWriter());
-                }
-            };
-        };
-    }
+//inline template function(ECMA4XML)
+var tplFunction = function(user){
+    return <div>
+             hello ${user.name}
+             <c:if test="${user.messages}">
+                <c:for var="item" list="${user.messages}">
+                        <p>${item}</p>
+                </c:for>
+             </c:if>
+          </div>
 }
+//inline template string
+var user = ...
+var tplString = <div>
+             hello ${user.name}
+             <c:if test="${user.messages}">
+                <c:for var="item" list="${user.messages}">
+                        <p>${item}</p>
+                </c:for>
+             </c:if>
+          </div>;
 
 ```
-
-
-```xml
-
-        <dependency>
-            <groupId>org.xidea</groupId>
-            <artifactId>lite</artifactId>
-            <version>3.1.15</version>
-        </dependency>
-```
-
 
 ### Other Server Side Impl
 

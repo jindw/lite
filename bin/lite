@@ -4,4 +4,4 @@
 //// #!/usr/bin/env node --debug
 
 var args = process.argv.concat();
-require('../src/main/js/compiler').execute(args);
+require('../compiler').execute(args);
