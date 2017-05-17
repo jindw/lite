@@ -104,8 +104,9 @@ var Core = {
 	 * <c:date-format pattern="" >
 	 */
 	parseDateFormat:function(node){
-		var value =  findXMLAttributeAsEL(node,'value','date','time','#text').replace(/^\s+|\s+$/g,'') || 'null';
 		var pattern = findXMLAttribute(node,'pattern');
+		var value =  findXMLAttributeAsEL(node,'value','date','time','#text') || 'null';
+		value = value.replace(/^\s+|\s+$/g,'')
 		if(pattern){
 			var pattern2 = pattern.replace(/^\s*\$\{([\s\S]+)\}\s*$/,'$1')
 			if(pattern2 == pattern){
@@ -299,7 +300,7 @@ function _parseInclude(node){
     var selector = findXMLAttribute(node,'selector');
     var parentURI = this.currentURI;
 	try{
-	    if(path!=null){
+	    if(path){
 	    	if(path.charAt() == '#'){
 	    		console.warn("装饰器命名节点改用${pageName}模式了:(,您实用的模式还是:"+path);
 	    		path = '$'+path.substring(1);
@@ -320,15 +321,17 @@ function _parseInclude(node){
 			this.appendText("<strong style='color:red'>没找到包含节点："+this.currentURI+ node.value+"</strong>");
 		}else{
 		    if(selector != null){
-		    	//console.log(querySelectorAll+'')
 		    	var list = querySelectorAll.call(doc,selector);;
+		    	//console.log('#####')
 	    		if(list && list.length){
 	    			for(var i=0;i<list.length;i++){
+	    			//console.log(list[i]+'/'+i)
 	    				this.parse(list[i])
 	    			}
 	    		}else{
 	    			console.warn("empty selection:"+selector)
 	    		}
+	    		return;
 		    }else if(xpath!=null){
 		    	var d = doc;
 		        doc = selectByXPath(doc,xpath);

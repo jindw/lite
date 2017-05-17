@@ -152,8 +152,12 @@ function parseChildRemoveAttr(context,node,ignoreSpace){
 		//throw new Error();
 		var el = node.ownerElement||node.selectSingleNode('..');
 		//console.log(node.nodeName,node.namespaceURI);
-		el.removeAttributeNode(node);
-		context.parse(el);//||node.selectSingleNode('parent::*'));
+		try{
+			el.removeAttributeNode(node);
+			context.parse(el);//||node.selectSingleNode('parent::*'));
+		}finally{
+			el.setAttributeNode(node)
+		}
 	}else {//other
 		context.parse(node)
 	}
@@ -168,7 +172,7 @@ function appendForStart(context,var_,list,status_){
 	if(!list){
 		var match = var_.match(FOR_PATTERN);
 		if(!match){
-			throw console.error("非法 for 循环信息",value);
+			throw console.error("非法 for 循环信息",var_);
 		}
 		var var_ = match[1];
 		var status_ =match[2];

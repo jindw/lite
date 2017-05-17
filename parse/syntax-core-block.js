@@ -20,6 +20,7 @@ exports.parseLazyWidget = exports.interceptLazyWidget =processWidget;
 //addParserAndAttrInterceptor(processBlock,"module","lazy-module","lazy-block","block","group");
 //var PLUGIN_DEFINE=require('./template-token').PLUGIN_DEFINE;
 function parseDocument(doc,ns){//for extends syntax!! Document.nodeType == 9
+	ns = ns||'http://www.xidea.org/lite/core'
 	var isProcessed = this.getAttribute(DOCUMENT_LAYOUT_PROCESSED);
 	//console.log(doc.documentURI+'',isProcessed)
 	if(!isProcessed){
@@ -27,6 +28,7 @@ function parseDocument(doc,ns){//for extends syntax!! Document.nodeType == 9
 		var root = doc.documentElement;
 		var ln = root.localName || root.nodeName.replace(/^w+\:/,'');
 		if((ln == 'extends' || ln == 'extend') &&  root.namespaceURI == ns){
+			
 			processExtends.call(this,root);
 			return ;
 		}else{

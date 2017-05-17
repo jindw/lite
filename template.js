@@ -88,8 +88,8 @@ try{
 			'yield arguments[i]}}}')()
 }catch(e){
 	console.error('es6 yield is not support!!');
-	var modelWait = function(){
-		return {done:true}
+	var modelWait = function(value){
+		return {done:true,value:value}
 	}
 }
 

@@ -332,12 +332,13 @@ function wrapScript(source,wrap_script_method){
 	}
 	return source;
 }
+
 function parseHtmlClassAttr(attr){
-	attr.value = attr.value.replace(/\s*?[\r\n]\s*/,' ');
+	attr.value = attr.value.replace(/\s*?[\r\n]\s*/g,' ');
 	this.next(attr)
 }
 function parseHtmlEventAttr(attr){
-	var value = attr.value.replace(/\s*?([\r\n])\s*/,'$1');
+	var value = attr.value.replace(/\s*?([\r\n])\s*/g,'$1');
 	attr.value = processJS(this,value);
 	this.next(attr);
 }

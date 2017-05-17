@@ -53,7 +53,7 @@ function formatName(el){
 
 function loadExtObject(source){
 	try{
-		var p = /\b(?:document|xmlns|(?:parse|intercept|seek)\w*)\b/g;
+		var p = /\b(?:document|xmlns|(?:parse|intercept|seek|on)\w*)\b/g;
 		var fn = new Function("console","var window = this;"+source+"\n return function(){return eval(arguments[0])}");
 		var m,o;
 		var objectMap = {};
@@ -110,26 +110,6 @@ function copyParserMap(mapClazz,p,p2,key){
 			ParseChain previousChain, String name);
  */
 ExtensionParser.prototype = {
-	mapJava:function(mapClazz){
-		var result = mapClazz.newInstance();
-		for(var n in this.packageMap){
-			var p = this.packageMap[n];
-			var p2 = mapClazz.newInstance();
-			result.put(n,p2);
-			if(p.namespaceParser){
-				p2.put('namespaceParser', p.namespaceParser);
-			}
-			copyParserMap(mapClazz,p,p2,"interceptMap")
-			
-			copyParserMap(mapClazz,p,p2,"typeMap")
-			copyParserMap(mapClazz,p,p2,"tagMap")
-			copyParserMap(mapClazz,p,p2,"patternTagMap")
-			copyParserMap(mapClazz,p,p2,"attributeMap")
-			copyParserMap(mapClazz,p,p2,"patternAttributeMap")
-			copyParserMap(mapClazz,p,p2,"seekMap")
-		}
-		return result
-	},
 	parseElement:function(el, context,chain){
 //		context.setAttribute(CURRENT_NODE_KEY,el)
 		var ns = el.namespaceURI;
@@ -229,9 +209,6 @@ ExtensionParser.prototype = {
 			var ns = node.namespaceURI || el && el.namespaceURI||'';
 			var ext = this.packageMap[ns];
 			var n = formatName(node);
-			if(n == '__i' && ns == CORE_URI){
-				return true;
-			}
 //			var es=4;
 			if(ext && ext.attributeMap){
 				if(n in ext.attributeMap){

@@ -121,13 +121,23 @@ function processAttribute(node,context,chain){
         //remove attribute;
         //context.appendText(" "+name+"=''");
         if(buf.length > 1){
-            //TODO:....
-            throw new Error("属性内只能有单一EL表达式！！");
+            for(var i = 0;i<buf.length;i++){
+            	if(buf[i][0] == XA_TYPE){
+            		buf[i] = '('+new Expression(buf[i][1])+')';
+            		//console.log(buf[i])
+            	}else{
+            		throw new Error("属性内不能混合多条不安全的表达式输出！！");
+            	}
+            }
+            context.appendXA(name,"''+"+buf.join('+'));
+            return null;
         }else{//只考虑单一EL表达式的情况
             if(buf[0][0] == XA_TYPE){
             	//buf[0][1] 是一个表达式对象
 	        	context.appendXA(name,buf[0][1]);
 	        	return null;
+            //}else{
+            //	否则任意输出，甚至可以打破xml属性字符
             }
         }
     }
@@ -168,7 +178,8 @@ function processEntity(){
     return null;//not support
 }
 function processProcessingInstruction(node,context,chain){
-    context.appendText("<?"+node.nodeName+" "+node.data+"?>");
+	context.appendText("<?",node.target," ",node.data,"?>");
+    //context.appendText("<?"+node.nodeName+" "+node.data+"?>");
 }
 function processComment(){
     return null;//not support

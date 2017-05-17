@@ -46,7 +46,7 @@ function addInst(xml,s){
     var m;
     var first = xml.firstChild;
     while(m = s.match(p)){
-        if(m[1] == 'xml'){
+        if(m[1] == 'xml' && first.nodeType != 7){
             var pi = xml.createProcessingInstruction(m[1], m[2]);
             xml.insertBefore(pi, first);
         }
@@ -74,7 +74,7 @@ function parseXMLByText(text,path){
 			elp.querySelector = querySelector;
 			elp.querySelectorAll = querySelectorAll;
         }
-        return addInst(doc,text);
+        return doc;//addInst(doc,text);
     }catch(e){
         console.error("解析xml失败:",e,text);
     }

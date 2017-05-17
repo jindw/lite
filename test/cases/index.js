@@ -20,7 +20,7 @@ function start(){
 	var fileNames = fs.readdirSync(__dirname);
 	for(var i=0;i<fileNames.length;i++){
 		var fileName = fileNames[i];
-		if(/\.xml$/.test(fileName)){
+		if(/\.xml$/.test(fileName) && !/widget/.test(fileName)){
 			describe('test case filename:'+fileName,function(){ 
 				var p = path.join(__dirname,fileName);
 				var xml = fs.readFileSync(p).toString();
@@ -85,8 +85,9 @@ function buildCase(node,fileMap){
 					done(error)
 				}
 			}
-			//var responseMock = wrapResponse(resp,tpl);
-			tpl.render(model,resp)['catch'](String);
+			//var resp2 = wrapResponse(resp,tpl);
+			//resp.wait == resp2.wait;
+			tpl.render(model,resp);//['catch'](String);
 		}catch(e){
 			var fileName = node.ownerDocument.documentURI.replace(/.*\//,'')
 			console.error('\t\t\terror @file:'+fileName,';line:',node.lineNumber)

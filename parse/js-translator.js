@@ -488,7 +488,7 @@ JSTranslateContext.prototype.processCapture = function(item){
     }else{
     	var varName = item[2];
     	var bufbak = this.allocateId();
-    	this.append("var ",bufbak,"=__out__;__out__=[];");
+    	this.append("var ",bufbak,"=__out__;__out__=[];__out__.wait=",bufbak,'.wait;');
     
     	this.appendCode(childCode);
     	this.append("var ",varName,"=__out__.join('');__out__=",bufbak,";");
