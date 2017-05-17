@@ -313,14 +313,15 @@ function _parseInclude(node){
 	    		this.setCurrentURI(uri);
 	    	}
 	    }else{
-	    	var doc = this.loadXML(this.currentURI);
-	    	var doc = node.ownerDocument
+	    	//var doc = this.loadXML(this.currentURI);
+	    	var doc = node.ownerDocument.cloneNode(true);
 	    }
 		if(doc==null){
 			this.appendText("<strong style='color:red'>没找到包含节点："+this.currentURI+ node.value+"</strong>");
 		}else{
 		    if(selector != null){
-		    	var list = querySelectorAll.apply(doc,selector);;
+		    	//console.log(querySelectorAll+'')
+		    	var list = querySelectorAll.call(doc,selector);;
 	    		if(list && list.length){
 	    			for(var i=0;i<list.length;i++){
 	    				this.parse(list[i])
