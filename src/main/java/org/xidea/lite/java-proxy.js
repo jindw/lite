@@ -1,4 +1,5 @@
-
+//do export java-proxy.js:
+//node ./java-proxy.js lite/src/main/js/compiler
 //兼容 java8/IE console 缺失的情况
 if(typeof console == 'undefined' || !console.dir){
 	//console.log(typeof console ,!this.console, !console.dir)
