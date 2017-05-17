@@ -42,6 +42,7 @@ var HTML = {
 
 	/* 处理 html 事件中的模板变量(JSON.stringify) (ELEMENT_NODE == 2)*/
 	"onon*":parseHtmlEventAttr,
+	onclass:parseHtmlClassAttr,
 	
 	/* 处理html 资源地址属性中的模板变量（encodeURI） */
 	//if(tagName=='link'){
@@ -51,7 +52,7 @@ var HTML = {
 	onaction:autoURIEncoder,
 	//if(/^(?:script|img|button)$/i.test(tagName)){
 	//}else if(/^(?:a|frame|iframe)$/i.test(tagName)){
-	onsrc:autoURIEncoder,
+	onsrc:autoURIEncoder
 
 }
 
@@ -331,9 +332,13 @@ function wrapScript(source,wrap_script_method){
 	}
 	return source;
 }
-
+function parseHtmlClassAttr(attr){
+	attr.value = attr.value.replace(/\s*?[\r\n]\s*/,' ');
+	this.next(attr)
+}
 function parseHtmlEventAttr(attr){
-	attr.value = processJS(this,attr.value);
+	var value = attr.value.replace(/\s*?([\r\n])\s*/,'$1');
+	attr.value = processJS(this,value);
 	this.next(attr);
 }
 
