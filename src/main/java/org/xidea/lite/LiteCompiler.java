@@ -55,6 +55,9 @@ public class LiteCompiler {
 						+ new File("./").getAbsoluteFile().getParent()
 						+ "\nnpm install lite");
 	}
+	public File getRoot(){
+		return root;
+	}
 
 	@SuppressWarnings("unchecked")
 	public String compile(String path) throws ScriptException {

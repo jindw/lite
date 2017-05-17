@@ -17,7 +17,7 @@ import org.xidea.el.json.JSONDecoder;
 
 public class LiteEngine implements TemplateEngine {
 	private static final Log log = LogFactory.getLog(LiteEngine.class);
-	protected URI compiledBase;
+	private URI compiledBase;
 	/**
 	 * WeakHashMap 回收的太快了?
 	 */
@@ -67,7 +67,7 @@ public class LiteEngine implements TemplateEngine {
 		}
 	}
 
-	protected String getLitecode(String path) {
+	private String getLitecode(String path) {
 		
 		try {
 			InputStream in ;
@@ -91,7 +91,7 @@ public class LiteEngine implements TemplateEngine {
 		return null;
 	}
 
-	private String loadText(InputStream in) throws IOException {
+	String loadText(InputStream in) throws IOException {
 		try {
 			InputStreamReader reader = new InputStreamReader(in, "UTF-8");
 			StringBuilder buf = new StringBuilder();

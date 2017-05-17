@@ -2,8 +2,10 @@
 <!-- Duoshuo Comment BEGIN -->
 	<div class="ds-thread"></div>
 <script type="text/javascript">
+
 var duoshuoQuery = {short_name:"lite"};
 	(function() {
+		if(location.hostname == 'localhost')return;
 		var ds = document.createElement('script');
 		ds.type = 'text/javascript';ds.async = true;
 		ds.src = 'http://static.duoshuo.com/embed.js';
