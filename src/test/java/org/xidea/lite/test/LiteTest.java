@@ -100,7 +100,8 @@ public class LiteTest {
             projectRoot  = root;
 
 			engine = new ScriptEngineManager().getEngineByExtension("js");
-			engine.eval(new InputStreamReader(new FileInputStream(new File(root,"src/main/java/org/xidea/lite/java-proxy.js"))));
+			File proxyBoot = new File(root,"src/main/java/org/xidea/lite/java-proxy.js");
+			engine.eval(new InputStreamReader(new FileInputStream(proxyBoot)));
 			engine.eval(new InputStreamReader(new FileInputStream(new File(root,"src/test/java/org/xidea/lite/test/test.js"))));
 			//System.out.println(base.toURI());
 			engine.eval("initTest("

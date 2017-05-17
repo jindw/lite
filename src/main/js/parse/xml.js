@@ -37,9 +37,9 @@ function loadLiteXML(uri,root,options){
     }
 }
 function txt2xml(source){
-    return "<out xmlns='http://www.xidea.org/lite/core'><![CDATA["+
+    return "<c:out c:xmlns='http://www.xidea.org/lite/core'><![CDATA["+
             source.replace(/^\ufeff?#.*[\r\n]*/, "").replace(/]]>/, "]]]]><![CDATA[>")+
-            "]]></out>";
+            "]]></c:out>";
 }
 function addInst(xml,s){
     var p = /^\s*<\?(\w+)\s+(.*)\?>/;

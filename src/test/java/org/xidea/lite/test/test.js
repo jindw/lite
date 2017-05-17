@@ -1,6 +1,6 @@
 var testRoot;
-//var LiteCompiler = require('lite/src/main/js/compiler').LiteCompiler;
-var LiteCompiler = require('lite/src/main/java/org/xidea/lite/java-packed')('lite/src/main/js/compiler').LiteCompiler
+var LiteCompiler = require('lite/src/main/js/compiler').LiteCompiler;
+//var LiteCompiler = require('lite/src/main/java/org/xidea/lite/java-packed')('lite/src/main/js/compiler').LiteCompiler
 var PHPTranslator=require('lite/src/main/php/php-translator').PHPTranslator;
 var xmldom = require('xmldom');
 var DOMParser = xmldom.DOMParser;

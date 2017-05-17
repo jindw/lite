@@ -1,0 +1,34 @@
+<test>
+	<unit title="html 处理" format='false'>
+		<model>
+		{
+		array:[0,'',null],
+		string:"html 处理'\"",
+		object:{aa:1,bB:2,CC:[1]}
+		}
+		</model>
+		<case>
+			<source><![CDATA[<html><body></body></html>]]></source>
+			<expect><![CDATA[<html><body></body></html>]]></expect>
+		</case>
+		<case>
+			<source><![CDATA[<html><head><title>test title</title></head><body></body></html>]]></source>
+			<expect><![CDATA[<html><head><title>test title</title></head><body></body></html>]]></expect>
+		</case>
+		<case>
+			<source><![CDATA[<html><body class="a
+			b
+			c"></body></html>]]></source>
+			<expect><![CDATA[<html><body class='a b c'></body></html>]]></expect>
+		</case>
+		<case>
+			<source><![CDATA[<html><body onclick="alert(1);
+			alert(2);
+			prompt(3)"></body></html>]]></source>
+			<expect><![CDATA[<html><body
+onclick='alert(1);
+alert(2);
+prompt(3)'></body></html>]]></expect>
+		</case>
+	</unit>
+</test>

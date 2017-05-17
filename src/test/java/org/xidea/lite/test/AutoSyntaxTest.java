@@ -56,6 +56,7 @@ public class AutoSyntaxTest {
 				"if-case.xml",
 				"include-case.xml" ,
 				"out-case.xml",
+				"html-case.xml",
 				"widget-case.xml"};
 
 		//System.out.println(getParams(casefiles));
