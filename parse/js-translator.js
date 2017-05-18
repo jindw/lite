@@ -547,7 +547,7 @@ JSTranslateContext.prototype.processFor=function(code,i){
     this.append("var ",itemsId,'=',itemsEL,';');
     this.append("var ",indexId,"=0;")
     this.append("var ",lastIndexId," = (",
-    	itemsId,'=',itemsId,' instanceof Array?',itemsId,':Object.keys(',itemsId,')'
+    	itemsId,'=',itemsId,' instanceof Array?',itemsId,':typeof ',itemsId,' == "object"? Object.keys(',itemsId,'):Array(',itemsId,')'
     	,").length-1;");
     
     //初始化 for状态

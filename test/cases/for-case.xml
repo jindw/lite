@@ -1,12 +1,26 @@
 <test>
 	<unit title="循环控制">
 		<model>
+		
 		{
+		ivalue:3,
 		array:[0,'',null],
 		string:"JSON 功能测试'\"",
 		object:{aa:1,bB:2,CC:[1]}
 		}
 		</model>
+		<case title="for .. 范围迭代语法">
+			<source><![CDATA[<c:for var="f1" list="${[-1..ivalue]}">${f1}</c:for>]]></source>
+			<expect>-10123</expect>
+		</case>
+		<case title="for .. 范围迭代语法2">
+			<source><![CDATA[<c:for var="f1" list="${[-3..-1]}">${f1}</c:for>]]></source>
+			<expect>-3-2-1</expect>
+		</case>
+		<case title="for 迭代次数语法">
+			<source><![CDATA[<c:for var="f1" list="${ivalue}">${for.index}</c:for>]]></source>
+			<expect>012</expect>
+		</case>
 		<case>
 			<source><![CDATA[<c:for var="f1" list="${array}">${for.index}</c:for>]]></source>
 			<expect>012</expect>

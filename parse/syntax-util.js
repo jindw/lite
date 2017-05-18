@@ -184,9 +184,9 @@ function appendForStart(context,var_,list,status_){
 	if(be.length==2){
 		var begin = be[0];//list.substring(0,dd);
 		var end = be[1];//list.substring(dd+2);
-		list = "Math.abs("+begin+'-'+end+")+1";
+		list = "Math.abs("+begin+' - '+end+")+1";
 		context.appendFor(var_,list,status_||null);
-		context.appendVar(var_,var_+'+'+begin+"-1");
+		context.appendVar(var_,'for.index+'+begin);
 	}else if(be.length ==1){
 		context.appendFor(var_,list,status_||null);
 	}else{
@@ -208,7 +208,7 @@ function _splitList(list){
 				try{
 					var begin = list.substring(0,dd);
 					var end = list.substring(dd+2);
-					new Function("return "+begin+'-'+end);//for x4e
+					new Function("return "+begin+' - '+end);//for x4e
 					var begin2 = begin.replace(/^\s*\[/,'');
 					if(begin2 != begin){
 						try{
@@ -219,13 +219,14 @@ function _splitList(list){
 					}
 					if(begin2 != begin){
 						end = end.replace(/\]\s*$/,'');
-						console.debug("[start,last] 语法 不是通用表达式，只能在for循环中使用。",list);
+						console.info("[start,last] 语法 不是通用表达式，只能在for循环中使用。",list);
 						return [begin2,end];
 					}else{
 						console.warn("range for 表达式(非通用表达式)推荐模式为：[start,last]，您提供的表达式为"+list);
 						return [begin,end];
 					}
 				}catch(e){
+					console.error(e)
 				}
 				//value = list.substring(0,dd)+'-'+list.substring(dd+2)
 			}else{
