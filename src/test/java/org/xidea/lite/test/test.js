@@ -79,6 +79,10 @@ function getPhpCode(compileResult){
 	});
 }
 function formatXML(source){
+	if(!source){
+		console.error('invalid source:',source);
+		return source;
+	}
 	var dom = new DOMParser().parseFromString(source,'text/html');
 	var result = dom.toString(true,function filter(node){
 		//console.log(JSON.stringify(arguments));
