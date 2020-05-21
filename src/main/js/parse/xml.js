@@ -1,9 +1,11 @@
+const os = require('os');
 function loadLiteXML(uri,root,options){
     try{
         if(uri instanceof URI){ 
             if(uri.source){
                 return parseXMLByText(uri.source.replace(/^[\s\ufeff]*/,uri,options))
-            }else if(uri.scheme == 'lite'){
+                //resolve path when url scheme is file and win32 
+            }else if(uri.scheme == 'lite' || (uri.scheme=='file' && os.platform()=='win32')){
                 var path = uri.path+(uri.query||'')+(uri.fragment || '');
                 path = root.resolve(path.replace(/^\//,'./'))+'';
             }else{

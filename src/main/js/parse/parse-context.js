@@ -9,7 +9,7 @@
 var ResultContext=require('./result-context').ResultContext;
 var URI=require('./resource').URI;
 var defaultBase = new URI("lite:///");
-
+var os = require('os');
 
 var loadLiteXML=require('./xml').loadLiteXML;
 var buildTopChain=require('./parse-chain').buildTopChain;
@@ -140,6 +140,10 @@ ParseContext.prototype = {
 		path = String(path);
 		if(path.indexOf(base) ==0){
 			path = path.substring(base.length-1);
+		}
+		//resolve path when url scheme is file and win32 
+		if(cu.scheme=='file' && os.platform()=='win32'){
+				path = this.config.root.resolve(path.replace(/^\//,'./'))+'';
 		}
 		var cu = this.currentURI;
 		if(cu){
